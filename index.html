@@ -1208,18 +1208,17 @@ async function saveRecord(){
   var total=Object.values(S.scores).reduce(function(a,b){return a+b},0);
   var tl=total<=10?"Green":total<=14?"Yellow":total<=20?"Red":"Black";
   var stateToSave=Object.assign({},S);delete stateToSave._id;
-  var row={name:S.dog.name||"Unknown",breed:S.dog.breed||"",ref_no:S.dog.refNo||"",intake_date:S.dog.intakeDate||null,assessor:S.dog.assessor||"",score:total,traffic_light:tl,saved_at:new Date().toISOString(),data:stateToSave};
-  var res;
-  if(S._id){
-    res=await supabaseClient.from("dogs").update(row).eq("id",S._id);
-  } else {
-    res=await supabaseClient.from("dogs").insert([row]).select();
-    if(res.data&&res.data[0])S._id=res.data[0].id;
-  }
-  if(res.error){console.error("Save failed:",res.error.message);persistSave();return;}
-  persistSave();
-  showSaved();
-  loadRecordsList();
+  var row={name:S.dog.name||"Unknown",breed:S.dog.breed||"",ref_no:S.dog.refNo||"",intake_date:S.dog.intakeDate||null,assessor:S.dog.assessor||"",score:total,traffic_light:tl,saved_at:new Date().toISOString(),state:JSON.stringify(stateToSave)};
+  try{
+    if(S._id){
+      await supabaseClient.from("dogs").update(row).eq("id",S._id);
+    } else {
+      var res=await supabaseClient.from("dogs").insert([row]);
+      if(res.data&&res.data[0]&&res.data[0].id){S._id=res.data[0].id;persistSave();}
+    }
+    persistSave();
+    await loadRecordsList();
+  }catch(e){console.error("saveRecord:",e);persistSave();}
 }
 
 async function deleteRecord(id){
