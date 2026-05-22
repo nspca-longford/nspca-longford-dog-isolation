@@ -1265,7 +1265,12 @@ function loadRecord(id){
 }
 
 // ── Init ──────────────────────────────────────────────────────────
-(async function(){try{if(initSupabase()){var t=await supabaseClient.from("dogs").select("id").limit(1);if(!t.error){var saved=localStorage.getItem("nspca-intake-auth");if(saved){LOGGED_IN=true;await loadRecordsList();showDashboard();}else{showScreen("login-screen");}if(S.dog.name){var b=document.getElementById("badge");if(b){b.style.display="block";b.textContent=S.dog.name;}}return;}}}catch(e){console.error(e);}showSetup();})();
+(function(){
+  if(!initSupabase()){showScreen("setup");return;}
+  var saved=localStorage.getItem("nspca-intake-auth");
+  if(saved){LOGGED_IN=true;loadRecordsList().then(function(){showDashboard();});}
+  else{showScreen("login-screen");}
+})();
 
 </script>
 </body>
