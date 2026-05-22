@@ -5,6 +5,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NSPCA Longford — Dog Intake Assessment (Shared)</title>
 <style>
@@ -241,9 +244,18 @@ create policy "Allow all"
   <div id="content"></div>
 
 </div>
-<script>
-
+<script>var BREEDS=["Afghan Hound","Airedale Terrier","Akita","Alaskan Malamute","American Bulldog","American Cocker Spaniel","American Staffordshire Terrier","Australian Cattle Dog","Australian Shepherd","Basenji","Basset Hound","Beagle","Bearded Collie","Bedlington Terrier","Belgian Malinois","Belgian Shepherd","Bernese Mountain Dog","Bichon Frise","Bloodhound","Border Collie","Border Terrier","Boston Terrier","Boxer","Briard","Brittany Spaniel","Bull Mastiff","Bull Terrier","Bull Terrier (Miniature)","Cairn Terrier","Cardigan Welsh Corgi","Cavalier King Charles Spaniel","Cavapoo","Chihuahua","Chow Chow","Clumber Spaniel","Cockapoo","Cocker Spaniel","Collie (Rough)","Collie (Smooth)","Crossbreed / Mixed","Dachshund (Long-Haired)","Dachshund (Miniature)","Dachshund (Short-Haired)","Dachshund (Wire-Haired)","Dalmatian","Dobermann","English Bulldog","English Setter","English Springer Spaniel","Field Spaniel","Flat-Coated Retriever","Fox Terrier (Smooth)","Fox Terrier (Wire)","French Bulldog","German Shepherd","German Shorthaired Pointer","German Spitz","Glen of Imaal Terrier","Golden Retriever","Gordon Setter","Great Dane","Greyhound","Hungarian Vizsla","Irish Red and White Setter","Irish Setter","Irish Terrier","Irish Water Spaniel","Irish Wolfhound","Jack Russell Terrier","Japanese Akita","Japanese Spitz","Kerry Blue Terrier","Labradoodle","Labrador Retriever","Lakeland Terrier","Leonberger","Lhasa Apso","Lurcher","Maltese","Mastiff","Miniature Pinscher","Miniature Schnauzer","Newfoundland","Norfolk Terrier","Norwegian Elkhound","Old English Sheepdog","Papillon","Parson Russell Terrier","Patterdale Terrier","Pekingese","Pembroke Welsh Corgi","Pointer","Pomeranian","Pomsky","Poodle (Miniature)","Poodle (Standard)","Poodle (Toy)","Portugese Podengo","Portuguese Water Dog","Pug","Rhodesian Ridgeback","Rottweiler","Saint Bernard","Samoyed","Scottish Terrier","Shar Pei","Shih Tzu","Siberian Husky","Soft-Coated Wheaten Terrier","Springer Spaniel","Staffordshire Bull Terrier","Terrier Cross","Unknown Breed","Weimaraner","Welsh Springer Spaniel","Welsh Terrier","West Highland White Terrier","Whippet","Yorkshire Terrier"];
+var CATS=[
+  {k:"excitability",l:"Excitability / Arousal",s:{1:"Calm, settles easily",2:"Occasionally excitable, recovers well",3:"Frequently excitable, slow to settle",4:"Extreme arousal, unable to settle safely"}},
+  {k:"reactivity",l:"Reactivity",s:{1:"Non-reactive to people, dogs, environment",2:"Mild reactions, recovers quickly",3:"Moderate reactions, needs active management",4:"Severe reactivity — lunging, snapping, or biting"}},
+  {k:"fearAnxiety",l:"Fear & Anxiety",s:{1:"Confident, no fear signs",2:"Mild anxiety, settles with reassurance",3:"Moderate fear, avoidance or freeze responses",4:"Severe fear, shutdown, panic, or defensive aggression"}},
+  {k:"sepAnx",l:"Separation Anxiety",s:{1:"Settles alone without distress",2:"Brief vocalisation, settles quickly",3:"Persistent vocalisation or destructive behaviour",4:"Severe distress when alone"}},
+  {k:"training",l:"Training & Obedience",s:{1:"Responds well, easy to manage",2:"Some compliance, occasional resistance",3:"Poor compliance, difficult to redirect",4:"No compliance, unsafe to handle"}},
+  {k:"misc",l:"Miscellaneous Behaviour",s:{1:"No concerns noted",2:"Minor concerns, manageable",3:"Concerning behaviours present",4:"Serious concerns, immediate action needed"}}
+];
 var TABS=[{id:"dog",l:"Dog details"},{id:"arrival",l:"On-arrival"},{id:"day1",l:"Day 1"},{id:"day2",l:"Day 2"},{id:"day3",l:"Day 3"},{id:"day4",l:"Day 4"},{id:"day5",l:"Day 5"},{id:"assessment",l:"&#128203; Assessment"},{id:"scoring",l:"Scoring"},{id:"report",l:"Report"},{id:"weights",l:"&#9878; Weights"},{id:"files",l:"&#128206; Files"}];
+
+
 var LOGGED_IN = false;
 
 function showScreen(id){
