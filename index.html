@@ -955,7 +955,7 @@ function doConnect(){
   var errEl=document.getElementById("setup-err");
   if(errEl)errEl.style.display="none";
   if(!url||!key){alert("Please enter both fields.");return;}
-  var btn=document.getElementById("connect-btn")||document.querySelector("button[onclick*='doConnect']");
+  var btn=document.querySelector("[onclick*='doConnect']")||document.getElementById("connect-btn");
   if(btn){btn.textContent="Connecting...";btn.disabled=true;}
   localStorage.setItem("nspca-supabase-config",JSON.stringify({url:url,key:key}));
   fetch(url.replace(/\/+$/,"")+"/rest/v1/dogs?select=id&limit=1",{headers:{"apikey":key,"Authorization":"Bearer "+key}})
