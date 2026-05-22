@@ -176,8 +176,7 @@ create policy "Allow all"
 </div>
 
 <div id="dashboard-screen" style="display:none;min-height:100vh;background:#f1f5f9">
-  <div style="background:#0f172a;padding:10px 20px;display:flex;align-items:center;justify-content:space-between">
-    <div style="color:#fff;font-size:13px;font-weight:700">NSPCA Longford &mdash; Isolation Unit</div>
+  <div style="background:#0f172a;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><div style="color:#fff;font-size:13px;font-weight:500">NSPCA Longford — Isolation</div><span id="dash-clock" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8"></span><span id="dash-count" style="background:#0d9488;border-radius:20px;padding:3px 10px;font-size:11px;color:#fff;font-weight:500;display:none"></span></div><div style="display:flex;align-items:center;gap:6px"><span id="dash-user" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#64748b;display:none"></span><button onclick="showDashSection('records')" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">&#128193; Records</button><button onclick="showDashSection('stats')" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">&#128200; Stats</button><button onclick="openNewDog()" style="background:#0d9488;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">+ New Dog</button><button onclick="doLogout()" style="background:transparent;border:none;color:#475569;cursor:pointer;padding:4px" title="Log out"><i class="ti ti-logout" style="font-size:16px"></i></button></div></div
     <div style="display:flex;align-items:center;gap:10px">
       <button onclick="showDashSection('records')" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#128193; Records</button><button onclick="showDashSection('stats')" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#128200; Stats</button><button onclick="openNewDog()" style="background:#0d9488;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">+ New Dog</button>
       <button onclick="doLogout()" style="background:transparent;border:none;color:#64748b;font-size:11px;cursor:pointer;font-family:inherit">Log out</button>
@@ -380,9 +379,19 @@ function showDashboard(){
 }
 
 function renderDashboard(){
-  var el=document.getElementById("dashboard-content");if(!el)return;
+  var el=document.getElementById("dashboard-content");
+  if(!el)return;
   updateClock();
-  var today=new Date().toISOString().slice(0,10);
+  var _search=(window._dbSearch||"").toLowerCase();
+  var _kennel=window._dbKennel||"";
+  var _tl=window._dbTL||"";
+  var _sort=window._dbSort||"day";
+
+  // Update header badges
+  var countEl=document.getElementById("dash-count");
+  if(countEl){var ac=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Finished Isolation";}).length;countEl.textContent=ac+" in isolation";countEl.style.display=ac?"inline":"none";}
+  var userEl=document.getElementById("dash-user");
+  if(userEl){var auth=localStorage.getItem("nspca-intake-auth");userEl.textContent=auth==="NSPCA-MGR"?"Manager":"Staff";userEl.style.display="inline";}
 
   // Auto alerts
   var autoNotices=generateAutoNotices();
@@ -390,32 +399,44 @@ function renderDashboard(){
   var priFg={Normal:"var(--color-text-secondary)",Important:"#854d0e",Urgent:"#991b1b"};
   var alertsHtml="";
   if(autoNotices.length){
-    alertsHtml='<div style="padding:10px 0 14px;display:flex;gap:8px;flex-wrap:wrap">'
-      +autoNotices.map(function(n){
-        var bg=priBg[n.priority];var fg=priFg[n.priority];
-        return '<div style="background:'+bg+';border:0.5px solid var(--color-border-secondary);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;color:'+fg+';display:flex;align-items:center;gap:6px">'
-          +'<span>'+n.icon+'</span><span>'+esc(n.text)+'</span></div>';
-      }).join("")
-      +'</div>';
+    alertsHtml='<div style="padding:8px 0 12px;display:flex;gap:8px;flex-wrap:wrap">'
+      +autoNotices.map(function(n){return'<div style="background:'+priBg[n.priority]+';border:0.5px solid var(--color-border-secondary);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;color:'+priFg[n.priority]+';display:flex;align-items:center;gap:6px"><span>'+n.icon+'</span><span>'+esc(n.text)+'</span></div>';}).join("")+'</div>';
   }
 
-  // Active dogs
+  // Build kennel list from records
+  var kennels=[];
+  records.forEach(function(r){var k=r.state&&r.state.dog?r.state.dog.kennel:"";if(k&&kennels.indexOf(k)<0)kennels.push(k);});
+  kennels.sort();
+
+  var filterBar='<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">'
+    +'<div style="flex:1;min-width:120px;display:flex;align-items:center;gap:6px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 10px">'
+    +'<i class="ti ti-search" style="font-size:14px;color:var(--color-text-secondary)" aria-hidden="true"></i>'
+    +'<input placeholder="Search..." value="'+esc(_search)+'" oninput="window._dbSearch=this.value;renderDashboard()" style="border:none;background:transparent;outline:none;font-size:12px;width:100%;color:var(--color-text-primary);font-family:inherit"></div>'
+    +'<select onchange="window._dbKennel=this.value;renderDashboard()" style="font-size:11px;padding:5px 8px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit">'
+    +'<option value="">All kennels</option>'
+    +kennels.map(function(k){return'<option value="'+esc(k)+'"'+(k===_kennel?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select>'
+    +'<select onchange="window._dbTL=this.value;renderDashboard()" style="font-size:11px;padding:5px 8px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit">'
+    +'<option value="">All</option>'
+    +["Green","Yellow","Red","Black"].map(function(t){return'<option value="'+t+'"'+(_tl===t?' selected':'')+'>'+t+'</option>';}).join("")+'</select>'
+    +'<select onchange="window._dbSort=this.value;renderDashboard()" style="font-size:11px;padding:5px 8px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit">'
+    +[["day","Day"],["name","Name"],["kennel","Kennel"],["tl","Score"]].map(function(o){return'<option value="'+o[0]+'"'+(_sort===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select></div>';
+
   var active=records.filter(function(r){
-    var outcome=r.state&&r.state.fin?r.state.fin.outcome:"";
-    return !outcome||outcome==="Active — in isolation"||outcome==="Finished Isolation";
+    var o=r.state&&r.state.fin?r.state.fin.outcome:"";
+    return !o||o==="Active — in isolation"||o==="Finished Isolation";
+  });
+  if(_search)active=active.filter(function(r){return(r.name||"").toLowerCase().includes(_search)||(r.breed||"").toLowerCase().includes(_search);});
+  if(_kennel)active=active.filter(function(r){return(r.state&&r.state.dog?r.state.dog.kennel:"")=== _kennel;});
+  if(_tl)active=active.filter(function(r){return r.trafficLight===_tl;});
+  active.sort(function(a,b){
+    if(_sort==="name")return(a.name||"").localeCompare(b.name||"");
+    if(_sort==="kennel"){var ka=a.state&&a.state.dog?a.state.dog.kennel||"":"";var kb=b.state&&b.state.dog?b.state.dog.kennel||"":"";return ka.localeCompare(kb);}
+    if(_sort==="tl"){var ord={Black:0,Red:1,Yellow:2,Green:3,"":4};return(ord[a.trafficLight]||4)-(ord[b.trafficLight]||4);}
+    return(daysInIsolation(b.intakeDate)||0)-(daysInIsolation(a.intakeDate)||0);
   });
 
   var tlColors={"Green":"#dcfce7|#166534","Yellow":"#fef9c3|#854d0e","Red":"#fee2e2|#991b1b","Black":"#1e293b|#f1f5f9"};
-
-  if(!active.length){
-    el.innerHTML=alertsHtml
-      +'<div style="text-align:center;padding:60px 20px">'
-      +'<div style="font-size:48px;margin-bottom:12px">&#128062;</div>'
-      +'<div style="font-size:18px;font-weight:500;margin-bottom:6px;color:var(--color-text-primary)">No dogs in isolation</div>'
-      +'<div style="font-size:14px;color:var(--color-text-secondary);margin-bottom:20px">Tap + New Dog to start an intake assessment</div>'
-      +'<button onclick="openNewDog()" style="background:#0d9488;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit">+ New Dog</button></div>';
-    return;
-  }
+  if(!active.length){el.innerHTML=alertsHtml+filterBar+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>';return;}
 
   var cards=active.map(function(rec){
     var d=rec.state&&rec.state.dog?rec.state.dog:{};
@@ -427,39 +448,27 @@ function renderDashboard(){
     var col=finished?"#0d9488":days>=5?"#dc2626":days===4?"#f59e0b":"#0d9488";
     var pct=days?Math.min(100,Math.round((days/5)*100)):0;
     var parts=(tlColors[rec.trafficLight]||"#f1f5f9|#94a3b8").split("|");
-
-    // Card top colour based on traffic light
+    var borderCol=finished?"#16a34a":rec.trafficLight==="Red"?"#dc2626":rec.trafficLight==="Black"?"#0f172a":rec.trafficLight==="Yellow"?"#f59e0b":rec.trafficLight==="Green"?"#16a34a":"#e2e8f0";
     var topBg=finished?"#dcfce7":rec.trafficLight==="Red"?"#fee2e2":rec.trafficLight==="Black"?"#1e293b":rec.trafficLight==="Yellow"?"#fef9c3":"#f0fdf4";
-
-    var photoHtml=d.photo
-      ?'<img src="'+d.photo+'" style="width:100%;height:88px;object-fit:cover;display:block">'
-      :'<div style="width:100%;height:88px;background:'+topBg+';display:flex;align-items:center;justify-content:center;font-size:36px">&#128062;</div>';
-
-    var dayHtml=finished
-      ?'<div style="font-size:9px;font-weight:600;color:#166534;margin-bottom:3px">&#10003; Finished</div><div style="background:#dcfce7;border-radius:20px;height:4px"><div style="background:#166534;width:100%;height:100%;border-radius:20px"></div></div>'
-      :days?'<div style="font-size:9px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of 5'+(overdue?' ⚠':'')+
-        (overdue?'<span style="color:#dc2626"> Overdue</span>':'')+'</div>'
-        +'<div style="background:#e2e8f0;border-radius:20px;height:4px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>'
-      :'';
-
-    return '<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;cursor:pointer">'
-      +photoHtml
-      +'<div style="padding:10px">'
+    var photoHtml=d.photo?'<img src="'+d.photo+'" style="width:100%;height:88px;object-fit:cover;display:block">':'<div style="width:100%;height:88px;background:'+topBg+';display:flex;align-items:center;justify-content:center;font-size:34px">&#128062;</div>';
+    var savedAt=rec.savedAt?new Date(rec.savedAt):null;
+    var timeAgo="";
+    if(savedAt&&!isNaN(savedAt)){var diff=Math.round((Date.now()-savedAt.getTime())/60000);timeAgo=diff<1?"just now":diff<60?diff+"m ago":diff<1440?Math.round(diff/60)+"h ago":Math.round(diff/1440)+"d ago";}
+    var lastBy=d.assessor||"";
+    var dayHtml=finished?'<div style="font-size:9px;font-weight:600;color:#166534;margin-bottom:3px">&#10003; Finished</div><div style="background:#dcfce7;border-radius:20px;height:4px"><div style="background:#166534;width:100%;height:100%;border-radius:20px"></div></div>':days?'<div style="font-size:9px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of 5'+(overdue?' &#9888; Overdue':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:4px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
+    return '<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:2px solid '+borderCol+';border-radius:16px;overflow:hidden;cursor:pointer">'
+      +photoHtml+'<div style="padding:10px">'
       +'<div style="font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div>'
-      +'<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:6px">'
+      +'<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:5px">'
       +(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+esc(d.kennel)+'</span>':'')
       +(rec.trafficLight?'<span style="background:'+parts[0]+';color:'+parts[1]+';font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+rec.trafficLight+'</span>':'')
       +(d.crossbreed?'<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">X</span>':'')
-      +'</div>'
-      +dayHtml
+      +'</div>'+dayHtml
+      +((lastBy||timeAgo)?'<div style="font-size:9px;color:var(--color-text-secondary);margin-top:5px"><i class="ti ti-pencil" style="font-size:9px" aria-hidden="true"></i> '+(lastBy?esc(lastBy)+" · ":"")+timeAgo+'</div>':"")
       +'</div></div>';
   }).join("");
 
-  el.innerHTML=alertsHtml
-    +'<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px;font-weight:500">'
-    +active.length+' dog'+(active.length!==1?'s':'')+' in isolation</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'
-    +cards+'</div>';
+  el.innerHTML=alertsHtml+filterBar+'<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px;font-weight:500">'+active.length+' dog'+(active.length!==1?'s':'')+' in isolation</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'+cards+'</div>';
 }
 
 function openDog(id){
