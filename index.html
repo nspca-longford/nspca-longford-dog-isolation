@@ -408,7 +408,7 @@ function generateAutoNotices(){
 
 function daysInIsolation(d){if(!d)return null;return Math.max(1,Math.floor((new Date()-new Date(d))/(1000*60*60*24))+1);}
 function setWeight(v){S.dog.weight=v?(v+" kg"):"";}
-function wfld(val){var n=(val||"").toString().replace(/[^0-9.]/g,"");return'<div class="f"><label class="lbl">Weight</label><div style="display:flex;align-items:center;gap:8px"><input type="number" step="0.1" min="0" placeholder="12.5" value="'+n+'" data-save="dog.weight" oninput="setWeight(this.value)" style="flex:1"><span style="font-weight:700;color:var(--color-text-secondary)">kg</span></div></div>';}
+function wfld(val){var n=(val||"").toString().replace(/[^0-9.]/g,"");return'<div class="f"><label class="lbl">Weight</label><div style="display:flex;align-items:center;gap:8px"><input type="number" step="0.1" min="0" placeholder="12.5" value="'+n+'" data-save="dog.weight" style="flex:1"><span style="font-weight:700;color:var(--color-text-secondary)">kg</span></div></div>';}
 function compressPhoto(file,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var MAX=400,w=img.width,h=img.height;if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}var cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);cb(cv.toDataURL("image/jpeg",0.75));};img.src=e.target.result;};r.readAsDataURL(file);}
 function handlePhotoUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){alert("Photo too large. Please use a photo under 5MB.");return;}compressPhoto(file,function(data){S.dog.photo=data;renderMain();});}
 function removePhoto(){S.dog.photo="";renderMain();}
@@ -659,12 +659,12 @@ document.getElementById("wrap").addEventListener("click",handleAppClick);
 document.getElementById("dashboard-screen").addEventListener("click",handleAppClick);
 document.getElementById("wrap").addEventListener("input",function(e){
   var el=e.target;
-  if(el.dataset.save){var p=el.dataset.save.split(".");S[p[0]][p[1]]=(el.type==="checkbox"?el.checked:el.value);if(p[0]==="dog"&&p[1]==="name"){var bg=document.getElementById("badge");if(bg){bg.style.display=el.value?"block":"none";bg.textContent=el.value;}}debouncedSave();}
+  if(el.dataset.save){var p=el.dataset.save.split(".");var val=el.type==="checkbox"?el.checked:el.value;if(p[0]==="dog"&&p[1]==="weight")val=val?(parseFloat(val)+" kg"):"";S[p[0]][p[1]]=val;if(p[0]==="dog"&&p[1]==="name"){var bg=document.getElementById("badge");if(bg){bg.style.display=val?"block":"none";bg.textContent=val;}}debouncedSave();}
   if(el.dataset.sd){var p2=el.dataset.sd.split(".");S.days[parseInt(p2[0])][p2[1]]=el.value;debouncedSave();}
 });
 document.getElementById("wrap").addEventListener("change",function(e){
   var el=e.target;
-  if(el.dataset.save){var p=el.dataset.save.split(".");S[p[0]][p[1]]=(el.type==="checkbox"?el.checked:el.value);if(p[0]==="dog"&&p[1]==="name"){var bg=document.getElementById("badge");if(bg){bg.style.display=el.value?"block":"none";bg.textContent=el.value;}}renderMain();debouncedSave();}
+  if(el.dataset.save){var p=el.dataset.save.split(".");var val=el.type==="checkbox"?el.checked:el.value;if(p[0]==="dog"&&p[1]==="weight")val=val?(parseFloat(val)+" kg"):"";S[p[0]][p[1]]=val;if(p[0]==="dog"&&p[1]==="name"){var bg=document.getElementById("badge");if(bg){bg.style.display=val?"block":"none";bg.textContent=val;}}renderMain();debouncedSave();}
   if(el.dataset.sd){var p2=el.dataset.sd.split(".");S.days[parseInt(p2[0])][p2[1]]=el.value;renderMain();debouncedSave();}
 });
 
@@ -715,7 +715,7 @@ async function saveRecord(){
   var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
   var tl=total<=10?"Green":total<=14?"Yellow":total<=20?"Red":"Black";
   var st=JSON.parse(JSON.stringify(S));delete st._id;
-  var row={name:S.dog.name,breed:S.dog.breed||"",ref_no:S.dog.refNo||"",intake_date:S.dog.intakeDate||null,assessor:S.dog.assessor||"",score:total,traffic_light:tl,saved_at:new Date().toISOString(),data:JSON.stringify(st)};
+  var row={name:S.dog.name,breed:S.dog.breed||"",ref_no:S.dog.refNo||"",intake_date:S.dog.intakeDate||null,assessor:S.dog.assessor||"",score:total,traffic_light:tl,saved_at:new Date().toISOString(),data:st};
   try{
     if(S._id){await supabaseClient.from("dogs").update(row).eq("id",S._id);}
     else{var res=await supabaseClient.from("dogs").insert([row]);if(res.data&&res.data[0]){S._id=res.data[0].id;}}
