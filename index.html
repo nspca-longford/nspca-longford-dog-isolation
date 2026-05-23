@@ -1107,12 +1107,12 @@ document.getElementById("wrap").addEventListener("click",handleAppClick);
 document.getElementById("dashboard-screen").addEventListener("click",handleAppClick);
 document.getElementById("wrap").addEventListener("input",function(e){
   var el=e.target;
-  if(el.dataset.save){var p=el.dataset.save.split(".");var oldVal=S[p[0]][p[1]];S[p[0]][p[1]]=(el.type==="checkbox"?el.checked:el.value);if(p[0]==="dog"&&p[1]==="weight"&&S.dog.weight&&S.dog.weight!==oldVal){var wEntry={date:new Date().toISOString().slice(0,10),weight:S.dog.weight,note:""};S.weights=S.weights||[];if(!S.weights.find(function(w){return w.date===wEntry.date&&w.weight===wEntry.weight;}))S.weights.push(wEntry);};if(p[0]==="dog"&&p[1]==="name"){var b=document.getElementById("badge");b.style.display=el.value?"block":"none";b.textContent=el.value;}debouncedSave();}
+  if(el.dataset.save){var p=el.dataset.save.split(".");S[p[0]][p[1]]=(el.type==="checkbox"?el.checked:el.value);if(p[0]==="dog"&&p[1]==="name"){var b=document.getElementById("badge");if(b&&S.dog.name){b.style.display="block";b.textContent=S.dog.name;}}if(p[0]==="dog"&&p[1]==="weight"&&S.dog.weight&&S.dog.weight!==oldVal){var wEntry={date:new Date().toISOString().slice(0,10),weight:S.dog.weight,note:""};S.weights=S.weights||[];if(!S.weights.find(function(w){return w.date===wEntry.date&&w.weight===wEntry.weight;}))S.weights.push(wEntry);};if(p[0]==="dog"&&p[1]==="name"){var b=document.getElementById("badge");b.style.display=el.value?"block":"none";b.textContent=el.value;}debouncedSave();}
   if(el.dataset.sd){var p2=el.dataset.sd.split(".");S.days[parseInt(p2[0])][p2[1]]=el.value;debouncedSave();}
 });
 document.getElementById("wrap").addEventListener("change",function(e){
   var el=e.target;
-  if(el.dataset.save){var p=el.dataset.save.split(".");var oldVal=S[p[0]][p[1]];S[p[0]][p[1]]=(el.type==="checkbox"?el.checked:el.value);if(p[0]==="dog"&&p[1]==="weight"&&S.dog.weight&&S.dog.weight!==oldVal){var wEntry={date:new Date().toISOString().slice(0,10),weight:S.dog.weight,note:""};S.weights=S.weights||[];if(!S.weights.find(function(w){return w.date===wEntry.date&&w.weight===wEntry.weight;}))S.weights.push(wEntry);};renderMain();debouncedSave();}
+  if(el.dataset.save){var p=el.dataset.save.split(".");S[p[0]][p[1]]=(el.type==="checkbox"?el.checked:el.value);if(p[0]==="dog"&&p[1]==="name"){var b=document.getElementById("badge");if(b&&S.dog.name){b.style.display="block";b.textContent=S.dog.name;}}if(p[0]==="dog"&&p[1]==="weight"&&S.dog.weight&&S.dog.weight!==oldVal){var wEntry={date:new Date().toISOString().slice(0,10),weight:S.dog.weight,note:""};S.weights=S.weights||[];if(!S.weights.find(function(w){return w.date===wEntry.date&&w.weight===wEntry.weight;}))S.weights.push(wEntry);};renderMain();debouncedSave();}
   if(el.dataset.sd){var p2=el.dataset.sd.split(".");S.days[parseInt(p2[0])][p2[1]]=el.value;renderMain();debouncedSave();}
 });
 
@@ -1188,37 +1188,39 @@ document.getElementById("reset-config").addEventListener("click", function(){
 });
 
 // ── Storage functions ─────────────────────────────────────────────
-function showSaved(){var el=document.getElementById("save-ind");if(el){el.style.display="flex";clearTimeout(window._saveHide);window._saveHide=setTimeout(function(){el.style.display="none";},2000);}}
-function persistSave(){try{localStorage.setItem("nspca-current",JSON.stringify(S));showSaved();}catch(e){}}
-function debouncedSave(){clearTimeout(saveTimer);saveTimer=setTimeout(function(){persistSave();if(S._id)saveRecord();},1500);}
-function loadCurrent(){try{var s=localStorage.getItem("nspca-current");if(s){var saved=JSON.parse(s);if(saved._id)S._id=saved._id;if(saved.dog)S.dog=Object.assign({},S.dog,saved.dog);if(saved.arrival)S.arrival=Object.assign({},S.arrival,saved.arrival);if(saved.days)S.days=saved.days;if(saved.scores)S.scores=Object.assign({},S.scores,saved.scores);if(saved.fin)S.fin=Object.assign({},S.fin,saved.fin);if(saved.weights)S.weights=saved.weights;if(saved.files)S.files=saved.files;if(saved.assessment)S.assessment=Object.assign({},S.assessment,saved.assessment);}}catch(e){}}
-
-async function loadRecordsList(){
-  if(!supabaseClient){records=[];return;}
-  var res = await supabaseClient.from("dogs").select("*").order("saved_at",{ascending:false}).limit(50);
-  if(res.error){console.error(res.error);records=[];return;}
-  records = (res.data||[]).map(function(row){
-    return {id:row.id, savedAt:row.saved_at, name:row.name||"Unknown", breed:row.breed, refNo:row.ref_no, intakeDate:row.intake_date, assessor:row.assessor, score:row.score, trafficLight:row.traffic_light, state:row.data};
-  });
+function showSaved(){
+  var b=document.getElementById("save-btn");
+  if(b){var orig=b.textContent;b.textContent="&#10003; Saved";b.style.background="#166534";
+    setTimeout(function(){b.textContent=orig;b.style.background="#0d9488";},2000);}
 }
 
 async function saveRecord(){
-  if(!supabaseClient){persistSave();return;}
-  if(!S.dog.name){persistSave();return;}
-  var total=Object.values(S.scores).reduce(function(a,b){return a+b},0);
+  if(!supabaseClient){persistSave();showSaved();return;}
+  if(!S.dog||!S.dog.name){persistSave();return;}
+  var b=document.getElementById("save-btn");
+  if(b){b.textContent="Saving...";b.disabled=true;}
+  var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
   var tl=total<=10?"Green":total<=14?"Yellow":total<=20?"Red":"Black";
-  var stateToSave=Object.assign({},S);delete stateToSave._id;
-  var row={name:S.dog.name||"Unknown",breed:S.dog.breed||"",ref_no:S.dog.refNo||"",intake_date:S.dog.intakeDate||null,assessor:S.dog.assessor||"",score:total,traffic_light:tl,saved_at:new Date().toISOString(),state:JSON.stringify(stateToSave)};
+  var stateToSave=JSON.parse(JSON.stringify(S));delete stateToSave._id;
+  var row={name:S.dog.name,breed:S.dog.breed||"",ref_no:S.dog.refNo||"",intake_date:S.dog.intakeDate||null,assessor:S.dog.assessor||"",score:total,traffic_light:tl,saved_at:new Date().toISOString(),state:JSON.stringify(stateToSave)};
   try{
     if(S._id){
       await supabaseClient.from("dogs").update(row).eq("id",S._id);
     } else {
       var res=await supabaseClient.from("dogs").insert([row]);
-      if(res.data&&res.data[0]&&res.data[0].id){S._id=res.data[0].id;persistSave();}
+      if(res.data&&res.data[0]){S._id=res.data[0].id||res.data[0];persistSave();}
     }
     persistSave();
+    showSaved();
     await loadRecordsList();
-  }catch(e){console.error("saveRecord:",e);persistSave();}
+  }catch(e){
+    console.error("saveRecord:",e);
+    persistSave();
+    if(b){b.textContent="&#128190; Save";}
+    alert("Save failed: "+e.message);
+  } finally {
+    if(b){b.disabled=false;b.textContent="&#128190; Save";}
+  }
 }
 
 async function deleteRecord(id){
