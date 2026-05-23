@@ -173,14 +173,14 @@ create policy "Allow all"
 <div id="dashboard-screen" style="display:none;min-height:100vh;background:var(--color-background-secondary)">
   <div style="background:#0f172a;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <div style="color:#fff;font-size:13px;font-weight:500">NSPCA Longford — Isolation</div>
+      <div style="color:#fff;font-size:13px;font-weight:500">NSPCA Longford - Isolation</div>
       <span id="dash-clock" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8"></span>
       <span id="dash-count" style="background:#0d9488;border-radius:20px;padding:3px 10px;font-size:11px;color:#fff;font-weight:500;display:none"></span>
     </div>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
       <span id="dash-user" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#64748b;display:none"></span>
-      <button onclick="showDashSection('records')" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">&#128193; Records</button>
-      <button onclick="showDashSection('stats')" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">&#128200; Stats</button>
+      <button onclick="showDashSection('records')" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">Records</button>
+      <button onclick="showDashSection('stats')" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">Stats</button>
       <button onclick="openNewDog()" style="background:#0d9488;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">+ New Dog</button>
       <button onclick="doLogout()" style="background:transparent;border:none;color:#64748b;cursor:pointer;padding:4px;font-size:12px;font-family:inherit">Log out</button>
     </div>
@@ -246,17 +246,7 @@ create policy "Allow all"
   <div id="content"></div>
 
 </div>
-<script>var TABS=[{id:"dog",l:"Dog details"},{id:"arrival",l:"On-arrival"},{id:"day1",l:"Day 1"},{id:"day2",l:"Day 2"},{id:"day3",l:"Day 3"},{id:"day4",l:"Day 4"},{id:"day5",l:"Day 5"},{id:"assessment",l:"&#128203; Assessment"},{id:"scoring",l:"Scoring"},{id:"report",l:"Report"},{id:"weights",l:"&#9878; Weights"},{id:"files",l:"&#128206; Files"}];
-var BREEDS=["Afghan Hound","Airedale Terrier","Akita","Alaskan Malamute","American Bulldog","American Cocker Spaniel","American Staffordshire Terrier","Australian Cattle Dog","Australian Shepherd","Basenji","Basset Hound","Beagle","Bearded Collie","Bedlington Terrier","Belgian Malinois","Belgian Shepherd","Bernese Mountain Dog","Bichon Frise","Bloodhound","Border Collie","Border Terrier","Boston Terrier","Boxer","Briard","Brittany Spaniel","Bull Mastiff","Bull Terrier","Bull Terrier (Miniature)","Cairn Terrier","Cardigan Welsh Corgi","Cavalier King Charles Spaniel","Cavapoo","Chihuahua","Chow Chow","Clumber Spaniel","Cockapoo","Cocker Spaniel","Collie (Rough)","Collie (Smooth)","Crossbreed / Mixed","Dachshund (Long-Haired)","Dachshund (Miniature)","Dachshund (Short-Haired)","Dachshund (Wire-Haired)","Dalmatian","Dobermann","English Bulldog","English Setter","English Springer Spaniel","Field Spaniel","Flat-Coated Retriever","Fox Terrier (Smooth)","Fox Terrier (Wire)","French Bulldog","German Shepherd","German Shorthaired Pointer","German Spitz","Glen of Imaal Terrier","Golden Retriever","Gordon Setter","Great Dane","Greyhound","Hungarian Vizsla","Irish Red and White Setter","Irish Setter","Irish Terrier","Irish Water Spaniel","Irish Wolfhound","Jack Russell Terrier","Japanese Akita","Japanese Spitz","Kerry Blue Terrier","Labradoodle","Labrador Retriever","Lakeland Terrier","Leonberger","Lhasa Apso","Lurcher","Maltese","Mastiff","Miniature Pinscher","Miniature Schnauzer","Newfoundland","Norfolk Terrier","Norwegian Elkhound","Old English Sheepdog","Papillon","Parson Russell Terrier","Patterdale Terrier","Pekingese","Pembroke Welsh Corgi","Pointer","Pomeranian","Pomsky","Poodle (Miniature)","Poodle (Standard)","Poodle (Toy)","Portugese Podengo","Portuguese Water Dog","Pug","Rhodesian Ridgeback","Rottweiler","Saint Bernard","Samoyed","Scottish Terrier","Shar Pei","Shih Tzu","Siberian Husky","Soft-Coated Wheaten Terrier","Springer Spaniel","Staffordshire Bull Terrier","Terrier Cross","Unknown Breed","Weimaraner","Welsh Springer Spaniel","Welsh Terrier","West Highland White Terrier","Whippet","Yorkshire Terrier"];
-var CATS=[
-  {k:"excitability",l:"Excitability / Arousal",s:{1:"Calm, settles easily",2:"Occasionally excitable, recovers well",3:"Frequently excitable, slow to settle",4:"Extreme arousal, unable to settle safely"}},
-  {k:"reactivity",l:"Reactivity",s:{1:"Non-reactive to people, dogs, environment",2:"Mild reactions, recovers quickly",3:"Moderate reactions, needs active management",4:"Severe reactivity — lunging, snapping, or biting"}},
-  {k:"fearAnxiety",l:"Fear & Anxiety",s:{1:"Confident, no fear signs",2:"Mild anxiety, settles with reassurance",3:"Moderate fear, avoidance or freeze responses",4:"Severe fear, shutdown, panic, or defensive aggression"}},
-  {k:"sepAnx",l:"Separation Anxiety",s:{1:"Settles alone without distress",2:"Brief vocalisation, settles quickly",3:"Persistent vocalisation or destructive behaviour",4:"Severe distress when alone"}},
-  {k:"training",l:"Training & Obedience",s:{1:"Responds well, easy to manage",2:"Some compliance, occasional resistance",3:"Poor compliance, difficult to redirect",4:"No compliance, unsafe to handle"}},
-  {k:"misc",l:"Miscellaneous Behaviour",s:{1:"No concerns noted",2:"Minor concerns, manageable",3:"Concerning behaviours present",4:"Serious concerns, immediate action needed"}}
-];
-
+<script>
 
 var LOGGED_IN = false;
 
@@ -380,7 +370,7 @@ function updateClock(){
   var el=document.getElementById("dash-clock");if(!el)return;
   var now=new Date(),d=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   var h=now.getHours(),mn=now.getMinutes();
-  el.textContent=d[now.getDay()]+" "+now.getDate()+" "+m[now.getMonth()]+" "+now.getFullYear()+" — "+(h<10?"0"+h:h)+":"+(mn<10?"0"+mn:mn);
+  el.textContent=d[now.getDay()]+" "+now.getDate()+" "+m[now.getMonth()]+" "+now.getFullYear()+" - "+(h<10?"0"+h:h)+":"+(mn<10?"0"+mn:mn);
 }
 setInterval(updateClock,10000);
 function showDashboard(){
@@ -392,46 +382,26 @@ function renderDashboard(){
   var el=document.getElementById("dashboard-content");if(!el)return;
   updateClock();
   var _s=(window._dbS||"").toLowerCase(),_k=window._dbK||"",_t=window._dbT||"",_o=window._dbO||"day";
-
   var ce=document.getElementById("dash-count");
-  if(ce){var ac=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Finished Isolation";}).length;ce.textContent=ac+" in isolation";ce.style.display=ac?"inline":"none";}
+  if(ce){var ac=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active - in isolation"||o==="Finished Isolation";}).length;ce.textContent=ac+" in isolation";ce.style.display=ac?"inline":"none";}
   var ue=document.getElementById("dash-user");
   if(ue){var auth=localStorage.getItem("nspca-intake-auth");ue.textContent=auth==="NSPCA-MGR"?"Manager":"Staff";ue.style.display="inline";}
-
   var notes=generateAutoNotices();
   var alertsHtml="";
   if(notes.length){var pb={Normal:"var(--color-background-primary)",Important:"#fef9c3",Urgent:"#fee2e2"},pf={Normal:"var(--color-text-secondary)",Important:"#854d0e",Urgent:"#991b1b"};alertsHtml='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+notes.map(function(n){return'<div style="background:'+pb[n.priority]+';border:0.5px solid var(--color-border-secondary);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;color:'+pf[n.priority]+'">'+n.icon+' '+esc(n.text)+'</div>';}).join("")+'</div>';}
-
   var ks=[];records.forEach(function(r){var k=r.state&&r.state.dog?r.state.dog.kennel:"";if(k&&ks.indexOf(k)<0)ks.push(k);});ks.sort();
-  var fb='<div style="display:flex;gap:6px;margin-bottom:12px;align-items:center">'
-    +'<div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 10px;min-width:0">'
-    +'<span style="font-size:13px;color:var(--color-text-secondary)">&#128269;</span>'
-    +'<input placeholder="Search..." value="'+esc(_s)+'" oninput="window._dbS=this.value;renderDashboard()" style="border:none;background:transparent;outline:none;font-size:12px;width:100%;font-family:inherit;min-width:0"></div>'
-    +'<select onchange="window._dbK=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:100px"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select>'
-    +'<select onchange="window._dbT=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:80px"><option value="">All</option>'+["Green","Yellow","Red","Black"].map(function(t){return'<option value="'+t+'"'+(_t===t?' selected':'')+'>'+t+'</option>';}).join("")+'</select>'
-    +'<select onchange="window._dbO=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:90px">'+[["day","Day"],["name","Name"],["kennel","Kennel"],["tl","Score"]].map(function(o){return'<option value="'+o[0]+'"'+(_o===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select></div>';
-
-  var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Finished Isolation";});
+  var fb='<div style="display:flex;gap:6px;margin-bottom:12px;align-items:center"><div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 10px;min-width:0"><span>&#128269;</span><input placeholder="Search..." value="'+esc(_s)+'" oninput="window._dbS=this.value;renderDashboard()" style="border:none;background:transparent;outline:none;font-size:12px;width:100%;font-family:inherit"></div><select onchange="window._dbK=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:100px"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select><select onchange="window._dbT=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:80px"><option value="">All</option>'+["Green","Yellow","Red","Black"].map(function(t){return'<option value="'+t+'"'+(_t===t?' selected':'')+'>'+t+'</option>';}).join("")+'</select><select onchange="window._dbO=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:90px">'+[["day","Day"],["name","Name"],["kennel","Kennel"],["tl","Score"]].map(function(o){return'<option value="'+o[0]+'"'+(_o===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select></div>';
+  var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active - in isolation"||o==="Finished Isolation";});
   if(_s)active=active.filter(function(r){return(r.name||"").toLowerCase().includes(_s)||(r.breed||"").toLowerCase().includes(_s);});
   if(_k)active=active.filter(function(r){return(r.state&&r.state.dog?r.state.dog.kennel:"")=== _k;});
   if(_t)active=active.filter(function(r){return r.trafficLight===_t;});
-  active.sort(function(a,b){
-    if(_o==="name")return(a.name||"").localeCompare(b.name||"");
-    if(_o==="kennel"){var ka=a.state&&a.state.dog?a.state.dog.kennel||"":"",kb=b.state&&b.state.dog?b.state.dog.kennel||"":"";return ka.localeCompare(kb);}
-    if(_o==="tl"){var ord={Black:0,Red:1,Yellow:2,Green:3,"":4};return(ord[a.trafficLight]||4)-(ord[b.trafficLight]||4);}
-    return(daysInIsolation(b.intakeDate)||0)-(daysInIsolation(a.intakeDate)||0);
-  });
-
+  active.sort(function(a,b){if(_o==="name")return(a.name||"").localeCompare(b.name||"");if(_o==="kennel"){var ka=a.state&&a.state.dog?a.state.dog.kennel||"":"",kb=b.state&&b.state.dog?b.state.dog.kennel||"":"";return ka.localeCompare(kb);}if(_o==="tl"){var ord={Black:0,Red:1,Yellow:2,Green:3,"":4};return(ord[a.trafficLight]||4)-(ord[b.trafficLight]||4);}return(daysInIsolation(b.intakeDate)||0)-(daysInIsolation(a.intakeDate)||0);});
   var tlC={"Green":"#dcfce7|#166534","Yellow":"#fef9c3|#854d0e","Red":"#fee2e2|#991b1b","Black":"#1e293b|#f1f5f9"};
   if(!active.length){el.innerHTML=alertsHtml+fb+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>';return;}
-
   var cards=active.map(function(rec){
-    var d=rec.state&&rec.state.dog?rec.state.dog:{};
-    var f=rec.state&&rec.state.fin?rec.state.fin:{};
-    var outcome=f.outcome||"";
-    var finished=outcome==="Finished Isolation";
-    var days=daysInIsolation(rec.intakeDate);
-    var overdue=days>5&&!finished;
+    var d=rec.state&&rec.state.dog?rec.state.dog:{};var f=rec.state&&rec.state.fin?rec.state.fin:{};
+    var outcome=f.outcome||"";var finished=outcome==="Finished Isolation";
+    var days=daysInIsolation(rec.intakeDate);var overdue=days>5&&!finished;
     var col=finished?"#0d9488":days>=5?"#dc2626":days===4?"#f59e0b":"#0d9488";
     var pct=days?Math.min(100,Math.round((days/5)*100)):0;
     var parts=(tlC[rec.trafficLight]||"#f1f5f9|#94a3b8").split("|");
@@ -440,13 +410,9 @@ function renderDashboard(){
     var ph=d.photo?'<img src="'+d.photo+'" style="width:100%;height:88px;object-fit:cover;display:block">':'<div style="width:100%;height:88px;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:34px">&#128062;</div>';
     var sa=rec.savedAt?new Date(rec.savedAt):null;
     var ta="";if(sa&&!isNaN(sa)){var diff=Math.round((Date.now()-sa.getTime())/60000);ta=diff<1?"just now":diff<60?diff+"m ago":diff<1440?Math.round(diff/60)+"h ago":Math.round(diff/1440)+"d ago";}
-    var dayH=finished?'<div style="font-size:9px;font-weight:600;color:#166634;margin-bottom:3px">&#10003; Finished</div><div style="background:#dcfce7;border-radius:20px;height:4px"><div style="background:#166634;width:100%;height:100%;border-radius:20px"></div></div>':days?'<div style="font-size:9px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of 5'+(overdue?' &#9888;':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:4px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
-    return '<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:2px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer">'+ph
-      +'<div style="padding:10px"><div style="font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div>'
-      +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(rec.trafficLight?'<span style="background:'+parts[0]+';color:'+parts[1]+';font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+rec.trafficLight+'</span>':'')+(d.crossbreed?'<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">X</span>':'')+'</div>'
-      +dayH+((d.assessor||ta)?'<div style="font-size:9px;color:var(--color-text-secondary);margin-top:5px">'+(d.assessor?esc(d.assessor)+" · ":"")+ta+'</div>':"")+'</div></div>';
+    var dayH=finished?'<div style="font-size:9px;font-weight:600;color:#166634;margin-bottom:3px">Done</div><div style="background:#dcfce7;border-radius:20px;height:4px"><div style="background:#166634;width:100%;height:100%;border-radius:20px"></div></div>':days?'<div style="font-size:9px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of 5'+(overdue?' Overdue':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:4px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
+    return '<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:2px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:10px"><div style="font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(rec.trafficLight?'<span style="background:'+parts[0]+';color:'+parts[1]+';font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+rec.trafficLight+'</span>':'')+(d.crossbreed?'<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">X</span>':'')+'</div>'+dayH+((d.assessor||ta)?'<div style="font-size:9px;color:var(--color-text-secondary);margin-top:5px">'+(d.assessor?esc(d.assessor)+' - ':'')+ta+'</div>':"")+'</div></div>';
   }).join("");
-
   el.innerHTML=alertsHtml+fb+'<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px">'+active.length+' dog'+(active.length!==1?'s':'')+' in isolation</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'+cards+'</div>';
 }
 
@@ -1107,12 +1073,12 @@ document.getElementById("wrap").addEventListener("click",handleAppClick);
 document.getElementById("dashboard-screen").addEventListener("click",handleAppClick);
 document.getElementById("wrap").addEventListener("input",function(e){
   var el=e.target;
-  if(el.dataset.save){var p=el.dataset.save.split(".");S[p[0]][p[1]]=(el.type==="checkbox"?el.checked:el.value);if(p[0]==="dog"&&p[1]==="name"){var b=document.getElementById("badge");if(b&&S.dog.name){b.style.display="block";b.textContent=S.dog.name;}}if(p[0]==="dog"&&p[1]==="weight"&&S.dog.weight&&S.dog.weight!==oldVal){var wEntry={date:new Date().toISOString().slice(0,10),weight:S.dog.weight,note:""};S.weights=S.weights||[];if(!S.weights.find(function(w){return w.date===wEntry.date&&w.weight===wEntry.weight;}))S.weights.push(wEntry);};if(p[0]==="dog"&&p[1]==="name"){var b=document.getElementById("badge");b.style.display=el.value?"block":"none";b.textContent=el.value;}debouncedSave();}
+  if(el.dataset.save){var p=el.dataset.save.split(".");S[p[0]][p[1]]=(el.type==="checkbox"?el.checked:el.value);if(p[0]==="dog"&&p[1]==="name"){var bg=document.getElementById("badge");if(bg){bg.style.display="block";bg.textContent=S.dog.name;}}if(p[0]==="dog"&&p[1]==="weight"&&S.dog.weight&&S.dog.weight!==oldVal){var wEntry={date:new Date().toISOString().slice(0,10),weight:S.dog.weight,note:""};S.weights=S.weights||[];if(!S.weights.find(function(w){return w.date===wEntry.date&&w.weight===wEntry.weight;}))S.weights.push(wEntry);};if(p[0]==="dog"&&p[1]==="name"){var b=document.getElementById("badge");b.style.display=el.value?"block":"none";b.textContent=el.value;}debouncedSave();}
   if(el.dataset.sd){var p2=el.dataset.sd.split(".");S.days[parseInt(p2[0])][p2[1]]=el.value;debouncedSave();}
 });
 document.getElementById("wrap").addEventListener("change",function(e){
   var el=e.target;
-  if(el.dataset.save){var p=el.dataset.save.split(".");S[p[0]][p[1]]=(el.type==="checkbox"?el.checked:el.value);if(p[0]==="dog"&&p[1]==="name"){var b=document.getElementById("badge");if(b&&S.dog.name){b.style.display="block";b.textContent=S.dog.name;}}if(p[0]==="dog"&&p[1]==="weight"&&S.dog.weight&&S.dog.weight!==oldVal){var wEntry={date:new Date().toISOString().slice(0,10),weight:S.dog.weight,note:""};S.weights=S.weights||[];if(!S.weights.find(function(w){return w.date===wEntry.date&&w.weight===wEntry.weight;}))S.weights.push(wEntry);};renderMain();debouncedSave();}
+  if(el.dataset.save){var p=el.dataset.save.split(".");S[p[0]][p[1]]=(el.type==="checkbox"?el.checked:el.value);if(p[0]==="dog"&&p[1]==="name"){var bg=document.getElementById("badge");if(bg){bg.style.display="block";bg.textContent=S.dog.name;}}if(p[0]==="dog"&&p[1]==="weight"&&S.dog.weight&&S.dog.weight!==oldVal){var wEntry={date:new Date().toISOString().slice(0,10),weight:S.dog.weight,note:""};S.weights=S.weights||[];if(!S.weights.find(function(w){return w.date===wEntry.date&&w.weight===wEntry.weight;}))S.weights.push(wEntry);};renderMain();debouncedSave();}
   if(el.dataset.sd){var p2=el.dataset.sd.split(".");S.days[parseInt(p2[0])][p2[1]]=el.value;renderMain();debouncedSave();}
 });
 
@@ -1190,37 +1156,25 @@ document.getElementById("reset-config").addEventListener("click", function(){
 // ── Storage functions ─────────────────────────────────────────────
 function showSaved(){
   var b=document.getElementById("save-btn");
-  if(b){var orig=b.textContent;b.textContent="&#10003; Saved";b.style.background="#166534";
-    setTimeout(function(){b.textContent=orig;b.style.background="#0d9488";},2000);}
+  if(b){b.textContent="Saved!";b.style.background="#166534";
+    setTimeout(function(){b.textContent="Save";b.style.background="#0d9488";},2000);}
 }
 
 async function saveRecord(){
   if(!supabaseClient){persistSave();showSaved();return;}
   if(!S.dog||!S.dog.name){persistSave();return;}
-  var b=document.getElementById("save-btn");
-  if(b){b.textContent="Saving...";b.disabled=true;}
+  var btn=document.getElementById("save-btn");
+  if(btn){btn.textContent="Saving...";btn.disabled=true;}
   var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
   var tl=total<=10?"Green":total<=14?"Yellow":total<=20?"Red":"Black";
-  var stateToSave=JSON.parse(JSON.stringify(S));delete stateToSave._id;
-  var row={name:S.dog.name,breed:S.dog.breed||"",ref_no:S.dog.refNo||"",intake_date:S.dog.intakeDate||null,assessor:S.dog.assessor||"",score:total,traffic_light:tl,saved_at:new Date().toISOString(),state:JSON.stringify(stateToSave)};
+  var st=JSON.parse(JSON.stringify(S));delete st._id;
+  var row={name:S.dog.name,breed:S.dog.breed||"",ref_no:S.dog.refNo||"",intake_date:S.dog.intakeDate||null,assessor:S.dog.assessor||"",score:total,traffic_light:tl,saved_at:new Date().toISOString(),state:JSON.stringify(st)};
   try{
-    if(S._id){
-      await supabaseClient.from("dogs").update(row).eq("id",S._id);
-    } else {
-      var res=await supabaseClient.from("dogs").insert([row]);
-      if(res.data&&res.data[0]){S._id=res.data[0].id||res.data[0];persistSave();}
-    }
-    persistSave();
-    showSaved();
-    await loadRecordsList();
-  }catch(e){
-    console.error("saveRecord:",e);
-    persistSave();
-    if(b){b.textContent="&#128190; Save";}
-    alert("Save failed: "+e.message);
-  } finally {
-    if(b){b.disabled=false;b.textContent="&#128190; Save";}
-  }
+    if(S._id){await supabaseClient.from("dogs").update(row).eq("id",S._id);}
+    else{var res=await supabaseClient.from("dogs").insert([row]);if(res.data&&res.data[0]){S._id=res.data[0].id;persistSave();}}
+    persistSave();showSaved();await loadRecordsList();
+  }catch(e){console.error("saveRecord:",e);persistSave();alert("Save failed: "+e.message);}
+  if(btn){btn.disabled=false;btn.textContent="Save";}
 }
 
 async function deleteRecord(id){
@@ -1255,8 +1209,21 @@ function loadRecord(id){
 // ── Init ──────────────────────────────────────────────────────────
 (function(){
   if(!initSupabase()){showScreen("setup");return;}
+  loadCurrent();
   var saved=localStorage.getItem("nspca-intake-auth");
-  if(saved){LOGGED_IN=true;loadRecordsList().then(function(){showDashboard();});}
+  if(saved){LOGGED_IN=true;loadRecordsList().then
+async function loadRecordsList(){
+  if(!supabaseClient){records=[];return;}
+  var res = await supabaseClient.from("dogs").select("*").order("saved_at",{ascending:false}).limit(50);
+  if(res.error){console.error(res.error);records=[];return;}
+  records = (res.data||[]).map(function(row){
+    return {id:row.id, savedAt:row.saved_at, name:row.name||"Unknown", breed:row.breed, refNo:row.ref_no, intakeDate:row.intake_date, assessor:row.assessor, score:row.score, trafficLight:row.traffic_light, state:row.data};
+  });
+}
+
+function loadCurrent(){try{var s=localStorage.getItem("nspca-current");if(s){var saved=JSON.parse(s);if(saved._id)S._id=saved._id;if(saved.dog)S.dog=Object.assign({},S.dog,saved.dog);if(saved.arrival)S.arrival=Object.assign({},S.arrival,saved.arrival);if(saved.days)S.days=saved.days;if(saved.scores)S.scores=Object.assign({},S.scores,saved.scores);if(saved.fin)S.fin=Object.assign({},S.fin,saved.fin);if(saved.weights)S.weights=saved.weights;if(saved.files)S.files=saved.files;if(saved.assessment)S.assessment=Object.assign({},S.assessment,saved.assessment);}}catch(e){}}
+
+(function(){showDashboard();});}
   else{showScreen("login-screen");}
 })();
 
