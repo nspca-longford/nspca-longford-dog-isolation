@@ -59,7 +59,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .header{background:#0f172a;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
 .subheader{background:#1e293b;padding:6px 20px}
 .config-screen{max-width:500px;margin:60px auto;padding:0 16px}
-.dash-card{transition:box-shadow 0.15s;}.dash-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.08);}
+.dash-card{transition:box-shadow 0.15s}.dash-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.08)}
 @media print{nav,.brow{display:none !important}body{background:white}}
 </style>
 </head>
@@ -121,8 +121,15 @@ on conflict (key) do nothing;</pre>
     <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:28px 24px;text-align:center">
       <div style="font-size:36px;margin-bottom:8px">&#128062;</div>
       <div style="font-size:18px;font-weight:800;margin-bottom:4px">Isolation Unit</div>
-      <div style="font-size:13px;color:#64748b;margin-bottom:20px">Enter your access code to continue</div>
-      <input id="login-code" type="password" placeholder="Access code" style="text-align:center;font-size:20px;letter-spacing:0.12em;margin-bottom:10px">
+      <div style="font-size:13px;color:#64748b;margin-bottom:20px">Enter your name and access code</div>
+      <div style="text-align:left;margin-bottom:10px">
+        <label class="lbl">Your name</label>
+        <input id="login-name" type="text" placeholder="e.g. Shane Cox" style="margin-bottom:0" onkeydown="if(event.key==='Enter')document.getElementById('login-code').focus()">
+      </div>
+      <div style="text-align:left;margin-bottom:10px">
+        <label class="lbl">Access code</label>
+        <input id="login-code" type="password" placeholder="••••••••" style="text-align:center;font-size:20px;letter-spacing:0.12em" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
       <button class="btn btnp" style="width:100%" id="login-btn" onclick="doLogin()">Enter</button>
       <div id="login-err" style="display:none;color:#dc2626;font-size:12px;margin-top:8px;padding:8px;background:#fef2f2;border-radius:6px">Incorrect code. Try again.</div>
       <p style="margin-top:14px;font-size:12px;color:#94a3b8;cursor:pointer" onclick="resetSetup()">Change settings</p>
@@ -138,7 +145,7 @@ on conflict (key) do nothing;</pre>
       <span id="dash-count" style="background:#0d9488;border-radius:20px;padding:3px 10px;font-size:11px;color:#fff;font-weight:500;display:none"></span>
     </div>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-      <span id="dash-user" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#64748b;display:none"></span>
+      <span id="dash-user" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8;display:none;align-items:center;gap:6px"></span>
       <button onclick="showDashSection('records')" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">Records</button>
       <button onclick="showDashSection('stats')" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">Stats</button>
       <button onclick="openNewDog()" style="background:#0d9488;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">+ New Dog</button>
@@ -146,6 +153,7 @@ on conflict (key) do nothing;</pre>
     </div>
   </div>
   <div style="max-width:900px;margin:0 auto;padding:18px"><div id="dashboard-content"></div></div>
+  <div style="text-align:center;padding:24px 0 20px;opacity:0.35"><svg width="220" viewBox="0 0 1633 459" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_dash)"><path d="M55.869 395.139C50.5212 392.411 44.1614 391.048 36.7797 391.048C29.3979 391.048 22.7703 392.441 17.2637 395.238C11.7572 398.025 7.51071 401.997 4.50444 407.142C1.49817 412.288 0 418.41 0 425.496C0 432.583 1.46841 438.267 4.40523 443.283C7.34205 448.3 11.4992 452.172 16.8867 454.909C22.2643 457.636 28.6141 459 35.9264 459C43.2387 459 50.0152 457.606 55.4821 454.809C60.9588 452.022 65.1954 448.031 68.1917 442.855C71.198 437.679 72.6962 431.578 72.6962 424.551C72.6962 417.524 71.2278 411.701 68.2909 406.714C65.3541 401.728 61.2069 397.866 55.8591 395.139H55.869ZM50.7593 440.407C49.5687 444.199 47.8225 447.105 45.5108 449.116C43.199 451.126 40.3813 452.132 37.0674 452.132C33.7536 452.132 30.6382 450.967 28.1081 448.648C25.5781 446.329 23.6235 443.014 22.2444 438.715C20.8653 434.415 20.1807 429.348 20.1807 423.516C20.1807 418.061 20.776 413.413 21.9666 409.591C23.1572 405.769 24.9034 402.863 27.2152 400.882C29.5269 398.901 32.3447 397.916 35.6585 397.916C39.1609 397.916 42.1672 399.08 44.6674 401.399C47.1677 403.718 49.1024 407.013 50.4815 411.283C51.8606 415.553 52.5452 420.629 52.5452 426.532C52.5452 431.986 51.9499 436.614 50.7593 440.417V440.407Z" fill="#C5E86C"/><path d="M138.001 425.019C138.001 420.003 136.651 416.031 133.962 413.115C131.274 410.198 127.613 408.735 122.989 408.735C116.292 408.735 110.17 411.811 104.604 417.962H104.138L104.793 409.492H101.697L81.7148 415.892V418.151L88.1838 425.517V449.425L82.6475 455.795V457.487H109.853V455.795L105.07 449.465V422.202C105.954 421.635 106.906 421.147 107.928 420.789C109.525 420.222 111.291 419.943 113.226 419.943C115.974 419.943 117.979 420.669 119.229 422.103C120.479 423.546 121.104 425.835 121.104 428.971V449.465L116.322 455.795V457.487H143.527V455.795L137.991 449.425V425.019H138.001Z" fill="#C5E86C"/><path d="M196.906 420.689C195.09 416.926 192.61 414.02 189.445 411.98C186.29 409.939 182.609 408.924 178.422 408.924C173.173 408.924 168.53 410.068 164.492 412.358C160.454 414.647 157.299 417.802 155.017 421.813C152.735 425.825 151.594 430.473 151.594 435.738C151.594 440.257 152.655 444.268 154.779 447.782C156.902 451.295 159.829 454.042 163.549 456.013C167.27 457.994 171.566 458.979 176.448 458.979C181.329 458.979 185.893 457.785 189.772 455.406C193.652 453.027 196.46 449.822 198.216 445.811L195.031 443.552C191.846 446.816 187.709 448.449 182.649 448.449C178.521 448.449 175.237 446.976 172.796 444.029C170.693 441.481 169.502 438.187 169.215 434.146H199.625C199.625 428.94 198.722 424.451 196.906 420.689ZM169.195 429.726C169.304 427.348 169.582 425.237 170.028 423.376C170.624 420.898 171.487 418.997 172.608 417.683C173.729 416.369 175.049 415.702 176.547 415.702C178.362 415.702 179.841 416.628 181.002 418.479C182.162 420.33 182.738 423.137 182.738 426.9L169.195 429.726Z" fill="#C5E86C"/><path d="M281.518 394.81L287.997 401.3L292.878 435.549L258.728 392.551H249.441H247.745H238.458V394.81L246.157 403.937L243.994 448.738L237.525 455.227V457.487H260.792V455.227L254.313 448.738L250.989 410.467L288.364 457.487H298.316V401.3L304.784 394.81V392.551H281.518V394.81Z" fill="#C5E86C"/><path d="M358.718 426.432C358.718 420.729 356.734 416.35 352.765 413.304C348.796 410.258 343.121 408.735 335.739 408.735C332.922 408.735 330.035 408.944 327.058 409.343C324.091 409.751 321.333 410.298 318.803 410.985C316.273 411.672 314.249 412.458 312.751 413.334L318.476 427.637H321.194L330.352 415.683C331.066 415.504 331.791 415.404 332.545 415.404C335.422 415.404 337.684 416.389 339.341 418.37C340.998 420.351 341.831 423.028 341.831 426.413V428.005L333.11 429.707C319.16 432.404 312.195 437.829 312.195 445.991C312.195 449.823 313.505 452.938 316.134 455.357C318.763 457.776 322.137 458.98 326.264 458.98C329.638 458.98 332.723 458.353 335.501 457.099C338.279 455.845 340.551 454.053 342.298 451.734H343.052L347.179 458.701H349.709L364.254 452.49V450.231L358.718 444.458V426.423V426.432ZM336.017 449.017C334.083 449.017 332.565 448.439 331.463 447.275C330.372 446.11 329.826 444.468 329.826 442.338C329.826 440.327 330.471 438.685 331.751 437.401C333.031 436.117 335.015 435.162 337.704 434.535L341.831 433.499V447.713C340.135 448.579 338.2 449.027 336.017 449.027V449.017Z" fill="#C5E86C"/><path d="M400.935 448.26C398.624 448.26 396.937 447.494 395.865 445.951C394.804 444.418 394.268 442.009 394.268 438.755V419.684L406.839 422.56L408.525 421.247V408.168H406.462L394.268 411.592V395.746H391.172L369.037 419.276V421.535H377.381V442.706C377.381 445.901 378.056 448.728 379.395 451.176C380.735 453.625 382.62 455.536 385.021 456.92C387.432 458.303 390.16 458.99 393.226 458.99C397.919 458.99 401.858 457.855 405.043 455.606C408.228 453.346 410.232 450.301 411.046 446.478L407.861 444.786C405.985 447.106 403.674 448.27 400.915 448.27H400.935V448.26Z" fill="#C5E86C"/><path d="M441.268 409.491H438.172L417.912 415.891V418.151L424.391 425.218V449.424L418.855 455.794V457.486H446.804V455.794L441.268 449.424V409.491Z" fill="#C5E86C"/><path d="M425.6 401.489C427.535 403.251 430.045 404.127 433.101 404.127C436.157 404.127 438.667 403.251 440.602 401.489C442.537 399.737 443.509 397.508 443.509 394.811C443.509 392.113 442.537 389.804 440.602 388.082C438.667 386.36 436.157 385.494 433.101 385.494C430.045 385.494 427.535 386.36 425.6 388.082C423.666 389.804 422.693 392.053 422.693 394.811C422.693 397.568 423.666 399.737 425.6 401.489Z" fill="#C5E86C"/><path d="M497.463 411.89C493.335 409.909 488.454 408.924 482.828 408.924C477.203 408.924 472.559 410.019 468.333 412.218C464.116 414.418 460.812 417.454 458.441 421.346C456.06 425.237 454.879 429.716 454.879 434.803C454.879 439.889 456 444.039 458.252 447.652C460.504 451.265 463.679 454.052 467.777 456.033C471.875 458.014 476.736 458.999 482.362 458.999C487.988 458.999 492.71 457.904 496.907 455.705C501.094 453.505 504.378 450.449 506.759 446.528C509.131 442.606 510.321 438.137 510.321 433.12C510.321 428.104 509.21 423.884 506.988 420.271C504.765 416.668 501.59 413.871 497.463 411.9V411.89ZM491.5 445.532C490.776 447.732 489.783 449.424 488.494 450.619C487.214 451.813 485.666 452.41 483.85 452.41C481.35 452.41 479.266 451.594 477.609 449.962C475.953 448.329 474.702 445.871 473.859 442.576C473.016 439.282 472.589 435.161 472.589 430.204C472.589 427.188 472.946 424.59 473.671 422.391C474.385 420.191 475.407 418.499 476.717 417.305C478.026 416.11 479.564 415.513 481.31 415.513C483.811 415.513 485.894 416.329 487.551 417.962C489.208 419.594 490.458 422.052 491.301 425.347C492.145 428.641 492.571 432.762 492.571 437.719C492.571 440.735 492.214 443.333 491.49 445.532H491.5Z" fill="#C5E86C"/><path d="M575.786 425.019C575.786 420.003 574.436 416.031 571.748 413.115C569.059 410.198 565.398 408.735 560.774 408.735C554.077 408.735 547.955 411.811 542.389 417.962H541.923L542.578 409.492H539.482L519.5 415.892V418.151L525.969 425.517V449.425L520.433 455.795V457.487H547.638V455.795L542.856 449.465V422.202C543.739 421.635 544.691 421.147 545.713 420.789C547.311 420.222 549.077 419.943 551.011 419.943C553.76 419.943 555.764 420.669 557.014 422.103C558.264 423.546 558.889 425.835 558.889 428.971V449.465L554.107 455.795V457.487H581.312V455.795L575.776 449.425V425.019H575.786Z" fill="#C5E86C"/><path d="M636.386 426.432C636.386 420.729 634.402 416.35 630.433 413.304C626.464 410.258 620.789 408.735 613.407 408.735C610.59 408.735 607.702 408.944 604.726 409.343C601.759 409.751 599.001 410.298 596.471 410.985C593.941 411.672 591.917 412.458 590.419 413.334L596.144 427.637H598.862L608.02 415.683C608.734 415.504 609.459 415.404 610.213 415.404C613.09 415.404 615.352 416.389 617.009 418.37C618.666 420.351 619.499 423.028 619.499 426.413V428.005L610.778 429.707C596.828 432.404 589.863 437.829 589.863 445.991C589.863 449.823 591.173 452.938 593.802 455.357C596.431 457.776 599.805 458.98 603.932 458.98C607.306 458.98 610.391 458.353 613.169 457.099C615.947 455.845 618.219 454.053 619.966 451.734H620.72L624.847 458.701H627.377L641.922 452.49V450.231L636.386 444.458V426.423V426.432ZM613.685 449.017C611.751 449.017 610.232 448.439 609.131 447.275C608.04 446.11 607.494 444.468 607.494 442.338C607.494 440.327 608.139 438.685 609.419 437.401C610.699 436.117 612.683 435.162 615.372 434.535L619.499 433.499V447.713C617.803 448.579 615.868 449.027 613.685 449.027V449.017Z" fill="#C5E86C"/><path d="M671.469 385.494H668.373L648.113 392.551V394.811L654.582 401.768V449.425L649.056 455.795V457.487H677.005V455.795L671.469 449.425V385.494Z" fill="#C5E86C"/><path d="M781.323 394.81V392.551H756.558V394.81L763.384 400.613L752.708 441.103L734.581 400.643L741.358 394.81V392.551H710.402V394.81L715.492 400.742L740.892 457.487H750.833L776.233 400.742L781.323 394.81Z" fill="#C5E86C"/><path d="M823.152 411.89C819.025 409.909 814.143 408.924 808.518 408.924C802.892 408.924 798.249 410.019 794.022 412.218C789.805 414.418 786.502 417.454 784.13 421.346C781.749 425.237 780.568 429.716 780.568 434.803C780.568 439.889 781.69 444.039 783.942 447.652C786.194 451.265 789.369 454.052 793.467 456.033C797.564 458.014 802.426 458.999 808.051 458.999C813.677 458.999 818.4 457.904 822.597 455.705C826.784 453.505 830.068 450.449 832.449 446.528C834.82 442.606 836.011 438.137 836.011 433.12C836.011 428.104 834.9 423.884 832.677 420.271C830.455 416.668 827.28 413.871 823.152 411.9V411.89ZM817.199 445.532C816.475 447.732 815.483 449.424 814.193 450.619C812.913 451.813 811.365 452.41 809.55 452.41C807.049 452.41 804.966 451.594 803.309 449.962C801.652 448.329 800.402 445.871 799.558 442.576C798.715 439.282 798.289 435.161 798.289 430.204C798.289 427.188 798.646 424.59 799.37 422.391C800.084 420.191 801.106 418.499 802.416 417.305C803.726 416.11 805.263 415.513 807.01 415.513C809.51 415.513 811.593 416.329 813.25 417.962C814.907 419.594 816.157 422.052 817.001 425.347C817.844 428.641 818.271 432.762 818.271 437.719C818.271 440.735 817.914 443.333 817.189 445.532H817.199Z" fill="#C5E86C"/><path d="M852.897 401.489C854.832 403.251 857.332 404.127 860.398 404.127C863.464 404.127 865.964 403.251 867.899 401.489C869.834 399.737 870.806 397.508 870.806 394.811C870.806 392.113 869.834 389.804 867.899 388.082C865.964 386.36 863.454 385.494 860.398 385.494C857.342 385.494 854.832 386.36 852.897 388.082C850.963 389.804 849.99 392.053 849.99 394.811C849.99 397.568 850.963 399.737 852.897 401.489Z" fill="#C5E86C"/><path d="M868.565 409.491H865.469L845.199 415.891V418.151L851.678 425.218V449.424L846.142 455.794V457.486H874.091V455.794L868.565 449.424V409.491Z" fill="#C5E86C"/><path d="M1384.57 307.012H1292.98L1385.29 0.0996094H1534.05L1629.3 307.012H1504.71C1504.71 307.012 1493.18 257.882 1489.75 243.38H1400.67C1396.47 259.286 1384.57 307.012 1384.57 307.012ZM1457.11 122.675C1455.24 115.191 1452.9 110.512 1446.38 110.512C1439.39 110.512 1437.06 115.191 1434.73 122.675L1419.33 177.887H1472.03L1457.11 122.675Z" fill="#C5E86C"/><path d="M102.521 170.332V306.942H0V0.0292969H124.438L182.738 116.056C187.867 126.348 191.598 127.751 195.795 127.751C201.857 127.751 204.188 122.605 204.188 113.249V0.0292969H306.56V306.942H207.452L124.904 167.525C119.775 158.636 116.51 155.83 111.847 155.83C104.852 155.83 102.521 160.975 102.521 170.332Z" fill="#C5E86C"/><path d="M793.387 225.155V307.032H668.949V0.119141H904.381C944.484 0.119141 977.137 33.8014 977.137 90.4162C977.137 155.452 936.567 207.378 866.609 207.378H814.838C797.584 207.378 793.387 210.653 793.387 225.155ZM809.242 156.377H810.174C841.418 156.377 860.537 139.536 860.537 103.037C860.537 74.5007 845.615 55.7884 815.304 55.7884H810.641C797.584 55.7884 793.387 59.063 793.387 73.5651V138.6C793.387 153.103 797.584 156.377 809.242 156.377Z" fill="#C5E86C"/><path d="M480.377 248.048C505.092 248.048 519.082 239.628 519.082 221.841C519.082 164.748 346.99 219.97 346.99 90.8047C346.99 31.8409 391.757 0 443.062 0H620.313V88.4557H551.536C543.132 62.0892 529.589 57.5703 496.47 57.5703C476.885 57.5703 455.186 64.3983 455.186 77.2282C455.186 123.093 631.475 73.4858 631.475 202.183C631.475 272.384 572.242 307.012 523.745 307.012H352.834V203.119H422.048C432.436 235.457 449.6 248.048 480.377 248.048Z" fill="#C5E86C"/><path d="M1121.92 306.922C1072.2 306.922 992.734 258.738 992.734 153.461C992.734 48.1843 1070.62 0 1129.39 0H1294.61V114.155H1226.4C1220.8 84.6833 1204.18 68.31 1171.72 68.31C1133.02 68.31 1113.99 100.121 1113.99 153.461C1113.99 203.985 1140.03 235.805 1173.61 235.805C1207.18 235.805 1223.21 213.48 1226.59 188.557H1300.36C1285.89 247.978 1255.25 307.211 1190.47 306.922H1121.92Z" fill="#C5E86C"/></g><defs><clipPath id="clip0_dash"><rect width="1633" height="459" fill="white"/></clipPath></defs></svg></div>
 </div>
 
 <div id="wrap" style="display:none">
@@ -186,32 +194,39 @@ var TABS=[
 var BREEDS=["Afghan Hound","Airedale Terrier","Akita","Alaskan Malamute","American Bulldog","American Cocker Spaniel","American Staffordshire Terrier","Australian Cattle Dog","Australian Shepherd","Australian Terrier","Basenji","Basset Hound","Beagle","Bearded Collie","Belgian Malinois","Belgian Shepherd","Bernese Mountain Dog","Bichon Frise","Border Collie","Border Terrier","Borzoi","Boston Terrier","Boxer","Briard","Brittany Spaniel","Bull Mastiff","Bull Terrier","Cairn Terrier","Cavalier King Charles Spaniel","Chihuahua","Chinese Crested","Chow Chow","Clumber Spaniel","Cocker Spaniel","Collie","Corgi (Cardigan)","Corgi (Pembroke)","Dachshund","Dalmatian","Doberman Pinscher","Dogue de Bordeaux","English Bulldog","English Setter","English Springer Spaniel","English Toy Terrier","Field Spaniel","Flat-Coated Retriever","French Bulldog","German Shepherd","German Shorthaired Pointer","Glen of Imaal Terrier","Golden Retriever","Gordon Setter","Great Dane","Greyhound","Hungarian Vizsla","Husky (Siberian)","Irish Red and White Setter","Irish Setter","Irish Soft-coated Wheaten Terrier","Irish Terrier","Irish Water Spaniel","Irish Wolfhound","Jack Russell Terrier","Japanese Akita","Japanese Spitz","Kerry Blue Terrier","King Charles Spaniel","Labrador Retriever","Lakeland Terrier","Leonberger","Lhasa Apso","Lurcher","Maltese","Mastiff","Miniature Pinscher","Miniature Schnauzer","Mixed Breed","Newfoundland","Norfolk Terrier","Norwegian Elkhound","Norwich Terrier","Old English Sheepdog","Papillon","Parson Russell Terrier","Patterdale Terrier","Pekingese","Pharaoh Hound","Pointer","Pomeranian","Poodle (Miniature)","Poodle (Standard)","Poodle (Toy)","Portuguese Water Dog","Pug","Rhodesian Ridgeback","Rottweiler","Rough Collie","Saint Bernard","Saluki","Samoyed","Schnauzer","Scottish Deerhound","Scottish Terrier","Shar Pei","Shiba Inu","Shih Tzu","Smooth Collie","Spinone Italiano","Staffordshire Bull Terrier","Sussex Spaniel","Weimaraner","Welsh Springer Spaniel","Welsh Terrier","West Highland White Terrier","Whippet","Wire Fox Terrier","Yorkshire Terrier"];
 
 // ── State ─────────────────────────────────────────────────────────
-var LOGGED_IN = false;
-var supabaseClient = null;
-var saveTimer = null;
-var records = [];
+var LOGGED_IN=false;
+var supabaseClient=null;
+var saveTimer=null;
+var records=[];
+
+// ── Utility ───────────────────────────────────────────────────────
+function initials(n){var p=(n||"").trim().split(/\s+/);return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():(n||"?").slice(0,2).toUpperCase();}
+function avatarColor(n){var c=["#0d9488","#7c3aed","#dc2626","#d97706","#2563eb","#16a34a","#db2777"];var h=0;for(var i=0;i<(n||"").length;i++)h=(h*31+n.charCodeAt(i))&0xfffffff;return c[h%c.length];}
+function timeAgo(ts){if(!ts)return"";var diff=Math.round((Date.now()-new Date(ts).getTime())/60000);if(diff<1)return"just now";if(diff<60)return diff+"m ago";if(diff<1440)return Math.round(diff/60)+"h ago";return Math.round(diff/1440)+"d ago";}
 
 function showScreen(id){
   ["setup","login-screen","dashboard-screen","wrap"].forEach(function(s){
     var el=document.getElementById(s);if(el)el.style.display=(s===id?"block":"none");
   });
+  if(id==="login-screen"){
+    var saved=localStorage.getItem("nspca-user-name");
+    var ne=document.getElementById("login-name");
+    if(ne&&saved)ne.value=saved;
+  }
 }
 
-function persistSave(){
-  try{localStorage.setItem("nspca-current",JSON.stringify(S));}catch(e){}
-}
+function persistSave(){try{localStorage.setItem("nspca-current",JSON.stringify(S));}catch(e){}}
 var _dSt=null;
-function debouncedSave(){
-  if(_dSt)clearTimeout(_dSt);
-  _dSt=setTimeout(function(){saveRecord();},1500);
-}
+function debouncedSave(){if(_dSt)clearTimeout(_dSt);_dSt=setTimeout(function(){saveRecord();},1500);}
 
 async function doLogin(){
   var btn=document.getElementById("login-btn");
+  var name=(document.getElementById("login-name").value||"").trim();
   var code=(document.getElementById("login-code").value||"").trim();
   var errEl=document.getElementById("login-err");
   errEl.style.display="none";
   if(!code)return;
+  if(!name)name="Staff";
   btn.textContent="Checking...";btn.disabled=true;
   try{
     var res=await supabaseClient.from("config").select("value").eq("key","staff_code").single();
@@ -221,13 +236,19 @@ async function doLogin(){
       valid=(res2.data&&res2.data.value===code)||code==="NSPCA-MGR";
     }
     if(valid){
-      LOGGED_IN=true;localStorage.setItem("nspca-intake-auth",code);
+      LOGGED_IN=true;
+      localStorage.setItem("nspca-intake-auth",code);
+      localStorage.setItem("nspca-user-name",name);
       await loadRecordsList();showDashboard();
     }else{errEl.style.display="block";btn.textContent="Enter";btn.disabled=false;}
   }catch(e){
     var fallback=code==="NSPCA2024"||code==="NSPCA-MGR";
-    if(fallback){LOGGED_IN=true;localStorage.setItem("nspca-intake-auth",code);await loadRecordsList();showDashboard();}
-    else{errEl.style.display="block";btn.textContent="Enter";btn.disabled=false;}
+    if(fallback){
+      LOGGED_IN=true;
+      localStorage.setItem("nspca-intake-auth",code);
+      localStorage.setItem("nspca-user-name",name);
+      await loadRecordsList();showDashboard();
+    }else{errEl.style.display="block";btn.textContent="Enter";btn.disabled=false;}
   }
 }
 
@@ -244,11 +265,11 @@ function showDashSection(section){
   var el=document.getElementById("dashboard-content");if(!el)return;
   if(section==="records"){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'
-      +'<button onclick="loadDashNotices().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button>'
+      +'<button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button>'
       +'<h2 style="margin:0">All Records</h2></div>'+page_records();
   }else if(section==="stats"){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'
-      +'<button onclick="loadDashNotices().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button>'
+      +'<button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button>'
       +'</div>'+renderStats();
   }
 }
@@ -291,8 +312,7 @@ function page_records(){
       if(!days)return '';
       var pct=Math.min(100,Math.round((days/5)*100));
       var col=days>=5?"#dc2626":days===4?"#f59e0b":"#0d9488";
-      return '<div style="margin-top:5px"><div style="font-size:10px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of 5'+(days>5?' <span style="color:#dc2626">&#9888; Overdue</span>':'')+'</div>'
-        +'<div style="background:#e2e8f0;border-radius:20px;height:5px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div></div>';
+      return '<div style="margin-top:5px"><div style="font-size:10px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of 5'+(days>5?' <span style="color:#dc2626">&#9888; Overdue</span>':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:5px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div></div>';
     })();
     return '<div class="rec-card">'+ph2
       +'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;margin-bottom:2px">'+esc(rec.name)+'</div>'
@@ -326,22 +346,44 @@ function renderDashboard(){
   var el=document.getElementById("dashboard-content");if(!el)return;
   updateClock();
   var _s=(window._dbS||"").toLowerCase(),_k=window._dbK||"",_t=window._dbT||"",_o=window._dbO||"day";
+
+  // Update count chip
   var ce=document.getElementById("dash-count");
   if(ce){var ac=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";}).length;ce.textContent=ac+" in isolation";ce.style.display=ac?"inline":"none";}
+
+  // Update user chip with name + avatar
   var ue=document.getElementById("dash-user");
-  if(ue){var auth=localStorage.getItem("nspca-intake-auth");ue.textContent=auth==="NSPCA-MGR"?"Manager":"Staff";ue.style.display="inline";}
+  if(ue){
+    var myName=localStorage.getItem("nspca-user-name")||"Staff";
+    var auth=localStorage.getItem("nspca-intake-auth");
+    var role=auth==="NSPCA-MGR"?"Manager":"Staff";
+    var col=avatarColor(myName);
+    var ini=initials(myName);
+    ue.innerHTML='<span style="width:18px;height:18px;border-radius:50%;background:'+col+';color:#fff;font-size:8px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">'+ini+'</span><span>'+esc(myName)+' &middot; '+role+'</span>';
+    ue.style.display="inline-flex";ue.style.alignItems="center";ue.style.gap="6px";
+  }
+
   var notes=generateAutoNotices();
   var alertsHtml="";
   if(notes.length){var pb={Normal:"var(--color-background-primary)",Important:"#fef9c3",Urgent:"#fee2e2"},pf={Normal:"var(--color-text-secondary)",Important:"#854d0e",Urgent:"#991b1b"};alertsHtml='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+notes.map(function(n){return'<div style="background:'+pb[n.priority]+';border:0.5px solid var(--color-border-secondary);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;color:'+pf[n.priority]+'">'+n.icon+' '+esc(n.text)+'</div>';}).join("")+'</div>';}
+
   var ks=[];records.forEach(function(r){var k=r.state&&r.state.dog?r.state.dog.kennel:"";if(k&&ks.indexOf(k)<0)ks.push(k);});ks.sort();
-  var fb='<div style="display:flex;gap:6px;margin-bottom:12px;align-items:center"><div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 10px;min-width:0"><span>&#128269;</span><input placeholder="Search..." value="'+esc(_s)+'" oninput="window._dbS=this.value;renderDashboard()" style="border:none;background:transparent;outline:none;font-size:12px;width:100%;font-family:inherit"></div><select onchange="window._dbK=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:100px"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select><select onchange="window._dbT=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:80px"><option value="">All</option>'+["Green","Yellow","Red","Black"].map(function(t){return'<option value="'+t+'"'+(_t===t?' selected':'')+'>'+t+'</option>';}).join("")+'</select><select onchange="window._dbO=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:90px">'+[["day","Day"],["name","Name"],["kennel","Kennel"],["tl","Score"]].map(function(o){return'<option value="'+o[0]+'"'+(_o===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select></div>';
+  var fb='<div style="display:flex;gap:6px;margin-bottom:12px;align-items:center">'
+    +'<div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 10px;min-width:0"><span>&#128269;</span>'
+    +'<input placeholder="Search..." value="'+esc(_s)+'" oninput="window._dbS=this.value;window._dbSearchActive=true;renderDashboard()" style="border:none;background:transparent;outline:none;font-size:12px;width:100%;font-family:inherit"></div>'
+    +'<select onchange="window._dbK=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:100px"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select>'
+    +'<select onchange="window._dbT=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:80px"><option value="">All</option>'+["Green","Yellow","Red","Black"].map(function(t){return'<option value="'+t+'"'+(_t===t?' selected':'')+'>'+t+'</option>';}).join("")+'</select>'
+    +'<select onchange="window._dbO=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:90px">'+[["day","Day"],["name","Name"],["kennel","Kennel"],["tl","Score"]].map(function(o){return'<option value="'+o[0]+'"'+(_o===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select></div>';
+
   var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
   if(_s)active=active.filter(function(r){return(r.name||"").toLowerCase().includes(_s)||(r.breed||"").toLowerCase().includes(_s);});
   if(_k)active=active.filter(function(r){return(r.state&&r.state.dog?r.state.dog.kennel:"")=== _k;});
   if(_t)active=active.filter(function(r){return r.trafficLight===_t;});
   active.sort(function(a,b){if(_o==="name")return(a.name||"").localeCompare(b.name||"");if(_o==="kennel"){var ka=a.state&&a.state.dog?a.state.dog.kennel||"":"",kb=b.state&&b.state.dog?b.state.dog.kennel||"":"";return ka.localeCompare(kb);}if(_o==="tl"){var ord={Black:0,Red:1,Yellow:2,Green:3,"":4};return(ord[a.trafficLight]||4)-(ord[b.trafficLight]||4);}return(daysInIsolation(b.intakeDate)||0)-(daysInIsolation(a.intakeDate)||0);});
+
   var tlC={"Green":"#dcfce7|#166534","Yellow":"#fef9c3|#854d0e","Red":"#fee2e2|#991b1b","Black":"#1e293b|#f1f5f9"};
   if(!active.length){el.innerHTML=alertsHtml+fb+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>';return;}
+
   var cards=active.map(function(rec){
     var d=rec.state&&rec.state.dog?rec.state.dog:{};var f=rec.state&&rec.state.fin?rec.state.fin:{};
     var outcome=f.outcome||"";var finished=outcome==="Finished Isolation";
@@ -355,9 +397,29 @@ function renderDashboard(){
     var sa=rec.savedAt?new Date(rec.savedAt):null;
     var ta="";if(sa&&!isNaN(sa)){var diff=Math.round((Date.now()-sa.getTime())/60000);ta=diff<1?"just now":diff<60?diff+"m ago":diff<1440?Math.round(diff/60)+"h ago":Math.round(diff/1440)+"d ago";}
     var dayH=finished?'<div style="font-size:9px;font-weight:600;color:#166634;margin-bottom:3px">Done</div><div style="background:#dcfce7;border-radius:20px;height:4px"><div style="background:#166634;width:100%;height:100%;border-radius:20px"></div></div>':days?'<div style="font-size:9px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of 5'+(overdue?' Overdue':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:4px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
-    return '<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:2px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:10px"><div style="font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(rec.trafficLight?'<span style="background:'+parts[0]+';color:'+parts[1]+';font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+rec.trafficLight+'</span>':'')+(d.crossbreed?'<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">X</span>':'')+'</div>'+dayH+((d.assessor||ta)?'<div style="font-size:9px;color:var(--color-text-secondary);margin-top:5px">'+(d.assessor?esc(d.assessor)+' - ':'')+ta+'</div>':"")+'</div></div>';
+    // Last edited by
+    var savedBy=rec.savedBy||"";
+    var lastEditHtml=savedBy?'<div style="display:flex;align-items:center;gap:4px;margin-top:5px;padding-top:4px;border-top:0.5px solid var(--color-border-secondary)">'
+      +'<div style="width:14px;height:14px;border-radius:50%;background:'+avatarColor(savedBy)+';color:#fff;font-size:6px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials(savedBy)+'</div>'
+      +'<span style="font-size:9px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(savedBy)+' &middot; '+ta+'</span>'
+      +'</div>'
+      :'';
+    return '<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:2px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer">'+ph
+      +'<div style="padding:10px">'
+      +'<div style="font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div>'
+      +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(rec.trafficLight?'<span style="background:'+parts[0]+';color:'+parts[1]+';font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+rec.trafficLight+'</span>':'')+(d.crossbreed?'<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">X</span>':'')+'</div>'
+      +dayH+lastEditHtml
+      +'</div></div>';
   }).join("");
+
   el.innerHTML=alertsHtml+fb+'<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px">'+active.length+' dog'+(active.length!==1?'s':'')+' in isolation</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'+cards+'</div>';
+
+  // Restore search focus after re-render
+  if(window._dbSearchActive){
+    var si=el.querySelector('input[placeholder="Search..."]');
+    if(si){si.focus();var l=si.value.length;si.setSelectionRange(l,l);}
+    window._dbSearchActive=false;
+  }
 }
 
 function openDog(id){
@@ -383,7 +445,7 @@ function generateAutoNotices(){
     var f=r.state&&r.state.fin?r.state.fin:{};
     var outcome=f.outcome||"";
     var finished=outcome==="Finished Isolation";
-    var active=!outcome||outcome==="Active — in isolation";
+    var active=!outcome||outcome==="Active — in isolation"||outcome==="Active - in isolation";
     if(!active&&!finished)return;
     var days=daysInIsolation(r.intakeDate);
     var d=r.state&&r.state.dog?r.state.dog:{};
@@ -407,14 +469,12 @@ function generateAutoNotices(){
 }
 
 function daysInIsolation(d){if(!d)return null;return Math.max(1,Math.floor((new Date()-new Date(d))/(1000*60*60*24))+1);}
-function setWeight(v){S.dog.weight=v?(v+" kg"):"";}
+function setWeight(v){S.dog.weight=v?(v+" kg"):""}
 function wfld(val){var n=(val||"").toString().replace(/[^0-9.]/g,"");return'<div class="f"><label class="lbl">Weight</label><div style="display:flex;align-items:center;gap:8px"><input type="number" step="0.1" min="0" placeholder="12.5" value="'+n+'" data-save="dog.weight" style="flex:1"><span style="font-weight:700;color:var(--color-text-secondary)">kg</span></div></div>';}
 function compressPhoto(file,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var MAX=400,w=img.width,h=img.height;if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}var cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);cb(cv.toDataURL("image/jpeg",0.75));};img.src=e.target.result;};r.readAsDataURL(file);}
 function handlePhotoUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){alert("Photo too large. Please use a photo under 5MB.");return;}compressPhoto(file,function(data){S.dog.photo=data;renderMain();});}
 function removePhoto(){S.dog.photo="";renderMain();}
-function exportCSV(){var hdrs=["Name","Breed","Ref No","Intake Date","Kennel","Age","Sex","Colour","Weight","Traffic Light","Score","Outcome","Days","Saved"];var rows=records.map(function(r){var d=r.state&&r.state.dog?r.state.dog:{};var f=r.state&&r.state.fin?r.state.fin:{};return[r.name,r.breed,r.refNo,r.intakeDate,d.kennel||"",d.age||"",d.sex||"",d.colour||"",d.weight||"",r.trafficLight||"",r.score||"",f.outcome||"",daysInIsolation(r.intakeDate)||"",r.savedAt||""].map(function(v){return'"'+(v||"").toString().replace(/"/g,"''")+'"';}).join(",");});var csv=[hdrs.join(",")].concat(rows).join("\n");var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="nspca-isolation-"+new Date().toISOString().slice(0,10)+".csv";a.click();}
-
-function getWeekStart(dateStr){var d=new Date(dateStr);var day=d.getDay(),diff=d.getDate()-day+(day===0?-6:1);var m=new Date(d);m.setDate(diff);return m.toISOString().slice(0,10);}
+function exportCSV(){var hdrs=["Name","Breed","Ref No","Intake Date","Kennel","Age","Sex","Colour","Weight","Traffic Light","Score","Outcome","Days","Saved","Saved By"];var rows=records.map(function(r){var d=r.state&&r.state.dog?r.state.dog:{};var f=r.state&&r.state.fin?r.state.fin:{};return[r.name,r.breed,r.refNo,r.intakeDate,d.kennel||"",d.age||"",d.sex||"",d.colour||"",d.weight||"",r.trafficLight||"",r.score||"",f.outcome||"",daysInIsolation(r.intakeDate)||"",r.savedAt||"",r.savedBy||""].map(function(v){return'"'+(v||"").toString().replace(/"/g,"''")+'"';}).join(",");});var csv=[hdrs.join(",")].concat(rows).join("\n");var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="nspca-isolation-"+new Date().toISOString().slice(0,10)+".csv";a.click();}
 
 function renderWeights(){
   try{
@@ -426,7 +486,7 @@ function renderWeights(){
     var weeks=[];var ws=weekStart(intakeDate);var limit=0;
     while(ws<=today&&limit<52){var we=addDays(ws,6);var entry=weights.find(function(w){return w.date>=ws&&w.date<=we;})||null;weeks.push({ws:ws,we:we,entry:entry,current:ws===weekStart(today)});ws=addDays(ws,7);limit++;}
     var dueThisWeek=weeks.length>0&&!weeks[weeks.length-1].entry;
-    var banner=dueThisWeek?'<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><div style="font-size:13px;font-weight:700;color:#854d0e">&#9888; Weekly weigh-in due</div><div style="font-size:12px;color:#92400e;margin-top:2px">No weight recorded this week</div></div><button class="btn btnp" onclick="document.getElementById(&quot;w-val&quot;).focus()">Log Weight Now</button></div>':'';
+    var banner=dueThisWeek?'<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><div style="font-size:13px;font-weight:700;color:#854d0e">&#9888; Weekly weigh-in due</div><div style="font-size:12px;color:#92400e;margin-top:2px">No weight recorded this week</div></div><button class="btn btnp" onclick="document.getElementById(&quot;w-val&quot;).focus()">Log Weight Now</button></div>':"";
     var recorded=weeks.filter(function(w){return w.entry;}).length;
     var tableRows=weeks.slice().reverse().map(function(w,i){
       var revWeeks=weeks.slice().reverse();var prevW=revWeeks[i+1]||null;
@@ -446,28 +506,12 @@ function renderWeights(){
         :'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)">No weight entries yet.</div>');
   }catch(err){return '<div style="padding:20px;color:#dc2626">Weight tab error: '+err.message+'</div>';}
 }
-
-function addWeight(){
-  var dEl=document.getElementById("w-date"),vEl=document.getElementById("w-val"),nEl=document.getElementById("w-note");
-  var d=dEl?dEl.value.trim():"",v=vEl?vEl.value.trim():"",n=nEl?nEl.value.trim():"";
-  if(!d||!v){alert("Please enter a date and weight.");return;}
-  if(!S.weights)S.weights=[];
-  S.weights.push({date:d,weight:parseFloat(v)+" kg",note:n});
-  saveRecord();renderMain();
-}
-function deleteWeight(idx){if(!confirm("Delete this weight entry?"))return;S.weights.splice(idx,1);persistSave();renderMain();}
+function addWeight(){var dEl=document.getElementById("w-date"),vEl=document.getElementById("w-val"),nEl=document.getElementById("w-note");var d=dEl?dEl.value.trim():"",v=vEl?vEl.value.trim():"",n=nEl?nEl.value.trim():"";if(!d||!v){alert("Please enter a date and weight.");return;}if(!S.weights)S.weights=[];S.weights.push({date:d,weight:parseFloat(v)+" kg",note:n});saveRecord();renderMain();}
+function deleteWeight(idx){if(!confirm("Delete this weight entry?"))return;S.weights.splice(idx,1);saveRecord();renderMain();}
 
 function renderFiles(){
   var files=S.files||[];
-  var fileCards=files.map(function(f,i){
-    return '<div class="card" style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">'
-      +(f.type==="image"?'<img src="'+f.data+'" style="width:60px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0">'
-        :'<div style="width:60px;height:60px;border-radius:6px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">&#128196;</div>')
-      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(f.name)+'</div>'
-      +'<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">'+f.date+(f.note?" &middot; "+esc(f.note):"")+'</div>'
-      +(f.type==="image"?'<a href="'+f.data+'" download="'+esc(f.name)+'" style="font-size:11px;color:var(--color-teal)">Download</a>':'')+'</div>'
-      +'<button class="btn btnr" style="font-size:11px;padding:4px 8px;flex-shrink:0" onclick="deleteFile('+i+')">&#10005;</button></div>';
-  }).join("");
+  var fileCards=files.map(function(f,i){return'<div class="card" style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">'+(f.type==="image"?'<img src="'+f.data+'" style="width:60px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0">':`<div style="width:60px;height:60px;border-radius:6px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">&#128196;</div>`)+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(f.name)+'</div><div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">'+f.date+(f.note?" &middot; "+esc(f.note):"")+'</div>'+(f.type==="image"?'<a href="'+f.data+'" download="'+esc(f.name)+'" style="font-size:11px;color:var(--color-teal)">Download</a>':'')+'</div><button class="btn btnr" style="font-size:11px;padding:4px 8px;flex-shrink:0" onclick="deleteFile('+i+')">&#10005;</button></div>';}).join("");
   return '<h2 style="margin-bottom:4px">Files & Documents</h2><div class="sub" style="margin-bottom:16px">Upload photos, scans or documents for this dog</div>'
     +'<div class="card" style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Upload File</div>'
     +'<div class="f"><label class="lbl">Note (optional)</label><input id="f-note" placeholder="e.g. Vet report 12 May"></div>'
@@ -475,19 +519,8 @@ function renderFiles(){
     +'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px">Images are compressed automatically. Max 5MB per file.</div></div>'
     +(files.length?fileCards:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)"><div style="font-size:32px;margin-bottom:8px">&#128206;</div>No files uploaded yet</div>');
 }
-function handleFileUpload(inp){
-  var file=inp.files[0];if(!file)return;
-  if(file.size>5*1024*1024){alert("File too large. Max 5MB.");return;}
-  var note=(document.getElementById("f-note")||{}).value||"";
-  var date=new Date().toISOString().slice(0,10);
-  if(file.type.startsWith("image/")){
-    compressPhoto(file,function(data){S.files=S.files||[];S.files.push({name:file.name,data:data,type:"image",date:date,note:note});renderMain();});
-  }else{
-    var r=new FileReader();r.onload=function(e){S.files=S.files||[];S.files.push({name:file.name,data:e.target.result,type:"doc",date:date,note:note});renderMain();};r.readAsDataURL(file);
-  }
-  inp.value="";
-}
-function deleteFile(idx){if(!confirm("Delete this file?"))return;S.files.splice(idx,1);persistSave();renderMain();}
+function handleFileUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){alert("File too large. Max 5MB.");return;}var note=(document.getElementById("f-note")||{}).value||"";var date=new Date().toISOString().slice(0,10);if(file.type.startsWith("image/")){compressPhoto(file,function(data){S.files=S.files||[];S.files.push({name:file.name,data:data,type:"image",date:date,note:note});renderMain();});}else{var r=new FileReader();r.onload=function(e){S.files=S.files||[];S.files.push({name:file.name,data:e.target.result,type:"doc",date:date,note:note});renderMain();};r.readAsDataURL(file);}inp.value="";}
+function deleteFile(idx){if(!confirm("Delete this file?"))return;S.files.splice(idx,1);saveRecord();renderMain();}
 
 function addMuzzleSession(){var d=document.getElementById("mz-date")?document.getElementById("mz-date").value:"";var dur=document.getElementById("mz-dur")?document.getElementById("mz-dur").value.trim():"";var stage=document.getElementById("mz-stage")?document.getElementById("mz-stage").value:"";var notes=document.getElementById("mz-notes")?document.getElementById("mz-notes").value.trim():"";if(!d||!stage){alert("Please enter a date and stage.");return;}if(!S.assessment.muzzleSessions)S.assessment.muzzleSessions=[];S.assessment.muzzleSessions.push({date:d,duration:dur,stage:stage,notes:notes});saveRecord();renderMain();}
 function deleteMuzzleSession(i){if(!confirm("Delete?"))return;S.assessment.muzzleSessions.splice(i,1);saveRecord();renderMain();}
@@ -497,10 +530,8 @@ function addPlaydate(){var d=document.getElementById("pd-date")?document.getElem
 function deletePlaydate(i){if(!confirm("Delete?"))return;S.assessment.playdates.splice(i,1);saveRecord();renderMain();}
 
 function renderAssessment(){
-  var a=S.assessment||{};
-  var today2=new Date().toISOString().slice(0,10);
-  var h="";
-  function sec(title){return '<div class="sec" style="margin-top:4px">'+title+'</div>';}
+  var a=S.assessment||{};var today2=new Date().toISOString().slice(0,10);var h="";
+  function sec(t){return'<div class="sec" style="margin-top:4px">'+t+'</div>';}
   var touchOpts=[["","-- not tested --"],["Accepts freely","Accepts freely"],["Accepts — mild tension","Accepts — mild tension"],["Tolerates — discomfort","Tolerates — discomfort"],["Resists / pulls away","Resists / pulls away"],["Snaps or bites","Snaps or bites"]];
   var reactOpts=[["","-- not tested --"],["None observed","None observed"],["Mild — alert / excited","Mild — alert / excited"],["Moderate — barking / lunging","Moderate — barking / lunging"],["Severe — sustained","Severe — sustained aggression"]];
   var dogOpts=[["","-- not tested --"],["Friendly — calm","Friendly — calm greeting"],["Interested — pulls toward","Interested — pulls toward"],["Nervous — avoids","Nervous — avoids"],["Reactive — barks / lunges","Reactive — barks / lunges"],["Aggressive","Aggressive — requires space"]];
@@ -512,15 +543,11 @@ function renderAssessment(){
   h+='<div class="card">'+sec("Environment")+'<div class="g2">'+slct("Car travel",a.carTravel||"","assessment.carTravel",[["","-- not tested --"],["Settles well","Settles well"],["Anxious","Anxious but manageable"],["Very distressed","Very distressed"],["Not tested","Not tested"]])+slct("Noise sensitivity",a.noiseSensitivity||"","assessment.noiseSensitivity",[["","-- not assessed --"],["None observed","None observed"],["Mild — startles","Mild — startles but recovers"],["Moderate","Moderate — sustained anxiety"],["Severe","Severe — cannot settle"]])+slct("New environments",a.newEnvironments||"","assessment.newEnvironments",[["","-- not tested --"],["Confident","Confident — explores freely"],["Cautious","Cautious but settles"],["Very nervous","Very nervous"],["Shuts down","Shuts down"]])+slct("Kennel behaviour",a.kennelBehaviour||"","assessment.kennelBehaviour",[["","-- not assessed --"],["Settled","Settled and calm"],["Pacing","Pacing / repetitive behaviour"],["Vocal","Excessive vocalisation"],["Destructive","Destructive behaviour"],["Shutting down","Shutting down / withdrawn"]])+'</div>'+ta("Environment notes",a.environmentNotes||"","assessment.environmentNotes","Any environment observations...")+'</div>';
   h+='<div class="card">'+sec("Play & Drive")+'<div class="g2">'+slct("Toy interest",a.toyInterest||"","assessment.toyInterest",driveOpts)+slct("Retrieve",a.retrieve||"","assessment.retrieve",driveOpts)+slct("Tug",a.tug||"","assessment.tug",driveOpts)+slct("Food motivation",a.foodMotivation||"","assessment.foodMotivation",driveOpts)+slct("Resource guarding",a.resourceGuarding||"","assessment.resourceGuarding",[["","-- not tested --"],["None observed","None observed"],["Mild — stiffens / stares","Mild — stiffens / stares"],["Moderate — growls / snaps","Moderate — growls / snaps"],["Severe","Severe — bites"]])+slct("Play style",a.playStyle||"","assessment.playStyle",[["","-- not assessed --"],["Appropriate — good self-regulation","Appropriate — good self-regulation"],["Boisterous — needs breaks","Boisterous — needs regular breaks"],["Over-aroused","Over-aroused — escalates quickly"],["Bully / mounting","Bully / mounting behaviour"],["Fearful","Fearful / submissive"]])+'</div>'+ta("Play notes",a.playNotes||"","assessment.playNotes","Any play and drive observations...")+'</div>';
   h+='<div class="card">'+sec("Trainability")+'<div class="g2">'+slct("Attention span",a.attentionSpan||"","assessment.attentionSpan",[["","-- not assessed --"],["Excellent","Excellent — sustained focus"],["Good","Good — reasonable focus"],["Moderate","Moderate — easily distracted"],["Poor","Poor — unable to focus"]])+slct("Handler focus",a.handlerFocus||"","assessment.handlerFocus",[["","-- not assessed --"],["High","High — checks in frequently"],["Moderate","Moderate — responds when prompted"],["Low","Low — largely independent"],["None","None — ignores handler"]])+slct("Known commands",a.basicCommands||"","assessment.basicCommands",[["","-- not assessed --"],["None known","None known"],["Sit","Sit"],["Sit / Down","Sit and Down"],["Sit / Down / Stay","Sit, Down and Stay"],["Sit / Down / Stay / Come","Multiple commands"],["Fully trained","Fully trained"]])+slct("Previous training",a.previousTraining||"","assessment.previousTraining",[["","-- unknown --"],["None","None"],["Basic home training","Basic home training"],["Puppy class","Puppy class"],["Obedience classes","Obedience classes"],["Professional training","Professional training"]])+'</div>'+ta("Training notes",a.trainNotes||"","assessment.trainNotes","Any training observations or recommendations...")+'</div>';
-
   var bwRows=(a.buddyWalks||[]).map(function(w,i){var col=w.result&&w.result.indexOf("Settled")>=0?"#166534":w.result&&w.result.indexOf("Aggressive")>=0?"#991b1b":"#854d0e";return'<tr><td style="padding:8px 10px;font-size:12px;white-space:nowrap">'+w.date+'</td><td style="padding:8px 10px;font-size:12px">'+(w.dog||"—")+'</td><td style="padding:8px 10px;font-size:12px">'+(w.staff||"—")+'</td><td style="padding:8px 10px;font-size:12px;font-weight:600;color:'+col+'">'+esc(w.result)+'</td><td style="padding:8px 10px;font-size:11px;color:var(--color-text-secondary)">'+(w.notes?esc(w.notes):"")+'</td><td style="padding:8px 10px"><button onclick="deleteBuddyWalk('+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer">&#10005;</button></td></tr>';}).join("");
   h+='<div class="card">'+sec("Buddy Walks")+'<div class="g2"><div class="f"><label class="lbl">Date</label><input type="date" id="bw-date" value="'+today2+'"></div><div class="f"><label class="lbl">Partner dog</label><input id="bw-dog" placeholder="Dog name or kennel no."></div></div><div class="g2"><div class="f"><label class="lbl">Staff member</label><input id="bw-staff" placeholder="Name"></div><div class="f"><label class="lbl">Result</label><select id="bw-result"><option value="">-- select --</option>'+[["Settled — no reaction","Settled — no reaction"],["Walked well — minor interest","Walked well — minor interest"],["Reactive — manageable","Reactive — manageable with intervention"],["Reactive — difficult","Reactive — very difficult to manage"],["Aggressive — could not continue","Aggressive — could not continue"]].map(function(o){return'<option value="'+o[0]+'">'+o[1]+'</option>';}).join("")+'</select></div></div><div class="f"><label class="lbl">Notes</label><input id="bw-notes" placeholder="Any observations..."></div><button class="btn btnp" onclick="addBuddyWalk()">+ Add Buddy Walk</button>'+((a.buddyWalks||[]).length?'<div style="margin-top:14px;overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:2px solid var(--color-border-secondary)"><th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Date</th><th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Partner</th><th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Staff</th><th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Result</th><th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Notes</th><th></th></tr></thead><tbody>'+bwRows+'</tbody></table></div>':'<div style="text-align:center;padding:16px;color:var(--color-text-secondary);font-size:13px">No buddy walks recorded yet</div>')+'</div>';
-
   var pdRows=(a.playdates||[]).map(function(w,i){var col=w.result&&w.result.indexOf("Appropriate")>=0?"#166534":w.result&&w.result.indexOf("Aggressive")>=0?"#991b1b":"#854d0e";return'<tr><td style="padding:8px 10px;font-size:12px;white-space:nowrap">'+w.date+'</td><td style="padding:8px 10px;font-size:12px">'+(w.dog||"—")+'</td><td style="padding:8px 10px;font-size:12px">'+(w.staff||"—")+'</td><td style="padding:8px 10px;font-size:12px;font-weight:600;color:'+col+'">'+esc(w.result)+'</td><td style="padding:8px 10px;font-size:11px;color:var(--color-text-secondary)">'+(w.notes?esc(w.notes):"")+'</td><td style="padding:8px 10px"><button onclick="deletePlaydate('+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer">&#10005;</button></td></tr>';}).join("");
   h+='<div class="card">'+sec("Playdates")+'<div class="g2"><div class="f"><label class="lbl">Date</label><input type="date" id="pd-date" value="'+today2+'"></div><div class="f"><label class="lbl">Partner dog</label><input id="pd-dog" placeholder="Dog name or kennel no."></div></div><div class="g2"><div class="f"><label class="lbl">Staff member</label><input id="pd-staff" placeholder="Name"></div><div class="f"><label class="lbl">Result</label><select id="pd-result"><option value="">-- select --</option>'+[["Appropriate — good play","Appropriate — good play"],["Over-excited — needed breaks","Over-excited — needed breaks"],["Bully / mounting","Bully / mounting behaviour"],["Fearful — withdrew","Fearful — withdrew from interaction"],["Selective — specific dog only","Selective — specific dog only"],["Aggressive — had to separate","Aggressive — had to separate"]].map(function(o){return'<option value="'+o[0]+'">'+o[1]+'</option>';}).join("")+'</select></div></div><div class="f"><label class="lbl">Notes</label><input id="pd-notes" placeholder="Any observations..."></div><button class="btn btnp" onclick="addPlaydate()">+ Add Playdate</button>'+((a.playdates||[]).length?'<div style="margin-top:14px;overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:2px solid var(--color-border-secondary)"><th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Date</th><th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Partner</th><th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Staff</th><th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Result</th><th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Notes</th><th></th></tr></thead><tbody>'+pdRows+'</tbody></table></div>':'<div style="text-align:center;padding:16px;color:var(--color-text-secondary);font-size:13px">No playdates recorded yet</div>')+'</div>';
-
   h+='<div class="card">'+sec("Rehoming Suitability")+'<div class="g2">'+slct("Home type",a.homeType||"","assessment.homeType",[["","-- not assessed --"],["Any home","Any home"],["House with garden","House with garden required"],["Rural — large space","Rural — large space preferred"],["Experienced owner only","Experienced owner only"],["Single dog household","Single dog household only"],["Quiet home","Quiet home — no young children"]])+slct("Suitable with children",a.suitableChildren||"","assessment.suitableChildren",[["","-- not assessed --"],["All ages","Yes — all ages"],["Over 12","Yes — over 12 only"],["Adults only","Adults only"],["No","Not suitable with children"]])+slct("Suitable with other dogs",a.suitableOtherDogs||"","assessment.suitableOtherDogs",[["","-- not assessed --"],["Yes","Yes — good with other dogs"],["Female only","Yes — female dogs only"],["Male only","Yes — male dogs only"],["Selective","Selective — case by case"],["No","No — only dog"]])+slct("Suitable with cats",a.suitableCats||"","assessment.suitableCats",[["","-- not assessed --"],["Yes","Yes — cat tested"],["Caution","With caution"],["No","No — not safe with cats"]])+slct("Exercise needs",a.exerciseNeeds||"","assessment.exerciseNeeds",[["","-- not assessed --"],["Low — short walks","Low — short walks"],["Moderate — 1hr daily","Moderate — 1hr daily"],["High — 2hr+ daily","High — 2hr+ daily"],["Very high","Very high — working breed level"]])+slct("Owner experience required",a.experienceLevel||"","assessment.experienceLevel",[["","-- not assessed --"],["First time owner","Suitable for first time owner"],["Some experience","Some dog experience recommended"],["Experienced only","Experienced owner required"],["Specialist","Specialist handler only"]])+'</div>'+ta("Suitability notes",a.suitabilityNotes||"","assessment.suitabilityNotes","Ideal home description, any specific requirements...")+'</div>';
-
   var mzRows=(a.muzzleSessions||[]).map(function(s,i){var col=s.stage==="Trained — wears comfortably"?"#166534":s.stage==="Introduction"?"#94a3b8":"#854d0e";return'<tr><td style="padding:8px 10px;font-size:12px;white-space:nowrap">'+s.date+'</td><td style="padding:8px 10px;font-size:12px">'+(s.duration||"—")+'</td><td style="padding:8px 10px;font-size:12px;font-weight:600;color:'+col+'">'+esc(s.stage)+'</td><td style="padding:8px 10px;font-size:11px;color:var(--color-text-secondary)">'+(s.notes?esc(s.notes):"")+'</td><td style="padding:8px 10px"><button onclick="deleteMuzzleSession('+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer">&#10005;</button></td></tr>';}).join("");
   h+='<div class="card">'+sec("Muzzle Training")+'<div class="g2">'+slct("Muzzle required",a.muzzleRequired||"","assessment.muzzleRequired",[["","-- not assessed --"],["Yes — currently required","Yes — currently required"],["Under assessment","Under assessment"],["For specific situations","For specific situations only"],["No — not required","No — not required"]])+slct("Muzzle type",a.muzzleType||"","assessment.muzzleType",[["","-- not applicable --"],["Basket muzzle","Basket muzzle"],["Soft muzzle","Soft muzzle"],["Baskerville","Baskerville"],["Not yet fitted","Not yet fitted"]])+'</div>'+slct("Current training stage",a.muzzleStage||"","assessment.muzzleStage",[["","-- not started --"],["Introduction — sniffing / licking","Introduction — sniffing / licking"],["Nose in — food reward","Nose in — food reward"],["Wearing briefly — 1 to 2 mins","Wearing briefly — 1 to 2 mins"],["Wearing extended — 5+ mins","Wearing extended — 5+ mins"],["Trained — wears comfortably","Trained — wears comfortably"]])+'<div class="sec">Training Sessions</div><div class="g2"><div class="f"><label class="lbl">Date</label><input type="date" id="mz-date" value="'+today2+'"></div><div class="f"><label class="lbl">Duration</label><input id="mz-dur" placeholder="e.g. 10 minutes"></div></div><div class="f"><label class="lbl">Stage reached</label><select id="mz-stage"><option value="">-- select --</option>'+[["Introduction — sniffing / licking","Introduction — sniffing / licking"],["Nose in — food reward","Nose in — food reward"],["Wearing briefly — 1 to 2 mins","Wearing briefly — 1 to 2 mins"],["Wearing extended — 5+ mins","Wearing extended — 5+ mins"],["Trained — wears comfortably","Trained — wears comfortably"]].map(function(o){return'<option value="'+o[0]+'">'+o[1]+'</option>';}).join("")+'</select></div><div class="f"><label class="lbl">Notes</label><input id="mz-notes" placeholder="Any observations from this session..."></div><button class="btn btnp" onclick="addMuzzleSession()">+ Add Session</button>'+((a.muzzleSessions||[]).length?'<div style="margin-top:14px;overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:2px solid var(--color-border-secondary)"><th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Date</th><th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Duration</th><th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Stage</th><th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Notes</th><th></th></tr></thead><tbody>'+mzRows+'</tbody></table></div>':'<div style="text-align:center;padding:14px;color:var(--color-text-secondary);font-size:13px">No sessions logged yet</div>')+'</div>';
   h+='<div class="brow"><button class="btn" data-go="day5">&larr; Back</button><button class="btn btnp" data-go="scoring">Next: scoring &rarr;</button></div>';
@@ -531,8 +558,7 @@ function renderStats(){
   var now=new Date(),thisMonth=now.toISOString().slice(0,7);
   var byMonth={},tlC={Green:0,Yellow:0,Red:0,Black:0},outC={},totalD=0,countD=0;
   records.forEach(function(r){var m=(r.intakeDate||r.savedAt||"").slice(0,7);if(m)byMonth[m]=(byMonth[m]||0)+1;if(r.trafficLight&&tlC[r.trafficLight]!==undefined)tlC[r.trafficLight]++;var o=(r.state&&r.state.fin?r.state.fin.outcome:"")||"Not recorded";outC[o]=(outC[o]||0)+1;var d=daysInIsolation(r.intakeDate);if(d&&d<=30){totalD+=d;countD++;}});
-  var avg=countD?Math.round(totalD/countD):0;
-  var maxM=Math.max.apply(null,Object.values(byMonth).concat([1]));
+  var avg=countD?Math.round(totalD/countD):0;var maxM=Math.max.apply(null,Object.values(byMonth).concat([1]));
   var out='<h2 style="margin-bottom:4px">Isolation Statistics</h2><div class="sub" style="margin-bottom:18px">All-time overview</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px"><div class="card" style="padding:14px;text-align:center;margin-bottom:0"><div style="font-size:26px;font-weight:800">'+records.length+'</div><div style="font-size:10px;text-transform:uppercase;color:var(--color-text-secondary)">Total Dogs</div></div><div class="card" style="padding:14px;text-align:center;margin-bottom:0"><div style="font-size:26px;font-weight:800;color:#0d9488">'+(byMonth[thisMonth]||0)+'</div><div style="font-size:10px;text-transform:uppercase;color:var(--color-text-secondary)">This Month</div></div><div class="card" style="padding:14px;text-align:center;margin-bottom:0"><div style="font-size:26px;font-weight:800;color:#3b82f6">'+avg+'</div><div style="font-size:10px;text-transform:uppercase;color:var(--color-text-secondary)">Avg Days</div></div></div>';
   out+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px"><div class="card" style="margin-bottom:0"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Traffic Light Breakdown</div>';
   [["Green","#dcfce7","#166534"],["Yellow","#fef9c3","#854d0e"],["Red","#fee2e2","#991b1b"],["Black","#f1f5f9","#0f172a"]].forEach(function(t){out+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:'+t[1]+';border-radius:8px;margin-bottom:6px"><span style="font-weight:600;color:'+t[2]+'">'+t[0]+'</span><span style="font-size:18px;font-weight:800;color:'+t[2]+'">'+(tlC[t[0]]||0)+'</span></div>';});
@@ -543,8 +569,7 @@ function renderStats(){
   var months=Object.keys(byMonth).sort().reverse().slice(0,12);
   if(months.length)months.forEach(function(m){var lbl=new Date(m+"-01").toLocaleDateString("en-IE",{month:"long",year:"numeric"});var pct=Math.round((byMonth[m]/maxM)*100);out+='<tr><td style="padding:7px 12px;font-size:12px;white-space:nowrap;border:1px solid #e2e8f0">'+lbl+'</td><td style="padding:7px 12px;border:1px solid #e2e8f0"><div style="background:#e2e8f0;border-radius:20px;height:8px;overflow:hidden"><div style="background:#0d9488;width:'+pct+'%;height:100%"></div></div></td><td style="padding:7px 12px;font-size:12px;font-weight:700;text-align:right;border:1px solid #e2e8f0">'+byMonth[m]+'</td></tr>';});
   else out+='<tr><td style="padding:8px;color:var(--color-text-secondary);font-size:13px">No records yet</td></tr>';
-  out+='</table></div>';
-  return out;
+  out+='</table></div>';return out;
 }
 
 function doConnect(){
@@ -715,6 +740,8 @@ async function saveRecord(){
   var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
   var tl=total<=10?"Green":total<=14?"Yellow":total<=20?"Red":"Black";
   var st=JSON.parse(JSON.stringify(S));delete st._id;
+  // Store who saved it inside the data blob
+  st._savedBy=localStorage.getItem("nspca-user-name")||"Staff";
   var row={name:S.dog.name,breed:S.dog.breed||"",ref_no:S.dog.refNo||"",intake_date:S.dog.intakeDate||null,assessor:S.dog.assessor||"",score:total,traffic_light:tl,saved_at:new Date().toISOString(),data:st};
   try{
     if(S._id){await supabaseClient.from("dogs").update(row).eq("id",S._id);}
@@ -751,14 +778,14 @@ function loadRecord(id){
   S._id=rec.id;S.tab="report";render();
 }
 
-// ── loadRecordsList (global) ──────────────────────────────────────
 async function loadRecordsList(){
   if(!supabaseClient){records=[];return;}
   var res=await supabaseClient.from("dogs").select("*").order("saved_at",{ascending:false}).limit(50);
   if(res.error){console.error(res.error);records=[];return;}
   records=(res.data||[]).map(function(row){
     var st=null;try{st=typeof row.data==="string"?JSON.parse(row.data):row.data;}catch(e){}
-    return{id:row.id,savedAt:row.saved_at,name:row.name||"Unknown",breed:row.breed,refNo:row.ref_no,intakeDate:row.intake_date,assessor:row.assessor,score:row.score,trafficLight:row.traffic_light,state:st};
+    var savedBy=st&&st._savedBy?st._savedBy:"";
+    return{id:row.id,savedAt:row.saved_at,savedBy:savedBy,name:row.name||"Unknown",breed:row.breed,refNo:row.ref_no,intakeDate:row.intake_date,assessor:row.assessor,score:row.score,trafficLight:row.traffic_light,state:st};
   });
 }
 
@@ -780,7 +807,7 @@ function loadCurrent(){
   }catch(e){}
 }
 
-// ── Init ──────────────────────────────────────────────────────────
+// ── Init ─────────────────────────────────────────────────────────
 (function(){
   if(!initSupabase()){showScreen("setup");return;}
   loadCurrent();
