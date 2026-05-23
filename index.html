@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NSPCA Longford — Dog Intake Assessment (Shared)</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 :root{
   --color-background-primary:#ffffff;
   --color-background-secondary:#f1f5f9;
@@ -14,7 +15,6 @@
   --color-teal:#0d9488;
   --border-radius-md:8px;
 }
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;min-height:100vh}
 input,select,textarea{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-family:inherit;font-size:13px;color:#0f172a;background:#fff;outline:none}
@@ -327,7 +327,7 @@ function renderDashboard(){
   updateClock();
   var _s=(window._dbS||"").toLowerCase(),_k=window._dbK||"",_t=window._dbT||"",_o=window._dbO||"day";
   var ce=document.getElementById("dash-count");
-  if(ce){var ac=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active - in isolation"||o==="Finished Isolation";}).length;ce.textContent=ac+" in isolation";ce.style.display=ac?"inline":"none";}
+  if(ce){var ac=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";}).length;ce.textContent=ac+" in isolation";ce.style.display=ac?"inline":"none";}
   var ue=document.getElementById("dash-user");
   if(ue){var auth=localStorage.getItem("nspca-intake-auth");ue.textContent=auth==="NSPCA-MGR"?"Manager":"Staff";ue.style.display="inline";}
   var notes=generateAutoNotices();
@@ -335,7 +335,7 @@ function renderDashboard(){
   if(notes.length){var pb={Normal:"var(--color-background-primary)",Important:"#fef9c3",Urgent:"#fee2e2"},pf={Normal:"var(--color-text-secondary)",Important:"#854d0e",Urgent:"#991b1b"};alertsHtml='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+notes.map(function(n){return'<div style="background:'+pb[n.priority]+';border:0.5px solid var(--color-border-secondary);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;color:'+pf[n.priority]+'">'+n.icon+' '+esc(n.text)+'</div>';}).join("")+'</div>';}
   var ks=[];records.forEach(function(r){var k=r.state&&r.state.dog?r.state.dog.kennel:"";if(k&&ks.indexOf(k)<0)ks.push(k);});ks.sort();
   var fb='<div style="display:flex;gap:6px;margin-bottom:12px;align-items:center"><div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 10px;min-width:0"><span>&#128269;</span><input placeholder="Search..." value="'+esc(_s)+'" oninput="window._dbS=this.value;renderDashboard()" style="border:none;background:transparent;outline:none;font-size:12px;width:100%;font-family:inherit"></div><select onchange="window._dbK=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:100px"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select><select onchange="window._dbT=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:80px"><option value="">All</option>'+["Green","Yellow","Red","Black"].map(function(t){return'<option value="'+t+'"'+(_t===t?' selected':'')+'>'+t+'</option>';}).join("")+'</select><select onchange="window._dbO=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:90px">'+[["day","Day"],["name","Name"],["kennel","Kennel"],["tl","Score"]].map(function(o){return'<option value="'+o[0]+'"'+(_o===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select></div>';
-  var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active - in isolation"||o==="Finished Isolation";});
+  var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
   if(_s)active=active.filter(function(r){return(r.name||"").toLowerCase().includes(_s)||(r.breed||"").toLowerCase().includes(_s);});
   if(_k)active=active.filter(function(r){return(r.state&&r.state.dog?r.state.dog.kennel:"")=== _k;});
   if(_t)active=active.filter(function(r){return r.trafficLight===_t;});
@@ -652,7 +652,7 @@ function handleAppClick(e){
   var sc2=e.target.closest("[data-sc]");if(sc2){var p=sc2.dataset.sc.split(".");S.scores[p[0]]=S.scores[p[0]]===parseInt(p[1])?0:parseInt(p[1]);renderMain();debouncedSave();return;}
   if(e.target.closest("[data-action='save-record']")){saveRecord();return;}
   if(e.target.closest("[data-action='new-dog']")){if(confirm("Start a new dog? Current unsaved form will be cleared.")){S=defaultState();persistSave();render();}return;}
-  var ld=e.target.closest("[data-load]");if(ld){loadRecord(parseInt(ld.dataset.load));return;}
+  var ld=e.target.closest("[data-load]");if(ld){openDog(parseInt(ld.dataset.load));return;}
   var dl=e.target.closest("[data-delete]");if(dl){if(confirm("Delete this record? Cannot be undone.")){deleteRecord(parseInt(dl.dataset.delete));}return;}
 }
 document.getElementById("wrap").addEventListener("click",handleAppClick);
