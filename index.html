@@ -65,15 +65,21 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 <body>
 
 <div id="login-screen" style="display:none;min-height:100vh;background:#f1f5f9">
-  <div style="background:#0f172a;padding:10px 20px"><div style="color:#fff;font-size:13px;font-weight:700">NSPCA Longford &mdash; Isolation Unit</div></div>
-  <div style="max-width:400px;margin:60px auto;padding:0 18px">
-    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:28px 24px;text-align:center">
-      <div style="font-size:36px;margin-bottom:8px">&#128062;</div>
-      <div style="font-size:18px;font-weight:800;margin-bottom:4px">Isolation Unit</div>
-      <div style="font-size:13px;color:#64748b;margin-bottom:20px">Enter your access code</div>
-      <input id="login-code" type="password" placeholder="••••••••" style="text-align:center;font-size:20px;letter-spacing:0.15em;margin-bottom:10px" onkeydown="if(event.key==='Enter')doLogin()">
-      <button class="btn btnp" style="width:100%" id="login-btn" onclick="doLogin()">Enter</button>
-      <div id="login-err" style="display:none;color:#dc2626;font-size:12px;margin-top:8px;padding:8px;background:#fef2f2;border-radius:6px">Incorrect code. Try again.</div>
+  <div style="background:#0f172a;padding:14px 24px">
+    <svg width="160" height="35" viewBox="0 0 232 51" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M193.211 41.5648L191.972 46.3797H178.84L180.238 41.5648C180.572 40.428 180.839 39.4917 181.575 37.1512L192.074 2.51074H213.407L224.04 37.1512C224.708 39.4249 225.043 40.2942 225.444 41.5648L227.064 46.3797H209.199L208.064 41.5648C208.064 41.5648 207.547 39.3578 207.054 37.2849H194.281C193.679 39.5586 193.478 40.3611 193.211 41.5648ZM202.373 20.0316C202.105 18.9616 201.771 18.2929 200.835 18.2929C199.831 18.2929 199.497 18.9616 199.163 20.0316L196.956 27.9226H204.513L202.373 20.0316Z" fill="#C5E86C"/><path d="M154.633 46.3797C147.745 46.3797 136.109 39.4917 136.109 24.4452C136.109 9.39871 147.277 2.51074 155.703 2.51074H179.243V18.8279H170.081C169.279 14.6148 167.272 12.2743 162.391 12.2743C156.84 12.2743 153.496 16.8217 153.496 24.4452C153.496 31.6676 156.84 36.215 161.655 36.215C165.935 36.215 168.276 33.4731 169.613 29.4607H180.647C178.574 37.9537 173.425 46.3797 164.464 46.3797H154.633Z" fill="#C5E86C"/><path d="M108.068 34.6769V46.3797H91.3496V2.51074H123.984C129.735 2.51074 134.416 7.32563 134.416 15.4173C134.416 24.7127 128.598 32.1357 118.567 32.1357H111.144C108.67 32.1357 108.068 32.6038 108.068 34.6769ZM110.342 24.8465H110.475C114.956 24.8465 117.698 22.439 117.698 17.2229C117.698 13.1436 115.558 10.4687 111.211 10.4687H110.542C108.67 10.4687 108.068 10.9368 108.068 13.0099V22.3053C108.068 24.3784 108.67 24.8465 110.342 24.8465Z" fill="#C5E86C"/><path d="M66.159 37.9537C69.7033 37.9537 71.7095 36.7499 71.7095 34.2087C71.7095 26.0502 47.0332 33.9413 47.0332 15.4842C47.0332 7.05814 53.4531 2.51074 60.8091 2.51074H84.3486V15.1498H75.12C73.582 11.9399 70.8402 10.7362 67.229 10.7362C64.4203 10.7362 62.5478 11.6055 62.5478 13.5449C62.5478 20.0985 87.826 13.0099 87.826 31.4001C87.826 41.4311 79.3331 46.3797 72.3782 46.3797H47.3007V31.5338H56.5292C58.1342 36.0812 61.7454 37.9537 66.159 37.9537Z" fill="#C5E86C"/><path d="M14.3109 26.8527V46.3797H0V2.51074H17.454L25.8131 19.0954C26.5488 20.5666 27.0837 20.7672 27.6856 20.7672C28.555 20.7672 28.8893 20.0316 28.8893 18.6941V2.51074H43.2002V46.3797H29.3574L17.5208 26.4514C16.7852 25.1808 16.3171 24.7796 15.6484 24.7796C14.6453 24.7796 14.3109 25.5152 14.3109 26.8527Z" fill="#C5E86C"/></svg>
+  </div>
+  <div style="background:#1e293b;padding:7px 24px;display:flex;align-items:center;gap:8px">
+    <span style="color:#c5e86c;font-size:10px">&#9679;</span>
+    <span style="color:#94a3b8;font-size:11px">Isolation Unit &nbsp;&mdash;&nbsp; Longford</span>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 80px);padding:24px">
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:32px 28px;width:100%;max-width:360px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.06)">
+      <div style="font-size:20px;font-weight:700;color:#0f172a;margin-bottom:6px">Enter access code</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:24px">Your code identifies you and sets your access level</div>
+      <input id="login-code" type="password" placeholder="••••••" style="text-align:center;font-size:22px;letter-spacing:0.18em;margin-bottom:12px;background:#f8fafc;border-radius:8px;padding:12px 14px" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn btnp" style="width:100%;padding:11px;font-size:14px;border-radius:8px" id="login-btn" onclick="doLogin()">Enter &rarr;</button>
+      <div id="login-err" style="display:none;color:#dc2626;font-size:12px;margin-top:10px;padding:8px;background:#fef2f2;border-radius:6px">Incorrect code. Try again.</div>
+      <div style="border-top:1px solid #e2e8f0;margin-top:20px;padding-top:16px;font-size:11px;color:#94a3b8">Contact Shane Cox to request a code</div>
     </div>
   </div>
 </div>
