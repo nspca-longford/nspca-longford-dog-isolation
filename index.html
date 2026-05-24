@@ -226,7 +226,7 @@ function currentName(){return CURRENT_USER?CURRENT_USER.name:(localStorage.getIt
 function showDashSection(section){
   var el=document.getElementById("dashboard-content");if(!el)return;
   if(section==="records"){
-    el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0">All Records</h2></div>'+page_records();
+    el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1">All Records</h2><button onclick="exportCSV()" class="btn" style="font-size:12px;padding:6px 14px">Export CSV</button></div>'+page_records();
   }else if(section==="stats"){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button></div>'+renderStats();
   }
@@ -299,7 +299,13 @@ function renderDashboard(){
   active.sort(function(a,b){if(_o==="name")return(a.name||"").localeCompare(b.name||"");if(_o==="kennel"){var ka=a.state&&a.state.dog?a.state.dog.kennel||"":"",kb=b.state&&b.state.dog?b.state.dog.kennel||"":"";return ka.localeCompare(kb);}if(_o==="tl"){var ord={Black:0,Red:1,Yellow:2,Green:3,"":4};return(ord[a.trafficLight]||4)-(ord[b.trafficLight]||4);}return(daysInIsolation(b.intakeDate)||0)-(daysInIsolation(a.intakeDate)||0);});
 
   var tlC={"Green":"#dcfce7|#166534","Yellow":"#fef9c3|#854d0e","Red":"#fee2e2|#991b1b","Black":"#1e293b|#f1f5f9"};
-  if(!active.length){el.innerHTML=alertsHtml+fb+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>';return;}
+  var overdueDogs=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return (!o||o==="Active — in isolation"||o==="Active - in isolation")&&daysInIsolation(r.intakeDate)>5;});
+  var overdueBanner="";
+  if(overdueDogs.length){
+    var pills=overdueDogs.map(function(r){var d=r.state&&r.state.dog?r.state.dog:{};return'<span onclick="openDog('+r.id+')" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">'+esc(r.name)+(d.kennel?' &middot; '+esc(d.kennel):'')+' &mdash; Day '+daysInIsolation(r.intakeDate)+'</span>';}).join("");
+    overdueBanner='<div style="background:#dc2626;border-radius:10px;padding:12px 16px;margin-bottom:12px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">&#128680;</span><div><div style="color:#fff;font-size:13px;font-weight:600">'+overdueDogs.length+' dog'+(overdueDogs.length!==1?'s':'')+' overdue in isolation</div><div style="color:#fca5a5;font-size:11px;margin-top:2px">Past Day 5 — action required</div></div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">'+pills+'</div></div></div>';
+  }
+  if(!active.length){el.innerHTML=overdueBanner+alertsHtml+fb+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>';return;}
 
   var cards=active.map(function(rec){
     var d=rec.state&&rec.state.dog?rec.state.dog:{};var f=rec.state&&rec.state.fin?rec.state.fin:{};
@@ -318,7 +324,7 @@ function renderDashboard(){
     return'<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:2px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:10px"><div style="font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(rec.trafficLight?'<span style="background:'+parts[0]+';color:'+parts[1]+';font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+rec.trafficLight+'</span>':'')+(d.crossbreed?'<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">X</span>':'')+'</div>'+dayH+lastEditHtml+'</div></div>';
   }).join("");
 
-  el.innerHTML=alertsHtml+fb+'<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px">'+active.length+' dog'+(active.length!==1?'s':'')+' in isolation</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'+cards+'</div>';
+  el.innerHTML=overdueBanner+alertsHtml+fb+'<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px">'+active.length+' dog'+(active.length!==1?'s':'')+' in isolation</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'+cards+'</div>';
 
   if(window._dbSearchActive){
     var si=el.querySelector('input[placeholder="Search..."]');
