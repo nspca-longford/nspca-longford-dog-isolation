@@ -54,12 +54,36 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .med-tbl th{padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)}
 .med-tbl td{padding:8px 10px;font-size:12px;border-bottom:1px solid var(--color-border-secondary)}
 .med-tbl tr:last-child td{border-bottom:none}
-.badge-ok{background:#dcfce7;color:#166534;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.badge-ok{background:#dcfce7;color:#166534;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}// ── Medical overlay controls ───────────────────────────────────────
+function gv(id){var el=document.getElementById(id);return el?(el.value||"").trim():"";}
+function showMedOverlay(type){var el=document.getElementById("med-ov-"+type);if(el)el.classList.add("show");}
+function hideMedOverlay(type){var el=document.getElementById("med-ov-"+type);if(el)el.classList.remove("show");}
+function saveMedVac(){
+  var type=gv("med-vac-type"),date=gv("med-vac-date");
+  if(!type||!date){alert("Please select a vaccination and enter a date.");return;}
+  addMedEntry("vaccinations",{type:type,date:date,adminBy:gv("med-vac-admin"),notes:gv("med-vac-notes"),nextDue:""});
+}
+function saveMedPara(){
+  var type=gv("med-para-type"),date=gv("med-para-date");
+  if(!type||!date){alert("Please select a treatment and enter a date.");return;}
+  addMedEntry("parasiteTreatments",{type:type,product:type,date:date,adminBy:gv("med-para-admin"),notes:gv("med-para-notes"),nextDue:""});
+}
+function saveMedMed(){
+  var name=gv("med-med-name");
+  if(!name){alert("Please enter a medication name.");return;}
+  addMedEntry("medications",{name:name,dose:gv("med-med-dose"),frequency:gv("med-med-freq"),startDate:gv("med-med-start"),endDate:gv("med-med-end"),prescribedBy:gv("med-med-by"),notes:gv("med-med-notes"),active:true});
+}
+function saveMedVet(){
+  var date=gv("med-vet-date");
+  if(!date){alert("Please enter a date.");return;}
+  var fe=document.getElementById("med-vet-findings");
+  addMedEntry("vetVisits",{date:date,vet:gv("med-vet-name"),reason:gv("med-vet-reason"),findings:fe?(fe.value||"").trim():"",treatment:gv("med-vet-treatment"),followUp:gv("med-vet-followup"),notes:""});
+}
 .badge-warn{background:#fef9c3;color:#854d0e;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
 .badge-err{background:#fee2e2;color:#991b1b;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
 .badge-off{background:#f1f5f9;color:#64748b;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
 @media print{nav,.brow{display:none !important}body{background:white}}
-  /* Medical overlays */
+/* Medical overlays */
 .med-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity 0.18s}
 .med-overlay.show{opacity:1;pointer-events:all}
 .med-modal{background:#fff;border-radius:16px;padding:20px 22px;width:340px;max-width:90vw;transform:translateY(12px) scale(0.97);transition:transform 0.18s;box-shadow:0 20px 60px rgba(0,0,0,0.18);max-height:88vh;overflow-y:auto}
@@ -441,98 +465,153 @@ function dueBadge(nextDue,warnDays){
 function renderMedical(){
   var m=getMedical();
   var today=new Date().toISOString().slice(0,10);
-  var h='<h2 style="margin-bottom:4px">Medical Record</h2><div class="sub" style="margin-bottom:16px">Health, vaccinations, treatments and vet visits. Auto-saves as you go.</div>';
+  var h='';
 
-  // ── On-arrival health ──────────────────────────────────────────
-  // Show migration notice if old dog fields exist
+  // Migration banner
   var oldVax=S.dog&&S.dog.vaccination?S.dog.vaccination:"";
   var oldPara=S.dog&&S.dog.parasite?S.dog.parasite:"";
-  var migHtml="";
   if(oldVax||oldPara){
-    migHtml='<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#854d0e"><strong>&#9888; Migrated from Dog Details:</strong> '+(oldVax?"Vaccination: "+esc(oldVax)+". ":"")+(oldPara?"Parasite: "+esc(oldPara)+". ":"")+'Log these formally below to clear.</div>';
+    h+='<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#854d0e"><strong>&#9888; Migrated from Dog Details:</strong> '+(oldVax?"Vaccination: "+esc(oldVax)+". ":"")+(oldPara?"Parasite: "+esc(oldPara)+". ":"")+'Log below to clear.</div>';
   }
-  h+=migHtml;
-  h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">&#129657; On-Arrival Health</div>';
-  h+='<div class="g2">';
+  h+='<h2 style="margin-bottom:4px">Medical Record</h2><div class="sub" style="margin-bottom:16px">Health, vaccinations, treatments and vet visits.</div>';
+
+  // On-Arrival Health
+  h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px">On-Arrival Health</div><div class="g2">';
   h+=slct("Body Condition Score",m.bcs||"","medical.bcs",[["","-- not assessed --"],["1 — Emaciated","1 — Emaciated"],["2 — Very thin","2 — Very thin"],["3 — Thin","3 — Thin"],["4 — Underweight","4 — Underweight"],["5 — Ideal weight","5 — Ideal weight"],["6 — Slightly overweight","6 — Slightly overweight"],["7 — Overweight","7 — Overweight"],["8 — Obese","8 — Obese"],["9 — Severely obese","9 — Severely obese"]]);
   h+=slct("Neutered Confirmed by Vet",m.neuteredConfirmed||"","medical.neuteredConfirmed",[["","-- not checked --"],["Yes — confirmed by vet","Yes — confirmed by vet"],["No — confirmed intact","No — confirmed intact"],["Not yet checked","Not yet checked"],["Unknown","Unknown"]]);
   h+=slct("Dental Condition",m.dental||"","medical.dental",[["","-- not assessed --"],["Good — clean, no issues","Good — clean, no issues"],["Mild tartar","Mild tartar"],["Moderate tartar","Moderate tartar"],["Heavy tartar — treatment needed","Heavy tartar — treatment needed"],["Broken / missing teeth","Broken / missing teeth"],["Gum disease / gingivitis","Gum disease / gingivitis"],["Not assessed","Not assessed"]]);
   h+=slct("Coat & Skin Condition",m.skinCondition||"","medical.skinCondition",[["","-- not assessed --"],["Good — healthy coat","Good — healthy coat"],["Mild matting","Mild matting"],["Severe matting — required clipping","Severe matting — required clipping"],["Skin condition / lesions present","Skin condition / lesions present"],["Mange suspected","Mange suspected"],["Ringworm suspected","Ringworm suspected"],["Flea infestation on arrival","Flea infestation on arrival"],["Tick infestation on arrival","Tick infestation on arrival"]]);
   h+='</div>';
-  h+=fld("Visible Injuries / Conditions",m.injuries||"","medical.injuries","text","e.g. Laceration on left hindleg, old fracture...");
+  h+=fld("Visible Injuries / Conditions",m.injuries||"","medical.injuries","text","e.g. Laceration on left hindleg...");
   h+=ta("On-arrival health notes",m.arrivalHealthNotes||"","medical.arrivalHealthNotes","Any further health observations on arrival...");
   h+='</div>';
 
-  // ── Vaccinations ──────────────────────────────────────────────
-  var vaxList=m.vaccinations||[];
-  var lastVax=vaxList.slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0]||null;
-  var vaxStatusHtml="";
-  if(lastVax){
-    var vaxBadge=dueBadge(lastVax.nextDue,30);
-    vaxStatusHtml='<div style="background:#f8fafc;border:1px solid var(--color-border-secondary);border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px"><div style="font-size:12px;color:#0f172a">Last: <strong>'+esc(lastVax.type)+'</strong> &mdash; '+lastVax.date+'</div>'+vaxBadge+'</div>';
+  // Vaccinations
+  var VAC_FIXED=["1st Vaccination","Kennel Cough","2nd Vaccination","Booster"];
+  var vacList=m.vaccinations||[];
+  h+='<div class="card">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;font-weight:600">Vaccinations</span><button class="med-add-btn" onclick="showMedOverlay(\'vac\')">+ Log vaccination</button></div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  VAC_FIXED.forEach(function(vt){
+    var match=vacList.slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");}).find(function(v){return v.type===vt;});
+    var done=!!match;
+    h+='<div style="background:'+(done?"#dcfce7":"#f8fafc")+';border:1px solid '+(done?"#16a34a":"#e2e8f0")+';border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:6px">';
+    h+='<div style="min-width:0"><div style="font-size:12px;font-weight:500;margin-bottom:2px">'+esc(vt)+'</div>';
+    h+='<div style="font-size:11px;color:'+(done?"#166534":"#94a3b8")+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(done?(match.date+(match.adminBy?" &middot; "+esc(match.adminBy):"")):"Not recorded")+'</div></div>';
+    h+='<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;background:'+(done?"#16a34a":"#e2e8f0")+';color:'+(done?"#fff":"#64748b")+'">'+(done?"&#10003; Done":"Pending")+'</span>';
+    h+='</div>';
+  });
+  vacList.filter(function(v){return VAC_FIXED.indexOf(v.type)<0;}).forEach(function(v){
+    h+='<div style="background:#dcfce7;border:1px solid #16a34a;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:6px"><div style="min-width:0"><div style="font-size:12px;font-weight:500;margin-bottom:2px">'+esc(v.type)+'</div><div style="font-size:11px;color:#166534">'+v.date+(v.adminBy?" &middot; "+esc(v.adminBy):"")+'</div></div><span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;background:#16a34a;color:#fff;white-space:nowrap;flex-shrink:0">&#10003; Done</span></div>';
+  });
+  h+='</div>';
+  if(vacList.length){
+    h+='<div style="margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0">';
+    vacList.forEach(function(v,i){
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:11px"><span style="color:#64748b">'+esc(v.type)+(v.adminBy?" &middot; "+esc(v.adminBy):"")+'</span><div style="display:flex;align-items:center;gap:8px"><span style="color:#94a3b8">'+v.date+'</span><button onclick="deleteMedEntry(\'vaccinations\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer">&#10005;</button></div></div>';
+    });
+    h+='</div>';
   }
-  var vaxRows=vaxList.map(function(v,i){return'<tr><td>'+v.date+'</td><td style="font-weight:600">'+esc(v.type)+'</td><td>'+(v.nextDue||"—")+' '+dueBadge(v.nextDue,30)+'</td><td>'+(v.adminBy?esc(v.adminBy):"—")+'</td><td style="color:var(--color-text-secondary)">'+(v.notes?esc(v.notes):"")+'</td><td><button onclick="deleteMedEntry(\'vaccinations\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer">&#10005;</button></td></tr>';}).join("");
-  h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">&#128138; Vaccinations</div>'+vaxStatusHtml;
-  h+='<div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:8px">Log Vaccination</div><div class="g2"><div class="f"><label class="lbl">Date</label><input type="date" id="vax-date" value="'+today+'"></div><div class="f"><label class="lbl">Vaccine type</label><select id="vax-type"><option value="">-- select --</option>'+[["L4","L4 (Leptospirosis)"],["DHPPi","DHPPi (Distemper/Hepatitis/Parvo)"],["DHPPi + L4","DHPPi + L4 (Combined)"],["Rabies","Rabies"],["Kennel Cough","Kennel Cough (Bordetella)"],["Other","Other"]].map(function(o){return'<option value="'+o[0]+'">'+o[1]+'</option>';}).join("")+'</select></div></div><div class="g2"><div class="f"><label class="lbl">Next due</label><input type="date" id="vax-next"></div><div class="f"><label class="lbl">Administered by</label><input id="vax-admin" placeholder="Vet or staff name"></div></div><div class="f"><label class="lbl">Notes (batch no., reactions...)</label><input id="vax-notes" placeholder="Optional"></div>';
-  h+='<button class="btn btnp" onclick="addVaccination()">+ Log Vaccination</button>';
-  if(vaxList.length){h+='<div style="margin-top:14px;overflow-x:auto"><table class="med-tbl" style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:2px solid var(--color-border-secondary)"><th>Date</th><th>Vaccine</th><th>Next Due</th><th>By</th><th>Notes</th><th></th></tr></thead><tbody>'+vaxRows+'</tbody></table></div>';}
-  else{h+='<div style="text-align:center;padding:14px;color:var(--color-text-secondary);font-size:13px">No vaccination records yet</div>';}
   h+='</div>';
 
-  // ── Parasite Treatments ───────────────────────────────────────
+  // Parasite Treatments
   var paraList=m.parasiteTreatments||[];
-  var paraRows=paraList.map(function(p,i){return'<tr><td>'+p.date+'</td><td style="font-weight:600">'+esc(p.type)+'</td><td>'+(p.product?esc(p.product):"—")+'</td><td>'+(p.nextDue||"—")+' '+dueBadge(p.nextDue,14)+'</td><td style="color:var(--color-text-secondary)">'+(p.notes?esc(p.notes):"")+'</td><td><button onclick="deleteMedEntry(\'parasiteTreatments\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer">&#10005;</button></td></tr>';}).join("");
-  h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">&#128027; Parasite Treatments</div>';
-  h+='<div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:8px">Log Treatment</div><div class="g2"><div class="f"><label class="lbl">Date</label><input type="date" id="para-date" value="'+today+'"></div><div class="f"><label class="lbl">Treatment type</label><select id="para-type"><option value="">-- select --</option>'+[["Flea","Flea"],["Tick","Tick"],["Worm","Worming"],["Flea & Tick","Flea & Tick combined"],["Flea, Tick & Worm","Flea, Tick & Worm combined"],["Mange","Mange treatment"],["Other","Other"]].map(function(o){return'<option value="'+o[0]+'">'+o[1]+'</option>';}).join("")+'</select></div></div><div class="g2"><div class="f"><label class="lbl">Product name</label><input id="para-product" placeholder="e.g. Advocate, Bravecto..."></div><div class="f"><label class="lbl">Next due</label><input type="date" id="para-next"></div></div><div class="f"><label class="lbl">Notes</label><input id="para-notes" placeholder="Dose, batch, reactions..."></div>';
-  h+='<button class="btn btnp" onclick="addParasiteTreatment()">+ Log Treatment</button>';
-  if(paraList.length){h+='<div style="margin-top:14px;overflow-x:auto"><table class="med-tbl" style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:2px solid var(--color-border-secondary)"><th>Date</th><th>Type</th><th>Product</th><th>Next Due</th><th>Notes</th><th></th></tr></thead><tbody>'+paraRows+'</tbody></table></div>';}
-  else{h+='<div style="text-align:center;padding:14px;color:var(--color-text-secondary);font-size:13px">No parasite treatment records yet</div>';}
+  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:'+(paraList.length?"12px":"6px")+'"><span style="font-size:12px;font-weight:600">Parasite Treatment</span><button class="med-add-btn" onclick="showMedOverlay(\'para\')">+ Log treatment</button></div>';
+  if(paraList.length){
+    paraList.forEach(function(p,i){
+      var last=i===paraList.length-1;
+      h+='<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;'+(last?"padding-bottom:0":"border-bottom:1px solid #e2e8f0;")+'">';
+      h+='<div style="width:28px;height:28px;border-radius:6px;background:#fef9c3;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">&#128737;</div>';
+      h+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.product||p.type)+'</div>';
+      h+='<div style="font-size:11px;color:#64748b">'+p.date+(p.adminBy?" &middot; "+esc(p.adminBy):"")+(p.notes?" &middot; "+esc(p.notes):"")+'</div></div>';
+      h+='<button onclick="deleteMedEntry(\'parasiteTreatments\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0;align-self:center">&#10005;</button>';
+      h+='</div>';
+    });
+  }else{h+='<div style="text-align:center;padding:12px 0;color:#94a3b8;font-size:12px">No treatments recorded yet</div>';}
   h+='</div>';
 
-  // ── Medications ───────────────────────────────────────────────
+  // Medications
   var medList=m.medications||[];
   var activeMeds=medList.filter(function(x){return x.active!==false;});
-  var activeBanner="";
+  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;font-weight:600">Medications</span><button class="med-add-btn" onclick="showMedOverlay(\'med\')">+ Add medication</button></div>';
   if(activeMeds.length){
-    activeBanner='<div style="background:#dbeafe;border:1px solid #93c5fd;border-radius:8px;padding:10px 14px;margin-bottom:12px">'
-      +'<div style="font-size:11px;font-weight:700;color:#1e40af;text-transform:uppercase;margin-bottom:6px">&#128138; '+activeMeds.length+' Active Medication'+(activeMeds.length!==1?"s":"")+'</div>'
-      +activeMeds.map(function(med){return'<div style="font-size:12px;color:#1e3a8a;margin-bottom:2px"><strong>'+esc(med.name)+'</strong>'+(med.dose?" — "+esc(med.dose):"")+(med.frequency?", "+esc(med.frequency):"")+'</div>';}).join("")
-      +'</div>';
+    h+='<div style="background:#dbeafe;border:1px solid #93c5fd;border-radius:8px;padding:10px 14px;margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:#1e40af;text-transform:uppercase;margin-bottom:5px">'+activeMeds.length+' Active Medication'+(activeMeds.length!==1?"s":"")+'</div>';
+    activeMeds.forEach(function(med){h+='<div style="font-size:12px;color:#1e3a8a;margin-bottom:2px"><strong>'+esc(med.name)+'</strong>'+(med.dose?" &mdash; "+esc(med.dose):"")+(med.frequency?", "+esc(med.frequency):"")+'</div>';});
+    h+='</div>';
   }
-  var medRows=medList.map(function(med,i){
-    var isActive=med.active!==false;
-    var statusBadge=isActive?'<span class="badge-ok">Active</span>':'<span class="badge-off">Ended</span>';
-    var toggleBtn=isActive
-      ?'<button onclick="toggleMedActive('+i+')" style="background:#fef9c3;color:#854d0e;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;white-space:nowrap">End</button>'
-      :'<button onclick="toggleMedActive('+i+')" style="background:#dcfce7;color:#166534;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;white-space:nowrap">Reactivate</button>';
-    return'<tr><td style="font-weight:600">'+esc(med.name)+' '+statusBadge+'</td><td>'+(med.dose||"—")+'</td><td>'+(med.frequency||"—")+'</td><td style="white-space:nowrap">'+(med.startDate||"—")+'</td><td style="white-space:nowrap">'+(med.endDate||"—")+'</td><td>'+(med.prescribedBy||"—")+'</td><td style="white-space:nowrap">'+toggleBtn+' <button onclick="deleteMedEntry(\'medications\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer">&#10005;</button></td></tr>';
-  }).join("");
-  h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">&#128138; Medications</div>'+activeBanner;
-  h+='<div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:8px">Add Medication</div>';
-  h+='<div class="g2"><div class="f"><label class="lbl">Medication name</label><input id="med-name" placeholder="e.g. Metacam, Amoxicillin..."></div><div class="f"><label class="lbl">Dose</label><input id="med-dose" placeholder="e.g. 2.5ml, 250mg"></div></div>';
-  h+='<div class="g2"><div class="f"><label class="lbl">Frequency</label><select id="med-freq"><option value="">-- select --</option>'+[["Once daily","Once daily"],["Twice daily","Twice daily"],["Three times daily","Three times daily"],["Every 8 hours","Every 8 hours"],["Every 12 hours","Every 12 hours"],["Weekly","Weekly"],["As needed","As needed"],["Single dose","Single dose"],["Other","Other"]].map(function(o){return'<option value="'+o[0]+'">'+o[1]+'</option>';}).join("")+'</select></div><div class="f"><label class="lbl">Prescribed by</label><input id="med-by" placeholder="Vet name"></div></div>';
-  h+='<div class="g2"><div class="f"><label class="lbl">Start date</label><input type="date" id="med-start" value="'+today+'"></div><div class="f"><label class="lbl">End date (if known)</label><input type="date" id="med-end"></div></div>';
-  h+='<div class="f"><label class="lbl">Notes</label><input id="med-notes" placeholder="Reason, special instructions..."></div>';
-  h+='<button class="btn btnp" onclick="addMedication()">+ Add Medication</button>';
-  if(medList.length){h+='<div style="margin-top:14px;overflow-x:auto"><table class="med-tbl" style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:2px solid var(--color-border-secondary)"><th>Medication</th><th>Dose</th><th>Frequency</th><th>Start</th><th>End</th><th>By</th><th></th></tr></thead><tbody>'+medRows+'</tbody></table></div>';}
-  else{h+='<div style="text-align:center;padding:14px;color:var(--color-text-secondary);font-size:13px">No medications recorded yet</div>';}
+  if(medList.length){
+    medList.forEach(function(med,i){
+      var isActive=med.active!==false,last=i===medList.length-1;
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;'+(last?"":"border-bottom:1px solid #e2e8f0;")+'">';
+      h+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;margin-bottom:2px">'+esc(med.name)+'<span style="margin-left:6px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;background:'+(isActive?"#dcfce7":"#f1f5f9")+';color:'+(isActive?"#166534":"#64748b")+'">'+(isActive?"Active":"Ended")+'</span></div>';
+      h+='<div style="font-size:11px;color:#64748b">'+(med.dose?esc(med.dose):"")+(med.frequency?" &middot; "+esc(med.frequency):"")+(med.startDate?" &middot; from "+med.startDate:"")+'</div></div>';
+      h+='<div style="display:flex;gap:4px;align-items:center;flex-shrink:0">'+(isActive?'<button onclick="toggleMedActive('+i+')" style="background:#fef9c3;color:#854d0e;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">End</button>':'<button onclick="toggleMedActive('+i+')" style="background:#dcfce7;color:#166634;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">Reactivate</button>')+'<button onclick="deleteMedEntry(\'medications\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">&#10005;</button></div></div>';
+    });
+  }else{h+='<div style="text-align:center;padding:14px;color:#94a3b8;font-size:12px">No medications recorded yet</div>';}
   h+='</div>';
 
-  // ── Vet Visits ────────────────────────────────────────────────
+  // Vet Visits
   var vetList=m.vetVisits||[];
-  var vetRows=vetList.map(function(v,i){return'<tr><td style="white-space:nowrap">'+v.date+'</td><td>'+(v.vet?esc(v.vet):"—")+'</td><td>'+(v.reason?esc(v.reason):"—")+'</td><td style="color:var(--color-text-secondary);max-width:180px">'+(v.findings?esc(v.findings):"")+'</td><td>'+(v.treatment?esc(v.treatment):"—")+'</td><td><button onclick="deleteMedEntry(\'vetVisits\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer">&#10005;</button></td></tr>';}).join("");
-  h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">&#129658; Vet Visits</div>';
-  h+='<div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:8px">Log Visit</div>';
-  h+='<div class="g2"><div class="f"><label class="lbl">Date</label><input type="date" id="vet-date" value="'+today+'"></div><div class="f"><label class="lbl">Vet / Clinic</label><input id="vet-name" placeholder="e.g. Longford Vet Clinic"></div></div>';
-  h+='<div class="f"><label class="lbl">Reason for visit</label><input id="vet-reason" placeholder="e.g. Health check, wound treatment..."></div>';
-  h+='<div class="f"><label class="lbl">Findings</label><textarea id="vet-findings" style="min-height:52px" placeholder="Vet findings and diagnosis..."></textarea></div>';
-  h+='<div class="f"><label class="lbl">Treatment given</label><input id="vet-treatment" placeholder="e.g. Wound dressed, antibiotics prescribed"></div>';
-  h+='<div class="g2"><div class="f"><label class="lbl">Follow-up required?</label><select id="vet-followup"><option value="">-- select --</option>'+[["No follow-up required","No follow-up required"],["Follow-up in 1 week","Follow-up in 1 week"],["Follow-up in 2 weeks","Follow-up in 2 weeks"],["Follow-up in 1 month","Follow-up in 1 month"],["As needed","As needed"]].map(function(o){return'<option value="'+o[0]+'">'+o[1]+'</option>';}).join("")+'</select></div><div class="f"><label class="lbl">Follow-up date</label><input type="date" id="vet-followup-date"></div></div>';
-  h+='<div class="f"><label class="lbl">Notes</label><input id="vet-notes" placeholder="Any other notes..."></div>';
-  h+='<button class="btn btnp" onclick="addVetVisit()">+ Log Vet Visit</button>';
-  if(vetList.length){h+='<div style="margin-top:14px;overflow-x:auto"><table class="med-tbl" style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:2px solid var(--color-border-secondary)"><th>Date</th><th>Vet / Clinic</th><th>Reason</th><th>Findings</th><th>Treatment</th><th></th></tr></thead><tbody>'+vetRows+'</tbody></table></div>';}
-  else{h+='<div style="text-align:center;padding:14px;color:var(--color-text-secondary);font-size:13px">No vet visits recorded yet</div>';}
+  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;font-weight:600">Vet Visits</span><button class="med-add-btn" onclick="showMedOverlay(\'vet\')">+ Log visit</button></div>';
+  if(vetList.length){
+    vetList.forEach(function(v,i){
+      var last=i===vetList.length-1;
+      h+='<div style="padding:10px 0;'+(last?"":"border-bottom:1px solid #e2e8f0;")+'">';
+      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px"><div><div style="font-size:12px;font-weight:500">'+v.date+(v.vet?" &mdash; "+esc(v.vet):"")+'</div>';
+      if(v.reason)h+='<div style="font-size:11px;color:#64748b;margin-top:2px">'+esc(v.reason)+'</div>';
+      h+='</div><button onclick="deleteMedEntry(\'vetVisits\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0">&#10005;</button></div>';
+      if(v.findings)h+='<div style="font-size:11px;color:#64748b;background:#f8fafc;border-radius:4px;padding:5px 8px;margin-top:4px">'+esc(v.findings)+'</div>';
+      if(v.treatment)h+='<div style="font-size:11px;color:#64748b;margin-top:3px">Treatment: '+esc(v.treatment)+'</div>';
+      h+='</div>';
+    });
+  }else{h+='<div style="text-align:center;padding:14px;color:#94a3b8;font-size:12px">No vet visits recorded yet</div>';}
   h+='</div>';
+
+  // ── Overlay builder helpers ──────────────────────────────────────
+  function buildOv(type,title,body,saveFn,saveLbl){
+    return '<div id="med-ov-'+type+'" class="med-overlay" onclick="if(event.target===this)hideMedOverlay(\''+type+'\')">'
+      +'<div class="med-modal"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'
+      +'<span style="font-size:14px;font-weight:600">'+title+'</span>'
+      +'<button class="med-close-btn" onclick="hideMedOverlay(\''+type+'\')">&#10005;</button></div>'
+      +body+'<button class="med-save-btn" onclick="'+saveFn+'()">'+saveLbl+'</button>'
+      +'</div></div>';
+  }
+  function ovF(lbl,id,type,ph,dv){
+    return '<div class="f"><label class="lbl">'+lbl+'</label><input type="'+(type||"text")+'" id="'+id+'"'+(dv?' value="'+dv+'"':'')+' placeholder="'+(ph||"")+'"></div>';
+  }
+  function ovS(lbl,id,opts){
+    return '<div class="f"><label class="lbl">'+lbl+'</label><select id="'+id+'"><option value="">— select —</option>'+opts.map(function(o){return'<option>'+esc(o)+'</option>';}).join("")+'</select></div>';
+  }
+
+  h+=buildOv("vac","Log vaccination",
+    ovS("Vaccination","med-vac-type",["1st Vaccination","Kennel Cough","2nd Vaccination","Booster","Rabies","Other"])+
+    ovF("Date given","med-vac-date","date","",today)+
+    ovF("Administered by","med-vac-admin","text","e.g. Dr. O'Brien / Shane Cox","")+
+    ovF("Notes (batch no., clinic...)","med-vac-notes","text","Optional",""),
+    "saveMedVac","Save vaccination");
+
+  h+=buildOv("para","Log parasite treatment",
+    ovS("Treatment","med-para-type",["Advocate (Bayer) — fleas, roundworms, lungworm","Frontline Combo — fleas, ticks","Frontline Spot-On — fleas, ticks","Bravecto Oral — fleas, ticks (3 month)","NexGard — fleas, ticks (monthly)","Seresto Collar — fleas, ticks (8 month)","Stronghold — fleas, roundworms","Panacur — roundworms, hookworms, whipworms","Milbemax — roundworms, tapeworms","Drontal Plus — roundworms, tapeworms","Milpro — worms (3 month)","Other"])+
+    '<div class="g2">'+ovF("Date given","med-para-date","date","",today)+ovF("Given by","med-para-admin","text","Name","")+'</div>'+
+    ovF("Notes (dose, batch...)","med-para-notes","text","Optional",""),
+    "saveMedPara","Save treatment");
+
+  h+=buildOv("med","Add medication",
+    ovF("Medication name","med-med-name","text","e.g. Metacam, Amoxicillin...","")+
+    '<div class="g2">'+ovF("Dose","med-med-dose","text","e.g. 2.5ml","")+ovS("Frequency","med-med-freq",["Once daily","Twice daily","Three times daily","Every 8 hours","Every 12 hours","Weekly","As needed","Single dose","Other"])+'</div>'+
+    '<div class="g2">'+ovF("Start date","med-med-start","date","",today)+ovF("End date (if known)","med-med-end","date","","")+'</div>'+
+    ovF("Prescribed by","med-med-by","text","Vet name","")+
+    ovF("Notes","med-med-notes","text","Reason, instructions...",""),
+    "saveMedMed","Add medication");
+
+  h+=buildOv("vet","Log vet visit",
+    ovF("Date","med-vet-date","date","",today)+
+    ovF("Vet / Clinic","med-vet-name","text","e.g. Longford Vet Clinic","")+
+    ovF("Reason for visit","med-vet-reason","text","e.g. Health check, wound treatment...","")+
+    '<div class="f"><label class="lbl">Findings</label><textarea id="med-vet-findings" style="min-height:60px" placeholder="Vet findings and diagnosis..."></textarea></div>'+
+    ovF("Treatment given","med-vet-treatment","text","e.g. Wound dressed, antibiotics...","")+
+    ovF("Follow-up","med-vet-followup","text","e.g. 2 weeks",""),
+    "saveMedVet","Save vet visit");
 
   h+='<div class="brow"><button class="btn" data-go="scoring">&larr; Back</button><button class="btn btnp" data-go="weights">Next: weights &rarr;</button></div>';
   return h;
