@@ -59,6 +59,17 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .badge-err{background:#fee2e2;color:#991b1b;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
 .badge-off{background:#f1f5f9;color:#64748b;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
 @media print{nav,.brow{display:none !important}body{background:white}}
+  /* Medical overlays */
+.med-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity 0.18s}
+.med-overlay.show{opacity:1;pointer-events:all}
+.med-modal{background:#fff;border-radius:16px;padding:20px 22px;width:340px;max-width:90vw;transform:translateY(12px) scale(0.97);transition:transform 0.18s;box-shadow:0 20px 60px rgba(0,0,0,0.18);max-height:88vh;overflow-y:auto}
+.med-overlay.show .med-modal{transform:translateY(0) scale(1)}
+.med-add-btn{background:#0f172a;color:#fff;border:none;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit}
+.med-add-btn:hover{background:#334155}
+.med-save-btn{width:100%;padding:10px;background:#0f172a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;margin-top:4px;font-family:inherit}
+.med-save-btn:hover{background:#1e293b}
+.med-close-btn{background:#f1f5f9;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;color:#64748b;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.med-close-btn:hover{background:#e2e8f0}
 </style>
 </head>
 <body>
