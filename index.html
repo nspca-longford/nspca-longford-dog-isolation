@@ -104,9 +104,10 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
       <span id="dash-count" style="background:#0d9488;border-radius:20px;padding:3px 10px;font-size:11px;color:#fff;font-weight:500;display:none"></span>
     </div>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-      <span id="dash-user" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8;display:none;align-items:center;gap:6px"></span>
+      <span id="dash-user" onclick="showDashSection('profile')" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8;display:none;align-items:center;gap:6px;cursor:pointer"></span>
       <button onclick="showDashSection('records')" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">Records</button>
       <button onclick="showDashSection('stats')" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">Stats</button>
+      <button onclick="showDashSection('team')" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">Team</button>
       <button onclick="exportCSV()" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit" title="Export all records as CSV">CSV &#8595;</button>
       <button onclick="openNewDog()" style="background:#0d9488;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">+ New Dog</button>
       <button onclick="doLogout()" style="background:transparent;border:none;color:#64748b;cursor:pointer;padding:4px;font-size:12px;font-family:inherit">Log out</button>
@@ -166,6 +167,65 @@ var TABS=[
 var BREEDS=["Affenpinscher","Afghan Hound","Airedale Terrier","Akita","Alaskan Malamute","American Bulldog","American Bully","American Cocker Spaniel","American Pit Bull Terrier","American Staffordshire Terrier","Anatolian Shepherd","Australian Cattle Dog","Australian Shepherd","Australian Terrier","Basenji","Basset Hound","Beagle","Bearded Collie","Bedlington Terrier","Belgian Malinois","Belgian Shepherd","Bernese Mountain Dog","Bichon Frise","Boerboel","Border Collie","Border Terrier","Borzoi","Boston Terrier","Boxer","Briard","Brittany Spaniel","Bull Mastiff","Bull Terrier","Cairn Terrier","Cane Corso","Caucasian Shepherd","Cavachon","Cavalier King Charles Spaniel","Cavapoo","Chihuahua","Chinese Crested","Chow Chow","Clumber Spaniel","Cockalier","Cockapoo","Cocker Spaniel","Collie","Corgi (Cardigan)","Corgi (Pembroke)","Coton de Tulear","Czechoslovakian Wolfdog","Dachshund","Dalmatian","Doberman Pinscher","Dogo Argentino","Dogue de Bordeaux","English Bulldog","English Setter","English Springer Spaniel","English Toy Terrier","Field Spaniel","Flat-Coated Retriever","Foxhound","French Bulldog","Frenchton","German Pinscher","German Shepherd","German Shorthaired Pointer","Giant Schnauzer","Glen of Imaal Terrier","Golden Retriever","Goldendoodle","Gordon Setter","Great Dane","Greyhound","Harrier","Hungarian Vizsla","Husky (Siberian)","Irish Red and White Setter","Irish Setter","Irish Soft-coated Wheaten Terrier","Irish Terrier","Irish Water Spaniel","Irish Wolfhound","Italian Greyhound","Jack Russell Terrier","Jackapoo","Japanese Akita","Japanese Spitz","Keeshond","Kerry Blue Terrier","King Charles Spaniel","Labradoodle","Labrador Retriever","Lakeland Terrier","Leonberger","Lhasa Apso","Lurcher","Maltese","Maltipoo","Manchester Terrier","Mastiff","Miniature Pinscher","Miniature Schnauzer","Mixed Breed","Morkie","Neapolitan Mastiff","Newfoundland","Norfolk Terrier","Norwegian Elkhound","Norwich Terrier","Old English Bulldog","Old English Sheepdog","Papillon","Parson Russell Terrier","Patterdale Terrier","Pekingese","Pharaoh Hound","Pointer","Pomapoo","Pomeranian","Pomsky","Poodle (Miniature)","Poodle (Standard)","Poodle (Toy)","Portuguese Water Dog","Presa Canario","Pug","Puggle","Rhodesian Ridgeback","Rottweiler","Rough Collie","Saint Bernard","Saluki","Samoyed","Schipperke","Schnauzer","Schnoodle","Scottish Deerhound","Scottish Terrier","Shar Pei","Shetland Sheepdog","Shiba Inu","Shih Tzu","Shihpoo","Shorkie","Smooth Collie","Spinone Italiano","Sproodle","Staffordshire Bull Terrier","Sussex Spaniel","Tibetan Mastiff","Tibetan Terrier","Weimaraner","Welsh Springer Spaniel","Welsh Terrier","West Highland White Terrier","Whippet","Wire Fox Terrier","Working Cocker Spaniel","XL Bully","Yorkipoo","Yorkshire Terrier"];
 
 var LOGGED_IN=false,supabaseClient=null,records=[],_dSt=null;
+var _allUsersCache=null,_autoLogoutTimer=null,_lastActivity=Date.now();
+
+// ── User feature helpers ──────────────────────────────────────────
+function userPhoto(code){try{return localStorage.getItem("nspca-user-photo-"+code)||"";}catch(e){return"";}}
+function setUserPhoto(code,dataUrl){try{localStorage.setItem("nspca-user-photo-"+code,dataUrl||"");}catch(e){}if(supabaseClient&&dataUrl)supabaseClient.from("users").update({photo:dataUrl}).eq("code",code).then(function(){},function(){});}
+function userLastLogin(code){try{var v=localStorage.getItem("nspca-user-lastlogin-"+code);return v?parseInt(v):0;}catch(e){return 0;}}
+function recordLastLogin(code){try{localStorage.setItem("nspca-user-lastlogin-"+code,Date.now().toString());}catch(e){}if(supabaseClient)supabaseClient.from("users").update({last_login_at:new Date().toISOString()}).eq("code",code).then(function(){},function(){});}
+
+// Map name → user record (search hardcoded + Supabase)
+function findUserByName(name){if(!name)return null;var all=getAllUsersSync();return all.find(function(u){return u.name===name;})||null;}
+function avatarByName(name){var u=findUserByName(name);if(u&&userPhoto(u.code))return userPhoto(u.code);return null;}
+
+// Cached merged user list — call refreshAllUsers() to repopulate
+function getAllUsersSync(){return _allUsersCache||USERS;}
+async function refreshAllUsers(){
+  var merged=USERS.slice().map(function(u){return Object.assign({},u,{source:"app"});});
+  if(supabaseClient){
+    try{
+      var res=await supabaseClient.from("users").select("*");
+      if(res.data&&res.data.length){
+        res.data.forEach(function(u){
+          var existing=merged.find(function(x){return x.code===u.code;});
+          if(existing){Object.assign(existing,u,{source:"both"});}
+          else{merged.push(Object.assign({},u,{source:"db"}));}
+        });
+      }
+    }catch(e){}
+  }
+  _allUsersCache=merged;
+  return merged;
+}
+
+// Activity feed — return records saved by a given user name
+function getUserActivity(name,limit){
+  if(!name)return[];
+  var filtered=records.filter(function(r){return r.savedBy===name;});
+  filtered.sort(function(a,b){return(b.savedAt||"").localeCompare(a.savedAt||"");});
+  return filtered.slice(0,limit||20);
+}
+
+// Last activity for a user (their most recent save)
+function userLastActive(name){var act=getUserActivity(name,1);return act.length?act[0].savedAt:"";}
+
+// ── Auto-logout ───────────────────────────────────────────────────
+function getAutoLogoutMins(){try{var v=localStorage.getItem("nspca-auto-logout-mins");return v?parseInt(v):0;}catch(e){return 0;}}
+function setAutoLogoutMins(n){try{localStorage.setItem("nspca-auto-logout-mins",n.toString());}catch(e){}setupAutoLogout();}
+function bumpActivity(){_lastActivity=Date.now();}
+function setupAutoLogout(){
+  if(_autoLogoutTimer){clearInterval(_autoLogoutTimer);_autoLogoutTimer=null;}
+  var mins=getAutoLogoutMins();
+  if(!mins||mins<=0)return;
+  _autoLogoutTimer=setInterval(function(){
+    if(!LOGGED_IN)return;
+    var idleMs=Date.now()-_lastActivity;
+    if(idleMs>mins*60*1000){doLogout();appAlert("You were logged out after "+mins+" minutes of inactivity.");}
+  },30000);
+}
+["mousemove","keydown","click","touchstart","scroll"].forEach(function(ev){document.addEventListener(ev,bumpActivity,{passive:true});});
+
 
 // ── Utilities ──────────────────────────────────────────────────────
 function initials(n){var p=(n||"").trim().split(/\s+/);return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():(n||"?").slice(0,2).toUpperCase();}
@@ -402,11 +462,15 @@ async function doLogin(){
     localStorage.setItem("nspca-intake-auth",code);
     localStorage.setItem("nspca-user-name",user.name);
     localStorage.setItem("nspca-user-role",user.role||"staff");
+    recordLastLogin(user.code);
+    setupAutoLogout();
+    await refreshAllUsers();
     await loadRecordsList();showDashboard();
   }else{errEl.style.display="block";btn.textContent="Enter";btn.disabled=false;}
 }
 function doLogout(){
   LOGGED_IN=false;CURRENT_USER=null;
+  if(_autoLogoutTimer){clearInterval(_autoLogoutTimer);_autoLogoutTimer=null;}
   localStorage.removeItem("nspca-intake-auth");
   document.getElementById("login-code").value="";
   document.getElementById("login-err").style.display="none";
@@ -419,6 +483,211 @@ function currentRole(){return CURRENT_USER?CURRENT_USER.role:(localStorage.getIt
 function currentName(){return CURRENT_USER?CURRENT_USER.name:(localStorage.getItem("nspca-user-name")||"Staff");}
 
 // ── Dashboard ─────────────────────────────────────────────────────
+// ── Profile / Team / Users render functions ───────────────────────
+function backToDashBtn(){return '<button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button>';}
+function fmtAgo(ts){if(!ts)return"never";var diff=Math.round((Date.now()-(typeof ts==="number"?ts:new Date(ts).getTime()))/60000);if(diff<1)return"just now";if(diff<60)return diff+"m ago";if(diff<1440)return Math.round(diff/60)+"h ago";return Math.round(diff/1440)+"d ago";}
+
+function userAvatarHtml(user,size){
+  size=size||40;
+  var photo=userPhoto(user.code);
+  if(photo)return '<img src="'+photo+'" style="width:'+size+'px;height:'+size+'px;border-radius:50%;object-fit:cover;flex-shrink:0">';
+  return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+avatarColor(user.name)+';color:#fff;font-size:'+Math.round(size*0.36)+'px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials(user.name)+'</div>';
+}
+
+function renderProfile(){
+  var me=CURRENT_USER||{name:currentName(),code:localStorage.getItem("nspca-intake-auth")||"",role:currentRole()};
+  var role=me.role||currentRole();
+  var roleLabel=role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":"Staff";
+  var ll=userLastLogin(me.code);
+  var myActivity=getUserActivity(me.name,30);
+  var totalSaved=records.filter(function(r){return r.savedBy===me.name;}).length;
+  var photo=userPhoto(me.code);
+  var autoMins=getAutoLogoutMins();
+
+  var photoBlock=photo
+    ? '<img src="'+photo+'" style="width:80px;height:80px;border-radius:50%;object-fit:cover">'
+    : '<div style="width:80px;height:80px;border-radius:50%;background:'+avatarColor(me.name)+';color:#fff;font-size:30px;font-weight:600;display:flex;align-items:center;justify-content:center">'+initials(me.name)+'</div>';
+
+  var h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+backToDashBtn()+'<h2 style="margin:0;flex:1">Profile</h2>'+(role==="admin"?'<button onclick="showDashSection(\'users\')" class="btn" style="font-size:12px;padding:6px 12px">Manage users</button>':'')+'</div>';
+
+  h+='<div class="card" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div style="position:relative">'+photoBlock+'<label style="position:absolute;bottom:-2px;right:-2px;background:#0f172a;color:#c5e86c;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #fff;font-size:12px"><input type="file" accept="image/*" capture="user" style="display:none" onchange="handleAvatarUpload(this)">&#9998;</label></div>';
+  h+='<div style="flex:1;min-width:200px"><div style="font-size:22px;font-weight:700;color:#0f172a">'+esc(me.name)+'</div><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><span style="background:#0f172a;color:#c5e86c;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px">'+roleLabel+'</span><span style="background:#f1f5f9;color:#64748b;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;font-family:monospace">'+esc(me.code||"")+'</span></div></div>';
+  if(photo)h+='<button onclick="removeAvatar()" class="btn" style="font-size:11px;padding:5px 10px;background:#fee2e2;color:#991b1b;border:none">Remove photo</button>';
+  h+='</div>';
+
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px">'
+    +'<div class="card" style="margin:0;padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:#0d9488">'+totalSaved+'</div><div style="font-size:10px;color:#64748b;text-transform:uppercase;margin-top:2px">Saves all-time</div></div>'
+    +'<div class="card" style="margin:0;padding:12px;text-align:center"><div style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.2">'+fmtAgo(ll)+'</div><div style="font-size:10px;color:#64748b;text-transform:uppercase;margin-top:2px">Last login</div></div>'
+    +'<div class="card" style="margin:0;padding:12px;text-align:center"><div style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.2">'+(myActivity.length?fmtAgo(myActivity[0].savedAt):"-")+'</div><div style="font-size:10px;color:#64748b;text-transform:uppercase;margin-top:2px">Last save</div></div>'
+  +'</div>';
+
+  h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:10px">Settings</div>';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><div style="font-size:13px;font-weight:600">Auto-logout when inactive</div><div style="font-size:11px;color:#64748b;margin-top:2px">For shared devices in the staff room</div></div><select onchange="setAutoLogoutMins(parseInt(this.value)||0)" style="font-size:12px;padding:6px 8px;border-radius:6px;border:1px solid #cbd5e1;font-family:inherit"><option value="0"'+(autoMins===0?" selected":"")+'>Off</option><option value="15"'+(autoMins===15?" selected":"")+'>15 minutes</option><option value="30"'+(autoMins===30?" selected":"")+'>30 minutes</option><option value="60"'+(autoMins===60?" selected":"")+'>1 hour</option><option value="120"'+(autoMins===120?" selected":"")+'>2 hours</option></select></div>';
+  h+='</div>';
+
+  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b">Your recent activity</span><span style="font-size:11px;color:#64748b">'+myActivity.length+' shown</span></div>';
+  if(myActivity.length){
+    h+=myActivity.map(function(r){
+      var d=r.state&&r.state.dog?r.state.dog:{};
+      var ph=d.photo?'<img src="'+d.photo+'" style="width:30px;height:30px;border-radius:6px;object-fit:cover">':'<div style="width:30px;height:30px;border-radius:6px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:14px">&#128062;</div>';
+      return '<div onclick="openDog('+r.id+')" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #e2e8f0;cursor:pointer">'+ph+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(r.name)+'</div><div style="font-size:10px;color:#64748b">'+esc(r.breed||"")+(d.kennel?" &middot; "+esc(d.kennel):"")+'</div></div><div style="font-size:11px;color:#94a3b8;flex-shrink:0">'+fmtAgo(r.savedAt)+'</div></div>';
+    }).join("");
+  }else{h+='<div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px">No activity yet</div>';}
+  h+='</div>';
+
+  h+='<div style="margin-top:14px;display:flex;justify-content:center"><button onclick="appConfirm(\'Log out of NSPCA Longford?\',doLogout)" class="btn" style="padding:10px 20px;background:#fee2e2;color:#991b1b;border:none;font-weight:600">Log out</button></div>';
+  return h;
+}
+
+function renderTeamDirectory(){
+  var all=getAllUsersSync();
+  var meName=currentName();
+  // Sort by role priority then name
+  var roleOrder={admin:0,manager:1,supervisor:2,staff:3};
+  all=all.slice().sort(function(a,b){var ra=roleOrder[a.role||"staff"]||9;var rb=roleOrder[b.role||"staff"]||9;return ra===rb?(a.name||"").localeCompare(b.name||""):ra-rb;});
+  var canManage=currentRole()==="admin";
+
+  var h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+backToDashBtn()+'<h2 style="margin:0;flex:1">Team Directory</h2>'+(canManage?'<button onclick="showDashSection(\'users\')" class="btn" style="font-size:12px;padding:6px 12px">Manage</button>':'')+'</div>';
+  h+='<div class="sub" style="margin-bottom:16px">'+all.length+' user'+(all.length!==1?"s":"")+' with access. Tap a card to see their recent activity.</div>';
+
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">';
+  all.forEach(function(u){
+    var role=u.role||"staff";
+    var roleLabel=role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":"Staff";
+    var roleColor=role==="admin"?"#0f172a":role==="manager"?"#0d9488":role==="supervisor"?"#7c3aed":"#64748b";
+    var lastActive=userLastActive(u.name);
+    var lastLogin=userLastLogin(u.code);
+    var lastAct=lastActive?fmtAgo(lastActive):(lastLogin?"Logged in "+fmtAgo(lastLogin):"No activity yet");
+    var isMe=u.name===meName;
+    var saves=records.filter(function(r){return r.savedBy===u.name;}).length;
+    h+='<div style="background:#fff;border:1px solid '+(isMe?"#c5e86c":"#e2e8f0")+';border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:10px">'+userAvatarHtml(u,42)+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(u.name)+(isMe?' <span style="font-size:9px;background:#c5e86c;color:#3a4a16;padding:1px 6px;border-radius:20px;font-weight:700;margin-left:2px">YOU</span>':"")+'</div><div style="font-size:10px;font-weight:700;color:'+roleColor+';text-transform:uppercase;letter-spacing:0.04em;margin-top:2px">'+roleLabel+'</div></div></div>';
+    h+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid #e2e8f0;font-size:11px"><span style="color:#64748b">Activity</span><span style="font-weight:600;color:#0f172a">'+lastAct+'</span></div>';
+    h+='<div style="display:flex;justify-content:space-between;padding:0 0 0;font-size:11px"><span style="color:#64748b">Saves</span><span style="font-weight:600;color:#0f172a">'+saves+'</span></div>';
+    h+='</div>';
+  });
+  h+='</div>';
+  return h;
+}
+
+function renderUsersAdmin(){
+  var all=getAllUsersSync();
+  all=all.slice().sort(function(a,b){return(a.name||"").localeCompare(b.name||"");});
+  var h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+backToDashBtn()+'<h2 style="margin:0;flex:1">Manage Users</h2><button onclick="showAddUserModal()" class="btn btnp" style="font-size:12px;padding:6px 14px">+ Add user</button></div>';
+  h+='<div class="sub" style="margin-bottom:16px">'+all.length+' user'+(all.length!==1?"s":"")+' total. App-built users can\'t be removed from here; Supabase users can be edited and deactivated.</div>';
+
+  h+='<div class="card" style="padding:0;overflow:hidden"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f8fafc"><th style="padding:10px;text-align:left;font-size:10px;text-transform:uppercase;color:#64748b">User</th><th style="padding:10px;text-align:left;font-size:10px;text-transform:uppercase;color:#64748b">Code</th><th style="padding:10px;text-align:left;font-size:10px;text-transform:uppercase;color:#64748b">Role</th><th style="padding:10px;text-align:left;font-size:10px;text-transform:uppercase;color:#64748b">Status</th><th></th></tr></thead><tbody>';
+  all.forEach(function(u){
+    var role=u.role||"staff";
+    var roleColor=role==="admin"?"#0f172a":role==="manager"?"#0d9488":role==="supervisor"?"#7c3aed":"#64748b";
+    var isApp=u.source==="app"||!u.source;
+    var isActive=u.active!==false;
+    h+='<tr style="border-top:1px solid #e2e8f0"><td style="padding:10px"><div style="display:flex;align-items:center;gap:8px">'+userAvatarHtml(u,28)+'<span style="font-size:13px;font-weight:600">'+esc(u.name)+'</span></div></td>';
+    h+='<td style="padding:10px;font-family:monospace;font-size:11px;color:#64748b">'+esc(u.code)+'</td>';
+    h+='<td style="padding:10px"><span style="background:'+roleColor+';color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px">'+role.toUpperCase()+'</span></td>';
+    h+='<td style="padding:10px;font-size:11px">'+(isApp?'<span style="color:#64748b">Built-in</span>':isActive?'<span style="color:#16a34a">&#9679; Active</span>':'<span style="color:#dc2626">&#9679; Disabled</span>')+'</td>';
+    h+='<td style="padding:10px;text-align:right;white-space:nowrap">';
+    if(!isApp){
+      h+='<button onclick="showEditUserModal(\''+esc(u.code)+'\')" class="btn" style="font-size:10px;padding:4px 9px;margin-right:4px">Edit</button>';
+      h+='<button onclick="toggleUserActive(\''+esc(u.code)+'\','+(!isActive)+')" class="btn" style="font-size:10px;padding:4px 9px;background:'+(isActive?"#fef9c3":"#dcfce7")+';color:'+(isActive?"#854d0e":"#166534")+';border:none">'+(isActive?"Disable":"Enable")+'</button>';
+    }else{h+='<span style="font-size:10px;color:#94a3b8">Edit in code</span>';}
+    h+='</td></tr>';
+  });
+  h+='</tbody></table></div>';
+  h+='<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:12px 14px;margin-top:14px;font-size:12px;color:#854d0e"><strong>Note:</strong> New users added here are stored in your Supabase <code>users</code> table. Make sure the table exists with columns: <code>code</code> (text), <code>name</code> (text), <code>role</code> (text), <code>active</code> (bool default true), <code>photo</code> (text), <code>last_login_at</code> (timestamptz).</div>';
+  return h;
+}
+
+function showAddUserModal(){
+  var ov=document.createElement("div");
+  ov.style.cssText="position:fixed;inset:0;background:rgba(15,23,42,0.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999";
+  ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:380px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,0.25)">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:15px;font-weight:600">Add new user</span><button onclick="this.closest(\'.add-user-ov\').remove()" style="background:#f1f5f9;border:none;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px">&#10005;</button></div>'
+    +'<div class="f"><label class="lbl">Full name</label><input id="new-user-name" type="text" placeholder="e.g. John Murphy"></div>'
+    +'<div class="f"><label class="lbl">Access code</label><input id="new-user-code" type="text" placeholder="e.g. JM-01" style="font-family:monospace;letter-spacing:0.04em;text-transform:uppercase"></div>'
+    +'<div class="f"><label class="lbl">Role</label><select id="new-user-role"><option value="staff">Staff</option><option value="supervisor">Supervisor</option><option value="manager">Manager</option><option value="admin">Admin</option></select></div>'
+    +'<button onclick="saveNewUser()" class="btn btnp" style="width:100%;padding:10px;font-size:13px;font-weight:600">Add user</button>'
+    +'</div>';
+  ov.className="add-user-ov";
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+  setTimeout(function(){var i=document.getElementById("new-user-name");if(i)i.focus();},50);
+}
+
+async function saveNewUser(){
+  var name=(document.getElementById("new-user-name")||{}).value;name=name?name.trim():"";
+  var code=(document.getElementById("new-user-code")||{}).value;code=code?code.trim().toUpperCase():"";
+  var role=(document.getElementById("new-user-role")||{}).value||"staff";
+  if(!name||!code){appAlert("Please enter a name and access code.");return;}
+  if(getAllUsersSync().some(function(u){return u.code===code;})){appAlert("That code is already in use.");return;}
+  if(!supabaseClient){appAlert("Supabase not connected.");return;}
+  try{
+    await supabaseClient.from("users").insert([{name:name,code:code,role:role,active:true}]);
+    var ov=document.querySelector(".add-user-ov");if(ov)ov.remove();
+    await refreshAllUsers();
+    showDashSection("users");
+    appAlert("User added. They can now log in with code "+code+".");
+  }catch(e){appAlert("Could not add user. Check that your Supabase users table exists.");}
+}
+
+function showEditUserModal(code){
+  var u=getAllUsersSync().find(function(x){return x.code===code;});
+  if(!u)return;
+  var ov=document.createElement("div");
+  ov.className="edit-user-ov";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(15,23,42,0.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999";
+  ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:380px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,0.25)">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:15px;font-weight:600">Edit user</span><button onclick="this.closest(\'.edit-user-ov\').remove()" style="background:#f1f5f9;border:none;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px">&#10005;</button></div>'
+    +'<div class="f"><label class="lbl">Full name</label><input id="edit-user-name" type="text" value="'+esc(u.name)+'"></div>'
+    +'<div class="f"><label class="lbl">Access code (read-only)</label><input type="text" value="'+esc(u.code)+'" disabled style="background:#f1f5f9;color:#64748b;font-family:monospace"></div>'
+    +'<div class="f"><label class="lbl">Role</label><select id="edit-user-role">'+["staff","supervisor","manager","admin"].map(function(r){return'<option value="'+r+'"'+(u.role===r?" selected":"")+'>'+r.charAt(0).toUpperCase()+r.slice(1)+'</option>';}).join("")+'</select></div>'
+    +'<button onclick="saveEditedUser(\''+esc(code)+'\')" class="btn btnp" style="width:100%;padding:10px;font-size:13px;font-weight:600">Save changes</button>'
+    +'</div>';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}
+
+async function saveEditedUser(code){
+  var name=(document.getElementById("edit-user-name")||{}).value;name=name?name.trim():"";
+  var role=(document.getElementById("edit-user-role")||{}).value||"staff";
+  if(!name){appAlert("Please enter a name.");return;}
+  if(!supabaseClient)return;
+  try{
+    await supabaseClient.from("users").update({name:name,role:role}).eq("code",code);
+    var ov=document.querySelector(".edit-user-ov");if(ov)ov.remove();
+    await refreshAllUsers();
+    showDashSection("users");
+  }catch(e){appAlert("Could not save changes.");}
+}
+
+async function toggleUserActive(code,makeActive){
+  if(!supabaseClient)return;
+  try{
+    await supabaseClient.from("users").update({active:makeActive}).eq("code",code);
+    await refreshAllUsers();
+    showDashSection("users");
+  }catch(e){appAlert("Could not update user status.");}
+}
+
+function handleAvatarUpload(inp){
+  var file=inp.files[0];if(!file)return;
+  if(file.size>5*1024*1024){appAlert("Photo too large. Max 5MB.");return;}
+  compressPhoto(file,function(data){
+    var code=CURRENT_USER?CURRENT_USER.code:(localStorage.getItem("nspca-intake-auth")||"");
+    if(!code)return;
+    setUserPhoto(code,data);
+    showDashSection("profile");
+  });
+}
+function removeAvatar(){
+  appConfirm("Remove your profile photo?",function(){
+    var code=CURRENT_USER?CURRENT_USER.code:(localStorage.getItem("nspca-intake-auth")||"");
+    if(!code)return;
+    setUserPhoto(code,"");
+    try{localStorage.removeItem("nspca-user-photo-"+code);}catch(e){}
+    showDashSection("profile");
+  },{danger:true});
+}
+
 function showDashSection(section){
   var st=document.getElementById("overdue-sticky");if(st)st.innerHTML="";
   var el=document.getElementById("dashboard-content");if(!el)return;
@@ -426,6 +695,15 @@ function showDashSection(section){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1">All Records</h2><button onclick="exportCSV()" class="btn" style="font-size:12px;padding:6px 14px">Export CSV &#8595;</button></div>'+page_records();
   }else if(section==="stats"){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button></div>'+renderStats();
+  }else if(section==="profile"){
+    el.innerHTML=renderProfile();
+  }else if(section==="team"){
+    refreshAllUsers().then(function(){el.innerHTML=renderTeamDirectory();});
+    el.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">Loading team...</div>';
+  }else if(section==="users"){
+    if(currentRole()!=="admin"){el.innerHTML='<div style="text-align:center;padding:40px"><h2>Admin only</h2><div style="color:#64748b;margin-top:8px">User management is restricted to admin accounts.</div><button onclick="showDashSection(\'profile\')" class="btn" style="margin-top:14px">&larr; Back to profile</button></div>';return;}
+    refreshAllUsers().then(function(){el.innerHTML=renderUsersAdmin();});
+    el.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">Loading users...</div>';
   }
 }
 
@@ -542,7 +820,9 @@ function recentlyEditedHtml(activeRecords){
       var diff=Math.round((Date.now()-new Date(r.savedAt).getTime())/60000);
       var ago=diff<1?"just now":diff<60?diff+"m":diff<1440?Math.round(diff/60)+"h":Math.round(diff/1440)+"d";
       var by=r.savedBy?esc(r.savedBy):"";
-      var ph=d.photo?'<img src="'+d.photo+'" style="width:32px;height:32px;border-radius:6px;object-fit:cover;flex-shrink:0">':'<div style="width:32px;height:32px;border-radius:6px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">&#128062;</div>';
+      var userPic=r.savedBy?avatarByName(r.savedBy):null;
+      var avTag=userPic?'<img src="'+userPic+'" style="position:absolute;bottom:-3px;right:-3px;width:16px;height:16px;border-radius:50%;object-fit:cover;border:1.5px solid #fff">':'';
+      var ph=d.photo?'<div style="position:relative;flex-shrink:0"><img src="'+d.photo+'" style="width:32px;height:32px;border-radius:6px;object-fit:cover">'+avTag+'</div>':'<div style="position:relative;flex-shrink:0"><div style="width:32px;height:32px;border-radius:6px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:14px">&#128062;</div>'+avTag+'</div>';
       return '<div onclick="openDog('+r.id+')" style="background:#fff;border:0.5px solid #e2e8f0;border-radius:10px;padding:7px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0;min-width:160px">'
         +ph
         +'<div style="min-width:0;flex:1"><div style="font-size:12px;font-weight:600;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.name)+'</div>'
@@ -1605,7 +1885,7 @@ function loadCurrent(){
   var savedCode=localStorage.getItem("nspca-intake-auth");
   if(savedCode){
     var user=USERS.find(function(u){return u.code===savedCode;});
-    if(user){LOGGED_IN=true;CURRENT_USER=user;localStorage.setItem("nspca-user-name",user.name);localStorage.setItem("nspca-user-role",user.role);loadRecordsList().then(function(){showDashboard();});}
+    if(user){LOGGED_IN=true;CURRENT_USER=user;localStorage.setItem("nspca-user-name",user.name);localStorage.setItem("nspca-user-role",user.role);setupAutoLogout();refreshAllUsers().then(function(){return loadRecordsList();}).then(function(){showDashboard();});}
     else{showScreen("login-screen");}
   }else{showScreen("login-screen");}
 })();
