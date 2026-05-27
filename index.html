@@ -1187,7 +1187,9 @@ var S=defaultState();
 function getMedical(){if(!S.medical)S.medical=defaultMedical();return S.medical;}
 
 function addMedEntry(section,entry){
-  if(!entry.date){appAlert("Please enter a date.");return;}
+  // Date validation is section-specific
+  if((section==="vaccinations"||section==="parasiteTreatments"||section==="vetVisits")&&!entry.date){appAlert("Please enter a date.");return;}
+  if(section==="medications"&&!entry.startDate){appAlert("Please enter a start date.");return;}
   if((section==="vaccinations")&&!entry.type){appAlert("Please select vaccine type.");return;}
   if((section==="parasiteTreatments")&&!entry.type){appAlert("Please select treatment type.");return;}
   var m=getMedical();if(!m[section])m[section]=[];
@@ -1252,18 +1254,19 @@ function renderMedical(){
     if(nextDueEntry&&nextDueEntry.nextDue){
       return nextDueEntry.nextDue<todayStr?{state:"overdue",due:nextDueEntry.nextDue}:{state:"upcoming",due:nextDueEntry.nextDue};
     }
-    // Auto-calc upcoming dates from related vaccines
+    // Auto-calc upcoming dates — use the LATEST 1st vax if multiple entries exist
+    function latestFirstVax(){return vacList.filter(function(v){return v.type==="1st Vaccination"&&v.date;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];}
     if(vt==="2nd Vaccination"){
-      var first=vacList.find(function(v){return v.type==="1st Vaccination";});
-      if(first&&first.date){var due=addDaysStr(first.date,28);return due<todayStr?{state:"overdue",due:due,auto:true}:{state:"upcoming",due:due,auto:true};}
+      var first=latestFirstVax();
+      if(first){var due=addDaysStr(first.date,28);return{state:due<todayStr?"overdue":"upcoming",due:due,auto:true,basis:"28 days after 1st ("+first.date+")"};}
     }
     if(vt==="Booster"){
-      var first=vacList.find(function(v){return v.type==="1st Vaccination";});
-      if(first&&first.date){var due=addDaysStr(first.date,365);return due<todayStr?{state:"overdue",due:due,auto:true}:{state:"upcoming",due:due,auto:true};}
+      var first=latestFirstVax();
+      if(first){var due=addDaysStr(first.date,365);return{state:due<todayStr?"overdue":"upcoming",due:due,auto:true,basis:"1 year after 1st ("+first.date+")"};}
     }
     if(vt==="Kennel Cough"){
       var lastKc=vacList.filter(function(v){return v.type==="Kennel Cough";}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
-      if(lastKc&&lastKc.date){var due=addDaysStr(lastKc.date,365);return due<todayStr?{state:"overdue",due:due,auto:true}:{state:"upcoming",due:due,auto:true};}
+      if(lastKc&&lastKc.date){var due=addDaysStr(lastKc.date,365);return{state:due<todayStr?"overdue":"upcoming",due:due,auto:true,basis:"1 year after last KC"};}
     }
     return{state:"pending"};
   }
@@ -1297,8 +1300,10 @@ function renderMedical(){
       pillBg="#e2e8f0";pillFg="#64748b";pillText="Pending";
     }
     h+='<div style="background:'+bg+';border:1px solid '+bd+';border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:6px">';
-    h+='<div style="min-width:0"><div style="font-size:12px;font-weight:500;margin-bottom:2px">'+esc(vt)+'</div>';
-    h+='<div style="font-size:11px;color:'+subc+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+sub+'</div></div>';
+    h+='<div style="min-width:0;flex:1"><div style="font-size:12px;font-weight:500;margin-bottom:2px">'+esc(vt)+'</div>';
+    h+='<div style="font-size:11px;color:'+subc+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+sub+'</div>';
+    if(st.auto&&st.basis)h+='<div style="font-size:9.5px;color:'+subc+';opacity:0.75;margin-top:2px;font-style:italic">Auto: '+esc(st.basis)+'</div>';
+    h+='</div>';
     h+='<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;background:'+pillBg+';color:'+pillFg+'">'+pillText+'</span>';
     h+='</div>';
   });
@@ -1380,7 +1385,8 @@ function renderMedical(){
       if(v.reason)h+='<div style="font-size:11px;color:#64748b;margin-top:2px">'+esc(v.reason)+'</div>';
       h+='</div><button onclick="deleteMedEntry(\'vetVisits\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0">&#10005;</button></div>';
       if(v.findings)h+='<div style="font-size:11px;color:#64748b;background:#f8fafc;border-radius:4px;padding:5px 8px;margin-top:4px">'+esc(v.findings)+'</div>';
-      if(v.treatment)h+='<div style="font-size:11px;color:#64748b;margin-top:3px">Treatment: '+esc(v.treatment)+'</div>';
+      if(v.treatment)h+='<div style="font-size:11px;color:#64748b;margin-top:3px"><strong>Treatment:</strong> '+esc(v.treatment)+'</div>';
+      if(v.followUp)h+='<div style="font-size:11px;color:#0d9488;margin-top:3px;font-weight:600">&#128197; Follow-up: '+esc(v.followUp)+'</div>';
       h+='</div>';
     });
   }else{h+='<div style="text-align:center;padding:14px;color:#94a3b8;font-size:12px">No vet visits recorded yet</div>';}
