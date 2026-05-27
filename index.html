@@ -379,14 +379,26 @@ function generateAutoNotices(){
         var dueDate=null;
         var explicit=vl.find(function(v){return v.type===vt&&v.nextDue;});
         if(explicit&&explicit.nextDue){dueDate=explicit.nextDue;}
-        else if(vt==="2nd Vaccination"){var first=vl.find(function(v){return v.type==="1st Vaccination";});if(first&&first.date)dueDate=addDS(first.date,21);}
-        else if(vt==="Booster"){var last=vl.filter(function(v){return v.type==="1st Vaccination"||v.type==="2nd Vaccination";}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];if(last&&last.date)dueDate=addDS(last.date,365);}
+        else if(vt==="2nd Vaccination"){var first=vl.find(function(v){return v.type==="1st Vaccination";});if(first&&first.date)dueDate=addDS(first.date,28);}
+        else if(vt==="Booster"){var first=vl.find(function(v){return v.type==="1st Vaccination";});if(first&&first.date)dueDate=addDS(first.date,365);}
         else if(vt==="Kennel Cough"){var lkc=vl.filter(function(v){return v.type==="Kennel Cough";}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];if(lkc&&lkc.date)dueDate=addDS(lkc.date,365);}
         if(!dueDate)return;
         var diff=Math.round((new Date(dueDate)-new Date(today))/(86400000));
         if(diff<0)notices.push({priority:"Urgent",text:name+" "+kennel+" — "+vt+" overdue by "+Math.abs(diff)+" day"+(Math.abs(diff)!==1?"s":""),icon:"&#128137;"});
         else if(diff===0)notices.push({priority:"Important",text:name+" "+kennel+" — "+vt+" due today",icon:"&#128137;"});
         else if(diff<=7)notices.push({priority:"Important",text:name+" "+kennel+" — "+vt+" due in "+diff+" day"+(diff!==1?"s":""),icon:"&#128137;"});
+      });
+
+      // Parasite treatment reminders — Bravecto + Milpro auto-renew at 3 months
+      var pl=med.parasiteTreatments||[];
+      ["Bravecto","Milpro"].forEach(function(drug){
+        var lastDose=pl.filter(function(p){return(p.type||"").indexOf(drug)===0||(p.product||"").indexOf(drug)===0;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
+        if(!lastDose||!lastDose.date)return;
+        var nextDue=lastDose.nextDue||addDS(lastDose.date,90);
+        var diff=Math.round((new Date(nextDue)-new Date(today))/(86400000));
+        if(diff<0)notices.push({priority:"Urgent",text:name+" "+kennel+" — "+drug+" overdue by "+Math.abs(diff)+" day"+(Math.abs(diff)!==1?"s":""),icon:"&#128737;"});
+        else if(diff===0)notices.push({priority:"Important",text:name+" "+kennel+" — "+drug+" due today",icon:"&#128737;"});
+        else if(diff<=7)notices.push({priority:"Important",text:name+" "+kennel+" — "+drug+" due in "+diff+" day"+(diff!==1?"s":""),icon:"&#128737;"});
       });
     }
   });
@@ -507,11 +519,11 @@ function renderMedical(){
     // Auto-calc upcoming dates from related vaccines
     if(vt==="2nd Vaccination"){
       var first=vacList.find(function(v){return v.type==="1st Vaccination";});
-      if(first&&first.date){var due=addDaysStr(first.date,21);return due<todayStr?{state:"overdue",due:due,auto:true}:{state:"upcoming",due:due,auto:true};}
+      if(first&&first.date){var due=addDaysStr(first.date,28);return due<todayStr?{state:"overdue",due:due,auto:true}:{state:"upcoming",due:due,auto:true};}
     }
     if(vt==="Booster"){
-      var last=vacList.filter(function(v){return v.type==="1st Vaccination"||v.type==="2nd Vaccination";}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
-      if(last&&last.date){var due=addDaysStr(last.date,365);return due<todayStr?{state:"overdue",due:due,auto:true}:{state:"upcoming",due:due,auto:true};}
+      var first=vacList.find(function(v){return v.type==="1st Vaccination";});
+      if(first&&first.date){var due=addDaysStr(first.date,365);return due<todayStr?{state:"overdue",due:due,auto:true}:{state:"upcoming",due:due,auto:true};}
     }
     if(vt==="Kennel Cough"){
       var lastKc=vacList.filter(function(v){return v.type==="Kennel Cough";}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
@@ -570,6 +582,24 @@ function renderMedical(){
   // Parasite Treatments
   var paraList=m.parasiteTreatments||[];
   h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:'+(paraList.length?"12px":"6px")+'"><span style="font-size:12px;font-weight:600">Parasite Treatment</span><button class="med-add-btn" onclick="showMedOverlay(\'para\')">+ Log treatment</button></div>';
+
+  // Bravecto + Milpro auto 3-month status banners
+  ["Bravecto","Milpro"].forEach(function(drug){
+    var lastDose=paraList.filter(function(p){return(p.type||"").indexOf(drug)===0||(p.product||"").indexOf(drug)===0;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
+    if(!lastDose||!lastDose.date)return;
+    var nextDue=lastDose.nextDue||addDaysStr(lastDose.date,90);
+    var diff=Math.round((new Date(nextDue)-new Date(todayStr))/(86400000));
+    var bg,bd,fg,pillBg,pillFg,pillText,sub;
+    if(diff<0){bg="#fee2e2";bd="#dc2626";fg="#991b1b";pillBg="#dc2626";pillFg="#fff";pillText="Overdue";sub="Overdue "+fmtDue(nextDue);}
+    else if(diff<=7){bg="#fef9c3";bd="#f59e0b";fg="#854d0e";pillBg="#f59e0b";pillFg="#fff";pillText="Due soon";sub="Due "+fmtDue(nextDue);}
+    else{bg="#dcfce7";bd="#16a34a";fg="#166534";pillBg="#16a34a";pillFg="#fff";pillText="Up to date";sub="Next dose "+fmtDue(nextDue);}
+    h+='<div style="background:'+bg+';border:1px solid '+bd+';border-radius:8px;padding:9px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:6px">';
+    h+='<div style="min-width:0"><div style="font-size:12px;font-weight:600;color:'+fg+'">'+drug+' &middot; 3-month cover</div>';
+    h+='<div style="font-size:11px;color:'+fg+';opacity:0.85">'+sub+'</div></div>';
+    h+='<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+pillBg+';color:'+pillFg+';white-space:nowrap;flex-shrink:0">'+pillText+'</span>';
+    h+='</div>';
+  });
+
   if(paraList.length){
     paraList.forEach(function(p,i){
       var last=i===paraList.length-1;
