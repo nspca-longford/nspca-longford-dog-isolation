@@ -461,7 +461,184 @@ function updateClock(){
 }
 setInterval(updateClock,1000);
 
-function showDashboard(){showScreen("dashboard-screen");loadDashNotices().then(function(){renderDashboard();});}
+function showDashboard(){restoreDashFilters();showScreen("dashboard-screen");loadDashNotices().then(function(){renderDashboard();});}
+
+function setDashFilter(k,v){window["_db"+k]=v;try{var f={S:window._dbS||"",K:window._dbK||"",T:window._dbT||"",O:window._dbO||"day",V:window._dbView||"cards"};localStorage.setItem("nspca-dash-filters",JSON.stringify(f));}catch(e){}}
+function restoreDashFilters(){try{var raw=localStorage.getItem("nspca-dash-filters");if(!raw)return;var f=JSON.parse(raw);if(f.S)window._dbS=f.S;if(f.K)window._dbK=f.K;if(f.T)window._dbT=f.T;if(f.O)window._dbO=f.O;if(f.V)window._dbView=f.V;}catch(e){}}
+
+// Compute EA-flagged status for a record (score>=15 or serious/multiple moderate incidents)
+function recordEA(rec){
+  if(!rec.state)return false;
+  var total=Object.values(rec.state.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
+  if(total>=15)return true;
+  var serious=0,moderate=0;
+  (rec.state.days||[]).forEach(function(d){
+    if(d.incidents&&d.incidents.indexOf("Serious")>=0)serious++;
+    if(d.incidents&&d.incidents.indexOf("Injury")>=0)serious++;
+    if(d.incidents&&d.incidents.indexOf("Moderate")>=0)moderate++;
+  });
+  return serious>0||moderate>=3;
+}
+
+// "Today's tasks" rollup card
+function tasksRollupHtml(activeRecords){
+  var today=new Date().toISOString().slice(0,10);
+  function weekStart(ds){var d=new Date(ds);var day=d.getDay();var diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
+  var thisWeek=weekStart(today);
+  function addDS(ds,n){var x=new Date(ds);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10);}
+  var walks=0,vaccs=0,paras=0,weighs=0,vets=0,meds=0;
+  activeRecords.forEach(function(r){
+    if(!r.state)return;
+    var ex=(r.state.exercises||[]).filter(function(e){return e.date===today&&e.type==="Walked";});
+    if(!ex.length)walks++;
+    var vl=(r.state.medical&&r.state.medical.vaccinations)||[];
+    ["1st Vaccination","Kennel Cough","2nd Vaccination","Booster"].forEach(function(vt){
+      if(vl.some(function(v){return v.type===vt;}))return;
+      var dueDate=null;
+      var explicit=vl.find(function(v){return v.type===vt&&v.nextDue;});
+      if(explicit&&explicit.nextDue){dueDate=explicit.nextDue;}
+      else if(vt==="2nd Vaccination"){var f=vl.find(function(v){return v.type==="1st Vaccination";});if(f&&f.date)dueDate=addDS(f.date,28);}
+      else if(vt==="Booster"){var f=vl.find(function(v){return v.type==="1st Vaccination";});if(f&&f.date)dueDate=addDS(f.date,365);}
+      else if(vt==="Kennel Cough"){var lkc=vl.filter(function(v){return v.type==="Kennel Cough";}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];if(lkc&&lkc.date)dueDate=addDS(lkc.date,365);}
+      if(dueDate&&dueDate<=addDS(today,7))vaccs++;
+    });
+    var pl=(r.state.medical&&r.state.medical.parasiteTreatments)||[];
+    ["Bravecto","Milpro"].forEach(function(drug){
+      var last=pl.filter(function(p){return(p.type||"").indexOf(drug)===0||(p.product||"").indexOf(drug)===0;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
+      if(!last||!last.date)return;
+      var nextDue=last.nextDue||addDS(last.date,90);
+      if(nextDue<=addDS(today,7))paras++;
+    });
+    var wts=r.state.weights||[];
+    if(!wts.find(function(w){return w.date>=thisWeek&&w.date<=today;}))weighs++;
+    var active=(r.state.medical&&r.state.medical.medications||[]).filter(function(x){return x.active!==false;});
+    if(active.length)meds+=active.length;
+    var lastVet=(r.state.medical&&r.state.medical.vetVisits||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
+    if(lastVet&&lastVet.followUp){vets++;}
+  });
+  var items=[];
+  if(walks)items.push({n:walks,l:"Walk"+(walks!==1?"s":"")+" due",c:walks>=3?"#dc2626":"#a16207",bg:walks>=3?"#fee2e2":"#fef9c3"});
+  if(vaccs)items.push({n:vaccs,l:"Vaccine"+(vaccs!==1?"s":"")+" due",c:"#a16207",bg:"#fef9c3"});
+  if(paras)items.push({n:paras,l:"Parasite tx",c:"#a16207",bg:"#fef9c3"});
+  if(weighs)items.push({n:weighs,l:"Weigh-in"+(weighs!==1?"s":""),c:"#0d9488",bg:"#ccfbf1"});
+  if(meds)items.push({n:meds,l:"Active med"+(meds!==1?"s":""),c:"#1e40af",bg:"#dbeafe"});
+  if(!items.length)return"";
+  var total=walks+vaccs+paras+weighs;
+  return '<div class="card" style="margin-bottom:12px;padding:12px 14px;background:linear-gradient(135deg,#fafaf5,#f1f5f9)">'
+    +'<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#64748b">Today &middot; tasks</span><span style="font-size:11px;color:#64748b">'+total+' action'+(total!==1?"s":"")+'</span></div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+    +items.map(function(it){return'<div style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:'+it.bg+';color:'+it.c+';border-radius:20px;font-size:12px;font-weight:600"><strong style="font-size:13px">'+it.n+'</strong> <span style="font-weight:500">'+it.l+'</span></div>';}).join("")
+    +'</div></div>';
+}
+
+// "Recently edited" row — top 4 most recently saved dogs
+function recentlyEditedHtml(activeRecords){
+  var recent=activeRecords.slice().filter(function(r){return r.savedAt;}).sort(function(a,b){return(b.savedAt||"").localeCompare(a.savedAt||"");}).slice(0,4);
+  if(recent.length<2)return"";
+  return '<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#64748b;margin-bottom:6px">Recently edited</div>'
+    +'<div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px">'
+    +recent.map(function(r){
+      var d=r.state&&r.state.dog?r.state.dog:{};
+      var diff=Math.round((Date.now()-new Date(r.savedAt).getTime())/60000);
+      var ago=diff<1?"just now":diff<60?diff+"m":diff<1440?Math.round(diff/60)+"h":Math.round(diff/1440)+"d";
+      var by=r.savedBy?esc(r.savedBy):"";
+      var ph=d.photo?'<img src="'+d.photo+'" style="width:32px;height:32px;border-radius:6px;object-fit:cover;flex-shrink:0">':'<div style="width:32px;height:32px;border-radius:6px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">&#128062;</div>';
+      return '<div onclick="openDog('+r.id+')" style="background:#fff;border:0.5px solid #e2e8f0;border-radius:10px;padding:7px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0;min-width:160px">'
+        +ph
+        +'<div style="min-width:0;flex:1"><div style="font-size:12px;font-weight:600;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.name)+'</div>'
+        +'<div style="font-size:10px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+by+(by?' &middot; ':'')+ago+'</div></div>'
+      +'</div>';
+    }).join("")
+    +'</div></div>';
+}
+
+// View toggle UI
+function viewToggleHtml(){
+  var v=window._dbView||"cards";
+  var opts=[["cards","Cards","&#9783;"],["rounds","Rounds","&#9745;"],["kennels","Kennels","&#127968;"],["list","List","&#9776;"]];
+  return '<div style="display:inline-flex;gap:0;background:#f1f5f9;border-radius:8px;padding:2px;border:0.5px solid #e2e8f0;margin-bottom:12px">'
+    +opts.map(function(o){var on=v===o[0];return '<button onclick="setDashFilter(\'View\',\''+o[0]+'\');renderDashboard()" style="padding:5px 11px;border:none;background:'+(on?"#0f172a":"transparent")+';color:'+(on?"#c5e86c":"#64748b")+';font-size:11px;font-weight:'+(on?"600":"500")+';border-radius:6px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px">'+o[2]+' '+o[1]+'</button>';}).join("")
+  +'</div>';
+}
+
+// ROUNDS view — kennel-order, big tappable exercise dots
+function roundsViewHtml(active){
+  if(!active.length)return "";
+  // Sort by kennel
+  var sorted=active.slice().sort(function(a,b){var ka=(a.state&&a.state.dog?a.state.dog.kennel||"":"");var kb=(b.state&&b.state.dog?b.state.dog.kennel||"":"");return ka.localeCompare(kb);});
+  return '<div style="display:flex;flex-direction:column;gap:8px">'+sorted.map(function(rec){
+    var d=rec.state&&rec.state.dog?rec.state.dog:{};
+    var days=daysInIsolation(rec.intakeDate);
+    var todays=getTodaysExercises(rec);
+    var dots=EX_TYPES.map(function(t){
+      var done=todays.some(function(e){return e.type===t.key;});
+      return '<button onclick="event.stopPropagation();showExerciseOverlay('+rec.id+');setTimeout(function(){var b=document.querySelectorAll(\'#ex-overlay-content button\');for(var i=0;i<b.length;i++){if(b[i].textContent.indexOf(\''+t.key+'\')>=0){b[i].click();break;}}},80);" style="width:48px;height:48px;border-radius:10px;border:1.5px solid '+(done?"#16a34a":"#cbd5e1")+';background:'+(done?"#dcfce7":"#fff")+';color:'+(done?"#166534":"#64748b")+';font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px">'+(done?"&#10003;":t.short)+'<span style="font-size:8px;font-weight:500;opacity:0.8">'+t.key.split(" ")[0]+'</span></button>';
+    }).join("");
+    var ph=d.photo?'<img src="'+d.photo+'" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0">':'<div style="width:48px;height:48px;border-radius:8px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">&#128062;</div>';
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="openDog('+rec.id+')">'
+      +ph
+      +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:#0f172a">'+esc(rec.name)+'</div>'
+      +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+(d.kennel?'<strong>'+esc(d.kennel)+'</strong>':'No kennel')+(days?' &middot; Day '+days+' of 5':'')+'</div></div>'
+      +'<div style="display:flex;gap:4px;flex-shrink:0">'+dots+'</div>'
+    +'</div>';
+  }).join("")+'</div>';
+}
+
+// KENNELS view — grid layout of kennel slots
+function kennelsViewHtml(active){
+  var slots=["Kennel 1","Kennel 2","Kennel 3","Kennel 4","Kennel 5","Kennel 6","Pod 1","Pod 2","Pod 3","Pod 4"];
+  return '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">'+slots.map(function(k){
+    var occupant=active.find(function(r){return r.state&&r.state.dog&&r.state.dog.kennel===k;});
+    if(occupant){
+      var d=occupant.state.dog;
+      var ph=d.photo?'<img src="'+d.photo+'" style="width:100%;height:80px;object-fit:cover;display:block">':'<div style="width:100%;height:80px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:32px">&#128062;</div>';
+      var bc=occupant.trafficLight==="Red"?"#dc2626":occupant.trafficLight==="Black"?"#0f172a":occupant.trafficLight==="Yellow"?"#f59e0b":occupant.trafficLight==="Green"?"#16a34a":"#e2e8f0";
+      return '<div onclick="openDog('+occupant.id+')" style="background:#fff;border:2px solid '+bc+';border-radius:12px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:8px"><div style="font-size:10px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.04em">'+esc(k)+'</div><div style="font-size:13px;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(occupant.name)+'</div></div></div>';
+    }
+    return '<div style="background:#f8fafc;border:1.5px dashed #cbd5e1;border-radius:12px;padding:14px 8px;text-align:center;min-height:124px;display:flex;flex-direction:column;justify-content:center"><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px">'+esc(k)+'</div><div style="font-size:11px;color:#cbd5e1">empty</div></div>';
+  }).join("")+'</div>';
+}
+
+// LIST view — compact one-per-row
+function listViewHtml(active){
+  return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">'+active.map(function(rec,i){
+    var d=rec.state&&rec.state.dog?rec.state.dog:{};
+    var days=daysInIsolation(rec.intakeDate);
+    var ph=d.photo?'<img src="'+d.photo+'" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0">':'<div style="width:36px;height:36px;border-radius:6px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">&#128062;</div>';
+    var ea=recordEA(rec);
+    var tlPill=rec.trafficLight?'<span style="background:'+(rec.trafficLight==="Red"?"#fee2e2":rec.trafficLight==="Black"?"#1e293b":rec.trafficLight==="Yellow"?"#fef9c3":"#dcfce7")+';color:'+(rec.trafficLight==="Red"?"#991b1b":rec.trafficLight==="Black"?"#f1f5f9":rec.trafficLight==="Yellow"?"#854d0e":"#166534")+';font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">'+rec.trafficLight+' '+(rec.score||"")+'</span>':"";
+    return '<div onclick="openDog('+rec.id+')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer'+(i>0?";border-top:1px solid #e2e8f0":"")+'">'
+      +ph
+      +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px">'+esc(rec.name)+(ea?'<span style="background:#f59e0b;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px">&#9888; EA</span>':'')+'</div><div style="font-size:11px;color:#64748b">'+esc(d.kennel||"No kennel")+' &middot; '+esc(rec.breed||"")+(days?' &middot; Day '+days:'')+'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+tlPill+'</div>'
+    +'</div>';
+  }).join("")+'</div>';
+}
+
+// Daily print summary
+function printDailySummary(){
+  var today=new Date().toISOString().slice(0,10);
+  var todayLabel=new Date().toLocaleDateString("en-IE",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
+  active.sort(function(a,b){var ka=(a.state&&a.state.dog?a.state.dog.kennel||"":"");var kb=(b.state&&b.state.dog?b.state.dog.kennel||"":"");return ka.localeCompare(kb);});
+  var rows=active.map(function(r){
+    var d=r.state&&r.state.dog?r.state.dog:{};
+    var days=daysInIsolation(r.intakeDate);
+    var todays=getTodaysExercises(r);
+    var exStr=EX_TYPES.map(function(t){return todays.some(function(e){return e.type===t.key;})?t.short:"·";}).join(" ");
+    var activeMeds=(r.state&&r.state.medical&&r.state.medical.medications||[]).filter(function(x){return x.active!==false;}).map(function(m){return m.name;}).join(", ");
+    return '<tr><td>'+(d.kennel||"-")+'</td><td><strong>'+esc(r.name)+'</strong></td><td>'+esc(r.breed||"")+'</td><td>'+(days||"-")+'</td><td>'+(r.trafficLight||"")+(r.score?" "+r.score:"")+'</td><td style="font-family:monospace">'+exStr+'</td><td>'+esc(activeMeds)+'</td></tr>';
+  }).join("");
+  var w=window.open("","_blank");
+  w.document.write('<!DOCTYPE html><html><head><title>NSPCA Longford &middot; '+today+'</title><style>body{font-family:system-ui,sans-serif;padding:24px;color:#0f172a}h1{font-size:18px;margin:0 0 4px}h2{font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#64748b;margin:0 0 18px;font-weight:600}table{width:100%;border-collapse:collapse;font-size:11px}th,td{padding:7px 8px;text-align:left;border-bottom:1px solid #e2e8f0}th{font-size:9px;text-transform:uppercase;letter-spacing:0.06em;color:#64748b;background:#f8fafc}.foot{margin-top:24px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8}@media print{body{padding:12px}}</style></head><body>'
+    +'<h1>Daily Summary &middot; NSPCA Longford Isolation</h1>'
+    +'<h2>'+todayLabel+' &middot; '+active.length+' dogs in care</h2>'
+    +'<table><thead><tr><th>Kennel</th><th>Name</th><th>Breed</th><th>Day</th><th>Score</th><th>W C R E</th><th>Active medications</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<div class="foot">Exercise key: W = Walked, C = Compound, R = Round Pen/Pond, E = Enrichment. Filled = done today. Generated '+new Date().toLocaleString("en-IE")+' by '+esc(currentName())+'.</div>'
+    +'</body></html>');
+  w.document.close();
+  setTimeout(function(){w.print();},250);
+}
 
 function renderDashboard(){
   var el=document.getElementById("dashboard-content");if(!el)return;
@@ -475,7 +652,7 @@ function renderDashboard(){
   var alertsHtml="";
   if(notes.length){var pb={Normal:"var(--color-background-primary)",Important:"#fef9c3",Urgent:"#fee2e2"},pf={Normal:"var(--color-text-secondary)",Important:"#854d0e",Urgent:"#991b1b"};alertsHtml='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+notes.map(function(n){return'<div style="background:'+pb[n.priority]+';border:0.5px solid var(--color-border-secondary);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;color:'+pf[n.priority]+'">'+n.icon+' '+esc(n.text)+'</div>';}).join("")+'</div>';}
   var ks=[];records.forEach(function(r){var k=r.state&&r.state.dog?r.state.dog.kennel:"";if(k&&ks.indexOf(k)<0)ks.push(k);});ks.sort();
-  var fb='<div style="display:flex;gap:6px;margin-bottom:12px;align-items:center"><div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 10px;min-width:0"><span>&#128269;</span><input placeholder="Search..." value="'+esc(_s)+'" oninput="window._dbS=this.value;window._dbSearchActive=true;renderDashboard()" style="border:none;background:transparent;outline:none;font-size:12px;width:100%;font-family:inherit"></div><select onchange="window._dbK=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:100px"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select><select onchange="window._dbT=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:80px"><option value="">All</option>'+["Green","Yellow","Red","Black"].map(function(t){return'<option value="'+t+'"'+(_t===t?' selected':'')+'>'+t+'</option>';}).join("")+'</select><select onchange="window._dbO=this.value;renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:90px">'+[["day","Day"],["name","Name"],["kennel","Kennel"],["tl","Score"]].map(function(o){return'<option value="'+o[0]+'"'+(_o===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select></div>';
+  var fb='<div style="display:flex;gap:6px;margin-bottom:12px;align-items:center"><div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 10px;min-width:0"><span>&#128269;</span><input placeholder="Search..." value="'+esc(_s)+'" oninput="setDashFilter(\'S\',this.value);window._dbSearchActive=true;renderDashboard()" style="border:none;background:transparent;outline:none;font-size:12px;width:100%;font-family:inherit"></div><select onchange="setDashFilter(\'K\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:100px"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select><select onchange="setDashFilter(\'T\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:80px"><option value="">All</option>'+["Green","Yellow","Red","Black"].map(function(t){return'<option value="'+t+'"'+(_t===t?' selected':'')+'>'+t+'</option>';}).join("")+'</select><select onchange="setDashFilter(\'O\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:90px">'+[["day","Day"],["name","Name"],["kennel","Kennel"],["tl","Score"]].map(function(o){return'<option value="'+o[0]+'"'+(_o===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select></div>';
   var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
   if(_s)active=active.filter(function(r){return(r.name||"").toLowerCase().includes(_s)||(r.breed||"").toLowerCase().includes(_s);});
   if(_k)active=active.filter(function(r){return(r.state&&r.state.dog?r.state.dog.kennel:"")=== _k;});
@@ -490,7 +667,7 @@ function renderDashboard(){
   }
   var stickyEl=document.getElementById("overdue-sticky");
   if(stickyEl)stickyEl.innerHTML=overdueBannerHtml;
-  if(!active.length){el.innerHTML=alertsHtml+fb+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+brandFooterHtml();return;}
+  if(!active.length){el.innerHTML=alertsHtml+tasksRollupHtml(records)+fb+'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px">'+viewToggleHtml()+'<button onclick="printDailySummary()" style="background:#fff;border:0.5px solid #e2e8f0;color:#0f172a;padding:5px 11px;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit">&#128424; Print summary</button></div><div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+brandFooterHtml();return;}
   var cards=active.map(function(rec){
     var d=rec.state&&rec.state.dog?rec.state.dog:{};var f=rec.state&&rec.state.fin?rec.state.fin:{};
     var outcome=f.outcome||"";var finished=outcome==="Finished Isolation";
@@ -505,9 +682,19 @@ function renderDashboard(){
     var dayH=finished?'<div style="font-size:9px;font-weight:600;color:#166634;margin-bottom:3px">Done</div><div style="background:#dcfce7;border-radius:20px;height:4px"><div style="background:#166634;width:100%;height:100%;border-radius:20px"></div></div>':days?'<div style="font-size:9px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of 5'+(overdue?' Overdue':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:4px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
     var savedBy=rec.savedBy||"";
     var lastEditHtml=savedBy?'<div style="display:flex;align-items:center;gap:4px;margin-top:5px;padding-top:4px;border-top:0.5px solid var(--color-border-secondary)"><div style="width:14px;height:14px;border-radius:50%;background:'+avatarColor(savedBy)+';color:#fff;font-size:6px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials(savedBy)+'</div><span style="font-size:9px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(savedBy)+' &middot; '+ta2+'</span></div>':"";
-    return'<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:2px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:10px"><div style="font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(rec.trafficLight?'<span style="background:'+parts[0]+';color:'+parts[1]+';font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+rec.trafficLight+'</span>':'')+(d.crossbreed?'<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">X</span>':'')+'</div>'+dayH+exerciseDotsHtml(rec)+lastEditHtml+'</div></div>';
+    return'<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:2px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:10px"><div style="font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(rec.trafficLight?'<span style="background:'+parts[0]+';color:'+parts[1]+';font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+rec.trafficLight+'</span>':'')+(recordEA(rec)?'<span style="background:#f59e0b;color:#fff;font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px">&#9888; EA</span>':'')+(d.crossbreed?'<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">X</span>':'')+'</div>'+dayH+exerciseDotsHtml(rec)+lastEditHtml+'</div></div>';
   }).join("");
-  el.innerHTML=alertsHtml+fb+'<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px">'+active.length+' dog'+(active.length!==1?'s':'')+' in isolation</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'+cards+'</div>'+brandFooterHtml();
+  var view=window._dbView||"cards";
+  var rollupHtml=tasksRollupHtml(active);
+  var recentRow=recentlyEditedHtml(active);
+  var toggleBar='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px">'+viewToggleHtml()+'<button onclick="printDailySummary()" style="background:#fff;border:0.5px solid #e2e8f0;color:#0f172a;padding:5px 11px;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px">&#128424; Print summary</button></div>';
+  var countLine='<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px">'+active.length+' dog'+(active.length!==1?'s':'')+' in isolation</div>';
+  var viewBody;
+  if(view==="rounds")viewBody=roundsViewHtml(active);
+  else if(view==="kennels")viewBody=kennelsViewHtml(active);
+  else if(view==="list")viewBody=listViewHtml(active);
+  else viewBody='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'+cards+'</div>';
+  el.innerHTML=alertsHtml+rollupHtml+recentRow+fb+toggleBar+countLine+viewBody+brandFooterHtml();
   if(window._dbSearchActive){var si=el.querySelector('input[placeholder="Search..."]');if(si){si.focus();var l=si.value.length;si.setSelectionRange(l,l);}window._dbSearchActive=false;}
 }
 
@@ -1151,20 +1338,115 @@ function page(){
   if(t==="report"){
     var total2=Object.values(S.scores).reduce(function(a,b){return a+b},0),tl2=tlc(total2),ea2=eaTriggered();
     var tlb2=tl2?'<span class="pill" style="background:'+tl2.bg+';color:'+tl2.tc+';font-size:13px;padding:5px 12px"><span style="width:8px;height:8px;border-radius:50%;background:'+tl2.dot+';display:inline-block;margin-right:6px"></span>'+tl2.l+'</span>':"";
-    var d2=S.dog,a2=S.arrival,f2=S.fin,m2=S.medical||{};
-    var drows=[["Ref. no.",d2.refNo],["Intake date",d2.intakeDate],["Reason",d2.intakeReason],["Assessor",d2.assessor],["Breed",d2.breed],["Sex",d2.sex],["Age",d2.age],["Colour",d2.colour],["Weight",d2.weight],["Microchip",d2.microchip]].filter(function(r){return r[1]}).map(function(r){return'<div class="rrow"><span class="rk">'+r[0]+'</span><span class="rv">'+r[1]+'</span></div>'}).join("");
-    var arows=[["Demeanour",a2.demeanour],["Muzzle",a2.muzzle],["Lead handling",a2.lead],["First vet visit",a2.vet],["Dog-to-dog",a2.dogDog],["Cat tolerance",a2.catTolerance],["Child history",a2.childHistory],["Bite history",a2.biteHistory]].filter(function(r){return r[1]}).map(function(r){return'<div class="rrow"><span class="rk">'+r[0]+'</span><span class="rv">'+r[1]+'</span></div>'}).join("");
-    var dblocks=S.days.map(function(dy,i){var rows=[["Demeanour",dy.demeanour],["Feeding",dy.feeding],["Toileting",dy.toileting],["Staff interaction",dy.staffInt],["Incidents",dy.incidents]].filter(function(r){return r[1]}).map(function(r){return'<div style="font-size:12px;margin-bottom:3px"><span style="color:#64748b">'+r[0]+': </span><span style="font-weight:500">'+r[1]+'</span></div>'}).join("");return'<div class="db"><div style="font-size:13px;font-weight:600;margin-bottom:5px">Day '+(i+1)+(dy.date?" — "+dy.date:"")+'</div>'+(rows||'<span style="font-size:12px;color:#64748b">No data.</span>')+(dy.notes?'<div style="font-size:12px;color:#64748b;margin-top:5px">'+dy.notes+'</div>':'')+'</div>';}).join("");
+    var d2=S.dog,a2=S.arrival,f2=S.fin,m2=S.medical||{},asmt=S.assessment||{};
+    var drows=[["Ref. no.",d2.refNo],["Intake date",d2.intakeDate],["Reason",d2.intakeReason],["Assessor",d2.assessor],["Breed",d2.breed],["Sex",d2.sex],["Age",d2.age],["Colour",d2.colour],["Weight",d2.weight],["Microchip",d2.microchip],["Kennel",d2.kennel]].filter(function(r){return r[1]}).map(function(r){return'<div class="rrow"><span class="rk">'+r[0]+'</span><span class="rv">'+esc(r[1])+'</span></div>'}).join("");
+    var arows=[["Demeanour",a2.demeanour],["Muzzle",a2.muzzle],["Lead handling",a2.lead],["First vet visit",a2.vet],["Dog-to-dog",a2.dogDog],["Cat tolerance",a2.catTolerance],["Child history",a2.childHistory],["Bite history",a2.biteHistory]].filter(function(r){return r[1]}).map(function(r){return'<div class="rrow"><span class="rk">'+r[0]+'</span><span class="rv">'+esc(r[1])+'</span></div>'}).join("");
+    var dblocks=S.days.map(function(dy,i){var rows=[["Demeanour",dy.demeanour],["Feeding",dy.feeding],["Toileting",dy.toileting],["Staff interaction",dy.staffInt],["Incidents",dy.incidents]].filter(function(r){return r[1]}).map(function(r){return'<div style="font-size:12px;margin-bottom:3px"><span style="color:#64748b">'+r[0]+': </span><span style="font-weight:500">'+esc(r[1])+'</span></div>'}).join("");return'<div class="db"><div style="font-size:13px;font-weight:600;margin-bottom:5px">Day '+(i+1)+(dy.date?" — "+dy.date:"")+'</div>'+(rows||'<span style="font-size:12px;color:#64748b">No data.</span>')+(dy.notes?'<div style="font-size:12px;color:#64748b;margin-top:5px">'+esc(dy.notes)+'</div>':'')+'</div>';}).join("");
     var srows=CATS.map(function(c){var v=S.scores[c.k];return'<div class="sr"><span>'+c.l+'</span><div style="display:flex;align-items:center;gap:8px">'+(v?'<span style="font-size:11px;color:#64748b">'+c.s[v]+'</span>':'')+'<span class="pill" style="'+sc(v)+'">'+v+'</span></div></div>';}).join("");
-    var concerns=[f2.c1,f2.c2,f2.c3].filter(Boolean).map(function(c,i){return'<div style="display:flex;gap:10px;margin-bottom:8px"><div style="width:20px;height:20px;border-radius:50%;background:#fee2e2;color:#991b1b;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">'+(i+1)+'</div><span style="font-size:13px">'+c+'</span></div>'}).join("");
-    var activeMeds2=(m2.medications||[]).filter(function(x){return x.active!==false;});
-    var lastVax2=(m2.vaccinations||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0]||null;
-    var lastPara2=(m2.parasiteTreatments||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0]||null;
-    var lastVet2=(m2.vetVisits||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0]||null;
-    var medSummaryRows=[["BCS",m2.bcs],["Neutered",m2.neuteredConfirmed],["Dental",m2.dental],["Skin / Coat",m2.skinCondition],["Injuries",m2.injuries],["Last vaccination",lastVax2?(lastVax2.date+" — "+lastVax2.type):""],["Last parasite tx",lastPara2?(lastPara2.date+" — "+lastPara2.type):""],["Last vet visit",lastVet2?(lastVet2.date+(lastVet2.reason?" — "+lastVet2.reason:"")):""]].filter(function(r){return r[1]}).map(function(r){return'<div class="rrow"><span class="rk">'+r[0]+'</span><span class="rv">'+esc(r[1])+'</span></div>';}).join("");
-    var activeMedsHtml=activeMeds2.length?'<div style="background:#dbeafe;border:1px solid #93c5fd;border-radius:8px;padding:10px 14px;margin-top:8px"><div style="font-size:11px;font-weight:700;color:#1e40af;text-transform:uppercase;margin-bottom:6px">&#128138; '+activeMeds2.length+' Active Medication'+(activeMeds2.length!==1?"s":"")+'</div>'+activeMeds2.map(function(med){return'<div style="font-size:12px;color:#1e3a8a;margin-bottom:2px"><strong>'+esc(med.name)+'</strong>'+(med.dose?" — "+esc(med.dose):"")+'</div>';}).join("")+'</div>':"";
-    var medCard=(medSummaryRows||activeMedsHtml)?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Medical summary</div>'+medSummaryRows+activeMedsHtml+'</div>':"";
-    return'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="margin:0">Full assessment report</h2><button class="btn" onclick="window.print()" style="font-size:12px">Print</button></div><div style="background:#0f172a;border-radius:10px;padding:16px 18px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="color:#94a3b8;font-size:11px;margin-bottom:2px">'+(d2.refNo||"&nbsp;")+'</div><div style="color:#fff;font-size:22px;font-weight:600">'+(d2.name||"—")+'</div><div style="color:#94a3b8;font-size:12px;margin-top:2px">'+[d2.breed,d2.sex,d2.age].filter(Boolean).join(" · ")+'</div></div><div style="text-align:right">'+tlb2+(total2?'<div style="color:#94a3b8;font-size:11px;margin-top:4px">Score: '+total2+'/24</div>':"")+'</div></div></div>'+(ea2?'<div class="ea-warn" style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:#92400e">&#9888; Enhanced Assessment flagged</div></div>':'')+'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Dog details</div>'+(drows||"—")+'</div>'+medCard+'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">On-arrival &amp; behaviour history</div>'+(arows||"")+(a2.notes?'<div style="font-size:12px;margin-top:10px;padding:10px;background:#f8fafc;border-radius:6px">'+a2.notes+'</div>':"")+'</div><div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">5-Day isolation log</div>'+dblocks+'</div><div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Behaviour scoring</div>'+srows+'<div style="display:flex;justify-content:space-between;padding:10px 0 0;font-weight:600;font-size:13px"><span>Total</span><span>'+total2+'/24</span></div></div>'+((concerns||f2.steps)?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">Primary concerns &amp; next steps</div>'+concerns+(f2.steps?'<div style="background:#dbeafe;border-radius:6px;padding:11px;margin-top:8px"><div style="font-size:10px;font-weight:600;color:#0369a1;text-transform:uppercase;margin-bottom:3px">Recommended next steps</div><div style="font-size:13px">'+f2.steps+'</div></div>':'')+(f2.handoverNote?'<div style="margin-top:10px;padding:10px;background:#f8fafc;border-radius:6px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:4px">Kennel handover note</div><div style="font-size:13px">'+f2.handoverNote+'</div></div>':'')+'</div>':'')+(f2.assessorName?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:8px">Sign-off</div><div class="rrow"><span class="rk">Assessor</span><span class="rv">'+f2.assessorName+(f2.assessorDate?' — '+f2.assessorDate:'')+'</span></div>'+(f2.secondAssessor?'<div class="rrow"><span class="rk">Second assessor</span><span class="rv">'+f2.secondAssessor+(f2.secondAssessorDate?' — '+f2.secondAssessorDate:'')+'</span></div>':'')+'</div>':'')+'<div class="brow"><button class="btn" data-go="medical">&larr; Back</button><button class="btn" onclick="window.print()">Print</button><button class="btn btng" data-action="save-record">&#128190; Save</button></div>';
+    var concerns=[f2.c1,f2.c2,f2.c3].filter(Boolean).map(function(c,i){return'<div style="display:flex;gap:10px;margin-bottom:8px"><div style="width:20px;height:20px;border-radius:50%;background:#fee2e2;color:#991b1b;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">'+(i+1)+'</div><span style="font-size:13px">'+esc(c)+'</span></div>'}).join("");
+
+    // ─── Helper: render a section of key/value rows ───
+    function kvRows(pairs){return pairs.filter(function(r){return r[1];}).map(function(r){return'<div class="rrow"><span class="rk">'+r[0]+'</span><span class="rv">'+esc(r[1])+'</span></div>';}).join("");}
+    function noteBlock(label,text){return text?'<div style="margin-top:8px;padding:8px 10px;background:#f8fafc;border-radius:6px"><div style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;margin-bottom:3px">'+label+'</div><div style="font-size:12px;color:#0f172a;white-space:pre-wrap">'+esc(text)+'</div></div>':"";}
+    function subHead(label){return'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin:14px 0 6px;padding-top:10px;border-top:1px solid #e2e8f0">'+label+'</div>';}
+
+    // ─── FULL MEDICAL CARD ───
+    var vacList=(m2.vaccinations||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");});
+    var paraList=(m2.parasiteTreatments||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");});
+    var medList=(m2.medications||[]);
+    var vetList=(m2.vetVisits||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");});
+
+    var medCard='<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Medical record</div>';
+    var arrivalRows=kvRows([["Body Condition Score",m2.bcs],["Neutered status",m2.neuteredConfirmed],["Dental",m2.dental],["Coat & skin",m2.skinCondition],["Visible injuries",m2.injuries]]);
+    if(arrivalRows||m2.arrivalHealthNotes){
+      medCard+='<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0f172a;margin-bottom:6px">On-arrival health</div>'+arrivalRows+noteBlock("Notes",m2.arrivalHealthNotes);
+    }
+    if(vacList.length){
+      medCard+=subHead("Vaccinations &middot; "+vacList.length)+vacList.map(function(v){return'<div class="rrow"><span class="rk">'+esc(v.type)+'</span><span class="rv">'+esc(v.date||"")+(v.adminBy?" &middot; "+esc(v.adminBy):"")+(v.notes?" &middot; "+esc(v.notes):"")+'</span></div>';}).join("");
+    }
+    if(paraList.length){
+      medCard+=subHead("Parasite treatments &middot; "+paraList.length)+paraList.map(function(p){return'<div class="rrow"><span class="rk">'+esc(p.product||p.type||"")+'</span><span class="rv">'+esc(p.date||"")+(p.adminBy?" &middot; "+esc(p.adminBy):"")+(p.notes?" &middot; "+esc(p.notes):"")+'</span></div>';}).join("");
+    }
+    if(medList.length){
+      var activeM=medList.filter(function(x){return x.active!==false;});
+      var endedM=medList.filter(function(x){return x.active===false;});
+      medCard+=subHead("Medications &middot; "+medList.length+" ("+activeM.length+" active)");
+      medList.forEach(function(med){
+        var isAct=med.active!==false;
+        medCard+='<div style="padding:7px 0;border-bottom:1px solid #e2e8f0"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-size:12px;font-weight:600">'+esc(med.name||"")+' <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:4px;background:'+(isAct?"#dcfce7":"#f1f5f9")+';color:'+(isAct?"#166534":"#64748b")+'">'+(isAct?"Active":"Ended")+'</span></div></div>';
+        medCard+='<div style="font-size:11px;color:#64748b;margin-top:2px">'+[med.dose,med.frequency,med.startDate?"From "+med.startDate:"",med.endDate?"To "+med.endDate:"",med.prescribedBy?"By "+med.prescribedBy:""].filter(Boolean).map(esc).join(" &middot; ")+'</div>';
+        if(med.notes)medCard+='<div style="font-size:11px;color:#64748b;margin-top:3px;font-style:italic">'+esc(med.notes)+'</div>';
+        medCard+='</div>';
+      });
+    }
+    if(vetList.length){
+      medCard+=subHead("Vet visits &middot; "+vetList.length);
+      vetList.forEach(function(v){
+        medCard+='<div style="padding:8px 0;border-bottom:1px solid #e2e8f0"><div style="font-size:12px;font-weight:600">'+esc(v.date||"")+(v.vet?" &middot; "+esc(v.vet):"")+'</div>';
+        if(v.reason)medCard+='<div style="font-size:11px;color:#64748b;margin-top:2px"><strong>Reason:</strong> '+esc(v.reason)+'</div>';
+        if(v.findings)medCard+='<div style="font-size:11px;color:#64748b;margin-top:2px"><strong>Findings:</strong> '+esc(v.findings)+'</div>';
+        if(v.treatment)medCard+='<div style="font-size:11px;color:#64748b;margin-top:2px"><strong>Treatment:</strong> '+esc(v.treatment)+'</div>';
+        if(v.followUp)medCard+='<div style="font-size:11px;color:#64748b;margin-top:2px"><strong>Follow-up:</strong> '+esc(v.followUp)+'</div>';
+        medCard+='</div>';
+      });
+    }
+    if(!arrivalRows&&!m2.arrivalHealthNotes&&!vacList.length&&!paraList.length&&!medList.length&&!vetList.length){
+      medCard+='<div style="font-size:12px;color:#94a3b8;font-style:italic">No medical data recorded.</div>';
+    }
+    medCard+='</div>';
+
+    // ─── FULL ASSESSMENT CARD ───
+    var asmtCard='<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Behaviour assessment</div>';
+    var handlingRows=kvRows([["Touch — head",asmt.touchHead],["Touch — body",asmt.touchBody],["Touch — paws",asmt.touchPaws],["Touch — ears",asmt.touchEars],["Touch — mouth",asmt.touchMouth],["Collar grab",asmt.collarGrab],["Restraint",asmt.restraint],["On lead",asmt.leadBehaviour]]);
+    if(handlingRows||asmt.handlingNotes){asmtCard+='<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0f172a;margin-bottom:6px">Handling</div>'+handlingRows+noteBlock("Handling notes",asmt.handlingNotes);}
+    var barrierRows=kvRows([["Reaction at barrier",asmt.barrierReaction],["Intensity",asmt.barrierIntensity],["Triggers",asmt.barrierTriggers],["Redirected aggression",asmt.redirectedAggression]]);
+    if(barrierRows||asmt.barrierNotes){asmtCard+=subHead("Barrier aggression")+barrierRows+noteBlock("Barrier notes",asmt.barrierNotes);}
+    var socialRows=kvRows([["Strangers approaching",asmt.strangerApproach],["Suitable with children",asmt.childrenSuitable],["Other dogs — on lead",asmt.dogOnLead],["Other dogs — off lead",asmt.dogOffLead],["Cats",asmt.catResponse],["Group setting",asmt.groupDogs]]);
+    if(socialRows||asmt.socialNotes){asmtCard+=subHead("Social behaviour")+socialRows+noteBlock("Social notes",asmt.socialNotes);}
+    var envRows=kvRows([["Car travel",asmt.carTravel],["Noise sensitivity",asmt.noiseSensitivity],["New environments",asmt.newEnvironments],["Kennel behaviour",asmt.kennelBehaviour]]);
+    if(envRows||asmt.environmentNotes){asmtCard+=subHead("Environment")+envRows+noteBlock("Environment notes",asmt.environmentNotes);}
+    var playRows=kvRows([["Toy interest",asmt.toyInterest],["Retrieve",asmt.retrieve],["Tug",asmt.tug],["Food motivation",asmt.foodMotivation],["Resource guarding",asmt.resourceGuarding],["Play style",asmt.playStyle]]);
+    if(playRows||asmt.playNotes){asmtCard+=subHead("Play & drive")+playRows+noteBlock("Play notes",asmt.playNotes);}
+    var trainRows=kvRows([["Attention span",asmt.attentionSpan],["Handler focus",asmt.handlerFocus],["Known commands",asmt.basicCommands],["Previous training",asmt.previousTraining]]);
+    if(trainRows||asmt.trainNotes){asmtCard+=subHead("Trainability")+trainRows+noteBlock("Training notes",asmt.trainNotes);}
+    var rehomeRows=kvRows([["Home type",asmt.homeType],["With children",asmt.suitableChildren],["With other dogs",asmt.suitableOtherDogs],["With cats",asmt.suitableCats],["Exercise needs",asmt.exerciseNeeds],["Owner experience",asmt.experienceLevel]]);
+    if(rehomeRows||asmt.suitabilityNotes){asmtCard+=subHead("Rehoming suitability")+rehomeRows+noteBlock("Suitability notes",asmt.suitabilityNotes);}
+    var bw=asmt.buddyWalks||[];
+    if(bw.length){
+      asmtCard+=subHead("Buddy walks &middot; "+bw.length);
+      bw.forEach(function(w){asmtCard+='<div style="padding:6px 0;border-bottom:1px solid #e2e8f0;font-size:12px"><strong>'+esc(w.date)+'</strong>'+(w.dog?" &middot; with "+esc(w.dog):"")+(w.staff?" &middot; "+esc(w.staff):"")+'<div style="color:#64748b;font-size:11px;margin-top:2px">'+esc(w.result||"")+(w.notes?" &middot; "+esc(w.notes):"")+'</div></div>';});
+    }
+    var pd=asmt.playdates||[];
+    if(pd.length){
+      asmtCard+=subHead("Playdates &middot; "+pd.length);
+      pd.forEach(function(w){asmtCard+='<div style="padding:6px 0;border-bottom:1px solid #e2e8f0;font-size:12px"><strong>'+esc(w.date)+'</strong>'+(w.dog?" &middot; with "+esc(w.dog):"")+(w.staff?" &middot; "+esc(w.staff):"")+'<div style="color:#64748b;font-size:11px;margin-top:2px">'+esc(w.result||"")+(w.notes?" &middot; "+esc(w.notes):"")+'</div></div>';});
+    }
+    var muzzleRows=kvRows([["Muzzle required",asmt.muzzleRequired],["Muzzle type",asmt.muzzleType],["Current stage",asmt.muzzleStage]]);
+    var mzs=asmt.muzzleSessions||[];
+    if(muzzleRows||mzs.length){
+      asmtCard+=subHead("Muzzle training")+muzzleRows;
+      if(mzs.length){
+        asmtCard+='<div style="font-size:11px;color:#64748b;margin:6px 0 4px">Sessions &middot; '+mzs.length+'</div>';
+        mzs.forEach(function(s){asmtCard+='<div style="padding:6px 0;border-bottom:1px solid #e2e8f0;font-size:12px"><strong>'+esc(s.date)+'</strong>'+(s.duration?" &middot; "+esc(s.duration):"")+'<div style="color:#64748b;font-size:11px;margin-top:2px">'+esc(s.stage||"")+(s.notes?" &middot; "+esc(s.notes):"")+'</div></div>';});
+      }
+    }
+    if(!handlingRows&&!barrierRows&&!socialRows&&!envRows&&!playRows&&!trainRows&&!rehomeRows&&!bw.length&&!pd.length&&!muzzleRows&&!mzs.length){
+      asmtCard+='<div style="font-size:12px;color:#94a3b8;font-style:italic">No assessment data recorded.</div>';
+    }
+    asmtCard+='</div>';
+
+    return'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="margin:0">Full assessment report</h2><button class="btn" onclick="window.print()" style="font-size:12px">Print</button></div>'
+      +'<div style="background:#0f172a;border-radius:10px;padding:16px 18px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="color:#94a3b8;font-size:11px;margin-bottom:2px">'+esc(d2.refNo||"")+'</div><div style="color:#fff;font-size:22px;font-weight:600">'+esc(d2.name||"—")+'</div><div style="color:#94a3b8;font-size:12px;margin-top:2px">'+[d2.breed,d2.sex,d2.age].filter(Boolean).map(esc).join(" · ")+'</div></div><div style="text-align:right">'+tlb2+(total2?'<div style="color:#94a3b8;font-size:11px;margin-top:4px">Score: '+total2+'/24</div>':"")+'</div></div></div>'
+      +(ea2?'<div class="ea-warn" style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:#92400e">&#9888; Enhanced Assessment flagged</div></div>':'')
+      +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Dog details</div>'+(drows||"—")+'</div>'
+      +medCard
+      +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">On-arrival &amp; behaviour history</div>'+arows+(a2.notes?'<div style="font-size:12px;margin-top:10px;padding:10px;background:#f8fafc;border-radius:6px;white-space:pre-wrap">'+esc(a2.notes)+'</div>':"")+'</div>'
+      +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">5-Day isolation log</div>'+dblocks+'</div>'
+      +asmtCard
+      +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Behaviour scoring</div>'+srows+'<div style="display:flex;justify-content:space-between;padding:10px 0 0;font-weight:600;font-size:13px"><span>Total</span><span>'+total2+'/24</span></div></div>'
+      +((concerns||f2.steps||f2.handoverNote||f2.outcome||f2.overallProgress)?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">Final assessment output</div>'+concerns+(f2.steps?'<div style="background:#dbeafe;border-radius:6px;padding:11px;margin-top:8px"><div style="font-size:10px;font-weight:600;color:#0369a1;text-transform:uppercase;margin-bottom:3px">Recommended next steps</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.steps)+'</div></div>':"")+(f2.followUp?'<div class="rrow" style="margin-top:8px"><span class="rk">Follow-up date</span><span class="rv">'+esc(f2.followUp)+'</span></div>':"")+(f2.overallProgress?'<div class="rrow"><span class="rk">Overall progress</span><span class="rv">'+esc(f2.overallProgress)+'</span></div>':"")+(f2.outcome?'<div class="rrow"><span class="rk">Outcome</span><span class="rv">'+esc(f2.outcome)+(f2.outcomeDate?" &middot; "+esc(f2.outcomeDate):"")+'</span></div>':"")+(f2.outcomeNotes?noteBlock("Outcome notes",f2.outcomeNotes):"")+(f2.notes?noteBlock("Additional notes",f2.notes):"")+(f2.handoverNote?'<div style="margin-top:10px;padding:10px;background:#f8fafc;border-radius:6px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:4px">Kennel handover note</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.handoverNote)+'</div></div>':"")+'</div>':"")
+      +(f2.assessorName?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:8px">Sign-off</div><div class="rrow"><span class="rk">Assessor</span><span class="rv">'+esc(f2.assessorName)+(f2.assessorDate?' &mdash; '+esc(f2.assessorDate):'')+'</span></div>'+(f2.secondAssessor?'<div class="rrow"><span class="rk">Second assessor</span><span class="rv">'+esc(f2.secondAssessor)+(f2.secondAssessorDate?' &mdash; '+esc(f2.secondAssessorDate):'')+'</span></div>':'')+'</div>':'')
+      +'<div class="brow"><button class="btn" data-go="files">&larr; Back</button><button class="btn" onclick="window.print()">Print</button><button class="btn btng" data-action="save-record">&#128190; Save</button></div>';
   }
 
   if(t==="assessment")return renderAssessment();
