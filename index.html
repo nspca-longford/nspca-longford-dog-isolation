@@ -139,10 +139,11 @@ var SUPABASE_URL="https://sbajswwuykvjhtoehfps.supabase.co";
 var SUPABASE_KEY="sb_publishable_uP40lclXeaMzJ__zFQESHQ__XSLqJgK";
 
 var USERS=[
-  {code:"SHC01",name:"Shane",role:"admin"},
+  {code:"SHC01",name:"Shane Cox",role:"admin"},
   {code:"SAR01",name:"Sarah",role:"manager"},
   {code:"CIA01",name:"Ciara",role:"supervisor"},
   {code:"NSPCA2024",name:"Staff",role:"staff"},
+  {code:"NSPCA-MGR",name:"Manager",role:"manager"}
 ];
 var CURRENT_USER=null;
 
@@ -209,8 +210,51 @@ function getUserActivity(name,limit){
 // Last activity for a user (their most recent save)
 function userLastActive(name){var act=getUserActivity(name,1);return act.length?act[0].savedAt:"";}
 
-// ── Auto-logout ───────────────────────────────────────────────────
-function getAutoLogoutMins(){try{var v=localStorage.getItem("nspca-auto-logout-mins");return v?parseInt(v):0;}catch(e){return 0;}}
+// ── Welcome toast on login/startup ────────────────────────────────
+function showWelcomeToast(){
+  if(window._welcomedThisSession)return;
+  window._welcomedThisSession=true;
+  var hour=new Date().getHours();
+  var greeting=hour>=5&&hour<12?"Good morning":hour>=12&&hour<17?"Good afternoon":hour>=17&&hour<22?"Good evening":"You're up late";
+  var firstName=(currentName()||"there").split(" ")[0];
+  // Brief context
+  var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";}).length;
+  var notices=(typeof generateAutoNotices==="function")?generateAutoNotices():[];
+  var urgent=notices.filter(function(n){return n.priority==="Urgent";}).length;
+  var important=notices.filter(function(n){return n.priority==="Important";}).length;
+  var subtitle;
+  if(urgent)subtitle=urgent+" urgent item"+(urgent>1?"s":"")+" need attention";
+  else if(important)subtitle=important+" item"+(important>1?"s":"")+" due today";
+  else if(active===0)subtitle="No dogs in isolation right now \u2014 quiet day";
+  else subtitle=active+" dog"+(active>1?"s":"")+" in your care today";
+  // Build avatar
+  var code=CURRENT_USER?CURRENT_USER.code:(localStorage.getItem("nspca-intake-auth")||"");
+  var photo=code?userPhoto(code):"";
+  var av=photo
+    ? '<img src="'+photo+'" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid #c5e86c;flex-shrink:0">'
+    : '<div style="width:42px;height:42px;border-radius:50%;background:'+avatarColor(currentName())+';color:#fff;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;border:2px solid #c5e86c;flex-shrink:0">'+initials(currentName())+'</div>';
+  // Build toast
+  var existing=document.getElementById("welcome-toast");if(existing)existing.remove();
+  var toast=document.createElement("div");
+  toast.id="welcome-toast";
+  toast.style.cssText="position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-120%);background:#0f172a;color:#fff;padding:12px 18px 12px 14px;border-radius:14px;display:flex;align-items:center;gap:12px;box-shadow:0 12px 40px rgba(0,0,0,0.3),0 0 0 1px rgba(197,232,108,0.18);z-index:9998;max-width:calc(100vw - 24px);min-width:280px;transition:transform 0.45s cubic-bezier(0.16,1,0.3,1);font-family:inherit";
+  toast.innerHTML=av
+    +'<div style="min-width:0;flex:1"><div style="font-size:14px;font-weight:600;color:#fff;line-height:1.2">'+esc(greeting)+', '+esc(firstName)+'.</div>'
+    +'<div style="font-size:11px;color:#94a3b8;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(subtitle)+'</div></div>'
+    +'<button onclick="dismissWelcomeToast()" style="background:rgba(255,255,255,0.08);color:#94a3b8;border:none;font-size:14px;cursor:pointer;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit">&#10005;</button>';
+  document.body.appendChild(toast);
+  // Animate in
+  requestAnimationFrame(function(){requestAnimationFrame(function(){toast.style.transform="translateX(-50%) translateY(0)";});});
+  // Auto-dismiss
+  setTimeout(dismissWelcomeToast,6500);
+}
+function dismissWelcomeToast(){
+  var t=document.getElementById("welcome-toast");if(!t)return;
+  t.style.transform="translateX(-50%) translateY(-120%)";
+  setTimeout(function(){if(t.parentNode)t.remove();},450);
+}
+
+// ── Auto-logout ───────────────────────────────────────────────────function getAutoLogoutMins(){try{var v=localStorage.getItem("nspca-auto-logout-mins");return v?parseInt(v):0;}catch(e){return 0;}}
 function setAutoLogoutMins(n){try{localStorage.setItem("nspca-auto-logout-mins",n.toString());}catch(e){}setupAutoLogout();}
 function bumpActivity(){_lastActivity=Date.now();}
 function setupAutoLogout(){
@@ -738,7 +782,7 @@ function updateClock(){
 }
 setInterval(updateClock,1000);
 
-function showDashboard(){restoreDashFilters();showScreen("dashboard-screen");loadDashNotices().then(function(){renderDashboard();});}
+function showDashboard(){restoreDashFilters();showScreen("dashboard-screen");loadDashNotices().then(function(){renderDashboard();showWelcomeToast();});}
 
 function setDashFilter(k,v){window["_db"+k]=v;try{var f={S:window._dbS||"",K:window._dbK||"",T:window._dbT||"",O:window._dbO||"day",V:window._dbView||"cards"};localStorage.setItem("nspca-dash-filters",JSON.stringify(f));}catch(e){}}
 function restoreDashFilters(){try{var raw=localStorage.getItem("nspca-dash-filters");if(!raw)return;var f=JSON.parse(raw);if(f.S)window._dbS=f.S;if(f.K)window._dbK=f.K;if(f.T)window._dbT=f.T;if(f.O)window._dbO=f.O;if(f.V)window._dbView=f.V;}catch(e){}}
