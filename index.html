@@ -307,7 +307,7 @@ function renderDashboard(){
   }
   var stickyEl=document.getElementById("overdue-sticky");
   if(stickyEl)stickyEl.innerHTML=overdueBannerHtml;
-  if(!active.length){el.innerHTML=alertsHtml+fb+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>';return;}
+  if(!active.length){el.innerHTML=alertsHtml+fb+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+brandFooterHtml();return;}
   var cards=active.map(function(rec){
     var d=rec.state&&rec.state.dog?rec.state.dog:{};var f=rec.state&&rec.state.fin?rec.state.fin:{};
     var outcome=f.outcome||"";var finished=outcome==="Finished Isolation";
@@ -324,7 +324,7 @@ function renderDashboard(){
     var lastEditHtml=savedBy?'<div style="display:flex;align-items:center;gap:4px;margin-top:5px;padding-top:4px;border-top:0.5px solid var(--color-border-secondary)"><div style="width:14px;height:14px;border-radius:50%;background:'+avatarColor(savedBy)+';color:#fff;font-size:6px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials(savedBy)+'</div><span style="font-size:9px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(savedBy)+' &middot; '+ta2+'</span></div>':"";
     return'<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:2px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:10px"><div style="font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(rec.trafficLight?'<span style="background:'+parts[0]+';color:'+parts[1]+';font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+rec.trafficLight+'</span>':'')+(d.crossbreed?'<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">X</span>':'')+'</div>'+dayH+lastEditHtml+'</div></div>';
   }).join("");
-  el.innerHTML=alertsHtml+fb+'<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px">'+active.length+' dog'+(active.length!==1?'s':'')+' in isolation</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'+cards+'</div>';
+  el.innerHTML=alertsHtml+fb+'<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px">'+active.length+' dog'+(active.length!==1?'s':'')+' in isolation</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'+cards+'</div>'+brandFooterHtml();
   if(window._dbSearchActive){var si=el.querySelector('input[placeholder="Search..."]');if(si){si.focus();var l=si.value.length;si.setSelectionRange(l,l);}window._dbSearchActive=false;}
 }
 
@@ -332,6 +332,20 @@ function openDog(id){var rec=records.find(function(r){return r.id===id;});if(!re
 function openNewDog(){if(confirm("Start a new dog? Current unsaved data will be cleared.")){S=defaultState();persistSave();showScreen("wrap");S.tab="dog";render();}}
 function goToDashboard(){loadRecordsList().then(function(){showDashboard();});}
 async function loadDashNotices(){}
+
+function brandFooterHtml(){
+  return '<div style="margin:40px 0 8px;padding:28px 16px 4px;text-align:center;border-top:1px solid var(--color-border-secondary)">'
+    +'<div style="width:36px;height:2px;background:#c5e86c;border-radius:2px;margin:0 auto 16px"></div>'
+    +'<svg width="180" viewBox="0 0 1633 459" fill="none" xmlns="http://www.w3.org/2000/svg" style="color:#0f172a;max-width:100%;height:auto;display:block;margin:0 auto" aria-label="NSPCA">'
+      +'<path d="M1384.57 307.012H1292.98L1385.29 0.0996094H1534.05L1629.3 307.012H1504.71C1504.71 307.012 1493.18 257.882 1489.75 243.38H1400.67C1396.47 259.286 1384.57 307.012 1384.57 307.012ZM1457.11 122.675C1455.24 115.191 1452.9 110.512 1446.38 110.512C1439.39 110.512 1437.06 115.191 1434.73 122.675L1419.33 177.887H1472.03L1457.11 122.675Z" fill="currentColor"/>'
+      +'<path d="M102.521 170.332V306.942H0V0.0292969H124.438L182.738 116.056C187.867 126.348 191.598 127.751 195.795 127.751C201.857 127.751 204.188 122.605 204.188 113.249V0.0292969H306.56V306.942H207.452L124.904 167.525C119.775 158.636 116.51 155.83 111.847 155.83C104.852 155.83 102.521 160.975 102.521 170.332Z" fill="currentColor"/>'
+      +'<path d="M793.387 225.155V307.032H668.949V0.119141H904.381C944.484 0.119141 977.137 33.8014 977.137 90.4162C977.137 155.452 936.567 207.378 866.609 207.378H814.838C797.584 207.378 793.387 210.653 793.387 225.155ZM809.242 156.377H810.174C841.418 156.377 860.537 139.536 860.537 103.037C860.537 73.5651 845.615 55.7884 815.304 55.7884H810.641C797.584 55.7884 793.387 59.063 793.387 73.5651V138.6C793.387 153.103 797.584 156.377 809.242 156.377Z" fill="currentColor"/>'
+      +'<path d="M480.377 248.048C505.092 248.048 519.082 239.628 519.082 221.841C519.082 164.748 346.99 219.97 346.99 90.8047C346.99 31.8409 391.757 0 443.062 0H620.313V88.4557H551.536C543.132 62.0892 529.589 57.5703 496.47 57.5703C476.885 57.5703 455.186 64.3983 455.186 77.2282C455.186 123.093 631.475 73.4858 631.475 202.183C631.475 272.384 572.242 307.012 523.745 307.012H352.834V203.119H422.048C432.436 235.457 449.6 248.048 480.377 248.048Z" fill="currentColor"/>'
+      +'<path d="M1121.92 306.922C1072.2 306.922 992.734 258.738 992.734 153.461C992.734 48.1843 1070.62 0 1129.39 0H1294.61V114.155H1226.4C1220.8 84.6833 1204.18 68.31 1171.72 68.31C1133.02 68.31 1113.99 100.121 1113.99 153.461C1113.99 203.985 1140.03 235.805 1173.61 235.805C1207.18 235.805 1223.21 213.48 1226.59 188.557H1300.36C1285.89 247.978 1255.25 307.211 1190.47 306.922H1121.92Z" fill="currentColor"/>'
+    +'</svg>'
+    +'<div style="font-size:13px;color:#475569;font-style:italic;margin-top:10px;letter-spacing:-0.005em">One National Voice for Animals</div>'
+    +'</div>';
+}
 
 function generateAutoNotices(){
   var notices=[];var today=new Date().toISOString().slice(0,10);
@@ -354,6 +368,27 @@ function generateAutoNotices(){
     if(r.intakeDate===today&&days===1)notices.push({priority:"Normal",text:name+" "+kennel+" arrived today",icon:"&#128062;"});
     var mz=r.state&&r.state.assessment?r.state.assessment.muzzleRequired:"";
     if(mz==="Yes — currently required")notices.push({priority:"Normal",text:name+" "+kennel+" requires muzzle",icon:"&#128276;"});
+
+    // Vaccine reminders
+    if(active||finished){
+      var med=r.state&&r.state.medical?r.state.medical:{};var vl=med.vaccinations||[];
+      var VAC=["1st Vaccination","Kennel Cough","2nd Vaccination","Booster"];
+      function addDS(ds,n){var x=new Date(ds);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10);}
+      VAC.forEach(function(vt){
+        if(vl.some(function(v){return v.type===vt;}))return;
+        var dueDate=null;
+        var explicit=vl.find(function(v){return v.type===vt&&v.nextDue;});
+        if(explicit&&explicit.nextDue){dueDate=explicit.nextDue;}
+        else if(vt==="2nd Vaccination"){var first=vl.find(function(v){return v.type==="1st Vaccination";});if(first&&first.date)dueDate=addDS(first.date,21);}
+        else if(vt==="Booster"){var last=vl.filter(function(v){return v.type==="1st Vaccination"||v.type==="2nd Vaccination";}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];if(last&&last.date)dueDate=addDS(last.date,365);}
+        else if(vt==="Kennel Cough"){var lkc=vl.filter(function(v){return v.type==="Kennel Cough";}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];if(lkc&&lkc.date)dueDate=addDS(lkc.date,365);}
+        if(!dueDate)return;
+        var diff=Math.round((new Date(dueDate)-new Date(today))/(86400000));
+        if(diff<0)notices.push({priority:"Urgent",text:name+" "+kennel+" — "+vt+" overdue by "+Math.abs(diff)+" day"+(Math.abs(diff)!==1?"s":""),icon:"&#128137;"});
+        else if(diff===0)notices.push({priority:"Important",text:name+" "+kennel+" — "+vt+" due today",icon:"&#128137;"});
+        else if(diff<=7)notices.push({priority:"Important",text:name+" "+kennel+" — "+vt+" due in "+diff+" day"+(diff!==1?"s":""),icon:"&#128137;"});
+      });
+    }
   });
   return notices;
 }
@@ -459,16 +494,64 @@ function renderMedical(){
   // Vaccinations
   var VAC_FIXED=["1st Vaccination","Kennel Cough","2nd Vaccination","Booster"];
   var vacList=m.vaccinations||[];
+  var todayStr=new Date().toISOString().slice(0,10);
+  // Compute status for each fixed vaccine type
+  function vaxStatus(vt){
+    var match=vacList.slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");}).find(function(v){return v.type===vt;});
+    if(match)return{state:"done",match:match};
+    // Look for an explicit nextDue from any earlier entry of this type
+    var nextDueEntry=vacList.find(function(v){return v.type===vt&&v.nextDue;});
+    if(nextDueEntry&&nextDueEntry.nextDue){
+      return nextDueEntry.nextDue<todayStr?{state:"overdue",due:nextDueEntry.nextDue}:{state:"upcoming",due:nextDueEntry.nextDue};
+    }
+    // Auto-calc upcoming dates from related vaccines
+    if(vt==="2nd Vaccination"){
+      var first=vacList.find(function(v){return v.type==="1st Vaccination";});
+      if(first&&first.date){var due=addDaysStr(first.date,21);return due<todayStr?{state:"overdue",due:due,auto:true}:{state:"upcoming",due:due,auto:true};}
+    }
+    if(vt==="Booster"){
+      var last=vacList.filter(function(v){return v.type==="1st Vaccination"||v.type==="2nd Vaccination";}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
+      if(last&&last.date){var due=addDaysStr(last.date,365);return due<todayStr?{state:"overdue",due:due,auto:true}:{state:"upcoming",due:due,auto:true};}
+    }
+    if(vt==="Kennel Cough"){
+      var lastKc=vacList.filter(function(v){return v.type==="Kennel Cough";}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
+      if(lastKc&&lastKc.date){var due=addDaysStr(lastKc.date,365);return due<todayStr?{state:"overdue",due:due,auto:true}:{state:"upcoming",due:due,auto:true};}
+    }
+    return{state:"pending"};
+  }
+  function fmtDue(ds){
+    var d=new Date(ds);if(isNaN(d))return ds;
+    var diff=Math.round((d-new Date(todayStr))/(86400000));
+    var label=d.toLocaleDateString("en-IE",{day:"numeric",month:"short"});
+    if(diff===0)return"today &middot; "+label;
+    if(diff===1)return"tomorrow &middot; "+label;
+    if(diff>0&&diff<=14)return"in "+diff+" days &middot; "+label;
+    if(diff<0&&diff>=-14)return Math.abs(diff)+" days ago &middot; "+label;
+    return label;
+  }
   h+='<div class="card">';
   h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;font-weight:600">Vaccinations</span><button class="med-add-btn" onclick="showMedOverlay(\'vac\')">+ Log vaccination</button></div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
   VAC_FIXED.forEach(function(vt){
-    var match=vacList.slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");}).find(function(v){return v.type===vt;});
-    var done=!!match;
-    h+='<div style="background:'+(done?"#dcfce7":"#f8fafc")+';border:1px solid '+(done?"#16a34a":"#e2e8f0")+';border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:6px">';
+    var st=vaxStatus(vt);
+    var bg,bd,sub,subc,pillBg,pillFg,pillText;
+    if(st.state==="done"){
+      bg="#dcfce7";bd="#16a34a";sub=st.match.date+(st.match.adminBy?" &middot; "+esc(st.match.adminBy):"");subc="#166534";
+      pillBg="#16a34a";pillFg="#fff";pillText="&#10003; Done";
+    }else if(st.state==="upcoming"){
+      bg="#fef9c3";bd="#f59e0b";sub="Due "+fmtDue(st.due);subc="#854d0e";
+      pillBg="#f59e0b";pillFg="#fff";pillText="Upcoming";
+    }else if(st.state==="overdue"){
+      bg="#fee2e2";bd="#dc2626";sub="Overdue "+fmtDue(st.due);subc="#991b1b";
+      pillBg="#dc2626";pillFg="#fff";pillText="Overdue";
+    }else{
+      bg="#f8fafc";bd="#e2e8f0";sub="Not recorded";subc="#94a3b8";
+      pillBg="#e2e8f0";pillFg="#64748b";pillText="Pending";
+    }
+    h+='<div style="background:'+bg+';border:1px solid '+bd+';border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:6px">';
     h+='<div style="min-width:0"><div style="font-size:12px;font-weight:500;margin-bottom:2px">'+esc(vt)+'</div>';
-    h+='<div style="font-size:11px;color:'+(done?"#166534":"#94a3b8")+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(done?(match.date+(match.adminBy?" &middot; "+esc(match.adminBy):"")):"Not recorded")+'</div></div>';
-    h+='<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;background:'+(done?"#16a34a":"#e2e8f0")+';color:'+(done?"#fff":"#64748b")+'">'+(done?"&#10003; Done":"Pending")+'</span>';
+    h+='<div style="font-size:11px;color:'+subc+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+sub+'</div></div>';
+    h+='<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;background:'+pillBg+';color:'+pillFg+'">'+pillText+'</span>';
     h+='</div>';
   });
   vacList.filter(function(v){return VAC_FIXED.indexOf(v.type)<0;}).forEach(function(v){
