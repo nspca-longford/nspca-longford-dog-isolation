@@ -180,27 +180,208 @@ function showScreen(id){["login-screen","dashboard-screen","wrap"].forEach(funct
 function gv(id){var el=document.getElementById(id);return el?(el.value||"").trim():"";}
 function showMedOverlay(type){var el=document.getElementById("med-ov-"+type);if(el)el.classList.add("show");}
 function hideMedOverlay(type){var el=document.getElementById("med-ov-"+type);if(el)el.classList.remove("show");}
+
+// ── Exercise tracking ─────────────────────────────────────────────
+// Stored per-dog on rec.state.exercises[]: {date, time, type, staff, notes}
+// Four types: Walked, Compound, Round Pen/Pond, Enrichment
+var _exOverlayRec=null;
+var EX_TYPES=[
+  {key:"Walked",icon:"&#128694;",short:"W"},
+  {key:"Compound",icon:"&#127968;",short:"C"},
+  {key:"Round Pen/Pond",icon:"&#11093;",short:"R"},
+  {key:"Enrichment",icon:"&#129504;",short:"E"}
+];
+
+function getTodaysExercises(rec){
+  var today=new Date().toISOString().slice(0,10);
+  var ex=(rec&&rec.state&&rec.state.exercises)||[];
+  return ex.filter(function(e){return e.date===today;});
+}
+
+function exerciseDotsHtml(rec){
+  var todays=getTodaysExercises(rec);
+  var dots=EX_TYPES.map(function(t){
+    var done=todays.some(function(e){return e.type===t.key;});
+    return '<div style="width:16px;height:16px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;'+(done?'background:#c5e86c;color:#3a4a16;border:0.5px solid #9bc23e':'background:#fff;color:#94a3b8;border:0.5px solid #cbd5e1')+'" title="'+t.key+(done?' &mdash; done":'')+'">'+t.short+'</div>';
+  }).join("");
+  return '<div onclick="event.stopPropagation();showExerciseOverlay('+rec.id+')" style="display:flex;align-items:center;gap:4px;padding:6px 0 0;margin-top:5px;border-top:0.5px dashed var(--color-border-secondary);cursor:pointer">'
+    +'<span style="font-size:8px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.04em;font-weight:600;margin-right:auto">Today</span>'
+    +dots
+    +'</div>';
+}
+
+function showExerciseOverlay(recId){
+  var rec=records.find(function(r){return r.id===recId;});
+  if(!rec)return;
+  if(!rec.state)rec.state={};
+  if(!rec.state.exercises)rec.state.exercises=[];
+  _exOverlayRec=rec;
+  var ov=document.getElementById("ex-overlay");
+  if(!ov){
+    ov=document.createElement("div");
+    ov.id="ex-overlay";
+    ov.className="med-overlay";
+    ov.onclick=function(e){if(e.target===ov)hideExerciseOverlay();};
+    ov.innerHTML='<div id="ex-overlay-content" style="background:#fff;border-radius:16px;max-width:420px;width:calc(100% - 24px);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25)"></div>';
+    document.body.appendChild(ov);
+  }
+  renderExerciseOverlay();
+  ov.classList.add("show");
+}
+
+function hideExerciseOverlay(){
+  var ov=document.getElementById("ex-overlay");
+  if(ov)ov.classList.remove("show");
+  _exOverlayRec=null;
+}
+
+function renderExerciseOverlay(){
+  var rec=_exOverlayRec;if(!rec)return;
+  var d=(rec.state&&rec.state.dog)||{};
+  var todays=getTodaysExercises(rec);
+  var dateLabel=new Date().toLocaleDateString("en-IE",{weekday:"long",day:"numeric",month:"short"});
+
+  var h='<div style="padding:16px 18px 12px;border-bottom:0.5px solid var(--color-border-secondary);display:flex;align-items:center;gap:10px">'
+    +(d.photo?'<img src="'+d.photo+'" style="width:38px;height:38px;border-radius:8px;object-fit:cover;flex-shrink:0">':'<div style="width:38px;height:38px;border-radius:8px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">&#128062;</div>')
+    +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:14px;font-weight:600;color:var(--color-text-primary);line-height:1.15">'+esc(rec.name)+' &middot; Exercise</div>'
+      +'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">'+dateLabel+(d.kennel?' &middot; '+esc(d.kennel):'')+'</div>'
+    +'</div>'
+    +'<button onclick="hideExerciseOverlay()" style="background:none;border:none;color:var(--color-text-secondary);font-size:20px;line-height:1;cursor:pointer;width:30px;height:30px;border-radius:50%">&times;</button>'
+  +'</div>';
+
+  h+='<div style="padding:12px 18px 0">'
+    +'<input id="ex-note-input" type="text" placeholder="Optional note (attached to next entry)" style="width:100%;padding:8px 11px;border:0.5px solid var(--color-border-secondary);border-radius:8px;font-size:12px;font-family:inherit;background:var(--color-background-primary)">'
+  +'</div>';
+
+  h+='<div style="padding:10px 18px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  EX_TYPES.forEach(function(t){
+    var sessions=todays.filter(function(e){return e.type===t.key;});
+    var done=sessions.length>0;
+    var last=done?sessions[sessions.length-1]:null;
+    var status=last?("Last "+last.time+(sessions.length>1?" &middot; "+sessions.length+"\u00d7":"")):"Tap to log";
+    var bg=done?"#edf6cf":"var(--color-background-primary)";
+    var bd=done?"#9bc23e":"var(--color-border-secondary)";
+    var statusColor=done?"#3a4a16":"var(--color-text-secondary)";
+    h+='<button onclick="logExerciseEntry(\''+t.key.replace(/'/g,"\\'")+'\')" style="background:'+bg+';border:1px solid '+bd+';border-radius:10px;padding:11px;text-align:left;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:5px;min-height:76px;justify-content:space-between;position:relative">'
+      +(done?'<div style="position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:#9bc23e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">&#10003;</div>':'')
+      +'<div style="font-size:18px;line-height:1">'+t.icon+'</div>'
+      +'<div>'
+        +'<div style="font-size:12px;font-weight:600;color:var(--color-text-primary);letter-spacing:-0.005em">'+t.key+'</div>'
+        +'<div style="font-size:10px;color:'+statusColor+';font-weight:'+(done?'600':'500')+';margin-top:1px">'+status+'</div>'
+      +'</div>'
+    +'</button>';
+  });
+  h+='</div>';
+
+  if(todays.length){
+    var logRows=todays.slice().sort(function(a,b){return(b.time||"").localeCompare(a.time||"");}).map(function(e){
+      var origIdx=rec.state.exercises.indexOf(e);
+      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;font-size:11.5px;border-bottom:0.5px solid var(--color-border-secondary)">'
+        +'<span style="font-size:10.5px;color:var(--color-text-secondary);min-width:40px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(e.time||"")+'</span>'
+        +'<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;background:#edf6cf;color:#3a4a16;text-transform:uppercase;letter-spacing:0.03em;white-space:nowrap">'+esc(e.type)+'</span>'
+        +'<span style="flex:1;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;font-size:11px">'+esc(e.staff||"")+(e.notes?' &middot; '+esc(e.notes):'')+'</span>'
+        +'<button onclick="deleteExerciseEntry('+origIdx+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer">&#10005;</button>'
+      +'</div>';
+    }).join("");
+    h+='<div style="padding:10px 18px 8px;border-top:0.5px solid var(--color-border-secondary)">'
+      +'<div style="font-size:10px;font-weight:700;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Today\'s log &middot; '+todays.length+'</div>'
+      +logRows
+    +'</div>';
+  }
+
+  h+='<div style="padding:12px 18px 14px;border-top:0.5px solid var(--color-border-secondary);background:#f8fafc">'
+    +'<button onclick="hideExerciseOverlay()" style="width:100%;padding:11px;border-radius:8px;border:none;background:#0f172a;color:#c5e86c;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-0.005em">Done</button>'
+  +'</div>';
+
+  document.getElementById("ex-overlay-content").innerHTML=h;
+}
+
+async function logExerciseEntry(type){
+  if(!_exOverlayRec)return;
+  var now=new Date();
+  var date=now.toISOString().slice(0,10);
+  var time=now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0");
+  var noteInput=document.getElementById("ex-note-input");
+  var notes=noteInput?noteInput.value.trim():"";
+  if(!_exOverlayRec.state.exercises)_exOverlayRec.state.exercises=[];
+  _exOverlayRec.state.exercises.push({date:date,time:time,type:type,staff:currentName(),notes:notes});
+  if(noteInput)noteInput.value="";
+  await saveExerciseChange(_exOverlayRec);
+  renderExerciseOverlay();
+  renderDashboard();
+}
+
+function deleteExerciseEntry(idx){
+  if(!_exOverlayRec)return;
+  appConfirm("Delete this exercise entry?",async function(){
+    _exOverlayRec.state.exercises.splice(idx,1);
+    await saveExerciseChange(_exOverlayRec);
+    renderExerciseOverlay();
+    renderDashboard();
+  },{danger:true});
+}
+
+async function saveExerciseChange(rec){
+  if(!supabaseClient)return;
+  var st=JSON.parse(JSON.stringify(rec.state));delete st._id;st._savedBy=currentName();
+  var row={name:rec.name,breed:rec.breed||"",ref_no:rec.refNo||"",intake_date:rec.intakeDate||null,assessor:rec.assessor||"",score:rec.score||0,traffic_light:rec.trafficLight||"",saved_at:new Date().toISOString(),data:st};
+  try{await supabaseClient.from("dogs").update(row).eq("id",rec.id);rec.savedAt=row.saved_at;rec.savedBy=currentName();}catch(e){console.error("Exercise save error:",e);}
+}
+
+// Custom in-page confirm — replaces native confirm() to avoid the browser's
+// "domain.com says:" prompt. Pass {danger:true} for destructive actions.
+function appConfirm(message,onConfirm,options){
+  options=options||{};
+  var ov=document.getElementById("app-confirm-overlay");
+  if(!ov){
+    ov=document.createElement("div");
+    ov.id="app-confirm-overlay";
+    ov.style.cssText="position:fixed;inset:0;background:rgba(15,23,42,0.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:9999";
+    ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:360px;width:100%;padding:22px 22px 18px;box-shadow:0 20px 60px rgba(0,0,0,0.25)"><div id="app-confirm-msg" style="font-size:14px;color:#0f172a;line-height:1.45;margin-bottom:18px"></div><div style="display:flex;gap:10px;justify-content:flex-end"><button id="app-confirm-cancel" style="padding:9px 16px;border:1px solid #cbd5e1;background:#fff;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:#0f172a">Cancel</button><button id="app-confirm-ok" style="padding:9px 16px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Confirm</button></div></div>';
+    document.body.appendChild(ov);
+  }
+  document.getElementById("app-confirm-msg").textContent=message;
+  var okBtn=document.getElementById("app-confirm-ok");
+  var cancelBtn=document.getElementById("app-confirm-cancel");
+  okBtn.textContent=options.confirmText||"Confirm";
+  cancelBtn.style.display=options.hideCancel?"none":"";
+  if(options.danger){okBtn.style.background="#dc2626";okBtn.style.color="#fff";}
+  else{okBtn.style.background="#0f172a";okBtn.style.color="#c5e86c";}
+  // Replace nodes to clear old listeners
+  var newOk=okBtn.cloneNode(true);okBtn.parentNode.replaceChild(newOk,okBtn);
+  var newCancel=cancelBtn.cloneNode(true);cancelBtn.parentNode.replaceChild(newCancel,cancelBtn);
+  ov.style.display="flex";
+  newOk.addEventListener("click",function(){ov.style.display="none";if(onConfirm)onConfirm();});
+  newCancel.addEventListener("click",function(){ov.style.display="none";});
+  ov.onclick=function(e){if(e.target===ov)ov.style.display="none";};
+}
+
+// Custom in-page alert — replaces native appAlert()
+function appAlert(message,onClose){
+  appConfirm(message,onClose,{confirmText:"OK",hideCancel:true});
+}
 function saveMedVac(){
   var type=gv("med-vac-type"),date=gv("med-vac-date");
-  if(!type||!date){alert("Please select a vaccination and enter a date.");return;}
+  if(!type||!date){appAlert("Please select a vaccination and enter a date.");return;}
   addMedEntry("vaccinations",{type:type,date:date,adminBy:gv("med-vac-admin"),notes:gv("med-vac-notes"),nextDue:""});
   hideMedOverlay("vac");
 }
 function saveMedPara(){
   var type=gv("med-para-type"),date=gv("med-para-date");
-  if(!type||!date){alert("Please select a treatment and enter a date.");return;}
+  if(!type||!date){appAlert("Please select a treatment and enter a date.");return;}
   addMedEntry("parasiteTreatments",{type:type,product:type,date:date,adminBy:gv("med-para-admin"),notes:gv("med-para-notes"),nextDue:""});
   hideMedOverlay("para");
 }
 function saveMedMed(){
   var name=gv("med-med-name");
-  if(!name){alert("Please enter a medication name.");return;}
+  if(!name){appAlert("Please enter a medication name.");return;}
   addMedEntry("medications",{name:name,dose:gv("med-med-dose"),frequency:gv("med-med-freq"),startDate:gv("med-med-start"),endDate:gv("med-med-end"),prescribedBy:gv("med-med-by"),notes:gv("med-med-notes"),active:true});
   hideMedOverlay("med");
 }
 function saveMedVet(){
   var date=gv("med-vet-date");
-  if(!date){alert("Please enter a date.");return;}
+  if(!date){appAlert("Please enter a date.");return;}
   var fe=document.getElementById("med-vet-findings");
   addMedEntry("vetVisits",{date:date,vet:gv("med-vet-name"),reason:gv("med-vet-reason"),findings:fe?(fe.value||"").trim():"",treatment:gv("med-vet-treatment"),followUp:gv("med-vet-followup"),notes:""});
   hideMedOverlay("vet");
@@ -324,14 +505,14 @@ function renderDashboard(){
     var dayH=finished?'<div style="font-size:9px;font-weight:600;color:#166634;margin-bottom:3px">Done</div><div style="background:#dcfce7;border-radius:20px;height:4px"><div style="background:#166634;width:100%;height:100%;border-radius:20px"></div></div>':days?'<div style="font-size:9px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of 5'+(overdue?' Overdue':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:4px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
     var savedBy=rec.savedBy||"";
     var lastEditHtml=savedBy?'<div style="display:flex;align-items:center;gap:4px;margin-top:5px;padding-top:4px;border-top:0.5px solid var(--color-border-secondary)"><div style="width:14px;height:14px;border-radius:50%;background:'+avatarColor(savedBy)+';color:#fff;font-size:6px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials(savedBy)+'</div><span style="font-size:9px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(savedBy)+' &middot; '+ta2+'</span></div>':"";
-    return'<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:2px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:10px"><div style="font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(rec.trafficLight?'<span style="background:'+parts[0]+';color:'+parts[1]+';font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+rec.trafficLight+'</span>':'')+(d.crossbreed?'<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">X</span>':'')+'</div>'+dayH+lastEditHtml+'</div></div>';
+    return'<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:2px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:10px"><div style="font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(rec.trafficLight?'<span style="background:'+parts[0]+';color:'+parts[1]+';font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+rec.trafficLight+'</span>':'')+(d.crossbreed?'<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">X</span>':'')+'</div>'+dayH+exerciseDotsHtml(rec)+lastEditHtml+'</div></div>';
   }).join("");
   el.innerHTML=alertsHtml+fb+'<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px">'+active.length+' dog'+(active.length!==1?'s':'')+' in isolation</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'+cards+'</div>'+brandFooterHtml();
   if(window._dbSearchActive){var si=el.querySelector('input[placeholder="Search..."]');if(si){si.focus();var l=si.value.length;si.setSelectionRange(l,l);}window._dbSearchActive=false;}
 }
 
 function openDog(id){var rec=records.find(function(r){return r.id===id;});if(!rec)return;loadRecord(id);showScreen("wrap");S.tab="report";render();}
-function openNewDog(){if(confirm("Start a new dog? Current unsaved data will be cleared.")){S=defaultState();persistSave();showScreen("wrap");S.tab="dog";render();}}
+function openNewDog(){appConfirm("Start a new dog? Current unsaved data will be cleared.",function(){S=defaultState();persistSave();showScreen("wrap");S.tab="dog";render();});}
 function goToDashboard(){loadRecordsList().then(function(){showDashboard();});}
 async function loadDashNotices(){}
 
@@ -431,6 +612,20 @@ function generateAutoNotices(){
       });
     }
   });
+  // "Not walked yet" — count active dogs without a "Walked" entry today
+  var unWalked=[];var todayDate=new Date().toISOString().slice(0,10);
+  records.forEach(function(r){
+    var f=r.state&&r.state.fin?r.state.fin:{};var outcome=f.outcome||"";
+    var active=!outcome||outcome==="Active — in isolation"||outcome==="Active - in isolation";
+    if(!active)return;
+    var ex=(r.state&&r.state.exercises)||[];
+    var walkedToday=ex.some(function(e){return e.date===todayDate&&e.type==="Walked";});
+    if(!walkedToday){var d2=r.state&&r.state.dog?r.state.dog:{};unWalked.push(r.name+(d2.kennel?" ("+d2.kennel+")":""));}
+  });
+  if(unWalked.length){
+    var label=unWalked.length===1?unWalked[0]+" not walked yet today":unWalked.length+" dogs not walked yet today";
+    notices.push({priority:unWalked.length>=3?"Urgent":"Important",text:label,icon:"&#128694;"});
+  }
   return notices;
 }
 
@@ -472,7 +667,7 @@ function defaultState(){return{_id:null,tab:"dog",
   medical:defaultMedical(),
   assessment:{touchHead:"",touchBody:"",touchPaws:"",touchEars:"",touchMouth:"",collarGrab:"",restraint:"",leadBehaviour:"",handlingNotes:"",barrierReaction:"",barrierIntensity:"",barrierTriggers:"",redirectedAggression:"",barrierNotes:"",strangerApproach:"",childrenSuitable:"",dogOnLead:"",dogOffLead:"",catResponse:"",groupDogs:"",socialNotes:"",carTravel:"",noiseSensitivity:"",newEnvironments:"",kennelBehaviour:"",environmentNotes:"",toyInterest:"",retrieve:"",tug:"",foodMotivation:"",resourceGuarding:"",playStyle:"",playNotes:"",attentionSpan:"",handlerFocus:"",basicCommands:"",previousTraining:"",trainNotes:"",homeType:"",suitableChildren:"",suitableOtherDogs:"",suitableCats:"",exerciseNeeds:"",experienceLevel:"",suitabilityNotes:"",buddyWalks:[],playdates:[],muzzleRequired:"",muzzleType:"",muzzleStage:"",muzzleSessions:[]},
   fin:{c1:"",c2:"",c3:"",steps:"",followUp:"",notes:"",overallProgress:"",handoverNote:"",assessorName:"",assessorDate:"",secondAssessor:"",secondAssessorDate:"",outcome:"",outcomeDate:"",outcomeNotes:""},
-  weights:[],files:[]
+  weights:[],files:[],exercises:[]
 };}
 
 var S=defaultState();
@@ -481,16 +676,17 @@ var S=defaultState();
 function getMedical(){if(!S.medical)S.medical=defaultMedical();return S.medical;}
 
 function addMedEntry(section,entry){
-  if(!entry.date){alert("Please enter a date.");return;}
-  if((section==="vaccinations")&&!entry.type){alert("Please select vaccine type.");return;}
-  if((section==="parasiteTreatments")&&!entry.type){alert("Please select treatment type.");return;}
+  if(!entry.date){appAlert("Please enter a date.");return;}
+  if((section==="vaccinations")&&!entry.type){appAlert("Please select vaccine type.");return;}
+  if((section==="parasiteTreatments")&&!entry.type){appAlert("Please select treatment type.");return;}
   var m=getMedical();if(!m[section])m[section]=[];
   m[section].push(entry);saveRecord();renderMain();
 }
 
 function deleteMedEntry(section,idx){
-  if(!confirm("Delete this entry?"))return;
-  getMedical()[section].splice(idx,1);saveRecord();renderMain();
+  appConfirm("Delete this entry?",function(){
+    getMedical()[section].splice(idx,1);saveRecord();renderMain();
+  },{danger:true});
 }
 
 function toggleMedActive(idx){
@@ -748,8 +944,8 @@ function renderWeights(){
     return'<h2 style="margin-bottom:4px">Weight Records</h2><div class="sub" style="margin-bottom:16px">Weekly tracking from intake date.</div>'+banner+'<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Log Weight</div><div class="g2"><div class="f"><label class="lbl">Date</label><input type="date" id="w-date" value="'+today+'"></div><div class="f"><label class="lbl">Weight</label><div style="display:flex;align-items:center;gap:8px"><input type="number" step="0.1" min="0" id="w-val" placeholder="12.5" style="flex:1"><span style="font-weight:700;color:var(--color-text-secondary)">kg</span></div></div></div><div class="f"><label class="lbl">Note (optional)</label><input id="w-note" placeholder="e.g. Post-treatment weigh-in"></div><button class="btn btnp" onclick="addWeight()">+ Add Entry</button></div>'+(weeks.length?'<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Weekly Progress ('+recorded+' of '+weeks.length+' weeks recorded)</div><table style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:2px solid var(--color-border-secondary)"><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Week</th><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Weight</th><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Detail</th><th></th></tr></thead><tbody>'+tableRows+'</tbody></table></div>':'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)">No weight entries yet.</div>')+'<div class="brow"><button class="btn" data-go="medical">&larr; Back</button><button class="btn btnp" data-go="files">Next: files &rarr;</button></div>';
   }catch(err){return'<div style="padding:20px;color:#dc2626">Weight tab error: '+err.message+'</div>';}
 }
-function addWeight(){var dEl=document.getElementById("w-date"),vEl=document.getElementById("w-val"),nEl=document.getElementById("w-note");var d=dEl?dEl.value.trim():"",v=vEl?vEl.value.trim():"",n=nEl?nEl.value.trim():"";if(!d||!v){alert("Please enter a date and weight.");return;}if(!S.weights)S.weights=[];S.weights.push({date:d,weight:parseFloat(v)+" kg",note:n});saveRecord();renderMain();}
-function deleteWeight(idx){if(!confirm("Delete this weight entry?"))return;S.weights.splice(idx,1);saveRecord();renderMain();}
+function addWeight(){var dEl=document.getElementById("w-date"),vEl=document.getElementById("w-val"),nEl=document.getElementById("w-note");var d=dEl?dEl.value.trim():"",v=vEl?vEl.value.trim():"",n=nEl?nEl.value.trim():"";if(!d||!v){appAlert("Please enter a date and weight.");return;}if(!S.weights)S.weights=[];S.weights.push({date:d,weight:parseFloat(v)+" kg",note:n});saveRecord();renderMain();}
+function deleteWeight(idx){appConfirm("Delete this weight entry?",function(){S.weights.splice(idx,1);saveRecord();renderMain();},{danger:true});}
 
 // ── Files ─────────────────────────────────────────────────────────
 function renderFiles(){
@@ -758,18 +954,18 @@ function renderFiles(){
   return'<h2 style="margin-bottom:4px">Files & Documents</h2><div class="sub" style="margin-bottom:16px">Upload photos, scans or documents for this dog</div><div class="card" style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Upload File</div><div class="f"><label class="lbl">Note (optional)</label><input id="f-note" placeholder="e.g. Vet report 12 May"></div><label style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:13px;color:var(--color-text-secondary)">&#128206; Choose file<input type="file" accept="image/*,application/pdf,.pdf,.doc,.docx" style="display:none" onchange="handleFileUpload(this)"></label><div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px">Images compressed automatically. Max 5MB.</div></div>'+(files.length?fileCards:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)"><div style="font-size:32px;margin-bottom:8px">&#128206;</div>No files uploaded yet</div>')+'<div class="brow"><button class="btn" data-go="weights">&larr; Back</button><button class="btn btnp" data-go="report">View report &rarr;</button></div>';
 }
 function compressPhoto(file,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var MAX=400,w=img.width,h=img.height;if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}var cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);cb(cv.toDataURL("image/jpeg",0.75));};img.src=e.target.result;};r.readAsDataURL(file);}
-function handlePhotoUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){alert("Photo too large. Max 5MB.");return;}compressPhoto(file,function(data){S.dog.photo=data;renderMain();});}
+function handlePhotoUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){appAlert("Photo too large. Max 5MB.");return;}compressPhoto(file,function(data){S.dog.photo=data;renderMain();});}
 function removePhoto(){S.dog.photo="";renderMain();}
-function handleFileUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){alert("File too large. Max 5MB.");return;}var note=(document.getElementById("f-note")||{}).value||"";var date=new Date().toISOString().slice(0,10);if(file.type.startsWith("image/")){compressPhoto(file,function(data){S.files=S.files||[];S.files.push({name:file.name,data:data,type:"image",date:date,note:note});renderMain();});}else{var r=new FileReader();r.onload=function(e){S.files=S.files||[];S.files.push({name:file.name,data:e.target.result,type:"doc",date:date,note:note});renderMain();};r.readAsDataURL(file);}inp.value="";}
-function deleteFile(idx){if(!confirm("Delete this file?"))return;S.files.splice(idx,1);saveRecord();renderMain();}
+function handleFileUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){appAlert("File too large. Max 5MB.");return;}var note=(document.getElementById("f-note")||{}).value||"";var date=new Date().toISOString().slice(0,10);if(file.type.startsWith("image/")){compressPhoto(file,function(data){S.files=S.files||[];S.files.push({name:file.name,data:data,type:"image",date:date,note:note});renderMain();});}else{var r=new FileReader();r.onload=function(e){S.files=S.files||[];S.files.push({name:file.name,data:e.target.result,type:"doc",date:date,note:note});renderMain();};r.readAsDataURL(file);}inp.value="";}
+function deleteFile(idx){appConfirm("Delete this file?",function(){S.files.splice(idx,1);saveRecord();renderMain();},{danger:true});}
 
 // ── Assessment helpers ────────────────────────────────────────────
-function addMuzzleSession(){var d=document.getElementById("mz-date")?document.getElementById("mz-date").value:"";var dur=document.getElementById("mz-dur")?document.getElementById("mz-dur").value.trim():"";var stage=document.getElementById("mz-stage")?document.getElementById("mz-stage").value:"";var notes=document.getElementById("mz-notes")?document.getElementById("mz-notes").value.trim():"";if(!d||!stage){alert("Please enter a date and stage.");return;}if(!S.assessment.muzzleSessions)S.assessment.muzzleSessions=[];S.assessment.muzzleSessions.push({date:d,duration:dur,stage:stage,notes:notes});saveRecord();renderMain();}
-function deleteMuzzleSession(i){if(!confirm("Delete?"))return;S.assessment.muzzleSessions.splice(i,1);saveRecord();renderMain();}
-function addBuddyWalk(){var d=document.getElementById("bw-date")?document.getElementById("bw-date").value:"";var dog=document.getElementById("bw-dog")?document.getElementById("bw-dog").value.trim():"";var staff=document.getElementById("bw-staff")?document.getElementById("bw-staff").value.trim():"";var result=document.getElementById("bw-result")?document.getElementById("bw-result").value:"";var notes=document.getElementById("bw-notes")?document.getElementById("bw-notes").value.trim():"";if(!d||!result){alert("Please enter a date and result.");return;}if(!S.assessment)S.assessment={};if(!S.assessment.buddyWalks)S.assessment.buddyWalks=[];S.assessment.buddyWalks.push({date:d,dog:dog,staff:staff,result:result,notes:notes});saveRecord();renderMain();}
-function deleteBuddyWalk(i){if(!confirm("Delete?"))return;S.assessment.buddyWalks.splice(i,1);saveRecord();renderMain();}
-function addPlaydate(){var d=document.getElementById("pd-date")?document.getElementById("pd-date").value:"";var dog=document.getElementById("pd-dog")?document.getElementById("pd-dog").value.trim():"";var staff=document.getElementById("pd-staff")?document.getElementById("pd-staff").value.trim():"";var result=document.getElementById("pd-result")?document.getElementById("pd-result").value:"";var notes=document.getElementById("pd-notes")?document.getElementById("pd-notes").value.trim():"";if(!d||!result){alert("Please enter a date and result.");return;}if(!S.assessment)S.assessment={};if(!S.assessment.playdates)S.assessment.playdates=[];S.assessment.playdates.push({date:d,dog:dog,staff:staff,result:result,notes:notes});saveRecord();renderMain();}
-function deletePlaydate(i){if(!confirm("Delete?"))return;S.assessment.playdates.splice(i,1);saveRecord();renderMain();}
+function addMuzzleSession(){var d=document.getElementById("mz-date")?document.getElementById("mz-date").value:"";var dur=document.getElementById("mz-dur")?document.getElementById("mz-dur").value.trim():"";var stage=document.getElementById("mz-stage")?document.getElementById("mz-stage").value:"";var notes=document.getElementById("mz-notes")?document.getElementById("mz-notes").value.trim():"";if(!d||!stage){appAlert("Please enter a date and stage.");return;}if(!S.assessment.muzzleSessions)S.assessment.muzzleSessions=[];S.assessment.muzzleSessions.push({date:d,duration:dur,stage:stage,notes:notes});saveRecord();renderMain();}
+function deleteMuzzleSession(i){appConfirm("Delete this session?",function(){S.assessment.muzzleSessions.splice(i,1);saveRecord();renderMain();},{danger:true});}
+function addBuddyWalk(){var d=document.getElementById("bw-date")?document.getElementById("bw-date").value:"";var dog=document.getElementById("bw-dog")?document.getElementById("bw-dog").value.trim():"";var staff=document.getElementById("bw-staff")?document.getElementById("bw-staff").value.trim():"";var result=document.getElementById("bw-result")?document.getElementById("bw-result").value:"";var notes=document.getElementById("bw-notes")?document.getElementById("bw-notes").value.trim():"";if(!d||!result){appAlert("Please enter a date and result.");return;}if(!S.assessment)S.assessment={};if(!S.assessment.buddyWalks)S.assessment.buddyWalks=[];S.assessment.buddyWalks.push({date:d,dog:dog,staff:staff,result:result,notes:notes});saveRecord();renderMain();}
+function deleteBuddyWalk(i){appConfirm("Delete this buddy walk?",function(){S.assessment.buddyWalks.splice(i,1);saveRecord();renderMain();},{danger:true});}
+function addPlaydate(){var d=document.getElementById("pd-date")?document.getElementById("pd-date").value:"";var dog=document.getElementById("pd-dog")?document.getElementById("pd-dog").value.trim():"";var staff=document.getElementById("pd-staff")?document.getElementById("pd-staff").value.trim():"";var result=document.getElementById("pd-result")?document.getElementById("pd-result").value:"";var notes=document.getElementById("pd-notes")?document.getElementById("pd-notes").value.trim():"";if(!d||!result){appAlert("Please enter a date and result.");return;}if(!S.assessment)S.assessment={};if(!S.assessment.playdates)S.assessment.playdates=[];S.assessment.playdates.push({date:d,dog:dog,staff:staff,result:result,notes:notes});saveRecord();renderMain();}
+function deletePlaydate(i){appConfirm("Delete this playdate?",function(){S.assessment.playdates.splice(i,1);saveRecord();renderMain();},{danger:true});}
 
 function renderAssessment(){
   var a=S.assessment||{};var today2=new Date().toISOString().slice(0,10);var h="";
@@ -883,10 +1079,10 @@ function handleAppClick(e){
   var go=e.target.closest("[data-go]");if(go){S.tab=go.dataset.go;render();window.scrollTo(0,0);return;}
   var sc2=e.target.closest("[data-sc]");if(sc2){var p=sc2.dataset.sc.split(".");S.scores[p[0]]=S.scores[p[0]]===parseInt(p[1])?0:parseInt(p[1]);renderMain();debouncedSave();return;}
   if(e.target.closest("[data-action='save-record']")){saveRecord();return;}
-  if(e.target.closest("[data-action='new-dog']")){if(confirm("Start a new dog?")){S=defaultState();persistSave();render();}return;}
+  if(e.target.closest("[data-action='new-dog']")){appConfirm("Start a new dog?",function(){S=defaultState();persistSave();render();});return;}
   var ld=e.target.closest("[data-load]");if(ld){openDog(parseInt(ld.dataset.load));return;}
   var dl=e.target.closest("[data-delete]");
-  if(dl){var role=currentRole();if(role==="staff"){alert("You don't have permission to delete records.");return;}if(confirm("Delete this record? Cannot be undone.")){deleteRecord(parseInt(dl.dataset.delete));}return;}
+  if(dl){var role=currentRole();if(role==="staff"){appAlert("You don't have permission to delete records.");return;}appConfirm("Delete this record? Cannot be undone.",function(){deleteRecord(parseInt(dl.dataset.delete));},{danger:true});return;}
 }
 document.getElementById("wrap").addEventListener("click",handleAppClick);
 document.getElementById("dashboard-screen").addEventListener("click",handleAppClick);
@@ -995,6 +1191,7 @@ function loadRecord(id){
   }
   if(saved.weights)S.weights=saved.weights;
   if(saved.files)S.files=saved.files;
+  if(saved.exercises)S.exercises=saved.exercises;
   S._id=rec.id;S.tab="report";render();
 }
 
