@@ -160,7 +160,7 @@ var TABS=[
   {id:"day1",l:"Day 1"},{id:"day2",l:"Day 2"},{id:"day3",l:"Day 3"},{id:"day4",l:"Day 4"},{id:"day5",l:"Day 5"},
   {id:"assessment",l:"Assessment"},{id:"scoring",l:"Scoring"},
   {id:"medical",l:"Medical"},
-  {id:"weights",l:"Weights"},{id:"files",l:"Files"},{id:"report",l:"Report"}
+  {id:"weights",l:"Weights"},{id:"exercise",l:"Exercise"},{id:"files",l:"Files"},{id:"report",l:"Report"}
 ];
 
 var BREEDS=["Affenpinscher","Afghan Hound","Airedale Terrier","Akita","Alaskan Malamute","American Bulldog","American Bully","American Cocker Spaniel","American Pit Bull Terrier","American Staffordshire Terrier","Anatolian Shepherd","Australian Cattle Dog","Australian Shepherd","Australian Terrier","Basenji","Basset Hound","Beagle","Bearded Collie","Bedlington Terrier","Belgian Malinois","Belgian Shepherd","Bernese Mountain Dog","Bichon Frise","Boerboel","Border Collie","Border Terrier","Borzoi","Boston Terrier","Boxer","Briard","Brittany Spaniel","Bull Mastiff","Bull Terrier","Cairn Terrier","Cane Corso","Caucasian Shepherd","Cavachon","Cavalier King Charles Spaniel","Cavapoo","Chihuahua","Chinese Crested","Chow Chow","Clumber Spaniel","Cockalier","Cockapoo","Cocker Spaniel","Collie","Corgi (Cardigan)","Corgi (Pembroke)","Coton de Tulear","Czechoslovakian Wolfdog","Dachshund","Dalmatian","Doberman Pinscher","Dogo Argentino","Dogue de Bordeaux","English Bulldog","English Setter","English Springer Spaniel","English Toy Terrier","Field Spaniel","Flat-Coated Retriever","Foxhound","French Bulldog","Frenchton","German Pinscher","German Shepherd","German Shorthaired Pointer","Giant Schnauzer","Glen of Imaal Terrier","Golden Retriever","Goldendoodle","Gordon Setter","Great Dane","Greyhound","Harrier","Hungarian Vizsla","Husky (Siberian)","Irish Red and White Setter","Irish Setter","Irish Soft-coated Wheaten Terrier","Irish Terrier","Irish Water Spaniel","Irish Wolfhound","Italian Greyhound","Jack Russell Terrier","Jackapoo","Japanese Akita","Japanese Spitz","Keeshond","Kerry Blue Terrier","King Charles Spaniel","Labradoodle","Labrador Retriever","Lakeland Terrier","Leonberger","Lhasa Apso","Lurcher","Maltese","Maltipoo","Manchester Terrier","Mastiff","Miniature Pinscher","Miniature Schnauzer","Mixed Breed","Morkie","Neapolitan Mastiff","Newfoundland","Norfolk Terrier","Norwegian Elkhound","Norwich Terrier","Old English Bulldog","Old English Sheepdog","Papillon","Parson Russell Terrier","Patterdale Terrier","Pekingese","Pharaoh Hound","Pointer","Pomapoo","Pomeranian","Pomsky","Poodle (Miniature)","Poodle (Standard)","Poodle (Toy)","Portuguese Water Dog","Presa Canario","Pug","Puggle","Rhodesian Ridgeback","Rottweiler","Rough Collie","Saint Bernard","Saluki","Samoyed","Schipperke","Schnauzer","Schnoodle","Scottish Deerhound","Scottish Terrier","Shar Pei","Shetland Sheepdog","Shiba Inu","Shih Tzu","Shihpoo","Shorkie","Smooth Collie","Spinone Italiano","Sproodle","Staffordshire Bull Terrier","Sussex Spaniel","Tibetan Mastiff","Tibetan Terrier","Weimaraner","Welsh Springer Spaniel","Welsh Terrier","West Highland White Terrier","Whippet","Wire Fox Terrier","Working Cocker Spaniel","XL Bully","Yorkipoo","Yorkshire Terrier"];
@@ -202,7 +202,7 @@ function exerciseDotsHtml(rec){
   var todays=getTodaysExercises(rec);
   var dots=EX_TYPES.map(function(t){
     var done=todays.some(function(e){return e.type===t.key;});
-    return '<div style="width:16px;height:16px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;'+(done?'background:#c5e86c;color:#3a4a16;border:0.5px solid #9bc23e':'background:#fff;color:#94a3b8;border:0.5px solid #cbd5e1')+'" title="'+t.key+(done?' &mdash; done":'')+'">'+t.short+'</div>';
+    return '<div style="width:16px;height:16px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;'+(done?'background:#c5e86c;color:#3a4a16;border:0.5px solid #9bc23e':'background:#fff;color:#94a3b8;border:0.5px solid #cbd5e1')+'" title="'+t.key+(done?' &mdash; done':'')+'">'+t.short+'</div>';
   }).join("");
   return '<div onclick="event.stopPropagation();showExerciseOverlay('+rec.id+')" style="display:flex;align-items:center;gap:4px;padding:6px 0 0;margin-top:5px;border-top:0.5px dashed var(--color-border-secondary);cursor:pointer">'
     +'<span style="font-size:8px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.04em;font-weight:600;margin-right:auto">Today</span>'
@@ -941,7 +941,7 @@ function renderWeights(){
       if(w.entry){var changeHtml="";if(prevW&&prevW.entry){var curr=parseFloat((w.entry.weight||"0").replace(/[^0-9.]/g,""));var prev=parseFloat((prevW.entry.weight||"0").replace(/[^0-9.]/g,""));if(!isNaN(curr)&&!isNaN(prev)&&prev>0){var diff=Math.round((curr-prev)*10)/10;if(diff>0)changeHtml='<span style="color:#166534;font-size:11px;font-weight:600;margin-left:6px">&#9650; +'+diff+' kg</span>';else if(diff<0)changeHtml='<span style="color:#dc2626;font-size:11px;font-weight:600;margin-left:6px">&#9660; '+diff+' kg</span>';else changeHtml='<span style="color:#94a3b8;font-size:11px;margin-left:6px">&mdash; no change</span>';}}return'<tr><td style="padding:10px 12px;font-size:12px;color:var(--color-text-secondary)">'+(w.current?"<strong>This week</strong>":label)+'</td><td style="padding:10px 12px;font-size:14px;font-weight:700;color:#166534">'+w.entry.weight+changeHtml+'</td><td style="padding:10px 12px;font-size:12px;color:var(--color-text-secondary)">'+w.entry.date+(w.entry.note?' &middot; '+esc(w.entry.note):'')+'</td><td style="padding:10px 12px;text-align:right"><button onclick="deleteWeight('+weights.indexOf(w.entry)+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer">&#10005;</button></td></tr>';}
       else return'<tr style="opacity:0.45"><td style="padding:10px 12px;font-size:12px;color:var(--color-text-secondary)">'+(w.current?"<strong>This week</strong>":label)+'</td><td style="padding:10px 12px;font-size:12px;color:#dc2626;font-weight:600">Not recorded</td><td></td><td></td></tr>';
     }).join("");
-    return'<h2 style="margin-bottom:4px">Weight Records</h2><div class="sub" style="margin-bottom:16px">Weekly tracking from intake date.</div>'+banner+'<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Log Weight</div><div class="g2"><div class="f"><label class="lbl">Date</label><input type="date" id="w-date" value="'+today+'"></div><div class="f"><label class="lbl">Weight</label><div style="display:flex;align-items:center;gap:8px"><input type="number" step="0.1" min="0" id="w-val" placeholder="12.5" style="flex:1"><span style="font-weight:700;color:var(--color-text-secondary)">kg</span></div></div></div><div class="f"><label class="lbl">Note (optional)</label><input id="w-note" placeholder="e.g. Post-treatment weigh-in"></div><button class="btn btnp" onclick="addWeight()">+ Add Entry</button></div>'+(weeks.length?'<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Weekly Progress ('+recorded+' of '+weeks.length+' weeks recorded)</div><table style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:2px solid var(--color-border-secondary)"><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Week</th><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Weight</th><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Detail</th><th></th></tr></thead><tbody>'+tableRows+'</tbody></table></div>':'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)">No weight entries yet.</div>')+'<div class="brow"><button class="btn" data-go="medical">&larr; Back</button><button class="btn btnp" data-go="files">Next: files &rarr;</button></div>';
+    return'<h2 style="margin-bottom:4px">Weight Records</h2><div class="sub" style="margin-bottom:16px">Weekly tracking from intake date.</div>'+banner+'<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Log Weight</div><div class="g2"><div class="f"><label class="lbl">Date</label><input type="date" id="w-date" value="'+today+'"></div><div class="f"><label class="lbl">Weight</label><div style="display:flex;align-items:center;gap:8px"><input type="number" step="0.1" min="0" id="w-val" placeholder="12.5" style="flex:1"><span style="font-weight:700;color:var(--color-text-secondary)">kg</span></div></div></div><div class="f"><label class="lbl">Note (optional)</label><input id="w-note" placeholder="e.g. Post-treatment weigh-in"></div><button class="btn btnp" onclick="addWeight()">+ Add Entry</button></div>'+(weeks.length?'<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Weekly Progress ('+recorded+' of '+weeks.length+' weeks recorded)</div><table style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:2px solid var(--color-border-secondary)"><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Week</th><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Weight</th><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Detail</th><th></th></tr></thead><tbody>'+tableRows+'</tbody></table></div>':'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)">No weight entries yet.</div>')+'<div class="brow"><button class="btn" data-go="medical">&larr; Back</button><button class="btn btnp" data-go="exercise">Next: exercise &rarr;</button></div>';
   }catch(err){return'<div style="padding:20px;color:#dc2626">Weight tab error: '+err.message+'</div>';}
 }
 function addWeight(){var dEl=document.getElementById("w-date"),vEl=document.getElementById("w-val"),nEl=document.getElementById("w-note");var d=dEl?dEl.value.trim():"",v=vEl?vEl.value.trim():"",n=nEl?nEl.value.trim():"";if(!d||!v){appAlert("Please enter a date and weight.");return;}if(!S.weights)S.weights=[];S.weights.push({date:d,weight:parseFloat(v)+" kg",note:n});saveRecord();renderMain();}
@@ -951,13 +951,116 @@ function deleteWeight(idx){appConfirm("Delete this weight entry?",function(){S.w
 function renderFiles(){
   var files=S.files||[];
   var fileCards=files.map(function(f,i){return'<div class="card" style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">'+(f.type==="image"?'<img src="'+f.data+'" style="width:60px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0">':'<div style="width:60px;height:60px;border-radius:6px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">&#128196;</div>')+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(f.name)+'</div><div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">'+f.date+(f.note?" &middot; "+esc(f.note):"")+'</div>'+(f.type==="image"?'<a href="'+f.data+'" download="'+esc(f.name)+'" style="font-size:11px;color:var(--color-teal)">Download</a>':'')+'</div><button class="btn btnr" style="font-size:11px;padding:4px 8px;flex-shrink:0" onclick="deleteFile('+i+')">&#10005;</button></div>';}).join("");
-  return'<h2 style="margin-bottom:4px">Files & Documents</h2><div class="sub" style="margin-bottom:16px">Upload photos, scans or documents for this dog</div><div class="card" style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Upload File</div><div class="f"><label class="lbl">Note (optional)</label><input id="f-note" placeholder="e.g. Vet report 12 May"></div><label style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:13px;color:var(--color-text-secondary)">&#128206; Choose file<input type="file" accept="image/*,application/pdf,.pdf,.doc,.docx" style="display:none" onchange="handleFileUpload(this)"></label><div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px">Images compressed automatically. Max 5MB.</div></div>'+(files.length?fileCards:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)"><div style="font-size:32px;margin-bottom:8px">&#128206;</div>No files uploaded yet</div>')+'<div class="brow"><button class="btn" data-go="weights">&larr; Back</button><button class="btn btnp" data-go="report">View report &rarr;</button></div>';
+  return'<h2 style="margin-bottom:4px">Files & Documents</h2><div class="sub" style="margin-bottom:16px">Upload photos, scans or documents for this dog</div><div class="card" style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Upload File</div><div class="f"><label class="lbl">Note (optional)</label><input id="f-note" placeholder="e.g. Vet report 12 May"></div><label style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:13px;color:var(--color-text-secondary)">&#128206; Choose file<input type="file" accept="image/*,application/pdf,.pdf,.doc,.docx" style="display:none" onchange="handleFileUpload(this)"></label><div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px">Images compressed automatically. Max 5MB.</div></div>'+(files.length?fileCards:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)"><div style="font-size:32px;margin-bottom:8px">&#128206;</div>No files uploaded yet</div>')+'<div class="brow"><button class="btn" data-go="exercise">&larr; Back</button><button class="btn btnp" data-go="report">View report &rarr;</button></div>';
 }
 function compressPhoto(file,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var MAX=400,w=img.width,h=img.height;if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}var cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);cb(cv.toDataURL("image/jpeg",0.75));};img.src=e.target.result;};r.readAsDataURL(file);}
 function handlePhotoUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){appAlert("Photo too large. Max 5MB.");return;}compressPhoto(file,function(data){S.dog.photo=data;renderMain();});}
 function removePhoto(){S.dog.photo="";renderMain();}
 function handleFileUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){appAlert("File too large. Max 5MB.");return;}var note=(document.getElementById("f-note")||{}).value||"";var date=new Date().toISOString().slice(0,10);if(file.type.startsWith("image/")){compressPhoto(file,function(data){S.files=S.files||[];S.files.push({name:file.name,data:data,type:"image",date:date,note:note});renderMain();});}else{var r=new FileReader();r.onload=function(e){S.files=S.files||[];S.files.push({name:file.name,data:e.target.result,type:"doc",date:date,note:note});renderMain();};r.readAsDataURL(file);}inp.value="";}
 function deleteFile(idx){appConfirm("Delete this file?",function(){S.files.splice(idx,1);saveRecord();renderMain();},{danger:true});}
+
+// ── Exercise (detail-view tab) ────────────────────────────────────
+function renderExercise(){
+  if(!S.exercises)S.exercises=[];
+  var today=new Date().toISOString().slice(0,10);
+  var todayLabel=new Date().toLocaleDateString("en-IE",{weekday:"long",day:"numeric",month:"short"});
+  function weekStart(ds){var d=new Date(ds);var day=d.getDay();var diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
+  var thisWeek=weekStart(today);
+  var todaysList=S.exercises.filter(function(e){return e.date===today;});
+  var thisWeekEntries=S.exercises.filter(function(e){return e.date>=thisWeek&&e.date<=today;});
+
+  var h='<h2 style="margin-bottom:4px">Exercise &amp; Enrichment</h2><div class="sub" style="margin-bottom:16px">Daily activity log &mdash; walks, compound, round pen/pond, enrichment.</div>';
+
+  // ── Quick log card ──
+  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary)">Quick Log</span><span style="font-size:11px;color:var(--color-text-secondary)">'+todayLabel+'</span></div>';
+  h+='<div class="f"><label class="lbl">Optional note (attaches to next entry)</label><input id="ex-detail-note" type="text" placeholder="e.g. Took round the back field, settled well"></div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  EX_TYPES.forEach(function(t){
+    var sessions=todaysList.filter(function(e){return e.type===t.key;});
+    var done=sessions.length>0;
+    var last=done?sessions[sessions.length-1]:null;
+    var status=last?("Last "+last.time+(sessions.length>1?" &middot; "+sessions.length+"\u00d7":"")):"Tap to log";
+    var bg=done?"#dcfce7":"#f8fafc";
+    var bd=done?"#16a34a":"#e2e8f0";
+    var sc=done?"#166534":"#94a3b8";
+    h+='<button onclick="logExerciseS(\''+t.key.replace(/'/g,"\\'")+'\')" style="background:'+bg+';border:1px solid '+bd+';border-radius:10px;padding:12px;text-align:left;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:6px;min-height:78px;justify-content:space-between;position:relative">';
+    if(done)h+='<div style="position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">&#10003;</div>';
+    h+='<div style="font-size:18px;line-height:1">'+t.icon+'</div>';
+    h+='<div><div style="font-size:13px;font-weight:600;color:#0f172a">'+t.key+'</div>';
+    h+='<div style="font-size:10.5px;color:'+sc+';font-weight:'+(done?"600":"500")+';margin-top:1px">'+status+'</div></div>';
+    h+='</button>';
+  });
+  h+='</div></div>';
+
+  // ── This week summary ──
+  var weekByType={};
+  EX_TYPES.forEach(function(t){weekByType[t.key]=thisWeekEntries.filter(function(e){return e.type===t.key;}).length;});
+  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary)">This Week</span><span style="font-size:11px;color:var(--color-text-secondary)">'+thisWeek+' &mdash; '+today+'</span></div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">';
+  EX_TYPES.forEach(function(t){
+    var n=weekByType[t.key];
+    var bg=n>0?"#dcfce7":"#f8fafc";var bd=n>0?"#16a34a":"#e2e8f0";var nc=n>0?"#166534":"#94a3b8";
+    h+='<div style="text-align:center;padding:10px 8px;border-radius:8px;background:'+bg+';border:1px solid '+bd+'">';
+    h+='<div style="font-size:18px;line-height:1;margin-bottom:5px">'+t.icon+'</div>';
+    h+='<div style="font-size:22px;font-weight:700;color:'+nc+';line-height:1">'+n+'</div>';
+    h+='<div style="font-size:9px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-top:5px">'+t.key+'</div>';
+    h+='</div>';
+  });
+  h+='</div>';
+  h+='<div style="font-size:11px;color:var(--color-text-secondary);text-align:center;margin-top:10px"><strong style="color:#0f172a">'+thisWeekEntries.length+'</strong> total session'+(thisWeekEntries.length!==1?"s":"")+' this week</div>';
+  h+='</div>';
+
+  // ── Full history grouped by date ──
+  if(S.exercises.length){
+    var sorted=S.exercises.slice().sort(function(a,b){var c=(b.date||"").localeCompare(a.date||"");return c!==0?c:(b.time||"").localeCompare(a.time||"");});
+    var byDate={};
+    sorted.forEach(function(e){if(!byDate[e.date])byDate[e.date]=[];byDate[e.date].push(e);});
+    var dates=Object.keys(byDate).sort().reverse();
+    h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px">Full History &middot; '+S.exercises.length+' entr'+(S.exercises.length===1?"y":"ies")+'</div>';
+    dates.forEach(function(date){
+      var dayEntries=byDate[date];
+      var dayLbl;try{dayLbl=new Date(date).toLocaleDateString("en-IE",{weekday:"short",day:"numeric",month:"short"});}catch(e){dayLbl=date;}
+      h+='<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:#0f172a;padding:6px 0;border-bottom:1px solid #e2e8f0;margin-bottom:6px;display:flex;justify-content:space-between"><span>'+dayLbl+(date===today?' &middot; <span style="color:#0d9488">Today</span>':'')+'</span><span style="font-weight:500;color:var(--color-text-secondary);font-size:11px">'+dayEntries.length+' session'+(dayEntries.length!==1?"s":"")+'</span></div>';
+      dayEntries.forEach(function(e){
+        var origIdx=S.exercises.indexOf(e);
+        h+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px">';
+        h+='<span style="font-size:11px;color:#64748b;min-width:44px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(e.time||"")+'</span>';
+        h+='<span style="font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:20px;background:#dcfce7;color:#166534;text-transform:uppercase;letter-spacing:0.03em;white-space:nowrap">'+esc(e.type)+'</span>';
+        h+='<span style="flex:1;color:#64748b;overflow:hidden;text-overflow:ellipsis;font-size:11.5px">'+esc(e.staff||"")+(e.notes?' &middot; '+esc(e.notes):"")+'</span>';
+        h+='<button onclick="deleteExerciseEntryS('+origIdx+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer">&#10005;</button>';
+        h+='</div>';
+      });
+      h+='</div>';
+    });
+    h+='</div>';
+  }else{
+    h+='<div style="text-align:center;padding:30px;color:var(--color-text-secondary);font-size:13px">No exercise entries yet. Use Quick Log above to start.</div>';
+  }
+
+  h+='<div class="brow"><button class="btn" data-go="weights">&larr; Back</button><button class="btn btnp" data-go="files">Next: files &rarr;</button></div>';
+  return h;
+}
+
+function logExerciseS(type){
+  if(!S.exercises)S.exercises=[];
+  var now=new Date();
+  var date=now.toISOString().slice(0,10);
+  var time=now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0");
+  var noteInput=document.getElementById("ex-detail-note");
+  var notes=noteInput?noteInput.value.trim():"";
+  S.exercises.push({date:date,time:time,type:type,staff:currentName(),notes:notes});
+  if(noteInput)noteInput.value="";
+  saveRecord();
+  renderMain();
+}
+
+function deleteExerciseEntryS(idx){
+  appConfirm("Delete this exercise entry?",function(){
+    S.exercises.splice(idx,1);
+    saveRecord();
+    renderMain();
+  },{danger:true});
+}
 
 // ── Assessment helpers ────────────────────────────────────────────
 function addMuzzleSession(){var d=document.getElementById("mz-date")?document.getElementById("mz-date").value:"";var dur=document.getElementById("mz-dur")?document.getElementById("mz-dur").value.trim():"";var stage=document.getElementById("mz-stage")?document.getElementById("mz-stage").value:"";var notes=document.getElementById("mz-notes")?document.getElementById("mz-notes").value.trim():"";if(!d||!stage){appAlert("Please enter a date and stage.");return;}if(!S.assessment.muzzleSessions)S.assessment.muzzleSessions=[];S.assessment.muzzleSessions.push({date:d,duration:dur,stage:stage,notes:notes});saveRecord();renderMain();}
@@ -1067,6 +1170,7 @@ function page(){
   if(t==="assessment")return renderAssessment();
   if(t==="medical")return renderMedical();
   if(t==="weights")return renderWeights();
+  if(t==="exercise")return renderExercise();
   if(t==="files")return renderFiles();
   return"";
 }
