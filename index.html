@@ -254,7 +254,8 @@ function dismissWelcomeToast(){
   setTimeout(function(){if(t.parentNode)t.remove();},450);
 }
 
-// ── Auto-logout ───────────────────────────────────────────────────function getAutoLogoutMins(){try{var v=localStorage.getItem("nspca-auto-logout-mins");return v?parseInt(v):0;}catch(e){return 0;}}
+// ── Auto-logout ───────────────────────────────────────────────────
+function getAutoLogoutMins(){try{var v=localStorage.getItem("nspca-auto-logout-mins");return v?parseInt(v):0;}catch(e){return 0;}}
 function setAutoLogoutMins(n){try{localStorage.setItem("nspca-auto-logout-mins",n.toString());}catch(e){}setupAutoLogout();}
 function bumpActivity(){_lastActivity=Date.now();}
 function setupAutoLogout(){
