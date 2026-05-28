@@ -80,6 +80,9 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .med-save-btn:hover{background:#1e293b}
 .med-close-btn{background:#f1f5f9;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;color:#64748b;display:flex;align-items:center;justify-content:center;font-family:inherit}
 .med-close-btn:hover{background:#e2e8f0}
+.dmi{padding:10px 14px;font-size:12.5px;color:#0f172a;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;line-height:1.2;transition:background 0.1s}
+.dmi:hover{background:#f1f5f9}
+.dmi:active{background:#e2e8f0}
 </style>
 </head>
 <body>
@@ -111,15 +114,22 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
       <span id="dash-clock" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8"></span>
       <span id="dash-count" style="background:#0d9488;border-radius:20px;padding:3px 10px;font-size:11px;color:#fff;font-weight:500;display:none"></span>
     </div>
-    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap">
       <span id="dash-user" onclick="showDashSection('profile')" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8;display:none;align-items:center;gap:6px;cursor:pointer"></span>
-      <button onclick="showDashSection('records')" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">Records</button>
-      <button onclick="showDashSection('stats')" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">Stats</button>
-      <button onclick="showDashSection('team')" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">Team</button>
       <button onclick="showIncidentModal()" style="background:#7f1d1d;color:#fecaca;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600" title="Quickly log an incident">&#9888; Incident</button>
-      <button onclick="exportCSV()" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit" title="Export all records as CSV">CSV &#8595;</button>
-      <button onclick="openNewDog()" style="background:#0d9488;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">+ New Dog</button>
-      <button onclick="doLogout()" style="background:transparent;border:none;color:#64748b;cursor:pointer;padding:4px;font-size:12px;font-family:inherit">Log out</button>
+      <button onclick="openNewDog()" style="background:#0d9488;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" title="Start a new dog">+ New</button>
+      <div style="position:relative">
+        <button id="dash-menu-btn" onclick="toggleDashMenu(event)" style="background:#1e293b;color:#c5e86c;border:0.5px solid #334155;padding:5px 11px;border-radius:6px;font-size:14px;cursor:pointer;font-family:inherit;line-height:1" title="Menu" aria-label="Menu">&#9776;</button>
+        <div id="dash-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,0.18);min-width:200px;z-index:50;overflow:hidden">
+          <div onclick="dashMenuGo('records')" class="dmi">&#128203; Records</div>
+          <div onclick="dashMenuGo('stats')" class="dmi">&#128202; Stats</div>
+          <div onclick="dashMenuGo('team')" class="dmi">&#128101; Team Directory</div>
+          <div id="dash-menu-users" onclick="dashMenuGo('users')" class="dmi" style="display:none">&#9881; Manage Users</div>
+          <div onclick="closeDashMenu();exportCSV()" class="dmi">&#128229; Export CSV</div>
+          <div style="border-top:1px solid #e2e8f0;margin:4px 0"></div>
+          <div onclick="closeDashMenu();appConfirm('Log out of NSPCA Longford?',doLogout)" class="dmi" style="color:#991b1b">&#128682; Log out</div>
+        </div>
+      </div>
     </div>
   </div>
   <div id="overdue-sticky"></div>
@@ -796,6 +806,30 @@ function updateClock(){
 setInterval(updateClock,1000);
 
 function showDashboard(){restoreDashFilters();showScreen("dashboard-screen");loadDashNotices().then(function(){renderDashboard();showWelcomeToast();startDashRefresh();});}
+
+// ── Header dropdown menu ──────────────────────────────────────────
+function toggleDashMenu(e){
+  if(e){e.stopPropagation();}
+  var m=document.getElementById("dash-menu");if(!m)return;
+  var open=m.style.display==="block";
+  if(open){closeDashMenu();return;}
+  // Show admin-only items
+  var au=document.getElementById("dash-menu-users");
+  if(au)au.style.display=currentRole()==="admin"?"flex":"none";
+  m.style.display="block";
+  // Defer outside-click handler so this click doesn't immediately close it
+  setTimeout(function(){document.addEventListener("click",_outsideDashMenu);},0);
+}
+function closeDashMenu(){
+  var m=document.getElementById("dash-menu");if(m)m.style.display="none";
+  document.removeEventListener("click",_outsideDashMenu);
+}
+function _outsideDashMenu(e){
+  var m=document.getElementById("dash-menu");if(!m)return;
+  if(m.contains(e.target))return;
+  closeDashMenu();
+}
+function dashMenuGo(section){closeDashMenu();showDashSection(section);}
 
 // ── Auto-refresh dashboard from Supabase (60s background poll) ────
 function startDashRefresh(){
