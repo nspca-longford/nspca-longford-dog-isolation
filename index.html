@@ -1447,6 +1447,14 @@ function toggleMedActive(idx){
   saveRecord();renderMain();
 }
 
+function cycleDiseaseStatus(idx){
+  var m=getMedical();if(!m.diseases||!m.diseases[idx])return;
+  var order=["Suspected","Confirmed","Under treatment","Recovering","Recovered / cleared"];
+  var cur=m.diseases[idx].status||"Suspected";
+  m.diseases[idx].status=order[(order.indexOf(cur)+1)%order.length];
+  saveRecord();renderMain();
+}
+
 function dueBadge(nextDue,warnDays){
   if(!nextDue)return"";
   var today=new Date().toISOString().slice(0,10);
@@ -1499,9 +1507,10 @@ function renderMedical(){
     disList.forEach(function(p,i){
       var last=i===disList.length-1;var st=disStatusTheme(p.status);
       var isCon=CONTAGIOUS[p.type]&&p.status!=="Recovered / cleared";
-      h+='<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;'+(last?"padding-bottom:0":"border-bottom:1px solid #e2e8f0;")+'">';
-      h+='<div style="width:28px;height:28px;border-radius:6px;background:'+st[0]+';display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">&#129440;</div>';
-      h+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;margin-bottom:3px">'+esc(p.type)+' <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;background:'+st[0]+';color:'+st[1]+'">'+esc(p.status||"Suspected")+'</span>'+(isCon?' <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;background:#fee2e2;color:#991b1b">&#9888; Contagious</span>':'')+'</div>';
+      var cleared=p.status==="Recovered / cleared";
+      h+='<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;'+(last?"padding-bottom:0":"border-bottom:1px solid #e2e8f0;")+(cleared?"opacity:0.6;":"")+'">';
+      h+='<div style="width:28px;height:28px;border-radius:6px;background:'+st[0]+';display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">'+(cleared?"&#10003;":"&#129440;")+'</div>';
+      h+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;margin-bottom:3px"><span style="'+(cleared?"text-decoration:line-through;color:#64748b":"")+'">'+esc(p.type)+'</span> <span onclick="cycleDiseaseStatus('+i+')" title="Tap to update status" style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;cursor:pointer;background:'+st[0]+';color:'+st[1]+'">'+esc(p.status||"Suspected")+' &#8635;</span>'+(isCon?' <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;background:#fee2e2;color:#991b1b">&#9888; Contagious</span>':'')+'</div>';
       h+='<div style="font-size:11px;color:#64748b">Noted '+esc(p.date)+(p.treatment?" &middot; "+esc(p.treatment):"")+(p.notes?" &middot; "+esc(p.notes):"")+'</div></div>';
       h+='<button onclick="deleteMedEntry(\'diseases\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0;align-self:center">&#10005;</button>';
       h+='</div>';
