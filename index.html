@@ -512,6 +512,13 @@ function saveMedVet(){
   addMedEntry("vetVisits",{date:date,vet:gv("med-vet-name"),reason:gv("med-vet-reason"),findings:fe?(fe.value||"").trim():"",treatment:gv("med-vet-treatment"),followUp:gv("med-vet-followup"),notes:""});
   hideMedOverlay("vet");
 }
+function saveMedDisease(){
+  var type=gv("med-dis-type"),date=gv("med-dis-date");
+  if(!type){appAlert("Please select a disease / condition.");return;}
+  if(!date){appAlert("Please enter the date it was noted.");return;}
+  addMedEntry("diseases",{type:type,status:gv("med-dis-status")||"Suspected",date:date,treatment:gv("med-dis-treatment"),notes:gv("med-dis-notes")});
+  hideMedOverlay("dis");
+}
 
 // ── Auth ──────────────────────────────────────────────────────────
 async function doLogin(){
@@ -1147,6 +1154,7 @@ function renderDashboard(){
   if(!active.length){el.innerHTML=alertsHtml+tasksRollupHtml(records)+fb+'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px">'+viewToggleHtml()+'<button onclick="printDailySummary()" style="background:#fff;border:0.5px solid #e2e8f0;color:#0f172a;padding:5px 11px;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit">&#128424; Print summary</button></div><div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+brandFooterHtml();return;}
   var cards=active.map(function(rec){
     var d=rec.state&&rec.state.dog?rec.state.dog:{};var f=rec.state&&rec.state.fin?rec.state.fin:{};
+    var con=activeContagiousList(rec.state&&rec.state.medical?rec.state.medical:null);
     var outcome=f.outcome||"";var finished=outcome==="Finished Isolation";
     var days=daysInIsolation(rec.intakeDate);var overdue=days>5&&!finished;
     var col=finished?"#0d9488":days>=5?"#dc2626":days===4?"#f59e0b":"#0d9488";
@@ -1159,7 +1167,7 @@ function renderDashboard(){
     var dayH=finished?'<div style="font-size:9px;font-weight:700;color:#166634;margin-bottom:3px">&#10003; Isolation cleared</div><div style="background:#dcfce7;border-radius:20px;height:4px"><div style="background:#166634;width:100%;height:100%;border-radius:20px"></div></div>':days?'<div style="font-size:9px;font-weight:700;color:'+col+';margin-bottom:3px">&#128274; Isolation &middot; Day '+days+' of 5'+(overdue?' &middot; <span style="color:#dc2626">Overdue</span>':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:4px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
     var savedBy=rec.savedBy||"";
     var lastEditHtml=savedBy?'<div style="display:flex;align-items:center;gap:4px;margin-top:5px;padding-top:4px;border-top:0.5px solid var(--color-border-secondary)"><div style="width:14px;height:14px;border-radius:50%;background:'+avatarColor(savedBy)+';color:#fff;font-size:6px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials(savedBy)+'</div><span style="font-size:9px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(savedBy)+' &middot; '+ta2+'</span></div>':"";
-    return'<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:2px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:10px"><div style="font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(rec.trafficLight?'<span style="background:'+parts[0]+';color:'+parts[1]+';font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+rec.trafficLight+'</span>':'')+(recordEA(rec)?'<span style="background:#f59e0b;color:#fff;font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px">&#9888; EA</span>':'')+(d.crossbreed?'<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">X</span>':'')+'</div>'+dayH+exerciseDotsHtml(rec)+lastEditHtml+'</div></div>';
+    return'<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:2px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:10px"><div style="font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(rec.trafficLight?'<span style="background:'+parts[0]+';color:'+parts[1]+';font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+rec.trafficLight+'</span>':'')+(recordEA(rec)?'<span style="background:#f59e0b;color:#fff;font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px">&#9888; EA</span>':'')+(con.length?'<span title="'+esc(con.map(function(x){return diseaseShortName(x.type);}).join(", "))+'" style="background:#dc2626;color:#fff;font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px">&#129440; Contagious</span>':'')+(d.crossbreed?'<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">X</span>':'')+'</div>'+dayH+exerciseDotsHtml(rec)+lastEditHtml+'</div></div>';
   }).join("");
   var view=window._dbView||"cards";
   var rollupHtml=tasksRollupHtml(active);
@@ -1391,7 +1399,13 @@ function renderStats(){
 }
 
 // ── Default state ─────────────────────────────────────────────────
-function defaultMedical(){return{bcs:"",neuteredConfirmed:"",dental:"",skinCondition:"",injuries:"",arrivalHealthNotes:"",vaccinations:[],parasiteTreatments:[],medications:[],vetVisits:[],bodyMap:[]};}
+function defaultMedical(){return{bcs:"",neuteredConfirmed:"",dental:"",skinCondition:"",injuries:"",arrivalHealthNotes:"",diseases:[],vaccinations:[],parasiteTreatments:[],medications:[],vetVisits:[],bodyMap:[]};}
+
+// Shared infectious-disease lookups (used by Medical tab, dashboard cards and briefing)
+var CONTAGIOUS_DISEASES={"Parvovirus (CPV)":1,"Canine Distemper":1,"Kennel Cough (CIRDC)":1,"Canine Influenza":1,"Infectious Hepatitis (CAV-1)":1,"Leptospirosis":1,"Sarcoptic Mange (scabies)":1,"Demodectic Mange":0,"Ringworm":1,"Giardia":1,"Coccidiosis":1,"Lungworm":0,"Tick-borne (Babesia / Ehrlichia)":0,"Other":0};
+var ZOONOTIC_DISEASES={"Leptospirosis":1,"Sarcoptic Mange (scabies)":1,"Ringworm":1,"Giardia":1};
+function activeContagiousList(medical){var ds=(medical&&medical.diseases)||[];return ds.filter(function(p){return CONTAGIOUS_DISEASES[p.type]&&p.status!=="Recovered / cleared";});}
+function diseaseShortName(t){return(t||"").replace(/ \(.*$/,"");}
 
 function defaultState(){return{_id:null,tab:"dog",
   dog:{name:"",breed:"",sex:"",age:"",colour:"",weight:"",microchip:"",intakeDate:"",intakeReason:"",assessor:"",refNo:"",photo:"",kennel:"",crossbreed:false,size:""},
@@ -1411,10 +1425,11 @@ function getMedical(){if(!S.medical)S.medical=defaultMedical();return S.medical;
 
 function addMedEntry(section,entry){
   // Date validation is section-specific
-  if((section==="vaccinations"||section==="parasiteTreatments"||section==="vetVisits")&&!entry.date){appAlert("Please enter a date.");return;}
+  if((section==="vaccinations"||section==="parasiteTreatments"||section==="vetVisits"||section==="diseases")&&!entry.date){appAlert("Please enter a date.");return;}
   if(section==="medications"&&!entry.startDate){appAlert("Please enter a start date.");return;}
   if((section==="vaccinations")&&!entry.type){appAlert("Please select vaccine type.");return;}
   if((section==="parasiteTreatments")&&!entry.type){appAlert("Please select treatment type.");return;}
+  if((section==="diseases")&&!entry.type){appAlert("Please select a disease / condition.");return;}
   var m=getMedical();if(!m[section])m[section]=[];
   m[section].push(entry);saveRecord();renderMain();
 }
@@ -1462,6 +1477,36 @@ function renderMedical(){
   h+='</div>';
   h+=fld("Visible Injuries / Conditions",m.injuries||"","medical.injuries","text","e.g. Laceration on left hindleg...");
   h+=ta("On-arrival health notes",m.arrivalHealthNotes||"","medical.arrivalHealthNotes","Any further health observations on arrival...");
+  h+='</div>';
+
+  // Disease / Infection on Arrival
+  var disList=m.diseases||[];
+  var CONTAGIOUS=CONTAGIOUS_DISEASES;
+  var ZOONOTIC=ZOONOTIC_DISEASES;
+  function disStatusTheme(s){
+    if(s==="Recovered / cleared")return["#dcfce7","#166534"];
+    if(s==="Recovering")return["#ccfbf1","#115e59"];
+    if(s==="Under treatment")return["#dbeafe","#1e40af"];
+    if(s==="Confirmed")return["#fee2e2","#991b1b"];
+    return["#fef9c3","#854d0e"]; // Suspected
+  }
+  var activeContagious=disList.filter(function(p){return CONTAGIOUS[p.type]&&p.status!=="Recovered / cleared";});
+  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:'+(disList.length?"12px":"6px")+'"><span style="font-size:12px;font-weight:600">Disease / Infection on Arrival</span><button class="med-add-btn" onclick="showMedOverlay(\'dis\')">+ Log disease</button></div>';
+  if(activeContagious.length){
+    h+='<div style="background:#fee2e2;border:1px solid #dc2626;border-radius:8px;padding:9px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="font-size:16px">&#128680;</span><div style="font-size:11.5px;color:#991b1b;font-weight:600;line-height:1.4">Contagious disease present — '+activeContagious.map(function(p){return esc(p.type.replace(/ \(.*$/,""));}).join(", ")+'. Maintain strict isolation, PPE and hygiene barriers.'+(activeContagious.some(function(p){return ZOONOTIC[p.type];})?' One or more is <strong>zoonotic</strong> (can pass to people).':'')+'</div></div>';
+  }
+  if(disList.length){
+    disList.forEach(function(p,i){
+      var last=i===disList.length-1;var st=disStatusTheme(p.status);
+      var isCon=CONTAGIOUS[p.type]&&p.status!=="Recovered / cleared";
+      h+='<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;'+(last?"padding-bottom:0":"border-bottom:1px solid #e2e8f0;")+'">';
+      h+='<div style="width:28px;height:28px;border-radius:6px;background:'+st[0]+';display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">&#129440;</div>';
+      h+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;margin-bottom:3px">'+esc(p.type)+' <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;background:'+st[0]+';color:'+st[1]+'">'+esc(p.status||"Suspected")+'</span>'+(isCon?' <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;background:#fee2e2;color:#991b1b">&#9888; Contagious</span>':'')+'</div>';
+      h+='<div style="font-size:11px;color:#64748b">Noted '+esc(p.date)+(p.treatment?" &middot; "+esc(p.treatment):"")+(p.notes?" &middot; "+esc(p.notes):"")+'</div></div>';
+      h+='<button onclick="deleteMedEntry(\'diseases\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0;align-self:center">&#10005;</button>';
+      h+='</div>';
+    });
+  }else{h+='<div style="text-align:center;padding:12px 0;color:#94a3b8;font-size:12px">No diseases or infections recorded on arrival</div>';}
   h+='</div>';
 
   // Vaccinations
@@ -1628,6 +1673,14 @@ function renderMedical(){
   function ovS(lbl,id,opts){
     return '<div class="f"><label class="lbl">'+lbl+'</label><select id="'+id+'"><option value="">— select —</option>'+opts.map(function(o){return'<option>'+esc(o)+'</option>';}).join("")+'</select></div>';
   }
+
+  h+=buildOv("dis","Log disease / infection",
+    ovS("Disease / condition","med-dis-type",["Parvovirus (CPV)","Canine Distemper","Kennel Cough (CIRDC)","Canine Influenza","Infectious Hepatitis (CAV-1)","Leptospirosis","Sarcoptic Mange (scabies)","Demodectic Mange","Ringworm","Giardia","Coccidiosis","Lungworm","Tick-borne (Babesia / Ehrlichia)","Other"])+
+    ovS("Status","med-dis-status",["Suspected","Confirmed","Under treatment","Recovering","Recovered / cleared"])+
+    ovF("Date noted","med-dis-date","date","",today)+
+    ovF("Treatment / plan","med-dis-treatment","text","e.g. IV fluids, isolation, ivermectin...","")+
+    ovF("Notes (test result, vet, specify if Other...)","med-dis-notes","text","Optional",""),
+    "saveMedDisease","Save disease");
 
   h+=buildOv("vac","Log vaccination",
     ovS("Vaccination","med-vac-type",["1st Vaccination","Kennel Cough","2nd Vaccination","Booster","Rabies","Other"])+
@@ -2372,7 +2425,7 @@ function renderBriefing(){
   }
 
   // ── MEDICAL STATUS ──
-  var hasMedical=m.bcs||m.dental||m.skinCondition||m.injuries||m.arrivalHealthNotes||(m.vaccinations||[]).length||(m.parasiteTreatments||[]).length||(m.medications||[]).length||(m.vetVisits||[]).length;
+  var hasMedical=m.bcs||m.dental||m.skinCondition||m.injuries||m.arrivalHealthNotes||(m.diseases||[]).length||(m.vaccinations||[]).length||(m.parasiteTreatments||[]).length||(m.medications||[]).length||(m.vetVisits||[]).length;
   if(hasMedical){
     h+=sectionHead("Medical Status");
     var med=[];
@@ -2382,6 +2435,18 @@ function renderBriefing(){
     if(m.injuries)med.push("visible injuries on arrival: "+esc(m.injuries));
     if(med.length)h+=p(cap(joinNicely(med))+".");
     h+=subP("Arrival health notes",m.arrivalHealthNotes);
+
+    // Disease / infection on arrival
+    var dl=m.diseases||[];if(dl.length){
+      var acon=activeContagiousList(m);
+      if(acon.length){
+        var zoo=acon.some(function(x){return ZOONOTIC_DISEASES[x.type];});
+        h+='<p style="margin:0 0 10px;padding:10px 12px;background:#fef2f2;border-left:3px solid #dc2626;line-height:1.6"><strong style="color:#991b1b">&#9888; Infectious disease present.</strong> '+name+' arrived with '+joinNicely(acon.map(function(x){return esc(diseaseShortName(x.type))+" ("+esc((x.status||"suspected").toLowerCase())+")";}))+'. Strict isolation, barrier nursing and PPE protocols apply'+(zoo?', and at least one condition is zoonotic (transmissible to people)':'')+'.</p>';
+      }
+      h+=p('<strong>Disease / infection history.</strong>');
+      var dlines=dl.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).map(function(x){return"• "+esc(x.type)+" — "+esc(x.status||"Suspected")+(x.date?", noted "+fmtDateLong(x.date):"")+(x.treatment?" (treatment: "+esc(x.treatment)+")":"");});
+      h+='<div style="margin:0 0 10px 14px;font-size:12.5px;line-height:1.7">'+dlines.join("<br>")+'</div>';
+    }
 
     // Vaccinations
     var vl=m.vaccinations||[];if(vl.length){
@@ -2810,6 +2875,7 @@ function loadRecord(id){
   }
   if(saved.medical){
     S.medical=Object.assign({},S.medical,saved.medical);
+    if(saved.medical.diseases)S.medical.diseases=saved.medical.diseases;
     if(saved.medical.vaccinations)S.medical.vaccinations=saved.medical.vaccinations;
     if(saved.medical.parasiteTreatments)S.medical.parasiteTreatments=saved.medical.parasiteTreatments;
     if(saved.medical.medications)S.medical.medications=saved.medical.medications;
