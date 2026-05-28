@@ -45,6 +45,9 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .sg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
 .sb{padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;font-size:11px;text-align:left;background:#fff;color:#0f172a;font-family:inherit;line-height:1.4;transition:all 0.12s}
 .sb .n{font-weight:600;font-size:12px;display:block;margin-bottom:1px}
+.schiprow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.schip{padding:9px 4px;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;text-align:center;background:#fff;color:#475569;font-family:inherit;transition:all 0.12s}
+.schip:hover{border-color:#94a3b8}
 .totb{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
 .rrow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:13px}
@@ -1455,6 +1458,8 @@ function cycleDiseaseStatus(idx){
   saveRecord();renderMain();
 }
 
+function toggleFinSection(){window._finOpen=!window._finOpen;renderMain();}
+
 function dueBadge(nextDue,warnDays){
   if(!nextDue)return"";
   var today=new Date().toISOString().slice(0,10);
@@ -2643,10 +2648,46 @@ function page(){
   }
 
   if(t==="scoring"){
-    var cats=CATS.map(function(c){var v=S.scores[c.k];var badge=v?'<span class="pill" style="'+sc(v)+'">'+v+'</span>':"";var btns=[1,2,3,4].map(function(n){var sel=v===n,nc=n===1?"#15803d":n===2?"#a16207":n===3?"#b91c1c":"#475569";return'<button class="sb" style="'+(sel?sc(n)+";border-color:"+nc:"")+'" data-sc="'+c.k+'.'+n+'"><span class="n" style="color:'+nc+'">Score '+n+'</span>'+c.s[n]+'</button>';}).join("");return'<div class="scat"><div style="font-size:13px;font-weight:500;display:flex;justify-content:space-between;align-items:center;margin-bottom:2px"><span>'+c.l+'</span>'+badge+'</div><div class="sg">'+btns+'</div></div>';}).join("");
-    var tlb=tl?'<span class="pill" style="background:'+tl.bg+';color:'+tl.tc+'"><span style="width:8px;height:8px;border-radius:50%;background:'+tl.dot+';display:inline-block;margin-right:6px"></span>'+tl.l+'</span>':"<span style='font-size:12px;color:#64748b'>Score all categories</span>";
+    var sevSevere=CATS.filter(function(c){return S.scores[c.k]===4;});
+    var sevMod=CATS.filter(function(c){return S.scores[c.k]===3;});
+    var scoredCount=CATS.filter(function(c){return S.scores[c.k]>0;}).length;
+    var sevLabels={1:"Low",2:"Mild",3:"Mod.",4:"Severe"};
+    var accentFor=function(n){return n===1?"#16a34a":n===2?"#ca8a04":n===3?"#dc2626":"#1e293b";};
+
+    // Per-category 1-4 selector
+    var cats=CATS.map(function(c){
+      var v=S.scores[c.k];
+      var chips=[1,2,3,4].map(function(n){
+        var sel=v===n,ac=accentFor(n);
+        return '<button class="schip'+(sel?" on":"")+'" data-sc="'+c.k+'.'+n+'" style="'+(sel?"background:"+ac+";color:#fff;border-color:"+ac:"")+'"><span style="font-size:16px;font-weight:700;display:block;line-height:1.1">'+n+'</span><span style="font-size:9px;font-weight:600;'+(sel?"opacity:0.9":"color:"+ac)+'">'+sevLabels[n]+'</span></button>';
+      }).join("");
+      var desc=v?'<div style="font-size:12px;color:#475569;margin-top:8px;line-height:1.45">'+esc(c.s[v])+'</div>':'<div style="font-size:11px;color:#94a3b8;margin-top:8px;font-style:italic">Tap a score to rate this category</div>';
+      return '<div class="scat" style="border-left:4px solid '+(v?accentFor(v):"#e2e8f0")+'"><div style="font-size:13px;font-weight:600">'+c.l+'</div><div class="schiprow">'+chips+'</div>'+desc+'</div>';
+    }).join("");
+
+    // Live result panel
+    var bands=[[0,10,"#16a34a"],[10,14,"#ca8a04"],[14,20,"#dc2626"],[20,24,"#1e293b"]];
+    var bandSeg=bands.map(function(b){return '<div style="width:'+((b[1]-b[0])/24*100).toFixed(2)+'%;background:'+b[2]+';height:100%"></div>';}).join("");
+    var marker=total>0?'<div style="position:absolute;top:-3px;left:'+Math.min(100,total/24*100)+'%;transform:translateX(-50%);width:3px;height:16px;background:#0f172a;border-radius:2px;box-shadow:0 0 0 2px #fff"></div>':'';
+    var resultPanel='<div class="card" style="padding:16px 18px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px"><div><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:2px">Total score</div><div style="font-size:30px;font-weight:700;line-height:1">'+total+'<span style="font-size:15px;color:#94a3b8;font-weight:500">/24</span></div><div style="font-size:11px;color:#94a3b8;margin-top:3px">'+scoredCount+' of 6 categories scored</div></div>'+(tl?'<span class="pill" style="background:'+tl.bg+';color:'+tl.tc+';font-size:13px;padding:6px 14px;font-weight:700"><span style="width:9px;height:9px;border-radius:50%;background:'+tl.dot+';display:inline-block;margin-right:7px"></span>'+tl.l+'</span>':'<span style="font-size:12px;color:#94a3b8">Score to see result</span>')+'</div><div style="position:relative;margin:0 2px 5px"><div style="display:flex;height:10px;border-radius:20px;overflow:hidden">'+bandSeg+'</div>'+marker+'</div><div style="display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;font-weight:600;margin:0 2px"><span>Green</span><span>Yellow</span><span>Red</span><span>Black</span></div></div>';
+
+    // Severe / moderate item flag (single-4 = critical on its own)
+    var flagHtml='';
+    if(sevSevere.length){
+      flagHtml='<div style="background:#fee2e2;border:1.5px solid #dc2626;border-radius:10px;padding:12px 16px;margin-bottom:12px"><div style="font-size:13px;font-weight:700;color:#991b1b;margin-bottom:3px">&#9888; Severe finding'+(sevSevere.length>1?"s":"")+' &mdash; '+sevSevere.map(function(c){return esc(c.l);}).join(", ")+'</div><div style="font-size:12px;color:#991b1b;line-height:1.45">A category scored 4 is a critical risk on its own. Flag for senior review regardless of the total.</div></div>';
+    } else if(sevMod.length){
+      flagHtml='<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#854d0e;line-height:1.45"><strong>Moderate concern</strong> &mdash; '+sevMod.length+' categor'+(sevMod.length>1?"ies":"y")+' at 3: '+sevMod.map(function(c){return esc(c.l);}).join(", ")+'.</div>';
+    }
+
     var eaBlock=total>0?(ea?'<div class="ea-warn"><div style="font-size:13px;font-weight:600;color:#92400e;margin-bottom:4px">&#9888; Enhanced Assessment may be required</div><div style="font-size:12px;color:#92400e">Review with senior staff before any rehoming decisions.</div></div>':'<div class="ea-clear"><div style="font-size:12px;font-weight:500;color:#166534">&#10003; No automatic EA flag triggered</div></div>'):"";
-    return'<h2>Behaviour scoring</h2><div class="sub">Rate each category 1–4. Total /24 determines the traffic light.</div>'+cats+'<div class="totb"><div><div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px">Total score</div><div style="font-size:26px;font-weight:600">'+total+'<span style="font-size:15px;color:#64748b">/24</span></div></div>'+tlb+'</div>'+eaBlock+'<div class="card"><h2 style="margin-bottom:12px">Final assessment output</h2>'+fld("Primary concern #1",f.c1,"fin.c1","text","e.g. High reactivity toward dogs")+fld("Primary concern #2",f.c2,"fin.c2","text","")+fld("Primary concern #3",f.c3,"fin.c3","text","")+ta("Recommended next steps",f.steps,"fin.steps","")+fld("Follow-up date",f.followUp,"fin.followUp","date")+ta("Additional notes",f.notes,"fin.notes","")+'<div class="sec">Outcome</div>'+slct("Outcome",f.outcome,"fin.outcome",[["","Not yet determined"],["Active — in isolation","Active — in isolation"],["Finished Isolation","Finished Isolation"],["Moved to Kennels","Moved to Kennels"],["Rehomed","Rehomed"],["Returned to Owner","Returned to Owner"],["Transferred","Transferred"],["Euthanised","Euthanised"]])+fld("Outcome Date",f.outcomeDate,"fin.outcomeDate","date")+ta("Outcome Notes",f.outcomeNotes,"fin.outcomeNotes","")+'<div class="sec">5-Day Progress Summary</div>'+slct("Overall progress",f.overallProgress,"fin.overallProgress",[["Significantly improved","Significantly improved — much calmer"],["Slightly improved","Slightly improved"],["Stable","Stable — no significant change"],["Slightly deteriorated","Slightly deteriorated"],["Significantly deteriorated","Significantly deteriorated — urgent review"]])+ta("Kennel Handover Note",f.handoverNote,"fin.handoverNote","Key info for next shift...")+fld("Assessor Name",f.assessorName,"fin.assessorName","text","")+fld("Assessor Date",f.assessorDate,"fin.assessorDate","date")+fld("Second Assessor",f.secondAssessor,"fin.secondAssessor","text","")+fld("Second Assessor Date",f.secondAssessorDate,"fin.secondAssessorDate","date")+'</div><div class="brow"><button class="btn" data-go="assessment">&larr; Back</button><button class="btn btnp" data-go="medical">Next: medical &rarr;</button></div>';
+
+    // Collapsible final assessment & outcome
+    var finOpen=window._finOpen===true;
+    var finSummary=(f.outcome&&f.outcome!=="")?esc(f.outcome):([f.c1,f.c2,f.c3].filter(Boolean).length?"Concerns recorded":"Not started");
+    var finFields=fld("Primary concern #1",f.c1,"fin.c1","text","e.g. High reactivity toward dogs")+fld("Primary concern #2",f.c2,"fin.c2","text","")+fld("Primary concern #3",f.c3,"fin.c3","text","")+ta("Recommended next steps",f.steps,"fin.steps","")+fld("Follow-up date",f.followUp,"fin.followUp","date")+ta("Additional notes",f.notes,"fin.notes","")+'<div class="sec">Outcome</div>'+slct("Outcome",f.outcome,"fin.outcome",[["","Not yet determined"],["Active — in isolation","Active — in isolation"],["Finished Isolation","Finished Isolation"],["Moved to Kennels","Moved to Kennels"],["Rehomed","Rehomed"],["Returned to Owner","Returned to Owner"],["Transferred","Transferred"],["Euthanised","Euthanised"]])+fld("Outcome Date",f.outcomeDate,"fin.outcomeDate","date")+ta("Outcome Notes",f.outcomeNotes,"fin.outcomeNotes","")+'<div class="sec">5-Day Progress Summary</div>'+slct("Overall progress",f.overallProgress,"fin.overallProgress",[["Significantly improved","Significantly improved — much calmer"],["Slightly improved","Slightly improved"],["Stable","Stable — no significant change"],["Slightly deteriorated","Slightly deteriorated"],["Significantly deteriorated","Significantly deteriorated — urgent review"]])+ta("Kennel Handover Note",f.handoverNote,"fin.handoverNote","Key info for next shift...")+fld("Assessor Name",f.assessorName,"fin.assessorName","text","")+fld("Assessor Date",f.assessorDate,"fin.assessorDate","date")+fld("Second Assessor",f.secondAssessor,"fin.secondAssessor","text","")+fld("Second Assessor Date",f.secondAssessorDate,"fin.secondAssessorDate","date");
+    var finCard='<div class="card"><div onclick="toggleFinSection()" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer"><div><h2 style="margin:0;font-size:15px">Final assessment &amp; outcome</h2><div style="font-size:11px;color:#94a3b8;margin-top:2px">'+(finOpen?"Concerns, next steps, outcome and sign-off":"Tap to expand &middot; "+finSummary)+'</div></div><span style="font-size:16px;color:#64748b;display:inline-block;transform:rotate('+(finOpen?"180":"0")+'deg);transition:transform 0.15s">&#9662;</span></div>'+(finOpen?'<div style="margin-top:14px">'+finFields+'</div>':'')+'</div>';
+
+    return '<h2>Behaviour scoring</h2><div class="sub">Rate each category 1–4. Total /24 sets the traffic light; any single 4 is flagged on its own.</div>'+resultPanel+flagHtml+eaBlock+cats+finCard+'<div class="brow"><button class="btn" data-go="assessment">&larr; Back</button><button class="btn btnp" data-go="medical">Next: medical &rarr;</button></div>';
   }
 
   if(t==="report"){
