@@ -144,6 +144,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
       <button id="save-btn" onclick="saveRecord()" class="btn btng" style="font-size:12px;padding:6px 14px">Save</button>
       <button onclick="goToDashboard()" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">&#8592; All Dogs</button>
       <div id="badge" style="display:none;background:#1e293b;border-radius:6px;padding:4px 12px;color:#e2e8f0;font-size:12px"></div>
+      <div id="iso-chip" onclick="showIsolationOverlay()" title="5-day isolation status" style="display:none;align-items:center;gap:4px;border:1px solid #0d9488;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap"></div>
     </div>
   </div>
   <div class="subheader">
@@ -1155,7 +1156,7 @@ function renderDashboard(){
     var bg=finished?"#dcfce7":rec.trafficLight==="Red"?"#fee2e2":rec.trafficLight==="Black"?"#1e293b":rec.trafficLight==="Yellow"?"#fef9c3":"#f0fdf4";
     var ph=d.photo?'<img src="'+d.photo+'" style="width:100%;height:88px;object-fit:cover;display:block">':'<div style="width:100%;height:88px;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:34px">&#128062;</div>';
     var ta2="";if(rec.savedAt){var diff=Math.round((Date.now()-new Date(rec.savedAt).getTime())/60000);ta2=diff<1?"just now":diff<60?diff+"m ago":diff<1440?Math.round(diff/60)+"h ago":Math.round(diff/1440)+"d ago";}
-    var dayH=finished?'<div style="font-size:9px;font-weight:600;color:#166634;margin-bottom:3px">Done</div><div style="background:#dcfce7;border-radius:20px;height:4px"><div style="background:#166634;width:100%;height:100%;border-radius:20px"></div></div>':days?'<div style="font-size:9px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of 5'+(overdue?' Overdue':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:4px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
+    var dayH=finished?'<div style="font-size:9px;font-weight:700;color:#166634;margin-bottom:3px">&#10003; Isolation cleared</div><div style="background:#dcfce7;border-radius:20px;height:4px"><div style="background:#166634;width:100%;height:100%;border-radius:20px"></div></div>':days?'<div style="font-size:9px;font-weight:700;color:'+col+';margin-bottom:3px">&#128274; Isolation &middot; Day '+days+' of 5'+(overdue?' &middot; <span style="color:#dc2626">Overdue</span>':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:4px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
     var savedBy=rec.savedBy||"";
     var lastEditHtml=savedBy?'<div style="display:flex;align-items:center;gap:4px;margin-top:5px;padding-top:4px;border-top:0.5px solid var(--color-border-secondary)"><div style="width:14px;height:14px;border-radius:50%;background:'+avatarColor(savedBy)+';color:#fff;font-size:6px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials(savedBy)+'</div><span style="font-size:9px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(savedBy)+' &middot; '+ta2+'</span></div>':"";
     return'<div onclick="openDog('+rec.id+')" style="background:var(--color-background-primary);border:2px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:10px"><div style="font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(rec.trafficLight?'<span style="background:'+parts[0]+';color:'+parts[1]+';font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">'+rec.trafficLight+'</span>':'')+(recordEA(rec)?'<span style="background:#f59e0b;color:#fff;font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px">&#9888; EA</span>':'')+(d.crossbreed?'<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:600;padding:1px 7px;border-radius:20px">X</span>':'')+'</div>'+dayH+exerciseDotsHtml(rec)+lastEditHtml+'</div></div>';
@@ -1173,7 +1174,7 @@ function renderDashboard(){
   if(window._dbSearchActive){var si=el.querySelector('input[placeholder="Search..."]');if(si){si.focus();var l=si.value.length;si.setSelectionRange(l,l);}window._dbSearchActive=false;}
 }
 
-function openDog(id){var rec=records.find(function(r){return r.id===id;});if(!rec)return;loadRecord(id);showScreen("wrap");S.tab="report";render();}
+function openDog(id){var rec=records.find(function(r){return r.id===id;});if(!rec)return;loadRecord(id);showScreen("wrap");S.tab="report";render();maybeAutoIsolationOverlay();}
 function openNewDog(){appConfirm("Start a new dog? Current unsaved data will be cleared.",function(){S=defaultState();persistSave();showScreen("wrap");S.tab="dog";render();});}
 function goToDashboard(){loadRecordsList().then(function(){showDashboard();});}
 async function loadDashNotices(){}
@@ -1289,6 +1290,81 @@ function generateAutoNotices(){
 
 function daysInIsolation(d){if(!d)return null;return Math.max(1,Math.floor((new Date()-new Date(d))/(1000*60*60*24))+1);}
 
+// ── 5-day isolation status ────────────────────────────────────────
+// Day 1 = arrival day; isolation completes at the end of Day 5 (arrival + 4 days).
+function isoClearDate(intakeDate){return intakeDate?addDaysStr(intakeDate,4):"";}
+function isolationInfo(intakeDate,outcome){
+  if((outcome||"")==="Finished Isolation")return{state:"done",day:null};
+  if(!intakeDate)return{state:"none",day:null};
+  var day=daysInIsolation(intakeDate);
+  var clears=isoClearDate(intakeDate);
+  if(day>5)return{state:"overdue",day:day,clears:clears};
+  if(day===5)return{state:"final",day:day,clears:clears};
+  return{state:"active",day:day,clears:clears};
+}
+function isoTheme(state){
+  // [bg, border, text, label, icon]
+  if(state==="done")return["#dcfce7","#16a34a","#166534","Isolation complete","&#10003;"];
+  if(state==="overdue")return["#fee2e2","#dc2626","#991b1b","Past Day 5","&#128680;"];
+  if(state==="final")return["#fef9c3","#f59e0b","#854d0e","Final day","&#9888;"];
+  return["#ccfbf1","#0d9488","#115e59","In isolation","&#128274;"];
+}
+window._isoShown=window._isoShown||{};
+function showIsolationOverlay(){
+  var dog=S.dog||{};var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome);
+  if(info.state==="none"){appAlert("No arrival date recorded for this dog yet.");return;}
+  var t=isoTheme(info.state);
+  var ov=document.getElementById("iso-overlay");
+  if(!ov){ov=document.createElement("div");ov.id="iso-overlay";ov.className="med-overlay";ov.onclick=function(e){if(e.target===ov)hideIsolationOverlay();};document.body.appendChild(ov);}
+  var name=esc(dog.name||"This dog");
+  var bodyHtml='';
+  if(info.state==="done"){
+    bodyHtml='<div style="font-size:13px;color:#475569;line-height:1.5">'+name+' has <strong>completed the 5-day isolation period</strong> and has been cleared.</div>';
+  }else{
+    var pct=Math.min(100,Math.round((info.day/5)*100));
+    var line=info.state==="overdue"?(name+' is <strong>overdue</strong> — Day '+info.day+', past the 5-day window. Review for clearance.'):
+      info.state==="final"?(name+' is on <strong>Day 5 of 5</strong> — the final day. Isolation ends today.'):
+      (name+' is in isolation — <strong>Day '+info.day+' of 5</strong>.');
+    bodyHtml='<div style="font-size:13px;color:#475569;line-height:1.5;margin-bottom:14px">'+line+'</div>'
+      +'<div style="background:#e2e8f0;border-radius:20px;height:8px;overflow:hidden;margin-bottom:14px"><div style="background:'+t[1]+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b">'
+      +'<div><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;color:#94a3b8;margin-bottom:2px">Arrived</div><strong style="color:#0f172a">'+esc(dog.intakeDate)+'</strong></div>'
+      +'<div style="text-align:right"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;color:#94a3b8;margin-bottom:2px">Isolation ends</div><strong style="color:#0f172a">'+esc(info.clears)+'</strong></div>'
+      +'</div>'+(dog.kennel?'<div style="margin-top:12px;font-size:12px;color:#64748b">Kennel <strong style="color:#0f172a">'+esc(dog.kennel)+'</strong></div>':'');
+  }
+  ov.innerHTML='<div class="med-modal" style="border-top:5px solid '+t[1]+'">'
+    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
+    +'<div style="width:38px;height:38px;border-radius:10px;background:'+t[0]+';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">'+t[4]+'</div>'
+    +'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700;color:'+t[2]+'">'+t[3]+'</div><div style="font-size:11px;color:#94a3b8">5-day isolation protocol</div></div>'
+    +'<button class="med-close-btn" onclick="hideIsolationOverlay()">&#10005;</button></div>'
+    +bodyHtml
+    +'<button class="med-save-btn" style="background:'+t[1]+';margin-top:18px" onclick="hideIsolationOverlay()">Got it</button>'
+    +'</div>';
+  requestAnimationFrame(function(){ov.classList.add("show");});
+}
+function hideIsolationOverlay(){var ov=document.getElementById("iso-overlay");if(ov)ov.classList.remove("show");}
+function maybeAutoIsolationOverlay(){
+  var dog=S.dog||{};if(!dog.intakeDate)return;
+  var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome);
+  if(info.state==="done"||info.state==="none")return;
+  var key=S._id||dog.name||"unsaved";
+  if(window._isoShown[key])return;
+  window._isoShown[key]=true;
+  setTimeout(showIsolationOverlay,260);
+}
+function updateIsoChip(){
+  var chip=document.getElementById("iso-chip");if(!chip)return;
+  var dog=S.dog||{};
+  if(!dog.intakeDate){chip.style.display="none";return;}
+  var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome);
+  if(info.state==="none"){chip.style.display="none";return;}
+  var t=isoTheme(info.state);
+  var txt=info.state==="done"?(t[4]+" Cleared"):(t[4]+" Day "+info.day+"/5");
+  chip.innerHTML=txt;
+  chip.style.display="inline-flex";
+  chip.style.background=t[0];chip.style.color=t[2];chip.style.borderColor=t[1];
+}
+
 function exportCSV(){
   var hdrs=["Name","Breed","Ref No","Intake Date","Kennel","Age","Sex","Colour","Weight","Traffic Light","Score","Outcome","Days","Saved","Saved By"];
   var rows=records.map(function(r){var d=r.state&&r.state.dog?r.state.dog:{};var f=r.state&&r.state.fin?r.state.fin:{};return[r.name,r.breed,r.refNo,r.intakeDate,d.kennel||"",d.age||"",d.sex||"",d.colour||"",d.weight||"",r.trafficLight||"",r.score||"",f.outcome||"",daysInIsolation(r.intakeDate)||"",r.savedAt||"",r.savedBy||""].map(function(v){return'"'+(v||"").toString().replace(/"/g,"''")+'"';}).join(",");});
@@ -1396,10 +1472,22 @@ function renderMedical(){
   function vaxStatus(vt){
     var match=vacList.slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");}).find(function(v){return v.type===vt;});
     if(match)return{state:"done",match:match};
-    // Only honour an explicit nextDue from a previous entry — no auto-calc
+    // Honour an explicit nextDue from a previous entry first (overrides auto-calc)
     var nextDueEntry=vacList.find(function(v){return v.type===vt&&v.nextDue;});
     if(nextDueEntry&&nextDueEntry.nextDue){
       return nextDueEntry.nextDue<todayStr?{state:"overdue",due:nextDueEntry.nextDue}:{state:"upcoming",due:nextDueEntry.nextDue};
+    }
+    // Auto-calc: 2nd = 1st + 14 days; Booster = 2nd + 1 year (actual 2nd if logged, else projected)
+    function firstVac(){return vacList.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(v){return v.type==="1st Vaccination"&&v.date;});}
+    function secondVac(){return vacList.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(v){return v.type==="2nd Vaccination"&&v.date;});}
+    if(vt==="2nd Vaccination"){
+      var f=firstVac();
+      if(f){var due=addDaysStr(f.date,14);return due<todayStr?{state:"overdue",due:due,auto:true,basis:"14 days after 1st vaccination ("+f.date+")"}:{state:"upcoming",due:due,auto:true,basis:"14 days after 1st vaccination ("+f.date+")"};}
+    }
+    if(vt==="Booster"){
+      var s=secondVac(),f2=firstVac();
+      var base2=s?s.date:(f2?addDaysStr(f2.date,14):null);
+      if(base2){var dy=new Date(base2);dy.setFullYear(dy.getFullYear()+1);var due=dy.toISOString().slice(0,10);var basis="1 year after 2nd vaccination ("+base2+(s?"":", projected")+")";return due<todayStr?{state:"overdue",due:due,auto:true,basis:basis}:{state:"upcoming",due:due,auto:true,basis:basis};}
     }
     return{state:"pending"};
   }
@@ -2615,7 +2703,7 @@ function page(){
 
 function renderNav(){document.getElementById("nav").innerHTML=TABS.map(function(tb){return'<button class="nb'+(S.tab===tb.id?" on":"")+'" data-go="'+tb.id+'">'+tb.l+'</button>';}).join("");}
 function renderMain(){document.getElementById("content").innerHTML=page();}
-function render(){renderNav();renderMain();}
+function render(){renderNav();renderMain();updateIsoChip();}
 
 function handleAppClick(e){
   var go=e.target.closest("[data-go]");if(go){S.tab=go.dataset.go;render();window.scrollTo(0,0);return;}
