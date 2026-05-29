@@ -357,8 +357,23 @@ function showScreen(id){["login-screen","dashboard-screen","wrap"].forEach(funct
 
 // ── Medical overlay controls (THE FIX — these now live in <script>, not <style>) ─
 function gv(id){var el=document.getElementById(id);return el?(el.value||"").trim():"";}
-function showMedOverlay(type){var el=document.getElementById("med-ov-"+type);if(el)el.classList.add("show");}
-function hideMedOverlay(type){var el=document.getElementById("med-ov-"+type);if(el)el.classList.remove("show");}
+function showMedOverlay(type){window._medEditCtx=null;var el=document.getElementById("med-ov-"+type);if(el)el.classList.add("show");}
+function hideMedOverlay(type){window._medEditCtx=null;var el=document.getElementById("med-ov-"+type);if(el)el.classList.remove("show");}
+var MED_EDIT_MAP={
+  vaccinations:{type:"vac",f:{"med-vac-type":"type","med-vac-date":"date","med-vac-admin":"adminBy","med-vac-notes":"notes"}},
+  parasiteTreatments:{type:"para",f:{"med-para-type":"type","med-para-date":"date","med-para-admin":"adminBy","med-para-notes":"notes"}},
+  medications:{type:"med",f:{"med-med-name":"name","med-med-dose":"dose","med-med-freq":"frequency","med-med-start":"startDate","med-med-end":"endDate","med-med-by":"prescribedBy","med-med-notes":"notes"}},
+  vetVisits:{type:"vet",f:{"med-vet-date":"date","med-vet-name":"vet","med-vet-reason":"reason","med-vet-findings":"findings","med-vet-treatment":"treatment","med-vet-followup":"followUp"}},
+  diseases:{type:"dis",f:{"med-dis-type":"type","med-dis-status":"status","med-dis-date":"date","med-dis-treatment":"treatment","med-dis-notes":"notes"}}
+};
+function editMedEntry(section,idx){
+  var m=getMedical();if(!m[section]||!m[section][idx])return;
+  var cfg=MED_EDIT_MAP[section];if(!cfg)return;
+  var entry=m[section][idx];
+  showMedOverlay(cfg.type);
+  window._medEditCtx={section:section,idx:idx};
+  Object.keys(cfg.f).forEach(function(inputId){var el=document.getElementById(inputId);if(el)el.value=entry[cfg.f[inputId]]||"";});
+}
 
 // ── Exercise tracking ─────────────────────────────────────────────
 // Stored per-dog on rec.state.exercises[]: {date, time, type, staff, notes}
@@ -1538,7 +1553,14 @@ function addMedEntry(section,entry){
   if((section==="parasiteTreatments")&&!entry.type){appAlert("Please select treatment type.");return;}
   if((section==="diseases")&&!entry.type){appAlert("Please select a disease / condition.");return;}
   var m=getMedical();if(!m[section])m[section]=[];
-  m[section].push(entry);saveRecord();renderMain();
+  if(window._medEditCtx&&window._medEditCtx.section===section&&m[section][window._medEditCtx.idx]){
+    m[section][window._medEditCtx.idx]=Object.assign({},m[section][window._medEditCtx.idx],entry);
+    window._medEditCtx=null;
+  }else{
+    window._medEditCtx=null;
+    m[section].push(entry);
+  }
+  saveRecord();renderMain();
 }
 
 function deleteMedEntry(section,idx){
@@ -1622,7 +1644,7 @@ function renderMedical(){
       h+='<div style="width:28px;height:28px;border-radius:6px;background:'+st[0]+';display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">'+(cleared?"&#10003;":"&#129440;")+'</div>';
       h+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;margin-bottom:3px"><span style="'+(cleared?"text-decoration:line-through;color:#64748b":"")+'">'+esc(p.type)+'</span> <span onclick="cycleDiseaseStatus('+i+')" title="Tap to update status" style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;cursor:pointer;background:'+st[0]+';color:'+st[1]+'">'+esc(p.status||"Suspected")+' &#8635;</span>'+(isCon?' <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;background:#fee2e2;color:#991b1b">&#9888; Contagious</span>':'')+'</div>';
       h+='<div style="font-size:11px;color:#64748b">Noted '+esc(p.date)+(p.treatment?" &middot; "+esc(p.treatment):"")+(p.notes?" &middot; "+esc(p.notes):"")+'</div></div>';
-      h+='<button onclick="deleteMedEntry(\'diseases\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0;align-self:center">&#10005;</button>';
+      h+='<button onclick="editMedEntry(\'diseases\','+i+')" style="background:#e2e8f0;color:#475569;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0;align-self:center;margin-right:4px">&#9998;</button><button onclick="deleteMedEntry(\'diseases\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0;align-self:center">&#10005;</button>';
       h+='</div>';
     });
   }else{h+='<div style="text-align:center;padding:12px 0;color:#94a3b8;font-size:12px">No diseases or infections recorded on arrival</div>';}
@@ -1699,7 +1721,7 @@ function renderMedical(){
   if(vacList.length){
     h+='<div style="margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0">';
     vacList.forEach(function(v,i){
-      h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:11px"><span style="color:#64748b">'+esc(v.type)+(v.adminBy?" &middot; "+esc(v.adminBy):"")+'</span><div style="display:flex;align-items:center;gap:8px"><span style="color:#94a3b8">'+v.date+'</span><button onclick="deleteMedEntry(\'vaccinations\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer">&#10005;</button></div></div>';
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:11px"><span style="color:#64748b">'+esc(v.type)+(v.adminBy?" &middot; "+esc(v.adminBy):"")+'</span><div style="display:flex;align-items:center;gap:8px"><span style="color:#94a3b8">'+v.date+'</span><button onclick="editMedEntry(\'vaccinations\','+i+')" style="background:#e2e8f0;color:#475569;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer">&#9998;</button><button onclick="deleteMedEntry(\'vaccinations\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer">&#10005;</button></div></div>';
     });
     h+='</div>';
   }
@@ -1733,7 +1755,7 @@ function renderMedical(){
       h+='<div style="width:28px;height:28px;border-radius:6px;background:#fef9c3;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">&#128737;</div>';
       h+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.product||p.type)+'</div>';
       h+='<div style="font-size:11px;color:#64748b">'+p.date+(p.adminBy?" &middot; "+esc(p.adminBy):"")+(p.notes?" &middot; "+esc(p.notes):"")+'</div></div>';
-      h+='<button onclick="deleteMedEntry(\'parasiteTreatments\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0;align-self:center">&#10005;</button>';
+      h+='<button onclick="editMedEntry(\'parasiteTreatments\','+i+')" style="background:#e2e8f0;color:#475569;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0;align-self:center;margin-right:4px">&#9998;</button><button onclick="deleteMedEntry(\'parasiteTreatments\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0;align-self:center">&#10005;</button>';
       h+='</div>';
     });
   }else{h+='<div style="text-align:center;padding:12px 0;color:#94a3b8;font-size:12px">No treatments recorded yet</div>';}
@@ -1754,7 +1776,7 @@ function renderMedical(){
       h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;'+(last?"":"border-bottom:1px solid #e2e8f0;")+'">';
       h+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;margin-bottom:2px">'+esc(med.name)+'<span style="margin-left:6px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;background:'+(isActive?"#dcfce7":"#f1f5f9")+';color:'+(isActive?"#166534":"#64748b")+'">'+(isActive?"Active":"Ended")+'</span></div>';
       h+='<div style="font-size:11px;color:#64748b">'+(med.dose?esc(med.dose):"")+(med.frequency?" &middot; "+esc(med.frequency):"")+(med.startDate?" &middot; from "+med.startDate:"")+'</div></div>';
-      h+='<div style="display:flex;gap:4px;align-items:center;flex-shrink:0">'+(isActive?'<button onclick="toggleMedActive('+i+')" style="background:#fef9c3;color:#854d0e;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">End</button>':'<button onclick="toggleMedActive('+i+')" style="background:#dcfce7;color:#166634;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">Reactivate</button>')+'<button onclick="deleteMedEntry(\'medications\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">&#10005;</button></div></div>';
+      h+='<div style="display:flex;gap:4px;align-items:center;flex-shrink:0">'+(isActive?'<button onclick="toggleMedActive('+i+')" style="background:#fef9c3;color:#854d0e;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">End</button>':'<button onclick="toggleMedActive('+i+')" style="background:#dcfce7;color:#166634;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">Reactivate</button>')+'<button onclick="editMedEntry(\'medications\','+i+')" style="background:#e2e8f0;color:#475569;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">&#9998;</button><button onclick="deleteMedEntry(\'medications\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">&#10005;</button></div></div>';
     });
   }else{h+='<div style="text-align:center;padding:14px;color:#94a3b8;font-size:12px">No medications recorded yet</div>';}
   h+='</div>';
@@ -1768,7 +1790,7 @@ function renderMedical(){
       h+='<div style="padding:10px 0;'+(last?"":"border-bottom:1px solid #e2e8f0;")+'">';
       h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px"><div><div style="font-size:12px;font-weight:500">'+v.date+(v.vet?" &mdash; "+esc(v.vet):"")+'</div>';
       if(v.reason)h+='<div style="font-size:11px;color:#64748b;margin-top:2px">'+esc(v.reason)+'</div>';
-      h+='</div><button onclick="deleteMedEntry(\'vetVisits\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0">&#10005;</button></div>';
+      h+='</div><button onclick="editMedEntry(\'vetVisits\','+i+')" style="background:#e2e8f0;color:#475569;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0;margin-right:4px">&#9998;</button><button onclick="deleteMedEntry(\'vetVisits\','+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0">&#10005;</button></div>';
       if(v.findings)h+='<div style="font-size:11px;color:#64748b;background:#f8fafc;border-radius:4px;padding:5px 8px;margin-top:4px">'+esc(v.findings)+'</div>';
       if(v.treatment)h+='<div style="font-size:11px;color:#64748b;margin-top:3px"><strong>Treatment:</strong> '+esc(v.treatment)+'</div>';
       if(v.followUp)h+='<div style="font-size:11px;color:#0d9488;margin-top:3px;font-weight:600">&#128197; Follow-up: '+esc(v.followUp)+'</div>';
@@ -2391,6 +2413,14 @@ function renderBriefing(){
   if(idParts.length)h+='<div style="font-size:11px;color:#64748b;margin-top:3px">'+idParts.join(" &middot; ")+'</div>';
   h+='</div>';
 
+  // Handling warnings callout
+  var bWarn=S.warnings||[];
+  if(bWarn.length){
+    var bCrit=bWarn.some(function(w){return w.level==="Critical";});
+    var bAcc=bCrit?"#dc2626":"#f59e0b",bBg=bCrit?"#fef2f2":"#fffbeb",bFg=bCrit?"#991b1b":"#854d0e";
+    h+='<div style="margin:14px 0;padding:12px 16px;background:'+bBg+';border-left:4px solid '+bAcc+';border-radius:4px"><div style="font-size:12px;font-weight:700;color:'+bFg+';margin-bottom:5px">&#9888; Handling warnings</div><div style="font-size:12.5px;line-height:1.6;color:#0f172a">'+bWarn.slice().sort(function(a,b){return(a.level==="Critical"?0:1)-(b.level==="Critical"?0:1);}).map(function(w){return esc(w.text)+(w.level==="Critical"?' <strong style="color:#991b1b">(Critical)</strong>':'');}).join("; ")+'.</div></div>';
+  }
+
   // ── EXECUTIVE SUMMARY ──
   h+=sectionHead("Executive Summary");
   var sumParts=[];
@@ -2811,6 +2841,7 @@ function page(){
     var total2=Object.values(S.scores).reduce(function(a,b){return a+b},0),tl2=tlc(total2),ea2=eaTriggered();
     var tlb2=tl2?'<span class="pill" style="background:'+tl2.bg+';color:'+tl2.tc+';font-size:13px;padding:5px 12px"><span style="width:8px;height:8px;border-radius:50%;background:'+tl2.dot+';display:inline-block;margin-right:6px"></span>'+tl2.l+'</span>':"";
     var d2=S.dog,a2=S.arrival,f2=S.fin,m2=S.medical||{},asmt=S.assessment||{};
+    var rWarn=(S.warnings||[]).slice().sort(function(a,b){return(a.level==="Critical"?0:1)-(b.level==="Critical"?0:1);});var rCrit=rWarn.some(function(w){return w.level==="Critical";});
     var drows=[["Ref. no.",d2.refNo],["Intake date",d2.intakeDate],["Reason",d2.intakeReason],["Assessor",d2.assessor],["Breed",d2.breed],["Sex",d2.sex],["Age",d2.age],["Colour",d2.colour],["Weight",d2.weight],["Microchip",d2.microchip],["Kennel",d2.kennel]].filter(function(r){return r[1]}).map(function(r){return'<div class="rrow"><span class="rk">'+r[0]+'</span><span class="rv">'+esc(r[1])+'</span></div>'}).join("");
     var arows=[["Demeanour",a2.demeanour],["Muzzle",a2.muzzle],["Lead handling",a2.lead],["First vet visit",a2.vet],["Dog-to-dog",a2.dogDog],["Cat tolerance",a2.catTolerance],["Child history",a2.childHistory],["Bite history",a2.biteHistory]].filter(function(r){return r[1]}).map(function(r){return'<div class="rrow"><span class="rk">'+r[0]+'</span><span class="rv">'+esc(r[1])+'</span></div>'}).join("");
     var dblocks=S.days.map(function(dy,i){var rows=[["Demeanour",dy.demeanour],["Feeding",dy.feeding],["Toileting",dy.toileting],["Staff interaction",dy.staffInt],["Incidents",dy.incidents]].filter(function(r){return r[1]}).map(function(r){return'<div style="font-size:12px;margin-bottom:3px"><span style="color:#64748b">'+r[0]+': </span><span style="font-weight:500">'+esc(r[1])+'</span></div>'}).join("");return'<div class="db"><div style="font-size:13px;font-weight:600;margin-bottom:5px">Day '+(i+1)+(dy.date?" — "+dy.date:"")+'</div>'+(rows||'<span style="font-size:12px;color:#64748b">No data.</span>')+(dy.notes?'<div style="font-size:12px;color:#64748b;margin-top:5px">'+esc(dy.notes)+'</div>':'')+'</div>';}).join("");
@@ -2910,6 +2941,7 @@ function page(){
     return'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="margin:0">Full assessment report</h2><button class="btn" onclick="window.print()" style="font-size:12px">Print</button></div>'
       +'<div style="background:#0f172a;border-radius:10px;padding:16px 18px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="color:#94a3b8;font-size:11px;margin-bottom:2px">'+esc(d2.refNo||"")+'</div><div style="color:#fff;font-size:22px;font-weight:600">'+esc(d2.name||"—")+'</div><div style="color:#94a3b8;font-size:12px;margin-top:2px">'+[d2.breed,d2.sex,d2.age].filter(Boolean).map(esc).join(" · ")+'</div></div><div style="text-align:right">'+tlb2+(total2?'<div style="color:#94a3b8;font-size:11px;margin-top:4px">Score: '+total2+'/24</div>':"")+'</div></div></div>'
       +(ea2?'<div class="ea-warn" style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:#92400e">&#9888; Enhanced Assessment flagged</div></div>':'')
+      +(rWarn.length?'<div class="card" style="border-left:4px solid '+(rCrit?"#dc2626":"#f59e0b")+'"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:'+(rCrit?"#991b1b":"#854d0e")+';margin-bottom:8px">&#9888; Handling warnings</div>'+rWarn.map(function(w){var th=warnLevelTheme(w.level);return'<div class="rrow"><span class="rk">'+esc(w.text)+'</span><span class="rv"><span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;background:'+th[0]+';color:'+th[2]+'">'+esc(w.level||"Caution")+'</span></span></div>';}).join("")+'</div>':"")
       +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Dog details</div>'+(drows||"—")+'</div>'
       +medCard
       +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">On-arrival &amp; behaviour history</div>'+arows+(a2.notes?'<div style="font-size:12px;margin-top:10px;padding:10px;background:#f8fafc;border-radius:6px;white-space:pre-wrap">'+esc(a2.notes)+'</div>':"")+'</div>'
