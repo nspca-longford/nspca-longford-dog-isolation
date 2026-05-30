@@ -214,7 +214,7 @@ var CHANGELOG=[
   {version:"1.4",date:"2026-05-28",note:"Scoring page overhauled — live result panel with traffic-light band, faster 1–4 selector, single-4 severity flag, and a collapsible outcome/sign-off section."},
   {version:"1.3",date:"2026-05-28",note:"New Disease / Infection on Arrival tracking in Medical (parvo, mange, etc.) with contagious flags shown on the dashboard cards and the briefing report."},
   {version:"1.2",date:"2026-05-28",note:"5-day isolation overlay when you open a dog, a status chip in the header, and clearer isolation status on the dashboard cards."},
-  {version:"1.1",date:"2026-05-28",note:"Vaccinations now auto-schedule: 2nd dose 14 days after the 1st, booster 1 year after the 2nd."}
+  {version:"1.1",date:"2026-05-28",note:"Vaccinations now auto-schedule: 2nd dose 4 weeks after the 1st, booster 1 year after the 2nd."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1083,7 +1083,7 @@ function tasksRollupHtml(activeRecords){
     function dateOf(t){var e=vl.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(x){return x.type===t&&x.date;});return e?e.date:null;}
     var due=false;
     ["1st Vaccination","Kennel Cough","2nd Vaccination","Booster"].forEach(function(vt){if(vl.some(function(v){return v.type===vt;}))return;var ex=vl.find(function(v){return v.type===vt&&v.nextDue;});if(ex&&ex.nextDue&&ex.nextDue<=addDS(today,7))due=true;});
-    var first=dateOf("1st Vaccination");if(first&&!vl.some(function(v){return v.type==="2nd Vaccination";})&&addDS(first,14)<=addDS(today,7))due=true;
+    var first=dateOf("1st Vaccination");if(first&&!vl.some(function(v){return v.type==="2nd Vaccination";})&&addDS(first,28)<=addDS(today,7))due=true;
     var second=dateOf("2nd Vaccination");if(second&&!vl.some(function(v){return v.type==="Booster";})){var dy=new Date(second);dy.setFullYear(dy.getFullYear()+1);if(dy.toISOString().slice(0,10)<=addDS(today,7))due=true;}
     return due;
   }
@@ -1698,16 +1698,16 @@ function renderMedical(){
     if(nextDueEntry&&nextDueEntry.nextDue){
       return nextDueEntry.nextDue<todayStr?{state:"overdue",due:nextDueEntry.nextDue}:{state:"upcoming",due:nextDueEntry.nextDue};
     }
-    // Auto-calc: 2nd = 1st + 14 days; Booster = 2nd + 1 year (actual 2nd if logged, else projected)
+    // Auto-calc: 2nd = 1st + 28 days (4 weeks); Booster = 2nd + 1 year (actual 2nd if logged, else projected)
     function firstVac(){return vacList.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(v){return v.type==="1st Vaccination"&&v.date;});}
     function secondVac(){return vacList.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(v){return v.type==="2nd Vaccination"&&v.date;});}
     if(vt==="2nd Vaccination"){
       var f=firstVac();
-      if(f){var due=addDaysStr(f.date,14);return due<todayStr?{state:"overdue",due:due,auto:true,basis:"14 days after 1st vaccination ("+f.date+")"}:{state:"upcoming",due:due,auto:true,basis:"14 days after 1st vaccination ("+f.date+")"};}
+      if(f){var due=addDaysStr(f.date,28);return due<todayStr?{state:"overdue",due:due,auto:true,basis:"4 weeks after 1st vaccination ("+f.date+")"}:{state:"upcoming",due:due,auto:true,basis:"4 weeks after 1st vaccination ("+f.date+")"};}
     }
     if(vt==="Booster"){
       var s=secondVac(),f2=firstVac();
-      var base2=s?s.date:(f2?addDaysStr(f2.date,14):null);
+      var base2=s?s.date:(f2?addDaysStr(f2.date,28):null);
       if(base2){var dy=new Date(base2);dy.setFullYear(dy.getFullYear()+1);var due=dy.toISOString().slice(0,10);var basis="1 year after 2nd vaccination ("+base2+(s?"":", projected")+")";return due<todayStr?{state:"overdue",due:due,auto:true,basis:basis}:{state:"upcoming",due:due,auto:true,basis:basis};}
     }
     return{state:"pending"};
@@ -2828,8 +2828,8 @@ function page(){
       +'<div class="f"><label class="lbl">Crossbreed</label><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0"><input type="checkbox" data-save="dog.crossbreed" '+(d.crossbreed?"checked":"")+' style="width:18px;height:18px;cursor:pointer"><span style="font-size:13px">This dog is a crossbreed</span></label></div>'
       +'<div class="g2">'+fld("Age (approx.)",d.age,"dog.age","text","e.g. 3 years")+slct("Size",d.size,"dog.size",[["","-- select --"],["Small (under 10kg)","Small (under 10kg)"],["Medium (10-25kg)","Medium (10-25kg)"],["Large (25-40kg)","Large (25-40kg)"],["XL (over 40kg)","XL (over 40kg)"]])+'</div>'
       +slct("Colour / markings",d.colour,"dog.colour",[["","-- select --"],["Black","Black"],["White","White"],["Cream","Cream"],["Golden","Golden"],["Fawn","Fawn"],["Tan","Tan"],["Red / Chestnut","Red / Chestnut"],["Brown / Chocolate","Brown / Chocolate"],["Blue / Grey","Blue / Grey"],["Sable","Sable"],["Black and White","Black and White"],["Black and Tan","Black and Tan"],["Brown and White","Brown and White"],["Tri-colour","Tri-colour"],["Brindle","Brindle"],["Merle","Merle"],["Other","Other"]])
-      +'<div class="g2">'+wfld(d.weight)+fld("Microchip no.",d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')+'</div>'
-      +'<div id="chip-info" style="margin:-2px 0 4px;font-size:11px"></div></div>';
+      +wfld(d.weight)+fld("Microchip no.",d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')
+      +'<div id="chip-info" style="margin:-6px 0 4px;font-size:11px">'+chipInfoHtml(d.microchip)+'</div></div>';
 
     var intake='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Intake</div>'
       +'<div class="g2">'+slct("Kennel / Pod",d.kennel,"dog.kennel",[["",'-- not assigned --'],["Kennel 1","Kennel 1"],["Kennel 2","Kennel 2"],["Kennel 3","Kennel 3"],["Kennel 4","Kennel 4"],["Kennel 5","Kennel 5"],["Kennel 6","Kennel 6"],["Pod 1","Pod 1"],["Pod 2","Pod 2"],["Pod 3","Pod 3"],["Pod 4","Pod 4"]])+fld("Assessor",d.assessor,"dog.assessor","text","e.g. Shane")+'</div>'
@@ -3035,15 +3035,14 @@ function renderMain(){document.getElementById("content").innerHTML=page();}
 function render(){renderNav();renderMain();updateIsoChip();updateWarnChip();updateSaveBar();updateHeaderDog();checkDuplicateName();checkMicrochip();}
 var CHIP_CC={"372":"Ireland","826":"United Kingdom","250":"France","276":"Germany","380":"Italy","724":"Spain","528":"Netherlands","056":"Belgium","620":"Portugal","616":"Poland","642":"Romania","208":"Denmark","752":"Sweden","040":"Austria","348":"Hungary","203":"Czechia","372":"Ireland"};
 function microchipLookup(num){try{if(navigator.clipboard&&num)navigator.clipboard.writeText(num);}catch(e){}window.open("https://www.europetnet.com/","_blank","noopener");}
-function checkMicrochip(v){
-  var el=document.getElementById("chip-info");if(!el)return;
-  v=(v!=null?v:((S.dog&&S.dog.microchip)||""));v=(""+v).trim();
-  if(!v){el.innerHTML="";return;}
+function chipInfoHtml(v){
+  v=(""+(v||"")).trim();if(!v)return"";
   var digits=v.replace(/\D/g,"");var ok=/^[0-9]{15}$/.test(v);var msg,color;
   if(ok){var cc=v.slice(0,3),origin=CHIP_CC[cc]?CHIP_CC[cc]:((+cc>=900&&+cc<=999)?"manufacturer-coded":null);msg="&#10003; Valid 15-digit ISO chip"+(origin?" &middot; "+origin:"");color="#16a34a";}
   else{msg="&#9888; A standard chip is 15 digits, numbers only ("+digits.length+" entered)";color="#b45309";}
-  el.innerHTML='<span style="color:'+color+';font-weight:600">'+msg+'</span> <button type="button" onclick="microchipLookup(\''+digits+'\')" style="margin-left:6px;background:#0f172a;color:#c5e86c;border:none;border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">Look up &#8599;</button>';
+  return '<span style="color:'+color+';font-weight:600">'+msg+'</span> <button type="button" onclick="microchipLookup(\''+digits+'\')" style="margin-left:6px;background:#0f172a;color:#c5e86c;border:none;border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">Look up &#8599;</button>';
 }
+function checkMicrochip(v){var el=document.getElementById("chip-info");if(!el)return;el.innerHTML=chipInfoHtml(v!=null?v:((S.dog&&S.dog.microchip)||""));}
 function updateHeaderDog(){var bg=document.getElementById("badge");if(bg){var nm=S.dog&&S.dog.name?S.dog.name:"";bg.textContent=nm;bg.style.display=nm?"block":"none";}var ph=document.getElementById("badge-photo");if(ph){if(S.dog&&S.dog.photo){ph.src=S.dog.photo;ph.style.display="block";}else{ph.style.display="none";ph.removeAttribute("src");}}}
 function checkDuplicateName(){var el=document.getElementById("dup-name-hint");if(!el)return;var nm=((S.dog&&S.dog.name)||"").trim().toLowerCase();if(!nm){el.style.display="none";return;}var dup=records.some(function(r){if(r.id===S._id)return false;var o=r.state&&r.state.fin?r.state.fin.outcome:"";var act=!o||o.indexOf("Active")>=0||o==="Finished Isolation";return act&&r.name&&r.name.trim().toLowerCase()===nm;});el.style.display=dup?"block":"none";}
 function updateSaveBar(){var ro=["report","briefing","timeline"].indexOf(S.tab)>=0;var sb=document.getElementById("save-bar");if(sb)sb.style.display=ro?"none":"";var c=document.getElementById("content");if(c)c.style.paddingBottom=ro?"24px":"";}
