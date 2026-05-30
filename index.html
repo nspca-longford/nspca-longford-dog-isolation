@@ -126,7 +126,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 <div id="dashboard-screen" style="display:none;min-height:100vh;background:var(--color-background-secondary)">
   <div style="background:#0f172a;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <div style="color:#fff;font-size:13px;font-weight:500">NSPCA Longford - Isolation</div>
+      <svg width="116" height="26" viewBox="0 0 232 51" fill="none" style="display:block"><path d="M193.211 41.5648L191.972 46.3797H178.84L180.238 41.5648C180.572 40.428 180.839 39.4917 181.575 37.1512L192.074 2.51074H213.407L224.04 37.1512C224.708 39.4249 225.043 40.2942 225.444 41.5648L227.064 46.3797H209.199L208.064 41.5648C208.064 41.5648 207.547 39.3578 207.054 37.2849H194.281C193.679 39.5586 193.478 40.3611 193.211 41.5648ZM202.373 20.0316C202.105 18.9616 201.771 18.2929 200.835 18.2929C199.831 18.2929 199.497 18.9616 199.163 20.0316L196.956 27.9226H204.513L202.373 20.0316Z" fill="#C5E86C"/><path d="M154.633 46.3797C147.745 46.3797 136.109 39.4917 136.109 24.4452C136.109 9.39871 147.277 2.51074 155.703 2.51074H179.243V18.8279H170.081C169.279 14.6148 167.272 12.2743 162.391 12.2743C156.84 12.2743 153.496 16.8217 153.496 24.4452C153.496 31.6676 156.84 36.215 161.655 36.215C165.935 36.215 168.276 33.4731 169.613 29.4607H180.647C178.574 37.9537 173.425 46.3797 164.464 46.3797H154.633Z" fill="#C5E86C"/><path d="M108.068 34.6769V46.3797H91.3496V2.51074H123.984C129.735 2.51074 134.416 7.32563 134.416 15.4173C134.416 24.7127 128.598 32.1357 118.567 32.1357H111.144C108.67 32.1357 108.068 32.6038 108.068 34.6769ZM110.342 24.8465H110.475C114.956 24.8465 117.698 22.439 117.698 17.2229C117.698 13.1436 115.558 10.4687 111.211 10.4687H110.542C108.67 10.4687 108.068 10.9368 108.068 13.0099V22.3053C108.068 24.3784 108.67 24.8465 110.342 24.8465Z" fill="#C5E86C"/><path d="M66.159 37.9537C69.7033 37.9537 71.7095 36.7499 71.7095 34.2087C71.7095 26.0502 47.0332 33.9413 47.0332 15.4842C47.0332 7.05814 53.4531 2.51074 60.8091 2.51074H84.3486V15.1498H75.12C73.582 11.9399 70.8402 10.7362 67.229 10.7362C64.4203 10.7362 62.5478 11.6055 62.5478 13.5449C62.5478 20.0985 87.826 13.0099 87.826 31.4001C87.826 41.4311 79.3331 46.3797 72.3782 46.3797H47.3007V31.5338H56.5292C58.1342 36.0812 61.7454 37.9537 66.159 37.9537Z" fill="#C5E86C"/><path d="M14.3109 26.8527V46.3797H0V2.51074H17.454L25.8131 19.0954C26.5488 20.5666 27.0837 20.7672 27.6856 20.7672C28.555 20.7672 28.8893 20.0316 28.8893 18.6941V2.51074H43.2002V46.3797H29.3574L17.5208 26.4514C16.7852 25.1808 16.3171 24.7796 15.6484 24.7796C14.6453 24.7796 14.3109 25.5152 14.3109 26.8527Z" fill="#C5E86C"/></svg>
       <span id="dash-clock" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8"></span>
       <span id="dash-count" style="background:#0d9488;border-radius:20px;padding:3px 10px;font-size:11px;color:#fff;font-weight:500;display:none"></span>
     </div>
@@ -733,7 +733,6 @@ function renderUsersAdmin(){
   var all=getAllUsersSync();
   all=all.slice().sort(function(a,b){return(a.name||"").localeCompare(b.name||"");});
   var h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+backToDashBtn()+'<h2 style="margin:0;flex:1">Manage Users</h2><button onclick="showAddUserModal()" class="btn btnp" style="font-size:12px;padding:6px 14px">+ Add user</button></div>';
-  h+='<div class="sub" style="margin-bottom:16px">'+all.length+' user'+(all.length!==1?"s":"")+' total. App-built users can\'t be removed from here; Supabase users can be edited and deactivated.</div>';
 
   h+='<div class="card" style="padding:0;overflow:hidden"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f8fafc"><th style="padding:10px;text-align:left;font-size:10px;text-transform:uppercase;color:#64748b">User</th><th style="padding:10px;text-align:left;font-size:10px;text-transform:uppercase;color:#64748b">Code</th><th style="padding:10px;text-align:left;font-size:10px;text-transform:uppercase;color:#64748b">Role</th><th style="padding:10px;text-align:left;font-size:10px;text-transform:uppercase;color:#64748b">Status</th><th></th></tr></thead><tbody>';
   all.forEach(function(u){
@@ -893,11 +892,11 @@ function page_records(){
 
 function updateClock(){
   var el=document.getElementById("dash-clock");if(!el)return;
-  var now=new Date(),days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  var h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
-  el.textContent=days[now.getDay()]+" "+now.getDate()+" "+months[now.getMonth()]+" "+now.getFullYear()+" — "+(h<10?"0"+h:h)+":"+(m<10?"0"+m:m)+":"+(s<10?"0"+s:s);
+  var now=new Date(),days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var h=now.getHours(),m=now.getMinutes();
+  el.textContent=days[now.getDay()]+" "+now.getDate()+" "+months[now.getMonth()]+" \u00b7 "+(h<10?"0"+h:h)+":"+(m<10?"0"+m:m);
 }
-setInterval(updateClock,1000);
+setInterval(updateClock,30000);
 
 function showDashboard(){restoreDashFilters();showScreen("dashboard-screen");loadDashNotices().then(function(){renderDashboard();showWelcomeToast();maybeShowWhatsNew();startDashRefresh();});}
 
@@ -1286,7 +1285,7 @@ function renderDashboard(){
   if(window._dbSearchActive){var si=el.querySelector('input[placeholder="Search..."]');if(si){si.focus();var l=si.value.length;si.setSelectionRange(l,l);}window._dbSearchActive=false;}
 }
 
-function openDog(id){var rec=records.find(function(r){return r.id===id;});if(!rec)return;window._dayView=0;loadRecord(id);showScreen("wrap");S.tab="report";render();if(!maybeAutoWarningOverlay())maybeAutoIsolationOverlay();}
+function openDog(id){var rec=records.find(function(r){return r.id===id;});if(!rec)return;window._dayView=0;loadRecord(id);showScreen("wrap");S.tab="dog";render();if(!maybeAutoWarningOverlay())maybeAutoIsolationOverlay();}
 function openNewDog(){appConfirm("Start a new dog? Current unsaved data will be cleared.",function(){S=defaultState();persistSave();showScreen("wrap");S.tab="dog";render();});}
 function goToDashboard(){loadRecordsList().then(function(){showDashboard();});}
 async function loadDashNotices(){}
@@ -1697,18 +1696,6 @@ function renderMedical(){
     var nextDueEntry=vacList.find(function(v){return v.type===vt&&v.nextDue;});
     if(nextDueEntry&&nextDueEntry.nextDue){
       return nextDueEntry.nextDue<todayStr?{state:"overdue",due:nextDueEntry.nextDue}:{state:"upcoming",due:nextDueEntry.nextDue};
-    }
-    // Auto-calc: 2nd = 1st + 28 days (4 weeks); Booster = 2nd + 1 year (actual 2nd if logged, else projected)
-    function firstVac(){return vacList.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(v){return v.type==="1st Vaccination"&&v.date;});}
-    function secondVac(){return vacList.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(v){return v.type==="2nd Vaccination"&&v.date;});}
-    if(vt==="2nd Vaccination"){
-      var f=firstVac();
-      if(f){var due=addDaysStr(f.date,28);return due<todayStr?{state:"overdue",due:due,auto:true,basis:"4 weeks after 1st vaccination ("+f.date+")"}:{state:"upcoming",due:due,auto:true,basis:"4 weeks after 1st vaccination ("+f.date+")"};}
-    }
-    if(vt==="Booster"){
-      var s=secondVac(),f2=firstVac();
-      var base2=s?s.date:(f2?addDaysStr(f2.date,28):null);
-      if(base2){var dy=new Date(base2);dy.setFullYear(dy.getFullYear()+1);var due=dy.toISOString().slice(0,10);var basis="1 year after 2nd vaccination ("+base2+(s?"":", projected")+")";return due<todayStr?{state:"overdue",due:due,auto:true,basis:basis}:{state:"upcoming",due:due,auto:true,basis:basis};}
     }
     return{state:"pending"};
   }
@@ -2404,7 +2391,7 @@ function sc(v){if(!v)return"background:#f1f5f9;color:#64748b";if(v===1)return"ba
 function eaTriggered(){var total=Object.values(S.scores).reduce(function(a,b){return a+b},0);if(total>=15)return true;var serious=0,moderate=0;S.days.forEach(function(d){if(d.incidents&&d.incidents.indexOf("Serious")>=0)serious++;if(d.incidents&&d.incidents.indexOf("Injury")>=0)serious++;if(d.incidents&&d.incidents.indexOf("Moderate")>=0)moderate++;});return serious>0||moderate>=3;}
 function fld(l,val,sv,type,ph,extra){return'<div class="f"><label class="lbl">'+l+'</label><input type="'+(type||"text")+'" value="'+esc(val)+'" placeholder="'+(ph||"")+'" data-save="'+sv+'" '+(extra||"")+'></div>';}
 function slct(l,val,sv,opts){var o='<option value="">— select —</option>'+opts.map(function(op){return'<option value="'+esc(op[0])+'"'+(val===op[0]?' selected':'')+'>'+op[1]+'</option>'}).join("");return'<div class="f"><label class="lbl">'+l+'</label><select data-save="'+sv+'">'+o+'</select></div>';}
-function breedSlct(val){var o='<option value="">— select breed —</option>'+BREEDS.map(function(b){return'<option value="'+esc(b)+'"'+(val===b?' selected':'')+'>'+b+'</option>'}).join("");return'<div class="f"><label class="lbl">Breed / Type</label><select data-save="dog.breed">'+o+'</select></div>';}
+function breedSlct(val,bind,label){var o='<option value="">— select breed —</option>'+BREEDS.map(function(b){return'<option value="'+esc(b)+'"'+(val===b?' selected':'')+'>'+b+'</option>'}).join("");return'<div class="f"><label class="lbl">'+(label||"Breed / Type")+'</label><select data-save="'+(bind||"dog.breed")+'">'+o+'</select></div>';}
 function ta(l,val,sv,ph){return'<div class="f"><label class="lbl">'+l+'</label><textarea data-save="'+sv+'" placeholder="'+(ph||"")+'">'+esc(val)+'</textarea></div>';}
 function dfld(l,val,i,k,type,ph){return'<div class="f"><label class="lbl">'+l+'</label><input type="'+(type||"text")+'" value="'+esc(val)+'" placeholder="'+(ph||"")+'" data-sd="'+i+'.'+k+'"></div>';}
 function dslct(l,val,i,k,opts){var o='<option value="">— select —</option>'+opts.map(function(op){return'<option value="'+esc(op[0])+'"'+(val===op[0]?' selected':'')+'>'+op[1]+'</option>'}).join("");return'<div class="f"><label class="lbl">'+l+'</label><select data-sd="'+i+'.'+k+'">'+o+'</select></div>';}
@@ -2825,10 +2812,10 @@ function page(){
     var identity='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Identity</div>'
       +'<div class="g2">'+fld("Dog name",d.name,"dog.name","text","e.g. Bailey",'onblur="checkDuplicateName()" id="dog-name-input"')+fld("Reference no.",d.refNo,"dog.refNo","text","e.g. 023-MH-2026")+'</div><div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:-4px 0 10px">&#9888; There&rsquo;s already an active dog with this name.</div>'
       +'<div class="g2">'+breedSlct(d.breed)+slct("Sex",d.sex,"dog.sex",[["Male","Male"],["Female","Female"],["Male (N)","Male (Neutered)"],["Female (S)","Female (Spayed)"],["Unknown","Unknown"]])+'</div>'
-      +'<div class="f"><label class="lbl">Crossbreed</label><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0"><input type="checkbox" data-save="dog.crossbreed" '+(d.crossbreed?"checked":"")+' style="width:18px;height:18px;cursor:pointer"><span style="font-size:13px">This dog is a crossbreed</span></label></div>'
+      +'<div class="f"><label class="lbl">Crossbreed</label><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0"><input type="checkbox" data-save="dog.crossbreed" '+(d.crossbreed?"checked":"")+' onchange="S.dog.crossbreed=this.checked;debouncedSave();renderMain()" style="width:18px;height:18px;cursor:pointer"><span style="font-size:13px">This dog is a crossbreed</span></label></div>'+(d.crossbreed?breedSlct(d.breed2,"dog.breed2","Crossed with"):'')
       +'<div class="g2">'+fld("Age (approx.)",d.age,"dog.age","text","e.g. 3 years")+slct("Size",d.size,"dog.size",[["","-- select --"],["Small (under 10kg)","Small (under 10kg)"],["Medium (10-25kg)","Medium (10-25kg)"],["Large (25-40kg)","Large (25-40kg)"],["XL (over 40kg)","XL (over 40kg)"]])+'</div>'
-      +slct("Colour / markings",d.colour,"dog.colour",[["","-- select --"],["Black","Black"],["White","White"],["Cream","Cream"],["Golden","Golden"],["Fawn","Fawn"],["Tan","Tan"],["Red / Chestnut","Red / Chestnut"],["Brown / Chocolate","Brown / Chocolate"],["Blue / Grey","Blue / Grey"],["Sable","Sable"],["Black and White","Black and White"],["Black and Tan","Black and Tan"],["Brown and White","Brown and White"],["Tri-colour","Tri-colour"],["Brindle","Brindle"],["Merle","Merle"],["Other","Other"]])
-      +wfld(d.weight)+fld("Microchip no.",d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')
+      +'<div class="g2">'+slct("Colour / markings",d.colour,"dog.colour",[["","-- select --"],["Black","Black"],["White","White"],["Cream","Cream"],["Golden","Golden"],["Fawn","Fawn"],["Tan","Tan"],["Red / Chestnut","Red / Chestnut"],["Brown / Chocolate","Brown / Chocolate"],["Blue / Grey","Blue / Grey"],["Sable","Sable"],["Black and White","Black and White"],["Black and Tan","Black and Tan"],["Brown and White","Brown and White"],["Tri-colour","Tri-colour"],["Brindle","Brindle"],["Merle","Merle"],["Other","Other"]])
+      +wfld(d.weight)+'</div>'+fld("Microchip no.",d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')
       +'<div id="chip-info" style="margin:-6px 0 4px;font-size:11px">'+chipInfoHtml(d.microchip)+'</div></div>';
 
     var intake='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Intake</div>'
