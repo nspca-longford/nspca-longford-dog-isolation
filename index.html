@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NSPCA Longford — Dog Intake Assessment</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 380 380'><rect width='380' height='380' rx='80' fill='%230f172a'/><path transform='translate(37,37)' fill='%23c5e86c' d='M102.521 170.332V306.942H0V0.029H124.438L182.738 116.056C187.867 126.348 191.598 127.751 195.795 127.751C201.857 127.751 204.188 122.605 204.188 113.249V0.029H306.56V306.942H207.452L124.904 167.525C119.775 158.636 116.51 155.83 111.847 155.83C104.852 155.83 102.521 160.975 102.521 170.332Z'/></svg>">
-<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 380 380'><rect width='380' height='380' rx='80' fill='%230f172a'/><path transform='translate(37,37)' fill='%23c5e86c' d='M102.521 170.332V306.942H0V0.029H124.438L182.738 116.056C187.867 126.348 191.598 127.751 195.795 127.751C201.857 127.751 204.188 122.605 204.188 113.249V0.029H306.56V306.942H207.452L124.904 167.525C119.775 158.636 116.51 155.83 111.847 155.83C104.852 155.83 102.521 160.975 102.521 170.332Z'/></svg>">
+<link rel="apple-touch-icon" id="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 380 380'><rect width='380' height='380' rx='80' fill='%230f172a'/><path transform='translate(37,37)' fill='%23c5e86c' d='M102.521 170.332V306.942H0V0.029H124.438L182.738 116.056C187.867 126.348 191.598 127.751 195.795 127.751C201.857 127.751 204.188 122.605 204.188 113.249V0.029H306.56V306.942H207.452L124.904 167.525C119.775 158.636 116.51 155.83 111.847 155.83C104.852 155.83 102.521 160.975 102.521 170.332Z'/></svg>">
 
 <!-- PWA: Install as home-screen app -->
 <meta name="theme-color" content="#0f172a">
@@ -17,11 +17,34 @@
 <link rel="manifest" id="manifest-link">
 <script>
 (function(){try{
- var svg="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 380 380'><rect width='380' height='380' rx='80' fill='#0f172a'/><path transform='translate(37,37)' fill='#c5e86c' d='M102.521 170.332V306.942H0V0.029H124.438L182.738 116.056C187.867 126.348 191.598 127.751 195.795 127.751C201.857 127.751 204.188 122.605 204.188 113.249V0.029H306.56V306.942H207.452L124.904 167.525C119.775 158.636 116.51 155.83 111.847 155.83C104.852 155.83 102.521 160.975 102.521 170.332Z'/></svg>";
- var icon="data:image/svg+xml;base64,"+btoa(svg);
- var base=location.origin+location.pathname.replace(/[^/]*$/,"");var m={name:"NSPCA Longford Isolation",short_name:"NSPCA Longford",start_url:base,scope:base,display:"standalone",background_color:"#0f172a",theme_color:"#0f172a",description:"NSPCA Longford Isolation Unit - Dog Intake Assessment & 5-Day Report",orientation:"any",icons:[{src:icon,sizes:"192x192",type:"image/svg+xml",purpose:"any"},{src:icon,sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}]};
- var url=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:"application/manifest+json"}));
- document.getElementById("manifest-link").href=url;
+ var NPATH="M102.521 170.332V306.942H0V0.029H124.438L182.738 116.056C187.867 126.348 191.598 127.751 195.795 127.751C201.857 127.751 204.188 122.605 204.188 113.249V0.029H306.56V306.942H207.452L124.904 167.525C119.775 158.636 116.51 155.83 111.847 155.83C104.852 155.83 102.521 160.975 102.521 170.332Z";
+ // Rounded badge (browser tab / desktop / "any" purpose)
+ var ROUNDED="<svg xmlns='http://www.w3.org/2000/svg' width='380' height='380' viewBox='0 0 380 380'><rect width='380' height='380' rx='80' fill='#0f172a'/><path transform='translate(37,37)' fill='#c5e86c' d='"+NPATH+"'/></svg>";
+ // Full-bleed with safe-zone padding (Android maskable / iOS home screen — OS adds its own rounding)
+ var FULL="<svg xmlns='http://www.w3.org/2000/svg' width='380' height='380' viewBox='0 0 380 380'><rect width='380' height='380' fill='#0f172a'/><path transform='translate(72,72) scale(0.77)' fill='#c5e86c' d='"+NPATH+"'/></svg>";
+ var base=location.origin+location.pathname.replace(/[^/]*$/,"");
+ function raster(svg,size,cb){var img=new Image();img.onload=function(){try{var c=document.createElement("canvas");c.width=size;c.height=size;var x=c.getContext("2d");x.drawImage(img,0,0,size,size);cb(c.toDataURL("image/png"));}catch(e){cb(null);}};img.onerror=function(){cb(null);};img.src="data:image/svg+xml;base64,"+btoa(svg);}
+ var out={},pending=4,fired=false;
+ function build(){if(fired)return;fired=true;
+  var icons;
+  if(out.any192&&out.any512&&out.mask512){
+   icons=[{src:out.any192,sizes:"192x192",type:"image/png",purpose:"any"},{src:out.any512,sizes:"512x512",type:"image/png",purpose:"any"},{src:out.mask512,sizes:"512x512",type:"image/png",purpose:"maskable"}];
+  }else{
+   var svgIcon="data:image/svg+xml;base64,"+btoa(ROUNDED);
+   icons=[{src:svgIcon,sizes:"any",type:"image/svg+xml",purpose:"any"},{src:svgIcon,sizes:"any",type:"image/svg+xml",purpose:"maskable"}];
+  }
+  var m={name:"NSPCA Longford Isolation",short_name:"NSPCA Longford",start_url:base,scope:base,display:"standalone",background_color:"#0f172a",theme_color:"#0f172a",description:"NSPCA Longford Isolation Unit - Dog Intake Assessment & 5-Day Report",orientation:"any",icons:icons};
+  var url=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:"application/manifest+json"}));
+  var link=document.getElementById("manifest-link");if(link)link.href=url;
+  if(out.ios180){var ai=document.getElementById("apple-touch-icon");if(ai)ai.href=out.ios180;}
+ }
+ function tick(){pending--;if(pending<=0)build();}
+ raster(ROUNDED,192,function(d){out.any192=d;tick();});
+ raster(ROUNDED,512,function(d){out.any512=d;tick();});
+ raster(FULL,512,function(d){out.mask512=d;tick();});
+ raster(FULL,180,function(d){out.ios180=d;tick();});
+ // Safety net in case an image never loads/fires
+ setTimeout(build,2500);
 }catch(e){}})();
 </script>
 <style>
