@@ -170,6 +170,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
         <button id="dash-menu-btn" onclick="toggleDashMenu(event)" style="background:#1e293b;color:#c5e86c;border:0.5px solid #334155;padding:5px 11px;border-radius:6px;font-size:14px;cursor:pointer;font-family:inherit;line-height:1" title="Menu" aria-label="Menu">&#9776;</button>
         <div id="dash-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,0.18);min-width:200px;z-index:50;overflow:hidden">
           <div onclick="dashMenuGo('records')" class="dmi">&#128203; Records</div>
+          <div onclick="dashMenuGo('rounds')" class="dmi">&#128694; Daily Rounds</div>
           <div onclick="dashMenuGo('stats')" class="dmi">&#128202; Stats</div>
           <div onclick="dashMenuGo('team')" class="dmi">&#128101; Team Directory</div>
           <div id="dash-menu-users" onclick="dashMenuGo('users')" class="dmi" style="display:none">&#9881; Manage Users</div>
@@ -241,6 +242,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"1.9",date:"2026-06-01",note:"Daily Rounds screen (tap to log walks/exercise across all dogs at once), printable kennel card, weight-trend sparkline with a loss flag, notices now shown on dashboard cards and in the briefing, and PDF/Print for the report and briefing."},
   {version:"1.8",date:"2026-06-01",note:"Notices — add care & status notes to any dog (needs neutering, no walking, vet follow-up, etc.). They pop up when you open the dog and show as a header chip, separate from the red/amber handling warnings."},
   {version:"1.7",date:"2026-05-28",note:"Handling warnings — add safety warnings to any dog (bite risk, two-person handling, muzzle required, etc.). They pop up when you open the dog and show as a header chip and a dashboard badge."},
   {version:"1.6",date:"2026-05-28",note:"5-Day Report — Day 1 to 5 are now a single tab with a day switcher and tick marks showing which days are filled in."},
@@ -574,6 +576,83 @@ async function saveExerciseChange(rec){
   try{await supabaseClient.from("dogs").update(row).eq("id",rec.id);rec.savedAt=row.saved_at;rec.savedBy=currentName();}catch(e){console.error("Exercise save error:",e);}
 }
 
+// ── Daily rounds (exercise) ───────────────────────────────────────
+function roundsActiveDogs(){
+  var act=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active \u2014 in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
+  act.sort(function(a,b){var ka=(a.state&&a.state.dog&&a.state.dog.kennel)||"~~",kb=(b.state&&b.state.dog&&b.state.dog.kennel)||"~~";if(ka!==kb)return ka.localeCompare(kb,undefined,{numeric:true});return(a.name||"").localeCompare(b.name||"");});
+  return act;
+}
+function renderRounds(){
+  var act=roundsActiveDogs();
+  var dateLabel=new Date().toLocaleDateString("en-IE",{weekday:"long",day:"numeric",month:"long"});
+  var walked=act.filter(function(r){return getTodaysExercises(r).some(function(e){return e.type==="Walked";});}).length;
+  var head='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1">Daily Rounds</h2></div>'
+    +'<div class="sub" style="margin-bottom:14px">'+dateLabel+' &middot; '+walked+' of '+act.length+' walked today &middot; tap to log/unlog</div>';
+  if(!act.length)return head+'<div style="text-align:center;padding:40px;color:var(--color-text-secondary)">No dogs in care.</div>';
+  var rows=act.map(function(r){
+    var d=(r.state&&r.state.dog)||{};
+    var todays=getTodaysExercises(r);
+    var btns=EX_TYPES.map(function(t){
+      var done=todays.some(function(e){return e.type===t.key;});
+      return '<button onclick="quickRoundLog('+r.id+',\''+t.key.replace(/'/g,"\\'")+'\')" title="'+t.key+'" style="flex:1;min-width:0;border:1px solid '+(done?"#9bc23e":"var(--color-border-secondary)")+';background:'+(done?"#c5e86c":"var(--color-background-primary)")+';color:'+(done?"#3a4a16":"#94a3b8")+';border-radius:9px;padding:8px 4px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:15px;line-height:1">'+t.icon+'</span><span style="font-size:9px;font-weight:700;letter-spacing:0.02em">'+t.short+'</span></button>';
+    }).join("");
+    var ph=d.photo?'<img src="'+d.photo+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0">':'<div style="width:40px;height:40px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">&#128062;</div>';
+    return '<div class="card" style="padding:10px 12px;margin-bottom:8px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'+ph+'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.name)+'</div><div style="font-size:11px;color:var(--color-text-secondary)">'+(d.kennel?esc(d.kennel):"No kennel")+(r.intakeDate?(' &middot; Day '+(daysInIsolation(r.intakeDate)||"?")):"")+'</div></div><button onclick="openDog('+r.id+')" style="background:#e2e8f0;color:#475569;border:none;border-radius:7px;padding:5px 11px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0">Open</button></div><div style="display:flex;gap:6px">'+btns+'</div></div>';
+  }).join("");
+  return head+rows;
+}
+async function quickRoundLog(recId,type){
+  var rec=records.find(function(r){return r.id===recId;});
+  if(!rec)return;
+  if(!rec.state)rec.state={};if(!rec.state.exercises)rec.state.exercises=[];
+  var today=new Date().toISOString().slice(0,10);
+  var has=rec.state.exercises.some(function(e){return e.date===today&&e.type===type;});
+  if(has){rec.state.exercises=rec.state.exercises.filter(function(e){return !(e.date===today&&e.type===type);});}
+  else{var now=new Date();var time=now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0");rec.state.exercises.push({date:today,time:time,type:type,staff:currentName(),notes:""});}
+  showDashSection("rounds");
+  saveExerciseChange(rec);
+}
+
+// ── Weight trend sparkline + loss flag ────────────────────────────
+function weightSparkCard(weights){
+  var pts=(weights||[]).map(function(w){return{date:w.date||"",kg:parseFloat((w.weight||"").toString().replace(/[^0-9.]/g,""))};}).filter(function(p){return p.date&&!isNaN(p.kg)&&p.kg>0;}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0;});
+  if(pts.length<2)return"";
+  var kgs=pts.map(function(p){return p.kg;});
+  var min=Math.min.apply(null,kgs),max=Math.max.apply(null,kgs);
+  var first=pts[0].kg,latest=pts[pts.length-1].kg;
+  var dropPct=max>0?Math.round(((max-latest)/max)*1000)/10:0;
+  var netKg=Math.round((latest-first)*10)/10;
+  var alert=dropPct>=5;
+  var W=300,H=46,pad=5,span=(max-min)||1,stepX=(W-2*pad)/(pts.length-1);
+  var coords=pts.map(function(p,i){var x=pad+i*stepX;var y=H-pad-((p.kg-min)/span)*(H-2*pad);return[Math.round(x*10)/10,Math.round(y*10)/10];});
+  var line=alert?"#dc2626":"#0ea5e9";
+  var poly=coords.map(function(c){return c[0]+","+c[1];}).join(" ");
+  var dots=coords.map(function(c,i){return'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="'+(i===coords.length-1?3.2:2)+'" fill="'+line+'"/>';}).join("");
+  var spark='<svg viewBox="0 0 '+W+' '+H+'" style="display:block;width:100%;max-width:340px;height:auto"><polyline points="'+poly+'" fill="none" stroke="'+line+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'+dots+'</svg>';
+  return'<div class="card" style="margin-bottom:14px;'+(alert?"border:1px solid #fca5a5":"")+'">'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;gap:8px;flex-wrap:wrap"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary)">Trend</div><div style="font-size:11px;color:var(--color-text-secondary)">'+pts.length+' weigh-ins &middot; now '+latest+' kg</div></div>'
+    +spark
+    +'<div style="display:flex;gap:14px;margin-top:9px;font-size:12px;flex-wrap:wrap"><span style="color:#64748b">Since first: <strong style="color:'+(netKg<0?"#dc2626":netKg>0?"#166534":"#64748b")+'">'+(netKg>0?"+":"")+netKg+' kg</strong></span><span style="color:#64748b">Range '+min+'&ndash;'+max+' kg</span></div>'
+    +(alert?'<div style="margin-top:10px;background:#fef2f2;border-radius:8px;padding:9px 12px;font-size:12px;color:#991b1b;font-weight:600">&#9888; Down '+dropPct+'% from peak ('+max+' kg &rarr; '+latest+' kg) &mdash; worth checking</div>':'')
+    +'</div>';
+}
+
+// ── Print / save-as-PDF the current report or briefing ────────────
+function printDoc(title){
+  var src=document.getElementById("content");
+  if(!src){window.print();return;}
+  var clone=src.cloneNode(true);
+  var strip=clone.querySelectorAll(".brow, button, input, textarea, select");
+  for(var i=0;i<strip.length;i++)strip[i].parentNode.removeChild(strip[i]);
+  var styles="";var sEls=document.querySelectorAll("style");for(var j=0;j<sEls.length;j++)styles+=sEls[j].textContent+"\n";
+  var links="";var lEls=document.querySelectorAll('link[rel="stylesheet"]');for(var k=0;k<lEls.length;k++)links+=lEls[k].outerHTML;
+  var w=window.open("","_blank");
+  var docTitle=(title||"NSPCA Longford")+(S.dog&&S.dog.name?" \u2014 "+S.dog.name:"");
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+esc(docTitle)+'</title>'+links+'<style>'+styles+'</style><style>body{background:#fff !important;margin:0;padding:24px;max-width:820px}@page{margin:14mm}.card{break-inside:avoid;page-break-inside:avoid}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>'+clone.innerHTML+'</body></html>');
+  w.document.close();
+  setTimeout(function(){w.print();},400);
+}
+
 // Custom in-page confirm — replaces native confirm() to avoid the browser's
 // "domain.com says:" prompt. Pass {danger:true} for destructive actions.
 function appConfirm(message,onConfirm,options){
@@ -888,6 +967,8 @@ function showDashSection(section){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1">All Records</h2><button onclick="exportCSV()" class="btn" style="font-size:12px;padding:6px 14px">Export CSV &#8595;</button></div>'+page_records();
   }else if(section==="stats"){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button></div>'+renderStats();
+  }else if(section==="rounds"){
+    el.innerHTML=renderRounds();
   }else if(section==="profile"){
     el.innerHTML=renderProfile();
   }else if(section==="team"){
@@ -2030,7 +2111,7 @@ function renderWeights(){
       if(w.entry){var changeHtml="";if(prevW&&prevW.entry){var curr=parseFloat((w.entry.weight||"0").replace(/[^0-9.]/g,""));var prev=parseFloat((prevW.entry.weight||"0").replace(/[^0-9.]/g,""));if(!isNaN(curr)&&!isNaN(prev)&&prev>0){var diff=Math.round((curr-prev)*10)/10;if(diff>0)changeHtml='<span style="color:#166534;font-size:11px;font-weight:600;margin-left:6px">&#9650; +'+diff+' kg</span>';else if(diff<0)changeHtml='<span style="color:#dc2626;font-size:11px;font-weight:600;margin-left:6px">&#9660; '+diff+' kg</span>';else changeHtml='<span style="color:#94a3b8;font-size:11px;margin-left:6px">&mdash; no change</span>';}}return'<tr><td style="padding:10px 12px;font-size:12px;color:var(--color-text-secondary)">'+(w.current?"<strong>This week</strong>":label)+'</td><td style="padding:10px 12px;font-size:14px;font-weight:700;color:#166534">'+w.entry.weight+changeHtml+'</td><td style="padding:10px 12px;font-size:12px;color:var(--color-text-secondary)">'+w.entry.date+(w.entry.note?' &middot; '+esc(w.entry.note):'')+'</td><td style="padding:10px 12px;text-align:right"><button onclick="editWeight('+weights.indexOf(w.entry)+')" style="background:#e2e8f0;color:#475569;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;margin-right:4px">&#9998;</button><button onclick="deleteWeight('+weights.indexOf(w.entry)+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer">&#10005;</button></td></tr>';}
       else return'<tr style="opacity:0.45"><td style="padding:10px 12px;font-size:12px;color:var(--color-text-secondary)">'+(w.current?"<strong>This week</strong>":label)+'</td><td style="padding:10px 12px;font-size:12px;color:#dc2626;font-weight:600">Not recorded</td><td></td><td></td></tr>';
     }).join("");
-    return'<h2 style="margin-bottom:4px">Weight Records</h2><div class="sub" style="margin-bottom:16px">Weekly tracking from intake date.</div>'+banner+'<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Log Weight</div><div class="g2"><div class="f"><label class="lbl">Date</label><input type="date" id="w-date" value="'+today+'"></div><div class="f"><label class="lbl">Weight</label><div style="display:flex;align-items:center;gap:8px"><input type="number" step="0.1" min="0" inputmode="decimal" id="w-val" placeholder="12.5" style="flex:1" onkeydown="if(event.key===\'Enter\')addWeight()"><span style="font-weight:700;color:var(--color-text-secondary)">kg</span></div></div></div><div class="f"><label class="lbl">Note (optional)</label><input id="w-note" placeholder="e.g. Post-treatment weigh-in" onkeydown="if(event.key===\'Enter\')addWeight()"></div><div id="w-edit-banner" style="display:none;align-items:center;justify-content:space-between;gap:8px;background:#dbeafe;border-radius:8px;padding:7px 11px;margin-bottom:8px"><span style="font-size:11px;font-weight:600;color:#1e40af">Editing entry &mdash; saving replaces it</span><button onclick="cancelWeightEdit()" style="background:#fff;border:0.5px solid #93c5fd;color:#1e40af;font-size:11px;font-weight:600;padding:4px 11px;border-radius:7px;cursor:pointer;font-family:inherit">Cancel</button></div><button id="w-add-btn" class="btn btnp" onclick="addWeight()">+ Add Entry</button></div>'+(weeks.length?'<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Weekly Progress ('+recorded+' of '+weeks.length+' weeks recorded)</div><table style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:2px solid var(--color-border-secondary)"><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Week</th><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Weight</th><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Detail</th><th></th></tr></thead><tbody>'+tableRows+'</tbody></table></div>':'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)">No weight entries yet.</div>')+'<div class="brow"><button class="btn" data-go="medical">&larr; Back</button><button class="btn btnp" data-go="exercise">Next: exercise &rarr;</button></div>';
+    return'<h2 style="margin-bottom:4px">Weight Records</h2><div class="sub" style="margin-bottom:16px">Weekly tracking from intake date.</div>'+banner+weightSparkCard(weights)+'<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Log Weight</div><div class="g2"><div class="f"><label class="lbl">Date</label><input type="date" id="w-date" value="'+today+'"></div><div class="f"><label class="lbl">Weight</label><div style="display:flex;align-items:center;gap:8px"><input type="number" step="0.1" min="0" inputmode="decimal" id="w-val" placeholder="12.5" style="flex:1" onkeydown="if(event.key===\'Enter\')addWeight()"><span style="font-weight:700;color:var(--color-text-secondary)">kg</span></div></div></div><div class="f"><label class="lbl">Note (optional)</label><input id="w-note" placeholder="e.g. Post-treatment weigh-in" onkeydown="if(event.key===\'Enter\')addWeight()"></div><div id="w-edit-banner" style="display:none;align-items:center;justify-content:space-between;gap:8px;background:#dbeafe;border-radius:8px;padding:7px 11px;margin-bottom:8px"><span style="font-size:11px;font-weight:600;color:#1e40af">Editing entry &mdash; saving replaces it</span><button onclick="cancelWeightEdit()" style="background:#fff;border:0.5px solid #93c5fd;color:#1e40af;font-size:11px;font-weight:600;padding:4px 11px;border-radius:7px;cursor:pointer;font-family:inherit">Cancel</button></div><button id="w-add-btn" class="btn btnp" onclick="addWeight()">+ Add Entry</button></div>'+(weeks.length?'<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Weekly Progress ('+recorded+' of '+weeks.length+' weeks recorded)</div><table style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:2px solid var(--color-border-secondary)"><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Week</th><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Weight</th><th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)">Detail</th><th></th></tr></thead><tbody>'+tableRows+'</tbody></table></div>':'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)">No weight entries yet.</div>')+'<div class="brow"><button class="btn" data-go="medical">&larr; Back</button><button class="btn btnp" data-go="exercise">Next: exercise &rarr;</button></div>';
   }catch(err){return'<div style="padding:20px;color:#dc2626">Weight tab error: '+err.message+'</div>';}
 }
 function addWeight(){var dEl=document.getElementById("w-date"),vEl=document.getElementById("w-val"),nEl=document.getElementById("w-note");var d=dEl?dEl.value.trim():"",v=vEl?vEl.value.trim():"",n=nEl?nEl.value.trim():"";if(!d||!v){appAlert("Please enter a date and weight.");return;}if(!S.weights)S.weights=[];var entry={date:d,weight:parseFloat(v)+" kg",note:n};if(window._weightEdit!=null&&S.weights[window._weightEdit]){S.weights[window._weightEdit]=entry;window._weightEdit=null;}else{S.weights.push(entry);}saveRecord();renderMain();}
@@ -2561,7 +2642,7 @@ function renderBriefing(){
 
   // Top toolbar
   var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap"><div><h2 style="margin:0">Management Briefing</h2><div class="sub" style="margin-top:2px">Narrative report for senior management review.</div></div>';
-  h+='<div style="display:flex;gap:6px"><button class="btn" onclick="copyBriefing()" style="font-size:12px">&#128203; Copy</button><button class="btn" onclick="window.print()" style="font-size:12px">&#128424; Print</button></div></div>';
+  h+='<div style="display:flex;gap:6px"><button class="btn" onclick="copyBriefing()" style="font-size:12px">&#128203; Copy</button><button class="btn" onclick="printDoc(\'Management Briefing\')" style="font-size:12px">&#128424; PDF / Print</button></div></div>';
 
   // Document container
   h+='<div id="briefing-doc" class="card" style="padding:28px 30px;line-height:1.6;font-size:13px;color:#0f172a;max-width:780px">';
@@ -2923,7 +3004,7 @@ function renderBriefing(){
 
   h+='</div>'; // close briefing-doc
 
-  h+='<div class="brow"><button class="btn" data-go="report">&larr; Back to Report</button><button class="btn" onclick="window.print()">Print</button><button class="btn btng" onclick="copyBriefing()">&#128203; Copy</button></div>';
+  h+='<div class="brow"><button class="btn" data-go="report">&larr; Back to Report</button><button class="btn" onclick="printDoc(\'Management Briefing\')">&#128424; PDF / Print</button><button class="btn btng" onclick="copyBriefing()">&#128203; Copy</button></div>';
   return h;
 }
 
@@ -3130,7 +3211,7 @@ function page(){
     }
     asmtCard+='</div>';
 
-    return'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="margin:0">Full assessment report</h2><button class="btn" onclick="window.print()" style="font-size:12px">Print</button></div>'
+    return'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="margin:0">Full assessment report</h2><button class="btn" onclick="printDoc(\'Assessment Report\')" style="font-size:12px">&#128424; PDF / Print</button></div>'
       +'<div style="background:#0f172a;border-radius:10px;padding:16px 18px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="color:#94a3b8;font-size:11px;margin-bottom:2px">'+esc(d2.refNo||"")+'</div><div style="color:#fff;font-size:22px;font-weight:600">'+esc(d2.name||"—")+'</div><div style="color:#94a3b8;font-size:12px;margin-top:2px">'+[d2.breed,d2.sex,d2.age].filter(Boolean).map(esc).join(" · ")+'</div></div><div style="text-align:right">'+tlb2+(total2?'<div style="color:#94a3b8;font-size:11px;margin-top:4px">Score: '+total2+'/24</div>':"")+'</div></div></div>'
       +(ea2?'<div class="ea-warn" style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:#92400e">&#9888; Enhanced Assessment flagged</div></div>':'')
       +(rWarn.length?'<div class="card" style="border-left:4px solid '+(rCrit?"#dc2626":"#f59e0b")+'"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:'+(rCrit?"#991b1b":"#854d0e")+';margin-bottom:8px">&#9888; Handling warnings</div>'+rWarn.map(function(w){var th=warnLevelTheme(w.level);return'<div class="rrow"><span class="rk">'+esc(w.text)+'</span><span class="rv"><span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;background:'+th[0]+';color:'+th[2]+'">'+esc(w.level||"Caution")+'</span></span></div>';}).join("")+'</div>':"")
@@ -3143,7 +3224,7 @@ function page(){
       +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Behaviour scoring</div>'+srows+'<div style="display:flex;justify-content:space-between;padding:10px 0 0;font-weight:600;font-size:13px"><span>Total</span><span>'+total2+'/24</span></div></div>'
       +((concerns||f2.steps||f2.handoverNote||f2.outcome||f2.overallProgress)?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">Final assessment output</div>'+concerns+(f2.steps?'<div style="background:#dbeafe;border-radius:6px;padding:11px;margin-top:8px"><div style="font-size:10px;font-weight:600;color:#0369a1;text-transform:uppercase;margin-bottom:3px">Recommended next steps</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.steps)+'</div></div>':"")+(f2.followUp?'<div class="rrow" style="margin-top:8px"><span class="rk">Follow-up date</span><span class="rv">'+esc(f2.followUp)+'</span></div>':"")+(f2.overallProgress?'<div class="rrow"><span class="rk">Overall progress</span><span class="rv">'+esc(f2.overallProgress)+'</span></div>':"")+(f2.outcome?'<div class="rrow"><span class="rk">Outcome</span><span class="rv">'+esc(f2.outcome)+(f2.outcomeDate?" &middot; "+esc(f2.outcomeDate):"")+'</span></div>':"")+(f2.outcomeNotes?noteBlock("Outcome notes",f2.outcomeNotes):"")+(f2.notes?noteBlock("Additional notes",f2.notes):"")+(f2.handoverNote?'<div style="margin-top:10px;padding:10px;background:#f8fafc;border-radius:6px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:4px">Kennel handover note</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.handoverNote)+'</div></div>':"")+'</div>':"")
       +(f2.assessorName?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:8px">Sign-off</div><div class="rrow"><span class="rk">Assessor</span><span class="rv">'+esc(f2.assessorName)+(f2.assessorDate?' &mdash; '+esc(f2.assessorDate):'')+'</span></div>'+(f2.secondAssessor?'<div class="rrow"><span class="rk">Second assessor</span><span class="rv">'+esc(f2.secondAssessor)+(f2.secondAssessorDate?' &mdash; '+esc(f2.secondAssessorDate):'')+'</span></div>':'')+'</div>':'')
-      +'<div class="brow"><button class="btn" data-go="timeline">&larr; Back</button><button class="btn" onclick="window.print()">Print</button><button class="btn" data-go="briefing">Briefing &rarr;</button></div>';
+      +'<div class="brow"><button class="btn" data-go="timeline">&larr; Back</button><button class="btn" onclick="printDoc(\'Assessment Report\')">&#128424; PDF / Print</button><button class="btn" data-go="briefing">Briefing &rarr;</button></div>';
   }
 
   if(t==="briefing")return renderBriefing();
