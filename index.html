@@ -195,6 +195,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
       <div id="badge" style="display:none;background:#1e293b;border-radius:6px;padding:4px 12px;color:#e2e8f0;font-size:12px"></div>
       <div id="iso-chip" onclick="showIsolationOverlay()" title="5-day isolation status" style="display:none;align-items:center;gap:4px;border:1px solid #0d9488;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap"></div>
       <div id="warn-chip" onclick="showWarningOverlay()" title="Handling warnings" style="display:none;align-items:center;gap:4px;border:1px solid #f59e0b;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap"></div>
+      <div id="notice-chip" onclick="showNoticeOverlay()" title="Notices" style="display:none;align-items:center;gap:4px;border:1px solid #0284c7;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap"></div>
     </div>
   </div>
   <div class="subheader">
@@ -240,6 +241,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"1.8",date:"2026-06-01",note:"Notices — add care & status notes to any dog (needs neutering, no walking, vet follow-up, etc.). They pop up when you open the dog and show as a header chip, separate from the red/amber handling warnings."},
   {version:"1.7",date:"2026-05-28",note:"Handling warnings — add safety warnings to any dog (bite risk, two-person handling, muzzle required, etc.). They pop up when you open the dog and show as a header chip and a dashboard badge."},
   {version:"1.6",date:"2026-05-28",note:"5-Day Report — Day 1 to 5 are now a single tab with a day switcher and tick marks showing which days are filled in."},
   {version:"1.5",date:"2026-05-28",note:"Isolation status now clears automatically once a dog is moved to kennels or leaves isolation — no more false ‘overdue’ alerts."},
@@ -1317,7 +1319,7 @@ function renderDashboard(){
   if(window._dbSearchActive){var si=el.querySelector('input[placeholder="Search..."]');if(si){si.focus();var l=si.value.length;si.setSelectionRange(l,l);}window._dbSearchActive=false;}
 }
 
-function openDog(id){var rec=records.find(function(r){return r.id===id;});if(!rec)return;window._dayView=0;loadRecord(id);showScreen("wrap");S.tab="dog";render();if(!maybeAutoContagiousOverlay()){if(!maybeAutoWarningOverlay())maybeAutoIsolationOverlay();}}
+function openDog(id){var rec=records.find(function(r){return r.id===id;});if(!rec)return;window._dayView=0;loadRecord(id);showScreen("wrap");S.tab="dog";render();if(!maybeAutoContagiousOverlay()){if(!maybeAutoWarningOverlay()){if(!maybeAutoNoticeOverlay())maybeAutoIsolationOverlay();}}}
 function openNewDog(){appConfirm("Start a new dog? Current unsaved data will be cleared.",function(){S=defaultState();persistSave();showScreen("wrap");S.tab="dog";render();});}
 function goToDashboard(){loadRecordsList().then(function(){showDashboard();});}
 async function loadDashNotices(){}
@@ -1581,6 +1583,53 @@ function updateWarnChip(){
   chip.style.background=anyCrit?"#dc2626":"#f59e0b";chip.style.color="#fff";chip.style.borderColor=anyCrit?"#dc2626":"#f59e0b";
 }
 
+// ── Care notices ──────────────────────────────────────────────────
+var PRESET_NOTICES=["Needs neutering","Needs spaying","No walking \u2014 on rest","Short walks only","Lead only \u2014 no off-lead","Vet follow-up due","Awaiting paperwork","Not ready for rehoming","Needs grooming","On medication"];
+var NOTICE_BG="#e0f2fe",NOTICE_BORDER="#0ea5e9",NOTICE_FG="#075985",NOTICE_ACCENT="#0284c7";
+function addQuickNotice(pi){var t=PRESET_NOTICES[pi];if(!t)return;if(!S.careNotices)S.careNotices=[];if(S.careNotices.some(function(n){return n.text===t;}))return;S.careNotices.push({text:t,by:currentName(),date:new Date().toISOString().slice(0,10)});saveRecord();renderMain();}
+function addCustomNotice(){var el=document.getElementById("notice-text");var txt=el?(el.value||"").trim():"";if(!txt){appAlert("Enter a notice.");return;}if(!S.careNotices)S.careNotices=[];S.careNotices.push({text:txt,by:currentName(),date:new Date().toISOString().slice(0,10)});saveRecord();renderMain();}
+function deleteNotice(i){if(!S.careNotices)return;S.careNotices.splice(i,1);saveRecord();renderMain();}
+function noticesCardHtml(){
+  var ns=S.careNotices||[];
+  var chips=PRESET_NOTICES.map(function(t,pi){
+    var exists=ns.some(function(n){return n.text===t;});
+    return '<button onclick="addQuickNotice('+pi+')" '+(exists?"disabled":"")+' style="border:1px solid '+(exists?"#e2e8f0":NOTICE_BORDER)+';background:'+(exists?"#f1f5f9":"#fff")+';color:'+(exists?"#94a3b8":NOTICE_FG)+';border-radius:20px;padding:5px 11px;font-size:11px;font-weight:600;cursor:'+(exists?"default":"pointer")+';font-family:inherit">'+(exists?"&#10003; ":"+ ")+esc(t)+'</button>';
+  }).join("");
+  var list=ns.length?ns.map(function(n,i){return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;'+(i<ns.length-1?"border-bottom:1px solid #f1f5f9":"")+'"><span style="flex:1;min-width:0;font-size:12.5px">'+esc(n.text)+'</span><button onclick="deleteNotice('+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;flex-shrink:0">&#10005;</button></div>';}).join(""):'<div style="text-align:center;padding:10px 0;color:#94a3b8;font-size:12px">No notices added</div>';
+  return '<div class="card" style="border:1px solid '+(ns.length?NOTICE_BORDER:"#e2e8f0")+'"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:16px">&#128276;</span><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:'+NOTICE_FG+'">Notices</span></div>'
+    +'<div style="font-size:11px;color:#64748b;margin-bottom:10px">Care &amp; status notes \u2014 these pop up when the dog is opened.</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+chips+'</div>'
+    +'<input id="notice-text" placeholder="Add a custom notice\u2026" style="width:100%;color:#0f172a;background:#fff;padding:9px 11px;border:1px solid var(--color-border-secondary);border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:8px"><div style="display:flex;justify-content:flex-end"><button onclick="addCustomNotice()" class="btn" style="background:'+NOTICE_ACCENT+';color:#fff;border:none;font-size:13px;padding:8px 20px;white-space:nowrap">Add</button></div>'
+    +'<div style="margin-top:10px">'+list+'</div></div>';
+}
+function showNoticeOverlay(){
+  var ns=S.careNotices||[];if(!ns.length){appAlert("No notices on this dog.");return;}
+  var ov=document.getElementById("notice-overlay");
+  if(!ov){ov=document.createElement("div");ov.id="notice-overlay";ov.className="med-overlay";ov.onclick=function(e){if(e.target===ov)hideNoticeOverlay();};document.body.appendChild(ov);}
+  var rows=ns.map(function(n){return '<div style="display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid #f1f5f9"><span style="flex:1;font-size:13px;color:#0f172a">'+esc(n.text)+'</span></div>';}).join("");
+  var name=esc((S.dog&&S.dog.name)||"This dog");
+  ov.innerHTML='<div class="med-modal" style="border-top:5px solid '+NOTICE_ACCENT+'"><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="width:38px;height:38px;border-radius:10px;background:'+NOTICE_BG+';display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0">&#128276;</div><div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700;color:'+NOTICE_FG+'">Notices</div><div style="font-size:11px;color:#94a3b8">'+name+'</div></div><button class="med-close-btn" onclick="hideNoticeOverlay()">&#10005;</button></div><div>'+rows+'</div><button class="med-save-btn" style="background:'+NOTICE_ACCENT+';margin-top:16px" onclick="hideNoticeOverlay()">Got it</button><button onclick="hideNoticeOverlay();S.tab=\'dog\';render();" style="width:100%;margin-top:8px;background:transparent;border:none;color:#64748b;font-size:11px;cursor:pointer;font-family:inherit;text-decoration:underline">Manage notices</button></div>';
+  requestAnimationFrame(function(){ov.classList.add("show");});
+}
+function hideNoticeOverlay(){var ov=document.getElementById("notice-overlay");if(ov)ov.classList.remove("show");}
+window._noticeShown=window._noticeShown||{};
+function maybeAutoNoticeOverlay(){
+  var ns=S.careNotices||[];if(!ns.length)return false;
+  var key=S._id||(S.dog&&S.dog.name)||"unsaved";
+  if(window._noticeShown[key])return false;
+  window._noticeShown[key]=true;
+  setTimeout(showNoticeOverlay,300);
+  return true;
+}
+function updateNoticeChip(){
+  var chip=document.getElementById("notice-chip");if(!chip)return;
+  var ns=S.careNotices||[];
+  if(!ns.length){chip.style.display="none";return;}
+  chip.innerHTML="&#128276; "+ns.length+" notice"+(ns.length>1?"s":"");
+  chip.style.display="inline-flex";
+  chip.style.background=NOTICE_ACCENT;chip.style.color="#fff";chip.style.borderColor=NOTICE_ACCENT;
+}
+
 function exportCSV(){
   var hdrs=["Name","Breed","Ref No","Intake Date","Kennel","Age","Sex","Colour","Weight","Traffic Light","Score","Outcome","Days","Saved","Saved By"];
   var rows=records.map(function(r){var d=r.state&&r.state.dog?r.state.dog:{};var f=r.state&&r.state.fin?r.state.fin:{};return[r.name,r.breed,r.refNo,r.intakeDate,d.kennel||"",d.age||"",d.sex||"",d.colour||"",d.weight||"",r.trafficLight||"",r.score||"",f.outcome||"",daysInIsolation(r.intakeDate)||"",r.savedAt||"",r.savedBy||""].map(function(v){return'"'+(v||"").toString().replace(/"/g,"''")+'"';}).join(",");});
@@ -1630,7 +1679,7 @@ function defaultState(){return{_id:null,tab:"dog",
   medical:defaultMedical(),
   assessment:{touchHead:"",touchBody:"",touchPaws:"",touchEars:"",touchMouth:"",collarGrab:"",restraint:"",leadBehaviour:"",handlingNotes:"",barrierReaction:"",barrierIntensity:"",barrierTriggers:"",redirectedAggression:"",barrierNotes:"",strangerApproach:"",childrenSuitable:"",dogOnLead:"",dogOffLead:"",catResponse:"",equineResponse:"",smallMammalResponse:"",groupDogs:"",socialNotes:"",carTravel:"",noiseSensitivity:"",newEnvironments:"",kennelBehaviour:"",environmentNotes:"",toyInterest:"",retrieve:"",tug:"",foodMotivation:"",resourceGuarding:"",playStyle:"",playNotes:"",attentionSpan:"",handlerFocus:"",basicCommands:"",previousTraining:"",trainNotes:"",homeType:"",suitableChildren:"",suitableOtherDogs:"",suitableCats:"",suitableEquine:"",suitableSmallMammals:"",exerciseNeeds:"",experienceLevel:"",suitabilityNotes:"",buddyWalks:[],playdates:[],muzzleRequired:"",muzzleType:"",muzzleStage:"",muzzleSessions:[]},
   fin:{c1:"",c2:"",c3:"",steps:"",followUp:"",notes:"",overallProgress:"",handoverNote:"",assessorName:"",assessorDate:"",secondAssessor:"",secondAssessorDate:"",outcome:"",outcomeDate:"",outcomeNotes:""},
-  weights:[],files:[],exercises:[],notes:[],incidents:[],feeding:[],warnings:[],feedingPlan:{brand:"",grams:"",frequency:"",dietType:"",notes:""}
+  weights:[],files:[],exercises:[],notes:[],incidents:[],feeding:[],warnings:[],careNotices:[],feedingPlan:{brand:"",grams:"",frequency:"",dietType:"",notes:""}
 };}
 
 var S=defaultState();
@@ -2881,7 +2930,7 @@ function page(){
       +'<div class="g2">'+slct("Kennel / Pod",d.kennel,"dog.kennel",[["",'-- not assigned --'],["Kennel 1","Kennel 1"],["Kennel 2","Kennel 2"],["Kennel 3","Kennel 3"],["Kennel 4","Kennel 4"],["Kennel 5","Kennel 5"],["Kennel 6","Kennel 6"],["Pod 1","Pod 1"],["Pod 2","Pod 2"],["Pod 3","Pod 3"],["Pod 4","Pod 4"]])+fld("Assessor",d.assessor,"dog.assessor","text","e.g. Shane")+'</div>'
       +'<div class="g2">'+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()+slct("Reason for intake",d.intakeReason,"dog.intakeReason",[["Stray","Stray"],["Owner surrender","Owner surrender"],["Cruelty case","Cruelty case"],["Transfer","Transfer from another centre"],["Other","Other"]])+'</div></div>';
 
-    return hero+identity+intake+warningsCardHtml()+'<div class="brow"><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
+    return hero+identity+intake+warningsCardHtml()+noticesCardHtml()+'<div class="brow"><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
   }
 
   if(t==="arrival") return'<h2>On-arrival observation</h2><div class="sub">Record the dog\'s behaviour on arrival.</div><div class="card">'+slct("Initial demeanour on arrival",a.demeanour,"arrival.demeanour",[["Engaging","Engaging — friendly, curious"],["Nervous","Nervous — withdrawn, avoidant"],["Reactive","Reactive — alert, tense, vocal"],["Shut down","Shut down — frozen, non-responsive"],["Neutral","Neutral — calm, no strong response"]])+slct("Muzzle required?",a.muzzle,"arrival.muzzle",[["No","No — handled safely without muzzle"],["Yes — accepted","Yes — accepted without issue"],["Yes — resistant","Yes — resistant to muzzling"],["Yes — required intervention","Yes — required significant intervention"]])+slct("Lead / handling acceptance",a.lead,"arrival.lead",[["Good","Good — relaxed, no tension"],["Moderate","Moderate — some pulling or resistance"],["Poor","Poor — strong pulling"],["Dangerous","Dangerous — unsafe on lead"]])+slct("First vet visit behaviour",a.vet,"arrival.vet",[["Cooperative","Cooperative"],["Nervous but manageable","Nervous but manageable"],["Resistant","Resistant — required restraint"],["Aggressive","Aggressive — unsafe to handle"],["Not yet seen","Not yet seen by vet"]])+ta("Arrival notes",a.notes,"arrival.notes","Describe arrival behaviour...")+'<div class="sec">Behaviour History</div>'+slct("Dog-to-Dog Reactivity",a.dogDog,"arrival.dogDog",[["Not tested","Not tested"],["None observed — settled","None observed — settled"],["Mild","Mild — some interest or pulling"],["Moderate","Moderate — barking or lunging"],["Severe","Severe — could not pass safely"]])+slct("Cat Tolerance",a.catTolerance,"arrival.catTolerance",[["Not tested","Not tested"],["Unknown","Unknown"],["Cat friendly","Known to be cat friendly"],["Reactive","Chased or reactive to cats"]])+slct("Horses / equine",a.equineHistory,"arrival.equineHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Good","Known to be good with horses"],["Reactive","Reactive / chased horses"]])+slct("Small mammals",a.smallMammalHistory,"arrival.smallMammalHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Safe","Known to be safe with small mammals"],["Reactive","Chased / high prey drive"]])+slct("Child History",a.childHistory,"arrival.childHistory",[["Not known","Not known"],["Good","Known to be good with children"],["No exposure","No known exposure"],["Caution","Owner advised caution"],["Incident","Known incident involving a child"]])+slct("Previous Bite History",a.biteHistory,"arrival.biteHistory",[["None","None declared"],["One","One bite declared by owner"],["Multiple","Multiple bites declared"],["Unknown details","Bite history — details unknown"]])+'</div><div class="brow"><button class="btn" data-go="dog">&larr; Back</button><button class="btn btnp" data-go="days">Next: 5-day report &rarr;</button></div>';
@@ -3053,6 +3102,7 @@ function page(){
       +'<div style="background:#0f172a;border-radius:10px;padding:16px 18px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="color:#94a3b8;font-size:11px;margin-bottom:2px">'+esc(d2.refNo||"")+'</div><div style="color:#fff;font-size:22px;font-weight:600">'+esc(d2.name||"—")+'</div><div style="color:#94a3b8;font-size:12px;margin-top:2px">'+[d2.breed,d2.sex,d2.age].filter(Boolean).map(esc).join(" · ")+'</div></div><div style="text-align:right">'+tlb2+(total2?'<div style="color:#94a3b8;font-size:11px;margin-top:4px">Score: '+total2+'/24</div>':"")+'</div></div></div>'
       +(ea2?'<div class="ea-warn" style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:#92400e">&#9888; Enhanced Assessment flagged</div></div>':'')
       +(rWarn.length?'<div class="card" style="border-left:4px solid '+(rCrit?"#dc2626":"#f59e0b")+'"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:'+(rCrit?"#991b1b":"#854d0e")+';margin-bottom:8px">&#9888; Handling warnings</div>'+rWarn.map(function(w){var th=warnLevelTheme(w.level);return'<div class="rrow"><span class="rk">'+esc(w.text)+'</span><span class="rv"><span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;background:'+th[0]+';color:'+th[2]+'">'+esc(w.level||"Caution")+'</span></span></div>';}).join("")+'</div>':"")
+      +((S.careNotices||[]).length?'<div class="card" style="border-left:4px solid '+NOTICE_ACCENT+'"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:'+NOTICE_FG+';margin-bottom:8px">&#128276; Notices</div>'+(S.careNotices||[]).map(function(n){return'<div class="rrow"><span class="rk">'+esc(n.text)+'</span></div>';}).join("")+'</div>':"")
       +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Dog details</div>'+(drows||"—")+'</div>'
       +medCard
       +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">On-arrival &amp; behaviour history</div>'+arows+(a2.notes?'<div style="font-size:12px;margin-top:10px;padding:10px;background:#f8fafc;border-radius:6px;white-space:pre-wrap">'+esc(a2.notes)+'</div>':"")+'</div>'
@@ -3078,7 +3128,7 @@ function page(){
 
 function renderNav(){document.getElementById("nav").innerHTML=TABS.map(function(tb){return'<button class="nb'+(S.tab===tb.id?" on":"")+'" data-go="'+tb.id+'">'+tb.l+'</button>';}).join("");}
 function renderMain(){document.getElementById("content").innerHTML=page();}
-function render(){renderNav();renderMain();updateIsoChip();updateWarnChip();updateSaveBar();updateHeaderDog();checkDuplicateName();checkMicrochip();}
+function render(){renderNav();renderMain();updateIsoChip();updateWarnChip();updateNoticeChip();updateSaveBar();updateHeaderDog();checkDuplicateName();checkMicrochip();}
 var CHIP_CC={"372":"Ireland","826":"United Kingdom","250":"France","276":"Germany","380":"Italy","724":"Spain","528":"Netherlands","056":"Belgium","620":"Portugal","616":"Poland","642":"Romania","208":"Denmark","752":"Sweden","040":"Austria","348":"Hungary","203":"Czechia","372":"Ireland"};
 function microchipLookup(num){try{if(navigator.clipboard&&num)navigator.clipboard.writeText(num);}catch(e){}window.open("https://www.europetnet.com/","_blank","noopener");}
 function chipInfoHtml(v){
@@ -3215,6 +3265,7 @@ function loadRecord(id){
   if(saved.incidents)S.incidents=saved.incidents;
   if(saved.feeding)S.feeding=saved.feeding;
   if(saved.warnings)S.warnings=saved.warnings;
+  if(saved.careNotices)S.careNotices=saved.careNotices;
   if(saved.feedingPlan)S.feedingPlan=Object.assign({},S.feedingPlan,saved.feedingPlan);
   if(saved.medical&&saved.medical.bodyMap)S.medical.bodyMap=saved.medical.bodyMap;
   S._id=rec.id;S.tab="report";render();
@@ -3234,7 +3285,7 @@ async function loadRecordsList(){
 function loadCurrent(){
   try{
     var s=localStorage.getItem("nspca-current");
-    if(s){var saved=JSON.parse(s);if(saved._id)S._id=saved._id;if(saved.dog)S.dog=Object.assign({},S.dog,saved.dog);if(saved.arrival)S.arrival=Object.assign({},S.arrival,saved.arrival);if(saved.days)S.days=saved.days;if(saved.scores)S.scores=Object.assign({},S.scores,saved.scores);if(saved.fin)S.fin=Object.assign({},S.fin,saved.fin);if(saved.weights)S.weights=saved.weights;if(saved.files)S.files=saved.files;if(saved.assessment)S.assessment=Object.assign({},S.assessment,saved.assessment);if(saved.medical)S.medical=Object.assign({},S.medical,saved.medical);if(saved.warnings)S.warnings=saved.warnings;}
+    if(s){var saved=JSON.parse(s);if(saved._id)S._id=saved._id;if(saved.dog)S.dog=Object.assign({},S.dog,saved.dog);if(saved.arrival)S.arrival=Object.assign({},S.arrival,saved.arrival);if(saved.days)S.days=saved.days;if(saved.scores)S.scores=Object.assign({},S.scores,saved.scores);if(saved.fin)S.fin=Object.assign({},S.fin,saved.fin);if(saved.weights)S.weights=saved.weights;if(saved.files)S.files=saved.files;if(saved.assessment)S.assessment=Object.assign({},S.assessment,saved.assessment);if(saved.medical)S.medical=Object.assign({},S.medical,saved.medical);if(saved.warnings)S.warnings=saved.warnings;if(saved.careNotices)S.careNotices=saved.careNotices;}
   }catch(e){}
 }
 
