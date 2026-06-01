@@ -1194,7 +1194,7 @@ function tasksRollupHtml(activeRecords){
   var thisWeek=weekStart(today);
   function addDS(ds,n){var x=new Date(ds);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10);}
   var act=activeRecords.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
-  var cats={walks:[],vaccs:[],paras:[],weighs:[]};
+  var cats={finishing:[],walks:[],vaccs:[],paras:[],weighs:[]};
   function vaccDue(med){
     var vl=(med&&med.vaccinations)||[];
     function dateOf(t){var e=vl.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(x){return x.type===t&&x.date;});return e?e.date:null;}
@@ -1206,6 +1206,7 @@ function tasksRollupHtml(activeRecords){
   }
   act.forEach(function(r){
     if(!r.state)return;var med=r.state.medical||{};
+    var _fo=r.state.fin?r.state.fin.outcome:"";if(_fo!=="Finished Isolation"&&daysInIsolation(r.intakeDate)===5)cats.finishing.push(r);
     var ex=(r.state.exercises||[]).filter(function(e){return e.date===today&&e.type==="Walked";});
     if(!ex.length)cats.walks.push(r);
     if(vaccDue(med))cats.vaccs.push(r);
@@ -1214,7 +1215,7 @@ function tasksRollupHtml(activeRecords){
     if(paraDue)cats.paras.push(r);
     var wts=r.state.weights||[];if((r.state.dog&&r.state.dog.intakeDate)&&!wts.find(function(w){return w.date>=thisWeek&&w.date<=today;}))cats.weighs.push(r);
   });
-  var defs=[["walks","Walks due","#a16207","#fef9c3"],["vaccs","Vaccines due","#a16207","#fef9c3"],["paras","Parasite tx due","#a16207","#fef9c3"],["weighs","Weigh-ins due","#0d9488","#ccfbf1"]];
+  var defs=[["finishing","Finishing today","#0d9488","#ccfbf1"],["walks","Walks due","#a16207","#fef9c3"],["vaccs","Vaccines due","#a16207","#fef9c3"],["paras","Parasite tx due","#a16207","#fef9c3"],["weighs","Weigh-ins due","#0d9488","#ccfbf1"]];
   var items=defs.filter(function(d){return cats[d[0]].length;});
   if(!items.length)return"";
   var total=items.reduce(function(a,d){return a+cats[d[0]].length;},0);
