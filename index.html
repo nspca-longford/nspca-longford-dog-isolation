@@ -350,7 +350,6 @@ function markWhatsNewSeen(){try{localStorage.setItem("nspca-whatsnew-seen",APP_V
 function maybeShowWhatsNew(){
   if(!CHANGELOG.length)return;
   if(window._wnShownSession)return;
-  if(whatsNewSeen()===APP_VERSION)return;
   window._wnShownSession=true;
   setTimeout(function(){showWhatsNew();},1200);
 }
@@ -447,13 +446,17 @@ function getTodaysExercises(rec){
 
 function exerciseDotsHtml(rec){
   var todays=getTodaysExercises(rec);
-  var dots=EX_TYPES.map(function(t){
-    var done=todays.some(function(e){return e.type===t.key;});
-    return '<div style="width:16px;height:16px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;'+(done?'background:#c5e86c;color:#3a4a16;border:0.5px solid #9bc23e':'background:#fff;color:#94a3b8;border:0.5px solid #cbd5e1')+'" title="'+t.key+(done?' &mdash; done':'')+'">'+t.short+'</div>';
-  }).join("");
-  return '<div onclick="event.stopPropagation();showExerciseOverlay('+rec.id+')" style="display:flex;align-items:center;gap:4px;padding:6px 0 0;margin-top:5px;border-top:0.5px dashed var(--color-border-secondary);cursor:pointer">'
-    +'<span style="font-size:8px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.04em;font-weight:600;margin-right:auto">Today</span>'
-    +dots
+  var walked=todays.some(function(e){return e.type==="Walked";});
+  var otherTypes={};todays.forEach(function(e){if(e.type!=="Walked")otherTypes[e.type]=1;});
+  var extra=Object.keys(otherTypes).length;
+  var pill=walked
+    ? '<span style="display:inline-flex;align-items:center;gap:4px;background:#edf6cf;color:#3a4a16;font-size:9px;font-weight:700;padding:2px 9px;border-radius:20px">&#128694; Walked'+(extra?(' &middot; +'+extra):'')+'</span>'
+    : (todays.length
+        ? '<span style="display:inline-flex;align-items:center;background:#f1f5f9;color:#64748b;font-size:9px;font-weight:600;padding:2px 9px;border-radius:20px">'+todays.length+' activit'+(todays.length===1?'y':'ies')+'</span>'
+        : '<span style="font-size:9px;color:#94a3b8;font-weight:600">Not walked yet</span>');
+  return '<div onclick="event.stopPropagation();showExerciseOverlay('+rec.id+')" style="display:flex;align-items:center;gap:7px;padding:6px 0 0;margin-top:5px;border-top:0.5px dashed var(--color-border-secondary);cursor:pointer">'
+    +'<span style="font-size:8px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.04em;font-weight:600">Today</span>'
+    +pill
     +'</div>';
 }
 
@@ -527,7 +530,7 @@ function renderExerciseOverlay(){
       return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;font-size:11.5px;border-bottom:0.5px solid var(--color-border-secondary)">'
         +'<span style="font-size:10.5px;color:var(--color-text-secondary);min-width:40px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(e.time||"")+'</span>'
         +'<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;background:#edf6cf;color:#3a4a16;text-transform:uppercase;letter-spacing:0.03em;white-space:nowrap">'+esc(e.type)+'</span>'
-        +'<span style="flex:1;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;font-size:11px">'+esc(e.staff||"")+(e.notes?' &middot; '+esc(e.notes):'')+'</span>'
+        +'<span style="flex:1;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;font-size:11px">'+esc(e.staff||"")+(e.mins?' &middot; '+e.mins+' min':'')+(e.notes?' &middot; '+esc(e.notes):'')+'</span>'
         +'<button onclick="deleteExerciseEntry('+origIdx+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer">&#10005;</button>'
       +'</div>';
     }).join("");
@@ -722,7 +725,7 @@ function saveMedDisease(){
 function toggleLoginCode(){var inp=document.getElementById("login-code"),ic=document.getElementById("login-eye");if(!inp)return;var show=inp.type==="password";inp.type=show?"text":"password";if(ic)ic.innerHTML=show?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';}
 async function doLogin(){
   var btn=document.getElementById("login-btn");
-  var code=(document.getElementById("login-code").value||"").trim();
+  var code=(document.getElementById("login-code").value||"").replace(/\s+/g,"");
   var errEl=document.getElementById("login-err");
   errEl.style.display="none";
   if(!code)return;
@@ -730,7 +733,7 @@ async function doLogin(){
   var user=USERS.find(function(u){return u.code===code;});
   if(!user&&supabaseClient){try{var res=await supabaseClient.from("users").select("*").eq("code",code).single();if(res.data&&res.data.name)user=res.data;}catch(e){}}
   if(user){
-    LOGGED_IN=true;CURRENT_USER=user;
+    LOGGED_IN=true;CURRENT_USER=user;window._wnShownSession=false;
     localStorage.setItem("nspca-intake-auth",code);
     localStorage.setItem("nspca-user-name",user.name);
     localStorage.setItem("nspca-user-role",user.role||"staff");
@@ -1706,7 +1709,7 @@ function noticesCardHtml(){
   return '<div class="card" style="border:1px solid '+(ns.length?NOTICE_BORDER:"#e2e8f0")+'"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:16px">&#128276;</span><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:'+NOTICE_FG+'">Notices</span></div>'
     +'<div style="font-size:11px;color:#64748b;margin-bottom:10px">Care &amp; status notes \u2014 these pop up when the dog is opened.</div>'
     +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+chips+'</div>'
-    +'<input id="notice-text" placeholder="Add a custom notice\u2026" style="width:100%;color:#0f172a;background:#fff;padding:9px 11px;border:1px solid var(--color-border-secondary);border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:8px"><div style="display:flex;justify-content:flex-end"><button onclick="addCustomNotice()" class="btn" style="background:'+NOTICE_ACCENT+';color:#fff;border:none;font-size:13px;padding:8px 20px;white-space:nowrap">Add</button></div>'
+    +'<input id="notice-text" placeholder="Add a custom notice\u2026" onkeydown="if(event.key===\'Enter\')addCustomNotice()" style="width:100%;color:#0f172a;background:#fff;padding:9px 11px;border:1px solid var(--color-border-secondary);border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:8px"><div style="display:flex;justify-content:flex-end"><button onclick="addCustomNotice()" class="btn" style="background:'+NOTICE_ACCENT+';color:#fff;border:none;font-size:13px;padding:8px 20px;white-space:nowrap">Add</button></div>'
     +'<div style="margin-top:10px">'+list+'</div></div>';
 }
 function showNoticeOverlay(){
@@ -2138,6 +2141,7 @@ function renderExercise(){
   if(!S.exercises)S.exercises=[];
   var today=new Date().toISOString().slice(0,10);
   var todayLabel=new Date().toLocaleDateString("en-IE",{weekday:"long",day:"numeric",month:"short"});
+  var _exNow=new Date();var nowHM=_exNow.getHours().toString().padStart(2,"0")+":"+_exNow.getMinutes().toString().padStart(2,"0");
   function weekStart(ds){var d=new Date(ds);var day=d.getDay();var diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
   var thisWeek=weekStart(today);
   var todaysList=S.exercises.filter(function(e){return e.date===today;});
@@ -2148,6 +2152,9 @@ function renderExercise(){
   // ── Quick log card ──
   h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary)">Quick Log</span><span style="font-size:11px;color:var(--color-text-secondary)">'+todayLabel+'</span></div>';
   h+='<div class="f"><label class="lbl">Optional note (attaches to next entry)</label><input id="ex-detail-note" type="text" placeholder="e.g. Took round the back field, settled well"></div>';
+  h+='<div class="g2" style="margin-bottom:8px"><div class="f"><label class="lbl">Date</label><input type="date" id="ex-date" value="'+today+'"></div><div class="f"><label class="lbl">Time</label><input type="time" id="ex-time" value="'+nowHM+'"></div></div>';
+  h+='<div class="f"><label class="lbl">Duration (mins, optional)</label><input type="number" id="ex-dur" min="0" inputmode="numeric" placeholder="e.g. 20"></div>';
+  h+='<div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:8px">Set date/time/duration above, then tap an activity to log it.</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
   EX_TYPES.forEach(function(t){
     var sessions=todaysList.filter(function(e){return e.type===t.key;});
@@ -2200,7 +2207,7 @@ function renderExercise(){
         h+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px">';
         h+='<span style="font-size:11px;color:#64748b;min-width:44px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(e.time||"")+'</span>';
         h+='<span style="font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:20px;background:#dcfce7;color:#166534;text-transform:uppercase;letter-spacing:0.03em;white-space:nowrap">'+esc(e.type)+'</span>';
-        h+='<span style="flex:1;color:#64748b;overflow:hidden;text-overflow:ellipsis;font-size:11.5px">'+esc(e.staff||"")+(e.notes?' &middot; '+esc(e.notes):"")+'</span>';
+        h+='<span style="flex:1;color:#64748b;overflow:hidden;text-overflow:ellipsis;font-size:11.5px">'+esc(e.staff||"")+(e.mins?' &middot; '+e.mins+' min':"")+(e.notes?' &middot; '+esc(e.notes):"")+'</span>';
         h+='<button onclick="deleteExerciseEntryS('+origIdx+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer">&#10005;</button>';
         h+='</div>';
       });
@@ -2218,11 +2225,15 @@ function renderExercise(){
 function logExerciseS(type){
   if(!S.exercises)S.exercises=[];
   var now=new Date();
-  var date=now.toISOString().slice(0,10);
-  var time=now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0");
+  var dEl=document.getElementById("ex-date"),tEl=document.getElementById("ex-time"),durEl=document.getElementById("ex-dur");
+  var date=(dEl&&dEl.value)?dEl.value:now.toISOString().slice(0,10);
+  var time=(tEl&&tEl.value)?tEl.value:(now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0"));
+  var mins=durEl&&durEl.value?parseInt(durEl.value,10):null;
   var noteInput=document.getElementById("ex-detail-note");
   var notes=noteInput?noteInput.value.trim():"";
-  S.exercises.push({date:date,time:time,type:type,staff:currentName(),notes:notes});
+  var entry={date:date,time:time,type:type,staff:currentName(),notes:notes};
+  if(mins&&!isNaN(mins)&&mins>0)entry.mins=mins;
+  S.exercises.push(entry);
   if(noteInput)noteInput.value="";
   saveRecord();
   renderMain();
