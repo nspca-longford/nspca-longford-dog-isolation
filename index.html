@@ -1773,6 +1773,9 @@ function updateWarnChip(){
 // ── Care notices ──────────────────────────────────────────────────
 var PRESET_NOTICES=["Needs neutering","Needs spaying","No walking \u2014 on rest","Short walks only","Lead only \u2014 no off-lead","Vet follow-up due","No vaccines","Awaiting paperwork","Not ready for rehoming","Needs grooming","On medication"];
 var FEEDS=["Purina Pro Plan Adult Sensitive","Purina Pro Plan Small & Mini Adult","Purina Pro Plan Hypoallergenic","Purina Pro Plan Gastro","Purina Pro Plan Puppy Sensitive","Hills Gastro Biome"];
+var FEED_FORMULA={"Purina Pro Plan Adult Sensitive":{a:35.9,b:0.67},"Purina Pro Plan Small & Mini Adult":{a:36.6,b:0.65}};
+function suggestFeedG(food,wkg){var f=FEED_FORMULA[food];if(!f||!wkg||wkg<=0)return null;return Math.round(f.a*Math.pow(wkg,f.b));}
+function applyFeedGrams(g){if(!S.feedingPlan)S.feedingPlan={};S.feedingPlan.grams=g;saveRecord();renderMain();}
 var NOTICE_BG="#e0f2fe",NOTICE_BORDER="#0ea5e9",NOTICE_FG="#075985",NOTICE_ACCENT="#0284c7";
 function addQuickNotice(pi){var t=PRESET_NOTICES[pi];if(!t)return;if(!S.careNotices)S.careNotices=[];if(S.careNotices.some(function(n){return n.text===t;}))return;S.careNotices.push({text:t,by:currentName(),date:new Date().toISOString().slice(0,10)});saveRecord();renderMain();}
 function addCustomNotice(){var el=document.getElementById("notice-text");var txt=el?(el.value||"").trim():"";if(!txt){appAlert("Enter a notice.");return;}if(!S.careNotices)S.careNotices=[];S.careNotices.push({text:txt,by:currentName(),date:new Date().toISOString().slice(0,10)});saveRecord();renderMain();}
@@ -2441,6 +2444,20 @@ function renderFeeding(){
   h+='<div class="g2">'+fld("Food brand / type",fp.brand||"","feedingPlan.brand","text","Pick or type a feed\u2026",'list="nspca-feeds"')+slct("Frequency",fp.frequency||"","feedingPlan.frequency",[["","-- select --"],["Once daily","Once daily"],["Twice daily","Twice daily — morning + evening"],["Three times daily","Three times daily"],["Free-feed","Free-feed"]])+'</div>';
   h+='<datalist id="nspca-feeds">'+FEEDS.map(function(f){return'<option value="'+esc(f)+'">';}).join("")+'</datalist>';
   h+='<div class="g2">'+fld("Grams per meal",fp.grams||"","feedingPlan.grams","number","e.g. 200")+slct("Diet type",fp.dietType||"","feedingPlan.dietType",[["","-- select --"],["Standard","Standard adult"],["Puppy","Puppy"],["Senior","Senior"],["Weight management","Weight management"],["Sensitive stomach","Sensitive stomach"],["Hypoallergenic","Hypoallergenic"],["Prescription","Prescription"]])+'</div>';
+  var _fw=null;var _wl=(S.weights||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");});if(_wl.length){var _pv=parseFloat(_wl[0].weight);if(!isNaN(_pv))_fw=_pv;}
+  var _fdaily=suggestFeedG(fp.brand,_fw);
+  if(_fdaily){
+    var _meals=fp.frequency==="Three times daily"?3:(fp.frequency==="Once daily"?1:(fp.frequency==="Free-feed"?0:2));
+    var _per=_meals>0?Math.round(_fdaily/_meals):_fdaily;
+    var _flab=(fp.frequency||"twice daily").toLowerCase();
+    h+='<div style="background:#edf6cf;border:1px solid #c5e86c;border-radius:10px;padding:10px 12px;margin:0 0 12px;font-size:12px;color:#3a4a16">'
+      +'<div style="font-weight:700;margin-bottom:2px">&#127869; Suggested &middot; ~'+_fdaily+' g/day</div>'
+      +'<div style="color:#4d5e22">'+(_meals>0?(_per+' g per meal ('+_flab+')'):'pick a frequency to split into meals')+' &middot; based on '+_fw+' kg</div>'
+      +(_meals>0?'<button class="btn" style="margin-top:8px;font-size:11px;padding:5px 11px;background:#0f172a;color:#fff;border:none" onclick="applyFeedGrams('+_per+')">Use '+_per+' g/meal</button>':'')
+    +'</div>';
+  } else if(FEED_FORMULA[fp.brand]&&!_fw){
+    h+='<div style="background:#f1f5f9;border:1px solid var(--color-border-secondary);border-radius:10px;padding:9px 12px;margin:0 0 12px;font-size:11.5px;color:#475569">Log a weight on the Weights tab to get a suggested amount for this feed.</div>';
+  }
   h+=ta("Special notes (allergies, restrictions, vet-prescribed amounts...)",fp.notes||"","feedingPlan.notes","");
   h+='</div>';
 
