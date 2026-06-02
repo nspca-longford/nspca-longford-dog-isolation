@@ -174,6 +174,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
         <div id="dash-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,0.18);min-width:200px;z-index:50;overflow:hidden">
           <div onclick="dashMenuGo('records')" class="dmi">&#128203; Records</div>
           <div onclick="dashMenuGo('rounds')" class="dmi">&#128694; Daily Rounds</div>
+          <div onclick="dashMenuGo('upcomingMedical')" class="dmi">&#128137; Upcoming Medical</div>
           <div onclick="dashMenuGo('stats')" class="dmi">&#128202; Stats</div>
           <div onclick="dashMenuGo('team')" class="dmi">&#128101; Team Directory</div>
           <div id="dash-menu-users" onclick="dashMenuGo('users')" class="dmi" style="display:none">&#9881; Manage Users</div>
@@ -245,6 +246,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"2.4",date:"2026-06-02",note:"New Upcoming Medical view in the menu - one list showing each dog next vaccine, worming (Milpro) and flea/tick (Bravecto) due across the whole unit, sorted soonest-first with overdue pinned to the top and All / Next 2 weeks / Overdue filters. Tap any row to jump straight to that dog medical record."},
   {version:"2.3",date:"2026-06-02",note:"Vaccines now remind you automatically - log the 1st and the app works out when the 2nd is due (4 weeks later) and the booster (a year after the 2nd). The next one shows as Upcoming or Overdue with its date on the vaccine card, and any dog due within two weeks or overdue appears under Needs attention on the dashboard."},
   {version:"2.2",date:"2026-06-02",note:"The Assessment tab is now organised into collapsible sections grouped under Behaviour, Activities and Rehoming - each shows how much is filled in, with quick jump and expand/collapse controls, so far less scrolling. Dropdowns and fields across the app also got a cleaner, more rounded look."},
   {version:"2.1",date:"2026-06-02",note:"Feeding now has a dropdown of the feeds we stock - Pro Plan Adult Sensitive, Small & Mini, Hypoallergenic, Gastro, Puppy Sensitive and Hills Gastro Biome - pick one or type your own. And dates now read the same way everywhere, day-month-year, like 02-06-26."},
@@ -632,6 +634,62 @@ async function quickRoundLog(recId,type){
   saveExerciseChange(rec);
 }
 
+// ── Upcoming Medical (cross-dog vaccine / worm / flea due list) ───
+function openDogMedical(id){var rec=records.find(function(r){return r.id===id;});if(!rec)return;window._dayView=0;loadRecord(id);showScreen("wrap");S.tab="medical";render();}
+function dogMedicalDue(r){
+  var med=(r.state&&r.state.medical)||{};
+  var today=new Date().toISOString().slice(0,10);
+  var items=[];
+  var vl=med.vaccinations||[];
+  function vlatest(t){return vl.filter(function(v){return v.type===t&&v.date;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];}
+  function vhas(t){return vl.some(function(v){return v.type===t&&v.date;});}
+  var vdue=null,vtype=null;
+  if(vhas("1st Vaccination")&&!vhas("2nd Vaccination")){vdue=addDaysStr(vlatest("1st Vaccination").date,28);vtype="2nd Vaccination";}
+  else if(vhas("2nd Vaccination")&&!vhas("Booster")){vdue=addDaysStr(vlatest("2nd Vaccination").date,365);vtype="Booster";}
+  vl.forEach(function(v){if(v.nextDue&&(!vdue||v.nextDue<vdue)){vdue=v.nextDue;vtype=v.type+" (next due)";}});
+  if(vdue)items.push({icon:"&#128137;",label:vtype,due:vdue});
+  var pl=med.parasiteTreatments||[];
+  [["Milpro","Worm (Milpro)","&#129440;"],["Bravecto","Flea/tick (Bravecto)","&#128027;"]].forEach(function(d){
+    var last=pl.filter(function(p){return(p.type||"").indexOf(d[0])===0||(p.product||"").indexOf(d[0])===0;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
+    if(!last||!last.date)return;
+    var due=last.nextDue||addDaysStr(last.date,90);
+    items.push({icon:d[2],label:d[1],due:due});
+  });
+  items.forEach(function(it){it.state=it.due<today?"overdue":(it.due<=addDaysStr(today,14)?"soon":"upcoming");});
+  return items;
+}
+function umDueText(due){var t=new Date().toISOString().slice(0,10);var diff=Math.round((new Date(due)-new Date(t))/86400000);var lab=fmtDMY(due);if(diff<0)return Math.abs(diff)+"d overdue &middot; "+lab;if(diff===0)return "today &middot; "+lab;if(diff===1)return "tomorrow &middot; "+lab;return "in "+diff+"d &middot; "+lab;}
+function renderUpcomingMedical(){
+  var act=roundsActiveDogs();
+  var all=[];
+  act.forEach(function(r){dogMedicalDue(r).forEach(function(it){all.push({r:r,it:it});});});
+  var filt=window._umFilt||"all";
+  var shown=all.filter(function(x){if(filt==="overdue")return x.it.state==="overdue";if(filt==="soon")return x.it.state==="overdue"||x.it.state==="soon";return true;});
+  shown.sort(function(a,b){return(a.it.due||"").localeCompare(b.it.due||"");});
+  var nOver=all.filter(function(x){return x.it.state==="overdue";}).length;
+  var nSoon=all.filter(function(x){return x.it.state==="soon";}).length;
+  var head='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'+backToDashBtn()+'<h2 style="margin:0;flex:1">Upcoming Medical</h2></div>'
+    +'<div class="sub" style="margin-bottom:12px">Vaccines, worming &amp; flea/tick due across the unit &middot; '+nOver+' overdue, '+nSoon+' due soon</div>';
+  var chips=[["all","All"],["soon","Next 2 weeks"],["overdue","Overdue"]].map(function(c){var sel=filt===c[0];return '<button onclick="window._umFilt=\''+c[0]+'\';showDashSection(\'upcomingMedical\')" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--color-border-secondary);background:'+(sel?"#0f172a":"var(--color-background-primary)")+';color:'+(sel?"#fff":"var(--color-text-secondary)")+'">'+c[1]+'</button>';}).join("");
+  head+='<div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">'+chips+'</div>';
+  if(!shown.length)return head+'<div style="text-align:center;padding:40px;color:var(--color-text-secondary)">Nothing '+(filt==="overdue"?"overdue":(filt==="soon"?"due in the next 2 weeks":"coming up"))+'.</div>';
+  var SC={overdue:["#fee2e2","#991b1b"],soon:["#fef9c3","#854d0e"],upcoming:["#f1f5f9","#475569"]};
+  var rows=shown.map(function(x){
+    var r=x.r,it=x.it,d=(r.state&&r.state.dog)||{};
+    var c=SC[it.state]||SC.upcoming;
+    var ph=d.photo?'<img src="'+d.photo+'" style="width:38px;height:38px;border-radius:8px;object-fit:cover;flex-shrink:0">':'<div style="width:38px;height:38px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">&#128062;</div>';
+    return '<div class="card" style="padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openDogMedical('+r.id+')">'
+      +ph
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.name)+(d.kennel?' <span style="font-weight:400;color:var(--color-text-secondary);font-size:11px">&middot; '+esc(d.kennel)+'</span>':'')+'</div>'
+        +'<div style="font-size:12px;color:#334155;margin-top:2px">'+it.icon+' '+esc(it.label)+'</div>'
+      +'</div>'
+      +'<span style="display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+c[0]+';color:'+c[1]+';white-space:nowrap;flex-shrink:0">'+umDueText(it.due)+'</span>'
+    +'</div>';
+  }).join("");
+  return head+rows;
+}
+
 // ── Weight trend sparkline + loss flag ────────────────────────────
 function weightSparkCard(weights){
   var pts=(weights||[]).map(function(w){return{date:w.date||"",kg:parseFloat((w.weight||"").toString().replace(/[^0-9.]/g,""))};}).filter(function(p){return p.date&&!isNaN(p.kg)&&p.kg>0;}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0;});
@@ -988,6 +1046,8 @@ function showDashSection(section){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button></div>'+renderStats();
   }else if(section==="rounds"){
     el.innerHTML=renderRounds();
+  }else if(section==="upcomingMedical"){
+    el.innerHTML=renderUpcomingMedical();
   }else if(section==="profile"){
     el.innerHTML=renderProfile();
   }else if(section==="team"){
