@@ -510,7 +510,7 @@ function renderExerciseOverlay(){
   var dateLabel=fmtDMYwk(new Date());
 
   var h='<div style="padding:16px 18px 12px;border-bottom:0.5px solid var(--color-border-secondary);display:flex;align-items:center;gap:10px">'
-    +(d.photo?'<img src="'+d.photo+'" style="width:38px;height:38px;border-radius:8px;object-fit:cover;flex-shrink:0">':'<div style="width:38px;height:38px;border-radius:8px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">&#128062;</div>')
+    +(d.photo?'<img src="'+d.photo+'" style="width:38px;height:38px;border-radius:8px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';flex-shrink:0">':'<div style="width:38px;height:38px;border-radius:8px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">&#128062;</div>')
     +'<div style="flex:1;min-width:0">'
       +'<div style="font-size:14px;font-weight:600;color:var(--color-text-primary);line-height:1.15">'+esc(rec.name)+' &middot; Exercise</div>'
       +'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">'+dateLabel+(d.kennel?' &middot; '+esc(d.kennel):'')+'</div>'
@@ -617,7 +617,7 @@ function renderRounds(){
       var done=todays.some(function(e){return e.type===t.key;});
       return '<button onclick="quickRoundLog('+r.id+',\''+t.key.replace(/'/g,"\\'")+'\')" title="'+t.key+'" style="flex:1;min-width:0;border:1px solid '+(done?"#9bc23e":"var(--color-border-secondary)")+';background:'+(done?"#c5e86c":"var(--color-background-primary)")+';color:'+(done?"#3a4a16":"#94a3b8")+';border-radius:9px;padding:8px 4px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:15px;line-height:1">'+t.icon+'</span><span style="font-size:9px;font-weight:700;letter-spacing:0.02em">'+t.short+'</span></button>';
     }).join("");
-    var ph=d.photo?'<img src="'+d.photo+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0">':'<div style="width:40px;height:40px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">&#128062;</div>';
+    var ph=d.photo?'<img src="'+d.photo+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';flex-shrink:0">':'<div style="width:40px;height:40px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">&#128062;</div>';
     return '<div class="card" style="padding:10px 12px;margin-bottom:8px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'+ph+'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.name)+'</div><div style="font-size:11px;color:var(--color-text-secondary)">'+(d.kennel?esc(d.kennel):"No kennel")+(r.intakeDate?(' &middot; Day '+(daysInIsolation(r.intakeDate)||"?")):"")+'</div></div><button onclick="openDog('+r.id+')" style="background:#e2e8f0;color:#475569;border:none;border-radius:7px;padding:5px 11px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0">Open</button></div><div style="display:flex;gap:6px">'+btns+'</div></div>';
   }).join("");
   return head+rows;
@@ -677,7 +677,7 @@ function renderUpcomingMedical(){
   var rows=shown.map(function(x){
     var r=x.r,it=x.it,d=(r.state&&r.state.dog)||{};
     var c=SC[it.state]||SC.upcoming;
-    var ph=d.photo?'<img src="'+d.photo+'" style="width:38px;height:38px;border-radius:8px;object-fit:cover;flex-shrink:0">':'<div style="width:38px;height:38px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">&#128062;</div>';
+    var ph=d.photo?'<img src="'+d.photo+'" style="width:38px;height:38px;border-radius:8px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';flex-shrink:0">':'<div style="width:38px;height:38px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">&#128062;</div>';
     return '<div class="card" style="padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openDogMedical('+r.id+')">'
       +ph
       +'<div style="flex:1;min-width:0">'
@@ -879,7 +879,7 @@ function renderProfile(){
   if(myActivity.length){
     h+=myActivity.map(function(r){
       var d=r.state&&r.state.dog?r.state.dog:{};
-      var ph=d.photo?'<img src="'+d.photo+'" style="width:30px;height:30px;border-radius:6px;object-fit:cover">':'<div style="width:30px;height:30px;border-radius:6px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:14px">&#128062;</div>';
+      var ph=d.photo?'<img src="'+d.photo+'" style="width:30px;height:30px;border-radius:6px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+'">':'<div style="width:30px;height:30px;border-radius:6px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:14px">&#128062;</div>';
       return '<div onclick="openDog('+r.id+')" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #e2e8f0;cursor:pointer">'+ph+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(r.name)+'</div><div style="font-size:10px;color:#64748b">'+esc(r.breed||"")+(d.kennel?" &middot; "+esc(d.kennel):"")+'</div></div><div style="font-size:11px;color:#94a3b8;flex-shrink:0">'+fmtAgo(r.savedAt)+'</div></div>';
     }).join("");
   }else{h+='<div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px">No activity yet</div>';}
@@ -1076,7 +1076,7 @@ function page_records(){
     var date=rec.intakeDate||(rec.savedAt||"").slice(0,10);
     var rd2=rec.state&&rec.state.dog?rec.state.dog:{};var rf=rec.state&&rec.state.fin?rec.state.fin:{};
     var outcome=rf.outcome||"";var days=daysInIsolation(rec.intakeDate);
-    var ph2=rd2.photo?('<img src="'+rd2.photo+'" style="width:48px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0;margin-right:2px">'):('<div style="width:48px;height:48px;border-radius:6px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;margin-right:2px">&#128062;</div>');
+    var ph2=rd2.photo?('<img src="'+rd2.photo+'" style="width:48px;height:48px;object-fit:cover;object-position:'+(rd2.photoPos||'50% 50%')+';border-radius:6px;flex-shrink:0;margin-right:2px">'):('<div style="width:48px;height:48px;border-radius:6px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;margin-right:2px">&#128062;</div>');
     var prog=(function(){if(outcome==="Finished Isolation")return'<div style="display:inline-block;margin-top:4px;background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px">&#10003; Finished Isolation</div>';if(!(!outcome||outcome==="Active — in isolation"))return'<div style="font-size:11px;color:#94a3b8;margin-top:2px">'+esc(outcome)+'</div>';if(!days)return'';var pct=Math.min(100,Math.round((days/5)*100));var col=days>5?"#16a34a":days===4?"#f59e0b":"#0d9488";return'<div style="margin-top:5px"><div style="font-size:10px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of 5'+(days>5?' <span style="color:#16a34a">&#10003; complete</span>':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:5px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div></div>';})();
     var canDelete=currentRole()==="admin"||currentRole()==="manager"||currentRole()==="supervisor"||currentRole()==="coordinator";
     return'<div class="rec-card">'+ph2+'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;margin-bottom:2px">'+esc(rec.name)+'</div><div style="font-size:12px;color:var(--color-text-secondary)">'+[rec.breed,rec.refNo,rd2.kennel||"",date].filter(Boolean).join(' · ')+'</div>'+prog+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+(rec.score?('<span class="pill" style="background:'+parts[0]+';color:'+parts[1]+'">'+rec.trafficLight+' '+rec.score+'/24</span>'):'')+'<button class="btn" style="font-size:12px;padding:6px 12px" data-load="'+rec.id+'">Load</button>'+(canDelete?'<button class="btnr btn" data-delete="'+rec.id+'">Delete</button>':'')+'</div></div>';
@@ -1323,7 +1323,7 @@ function recentlyEditedHtml(activeRecords){
       var by=r.savedBy?esc(r.savedBy):"";
       var userPic=r.savedBy?avatarByName(r.savedBy):null;
       var avTag=userPic?'<img src="'+userPic+'" style="position:absolute;bottom:-3px;right:-3px;width:16px;height:16px;border-radius:50%;object-fit:cover;border:1.5px solid #fff">':'';
-      var ph=d.photo?'<div style="position:relative;flex-shrink:0"><img src="'+d.photo+'" style="width:32px;height:32px;border-radius:6px;object-fit:cover">'+avTag+'</div>':'<div style="position:relative;flex-shrink:0"><div style="width:32px;height:32px;border-radius:6px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:14px">&#128062;</div>'+avTag+'</div>';
+      var ph=d.photo?'<div style="position:relative;flex-shrink:0"><img src="'+d.photo+'" style="width:32px;height:32px;border-radius:6px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+'">'+avTag+'</div>':'<div style="position:relative;flex-shrink:0"><div style="width:32px;height:32px;border-radius:6px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:14px">&#128062;</div>'+avTag+'</div>';
       return '<div onclick="openDog('+r.id+')" style="background:#fff;border:0.5px solid #e2e8f0;border-radius:10px;padding:7px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0;min-width:160px">'
         +ph
         +'<div style="min-width:0;flex:1"><div style="font-size:12px;font-weight:600;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.name)+'</div>'
@@ -1355,7 +1355,7 @@ function roundsViewHtml(active){
       var done=todays.some(function(e){return e.type===t.key;});
       return '<button onclick="event.stopPropagation();showExerciseOverlay('+rec.id+');setTimeout(function(){var b=document.querySelectorAll(\'#ex-overlay-content button\');for(var i=0;i<b.length;i++){if(b[i].textContent.indexOf(\''+t.key+'\')>=0){b[i].click();break;}}},80);" style="width:48px;height:48px;border-radius:10px;border:1.5px solid '+(done?"#16a34a":"#cbd5e1")+';background:'+(done?"#dcfce7":"#fff")+';color:'+(done?"#166534":"#64748b")+';font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px">'+(done?"&#10003;":t.short)+'<span style="font-size:8px;font-weight:500;opacity:0.8">'+t.key.split(" ")[0]+'</span></button>';
     }).join("");
-    var ph=d.photo?'<img src="'+d.photo+'" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0">':'<div style="width:48px;height:48px;border-radius:8px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">&#128062;</div>';
+    var ph=d.photo?'<img src="'+d.photo+'" style="width:48px;height:48px;border-radius:8px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';flex-shrink:0">':'<div style="width:48px;height:48px;border-radius:8px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">&#128062;</div>';
     return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="openDog('+rec.id+')">'
       +ph
       +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:#0f172a">'+esc(rec.name)+'</div>'
@@ -1372,7 +1372,7 @@ function kennelsViewHtml(active){
     var occupant=active.find(function(r){return r.state&&r.state.dog&&r.state.dog.kennel===k;});
     if(occupant){
       var d=occupant.state.dog;
-      var ph=d.photo?'<img src="'+d.photo+'" style="width:100%;height:80px;object-fit:cover;display:block">':'<div style="width:100%;height:80px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:32px">&#128062;</div>';
+      var ph=d.photo?'<img src="'+d.photo+'" style="width:100%;height:80px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';display:block">':'<div style="width:100%;height:80px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:32px">&#128062;</div>';
       var bc=occupant.trafficLight==="Red"?"#dc2626":occupant.trafficLight==="Black"?"#0f172a":occupant.trafficLight==="Yellow"?"#f59e0b":occupant.trafficLight==="Green"?"#16a34a":"#e2e8f0";
       return '<div onclick="openDog('+occupant.id+')" style="background:#fff;border:2px solid '+bc+';border-radius:12px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:8px"><div style="font-size:10px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.04em">'+esc(k)+'</div><div style="font-size:13px;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(occupant.name)+'</div></div></div>';
     }
@@ -1385,7 +1385,7 @@ function listViewHtml(active){
   return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">'+active.map(function(rec,i){
     var d=rec.state&&rec.state.dog?rec.state.dog:{};
     var days=daysInIsolation(rec.intakeDate);
-    var ph=d.photo?'<img src="'+d.photo+'" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0">':'<div style="width:36px;height:36px;border-radius:6px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">&#128062;</div>';
+    var ph=d.photo?'<img src="'+d.photo+'" style="width:36px;height:36px;border-radius:6px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';flex-shrink:0">':'<div style="width:36px;height:36px;border-radius:6px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">&#128062;</div>';
     var ea=recordEA(rec);
     var tlPill=rec.trafficLight?'<span style="background:'+(rec.trafficLight==="Red"?"#fee2e2":rec.trafficLight==="Black"?"#1e293b":rec.trafficLight==="Yellow"?"#fef9c3":"#dcfce7")+';color:'+(rec.trafficLight==="Red"?"#991b1b":rec.trafficLight==="Black"?"#f1f5f9":rec.trafficLight==="Yellow"?"#854d0e":"#166534")+';font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">'+rec.trafficLight+' '+(rec.score||"")+'</span>':"";
     return '<div onclick="openDog('+rec.id+')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer'+(i>0?";border-top:1px solid #e2e8f0":"")+'">'
@@ -1436,7 +1436,7 @@ function printKennelCard(){
   var fp=S.feedingPlan||{};
   var feed=[fp.brand,fp.grams?(fp.grams+"g"):"",fp.frequency].filter(Boolean).join(" \u00b7 ")||"Not set";
   var meta=[d.breed,d.sex,d.age,d.colour].filter(Boolean).join(" \u00b7 ");
-  var photo=d.photo?'<img src="'+d.photo+'" style="width:130px;height:130px;object-fit:cover;border-radius:10px;border:2px solid #0f172a">':'<div style="width:130px;height:130px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:54px">&#128062;</div>';
+  var photo=d.photo?'<img src="'+d.photo+'" style="width:130px;height:130px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';border-radius:10px;border:2px solid #0f172a">':'<div style="width:130px;height:130px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:54px">&#128062;</div>';
   var conHtml=con.length?'<div style="background:#dc2626;color:#fff;padding:8px 12px;border-radius:8px;margin-bottom:8px;font-weight:700;font-size:14px">&#129440; CONTAGIOUS &mdash; '+esc(con.map(function(x){return diseaseShortName(x.type);}).join(", "))+' &mdash; strict isolation &amp; PPE</div>':'';
   var warnHtml=ws.length?'<div style="border:2px solid #dc2626;border-radius:8px;padding:8px 12px;margin-bottom:8px"><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#991b1b;margin-bottom:4px">&#9888; Handling warnings</div>'+ws.map(function(w){var c=w.level==="Critical"?"#991b1b":"#854d0e";return'<span style="display:inline-block;font-size:13px;font-weight:700;color:'+c+';margin-right:14px">&bull; '+esc(w.text)+(w.level==="Critical"?" (Critical)":"")+'</span>';}).join("")+'</div>':'';
   var noteHtml=ns.length?'<div style="border:2px solid #0284c7;border-radius:8px;padding:8px 12px;margin-bottom:8px"><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#075985;margin-bottom:4px">&#128276; Notices</div>'+ns.map(function(n){return'<span style="display:inline-block;font-size:13px;font-weight:700;color:#075985;margin-right:14px">&bull; '+esc(n.text)+'</span>';}).join("")+'</div>':'';
@@ -1486,7 +1486,7 @@ function renderDashboard(){
     var parts=(tlC[rec.trafficLight]||"#f1f5f9|#94a3b8").split("|");
     var bc=finished?"#16a34a":rec.trafficLight==="Red"?"#dc2626":rec.trafficLight==="Black"?"#0f172a":rec.trafficLight==="Yellow"?"#f59e0b":rec.trafficLight==="Green"?"#16a34a":"#e2e8f0";
     var bg=finished?"#dcfce7":rec.trafficLight==="Red"?"#fee2e2":rec.trafficLight==="Black"?"#1e293b":rec.trafficLight==="Yellow"?"#fef9c3":"#f0fdf4";
-    var ph=d.photo?'<img src="'+d.photo+'" style="width:100%;height:88px;object-fit:cover;display:block">':'<div style="width:100%;height:88px;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:34px">&#128062;</div>';
+    var ph=d.photo?'<img src="'+d.photo+'" style="width:100%;height:88px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';display:block">':'<div style="width:100%;height:88px;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:34px">&#128062;</div>';
     var ta2="";if(rec.savedAt){var diff=Math.round((Date.now()-new Date(rec.savedAt).getTime())/60000);ta2=diff<1?"just now":diff<60?diff+"m ago":diff<1440?Math.round(diff/60)+"h ago":Math.round(diff/1440)+"d ago";}
     var dayH=(finished||overdue)?'<div style="font-size:9px;font-weight:700;color:#166634;margin-bottom:3px">&#10003; Isolation complete</div><div style="background:#dcfce7;border-radius:20px;height:4px"><div style="background:#166634;width:100%;height:100%;border-radius:20px"></div></div>':days?'<div style="font-size:9px;font-weight:700;color:'+col+';margin-bottom:3px">&#128274; Isolation &middot; Day '+days+' of 5</div><div style="background:#e2e8f0;border-radius:20px;height:4px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
     var savedBy=rec.savedBy||"";
@@ -2222,6 +2222,36 @@ function renderFiles(){
 function compressPhoto(file,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var MAX=400,w=img.width,h=img.height;if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}var cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);cb(cv.toDataURL("image/jpeg",0.75));};img.src=e.target.result;};r.readAsDataURL(file);}
 function handlePhotoUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){appAlert("Photo too large. Max 5MB.");return;}compressPhoto(file,function(data){S.dog.photo=data;renderMain();});}
 function removePhoto(){S.dog.photo="";renderMain();}
+function showRepositionPhoto(){
+  if(!S.dog||!S.dog.photo)return;
+  var pos=(S.dog.photoPos||"50% 50%").split(" ");
+  var fx=parseFloat(pos[0]);var fy=parseFloat(pos[1]);if(isNaN(fx))fx=50;if(isNaN(fy))fy=50;
+  window._repoPos={fx:fx,fy:fy};
+  var ov=document.createElement("div");
+  ov.id="reposition-ov";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(15,23,42,0.92);z-index:10001;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px";
+  ov.innerHTML='<div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:4px;text-align:center">Drag the photo to frame it</div>'
+    +'<div style="color:#cbd5e1;font-size:11px;margin-bottom:14px;text-align:center">This is how it will sit in every card</div>'
+    +'<div id="repo-frame" style="width:min(78vw,300px);height:min(78vw,300px);border-radius:14px;overflow:hidden;touch-action:none;cursor:grab;border:2px solid #c5e86c;background:#000;flex-shrink:0">'
+      +'<img id="repo-img" src="'+S.dog.photo+'" draggable="false" style="width:100%;height:100%;object-fit:cover;object-position:'+fx+'% '+fy+'%;pointer-events:none;user-select:none;-webkit-user-drag:none">'
+    +'</div>'
+    +'<div style="display:flex;gap:10px;margin-top:18px">'
+      +'<button class="btn" onclick="closeRepositionPhoto()" style="background:#fff;color:#0f172a">Cancel</button>'
+      +'<button class="btn btnp" onclick="saveRepositionPhoto()">Save</button>'
+    +'</div>';
+  document.body.appendChild(ov);
+  var img=document.getElementById("repo-img"),frame=document.getElementById("repo-frame");
+  var dragging=false,lastX=0,lastY=0;
+  function down(e){dragging=true;var p=e.touches?e.touches[0]:e;lastX=p.clientX;lastY=p.clientY;frame.style.cursor="grabbing";}
+  function move(e){if(!dragging)return;if(e.cancelable)e.preventDefault();var p=e.touches?e.touches[0]:e;var dx=p.clientX-lastX,dy=p.clientY-lastY;lastX=p.clientX;lastY=p.clientY;var k=0.35;var R=window._repoPos;R.fx=Math.max(0,Math.min(100,R.fx-dx*k));R.fy=Math.max(0,Math.min(100,R.fy-dy*k));img.style.objectPosition=R.fx+"% "+R.fy+"%";}
+  function up(){dragging=false;if(frame)frame.style.cursor="grab";}
+  frame.addEventListener("mousedown",down);frame.addEventListener("touchstart",down,{passive:false});
+  window.addEventListener("mousemove",move);window.addEventListener("touchmove",move,{passive:false});
+  window.addEventListener("mouseup",up);window.addEventListener("touchend",up);
+  ov._move=move;ov._up=up;
+}
+function closeRepositionPhoto(){var ov=document.getElementById("reposition-ov");if(ov){window.removeEventListener("mousemove",ov._move);window.removeEventListener("touchmove",ov._move);window.removeEventListener("mouseup",ov._up);window.removeEventListener("touchend",ov._up);ov.remove();}window._repoPos=null;}
+function saveRepositionPhoto(){if(window._repoPos&&S.dog){S.dog.photoPos=Math.round(window._repoPos.fx)+"% "+Math.round(window._repoPos.fy)+"%";saveRecord();}closeRepositionPhoto();renderMain();}
 function showPhotoLightbox(src){if(!src)return;var ov=document.getElementById("photo-lightbox");if(!ov){ov=document.createElement("div");ov.id="photo-lightbox";ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,0.88);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;cursor:zoom-out";ov.onclick=function(){ov.style.display="none";ov.innerHTML="";};document.body.appendChild(ov);}ov.innerHTML="";var img=document.createElement("img");img.src=src;img.style.cssText="max-width:100%;max-height:100%;border-radius:10px;object-fit:contain";ov.appendChild(img);ov.style.display="flex";}
 function showFileImage(i){var f=S.files&&S.files[i];if(f&&f.data)showPhotoLightbox(f.data);}
 function handleFileUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){appAlert("File too large. Max 5MB.");return;}var note=(document.getElementById("f-note")||{}).value||"";var date=new Date().toISOString().slice(0,10);if(file.type.startsWith("image/")){compressPhoto(file,function(data){S.files=S.files||[];S.files.push({name:file.name,data:data,type:"image",date:date,note:note});renderMain();});}else{var r=new FileReader();r.onload=function(e){S.files=S.files||[];S.files.push({name:file.name,data:e.target.result,type:"doc",date:date,note:note});renderMain();};r.readAsDataURL(file);}inp.value="";}
@@ -3139,7 +3169,7 @@ function page(){
     var ii=d.intakeDate?isolationInfo(d.intakeDate,(f.outcome||"")):null;
     var meta=[d.breed,d.sex,d.age,d.kennel].filter(Boolean).join(" \u00b7 ");
     var photoEl=d.photo
-      ? '<img src="'+d.photo+'" onclick="showPhotoLightbox(S.dog.photo)" style="width:66px;height:66px;object-fit:cover;border-radius:13px;border:1px solid var(--color-border-secondary);cursor:zoom-in;flex-shrink:0">'
+      ? '<img src="'+d.photo+'" onclick="showPhotoLightbox(S.dog.photo)" style="width:66px;height:66px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';border-radius:13px;border:1px solid var(--color-border-secondary);cursor:zoom-in;flex-shrink:0">'
       : '<div style="width:66px;height:66px;border-radius:13px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;color:#94a3b8;flex-shrink:0;font-size:24px">&#128062;</div>';
     var tlPill=tl?'<span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:'+tl.bg+';color:'+tl.tc+';flex-shrink:0">'+tl.l+'</span>':'';
     var chips=[];
@@ -3149,7 +3179,7 @@ function page(){
     var hero='<div class="card" style="margin-bottom:14px"><div style="display:flex;gap:13px;align-items:center">'+photoEl
       +'<div style="flex:1;min-width:0"><div style="font-size:19px;font-weight:800;line-height:1.1">'+esc(d.name||"Unnamed dog")+'</div>'+(meta?'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">'+esc(meta)+'</div>':'')+'</div>'+tlPill+'</div>'
       +(chips.length?'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:11px;padding-top:10px;border-top:0.5px solid var(--color-border-tertiary)">'+chips.join("")+'</div>':'')
-      +'<div style="margin-top:11px;display:flex;align-items:center;gap:8px"><label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:8px;cursor:pointer;font-size:11px;color:var(--color-text-secondary)">&#128247; '+(d.photo?"Change photo":"Add photo")+'<input type="file" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoUpload(this)"></label>'+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px;background:#fee2e2;color:#991b1b;border:none" onclick="removePhoto()">Remove</button>':'')+'</div></div>';
+      +'<div style="margin-top:11px;display:flex;align-items:center;gap:8px"><label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:8px;cursor:pointer;font-size:11px;color:var(--color-text-secondary)">&#128247; '+(d.photo?"Change photo":"Add photo")+'<input type="file" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoUpload(this)"></label>'+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px" onclick="showRepositionPhoto()">&#10021; Reposition</button>':'')+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px;background:#fee2e2;color:#991b1b;border:none" onclick="removePhoto()">Remove</button>':'')+'</div></div>';
 
     var identity='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Identity</div>'
       +'<div class="g2">'+fld("Dog name",d.name,"dog.name","text","e.g. Bailey",'onblur="checkDuplicateName()" id="dog-name-input"')+fld("Reference no.",d.refNo,"dog.refNo","text","e.g. 023-MH-2026")+'</div><div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:-4px 0 10px">&#9888; There&rsquo;s already an active dog with this name.</div>'
