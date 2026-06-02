@@ -245,6 +245,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"2.3",date:"2026-06-02",note:"Vaccines now remind you automatically - log the 1st and the app works out when the 2nd is due (4 weeks later) and the booster (a year after the 2nd). The next one shows as Upcoming or Overdue with its date on the vaccine card, and any dog due within two weeks or overdue appears under Needs attention on the dashboard."},
   {version:"2.2",date:"2026-06-02",note:"The Assessment tab is now organised into collapsible sections grouped under Behaviour, Activities and Rehoming - each shows how much is filled in, with quick jump and expand/collapse controls, so far less scrolling. Dropdowns and fields across the app also got a cleaner, more rounded look."},
   {version:"2.1",date:"2026-06-02",note:"Feeding now has a dropdown of the feeds we stock - Pro Plan Adult Sensitive, Small & Mini, Hypoallergenic, Gastro, Puppy Sensitive and Hills Gastro Biome - pick one or type your own. And dates now read the same way everywhere, day-month-year, like 02-06-26."},
   {version:"2.0",date:"2026-06-01",note:"Cleaner dashboard — duplicate alerts removed, with a single \u201cNeeds attention\u201d card that now flags dogs finishing isolation today. Exercise log lets you set the date, time and duration of each session, and dog cards show a simpler \u201cwalked today\u201d marker. Plus Enter now works on the login and notices boxes."},
@@ -1214,9 +1215,9 @@ function tasksRollupHtml(activeRecords){
     var vl=(med&&med.vaccinations)||[];
     function dateOf(t){var e=vl.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(x){return x.type===t&&x.date;});return e?e.date:null;}
     var due=false;
-    ["1st Vaccination","Kennel Cough","2nd Vaccination","Booster"].forEach(function(vt){if(vl.some(function(v){return v.type===vt;}))return;var ex=vl.find(function(v){return v.type===vt&&v.nextDue;});if(ex&&ex.nextDue&&ex.nextDue<=addDS(today,7))due=true;});
-    var first=dateOf("1st Vaccination");if(first&&!vl.some(function(v){return v.type==="2nd Vaccination";})&&addDS(first,28)<=addDS(today,7))due=true;
-    var second=dateOf("2nd Vaccination");if(second&&!vl.some(function(v){return v.type==="Booster";})){var dy=new Date(second);dy.setFullYear(dy.getFullYear()+1);if(dy.toISOString().slice(0,10)<=addDS(today,7))due=true;}
+    ["1st Vaccination","Kennel Cough","2nd Vaccination","Booster"].forEach(function(vt){if(vl.some(function(v){return v.type===vt;}))return;var ex=vl.find(function(v){return v.type===vt&&v.nextDue;});if(ex&&ex.nextDue&&ex.nextDue<=addDS(today,14))due=true;});
+    var first=dateOf("1st Vaccination");if(first&&!vl.some(function(v){return v.type==="2nd Vaccination";})&&addDS(first,28)<=addDS(today,14))due=true;
+    var second=dateOf("2nd Vaccination");if(second&&!vl.some(function(v){return v.type==="Booster";})){var dy=new Date(second);dy.setFullYear(dy.getFullYear()+1);if(dy.toISOString().slice(0,10)<=addDS(today,14))due=true;}
     return due;
   }
   act.forEach(function(r){
@@ -1932,6 +1933,10 @@ function renderMedical(){
     if(nextDueEntry&&nextDueEntry.nextDue){
       return nextDueEntry.nextDue<todayStr?{state:"overdue",due:nextDueEntry.nextDue}:{state:"upcoming",due:nextDueEntry.nextDue};
     }
+    // Auto-calc next due from standard intervals (2nd: 4 wks after 1st, booster: 1 yr after 2nd)
+    function _latestDose(t){return vacList.filter(function(v){return v.type===t&&v.date;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];}
+    if(vt==="2nd Vaccination"){var _f=_latestDose("1st Vaccination");if(_f){var _d=addDaysStr(_f.date,28);return _d<todayStr?{state:"overdue",due:_d}:{state:"upcoming",due:_d};}}
+    if(vt==="Booster"){var _s=_latestDose("2nd Vaccination");if(_s){var _d2=addDaysStr(_s.date,365);return _d2<todayStr?{state:"overdue",due:_d2}:{state:"upcoming",due:_d2};}}
     return{state:"pending"};
   }
   function fmtDue(ds){
@@ -1946,12 +1951,21 @@ function renderMedical(){
   }
   h+='<div class="card">';
   h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;font-weight:600">Vaccinations</span><button class="med-add-btn" onclick="showMedOverlay(\'vac\')">+ Log vaccination</button></div>';
+  var _vnext=null;
+  VAC_FIXED.forEach(function(vt){var s=vaxStatus(vt);if((s.state==="upcoming"||s.state==="overdue")&&s.due&&(!_vnext||s.due<_vnext.due))_vnext={type:vt,due:s.due,state:s.state};});
+  if(_vnext){
+    var _vc=_vnext.state==="overdue"?{bg:"#fee2e2",bd:"#dc2626",fg:"#991b1b",ic:"&#9888;&#65039;",lab:"Overdue"}:{bg:"#fffbeb",bd:"#f59e0b",fg:"#854d0e",ic:"&#128276;",lab:"Upcoming"};
+    h+='<div style="display:flex;align-items:center;gap:10px;background:'+_vc.bg+';border:1px solid '+_vc.bd+';border-radius:10px;padding:9px 12px;margin-bottom:12px">'
+      +'<span style="font-size:16px;line-height:1">'+_vc.ic+'</span>'
+      +'<div style="flex:1;font-size:12px;line-height:1.35;color:'+_vc.fg+'"><strong>Next vaccine: '+_vnext.type+'</strong><br>'+_vc.lab+' &middot; due '+fmtDue(_vnext.due)+'</div>'
+    +'</div>';
+  }
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
   VAC_FIXED.forEach(function(vt){
     var st=vaxStatus(vt);
     var bg,bd,sub,subc,pillBg,pillFg,pillText;
     if(st.state==="done"){
-      bg="#dcfce7";bd="#16a34a";sub=st.match.date+(st.match.adminBy?" &middot; "+esc(st.match.adminBy):"");subc="#166534";
+      bg="#dcfce7";bd="#16a34a";sub=fmtDMY(st.match.date)+(st.match.adminBy?" &middot; "+esc(st.match.adminBy):"");subc="#166534";
       pillBg="#16a34a";pillFg="#fff";pillText="&#10003; Done";
     }else if(st.state==="upcoming"){
       bg="#fef9c3";bd="#f59e0b";sub="Due "+fmtDue(st.due);subc="#854d0e";
@@ -2613,11 +2627,10 @@ function renderAssessment(){
   var driveOpts=[["","-- not tested --"],["High","High"],["Medium","Medium"],["Low","Low"],["None","None"]];
   h+='<h2 style="margin-bottom:4px">Dog Assessment</h2><div class="sub" style="margin-bottom:16px">Full behavioural assessment. Auto-saves as you go.</div>';
   // jump bar + expand controls
-  h+='<div style="position:sticky;top:0;z-index:6;display:flex;gap:6px;align-items:center;background:var(--color-background-primary);padding:8px 0;margin:-2px 0 6px;overflow-x:auto;-webkit-overflow-scrolling:touch">'
+  h+='<div style="position:sticky;top:0;z-index:6;display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--color-background-primary);padding:6px 2px 10px;margin-bottom:2px">'
     +'<button class="asmt-chip" onclick="asmtJump(\'behaviour\')">Behaviour</button>'
     +'<button class="asmt-chip" onclick="asmtJump(\'activities\')">Activities</button>'
     +'<button class="asmt-chip" onclick="asmtJump(\'rehoming\')">Rehoming</button>'
-    +'<span style="flex:1;min-width:8px"></span>'
     +'<button class="asmt-chip" onclick="asmtSetAll(true)">Expand all</button>'
     +'<button class="asmt-chip" onclick="asmtSetAll(false)">Collapse</button>'
   +'</div>';
