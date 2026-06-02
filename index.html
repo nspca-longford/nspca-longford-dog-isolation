@@ -242,6 +242,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"2.0",date:"2026-06-01",note:"Cleaner dashboard — duplicate alerts removed, with a single \u201cNeeds attention\u201d card that now flags dogs finishing isolation today. Exercise log lets you set the date, time and duration of each session, and dog cards show a simpler \u201cwalked today\u201d marker. Plus Enter now works on the login and notices boxes."},
   {version:"1.9",date:"2026-06-01",note:"Daily Rounds screen (tap to log walks/exercise across all dogs at once), printable kennel card, weight-trend sparkline with a loss flag, notices now shown on dashboard cards and in the briefing, and PDF/Print for the report and briefing."},
   {version:"1.8",date:"2026-06-01",note:"Notices — add care & status notes to any dog (needs neutering, no walking, vet follow-up, etc.). They pop up when you open the dog and show as a header chip, separate from the red/amber handling warnings."},
   {version:"1.7",date:"2026-05-28",note:"Handling warnings — add safety warnings to any dog (bite risk, two-person handling, muzzle required, etc.). They pop up when you open the dog and show as a header chip and a dashboard badge."},
@@ -347,10 +348,17 @@ function dismissWelcomeToast(){
 // ── What's new ────────────────────────────────────────────────────
 function whatsNewSeen(){try{return localStorage.getItem("nspca-whatsnew-seen")||"";}catch(e){return"";}}
 function markWhatsNewSeen(){try{localStorage.setItem("nspca-whatsnew-seen",APP_VERSION);}catch(e){}}
+var WN_AWAY_DAYS=7; // show What's New again if it's been this many days since last login
 function maybeShowWhatsNew(){
   if(!CHANGELOG.length)return;
   if(window._wnShownSession)return;
   window._wnShownSession=true;
+  var now=Date.now(),last=0;
+  try{last=parseInt(localStorage.getItem("nspca-last-login")||"0",10)||0;}catch(e){}
+  try{localStorage.setItem("nspca-last-login",String(now));}catch(e){}
+  var updated=whatsNewSeen()!==APP_VERSION;
+  var beenAway=last>0&&(now-last)>=WN_AWAY_DAYS*86400000;
+  if(!updated&&!beenAway)return;
   setTimeout(function(){showWhatsNew();},1200);
 }
 function fmtWnDate(ds){var d=new Date(ds);if(isNaN(d))return ds;return d.toLocaleDateString("en-IE",{day:"numeric",month:"short"});}
