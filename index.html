@@ -155,6 +155,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
           <div onclick="dashMenuGo('records')" class="dmi">&#128203; Records</div>
           <div onclick="dashMenuGo('rounds')" class="dmi">&#128694; Daily Rounds</div>
           <div onclick="dashMenuGo('upcomingMedical')" class="dmi">&#128137; Upcoming Medical</div>
+          <div onclick="dashMenuGo('factsheets')" class="dmi">&#129440; Disease info</div>
           <div onclick="dashMenuGo('stats')" class="dmi">&#128202; Stats</div>
           <div onclick="dashMenuGo('team')" class="dmi">&#128101; Team Directory</div>
           <div id="dash-menu-users" onclick="dashMenuGo('users')" class="dmi" style="display:none">&#9881; Manage Users</div>
@@ -1041,6 +1042,8 @@ function showDashSection(section){
     if(currentRole()!=="admin"){el.innerHTML='<div style="text-align:center;padding:40px"><h2>Admin only</h2><div style="color:#64748b;margin-top:8px">User management is restricted to admin accounts.</div><button onclick="showDashSection(\'profile\')" class="btn" style="margin-top:14px">&larr; Back to profile</button></div>';return;}
     refreshAllUsers().then(function(){el.innerHTML=renderUsersAdmin();});
     el.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">Loading users...</div>';
+  }else if(section==="factsheets"){
+    el.innerHTML=renderFactsheets();
   }
 }
 
@@ -1066,6 +1069,105 @@ function page_records(){
     return'<div class="rec-card">'+ph2+'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;margin-bottom:2px">'+esc(rec.name)+'</div><div style="font-size:12px;color:var(--color-text-secondary)">'+[rec.breed,rec.refNo,rd2.kennel||"",date].filter(Boolean).join(' · ')+'</div>'+prog+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+(rec.score?('<span class="pill" style="background:'+parts[0]+';color:'+parts[1]+'">'+rec.trafficLight+' '+rec.score+'/24</span>'):'')+'<button class="btn" style="font-size:12px;padding:6px 12px" data-load="'+rec.id+'">Load</button>'+(canDelete?'<button class="btnr btn" data-delete="'+rec.id+'">Delete</button>':'')+'</div></div>';
   }).join('');
   return sth+sch+(fil.length?cards:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)">No records match.</div>');
+}
+
+// ── Disease factsheets (general guidance, editable, saved on device) ──
+var FACTSHEET_DEFAULTS={
+"_protocol":`Treat every dog in isolation as if it could be infectious until proven otherwise.
+
+Work clean to dirty - healthy dogs first, suspected or confirmed cases last.
+Wear gloves and an apron to handle a case, and change them between dogs.
+Wash hands thoroughly between every dog, even after wearing gloves.
+Keep equipment separate per dog or area - bowls, leads, bedding, brushes. Never share between a sick and a healthy dog.
+Clean first, then disinfect surfaces with an approved product and respect its contact time.
+Use foot dips or dedicated footwear where the unit provides them.
+
+Zoonotic diseases (lepto, ringworm, scabies, giardia) can pass to people - extra hand hygiene, cover any cuts, and tell your manager if you develop symptoms.
+
+Always follow the unit's vet-approved isolation and cleaning protocol over anything written here.`,
+"Parvovirus (CPV)":`What it is: a tough, highly contagious gut virus, most dangerous to unvaccinated puppies and young dogs.
+How it spreads: infected faeces and anything it touches - floors, bowls, hands, footwear. It survives in the environment for months.
+Signs to watch: severe vomiting, foul or bloody diarrhoea, flat and off food, rapid decline.
+In the unit: strict isolation and barrier nursing, dedicated equipment, and thorough disinfection with a parvo-effective product.`,
+"Canine Distemper":`What it is: a serious virus affecting the gut, lungs and nervous system.
+How it spreads: droplets and secretions between dogs sharing air and space.
+Signs to watch: eye and nose discharge, cough, fever, vomiting or diarrhoea, and later twitching or fits.
+In the unit: strict isolation, and report any neurological signs to the vet promptly.`,
+"Kennel Cough (CIRDC)":`What it is: a contagious cough caused by several bugs (often including Bordetella). Usually mild but spreads fast.
+How it spreads: coughing and airborne droplets, and shared bowls or toys in close quarters.
+Signs to watch: a honking cough, retching or gagging, often otherwise bright and eating.
+In the unit: keep away from other dogs, good ventilation, and vet-check - especially pups, seniors or anything off-colour.`,
+"Canine Influenza":`What it is: a contagious respiratory virus.
+How it spreads: droplets from coughing, direct contact, and contaminated items.
+Signs to watch: cough, runny nose, fever, tiredness and reduced appetite.
+In the unit: isolate from other dogs and keep equipment separate.`,
+"Infectious Hepatitis (CAV-1)":`What it is: a virus that affects the liver, eyes and kidneys, mostly in unvaccinated dogs.
+How it spreads: urine, faeces and saliva, and items they contaminate; it persists in the environment.
+Signs to watch: fever, off food, belly pain, and sometimes a cloudy 'blue' eye.
+In the unit: isolate and disinfect thoroughly.`,
+"Leptospirosis":`What it is: a bacterial infection that can be serious. Zoonotic - it can infect people.
+How it spreads: mainly urine from infected dogs, wildlife or rats, and contaminated water or soil.
+Signs to watch: fever, off food, vomiting, increased thirst, and yellowing (jaundice).
+In the unit: isolate and use strict hygiene - gloves for any urine or bedding, cover cuts, wash hands well. Flag to your manager and vet quickly.`,
+"Sarcoptic Mange (scabies)":`What it is: a very itchy, highly contagious skin disease caused by mites. Zoonotic - can cause a temporary itchy rash on people.
+How it spreads: direct contact and shared bedding or grooming kit.
+Signs to watch: intense scratching, hair loss and crusty skin, often on ears, elbows and belly.
+In the unit: isolate, handle with gloves, and treat or dispose of bedding. Wash hands well after contact.`,
+"Ringworm":`What it is: a fungal skin infection - not actually a worm. Zoonotic - can infect people.
+How it spreads: direct contact and contaminated bedding, brushes and surfaces; spores last a long time in the environment.
+Signs to watch: circular patches of hair loss, scaly or crusty skin.
+In the unit: isolate, gloves on, and disinfect tools and bedding. Cover any skin breaks and wash hands well.`,
+"Giardia":`What it is: a gut parasite causing diarrhoea. Zoonotic - some risk to people, so hygiene matters.
+How it spreads: infected faeces and contaminated water.
+Signs to watch: soft, greasy or pale diarrhoea, sometimes weight loss, often otherwise well.
+In the unit: clean up faeces promptly, keep equipment separate, and wash hands thoroughly.`,
+"Coccidiosis":`What it is: a gut infection from a single-celled parasite, common in young or stressed dogs.
+How it spreads: infected faeces and contaminated areas.
+Signs to watch: watery or mucousy diarrhoea, sometimes straining.
+In the unit: prompt clean-up and good hygiene; vet for diagnosis and treatment. Not a risk to people.`,
+"Demodectic Mange":`What it is: a skin condition from mites that live on most dogs normally; it flares when the immune system is low. Not contagious to other dogs or people.
+How it spreads: it does not spread by contact - it relates to the individual dog.
+Signs to watch: patchy hair loss, often around the face and legs, usually not very itchy unless infected.
+In the unit: no isolation needed for the mange itself; follow vet advice on treatment.`,
+"Lungworm":`What it is: a parasite that can cause serious illness. Not spread dog-to-dog.
+How it spreads: dogs pick it up by eating slugs and snails, or their slime trails - not from other dogs directly.
+Signs to watch: cough, breathing difficulty, unusual bleeding or bruising, tiredness.
+In the unit: no dog-to-dog isolation needed; vet diagnosis and treatment, and slug and snail control in the environment.`,
+"Tick-borne (Babesia / Ehrlichia)":`What it is: infections passed on by tick bites. Not spread dog-to-dog.
+How it spreads: the bite of an infected tick - not between dogs in normal contact.
+Signs to watch: fever, lethargy, pale gums, weight loss, sometimes bruising.
+In the unit: no dog-to-dog isolation needed; focus on tick removal and prevention, and vet treatment.`
+};
+function getFactsheetOverrides(){try{var r=localStorage.getItem("nspca-factsheets");return r?JSON.parse(r):{};}catch(e){return{};}}
+function factsheetText(key){var o=getFactsheetOverrides();return(o[key]!==undefined&&o[key]!==null)?o[key]:(FACTSHEET_DEFAULTS[key]||"");}
+function fsEdit(key){window._fsEditing=key;showDashSection("factsheets");setTimeout(function(){var t=document.getElementById("fs-edit-area");if(t)t.focus();},30);}
+function fsCancel(){window._fsEditing="";showDashSection("factsheets");}
+function fsSave(){var k=window._fsEditing;var ta=document.getElementById("fs-edit-area");if(!k||!ta)return;var o=getFactsheetOverrides();o[k]=ta.value;try{localStorage.setItem("nspca-factsheets",JSON.stringify(o));}catch(e){}window._fsEditing="";showDashSection("factsheets");if(typeof miniToast==="function")miniToast("Saved on this device");}
+function fsReset(){var k=window._fsEditing;if(!k)return;var o=getFactsheetOverrides();delete o[k];try{localStorage.setItem("nspca-factsheets",JSON.stringify(o));}catch(e){}window._fsEditing="";showDashSection("factsheets");if(typeof miniToast==="function")miniToast("Reset to default");}
+function renderFactsheets(){
+  var editing=window._fsEditing||"";
+  var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><button onclick="window._fsEditing=&quot;&quot;;loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1;font-size:18px">Disease info</h2></div>';
+  var disclaimer='<div style="background:#fef9c3;border:0.5px solid #fde68a;color:#854d0e;border-radius:12px;padding:11px 14px;font-size:12px;line-height:1.5;margin-bottom:14px"><strong>General guidance, not veterinary advice.</strong> Use as a quick reference and always follow your vet and clinic protocols for isolation, treatment and cleaning. Tap Edit on any card to replace it with your own SOP. Edits are saved on this device.</div>';
+  function fsCard(key,title){
+    var txt=factsheetText(key);
+    var badges="";
+    if(key!=="_protocol"){
+      var c=CONTAGIOUS_DISEASES[key],z=ZOONOTIC_DISEASES[key];
+      badges='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px">'+(c?'<span style="background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px">Contagious</span>':'<span style="background:#e2e8f0;color:#475569;font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px">Not spread dog-to-dog</span>')+(z?'<span style="background:#7c2d12;color:#fff;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px">Zoonotic - human risk</span>':'')+'</div>';
+    }
+    var body;
+    if(editing===key){
+      body='<textarea id="fs-edit-area" style="width:100%;min-height:175px;padding:10px;border:1px solid var(--color-border-secondary);border-radius:8px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box">'+esc(txt)+'</textarea><div style="display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap"><button onclick="fsSave()" style="background:#c5e86c;color:#0f172a;border:none;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Save</button><button onclick="fsCancel()" style="background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-secondary);padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Cancel</button><button onclick="fsReset()" style="background:transparent;color:#991b1b;border:none;padding:6px 8px;font-size:12px;cursor:pointer;font-family:inherit;margin-left:auto">Reset to default</button></div>';
+    }else{
+      body='<div style="white-space:pre-wrap;font-size:13px;line-height:1.55;margin-top:8px">'+esc(txt)+'</div><div style="margin-top:9px"><button onclick="fsEdit(\''+key+'\')" style="background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-secondary);padding:5px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Edit</button></div>';
+    }
+    var accent=key==="_protocol"?'border-left:3px solid #c5e86c;':'';
+    return'<div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);'+accent+'border-radius:14px;padding:14px 15px;margin-bottom:10px"><div style="font-size:15px;font-weight:700">'+esc(title)+'</div>'+badges+body+'</div>';
+  }
+  var order=["Parvovirus (CPV)","Canine Distemper","Kennel Cough (CIRDC)","Canine Influenza","Infectious Hepatitis (CAV-1)","Leptospirosis","Sarcoptic Mange (scabies)","Ringworm","Giardia","Coccidiosis","Demodectic Mange","Lungworm","Tick-borne (Babesia / Ehrlichia)"];
+  var html=fsCard("_protocol","Isolation & hygiene barriers (general)");
+  html+=order.map(function(k){return fsCard(k,k);}).join("");
+  return back+disclaimer+html;
 }
 
 function updateClock(){
@@ -1868,7 +1970,7 @@ function contagiousAlertHtml(){
   if(!hits.length)return"";
   var zoo=hits.some(function(r){return activeContagiousList(r.state.medical).some(function(p){return ZOONOTIC_DISEASES[p.type];});});
   var names=hits.map(function(r){var ds=activeContagiousList(r.state.medical).map(function(x){return diseaseShortName(x.type);}).join(", ");return '<span onclick="openDog('+r.id+')" style="cursor:pointer;text-decoration:underline">'+esc(r.name||"Dog")+'</span> <span style="opacity:0.85">('+esc(ds)+')</span>';}).join(" &middot; ");
-  return '<div style="background:#dc2626;color:#fff;border-radius:10px;padding:10px 13px;margin-bottom:10px;display:flex;align-items:flex-start;gap:9px"><span style="font-size:17px;flex-shrink:0">&#128680;</span><div style="font-size:12px;line-height:1.45"><strong>Contagious &mdash; '+hits.length+' dog'+(hits.length>1?"s":"")+'.</strong> Strict isolation &amp; hygiene barriers.'+(zoo?' <strong>Zoonotic present.</strong>':'')+'<div style="margin-top:4px;font-size:11.5px;opacity:0.95">'+names+'</div></div></div>';
+  return '<div style="background:#dc2626;padding:10px 14px"><div style="max-width:900px;margin:0 auto;color:#fff;display:flex;align-items:flex-start;gap:9px"><span style="font-size:17px;flex-shrink:0">&#128680;</span><div style="font-size:12px;line-height:1.45"><strong>Contagious &mdash; '+hits.length+' dog'+(hits.length>1?"s":"")+'.</strong> Strict isolation &amp; hygiene barriers.'+(zoo?' <strong>Zoonotic present.</strong>':'')+'<div style="margin-top:4px;font-size:11.5px;opacity:0.95">'+names+'</div></div></div></div>';
 }
 function diseaseShortName(t){return(t||"").replace(/ \(.*$/,"");}
 
