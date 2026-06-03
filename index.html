@@ -2007,7 +2007,7 @@ function renderStats(){
 }
 
 // ── Default state ─────────────────────────────────────────────────
-function defaultMedical(){return{bcs:"",neuteredConfirmed:"",dental:"",skinCondition:"",injuries:"",arrivalHealthNotes:"",diseases:[],vaccinations:[],parasiteTreatments:[],medications:[],vetVisits:[],bodyMap:[]};}
+function defaultMedical(){return{bcs:"",neuteredConfirmed:"",neuterDate:"",dental:"",dentalDate:"",skinCondition:"",injuries:"",arrivalHealthNotes:"",diseases:[],vaccinations:[],parasiteTreatments:[],medications:[],vetVisits:[],bodyMap:[]};}
 
 // Shared infectious-disease lookups (used by Medical tab, dashboard cards and briefing)
 var CONTAGIOUS_DISEASES={"Parvovirus (CPV)":1,"Canine Distemper":1,"Kennel Cough (CIRDC)":1,"Canine Influenza":1,"Infectious Hepatitis (CAV-1)":1,"Leptospirosis":1,"Sarcoptic Mange (scabies)":1,"Demodectic Mange":0,"Ringworm":1,"Giardia":1,"Coccidiosis":1,"Lungworm":0,"Tick-borne (Babesia / Ehrlichia)":0,"Other":0};
@@ -2105,7 +2105,9 @@ function renderMedical(){
   h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px">On-Arrival Health</div><div class="g2">';
   h+=slct("Body Condition Score",m.bcs||"","medical.bcs",[["","-- not assessed --"],["1 — Emaciated","1 — Emaciated"],["2 — Very thin","2 — Very thin"],["3 — Thin","3 — Thin"],["4 — Underweight","4 — Underweight"],["5 — Ideal weight","5 — Ideal weight"],["6 — Slightly overweight","6 — Slightly overweight"],["7 — Overweight","7 — Overweight"],["8 — Obese","8 — Obese"],["9 — Severely obese","9 — Severely obese"]]);
   h+=slct("Neutered Confirmed by Vet",m.neuteredConfirmed||"","medical.neuteredConfirmed",[["","-- not checked --"],["Yes — confirmed by vet","Yes — confirmed by vet"],["No — confirmed intact","No — confirmed intact"],["Not yet checked","Not yet checked"],["Unknown","Unknown"]]);
+  h+=(m.neuteredConfirmed&&m.neuteredConfirmed.indexOf("Yes")===0)?fld("Date neutered / spayed",m.neuterDate||"","medical.neuterDate","date"):"";
   h+=slct("Dental Condition",m.dental||"","medical.dental",[["","-- not assessed --"],["Good — clean, no issues","Good — clean, no issues"],["Mild tartar","Mild tartar"],["Moderate tartar","Moderate tartar"],["Heavy tartar — treatment needed","Heavy tartar — treatment needed"],["Broken / missing teeth","Broken / missing teeth"],["Gum disease / gingivitis","Gum disease / gingivitis"],["Not assessed","Not assessed"]]);
+  h+=fld("Date of dental treatment",m.dentalDate||"","medical.dentalDate","date");
   h+=slct("Coat & Skin Condition",m.skinCondition||"","medical.skinCondition",[["","-- not assessed --"],["Good — healthy coat","Good — healthy coat"],["Mild matting","Mild matting"],["Severe matting — required clipping","Severe matting — required clipping"],["Skin condition / lesions present","Skin condition / lesions present"],["Mange suspected","Mange suspected"],["Ringworm suspected","Ringworm suspected"],["Flea infestation on arrival","Flea infestation on arrival"],["Tick infestation on arrival","Tick infestation on arrival"]]);
   h+='</div>';
   h+=fld("Visible Injuries / Conditions",m.injuries||"","medical.injuries","text","e.g. Laceration on left hindleg...");
@@ -2742,6 +2744,8 @@ function renderTimeline(){
   });
   (m.vetVisits||[]).forEach(function(v){if(!v.date)return;events.push({date:v.date,time:"11:00",icon:"&#129657;",color:"#dc2626",title:"Vet visit"+(v.vet?" &middot; "+esc(v.vet):""),detail:[v.reason,v.findings,v.treatment].filter(Boolean).map(esc).join(" &middot; ")});});
   (m.diseases||[]).forEach(function(ds){if(!ds.date)return;var crit=CONTAGIOUS_DISEASES[ds.type]&&ds.status!=="Recovered / cleared";events.push({date:ds.date,time:"10:30",icon:"&#129440;",color:crit?"#dc2626":"#0d9488",title:esc(ds.type)+" &middot; "+esc(ds.status||"Suspected"),detail:[ds.treatment,ds.notes].filter(Boolean).map(esc).join(" &middot; ")});});
+  if(m.neuterDate)events.push({date:m.neuterDate,time:"10:15",icon:"&#129658;",color:"#0891b2",title:"Neutered / spayed",detail:(m.neuteredConfirmed&&m.neuteredConfirmed.indexOf("Yes")===0)?"Confirmed by vet":""});
+  if(m.dentalDate)events.push({date:m.dentalDate,time:"10:20",icon:"&#129463;",color:"#0891b2",title:"Dental treatment",detail:esc(m.dental||"")});
   (S.weights||[]).forEach(function(w){if(!w.date)return;events.push({date:w.date,time:"08:00",icon:"&#9878;",color:"#0ea5e9",title:"Weighed "+esc(w.weight||""),detail:esc(w.note||"")});});
   (S.notes||[]).forEach(function(n){events.push({date:n.date,time:n.time||"15:00",icon:"&#128221;",color:"#7c3aed",title:"Note",detail:esc(n.text||""),staff:n.staff});});
   (S.incidents||[]).forEach(function(inc){var sc=inc.severity==="Serious"||inc.severity==="Injury"?"#dc2626":inc.severity==="Moderate"?"#f59e0b":"#64748b";events.push({date:inc.date,time:inc.time||"15:00",icon:"&#9888;",color:sc,title:esc(inc.severity||"Incident")+" incident",detail:esc(inc.text||""),staff:inc.staff});});
@@ -3172,12 +3176,14 @@ function renderBriefing(){
   }
 
   // ── MEDICAL STATUS ──
-  var hasMedical=m.bcs||m.dental||m.skinCondition||m.injuries||m.arrivalHealthNotes||(m.diseases||[]).length||(m.vaccinations||[]).length||(m.parasiteTreatments||[]).length||(m.medications||[]).length||(m.vetVisits||[]).length;
+  var hasMedical=m.bcs||m.dental||m.dentalDate||m.neuteredConfirmed||m.neuterDate||m.skinCondition||m.injuries||m.arrivalHealthNotes||(m.diseases||[]).length||(m.vaccinations||[]).length||(m.parasiteTreatments||[]).length||(m.medications||[]).length||(m.vetVisits||[]).length;
   if(hasMedical){
     h+=sectionHead("Medical Status");
     var med=[];
     if(m.bcs)med.push("Body Condition Score: "+esc(m.bcs));
-    if(m.dental)med.push("dental condition: "+esc(m.dental.toLowerCase()));
+    if(m.neuteredConfirmed)med.push("neuter status: "+esc(m.neuteredConfirmed.toLowerCase())+(m.neuterDate?" (carried out "+fmtDateLong(m.neuterDate)+")":""));
+    if(m.dental)med.push("dental condition: "+esc(m.dental.toLowerCase())+(m.dentalDate?" (treated "+fmtDateLong(m.dentalDate)+")":""));
+    else if(m.dentalDate)med.push("dental treatment carried out "+fmtDateLong(m.dentalDate));
     if(m.skinCondition)med.push("coat &amp; skin: "+esc(m.skinCondition.toLowerCase()));
     if(m.injuries)med.push("visible injuries on arrival: "+esc(m.injuries));
     if(med.length)h+=p(cap(joinNicely(med))+".");
@@ -3473,7 +3479,7 @@ function page(){
     var vetList=(m2.vetVisits||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");});
 
     var medCard='<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Medical record</div>';
-    var arrivalRows=kvRows([["Body Condition Score",m2.bcs],["Neutered status",m2.neuteredConfirmed],["Dental",m2.dental],["Coat & skin",m2.skinCondition],["Visible injuries",m2.injuries]]);
+    var arrivalRows=kvRows([["Body Condition Score",m2.bcs],["Neutered status",(m2.neuteredConfirmed||"")+(m2.neuterDate?" · "+fmtDMY(m2.neuterDate):"")],["Dental",(m2.dental||"")+(m2.dentalDate?" · treated "+fmtDMY(m2.dentalDate):"")],["Coat & skin",m2.skinCondition],["Visible injuries",m2.injuries]]);
     if(arrivalRows||m2.arrivalHealthNotes){
       medCard+='<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0f172a;margin-bottom:6px">On-arrival health</div>'+arrivalRows+noteBlock("Notes",m2.arrivalHealthNotes);
     }
