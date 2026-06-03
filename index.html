@@ -189,7 +189,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
   <nav id="nav"></nav>
   <div id="content"></div>
   <div id="save-bar" style="position:fixed;bottom:0;left:0;right:0;z-index:50;background:#fff;border-top:1px solid #e2e8f0;box-shadow:0 -4px 16px rgba(0,0,0,0.07);padding:10px 16px;padding-bottom:calc(10px + env(safe-area-inset-bottom))">
-    <div style="max-width:740px;margin:0 auto"><button id="save-btn" onclick="saveRecord()" class="btn btng" style="width:100%;font-size:14px;padding:11px;font-weight:600">Save</button></div>
+    <div style="max-width:740px;margin:0 auto"><div id="last-changed" style="font-size:10.5px;color:#94a3b8;text-align:right;margin-bottom:6px;min-height:13px;line-height:13px"></div><button id="save-btn" onclick="saveRecord()" class="btn btng" style="width:100%;font-size:14px;padding:11px;font-weight:600">Save</button></div>
   </div>
 </div>
 
@@ -3406,7 +3406,7 @@ function chipInfoHtml(v){
 function checkMicrochip(v){var el=document.getElementById("chip-info");if(!el)return;el.innerHTML=chipInfoHtml(v!=null?v:((S.dog&&S.dog.microchip)||""));}
 function updateHeaderDog(){var bg=document.getElementById("badge");if(bg){var nm=S.dog&&S.dog.name?S.dog.name:"";bg.textContent=nm;bg.style.display=nm?"block":"none";}var ph=document.getElementById("badge-photo");if(ph){if(S.dog&&S.dog.photo){ph.src=S.dog.photo;ph.style.display="block";}else{ph.style.display="none";ph.removeAttribute("src");}}}
 function checkDuplicateName(){var el=document.getElementById("dup-name-hint");if(!el)return;var nm=((S.dog&&S.dog.name)||"").trim().toLowerCase();if(!nm){el.style.display="none";return;}var dup=records.some(function(r){if(r.id===S._id)return false;var o=r.state&&r.state.fin?r.state.fin.outcome:"";var act=!o||o.indexOf("Active")>=0||o==="Finished Isolation";return act&&r.name&&r.name.trim().toLowerCase()===nm;});el.style.display=dup?"block":"none";}
-function updateSaveBar(){var ro=["report","briefing","timeline"].indexOf(S.tab)>=0;var sb=document.getElementById("save-bar");if(sb)sb.style.display=ro?"none":"";var c=document.getElementById("content");if(c)c.style.paddingBottom=ro?"24px":"";}
+function updateSaveBar(){var ro=["report","briefing","timeline"].indexOf(S.tab)>=0;var sb=document.getElementById("save-bar");if(sb)sb.style.display=ro?"none":"";var c=document.getElementById("content");if(c)c.style.paddingBottom=ro?"24px":"";var lc=document.getElementById("last-changed");if(lc){var rec=S._id?records.find(function(r){return r.id===S._id;}):null;if(rec&&rec.savedBy){lc.textContent="Last changed by "+rec.savedBy+(rec.savedAt?" \u00b7 "+fmtAgo(rec.savedAt):"");}else{lc.textContent="Not saved yet";}}}
 
 function handleAppClick(e){
   var go=e.target.closest("[data-go]");if(go){S.tab=go.dataset.go;render();window.scrollTo(0,0);return;}
@@ -3484,7 +3484,7 @@ async function saveRecord(){
   try{
     if(S._id){await supabaseClient.from("dogs").update(row).eq("id",S._id);}
     else{var res=await supabaseClient.from("dogs").insert([row]);if(res.data&&res.data[0]){S._id=res.data[0].id;}}
-    persistSave();showSaved();await loadRecordsList();
+    persistSave();showSaved();await loadRecordsList();updateSaveBar();
   }catch(e){console.error("saveRecord:",e);persistSave();}
 }
 
