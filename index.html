@@ -1662,6 +1662,33 @@ function showIsolationOverlay(){
   requestAnimationFrame(function(){ov.classList.add("show");});
 }
 function hideIsolationOverlay(){var ov=document.getElementById("iso-overlay");if(ov)ov.classList.remove("show");}
+var WALK_LEGEND=[
+  {k:"Green",c:"#16a34a",tc:"#fff",rule:"All volunteers and TY students can walk and spend time with these dogs. If a staff member or experienced volunteer says a particular green dog isn't for you, please accept their judgement."},
+  {k:"Yellow",c:"#eab308",tc:"#0f172a",rule:"Ask a member of staff before entering this kennel. These dogs may need a muzzle, be nervous, or not like other dogs. Check with staff even if you have walked this dog before."},
+  {k:"Red",c:"#dc2626",tc:"#fff",rule:"Experienced volunteers only, and only with approval from staff."},
+  {k:"Black",c:"#1e293b",tc:"#fff",rule:"Strictly staff only. No volunteers or work-experience may enter the kennel or interact with these dogs - no exceptions."}
+];
+function showWalkLegend(level){
+  var ov=document.getElementById("walk-overlay");
+  if(!ov){ov=document.createElement("div");ov.id="walk-overlay";ov.className="med-overlay";ov.onclick=function(e){if(e.target===ov)hideWalkLegend();};document.body.appendChild(ov);}
+  var rows=WALK_LEGEND.map(function(w){
+    var cur=w.k===level;
+    return '<div style="display:flex;gap:11px;align-items:flex-start;padding:11px;border-radius:10px;margin-bottom:8px;'+(cur?"background:#f8fafc;border:1.5px solid "+w.c:"border:0.5px solid #eef2f7")+'">'
+      +'<span style="width:24px;height:24px;border-radius:50%;background:'+w.c+';color:'+w.tc+';flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:1px">'+w.k.charAt(0)+'</span>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:#0f172a">'+w.k+(cur?' <span style="font-size:9px;font-weight:700;color:'+w.c+';background:#fff;border:1px solid '+w.c+';padding:1px 7px;border-radius:20px;margin-left:4px">THIS DOG</span>':"")+'</div>'
+      +'<div style="font-size:12px;color:#475569;line-height:1.45;margin-top:3px">'+w.rule+'</div></div>'
+    +'</div>';
+  }).join("");
+  ov.innerHTML='<div class="med-modal">'
+    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
+    +'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700;color:#0f172a">Dog walking traffic light</div><div style="font-size:11px;color:#94a3b8">Who can walk this dog</div></div>'
+    +'<button class="med-close-btn" onclick="hideWalkLegend()">&#10005;</button></div>'
+    +rows
+    +'<button class="med-save-btn" style="background:#0f172a;margin-top:10px" onclick="hideWalkLegend()">Got it</button>'
+    +'</div>';
+  requestAnimationFrame(function(){ov.classList.add("show");});
+}
+function hideWalkLegend(){var ov=document.getElementById("walk-overlay");if(ov)ov.classList.remove("show");}
 function maybeAutoIsolationOverlay(){
   var dog=S.dog||{};if(!dog.intakeDate)return;
   var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome);
@@ -3172,7 +3199,7 @@ function page(){
     var photoEl=d.photo
       ? '<img src="'+d.photo+'" onclick="showPhotoLightbox(S.dog.photo)" style="width:66px;height:66px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';border-radius:13px;border:1px solid var(--color-border-secondary);cursor:zoom-in;flex-shrink:0">'
       : '<div style="width:66px;height:66px;border-radius:13px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;color:#94a3b8;flex-shrink:0;font-size:24px">&#128062;</div>';
-    var tlPill=tl?'<span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:'+tl.bg+';color:'+tl.tc+';flex-shrink:0">'+tl.l+'</span>':'';
+    var tlPill=tl?'<span onclick="showWalkLegend(\''+tl.l+'\')" title="Who can walk this dog?" style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:'+tl.bg+';color:'+tl.tc+';flex-shrink:0;cursor:pointer">'+tl.l+' &#9432;</span>':'';
     var chips=[];
     if(ii){var icl=ii.state==="done"?"\u2713 Isolation complete":(ii.state==="final"?"\ud83d\udd12 Day 5 of 5":"\ud83d\udd12 Day "+ii.day+" of 5");chips.push('<span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:#ccfbf1;color:#115e59">'+icl+'</span>');}
     if(tl)chips.push('<span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:#dbeafe;color:#1e40af">Score '+total+'/24</span>');
