@@ -2372,6 +2372,17 @@ function renderWeights(){
   }catch(err){return'<div style="padding:20px;color:#dc2626">Weight tab error: '+err.message+'</div>';}
 }
 function addWeight(){var dEl=document.getElementById("w-date"),vEl=document.getElementById("w-val"),nEl=document.getElementById("w-note");var d=dEl?dEl.value.trim():"",v=vEl?vEl.value.trim():"",n=nEl?nEl.value.trim():"";if(!d||!v){appAlert("Please enter a date and weight.");return;}if(!S.weights)S.weights=[];var entry={date:d,weight:parseFloat(v)+" kg",note:n};if(window._weightEdit!=null&&S.weights[window._weightEdit]){S.weights[window._weightEdit]=entry;window._weightEdit=null;}else{S.weights.push(entry);}saveRecord();renderMain();}
+function syncDogWeightToLog(){
+  var v=parseFloat((S.dog&&S.dog.weight)?(""+S.dog.weight):"");
+  if(!v||v<=0)return;
+  if(!S.weights)S.weights=[];
+  var wstr=v+" kg";
+  var dt=(S.dog&&S.dog.intakeDate)?S.dog.intakeDate:new Date().toISOString().slice(0,10);
+  var idx=-1;
+  for(var i=0;i<S.weights.length;i++){if(S.weights[i].init||S.weights[i].note==="Initial weight"||S.weights[i].note==="From dog details")idx=i;}
+  if(idx>=0){S.weights[idx].weight=wstr;S.weights[idx].date=dt;S.weights[idx].note="Initial weight";S.weights[idx].init=true;}
+  else{S.weights.push({date:dt,weight:wstr,note:"Initial weight",init:true});}
+}
 function editWeight(idx){var w=S.weights&&S.weights[idx];if(!w)return;var dEl=document.getElementById("w-date"),vEl=document.getElementById("w-val"),nEl=document.getElementById("w-note");if(dEl)dEl.value=w.date||"";if(vEl)vEl.value=parseFloat((w.weight||"").replace(/[^0-9.]/g,""))||"";if(nEl)nEl.value=w.note||"";window._weightEdit=idx;var bn=document.getElementById("w-edit-banner");if(bn)bn.style.display="flex";var ab=document.getElementById("w-add-btn");if(ab)ab.textContent="Save changes";if(dEl&&dEl.scrollIntoView)dEl.scrollIntoView({behavior:"smooth",block:"center"});if(vEl)vEl.focus();}
 function cancelWeightEdit(){window._weightEdit=null;var d=document.getElementById("w-date"),v=document.getElementById("w-val"),n=document.getElementById("w-note");if(d)d.value=new Date().toISOString().slice(0,10);if(v)v.value="";if(n)n.value="";var bn=document.getElementById("w-edit-banner");if(bn)bn.style.display="none";var ab=document.getElementById("w-add-btn");if(ab)ab.textContent="+ Add Entry";}
 function deleteWeight(idx){appConfirm("Delete this weight entry?",function(){S.weights.splice(idx,1);saveRecord();renderMain();},{danger:true});}
@@ -3615,6 +3626,7 @@ document.getElementById("wrap").addEventListener("change",function(e){
     if(p[0]==="dog"&&p[1]==="weight")val=val?(parseFloat(val)+" kg"):"";
     if(!S[p[0]])S[p[0]]={};
     S[p[0]][p[1]]=val;
+    if(p[0]==="dog"&&p[1]==="weight")syncDogWeightToLog();
     if(p[0]==="dog"&&p[1]==="name"){var bg=document.getElementById("badge");if(bg){bg.style.display=val?"block":"none";bg.textContent=val;}}
     renderMain();debouncedSave();
   }
