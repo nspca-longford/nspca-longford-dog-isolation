@@ -399,7 +399,7 @@ function setupAutoLogout(){
 // ── Utilities ──────────────────────────────────────────────────────
 function initials(n){var p=(n||"").trim().split(/\s+/);return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():(n||"?").slice(0,2).toUpperCase();}
 function avatarColor(n){var c=["#0d9488","#7c3aed","#dc2626","#d97706","#2563eb","#16a34a","#db2777"];var h=0;for(var i=0;i<(n||"").length;i++)h=(h*31+n.charCodeAt(i))&0xfffffff;return c[h%c.length];}
-function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
+function esc(s){return(s===null||s===undefined?"":""+s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
 function persistSave(){try{localStorage.setItem("nspca-current",JSON.stringify(S));}catch(e){}}
 function debouncedSave(){if(_dSt)clearTimeout(_dSt);_dSt=setTimeout(function(){saveRecord();},1500);}
 function addDaysStr(ds,n){var d=new Date(ds);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
@@ -1758,7 +1758,7 @@ var PRESET_NOTICES=["Needs neutering","Needs spaying","No walking \u2014 on rest
 var FEEDS=["Purina Pro Plan Adult Sensitive","Purina Pro Plan Small & Mini Adult","Purina Pro Plan Hypoallergenic","Purina Pro Plan Gastro","Purina Pro Plan Puppy Sensitive","Hills Gastro Biome"];
 var FEED_FORMULA={"Purina Pro Plan Adult Sensitive":{a:35.9,b:0.67},"Purina Pro Plan Small & Mini Adult":{a:36.6,b:0.65}};
 function suggestFeedG(food,wkg){var f=FEED_FORMULA[food];if(!f||!wkg||wkg<=0)return null;return Math.round(f.a*Math.pow(wkg,f.b));}
-function applyFeedGrams(g){if(!S.feedingPlan)S.feedingPlan={};S.feedingPlan.grams=g;saveRecord();renderMain();miniToast("Feeding set to "+g+" g per meal");}
+function applyFeedGrams(g){if(!S.feedingPlan)S.feedingPlan={};S.feedingPlan.grams=String(g);saveRecord();renderMain();miniToast("Feeding set to "+g+" g per meal");}
 function ageOptions(cur){var o=[["","-- select --"],["Under 1 year (puppy)","Under 1 year (puppy)"]];for(var y=1;y<=14;y++){var lbl=y+(y===1?" year":" years");o.push([lbl,lbl]);}o.push(["15+ years","15+ years"]);if(cur&&!o.some(function(x){return x[0]===cur;}))o.splice(1,0,[cur,cur+" (current)"]);return o;}
 var NOTICE_BG="#e0f2fe",NOTICE_BORDER="#0ea5e9",NOTICE_FG="#075985",NOTICE_ACCENT="#0284c7";
 function addQuickNotice(pi){var t=PRESET_NOTICES[pi];if(!t)return;if(!S.careNotices)S.careNotices=[];if(S.careNotices.some(function(n){return n.text===t;}))return;S.careNotices.push({text:t,by:currentName(),date:new Date().toISOString().slice(0,10)});saveRecord();renderMain();}
