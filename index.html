@@ -1051,6 +1051,7 @@ function showDashSection(section){
   }
 }
 
+function toggleRecFolder(name){if(!window._rFoldersCollapsed)window._rFoldersCollapsed={};window._rFoldersCollapsed[name]=!window._rFoldersCollapsed[name];showDashSection("records");}
 function page_records(){
   var tlC={"Green":"#dcfce7|#166634","Yellow":"#fef9c3|#854d0e","Red":"#fee2e2|#991b1b","Black":"#1e293b|#f1f5f9"};
   var srch=(window._rSrch||"").toLowerCase(),filt=(window._rFilt||"all");
@@ -1062,7 +1063,7 @@ function page_records(){
   var sth='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px"><div class="card" style="padding:12px;text-align:center;margin-bottom:0"><div style="font-size:22px;font-weight:800">'+records.length+'</div><div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase">Total</div></div><div class="card" style="padding:12px;text-align:center;margin-bottom:0"><div style="font-size:22px;font-weight:800;color:#0d9488">'+mc+'</div><div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase">This Month</div></div><div class="card" style="padding:12px;text-align:center;margin-bottom:0"><div style="font-size:22px;font-weight:800;color:#dc2626">'+(rd+bl)+'</div><div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase">Red / Black</div></div><div class="card" style="padding:12px;text-align:center;margin-bottom:0"><div style="font-size:22px;font-weight:800;color:#f59e0b">'+ea+'</div><div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase">EA Flagged</div></div></div>';
   var fb=[["all","All"],["Green","Green"],["Yellow","Yellow"],["Red","Red"],["Black","Black"],["ea","EA"]].map(function(f){var sel=filt===f[0];return'<button data-f="'+f[0]+'" onclick="window._rFilt=this.dataset.f;showDashSection(&quot;records&quot;)" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--color-border-secondary);background:'+(sel?"#0f172a":"var(--color-background-primary)")+';color:'+(sel?"#fff":"var(--color-text-secondary)")+'">'+f[1]+'</button>';}).join('');
   var sch='<input type="text" placeholder="Search name, breed or ref..." value="'+esc(window._rSrch||"")+'" oninput="window._rSrch=this.value;showDashSection(&quot;records&quot;)" style="width:100%;padding:8px 10px;border:1px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:13px;margin-bottom:8px"><div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">'+fb+'</div>';
-  var cards=fil.map(function(rec){
+  function recCard(rec){
     var parts=(tlC[rec.trafficLight]||"#f1f5f9|#64748b").split("|");
     var date=rec.intakeDate||(rec.savedAt||"").slice(0,10);
     var rd2=rec.state&&rec.state.dog?rec.state.dog:{};var rf=rec.state&&rec.state.fin?rec.state.fin:{};
@@ -1071,8 +1072,22 @@ function page_records(){
     var prog=(function(){if(outcome==="Finished Isolation")return'<div style="display:inline-block;margin-top:4px;background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px">&#10003; Finished Isolation</div>';if(!(!outcome||outcome==="Active — in isolation"))return'<div style="font-size:11px;color:#94a3b8;margin-top:2px">'+esc(outcome)+'</div>';if(!days)return'';var pct=Math.min(100,Math.round((days/5)*100));var col=days>5?"#16a34a":days===4?"#f59e0b":"#0d9488";return'<div style="margin-top:5px"><div style="font-size:10px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of 5'+(days>5?' <span style="color:#16a34a">&#10003; complete</span>':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:5px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div></div>';})();
     var canDelete=currentRole()==="admin"||currentRole()==="manager"||currentRole()==="supervisor"||currentRole()==="coordinator";
     return'<div class="rec-card">'+ph2+'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;margin-bottom:2px">'+esc(rec.name)+'</div><div style="font-size:12px;color:var(--color-text-secondary)">'+[rec.breed,rec.refNo,rd2.kennel||"",date].filter(Boolean).join(' · ')+'</div>'+prog+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+(rec.score?('<span class="pill" style="background:'+parts[0]+';color:'+parts[1]+'">'+rec.trafficLight+' '+rec.score+'/24</span>'):'')+'<button class="btn" style="font-size:12px;padding:6px 12px" data-load="'+rec.id+'">Load</button>'+(canDelete?'<button class="btnr btn" data-delete="'+rec.id+'">Delete</button>':'')+'</div></div>';
-  }).join('');
-  return sth+sch+(fil.length?cards:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)">No records match.</div>');
+  }
+  function recFolderOf(o){o=o||"";if(o==="Moved to Kennels")return"Moved to Kennels";if(o==="Rehomed")return"Rehomed";if(o==="Euthanised")return"Euthanised";if(o===""||o==="Not yet determined"||o.indexOf("Active")>=0||o==="Finished Isolation")return"In Isolation";return"Other";}
+  var FOLDERS=["In Isolation","Moved to Kennels","Rehomed","Euthanised","Other"];
+  var FCOL={"In Isolation":"#0d9488","Moved to Kennels":"#2563eb","Rehomed":"#16a34a","Euthanised":"#334155","Other":"#64748b"};
+  var groups={};FOLDERS.forEach(function(f){groups[f]=[];});
+  fil.forEach(function(rec){var rf=rec.state&&rec.state.fin?rec.state.fin:{};(groups[recFolderOf(rf.outcome||"")]||groups.Other).push(rec);});
+  var collapsed=window._rFoldersCollapsed||{};
+  var body=FOLDERS.map(function(f){
+    var grp=groups[f];if(!grp.length)return"";
+    grp.sort(function(a,b){var da=a.intakeDate||a.savedAt||"",db=b.intakeDate||b.savedAt||"";return(db||"").localeCompare(da||"");});
+    var open=!collapsed[f];
+    var head='<div onclick="toggleRecFolder(&quot;'+f+'&quot;)" style="display:flex;align-items:center;gap:9px;cursor:pointer;padding:8px 2px;border-bottom:1px solid var(--color-border-tertiary)"><span style="display:inline-block;width:0;height:0;border-left:5px solid #94a3b8;border-top:4px solid transparent;border-bottom:4px solid transparent;transform:rotate('+(open?"90":"0")+'deg);transition:transform .12s"></span><span style="width:9px;height:9px;border-radius:50%;background:'+FCOL[f]+';flex-shrink:0"></span><span style="font-size:13px;font-weight:700;flex:1">'+f+'</span><span style="font-size:11px;color:#94a3b8;font-weight:600">'+grp.length+'</span></div>';
+    var rows=open?('<div style="margin-top:8px">'+grp.map(recCard).join("")+'</div>'):"";
+    return'<div style="margin-bottom:16px">'+head+rows+'</div>';
+  }).join("");
+  return sth+sch+(fil.length?body:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)">No records match.</div>');
 }
 
 // ── Disease factsheets (general guidance, editable, saved on device) ──
