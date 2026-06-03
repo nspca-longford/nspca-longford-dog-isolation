@@ -168,7 +168,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
     </div>
   </div>
   <div id="overdue-sticky"></div>
-  <div style="max-width:900px;margin:0 auto;padding:18px"><div id="dashboard-content"></div></div>
+  <div style="max-width:1300px;margin:0 auto;padding:18px"><div id="dashboard-content"></div></div>
 </div>
 
 <div id="wrap" style="display:none">
@@ -1167,7 +1167,7 @@ function renderFactsheets(){
   var order=["Parvovirus (CPV)","Canine Distemper","Kennel Cough (CIRDC)","Canine Influenza","Infectious Hepatitis (CAV-1)","Leptospirosis","Sarcoptic Mange (scabies)","Ringworm","Giardia","Coccidiosis","Demodectic Mange","Lungworm","Tick-borne (Babesia / Ehrlichia)"];
   var html=fsCard("_protocol","Isolation & hygiene barriers (general)");
   html+=order.map(function(k){return fsCard(k,k);}).join("");
-  return back+disclaimer+html;
+  return '<div style="max-width:840px;margin:0 auto">'+back+disclaimer+html+'</div>';
 }
 
 function updateClock(){
@@ -1554,7 +1554,7 @@ function renderDashboard(){
   var overdueBannerHtml="";
   if(overdueDogs.length){
     var pills=overdueDogs.map(function(r){var d=r.state&&r.state.dog?r.state.dog:{};return'<span onclick="openDog('+r.id+')" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">'+esc(r.name)+(d.kennel?' &middot; '+esc(d.kennel):'')+' &mdash; Day '+daysInIsolation(r.intakeDate)+'</span>';}).join("");
-    overdueBannerHtml='<div style="background:#b45309;padding:10px 14px;box-shadow:0 2px 8px rgba(180,83,9,0.3)"><div style="max-width:900px;margin:0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px">&#9989;</span><div><div style="color:#fff;font-size:13px;font-weight:600">'+overdueDogs.length+' dog'+(overdueDogs.length!==1?'s':'')+' completed 5-day isolation</div><div style="color:#fde68a;font-size:11px;margin-top:1px">Awaiting outcome</div></div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">'+pills+'</div></div></div>';
+    overdueBannerHtml='<div style="background:#b45309;padding:10px 14px;box-shadow:0 2px 8px rgba(180,83,9,0.3)"><div style="max-width:1300px;margin:0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px">&#9989;</span><div><div style="color:#fff;font-size:13px;font-weight:600">'+overdueDogs.length+' dog'+(overdueDogs.length!==1?'s':'')+' completed 5-day isolation</div><div style="color:#fde68a;font-size:11px;margin-top:1px">Awaiting outcome</div></div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">'+pills+'</div></div></div>';
   }
   var stickyEl=document.getElementById("overdue-sticky");
   if(stickyEl)stickyEl.innerHTML=contagiousAlertHtml()+overdueBannerHtml;
@@ -1970,7 +1970,7 @@ function contagiousAlertHtml(){
   if(!hits.length)return"";
   var zoo=hits.some(function(r){return activeContagiousList(r.state.medical).some(function(p){return ZOONOTIC_DISEASES[p.type];});});
   var names=hits.map(function(r){var ds=activeContagiousList(r.state.medical).map(function(x){return diseaseShortName(x.type);}).join(", ");return '<span onclick="openDog('+r.id+')" style="cursor:pointer;text-decoration:underline">'+esc(r.name||"Dog")+'</span> <span style="opacity:0.85">('+esc(ds)+')</span>';}).join(" &middot; ");
-  return '<div style="background:#dc2626;padding:10px 14px"><div style="max-width:900px;margin:0 auto;color:#fff;display:flex;align-items:flex-start;gap:9px"><span style="font-size:17px;flex-shrink:0">&#128680;</span><div style="font-size:12px;line-height:1.45"><strong>Contagious &mdash; '+hits.length+' dog'+(hits.length>1?"s":"")+'.</strong> Strict isolation &amp; hygiene barriers.'+(zoo?' <strong>Zoonotic present.</strong>':'')+'<div style="margin-top:4px;font-size:11.5px;opacity:0.95">'+names+'</div></div></div></div>';
+  return '<div style="background:#dc2626;padding:10px 14px"><div style="max-width:1300px;margin:0 auto;color:#fff;display:flex;align-items:flex-start;gap:9px"><span style="font-size:17px;flex-shrink:0">&#128680;</span><div style="font-size:12px;line-height:1.45"><strong>Contagious &mdash; '+hits.length+' dog'+(hits.length>1?"s":"")+'.</strong> Strict isolation &amp; hygiene barriers.'+(zoo?' <strong>Zoonotic present.</strong>':'')+'<div style="margin-top:4px;font-size:11.5px;opacity:0.95">'+names+'</div></div></div></div>';
 }
 function diseaseShortName(t){return(t||"").replace(/ \(.*$/,"");}
 
