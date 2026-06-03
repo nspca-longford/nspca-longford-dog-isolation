@@ -1046,7 +1046,8 @@ function showDashSection(section){
     refreshAllUsers().then(function(){el.innerHTML=renderUsersAdmin();});
     el.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">Loading users...</div>';
   }else if(section==="factsheets"){
-    el.innerHTML=renderFactsheets();
+    el.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">Loading…</div>';
+    loadFactsheets().then(function(){el.innerHTML=renderFactsheets();});
   }
 }
 
@@ -1141,16 +1142,45 @@ How it spreads: the bite of an infected tick - not between dogs in normal contac
 Signs to watch: fever, lethargy, pale gums, weight loss, sometimes bruising.
 In the unit: no dog-to-dog isolation needed; focus on tick removal and prevention, and vet treatment.`
 };
-function getFactsheetOverrides(){try{var r=localStorage.getItem("nspca-factsheets");return r?JSON.parse(r):{};}catch(e){return{};}}
+var _fsCache=null,_fsShared=false;
+function getFactsheetOverridesLocal(){try{var r=localStorage.getItem("nspca-factsheets");return r?JSON.parse(r):{};}catch(e){return{};}}
+function getFactsheetOverrides(){return _fsCache||getFactsheetOverridesLocal();}
+async function loadFactsheets(){
+  _fsCache=getFactsheetOverridesLocal();_fsShared=false;
+  if(typeof supabaseClient!=="undefined"&&supabaseClient){
+    try{
+      var res=await supabaseClient.from("factsheets").select("*");
+      if(res.error)throw res.error;
+      var o={};(res.data||[]).forEach(function(r){o[r.key]=r.content;});
+      _fsCache=o;_fsShared=true;
+      try{localStorage.setItem("nspca-factsheets",JSON.stringify(o));}catch(e){}
+    }catch(e){_fsShared=false;}
+  }
+}
 function factsheetText(key){var o=getFactsheetOverrides();return(o[key]!==undefined&&o[key]!==null)?o[key]:(FACTSHEET_DEFAULTS[key]||"");}
-function fsEdit(key){window._fsEditing=key;showDashSection("factsheets");setTimeout(function(){var t=document.getElementById("fs-edit-area");if(t)t.focus();},30);}
-function fsCancel(){window._fsEditing="";showDashSection("factsheets");}
-function fsSave(){var k=window._fsEditing;var ta=document.getElementById("fs-edit-area");if(!k||!ta)return;var o=getFactsheetOverrides();o[k]=ta.value;try{localStorage.setItem("nspca-factsheets",JSON.stringify(o));}catch(e){}window._fsEditing="";showDashSection("factsheets");if(typeof miniToast==="function")miniToast("Saved on this device");}
-function fsReset(){var k=window._fsEditing;if(!k)return;var o=getFactsheetOverrides();delete o[k];try{localStorage.setItem("nspca-factsheets",JSON.stringify(o));}catch(e){}window._fsEditing="";showDashSection("factsheets");if(typeof miniToast==="function")miniToast("Reset to default");}
+function _fsRerender(){var el=document.getElementById("dashboard-content");if(el)el.innerHTML=renderFactsheets();}
+function fsEdit(key){window._fsEditing=key;_fsRerender();setTimeout(function(){var t=document.getElementById("fs-edit-area");if(t)t.focus();},30);}
+function fsCancel(){window._fsEditing="";_fsRerender();}
+async function fsSave(){
+  var k=window._fsEditing;var ta=document.getElementById("fs-edit-area");if(!k||!ta)return;
+  var val=ta.value;if(!_fsCache)_fsCache={};_fsCache[k]=val;
+  try{localStorage.setItem("nspca-factsheets",JSON.stringify(_fsCache));}catch(e){}
+  if(typeof supabaseClient!=="undefined"&&supabaseClient&&_fsShared){try{await supabaseClient.from("factsheets").upsert({key:k,content:val,updated_at:new Date().toISOString(),updated_by:currentName()},{onConflict:"key"});}catch(e){}}
+  window._fsEditing="";await loadFactsheets();_fsRerender();
+  if(typeof miniToast==="function")miniToast(_fsShared?"Saved for the team":"Saved on this device");
+}
+async function fsReset(){
+  var k=window._fsEditing;if(!k)return;
+  if(_fsCache&&_fsCache[k]!==undefined)delete _fsCache[k];
+  try{localStorage.setItem("nspca-factsheets",JSON.stringify(_fsCache||{}));}catch(e){}
+  if(typeof supabaseClient!=="undefined"&&supabaseClient&&_fsShared){try{await supabaseClient.from("factsheets").delete().eq("key",k);}catch(e){}}
+  window._fsEditing="";await loadFactsheets();_fsRerender();
+  if(typeof miniToast==="function")miniToast("Reset to default");
+}
 function renderFactsheets(){
   var editing=window._fsEditing||"";
   var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><button onclick="window._fsEditing=&quot;&quot;;loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1;font-size:18px">Disease info</h2></div>';
-  var disclaimer='<div style="background:#fef9c3;border:0.5px solid #fde68a;color:#854d0e;border-radius:12px;padding:11px 14px;font-size:12px;line-height:1.5;margin-bottom:14px"><strong>General guidance, not veterinary advice.</strong> Use as a quick reference and always follow your vet and clinic protocols for isolation, treatment and cleaning. Tap Edit on any card to replace it with your own SOP. Edits are saved on this device.</div>';
+  var disclaimer='<div style="background:#fef9c3;border:0.5px solid #fde68a;color:#854d0e;border-radius:12px;padding:11px 14px;font-size:12px;line-height:1.5;margin-bottom:14px"><strong>General guidance, not veterinary advice.</strong> Use as a quick reference and always follow your vet and clinic protocols for isolation, treatment and cleaning. Tap Edit on any card to replace it with your own SOP. '+(_fsShared?'Edits sync across your team.':'Edits are saved on this device.')+'</div>';
   function fsCard(key,title){
     var txt=factsheetText(key);
     var badges="";
@@ -1464,7 +1494,7 @@ function kennelsViewHtml(active){
     if(occupant){
       var d=occupant.state.dog;
       var ph=d.photo?'<img src="'+d.photo+'" style="width:100%;height:80px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';display:block">':'<div style="width:100%;height:80px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:32px">&#128062;</div>';
-      var bc=occupant.trafficLight==="Red"?"#dc2626":occupant.trafficLight==="Black"?"#0f172a":occupant.trafficLight==="Yellow"?"#f59e0b":occupant.trafficLight==="Green"?"#16a34a":"#e2e8f0";
+      var bc=!occupant.score?"#e2e8f0":occupant.trafficLight==="Red"?"#dc2626":occupant.trafficLight==="Black"?"#0f172a":occupant.trafficLight==="Yellow"?"#f59e0b":occupant.trafficLight==="Green"?"#16a34a":"#e2e8f0";
       return '<div onclick="openDog('+occupant.id+')" style="background:#fff;border:2px solid '+bc+';border-radius:12px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:8px"><div style="font-size:10px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.04em">'+esc(k)+'</div><div style="font-size:13px;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(occupant.name)+'</div></div></div>';
     }
     return '<div style="background:#f8fafc;border:1.5px dashed #cbd5e1;border-radius:12px;padding:14px 8px;text-align:center;min-height:124px;display:flex;flex-direction:column;justify-content:center"><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px">'+esc(k)+'</div><div style="font-size:11px;color:#cbd5e1">empty</div></div>';
@@ -1478,7 +1508,7 @@ function listViewHtml(active){
     var days=daysInIsolation(rec.intakeDate);
     var ph=d.photo?'<img src="'+d.photo+'" style="width:36px;height:36px;border-radius:6px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';flex-shrink:0">':'<div style="width:36px;height:36px;border-radius:6px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">&#128062;</div>';
     var ea=recordEA(rec);
-    var tlPill=rec.trafficLight?'<span style="background:'+(rec.trafficLight==="Red"?"#fee2e2":rec.trafficLight==="Black"?"#1e293b":rec.trafficLight==="Yellow"?"#fef9c3":"#dcfce7")+';color:'+(rec.trafficLight==="Red"?"#991b1b":rec.trafficLight==="Black"?"#f1f5f9":rec.trafficLight==="Yellow"?"#854d0e":"#166534")+';font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">'+rec.trafficLight+' '+(rec.score||"")+'</span>':"";
+    var tlPill=!rec.score?'<span style="background:#e2e8f0;color:#475569;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">Not scored</span>':(rec.trafficLight?'<span style="background:'+(rec.trafficLight==="Red"?"#fee2e2":rec.trafficLight==="Black"?"#1e293b":rec.trafficLight==="Yellow"?"#fef9c3":"#dcfce7")+';color:'+(rec.trafficLight==="Red"?"#991b1b":rec.trafficLight==="Black"?"#f1f5f9":rec.trafficLight==="Yellow"?"#854d0e":"#166534")+';font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">'+rec.trafficLight+' '+(rec.score||"")+'</span>':"");
     return '<div onclick="openDog('+rec.id+')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer'+(i>0?";border-top:1px solid #e2e8f0":"")+'">'
       +ph
       +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px">'+esc(rec.name)+(ea?'<span style="background:#f59e0b;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px">&#9888; EA</span>':'')+'</div><div style="font-size:11px;color:#64748b">'+esc(d.kennel||"No kennel")+' &middot; '+esc(rec.breed||"")+(days?' &middot; Day '+days:'')+'</div></div>'
@@ -1572,7 +1602,7 @@ function renderDashboard(){
     var col=finished?"#0d9488":days>5?"#16a34a":days>=4?"#f59e0b":"#0d9488";
     var pct=days?Math.min(100,Math.round((days/5)*100)):0;
     var parts=(tlC[rec.trafficLight]||"#f1f5f9|#94a3b8").split("|");
-    var bc=rec.trafficLight==="Red"?"#dc2626":rec.trafficLight==="Black"?"#0f172a":rec.trafficLight==="Yellow"?"#f59e0b":rec.trafficLight==="Green"?"#16a34a":"#e2e8f0";
+    var bc=!rec.score?"#e2e8f0":rec.trafficLight==="Red"?"#dc2626":rec.trafficLight==="Black"?"#0f172a":rec.trafficLight==="Yellow"?"#f59e0b":rec.trafficLight==="Green"?"#16a34a":"#e2e8f0";
     var bg=finished?"#dcfce7":rec.trafficLight==="Red"?"#fee2e2":rec.trafficLight==="Black"?"#1e293b":rec.trafficLight==="Yellow"?"#fef9c3":"#f0fdf4";
     var ph=d.photo?'<img src="'+d.photo+'" style="width:100%;height:112px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';display:block">':'<div style="width:100%;height:112px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:40px">&#128062;</div>';
     var ta2="";if(rec.savedAt){var diff=Math.round((Date.now()-new Date(rec.savedAt).getTime())/60000);ta2=diff<1?"just now":diff<60?diff+"m ago":diff<1440?Math.round(diff/60)+"h ago":Math.round(diff/1440)+"d ago";}
@@ -3268,6 +3298,7 @@ function renderBriefing(){
   if(f.outcome||f.overallProgress||f.outcomeNotes||f.handoverNote){
     h+=sectionHead("Outcome &amp; Disposition");
     if(f.outcome)h+=p('Final outcome recorded: <strong>'+esc(f.outcome)+'</strong>'+(f.outcomeDate?" on "+fmtDateLong(f.outcomeDate):"")+'.');
+    if(f.outcome==="Euthanised"&&f.euthReason)h+=p('Reason for euthanasia: <strong>'+esc(f.euthReason)+'</strong>.');
     h+=subP("Outcome notes",f.outcomeNotes);
     if(f.overallProgress)h+=p("Overall progress assessment: "+esc(f.overallProgress)+".");
     h+=subP("Kennel handover note",f.handoverNote);
@@ -3505,7 +3536,7 @@ function page(){
       +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">5-Day isolation log</div>'+dblocks+'</div>'
       +asmtCard
       +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Behaviour scoring</div>'+srows+'<div style="display:flex;justify-content:space-between;padding:10px 0 0;font-weight:600;font-size:13px"><span>Total</span><span>'+total2+'/24</span></div></div>'
-      +((concerns||f2.steps||f2.handoverNote||f2.outcome||f2.overallProgress)?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">Final assessment output</div>'+concerns+(f2.steps?'<div style="background:#dbeafe;border-radius:6px;padding:11px;margin-top:8px"><div style="font-size:10px;font-weight:600;color:#0369a1;text-transform:uppercase;margin-bottom:3px">Recommended next steps</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.steps)+'</div></div>':"")+(f2.followUp?'<div class="rrow" style="margin-top:8px"><span class="rk">Follow-up date</span><span class="rv">'+esc(f2.followUp)+'</span></div>':"")+(f2.overallProgress?'<div class="rrow"><span class="rk">Overall progress</span><span class="rv">'+esc(f2.overallProgress)+'</span></div>':"")+(f2.outcome?'<div class="rrow"><span class="rk">Outcome</span><span class="rv">'+esc(f2.outcome)+(f2.outcomeDate?" &middot; "+esc(f2.outcomeDate):"")+'</span></div>':"")+(f2.outcomeNotes?noteBlock("Outcome notes",f2.outcomeNotes):"")+(f2.notes?noteBlock("Additional notes",f2.notes):"")+(f2.handoverNote?'<div style="margin-top:10px;padding:10px;background:#f8fafc;border-radius:6px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:4px">Kennel handover note</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.handoverNote)+'</div></div>':"")+'</div>':"")
+      +((concerns||f2.steps||f2.handoverNote||f2.outcome||f2.overallProgress)?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">Final assessment output</div>'+concerns+(f2.steps?'<div style="background:#dbeafe;border-radius:6px;padding:11px;margin-top:8px"><div style="font-size:10px;font-weight:600;color:#0369a1;text-transform:uppercase;margin-bottom:3px">Recommended next steps</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.steps)+'</div></div>':"")+(f2.followUp?'<div class="rrow" style="margin-top:8px"><span class="rk">Follow-up date</span><span class="rv">'+esc(f2.followUp)+'</span></div>':"")+(f2.overallProgress?'<div class="rrow"><span class="rk">Overall progress</span><span class="rv">'+esc(f2.overallProgress)+'</span></div>':"")+(f2.outcome?'<div class="rrow"><span class="rk">Outcome</span><span class="rv">'+esc(f2.outcome)+(f2.outcomeDate?" &middot; "+esc(f2.outcomeDate):"")+'</span></div>':"")+((f2.outcome==="Euthanised"&&f2.euthReason)?'<div class="rrow"><span class="rk">Reason for euthanasia</span><span class="rv">'+esc(f2.euthReason)+'</span></div>':"")+(f2.outcomeNotes?noteBlock("Outcome notes",f2.outcomeNotes):"")+(f2.notes?noteBlock("Additional notes",f2.notes):"")+(f2.handoverNote?'<div style="margin-top:10px;padding:10px;background:#f8fafc;border-radius:6px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:4px">Kennel handover note</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.handoverNote)+'</div></div>':"")+'</div>':"")
       +(f2.assessorName?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:8px">Sign-off</div><div class="rrow"><span class="rk">Assessor</span><span class="rv">'+esc(f2.assessorName)+(f2.assessorDate?' &mdash; '+esc(f2.assessorDate):'')+'</span></div>'+(f2.secondAssessor?'<div class="rrow"><span class="rk">Second assessor</span><span class="rv">'+esc(f2.secondAssessor)+(f2.secondAssessorDate?' &mdash; '+esc(f2.secondAssessorDate):'')+'</span></div>':'')+'</div>':'')
       +'<div class="brow"><button class="btn" data-go="timeline">&larr; Back</button><button class="btn" onclick="printDoc(\'Assessment Report\')">&#128424; PDF / Print</button><button class="btn" data-go="briefing">Briefing &rarr;</button></div>';
   }
