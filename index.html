@@ -211,12 +211,12 @@ var USERS=[
 var CURRENT_USER=null;
 
 var CATS=[
-  {k:"excitability",l:"Excitability / Arousal",s:{1:"Calm, settles easily",2:"Occasionally excitable, recovers well",3:"Frequently excitable, slow to settle",4:"Extreme arousal, unable to settle safely"}},
-  {k:"reactivity",l:"Reactivity",s:{1:"Non-reactive to people, dogs, environment",2:"Mild reactions, recovers quickly",3:"Moderate reactions, needs active management",4:"Severe reactivity — lunging, snapping, or biting"}},
-  {k:"fearAnxiety",l:"Fear & Anxiety",s:{1:"Confident, no fear signs",2:"Mild anxiety, settles with reassurance",3:"Moderate fear, avoidance or freeze responses",4:"Severe fear, shutdown, panic, or defensive aggression"}},
-  {k:"sepAnx",l:"Separation Anxiety",s:{1:"Settles alone without distress",2:"Brief vocalisation, settles within minutes",3:"Persistent vocalisation or destructive behaviour",4:"Severe distress when alone, self-harm risk"}},
-  {k:"training",l:"Training & Obedience",s:{1:"Responds well, easy and safe to manage",2:"Some compliance, occasional resistance",3:"Poor compliance, difficult to redirect",4:"No compliance, unsafe to handle without specialist kit"}},
-  {k:"misc",l:"General Risk / Misc",s:{1:"No specific risk factors",2:"Minor risk factors — manageable",3:"Moderate risk — requires management plan",4:"High risk — specialist intervention needed"}}
+  {k:"excitability",l:"Excitability / Arousal",s:{1:"Calm, settles easily when handled or walked.",2:"Overexcited briefly but can calm with time.",3:"Hard to manage excitement (jumping, mouthing, humping, spinning, barking).",4:"Completely uncontrollable when stimulated; cannot be calmed."}},
+  {k:"reactivity",l:"Reactivity",s:{1:"Relaxed with people and dogs; no signs of threat.",2:"Occasional stiffness, staring, growling, avoidance, or barking.",3:"Frequent snapping, lunging, or warning behaviours.",4:"Biting or attacking without clear provocation."}},
+  {k:"fearAnxiety",l:"Fear & Anxiety",s:{1:"Confident, recovers quickly from startle.",2:"Some cowering or avoidance but can be reassured.",3:"Persistent fear or avoidance; trembling, hiding, freezing.",4:"Extreme panic, shuts down or tries to flee violently."}},
+  {k:"sepAnx",l:"Separation Anxiety",s:{1:"Settles quietly when left alone.",2:"Mild vocalising or pacing but stops with time.",3:"Persistent distress (barking, scratching, destroying).",4:"Severe panic (self-injury, urination, tearing kennel apart)."}},
+  {k:"training",l:"Training & Obedience",s:{1:"Follows lure easily, engages well.",2:"Responds with repetition, somewhat distracted.",3:"Rarely responds; loses focus quickly.",4:"Ignores all prompts; unmanageable."}},
+  {k:"misc",l:"Miscellaneous Behaviour",s:{1:"Normal play, calm in kennel, toilets normally.",2:"Some chewing, spinning or chasing behaviour.",3:"Persistent barking, inappropriate chewing, escape attempts.",4:"Dangerous or repetitive behaviours (self-mutilation, barrier aggression)."}}
 ];
 
 var TABS=[
@@ -1151,10 +1151,10 @@ function toggleRecFolder(name){if(!window._rFoldersCollapsed)window._rFoldersCol
 function page_records(){
   var tlC={"Green":"#dcfce7|#166634","Yellow":"#fef9c3|#854d0e","Red":"#fee2e2|#991b1b","Black":"#1e293b|#f1f5f9"};
   var srch=(window._rSrch||"").toLowerCase(),filt=(window._rFilt||"all");
-  var fil=records.filter(function(r){var ms=!srch||(r.name||"").toLowerCase().includes(srch)||(r.breed||"").toLowerCase().includes(srch)||(r.refNo||"").toLowerCase().includes(srch);var mf=filt==="all"||r.trafficLight===filt||(filt==="ea"&&r.score>=15);return ms&&mf;});
+  var fil=records.filter(function(r){var ms=!srch||(r.name||"").toLowerCase().includes(srch)||(r.breed||"").toLowerCase().includes(srch)||(r.refNo||"").toLowerCase().includes(srch);var mf=filt==="all"||r.trafficLight===filt||(filt==="ea"&&eaCatOf(r));return ms&&mf;});
   var mon=new Date().toISOString().slice(0,7);
   var mc=records.filter(function(r){return(r.intakeDate||r.savedAt||"").slice(0,7)===mon;}).length;
-  var rd=0,bl=0,ea=0;records.forEach(function(r){if(r.trafficLight==="Red")rd++;if(r.trafficLight==="Black")bl++;if(r.score>=15)ea++;});
+  var rd=0,bl=0,ea=0;records.forEach(function(r){if(r.trafficLight==="Red")rd++;if(r.trafficLight==="Black")bl++;if(eaCatOf(r))ea++;});
   if(!records.length)return'<div style="text-align:center;padding:40px;color:var(--color-text-secondary)"><div style="font-size:32px;margin-bottom:10px">&#128193;</div><div>No saved records yet</div></div>';
   var sth='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px"><div class="card" style="padding:12px;text-align:center;margin-bottom:0"><div style="font-size:22px;font-weight:800">'+records.length+'</div><div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase">Total</div></div><div class="card" style="padding:12px;text-align:center;margin-bottom:0"><div style="font-size:22px;font-weight:800;color:#0d9488">'+mc+'</div><div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase">This Month</div></div><div class="card" style="padding:12px;text-align:center;margin-bottom:0"><div style="font-size:22px;font-weight:800;color:#dc2626">'+(rd+bl)+'</div><div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase">Red / Black</div></div><div class="card" style="padding:12px;text-align:center;margin-bottom:0"><div style="font-size:22px;font-weight:800;color:#f59e0b">'+ea+'</div><div style="font-size:10px;color:var(--color-text-secondary);text-transform:uppercase">EA Flagged</div></div></div>';
   var fb=[["all","All"],["Green","Green"],["Yellow","Yellow"],["Red","Red"],["Black","Black"],["ea","EA"]].map(function(f){var sel=filt===f[0];return'<button data-f="'+f[0]+'" onclick="window._rFilt=this.dataset.f;showDashSection(&quot;records&quot;)" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--color-border-secondary);background:'+(sel?"#0f172a":"var(--color-background-primary)")+';color:'+(sel?"#fff":"var(--color-text-secondary)")+'">'+f[1]+'</button>';}).join('');
@@ -1474,6 +1474,14 @@ function recordEA(rec){
   });
   return serious>0||moderate>=3;
 }
+// Real (formal) EA category for a record, or null if none flagged
+function eaCatOf(rec){
+  var e=rec&&rec.state&&rec.state.ea?rec.state.ea:null;
+  if(!e||e.needed!=="Yes")return null;
+  var c=eaCalc(e);
+  if(!c.complete)return {l:"EA",high:false};
+  return {l:"EA "+c.cat.replace("Category ","Cat "),high:(c.cat.indexOf("Category 4")===0||c.cat.indexOf("Category 5")===0)};
+}
 
 // "Today's tasks" rollup card
 function outcomeTheme(o){
@@ -1618,11 +1626,11 @@ function listViewHtml(active){
     var d=rec.state&&rec.state.dog?rec.state.dog:{};
     var days=daysInIsolation(rec.intakeDate);
     var ph=d.photo?'<img src="'+d.photo+'" style="width:36px;height:36px;border-radius:6px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';flex-shrink:0">':'<div style="width:36px;height:36px;border-radius:6px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">&#128062;</div>';
-    var ea=recordEA(rec);
+    var ea=eaCatOf(rec);
     var tlPill=!rec.score?'<span style="background:#e2e8f0;color:#475569;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">Not scored</span>':(rec.trafficLight?'<span style="background:'+(rec.trafficLight==="Red"?"#fee2e2":rec.trafficLight==="Black"?"#1e293b":rec.trafficLight==="Yellow"?"#fef9c3":"#dcfce7")+';color:'+(rec.trafficLight==="Red"?"#991b1b":rec.trafficLight==="Black"?"#f1f5f9":rec.trafficLight==="Yellow"?"#854d0e":"#166534")+';font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">'+rec.trafficLight+' '+(rec.score||"")+'</span>':"");
     return '<div onclick="openDog('+rec.id+')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer'+(i>0?";border-top:1px solid #e2e8f0":"")+'">'
       +ph
-      +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px">'+esc(rec.name)+(ea?'<span style="background:#f59e0b;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px">&#9888; EA</span>':'')+'</div><div style="font-size:11px;color:#64748b">'+esc(d.kennel||"No kennel")+' &middot; '+esc(rec.breed||"")+(days?' &middot; Day '+days:'')+'</div></div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px">'+esc(rec.name)+(ea?'<span style="background:'+(ea.high?"#dc2626":"#f59e0b")+';color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px">&#9888; '+esc(ea.l)+'</span>':'')+'</div><div style="font-size:11px;color:#64748b">'+esc(d.kennel||"No kennel")+' &middot; '+esc(rec.breed||"")+(days?' &middot; Day '+days:'')+'</div></div>'
       +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+tlPill+'</div>'
     +'</div>';
   }).join("")+'</div>';
@@ -1908,10 +1916,10 @@ function showIsolationOverlay(){
 }
 function hideIsolationOverlay(){var ov=document.getElementById("iso-overlay");if(ov)ov.classList.remove("show");}
 var WALK_LEGEND=[
-  {k:"Green",c:"#16a34a",tc:"#fff",rule:"All volunteers and TY students can walk and spend time with these dogs. If a staff member or experienced volunteer says a particular green dog isn't for you, please accept their judgement."},
-  {k:"Yellow",c:"#eab308",tc:"#0f172a",rule:"Ask a member of staff before entering this kennel. These dogs may need a muzzle, be nervous, or not like other dogs. Check with staff even if you have walked this dog before."},
-  {k:"Red",c:"#dc2626",tc:"#fff",rule:"Experienced volunteers only, and only with approval from staff."},
-  {k:"Black",c:"#1e293b",tc:"#fff",rule:"Strictly staff only. No volunteers or work-experience may enter the kennel or interact with these dogs - no exceptions."}
+  {k:"Green",c:"#16a34a",tc:"#fff",rule:"All volunteers and TY students can walk and spend time with these dogs. If a staff member or experienced volunteer says a particular green dog isn't for you, please accept their judgement.",action:"Standard handling by all staff and volunteers. Pair with a calm play group and find a suitable kennel buddy. Well-balanced and suitable for most homes."},
+  {k:"Yellow",c:"#eab308",tc:"#0f172a",rule:"Ask a member of staff before entering this kennel. These dogs may need a muzzle, be nervous, or not like other dogs. Check with staff even if you have walked this dog before.",action:"Minor behaviour and training issues. Experienced handlers only for new interactions; proceed with slow, calm introductions. Structured enrichment and a confidence-building training plan required. Note triggers and continue observation. Supervisor approval required before pairing attempts."},
+  {k:"Red",c:"#dc2626",tc:"#fff",rule:"Experienced volunteers only, and only with approval from staff.",action:"Serious behaviour challenges. A behaviour plan is required before rehoming. Handled only by staff following behaviour-specific protocols. Manager review required before any rehoming decision."},
+  {k:"Black",c:"#1e293b",tc:"#fff",rule:"Strictly staff only. No volunteers or work-experience may enter the kennel or interact with these dogs - no exceptions.",action:"Unsafe or extreme behaviours. Immediate safety measures and manager consultation required. Secure kennel only, two-person handling, muzzle training and muzzle use required. Behaviour and vet consult advised; manager approval required before pairing attempts. Urgent behaviourist and veterinary assessment. Supervisor or manager decision on future suitability. Use extreme caution."}
 ];
 function showWalkLegend(level){
   var ov=document.getElementById("walk-overlay");
@@ -1921,12 +1929,12 @@ function showWalkLegend(level){
     return '<div style="display:flex;gap:11px;align-items:flex-start;padding:11px;border-radius:10px;margin-bottom:8px;'+(cur?"background:#f8fafc;border:1.5px solid "+w.c:"border:0.5px solid #eef2f7")+'">'
       +'<span style="width:24px;height:24px;border-radius:50%;background:'+w.c+';color:'+w.tc+';flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:1px">'+w.k.charAt(0)+'</span>'
       +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:#0f172a">'+w.k+(cur?' <span style="font-size:9px;font-weight:700;color:'+w.c+';background:#fff;border:1px solid '+w.c+';padding:1px 7px;border-radius:20px;margin-left:4px">THIS DOG</span>':"")+'</div>'
-      +'<div style="font-size:12px;color:#475569;line-height:1.45;margin-top:3px">'+w.rule+'</div></div>'
+      +'<div style="font-size:12px;color:#475569;line-height:1.45;margin-top:3px">'+w.rule+'</div>'+(w.action?'<div style="font-size:11px;color:#334155;line-height:1.45;margin-top:6px;padding-top:6px;border-top:1px dashed #e2e8f0"><span style="font-weight:700;text-transform:uppercase;font-size:9px;letter-spacing:0.04em;color:#94a3b8">Required actions</span><br>'+w.action+'</div>':'')+'</div></div>'
     +'</div>';
   }).join("");
   ov.innerHTML='<div class="med-modal">'
     +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
-    +'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700;color:#0f172a">Dog walking traffic light</div><div style="font-size:11px;color:#94a3b8">Who can walk this dog</div></div>'
+    +'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700;color:#0f172a">Traffic light: handling &amp; actions</div><div style="font-size:11px;color:#94a3b8">Who can handle this dog, and the actions required at each level</div></div>'
     +'<button class="med-close-btn" onclick="hideWalkLegend()">&#10005;</button></div>'
     +rows
     +'<button class="med-save-btn" style="background:#0f172a;margin-top:10px" onclick="hideWalkLegend()">Got it</button>'
