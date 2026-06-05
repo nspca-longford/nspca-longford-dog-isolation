@@ -221,7 +221,7 @@ var CATS=[
 
 var TABS=[
   {id:"dog",l:"Dog"},{id:"arrival",l:"Arrival"},{id:"days",l:"5-Day Report"},
-  {id:"assessment",l:"Assessment"},{id:"scoring",l:"Scoring"},{id:"outcome",l:"Outcome"},
+  {id:"assessment",l:"Assessment"},{id:"scoring",l:"Scoring"},{id:"ea",l:"EA"},{id:"outcome",l:"Outcome"},
   {id:"medical",l:"Medical"},
   {id:"weights",l:"Weights"},{id:"exercise",l:"Exercise"},
   {id:"feeding",l:"Feeding"},{id:"notes",l:"Notes"},
@@ -1056,6 +1056,54 @@ function showDashSection(section){
   }
 }
 
+function eaCalc(e){
+  e=e||{};
+  var f=parseInt(e.frequency)||0,s=parseInt(e.size)||0,i=parseInt(e.intensity)||0,b=parseInt(e.biteScore)||0,p=parseInt(e.probability)||0;
+  var complete=!!(f&&s&&i&&b&&p);
+  var severity=f+s+i+b;
+  var score=complete?(severity*p)/72:0;
+  var cat="",mgmt="",col=["#f1f5f9","#64748b"];
+  if(complete){
+    if(score<=0.29){cat="Category 1";mgmt="Maintenance plan";col=["#dcfce7","#166534"];}
+    else if(score<=0.50){cat="Category 2";mgmt="Advanced Care Plan (ACP)";col=["#fef9c3","#854d0e"];}
+    else if(score<=0.60){if(e.punctures){cat="Category 4a";mgmt="Senior team review (punctures present)";col=["#fee2e2","#991b1b"];}else{cat="Category 3";mgmt="Behaviourist recommendation";col=["#ffedd5","#9a3412"];}}
+    else if(score<=0.70){cat="Category 4b";mgmt="Senior team review";col=["#fee2e2","#991b1b"];}
+    else{cat="Category 5";mgmt="Senior management + Head of Canine Behaviour sign-off + SMP";col=["#1e293b","#f1f5f9"];}
+  }
+  return {complete:complete,severity:severity,score:score,cat:cat,mgmt:mgmt,col:col,f:f,s:s,i:i,b:b,p:p};
+}
+function page_ea(){
+  var e=S.ea||{};
+  var h='<h2 style="margin-bottom:4px">Enhanced Assessment (EA)</h2><div class="sub" style="margin-bottom:14px">Battersea bite-risk method. A structured aid to inform management - it does not make the decision, and higher categories require senior sign-off.</div>';
+  h+='<div class="card" style="margin-bottom:14px;border-left:3px solid #dc2626"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#991b1b;margin-bottom:8px">When to use</div><div style="font-size:12.5px;color:var(--color-text-secondary);line-height:1.5">For dogs with a bite history, human-directed aggression, severe reactivity, or repeated overstimulation that includes biting. It does <strong>not</strong> assess general temperament or replace the intake assessment.</div></div>';
+  h+='<div class="card" style="margin-bottom:14px">'+slct("Does this dog require an EA?",e.needed||"","ea.needed",[["","-- select --"],["Yes","Yes - EA required"],["No","No - intake assessment is sufficient"],["Monitoring","Monitoring - watch for triggers"]])+'</div>';
+  if((e.needed||"")!=="Yes"){
+    h+='<div class="card" style="background:var(--color-background-secondary);text-align:center;color:var(--color-text-secondary);font-size:12.5px;padding:22px">Set the above to <strong>Yes</strong> to record an Enhanced Assessment for this dog.</div>';
+    h+='<div class="brow"><button class="btn" data-go="scoring">&larr; Back</button><button class="btn btnp" data-go="outcome">Next: outcome &rarr;</button></div>';
+    return h;
+  }
+  var freqOpts=[["","-- select --"],["1","1 - Isolated / one-off"],["2","2 - Occasional (a few times)"],["3","3 - Frequent (regular pattern)"],["4","4 - Constant / highly repeated"]];
+  var sizeOpts=[["","-- select --"],["1","1 - Small (under 10kg)"],["2","2 - Medium (10-25kg)"],["3","3 - Large (25-40kg)"],["4","4 - Giant (over 40kg)"]];
+  var intOpts=[["","-- select --"],["1","1 - Low - minor trigger, easily managed"],["2","2 - Moderate - clear trigger, manageable"],["3","3 - High - strong trigger, hard to manage"],["4","4 - Extreme - minimal or unpredictable trigger"]];
+  var biteOpts=[["","-- select --"],["1","1 - Aggression, no skin contact (air snap)"],["2","2 - Tooth contact, no puncture"],["3","3 - Shallow punctures, single bite"],["4","4 - Deep punctures, single bite"],["5","5 - Multiple bites / multiple deep punctures"],["6","6 - Fatal or extreme injury"]];
+  var probOpts=[["","-- select --"],["1","1 - Highly unlikely"],["2","2 - Unlikely"],["3","3 - Likely"],["4","4 - Highly likely"]];
+  var wHint=(S.dog&&S.dog.weight)?' <span style="color:#94a3b8;font-weight:400">(this dog: '+esc(S.dog.weight)+')</span>':'';
+  h+='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0f172a;margin-bottom:10px">1 &middot; Severity</div><div class="g2">'+slct("Frequency",e.frequency||"","ea.frequency",freqOpts)+slct("Size of dog",e.size||"","ea.size",sizeOpts)+slct("Intensity of situation",e.intensity||"","ea.intensity",intOpts)+slct("Bite score (Dunbar 1-6)",e.biteScore||"","ea.biteScore",biteOpts)+'</div>'+(wHint?'<div style="font-size:11px;margin-top:2px">Size band'+wHint+'</div>':'')+'</div>';
+  h+='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0f172a;margin-bottom:10px">2 &middot; Probability of recurrence</div>'+slct("How likely is this to happen again?",e.probability||"","ea.probability",probOpts)+'<label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:8px;font-size:13px"><input type="checkbox" '+(e.punctures?"checked":"")+' onchange="S.ea.punctures=this.checked;debouncedSave();renderMain()" style="width:18px;height:18px;cursor:pointer;flex-shrink:0"> Punctures present in any incident <span style="color:#94a3b8;font-size:11px">(raises a 0.51-0.60 result to Category 4a)</span></label></div>';
+  var r=eaCalc(e);
+  if(r.complete){
+    h+='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">Result</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;margin-bottom:12px"><span>Severity <strong>'+r.severity+'</strong></span><span style="color:#94a3b8">&times;</span><span>Probability <strong>'+r.p+'</strong></span><span style="color:#94a3b8">&divide; 72 =</span><span style="font-size:20px;font-weight:800">'+r.score.toFixed(2)+'</span></div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:14px;font-weight:800;padding:5px 14px;border-radius:20px;background:'+r.col[0]+';color:'+r.col[1]+'">'+esc(r.cat)+'</span><span style="font-size:13px;font-weight:600">'+esc(r.mgmt)+'</span></div>';
+    if(r.cat.indexOf("Category 4")===0||r.cat.indexOf("Category 5")===0){h+='<div style="margin-top:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;font-size:12px;color:#991b1b;font-weight:600">&#9888; This result requires senior team review'+(r.cat.indexOf("Category 5")===0?" and Head of Canine Behaviour sign-off (SMP)":"")+' before any rehoming or management decision.</div>';}
+    h+='</div>';
+  } else {
+    h+='<div class="card" style="margin-bottom:14px;background:var(--color-background-secondary);text-align:center;color:var(--color-text-secondary);font-size:12.5px;padding:18px">Complete all five scores above to calculate the EA category.</div>';
+  }
+  var today=new Date().toISOString().slice(0,10);
+  h+='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0f172a;margin-bottom:10px">Context &amp; sign-off</div>'+ta("Incident summary",e.incidentSummary||"","ea.incidentSummary","What happened - context, triggers, victims, injuries...")+ta("Primary concerns",e.concerns||"","ea.concerns","Key risks and management concerns...")+'<div class="g2">'+fld("Assessed by",e.assessorName||"","ea.assessorName","text","Behaviourist / senior TL")+fld("Date",e.assessorDate||today,"ea.assessorDate","date")+'</div></div>';
+  h+='<div style="font-size:10px;color:#94a3b8;margin-bottom:12px">Scales follow the standard Battersea severity and Dunbar bite definitions. EA Score = Severity (Frequency + Size + Intensity + Bite) &times; Probability &divide; 72.</div>';
+  h+='<div class="brow"><button class="btn" data-go="scoring">&larr; Back</button><button class="btn btnp" data-go="outcome">Next: outcome &rarr;</button></div>';
+  return h;
+}
 function renderReadyToGo(){
   var DEP=["Moved to Kennels","Moved to Foster","Rehomed","Returned to Owner","Transferred","Died in care","Escaped / Lost","Euthanised"];
   var list=records.filter(function(r){
@@ -2078,7 +2126,8 @@ function defaultState(){return{_id:null,tab:"dog",
   medical:defaultMedical(),
   assessment:{touchHead:"",touchBody:"",touchPaws:"",touchEars:"",touchMouth:"",collarGrab:"",restraint:"",leadBehaviour:"",handlingNotes:"",grooming:"",nailHandling:"",liftHandling:"",confidence:"",energyLevel:"",demeanour:"",stressRecovery:"",biddability:"",temperamentNotes:"",houseTraining:"",aloneTime:"",crateBehaviour:"",recall:"",toiletTraining:"",barrierReaction:"",barrierIntensity:"",barrierTriggers:"",redirectedAggression:"",barrierNotes:"",strangerApproach:"",childrenSuitable:"",dogOnLead:"",dogOffLead:"",catResponse:"",equineResponse:"",smallMammalResponse:"",groupDogs:"",socialNotes:"",carTravel:"",noiseSensitivity:"",newEnvironments:"",kennelBehaviour:"",environmentNotes:"",toyInterest:"",retrieve:"",tug:"",foodMotivation:"",resourceGuarding:"",playStyle:"",playEngagement:"",dropCue:"",mouthing:"",settleAfterPlay:"",frustration:"",toyPreference:"",playNotes:"",attentionSpan:"",handlerFocus:"",basicCommands:"",previousTraining:"",trainNotes:"",homeType:"",suitableChildren:"",suitableOtherDogs:"",suitableCats:"",suitableEquine:"",suitableSmallMammals:"",exerciseNeeds:"",experienceLevel:"",suitabilityNotes:"",buddyWalks:[],playdates:[],muzzleRequired:"",muzzleType:"",muzzleStage:"",muzzleSessions:[]},
   fin:{c1:"",c2:"",c3:"",steps:"",followUp:"",notes:"",overallProgress:"",handoverNote:"",assessorName:"",assessorDate:"",secondAssessor:"",secondAssessorDate:"",outcome:"",outcomeDate:"",outcomeNotes:""},
-  weights:[],files:[],exercises:[],notes:[],incidents:[],feeding:[],warnings:[],careNotices:[],feedingPlan:{brand:"",grams:"",frequency:"",dietType:"",notes:""}
+  weights:[],files:[],exercises:[],notes:[],incidents:[],feeding:[],warnings:[],careNotices:[],feedingPlan:{brand:"",grams:"",frequency:"",dietType:"",notes:""},
+  ea:{needed:"",frequency:"",size:"",intensity:"",biteScore:"",punctures:false,probability:"",concerns:"",incidentSummary:"",assessorName:"",assessorDate:""}
 };}
 
 var S=defaultState();
@@ -3438,6 +3487,8 @@ function page(){
   var total=Object.values(S.scores).reduce(function(a,b){return a+b},0);
   var tl=tlc(total);var ea=eaTriggered();
 
+  if(t==="ea")return page_ea();
+
   if(t==="dog"){
     var ii=d.intakeDate?isolationInfo(d.intakeDate,(f.outcome||"")):null;
     var meta=[d.breed,d.sex,d.age,d.kennel].filter(Boolean).join(" \u00b7 ");
@@ -3448,6 +3499,7 @@ function page(){
     var chips=[];
     if(ii){var icl=ii.state==="done"?"\u2713 Isolation complete":(ii.state==="final"?"\ud83d\udd12 Isolation \u00b7 Day 5 of 5":"\ud83d\udd12 Isolation \u00b7 Day "+ii.day+" of 5");var ibg=ii.state==="done"?"#dcfce7":"#fef3c7",itc=ii.state==="done"?"#166534":"#92400e";chips.push('<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+ibg+';color:'+itc+'">'+icl+'</span>');}
     var _con=activeContagiousList(S.medical);if(_con&&_con.length){var _zoo=_con.some(function(x){return ZOONOTIC_DISEASES[x.type];});chips.push('<span title="'+esc(_con.map(function(x){return diseaseShortName(x.type);}).join(", "))+'" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:#fee2e2;color:#991b1b">&#129440; Infectious'+(_zoo?" \u00b7 zoonotic":"")+'</span>');}
+    var _ea=eaCalc(S.ea);if(_ea.complete){chips.push('<span title="EA score '+_ea.score.toFixed(2)+' \u00b7 '+esc(_ea.mgmt)+'" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+_ea.col[0]+';color:'+_ea.col[1]+'">&#9888; EA '+esc(_ea.cat.replace("Category ","Cat "))+'</span>');}
     if(tl)chips.push('<span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:#dbeafe;color:#1e40af">Score '+total+'/24</span>');
     if(d.refNo)chips.push('<span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:#f1f5f9;color:#475569">Ref '+esc(d.refNo)+'</span>');
     var hero='<div class="card" style="margin-bottom:14px"><div style="display:flex;gap:13px;align-items:center">'+photoEl
@@ -3640,7 +3692,7 @@ function page(){
 
     return'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="margin:0">Full assessment report</h2><button class="btn" onclick="printDoc(\'Assessment Report\')" style="font-size:12px">&#128424; PDF / Print</button></div>'
       +'<div style="background:#0f172a;border-radius:10px;padding:16px 18px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="color:#94a3b8;font-size:11px;margin-bottom:2px">'+esc(d2.refNo||"")+'</div><div style="color:#fff;font-size:22px;font-weight:600">'+esc(d2.name||"—")+'</div><div style="color:#94a3b8;font-size:12px;margin-top:2px">'+[d2.breed,d2.sex,d2.age].filter(Boolean).map(esc).join(" · ")+'</div></div><div style="text-align:right">'+tlb2+(total2?'<div style="color:#94a3b8;font-size:11px;margin-top:4px">Score: '+total2+'/24</div>':"")+'</div></div></div>'
-      +(ea2?'<div class="ea-warn" style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:#92400e">&#9888; Enhanced Assessment flagged</div></div>':'')
+      +((ea2&&!(S.ea&&S.ea.needed==="Yes"))?'<div class="ea-warn" style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:#92400e">&#9888; High behaviour score - consider an Enhanced Assessment</div></div>':'')
       +(rWarn.length?'<div class="card" style="border-left:4px solid '+(rCrit?"#dc2626":"#f59e0b")+'"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:'+(rCrit?"#991b1b":"#854d0e")+';margin-bottom:8px">&#9888; Handling warnings</div>'+rWarn.map(function(w){var th=warnLevelTheme(w.level);return'<div class="rrow"><span class="rk">'+esc(w.text)+'</span><span class="rv"><span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;background:'+th[0]+';color:'+th[2]+'">'+esc(w.level||"Caution")+'</span></span></div>';}).join("")+'</div>':"")
       +((S.careNotices||[]).length?'<div class="card" style="border-left:4px solid '+NOTICE_ACCENT+'"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:'+NOTICE_FG+';margin-bottom:8px">&#128276; Notices</div>'+(S.careNotices||[]).map(function(n){return'<div class="rrow"><span class="rk">'+esc(n.text)+'</span></div>';}).join("")+'</div>':"")
       +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Dog details</div>'+(drows||"—")+'</div>'
@@ -3649,6 +3701,7 @@ function page(){
       +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">5-Day isolation log</div>'+dblocks+'</div>'
       +asmtCard
       +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Behaviour scoring</div>'+srows+'<div style="display:flex;justify-content:space-between;padding:10px 0 0;font-weight:600;font-size:13px"><span>Total</span><span>'+total2+'/24</span></div></div>'
+      +(function(){var er=eaCalc(S.ea||{});var e=S.ea||{};if((e.needed||"")!=="Yes"&&!er.complete)return"";var rows;if(er.complete){rows='<div class="rrow"><span class="rk">Severity (Freq + Size + Intensity + Bite)</span><span class="rv">'+er.severity+'</span></div><div class="rrow"><span class="rk">Probability</span><span class="rv">'+er.p+'</span></div><div class="rrow"><span class="rk">EA Score (Severity &times; Probability &divide; 72)</span><span class="rv">'+er.score.toFixed(2)+'</span></div><div class="rrow"><span class="rk">Risk category</span><span class="rv"><span style="font-size:11px;font-weight:700;padding:1px 9px;border-radius:20px;background:'+er.col[0]+';color:'+er.col[1]+'">'+esc(er.cat)+'</span></span></div><div class="rrow"><span class="rk">Management outcome</span><span class="rv">'+esc(er.mgmt)+'</span></div>';}else{rows='<div style="font-size:12px;color:#94a3b8;font-style:italic">EA flagged as required - scores not yet complete.</div>';}return'<div class="card" style="border-left:4px solid #dc2626"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#991b1b;margin-bottom:8px">&#9888; Enhanced Assessment (bite-risk)</div>'+rows+(e.incidentSummary?noteBlock("Incident summary",e.incidentSummary):"")+(e.concerns?noteBlock("Primary concerns",e.concerns):"")+(e.assessorName?'<div class="rrow"><span class="rk">Assessed by</span><span class="rv">'+esc(e.assessorName)+(e.assessorDate?" &middot; "+esc(e.assessorDate):"")+'</span></div>':"")+'</div>';})()
       +((concerns||f2.steps||f2.handoverNote||f2.outcome||f2.overallProgress)?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">Final assessment output</div>'+concerns+(f2.steps?'<div style="background:#dbeafe;border-radius:6px;padding:11px;margin-top:8px"><div style="font-size:10px;font-weight:600;color:#0369a1;text-transform:uppercase;margin-bottom:3px">Recommended next steps</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.steps)+'</div></div>':"")+(f2.followUp?'<div class="rrow" style="margin-top:8px"><span class="rk">Follow-up date</span><span class="rv">'+esc(f2.followUp)+'</span></div>':"")+(f2.overallProgress?'<div class="rrow"><span class="rk">Overall progress</span><span class="rv">'+esc(f2.overallProgress)+'</span></div>':"")+(f2.outcome?'<div class="rrow"><span class="rk">Outcome</span><span class="rv">'+esc(f2.outcome)+(f2.outcomeDate?" &middot; "+esc(f2.outcomeDate):"")+'</span></div>':"")+((f2.outcome==="Euthanised"&&f2.euthReason)?'<div class="rrow"><span class="rk">Reason for euthanasia</span><span class="rv">'+esc(f2.euthReason)+'</span></div>':"")+(f2.outcomeNotes?noteBlock("Outcome notes",f2.outcomeNotes):"")+(f2.notes?noteBlock("Additional notes",f2.notes):"")+(f2.handoverNote?'<div style="margin-top:10px;padding:10px;background:#f8fafc;border-radius:6px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:4px">Kennel handover note</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.handoverNote)+'</div></div>':"")+'</div>':"")
       +(f2.assessorName?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:8px">Sign-off</div><div class="rrow"><span class="rk">Assessor</span><span class="rv">'+esc(f2.assessorName)+(f2.assessorDate?' &mdash; '+esc(f2.assessorDate):'')+'</span></div>'+(f2.secondAssessor?'<div class="rrow"><span class="rk">Second assessor</span><span class="rv">'+esc(f2.secondAssessor)+(f2.secondAssessorDate?' &mdash; '+esc(f2.secondAssessorDate):'')+'</span></div>':'')+'</div>':'')
       +'<div class="brow"><button class="btn" data-go="timeline">&larr; Back</button><button class="btn" onclick="printDoc(\'Assessment Report\')">&#128424; PDF / Print</button><button class="btn" data-go="briefing">Briefing &rarr;</button></div>';
@@ -3808,6 +3861,7 @@ function loadRecord(id){
   if(saved.warnings)S.warnings=saved.warnings;
   if(saved.careNotices)S.careNotices=saved.careNotices;
   if(saved.feedingPlan)S.feedingPlan=Object.assign({},S.feedingPlan,saved.feedingPlan);
+  if(saved.ea)S.ea=Object.assign({},S.ea,saved.ea);
   if(saved.medical&&saved.medical.bodyMap)S.medical.bodyMap=saved.medical.bodyMap;
   S._id=rec.id;S.tab="report";render();
 }
@@ -3826,7 +3880,7 @@ async function loadRecordsList(){
 function loadCurrent(){
   try{
     var s=localStorage.getItem("nspca-current");
-    if(s){var saved=JSON.parse(s);if(saved._id)S._id=saved._id;if(saved.dog)S.dog=Object.assign({},S.dog,saved.dog);if(saved.arrival)S.arrival=Object.assign({},S.arrival,saved.arrival);if(saved.days)S.days=saved.days;if(saved.scores)S.scores=Object.assign({},S.scores,saved.scores);if(saved.fin)S.fin=Object.assign({},S.fin,saved.fin);if(saved.weights)S.weights=saved.weights;if(saved.files)S.files=saved.files;if(saved.assessment)S.assessment=Object.assign({},S.assessment,saved.assessment);if(saved.medical)S.medical=Object.assign({},S.medical,saved.medical);if(saved.warnings)S.warnings=saved.warnings;if(saved.careNotices)S.careNotices=saved.careNotices;}
+    if(s){var saved=JSON.parse(s);if(saved._id)S._id=saved._id;if(saved.dog)S.dog=Object.assign({},S.dog,saved.dog);if(saved.arrival)S.arrival=Object.assign({},S.arrival,saved.arrival);if(saved.days)S.days=saved.days;if(saved.scores)S.scores=Object.assign({},S.scores,saved.scores);if(saved.fin)S.fin=Object.assign({},S.fin,saved.fin);if(saved.weights)S.weights=saved.weights;if(saved.files)S.files=saved.files;if(saved.assessment)S.assessment=Object.assign({},S.assessment,saved.assessment);if(saved.medical)S.medical=Object.assign({},S.medical,saved.medical);if(saved.warnings)S.warnings=saved.warnings;if(saved.careNotices)S.careNotices=saved.careNotices;if(saved.ea)S.ea=Object.assign({},S.ea,saved.ea);}
   }catch(e){}
 }
 
