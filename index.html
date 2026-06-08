@@ -156,6 +156,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
         <div id="dash-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,0.18);min-width:200px;z-index:50;overflow:hidden">
           <div onclick="dashMenuGo('records')" class="dmi">&#128203; Records</div>
           <div onclick="dashMenuGo('rounds')" class="dmi">&#128694; Daily Rounds</div>
+          <div onclick="dashMenuGo('diary')" class="dmi">&#128214; Daily Diary</div>
           <div onclick="dashMenuGo('readytogo')" class="dmi">&#9989; Ready to Go</div>
           <div onclick="dashMenuGo('upcomingMedical')" class="dmi">&#128137; Upcoming Medical</div>
           <div onclick="dashMenuGo('factsheets')" class="dmi">&#129440; Disease info</div>
@@ -230,6 +231,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.1",date:"2026-06-08",note:"New Daily Diary in the menu - a shared running log of the unit's day. Anyone can jot down cleaning, vet visits, deliveries, intakes and movements, staffing notes, visitors or general observations. Entries are grouped by date with the newest day on top and today highlighted, each tagged with a category and the person who wrote it. Entries sync across the team. You can backfill a different date, and edit or delete your own entries (supervisors and above can tidy any)."},
   {version:"3.0",date:"2026-06-05",note:"A much fuller behavioural assessment. There is a new Temperament & demeanour card (overall confidence, energy, demeanour, recovery from stress and biddability), and the Handling, Play, Environment and Trainability sections have all been deepened - grooming and nail handling, mouthing and bite inhibition, settling after play, frustration tolerance, favourite toys, house-training, time alone, crate behaviour, recall, toilet training and more. Everything new flows through to the printed report and the management briefing, and the briefing now captures the full assessment rather than just a few lines. There is also a new Ready to Go page in the menu, listing dogs that have finished isolation, are clear of infection and have been assessed - sorted by who has been waiting longest."},
   {version:"2.9",date:"2026-06-04",note:"Two new status lights on a dog's profile, next to the behaviour traffic light: an Isolation light (amber during the 5-day hold, green once complete) and an Infectious light (red) for dogs with a disease or virus, marked zoonotic where relevant. Records are now grouped into folders by outcome (In Isolation, Moved to Kennels, Rehomed, Euthanised, Other). Neutered/spayed and dental now have treatment dates that carry through to the report, timeline and briefing. The initial weight typed in a dog's details now logs into the Weights tab on its own. And three more foods auto-suggest a daily feed from weight - Hypoallergenic, Gastro and Hills Gastro Biome."},
   {version:"2.8",date:"2026-06-03",note:"New Disease info section in the menu - quick reference cards for the diseases we see in isolation (parvo, distemper, kennel cough, lepto, ringworm, giardia and more), each flagged contagious or zoonotic, plus a general hygiene-barrier protocol. All marked as general guidance and editable, so you can swap in the unit's own vet-approved SOP. Search now also matches reference numbers."},
@@ -1053,6 +1055,10 @@ function showDashSection(section){
     loadFactsheets().then(function(){el.innerHTML=renderFactsheets();});
   }else if(section==="readytogo"){
     el.innerHTML=renderReadyToGo();
+  }else if(section==="diary"){
+    _diaryEditing="";
+    el.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">Loading\u2026</div>';
+    loadDiary().then(function(){el.innerHTML=renderDiary();});
   }
 }
 
@@ -1313,6 +1319,126 @@ function renderFactsheets(){
   html+=order.map(function(k){return fsCard(k,k);}).join("");
   return '<div style="max-width:840px;margin:0 auto">'+back+disclaimer+html+'</div>';
 }
+
+// ── Daily Diary (shared unit log) ─────────────────────────────────
+var _diaryCache=null,_diaryShared=false,_diaryEditing="";
+var DIARY_CATS=[
+  ["General","General",["#e2e8f0","#475569"]],
+  ["Cleaning","Cleaning & maintenance",["#dbeafe","#1e40af"]],
+  ["Vet","Vet & medical",["#fee2e2","#991b1b"]],
+  ["Movements","Intakes & movements",["#dcfce7","#166534"]],
+  ["Staffing","Staffing & rota",["#f3e8ff","#6b21a8"]],
+  ["Visitors","Visitors & contractors",["#ffedd5","#9a3412"]],
+  ["Other","Other",["#fef9c3","#854d0e"]]
+];
+function diaryCatTheme(c){var f=DIARY_CATS.find(function(x){return x[0]===c;});return f?f[2]:["#e2e8f0","#475569"];}
+function diaryCatLabel(c){var f=DIARY_CATS.find(function(x){return x[0]===c;});return f?f[1]:(c||"General");}
+function getDiaryLocal(){try{var r=localStorage.getItem("nspca-diary");return r?JSON.parse(r):[];}catch(e){return[];}}
+function setDiaryLocal(a){try{localStorage.setItem("nspca-diary",JSON.stringify(a||[]));}catch(e){}}
+function getDiary(){return _diaryCache||getDiaryLocal();}
+async function loadDiary(){
+  _diaryCache=getDiaryLocal();_diaryShared=false;
+  if(typeof supabaseClient!=="undefined"&&supabaseClient){
+    try{
+      var res=await supabaseClient.from("diary").select("*").order("entry_date",{ascending:false});
+      if(res.error)throw res.error;
+      _diaryCache=(res.data||[]).map(function(r){return {id:String(r.id),date:r.entry_date,time:r.entry_time||"",cat:r.category||"General",text:r.text||"",author:r.author||"",created:r.created_at};});
+      _diaryShared=true;setDiaryLocal(_diaryCache);
+    }catch(e){_diaryShared=false;}
+  }
+}
+async function diaryAdd(){
+  var dEl=document.getElementById("diary-date"),cEl=document.getElementById("diary-cat"),tEl=document.getElementById("diary-text");
+  if(!tEl)return;
+  var text=(tEl.value||"").trim();
+  if(!text){appAlert("Write something first.");return;}
+  var date=(dEl&&dEl.value)||new Date().toISOString().slice(0,10);
+  var cat=(cEl&&cEl.value)||"General";
+  var now=new Date();var time=("0"+now.getHours()).slice(-2)+":"+("0"+now.getMinutes()).slice(-2);
+  var author=currentName();
+  if(_diaryShared&&supabaseClient){
+    try{
+      var res=await supabaseClient.from("diary").insert([{entry_date:date,entry_time:time,category:cat,text:text,author:author,created_at:now.toISOString()}]);
+      if(res.error)throw res.error;
+    }catch(e){_diaryShared=false;}
+  }
+  if(!_diaryShared){
+    var arr=getDiary();arr.unshift({id:"local-"+Date.now(),date:date,time:time,cat:cat,text:text,author:author,created:now.toISOString()});_diaryCache=arr;setDiaryLocal(arr);
+  }
+  tEl.value="";
+  await loadDiary();_diaryRerender();
+  miniToast(_diaryShared?"Entry added for the team":"Entry saved on this device");
+}
+function diaryEdit(id){_diaryEditing=String(id);_diaryRerender();setTimeout(function(){var t=document.getElementById("diary-edit-area");if(t)t.focus();},30);}
+function diaryCancelEdit(){_diaryEditing="";_diaryRerender();}
+async function diarySaveEdit(id){
+  id=String(id);
+  var tEl=document.getElementById("diary-edit-area"),cEl=document.getElementById("diary-edit-cat");
+  if(!tEl)return;var text=(tEl.value||"").trim();if(!text){appAlert("Entry can't be empty.");return;}
+  var cat=(cEl&&cEl.value)||"General";
+  if(_diaryShared&&supabaseClient&&id.indexOf("local-")!==0){
+    try{var res=await supabaseClient.from("diary").update({text:text,category:cat,updated_at:new Date().toISOString()}).eq("id",id);if(res.error)throw res.error;}catch(e){}
+  }else{
+    var arr=getDiary();var it=arr.find(function(x){return x.id===id;});if(it){it.text=text;it.cat=cat;}setDiaryLocal(arr);_diaryCache=arr;
+  }
+  _diaryEditing="";await loadDiary();_diaryRerender();miniToast("Entry updated");
+}
+function diaryDelete(id){
+  id=String(id);
+  appConfirm("Delete this diary entry?",function(){
+    (async function(){
+      if(_diaryShared&&supabaseClient&&id.indexOf("local-")!==0){
+        try{await supabaseClient.from("diary").delete().eq("id",id);}catch(e){}
+      }else{
+        var arr=getDiary().filter(function(x){return x.id!==id;});setDiaryLocal(arr);_diaryCache=arr;
+      }
+      await loadDiary();_diaryRerender();miniToast("Entry deleted");
+    })();
+  },{danger:true});
+}
+function diaryCanManage(entry){return (entry.author&&entry.author===currentName())||currentRole()!=="staff";}
+function _diaryRerender(){var el=document.getElementById("dashboard-content");if(el)el.innerHTML=renderDiary();}
+function renderDiary(){
+  var editing=_diaryEditing||"";
+  var entries=getDiary().slice();
+  entries.sort(function(a,b){var c=(b.date||"").localeCompare(a.date||"");return c!==0?c:(b.time||"").localeCompare(a.time||"");});
+  var today=new Date().toISOString().slice(0,10);
+  var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><button onclick="_diaryEditing=&quot;&quot;;loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1;font-size:18px">Daily Diary</h2></div>';
+  var sub='<div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px">Shared log of the unit&rsquo;s day &mdash; cleaning, vet visits, deliveries, intakes, staffing and general observations. '+(_diaryShared?'Entries sync across your team.':'Entries are saved on this device.')+'</div>';
+  var catOpts=DIARY_CATS.map(function(c){return '<option value="'+c[0]+'">'+esc(c[1])+'</option>';}).join("");
+  var composer='<div class="card" style="margin-bottom:16px">'
+    +'<div class="g2"><div class="f"><label class="lbl">Date</label><input type="date" id="diary-date" value="'+today+'" style="width:100%;padding:9px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box"></div>'
+    +'<div class="f"><label class="lbl">Category</label><select id="diary-cat" style="width:100%;padding:9px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box">'+catOpts+'</select></div></div>'
+    +'<div class="f" style="margin-bottom:10px"><label class="lbl">Note</label><textarea id="diary-text" placeholder="What happened today? Cleaning, vet visits, deliveries, intakes, observations\u2026" style="width:100%;min-height:90px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box"></textarea></div>'
+    +'<button onclick="diaryAdd()" style="background:#c5e86c;color:#0f172a;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">+ Add entry</button>'
+    +'</div>';
+  var body="";
+  if(!entries.length){
+    body='<div style="text-align:center;padding:36px 20px;color:var(--color-text-secondary)"><div style="font-size:32px;margin-bottom:8px">&#128214;</div>No diary entries yet.<div style="font-size:11px;margin-top:6px;opacity:0.8">Add the first one above.</div></div>';
+  }else{
+    var byDate={};entries.forEach(function(e){if(!byDate[e.date])byDate[e.date]=[];byDate[e.date].push(e);});
+    Object.keys(byDate).sort().reverse().forEach(function(date){
+      body+='<div style="margin-bottom:18px"><div style="font-size:12px;font-weight:700;color:#0f172a;padding:6px 0;margin-bottom:8px;border-bottom:1px solid #e2e8f0">'+fmtDMYwk(date)+(date===today?' &middot; <span style="color:#0d9488">Today</span>':"")+'</div>';
+      byDate[date].forEach(function(e){
+        var th=diaryCatTheme(e.cat);
+        if(editing===e.id){
+          var eo=DIARY_CATS.map(function(c){return '<option value="'+c[0]+'"'+(c[0]===e.cat?' selected':'')+'>'+esc(c[1])+'</option>';}).join("");
+          body+='<div class="card" style="margin-bottom:8px"><select id="diary-edit-cat" style="padding:6px 8px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;font-family:inherit;margin-bottom:8px">'+eo+'</select><textarea id="diary-edit-area" style="width:100%;min-height:90px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box">'+esc(e.text)+'</textarea><div style="display:flex;gap:6px;margin-top:8px"><button onclick="diarySaveEdit(\''+e.id+'\')" style="background:#c5e86c;color:#0f172a;border:none;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Save</button><button onclick="diaryCancelEdit()" style="background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid #e2e8f0;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Cancel</button></div></div>';
+        }else{
+          var actions=diaryCanManage(e)?'<div style="display:flex;gap:5px;flex-shrink:0"><button onclick="diaryEdit(\''+e.id+'\')" style="background:#e2e8f0;color:#475569;border:none;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer">&#9998;</button><button onclick="diaryDelete(\''+e.id+'\')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer">&#10005;</button></div>':'';
+          body+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:11px 13px;margin-bottom:8px">'
+            +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:'+th[0]+';color:'+th[1]+'">'+esc(diaryCatLabel(e.cat))+'</span>'+(e.time?'<span style="font-size:11px;color:#94a3b8">'+esc(e.time)+'</span>':'')+'<span style="flex:1"></span>'+actions+'</div>'
+            +'<div style="font-size:13px;line-height:1.55;color:#0f172a;white-space:pre-wrap">'+esc(e.text)+'</div>'
+            +(e.author?'<div style="font-size:10px;color:#94a3b8;margin-top:6px">&mdash; '+esc(e.author)+'</div>':'')
+            +'</div>';
+        }
+      });
+      body+='</div>';
+    });
+  }
+  return '<div style="max-width:760px;margin:0 auto">'+back+sub+composer+body+'</div>';
+}
+
 
 function updateClock(){
   var el=document.getElementById("dash-clock");if(!el)return;
