@@ -43,8 +43,17 @@ textarea{resize:vertical;min-height:68px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
 .card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px 18px;margin-bottom:12px}
 .sec{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#64748b;padding:8px 0 10px;margin-top:4px;border-top:1px solid #e2e8f0}
-nav{display:flex;overflow-x:auto;border-bottom:1px solid #e2e8f0;background:#fff;scrollbar-width:none;position:sticky;top:0;z-index:10}
+#navwrap{position:sticky;top:0;z-index:10;background:#fff}
+nav{display:flex;align-items:flex-end;overflow-x:auto;border-bottom:1px solid #e2e8f0;background:#fff;scrollbar-width:none}
 nav::-webkit-scrollbar{display:none}
+#navfade{position:absolute;top:0;right:0;bottom:0;width:30px;background:linear-gradient(to right,rgba(255,255,255,0),#fff);pointer-events:none}
+.navseg{display:flex;flex-direction:column;flex-shrink:0}
+.navglabel{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:#94a3b8;padding:7px 14px 2px;white-space:nowrap}
+.navtabs{display:flex}
+.navdiv{width:1px;background:#eef2f6;align-self:stretch;margin:20px 0 9px;flex-shrink:0}
+.cdot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:5px;vertical-align:middle}
+.cdot.done{background:#16a34a}
+.cdot.empty{background:transparent;box-shadow:inset 0 0 0 1.5px #cbd5e1}
 .nb{padding:11px 14px;border:none;background:transparent;cursor:pointer;font-size:12px;font-weight:500;color:#64748b;border-bottom:2px solid transparent;white-space:nowrap;font-family:inherit}
 .nb.on{color:#185FA5;border-bottom-color:#378ADD}
 .nb:hover:not(.on){color:#0f172a}
@@ -191,7 +200,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
   <div class="subheader">
     <div style="color:#94a3b8;font-size:11px">Isolation Unit — Intake Assessment &amp; 5-Day Report &nbsp;|&nbsp; Longford &nbsp;|&nbsp; <span style="color:#c5e86c">&#9679; Shared records enabled</span></div>
   </div>
-  <nav id="nav"></nav>
+  <div id="navwrap"><nav id="nav"></nav><div id="navfade"></div></div>
   <div id="content"></div>
   <div id="save-bar" style="position:fixed;bottom:0;left:0;right:0;z-index:50;background:#fff;border-top:1px solid #e2e8f0;box-shadow:0 -4px 16px rgba(0,0,0,0.07);padding:10px 16px;padding-bottom:calc(10px + env(safe-area-inset-bottom))">
     <div style="max-width:740px;margin:0 auto"><div id="last-changed" style="font-size:10.5px;color:#94a3b8;text-align:right;margin-bottom:6px;min-height:13px;line-height:13px"></div><button id="save-btn" onclick="saveRecord()" class="btn btng" style="width:100%;font-size:14px;padding:11px;font-weight:600">Save</button></div>
@@ -221,17 +230,18 @@ var CATS=[
 ];
 
 var TABS=[
-  {id:"dog",l:"Dog"},{id:"arrival",l:"Arrival"},{id:"days",l:"5-Day Report"},
-  {id:"assessment",l:"Assessment"},{id:"scoring",l:"Scoring"},{id:"ea",l:"EA"},{id:"outcome",l:"Outcome"},
-  {id:"medical",l:"Medical"},
-  {id:"weights",l:"Weights"},{id:"exercise",l:"Exercise"},
-  {id:"feeding",l:"Feeding"},{id:"notes",l:"Notes"},
-  {id:"files",l:"Files"},{id:"timeline",l:"Timeline"},{id:"report",l:"Report"},{id:"briefing",l:"Briefing"}
+  {id:"dog",l:"Dog",g:"Profile"},{id:"arrival",l:"Arrival",g:"Profile"},{id:"days",l:"5-Day Report",g:"Profile"},
+  {id:"assessment",l:"Assessment",g:"Assessment"},{id:"scoring",l:"Scoring",g:"Assessment"},{id:"ea",l:"EA",g:"Assessment"},{id:"outcome",l:"Outcome",g:"Assessment"},
+  {id:"medical",l:"Medical",g:"Care"},
+  {id:"weights",l:"Weights",g:"Care"},{id:"exercise",l:"Exercise",g:"Care"},
+  {id:"feeding",l:"Feeding",g:"Care"},{id:"notes",l:"Notes",g:"Records"},
+  {id:"files",l:"Files",g:"Records"},{id:"timeline",l:"Timeline",g:"Output"},{id:"report",l:"Report",g:"Output"},{id:"briefing",l:"Briefing",g:"Output"}
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
-  {version:"3.1",date:"2026-06-08",note:"New Daily Diary - a shared running log of the unit's day. Anyone can jot down cleaning, vet visits, deliveries, intakes and movements, staffing notes, visitors or general observations. Entries are grouped by date with the newest day on top and today highlighted, each tagged with a category and the person who wrote it, and they sync across the team. Open the full diary from the menu (backfill any date, edit or delete your own entries - supervisors and above can tidy any), and there's a 'Today's diary' panel on the dashboard with a quick-add box so you can drop in a note without leaving the home screen."},
+  {version:"3.2",date:"2026-06-08",note:"The dog tabs are easier to read at a glance. They're now grouped into labelled clusters - Profile, Assessment, Care, Records and Output - with light dividers between them and a soft fade on the right edge so it's clear there's more to scroll to. Each data-entry tab also carries a small completion dot: filled green once it has entries, hollow when it's still empty, so you can see what's done and what's outstanding on a dog without opening every tab. Scoring lights up once a score exists, Outcome once an outcome is set, and EA only shows a dot when an Enhanced Assessment is actually required. The Timeline, Report and Briefing tabs have no dot since they generate themselves."},
+  {version:"3.1",date:"2026-06-08",note:"New Daily Diary - a shared running log of the unit's day. Anyone can jot down cleaning, vet visits, deliveries, intakes and movements, staffing notes, visitors or general observations. Entries are grouped by date with the newest day on top and today highlighted, each tagged with a category and the person who wrote it, and they sync across the team. Open the full diary from the menu (backfill any date, edit or delete your own entries - supervisors and above can tidy any)."},
   {version:"3.0",date:"2026-06-05",note:"A much fuller behavioural assessment. There is a new Temperament & demeanour card (overall confidence, energy, demeanour, recovery from stress and biddability), and the Handling, Play, Environment and Trainability sections have all been deepened - grooming and nail handling, mouthing and bite inhibition, settling after play, frustration tolerance, favourite toys, house-training, time alone, crate behaviour, recall, toilet training and more. Everything new flows through to the printed report and the management briefing, and the briefing now captures the full assessment rather than just a few lines. There is also a new Ready to Go page in the menu, listing dogs that have finished isolation, are clear of infection and have been assessed - sorted by who has been waiting longest."},
   {version:"2.9",date:"2026-06-04",note:"Two new status lights on a dog's profile, next to the behaviour traffic light: an Isolation light (amber during the 5-day hold, green once complete) and an Infectious light (red) for dogs with a disease or virus, marked zoonotic where relevant. Records are now grouped into folders by outcome (In Isolation, Moved to Kennels, Rehomed, Euthanised, Other). Neutered/spayed and dental now have treatment dates that carry through to the report, timeline and briefing. The initial weight typed in a dog's details now logs into the Weights tab on its own. And three more foods auto-suggest a daily feed from weight - Hypoallergenic, Gastro and Hills Gastro Biome."},
   {version:"2.8",date:"2026-06-03",note:"New Disease info section in the menu - quick reference cards for the diseases we see in isolation (parvo, distemper, kennel cough, lepto, ringworm, giardia and more), each flagged contagious or zoonotic, plus a general hygiene-barrier protocol. All marked as general guidance and editable, so you can swap in the unit's own vet-approved SOP. Search now also matches reference numbers."},
@@ -1367,31 +1377,6 @@ async function diaryInsert(date,cat,text){
   if(!_diaryShared){var arr=getDiary();arr.unshift({id:"local-"+Date.now(),date:date,time:time,cat:cat,text:text,author:author,created:now.toISOString()});_diaryCache=arr;setDiaryLocal(arr);}
   await loadDiary();
 }
-async function diaryQuickAdd(){
-  var i=document.getElementById("diary-quick");if(!i)return;
-  var text=(i.value||"").trim();if(!text)return;
-  var today=new Date().toISOString().slice(0,10);
-  await diaryInsert(today,"General",text);
-  i.value="";renderDashboard();
-  miniToast(_diaryShared?"Added to today's diary":"Saved on this device");
-}
-function diaryDashHtml(){
-  var entries=getDiary().slice();
-  entries.sort(function(a,b){var c=(b.date||"").localeCompare(a.date||"");return c!==0?c:(b.time||"").localeCompare(a.time||"");});
-  var today=new Date().toISOString().slice(0,10);
-  var todays=entries.filter(function(e){return e.date===today;});
-  var head='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div style="font-size:12px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:6px">&#128214; Today&rsquo;s diary</div><button onclick="showDashSection(\'diary\')" style="background:transparent;border:none;color:#0d9488;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">View all &rarr;</button></div>';
-  var quick='<div style="display:flex;gap:6px;margin-bottom:'+(todays.length?'10px':'2px')+'"><input id="diary-quick" placeholder="Add a quick note for today\u2026" onkeydown="if(event.key===\'Enter\')diaryQuickAdd()" style="flex:1;min-width:0;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box"><button onclick="diaryQuickAdd()" style="background:#c5e86c;color:#0f172a;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0">Add</button></div>';
-  var list="";
-  if(!todays.length){
-    var last=entries[0];
-    list='<div style="font-size:11px;color:#94a3b8;padding:4px 0">Nothing logged today yet.'+(last?' Last entry '+fmtDMY(last.date)+'.':'')+'</div>';
-  }else{
-    list=todays.slice(0,3).map(function(e){var th=diaryCatTheme(e.cat);return '<div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-top:0.5px solid #f1f5f9"><span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;background:'+th[0]+';color:'+th[1]+';flex-shrink:0;margin-top:1px">'+esc(diaryCatLabel(e.cat))+'</span><div style="flex:1;min-width:0"><div style="font-size:12px;color:#0f172a;line-height:1.45;white-space:pre-wrap">'+esc(e.text)+'</div><div style="font-size:10px;color:#94a3b8;margin-top:1px">'+(e.time?esc(e.time)+' &middot; ':'')+esc(e.author||"")+'</div></div></div>';}).join("");
-    if(todays.length>3)list+='<div onclick="showDashSection(\'diary\')" style="font-size:11px;color:#0d9488;font-weight:600;cursor:pointer;padding-top:6px">+ '+(todays.length-3)+' more today &rarr;</div>';
-  }
-  return '<div class="card" style="margin-top:14px">'+head+quick+list+'</div>';
-}
 
 function diaryEdit(id){_diaryEditing=String(id);_diaryRerender();setTimeout(function(){var t=document.getElementById("diary-edit-area");if(t)t.focus();},30);}
 function diaryCancelEdit(){_diaryEditing="";_diaryRerender();}
@@ -1472,7 +1457,7 @@ function updateClock(){
 }
 setInterval(updateClock,30000);
 
-function showDashboard(){restoreDashFilters();showScreen("dashboard-screen");Promise.all([loadDashNotices(),loadDiary()]).then(function(){renderDashboard();showWelcomeToast();maybeShowWhatsNew();startDashRefresh();});}
+function showDashboard(){restoreDashFilters();showScreen("dashboard-screen");loadDashNotices().then(function(){renderDashboard();showWelcomeToast();maybeShowWhatsNew();startDashRefresh();});}
 
 // ── Header dropdown menu ──────────────────────────────────────────
 function toggleDashMenu(e){
@@ -1510,7 +1495,7 @@ function startDashRefresh(){
     if(ae){var tag=(ae.tagName||"").toLowerCase();if(tag==="input"||tag==="textarea"||tag==="select")return;}
     if(document.querySelector('.med-overlay.show, .incident-ov, .add-user-ov, .edit-user-ov, .handover-ov, #app-confirm-overlay[style*="display:flex"], #ex-overlay.show'))return;
     // Refresh quietly
-    try{await loadRecordsList();await loadDiary();var ds=document.getElementById("dashboard-content");if(ds&&ds.children.length)renderDashboard();}catch(e){console.warn("Auto-refresh failed:",e);}
+    try{await loadRecordsList();var ds=document.getElementById("dashboard-content");if(ds&&ds.children.length)renderDashboard();}catch(e){console.warn("Auto-refresh failed:",e);}
   },60000);
 }
 function stopDashRefresh(){if(_dashRefreshTimer){clearInterval(_dashRefreshTimer);_dashRefreshTimer=null;}}
@@ -1860,7 +1845,7 @@ function renderDashboard(){
   }
   var stickyEl=document.getElementById("overdue-sticky");
   if(stickyEl)stickyEl.innerHTML=contagiousAlertHtml()+overdueBannerHtml;
-  if(!active.length){el.innerHTML=tasksRollupHtml(records)+fb+'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px">'+viewToggleHtml()+'<button onclick="printDailySummary()" style="background:#fff;border:0.5px solid #e2e8f0;color:#0f172a;padding:5px 11px;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit">&#128424; Print summary</button></div><div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+recentOutcomesHtml()+diaryDashHtml()+brandFooterHtml();return;}
+  if(!active.length){el.innerHTML=tasksRollupHtml(records)+fb+'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px">'+viewToggleHtml()+'<button onclick="printDailySummary()" style="background:#fff;border:0.5px solid #e2e8f0;color:#0f172a;padding:5px 11px;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit">&#128424; Print summary</button></div><div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+recentOutcomesHtml()+brandFooterHtml();return;}
   var cards=active.map(function(rec){
     var d=rec.state&&rec.state.dog?rec.state.dog:{};var f=rec.state&&rec.state.fin?rec.state.fin:{};
     var con=activeContagiousList(rec.state&&rec.state.medical?rec.state.medical:null);
@@ -1888,7 +1873,7 @@ function renderDashboard(){
   else if(view==="kennels")viewBody=kennelsViewHtml(active);
   else if(view==="list")viewBody=listViewHtml(active);
   else viewBody='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px">'+cards+'</div>';
-  el.innerHTML=rollupHtml+fb+toggleBar+viewBody+recentOutcomesHtml()+diaryDashHtml()+brandFooterHtml();
+  el.innerHTML=rollupHtml+fb+toggleBar+viewBody+recentOutcomesHtml()+brandFooterHtml();
   if(window._dbSearchActive){var si=el.querySelector('input[placeholder="Search..."]');if(si){si.focus();var l=si.value.length;si.setSelectionRange(l,l);}window._dbSearchActive=false;}
 }
 
@@ -3877,7 +3862,39 @@ function page(){
   return"";
 }
 
-function renderNav(){document.getElementById("nav").innerHTML=TABS.map(function(tb){return'<button class="nb'+(S.tab===tb.id?" on":"")+'" data-go="'+tb.id+'">'+tb.l+'</button>';}).join("");}
+function tabDone(id){
+  function anyVal(o){return o?Object.keys(o).some(function(k){var v=o[k];return v!==""&&v!==null&&v!==undefined&&v!==false&&v!==0&&!(Array.isArray(v)&&v.length===0);}):false;}
+  switch(id){
+    case "dog": return !!(S.dog&&S.dog.name);
+    case "arrival": return anyVal(S.arrival);
+    case "days": return (S.days||[]).some(function(d){return d&&(d.demeanour||d.feeding||d.toileting||d.staffInt||d.incidents||d.notes);});
+    case "assessment": return anyVal(S.assessment);
+    case "scoring": return Object.values(S.scores||{}).some(function(v){return (parseInt(v)||0)>0;});
+    case "ea": if(!S.ea||S.ea.needed!=="Yes")return null; return !!eaCalc(S.ea).complete;
+    case "outcome": return !!(S.fin&&S.fin.outcome);
+    case "medical": var m=S.medical||{}; return !!((m.diseases&&m.diseases.length)||(m.vaccinations&&m.vaccinations.length)||(m.parasiteTreatments&&m.parasiteTreatments.length)||(m.medications&&m.medications.length)||(m.vetVisits&&m.vetVisits.length)||m.bcs||m.neuteredConfirmed||m.dental||m.skinCondition||m.injuries||m.arrivalHealthNotes);
+    case "weights": return (S.weights||[]).length>0;
+    case "exercise": return (S.exercises||[]).length>0;
+    case "feeding": return (S.feeding||[]).length>0;
+    case "notes": return (S.notes||[]).length>0;
+    case "files": return (S.files||[]).length>0;
+    default: return null;
+  }
+}
+function renderNav(){
+  var groups=[],map={};
+  TABS.forEach(function(tb){if(!map[tb.g]){map[tb.g]={g:tb.g,tabs:[]};groups.push(map[tb.g]);}map[tb.g].tabs.push(tb);});
+  var html=groups.map(function(grp){
+    var btns=grp.tabs.map(function(tb){
+      var done=tabDone(tb.id);
+      var dot=done===null?"":'<span class="cdot '+(done?"done":"empty")+'"></span>';
+      return '<button class="nb'+(S.tab===tb.id?" on":"")+'" data-go="'+tb.id+'">'+tb.l+dot+'</button>';
+    }).join("");
+    return '<div class="navseg"><div class="navglabel">'+grp.g+'</div><div class="navtabs">'+btns+'</div></div>';
+  }).join('<div class="navdiv"></div>');
+  document.getElementById("nav").innerHTML=html;
+  var on=document.querySelector("#nav .nb.on");if(on&&on.scrollIntoView){try{on.scrollIntoView({inline:"center",block:"nearest"});}catch(e){}}
+}
 function renderMain(){document.getElementById("content").innerHTML=page();}
 function render(){renderNav();renderMain();updateIsoChip();updateWarnChip();updateNoticeChip();updateSaveBar();updateHeaderDog();checkDuplicateName();checkMicrochip();}
 var CHIP_CC={"372":"Ireland","826":"United Kingdom","250":"France","276":"Germany","380":"Italy","724":"Spain","528":"Netherlands","056":"Belgium","620":"Portugal","616":"Poland","642":"Romania","208":"Denmark","752":"Sweden","040":"Austria","348":"Hungary","203":"Czechia","372":"Ireland"};
