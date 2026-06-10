@@ -171,6 +171,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
           <div onclick="dashMenuGo('incidents')" class="dmi">&#9888;&#65039; Incident register</div>
           <div onclick="closeDashMenu();printFeedingSheet()" class="dmi">&#127869; Feeding sheet</div>
           <div onclick="closeDashMenu();downloadBackup()" class="dmi">&#128190; Download backup</div>
+          <div onclick="closeDashMenu();restoreBackupOpen()" class="dmi" id="dash-menu-restore">&#9851;&#65039; Restore backup</div>
           <div onclick="dashMenuGo('readytogo')" class="dmi">&#9989; Ready to Go</div>
           <div onclick="dashMenuGo('upcomingMedical')" class="dmi">&#128137; Upcoming Medical</div>
           <div onclick="dashMenuGo('factsheets')" class="dmi">&#129440; Disease info</div>
@@ -245,6 +246,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.6",date:"2026-06-10",note:"Assessment depth and housekeeping. RE-ASSESSMENT HISTORY: snapshot the scores at any point (day 1, day 4...) and the Scoring tab shows the progression - e.g. 21 Red falling to 13 Yellow - with an improved/worsened trend line, so decompression is visible evidence rather than memory. SCORE NOTES: each scoring category now has an optional one-line 'why this score' note for defensible records. SECOND ASSESSOR: an optional second set of scores with its own total - the tab flags clearly whether the two assessors land on the same traffic light or disagree. DAILY REPORT DUE: Needs Attention now nags for dogs with no 5-Day Report entry for today. OUTCOME GUARD: setting a final outcome while scoring or the behaviour assessment is still empty shows a warning (soft - it never blocks). RESTORE BACKUP: admins can restore a downloaded backup file, with a clear overwrite/add summary before anything happens. ARCHIVE: departed dogs can be archived from the Records page to keep the list tidy - a Show Archived toggle brings them back, and nothing is ever deleted."},
   {version:"3.5",date:"2026-06-10",note:"The big one. ISOLATION EXTENSIONS: supervisors can extend a dog's isolation beyond 5 days (with a required reason) from the new Isolation Period card on the Dog tab - every day counter, banner and report recalculates, and extended dogs no longer show as awaiting outcome. NEW IN THE MENU: Batch weigh-in (enter every dog's weight on one screen), Incident register (every incident across all dogs, printable), Biosecurity (deep-clean log per kennel with block/unblock after contagious cases), Feeding sheet and Download backup. ON THE DOG: a new-arrival checklist that ticks itself off during the first week, a printable Vaccination & Treatment record on the Medical tab, and quick-tap observation chips on Notes. Plus: outcome is now locked to supervisors and above, and dogs on active medication show in Needs Attention."},
   {version:"3.4",date:"2026-06-08",note:"A cleaner, sleeker look across the whole app. The blue accent is retired - active tabs are now ink with a lime underline, inputs glow lime when focused, and primary buttons (Save and friends) are now NSPCA lime. Cards everywhere sit on soft shadows with hairline borders and rounder corners instead of grey outlines, and the page background is a touch lighter. On the dashboard, a dog's traffic light shows as a slim coloured bar along the top of its card plus a small score tag on the photo (e.g. G - 8), replacing the heavy coloured border - same information, calmer grid. The kennels view tiles match, and the header controls are tidier. Purely visual: nothing moved, nothing removed."},
   {version:"3.3",date:"2026-06-08",note:"Dashboard overhaul. A new status strip sits at the top showing the unit's traffic-light spread at a glance - All, Green, Yellow, Red, Black and Unscored counts as tappable chips that double as the filter (tap a colour to filter to it, tap again to clear), replacing the old traffic-light dropdown. The search box, kennel and sort selectors, view toggle and Print button now all share a single control row instead of stacking, and the Needs Attention bar is slimmer, so the dog grid starts higher up the page. Counts on the strip respect your search and kennel filters, so they always describe what you're looking at."},
@@ -1182,7 +1184,9 @@ function toggleRecFolder(name){if(!window._rFoldersCollapsed)window._rFoldersCol
 function page_records(){
   var tlC={"Green":"#dcfce7|#166634","Yellow":"#fef9c3|#854d0e","Red":"#fee2e2|#991b1b","Black":"#1e293b|#f1f5f9"};
   var srch=(window._rSrch||"").toLowerCase(),filt=(window._rFilt||"all");
-  var fil=records.filter(function(r){var ms=!srch||(r.name||"").toLowerCase().includes(srch)||(r.breed||"").toLowerCase().includes(srch)||(r.refNo||"").toLowerCase().includes(srch);var mf=filt==="all"||r.trafficLight===filt||(filt==="ea"&&eaCatOf(r));return ms&&mf;});
+  var showArch=!!window._showArchived;
+  var archCount=records.filter(isArchived).length;
+  var fil=records.filter(function(r){var ms=!srch||(r.name||"").toLowerCase().includes(srch)||(r.breed||"").toLowerCase().includes(srch)||(r.refNo||"").toLowerCase().includes(srch);var mf=filt==="all"||r.trafficLight===filt||(filt==="ea"&&eaCatOf(r));var ma=showArch||!isArchived(r);return ms&&mf&&ma;});
   var mon=new Date().toISOString().slice(0,7);
   var mc=records.filter(function(r){return(r.intakeDate||r.savedAt||"").slice(0,7)===mon;}).length;
   var rd=0,bl=0,ea=0;records.forEach(function(r){if(r.trafficLight==="Red")rd++;if(r.trafficLight==="Black")bl++;if(eaCatOf(r))ea++;});
@@ -1198,7 +1202,9 @@ function page_records(){
     var ph2=rd2.photo?('<img src="'+rd2.photo+'" style="width:48px;height:48px;object-fit:cover;object-position:'+(rd2.photoPos||'50% 50%')+';border-radius:6px;flex-shrink:0;margin-right:2px">'):('<div style="width:48px;height:48px;border-radius:6px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;margin-right:2px">&#128062;</div>');
     var prog=(function(){if(outcome==="Finished Isolation")return'<div style="display:inline-block;margin-top:4px;background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px">&#10003; Finished Isolation</div>';if(!(!outcome||outcome==="Active — in isolation"))return'<div style="font-size:11px;color:#94a3b8;margin-top:2px">'+esc(outcome)+'</div>';if(!days)return'';var tot=5+isoExtraDays(rd2);var pct=Math.min(100,Math.round((days/tot)*100));var col=days>tot?"#16a34a":days===tot-1?"#f59e0b":"#0d9488";return'<div style="margin-top:5px"><div style="font-size:10px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of '+tot+(days>tot?' <span style="color:#16a34a">&#10003; complete</span>':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:5px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div></div>';})();
     var canDelete=currentRole()==="admin"||currentRole()==="manager"||currentRole()==="supervisor"||currentRole()==="coordinator";
-    return'<div class="rec-card">'+ph2+'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;margin-bottom:2px">'+esc(rec.name)+'</div><div style="font-size:12px;color:var(--color-text-secondary)">'+[rec.breed,rec.refNo,rd2.kennel||"",date].filter(Boolean).join(' · ')+'</div>'+prog+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+(rec.score?('<span class="pill" style="background:'+parts[0]+';color:'+parts[1]+'">'+rec.trafficLight+' '+rec.score+'/24</span>'):'')+'<button class="btn" style="font-size:12px;padding:6px 12px" data-load="'+rec.id+'">Load</button>'+(canDelete?'<button class="btnr btn" data-delete="'+rec.id+'">Delete</button>':'')+'</div></div>';
+    var _ro=(rec.state&&rec.state.fin?rec.state.fin.outcome:"")||"";var _dep=_ro&&_ro!=="Active — in isolation"&&_ro!=="Active - in isolation"&&_ro!=="Finished Isolation";
+    var archBtn=(_dep&&canDelete)?'<button onclick="event.stopPropagation();toggleArchive('+rec.id+')" title="'+(isArchived(rec)?"Restore from archive":"Archive")+'" style="background:'+(isArchived(rec)?"#e7f6e9":"#f1f5f9")+';color:'+(isArchived(rec)?"#166534":"#64748b")+';border:none;border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer;font-family:inherit">'+(isArchived(rec)?"&#9851; Restore":"&#128451; Archive")+'</button>':'';
+    return'<div class="rec-card"'+(isArchived(rec)?' style="opacity:0.6"':'')+'>'+ph2+'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;margin-bottom:2px">'+esc(rec.name)+(isArchived(rec)?' <span style="font-size:9px;font-weight:700;background:#e2e8f0;color:#64748b;padding:1px 7px;border-radius:20px;vertical-align:middle">ARCHIVED</span>':'')+'</div><div style="font-size:12px;color:var(--color-text-secondary)">'+[rec.breed,rec.refNo,rd2.kennel||"",date].filter(Boolean).join(' · ')+'</div>'+prog+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+archBtn+(rec.score?('<span class="pill" style="background:'+parts[0]+';color:'+parts[1]+'">'+rec.trafficLight+' '+rec.score+'/24</span>'):'')+'<button class="btn" style="font-size:12px;padding:6px 12px" data-load="'+rec.id+'">Load</button>'+(canDelete?'<button class="btnr btn" data-delete="'+rec.id+'">Delete</button>':'')+'</div></div>';
   }
   function recFolderOf(o){o=o||"";if(o==="Moved to Kennels")return"Moved to Kennels";if(o==="Rehomed")return"Rehomed";if(o==="Euthanised")return"Euthanised";if(o===""||o==="Not yet determined"||o.indexOf("Active")>=0||o==="Finished Isolation")return"In Isolation";return"Other";}
   var FOLDERS=["In Isolation","Moved to Kennels","Rehomed","Euthanised","Other"];
@@ -1214,7 +1220,8 @@ function page_records(){
     var rows=open?('<div style="margin-top:8px">'+grp.map(recCard).join("")+'</div>'):"";
     return'<div style="margin-bottom:16px">'+head+rows+'</div>';
   }).join("");
-  return sth+sch+(fil.length?body:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)">No records match.</div>');
+  var archToggle=archCount?'<div style="margin-bottom:12px"><button onclick="window._showArchived=!window._showArchived;document.getElementById(\'dashboard-content\').innerHTML=page_records()" style="background:'+(showArch?"#0f172a":"#fff")+';color:'+(showArch?"#c5e86c":"#64748b")+';border:1px solid '+(showArch?"#0f172a":"rgba(15,23,42,0.1)")+';border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">&#128451; '+(showArch?"Hide archived":"Show archived ("+archCount+")")+'</button></div>':"";
+  return sth+sch+archToggle+(fil.length?body:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)">No records match.</div>');
 }
 
 // ── Disease factsheets (general guidance, editable, saved on device) ──
@@ -1483,6 +1490,8 @@ function toggleDashMenu(e){
   // Show admin-only items
   var au=document.getElementById("dash-menu-users");
   if(au)au.style.display=currentRole()==="admin"?"flex":"none";
+  var ar=document.getElementById("dash-menu-restore");
+  if(ar)ar.style.display=currentRole()==="admin"?"flex":"none";
   m.style.display="block";
   // Defer outside-click handler so this click doesn't immediately close it
   setTimeout(function(){document.addEventListener("click",_outsideDashMenu);},0);
@@ -1660,7 +1669,7 @@ function tasksRollupHtml(activeRecords){
   var thisWeek=weekStart(today);
   function addDS(ds,n){var x=new Date(ds);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10);}
   var act=activeRecords.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
-  var cats={finishing:[],walks:[],vaccs:[],paras:[],weighs:[],meds:[]};
+  var cats={finishing:[],walks:[],vaccs:[],paras:[],weighs:[],meds:[],reports:[]};
   function vaccDue(med){
     var vl=(med&&med.vaccinations)||[];
     function dateOf(t){var e=vl.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(x){return x.type===t&&x.date;});return e?e.date:null;}
@@ -1674,6 +1683,7 @@ function tasksRollupHtml(activeRecords){
     if(!r.state)return;var med=r.state.medical||{};
     var _fo=r.state.fin?r.state.fin.outcome:"";if(_fo!=="Finished Isolation"&&daysInIsolation(r.intakeDate)===5+isoExtraDays(r.state.dog))cats.finishing.push(r);
     if((med.medications||[]).some(function(mm){return !mm.endDate||mm.endDate>=today;}))cats.meds.push(r);
+    (function(){var _o2=r.state.fin?r.state.fin.outcome:"";if(_o2&&_o2!=="Active — in isolation"&&_o2!=="Active - in isolation")return;var _dn=daysInIsolation(r.intakeDate);if(!_dn||_dn>5+isoExtraDays(r.state.dog))return;var _de=(r.state.days||[])[Math.min(_dn,5)-1];var _has=_de&&(_de.demeanour||_de.feeding||_de.toileting||_de.staffInt||_de.incidents||_de.notes);if(!_has)cats.reports.push(r);})();
     var ex=(r.state.exercises||[]).filter(function(e){return e.date===today&&e.type==="Walked";});
     if(!ex.length)cats.walks.push(r);
     if(vaccDue(med))cats.vaccs.push(r);
@@ -1682,7 +1692,7 @@ function tasksRollupHtml(activeRecords){
     if(paraDue)cats.paras.push(r);
     var wts=r.state.weights||[];if((r.state.dog&&r.state.dog.intakeDate)&&!wts.find(function(w){return w.date>=thisWeek&&w.date<=today;}))cats.weighs.push(r);
   });
-  var defs=[["finishing","Finishing today","#0d9488","#ccfbf1"],["meds","On medication","#9d174d","#fce7f3"],["walks","Walks due","#a16207","#fef9c3"],["vaccs","Vaccines due","#a16207","#fef9c3"],["paras","Parasite tx due","#a16207","#fef9c3"],["weighs","Weigh-ins due","#0d9488","#ccfbf1"]];
+  var defs=[["finishing","Finishing today","#0d9488","#ccfbf1"],["reports","Daily report due","#7c3aed","#f3e8ff"],["meds","On medication","#9d174d","#fce7f3"],["walks","Walks due","#a16207","#fef9c3"],["vaccs","Vaccines due","#a16207","#fef9c3"],["paras","Parasite tx due","#a16207","#fef9c3"],["weighs","Weigh-ins due","#0d9488","#ccfbf1"]];
   var items=defs.filter(function(d){return cats[d[0]].length;});
   if(!items.length)return"";
   var total=items.reduce(function(a,d){return a+cats[d[0]].length;},0);
@@ -1790,6 +1800,111 @@ function listViewHtml(active){
 // Daily print summary
 
 
+
+
+// ── Re-assessment history ─────────────────────────────────────────
+function scoreSnapshot(){
+  var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
+  if(!total){appAlert("Score at least one category before saving a snapshot.");return;}
+  if(!S.scoreHistory)S.scoreHistory=[];
+  var now=new Date();
+  S.scoreHistory.push({date:now.toISOString().slice(0,10),time:now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0"),scores:JSON.parse(JSON.stringify(S.scores)),notes:JSON.parse(JSON.stringify(S.scoreNotes||{})),total:total,light:(tlc(total)||{}).l||"",by:currentName()});
+  saveRecord();renderMain();miniToast("Assessment snapshot saved");
+}
+function scoreSnapDelete(i){appConfirm("Delete this snapshot?",function(){(S.scoreHistory||[]).splice(i,1);saveRecord();renderMain();},{danger:true});}
+function scoreHistoryCardHtml(){
+  var h=S.scoreHistory||[];
+  var btn='<button onclick="scoreSnapshot()" class="btn" style="font-size:11px;padding:5px 12px">&#128247; Snapshot</button>';
+  if(!h.length)return '<div class="card" style="margin-bottom:12px;padding:11px 14px;display:flex;align-items:center;gap:10px"><div style="flex:1"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Re-assessment history</div><div style="font-size:11px;color:#94a3b8;margin-top:2px">Snapshot the current scores to track change over the stay (e.g. day 1 vs day 4).</div></div>'+btn+'</div>';
+  var chips=h.map(function(s,i){
+    var t=tlc(s.total)||{bg:"#eef1f5",tc:"#64748b",dot:"#94a3b8"};
+    return '<div style="display:inline-flex;align-items:center;gap:7px;background:'+t.bg+';color:'+t.tc+';border-radius:10px;padding:6px 11px;font-size:11px;font-weight:700" title="'+esc(s.by||"")+'">'+fmtDMY(s.date)+' &middot; '+s.total+'/24 '+esc(s.light||"")+'<span onclick="scoreSnapDelete('+i+')" style="cursor:pointer;opacity:0.6;font-weight:400">&#10005;</span></div>';
+  }).join('<span style="color:#cbd5e1;font-size:13px;align-self:center">&#8594;</span>');
+  var trend="";
+  if(h.length>=2){
+    var diff=h[h.length-1].total-h[0].total;
+    trend='<div style="font-size:11px;font-weight:700;margin-top:8px;color:'+(diff<0?"#16a34a":diff>0?"#dc2626":"#64748b")+'">'+(diff<0?"&#8595; Improved by "+(-diff)+" since first assessment":diff>0?"&#8593; Worsened by "+diff+" since first assessment":"&#8596; No change since first assessment")+'</div>';
+  }
+  return '<div class="card" style="margin-bottom:12px;padding:13px 14px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Re-assessment history</span>'+btn+'</div><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'+chips+'</div>'+trend+'</div>';
+}
+
+// ── Second assessor scoring ───────────────────────────────────────
+function setScore2(k,n){if(!S.scores2)S.scores2={};S.scores2[k]=(S.scores2[k]===n?0:n);debouncedSave();renderMain();}
+function toggle2nd(){window._show2nd=!window._show2nd;renderMain();}
+function secondAssessorCardHtml(){
+  var totalA=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
+  var s2=S.scores2||{};
+  var totalB=Object.values(s2).reduce(function(a,v){return a+(parseInt(v)||0);},0);
+  var has2=totalB>0||(S.scorer2&&S.scorer2.length);
+  if(!window._show2nd&&!has2)return '<div style="margin-bottom:12px"><button onclick="toggle2nd()" class="btn" style="font-size:11px;padding:6px 13px">+ Add second assessor scores</button></div>';
+  var accentFor=function(n){return n===1?"#16a34a":n===2?"#ca8a04":n===3?"#dc2626":"#1e293b";};
+  var rows=CATS.map(function(c){
+    var v=s2[c.k]||0;
+    var chips=[1,2,3,4].map(function(n){var sel=v===n,ac=accentFor(n);return '<button onclick="setScore2(\''+c.k+'\','+n+')" style="flex:1;padding:6px 0;border-radius:8px;border:1.5px solid '+(sel?ac:'rgba(15,23,42,0.1)')+';background:'+(sel?ac:'#fff')+';color:'+(sel?'#fff':'#475569')+';font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">'+n+'</button>';}).join("");
+    return '<div style="display:flex;align-items:center;gap:10px;padding:5px 0"><span style="font-size:11.5px;color:#334155;width:150px;flex-shrink:0">'+c.l+'</span><div style="display:flex;gap:4px;flex:1">'+chips+'</div></div>';
+  }).join("");
+  var tB=tlc(totalB),tA=tlc(totalA);
+  var agree="";
+  if(totalA>0&&totalB>0&&tA&&tB){
+    agree=tA.l===tB.l
+      ?'<div style="font-size:11.5px;font-weight:700;color:#166534;background:#e7f6e9;border-radius:9px;padding:7px 11px;margin-top:9px">&#10003; Assessors agree &mdash; both '+tA.l+' ('+totalA+' / '+totalB+')</div>'
+      :'<div style="font-size:11.5px;font-weight:700;color:#991b1b;background:#fdeaea;border-radius:9px;padding:7px 11px;margin-top:9px">&#9888; Disagreement &mdash; '+tA.l+' ('+totalA+') vs '+tB.l+' ('+totalB+'). Discuss before setting an outcome.</div>';
+  }
+  return '<div class="card" style="margin-bottom:12px;padding:14px 16px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Second assessor</span><button onclick="toggle2nd()" style="background:none;border:none;font-size:11px;color:#94a3b8;cursor:pointer;font-family:inherit">'+(window._show2nd||has2?"hide":"show")+'</button></div>'
+    +'<div style="margin-bottom:8px"><input value="'+esc(S.scorer2||"")+'" oninput="S.scorer2=this.value;debouncedSave()" placeholder="Second assessor name" style="width:100%;padding:8px 11px;border:1px solid rgba(15,23,42,0.1);border-radius:9px;font-size:12.5px;font-family:inherit;box-sizing:border-box"></div>'
+    +rows
+    +(totalB>0?'<div style="font-size:12px;font-weight:700;margin-top:8px">Second total: '+totalB+' / 24'+(tB?' &middot; <span style="color:'+tB.dot+'">'+tB.l+'</span>':'')+'</div>':'')
+    +agree+'</div>';
+}
+
+// ── Backup restore ────────────────────────────────────────────────
+function restoreBackupOpen(){
+  if(currentRole()!=="admin"){appAlert("Only admins can restore a backup.");return;}
+  var inp=document.createElement("input");inp.type="file";inp.accept=".json,application/json";
+  inp.onchange=function(){
+    var f=inp.files&&inp.files[0];if(!f)return;
+    var rd=new FileReader();
+    rd.onload=function(){
+      try{
+        var data=JSON.parse(rd.result);
+        var recs=data.records||[];
+        if(!Array.isArray(recs)||!recs.length)throw new Error("No records found in this file.");
+        var existing=0,fresh=0;
+        recs.forEach(function(b){if(records.some(function(r){return r.id===b.id;}))existing++;else fresh++;});
+        appConfirm("Restore backup from "+(data.exported?fmtDMY(data.exported.slice(0,10)):"unknown date")+"?\n\n"+recs.length+" dogs in file: "+existing+" will OVERWRITE existing records, "+fresh+" will be added as new. This cannot be undone.",function(){restoreBackupRun(recs);},{danger:true});
+      }catch(e){appAlert("Couldn't read that backup: "+e.message);}
+    };
+    rd.readAsText(f);
+  };
+  inp.click();
+}
+async function restoreBackupRun(recs){
+  if(!supabaseClient){appAlert("No database connection.");return;}
+  var ok=0,fail=0;
+  for(var i=0;i<recs.length;i++){
+    var b=recs[i];
+    try{
+      var st=JSON.parse(JSON.stringify(b.state||{}));delete st._id;st._savedBy=currentName()+" (restore)";
+      var row={name:b.name||"",breed:b.breed||"",ref_no:b.refNo||"",intake_date:b.intakeDate||null,assessor:b.assessor||"",score:b.score||0,traffic_light:b.trafficLight||"",saved_at:new Date().toISOString(),data:st};
+      var exists=records.some(function(r){return r.id===b.id;});
+      var res=exists?await supabaseClient.from("dogs").update(row).eq("id",b.id):await supabaseClient.from("dogs").insert([row]);
+      if(res&&res.error)throw res.error;
+      ok++;
+    }catch(e){fail++;}
+  }
+  await loadRecordsList();renderDashboard();
+  miniToast("Restore complete: "+ok+" saved"+(fail?", "+fail+" failed":""));
+}
+
+// ── Archive departed dogs ─────────────────────────────────────────
+function isArchived(rec){return !!(rec&&rec.state&&rec.state._archived);}
+async function toggleArchive(id){
+  var rec=records.find(function(r){return r.id===id;});if(!rec||!rec.state)return;
+  rec.state._archived=!rec.state._archived;
+  try{await saveExerciseChange(rec);}catch(e){}
+  var el=document.getElementById("dashboard-content");if(el)el.innerHTML=page_records();
+  miniToast(rec.state._archived?"Archived":"Restored from archive");
+}
 
 // ── Biosecurity: kennel deep-clean tracker ────────────────────────
 var _bioCache=null,_bioShared=false;
@@ -4002,7 +4117,9 @@ function page(){
         return '<button class="schip'+(sel?" on":"")+'" data-sc="'+c.k+'.'+n+'" style="'+(sel?"background:"+ac+";color:#fff;border-color:"+ac:"")+'"><span style="font-size:16px;font-weight:700;display:block;line-height:1.1">'+n+'</span><span style="font-size:9px;font-weight:600;'+(sel?"opacity:0.9":"color:"+ac)+'">'+sevLabels[n]+'</span></button>';
       }).join("");
       var desc=v?'<div style="font-size:12px;color:#475569;margin-top:8px;line-height:1.45">'+esc(c.s[v])+'</div>':'<div style="font-size:11px;color:#94a3b8;margin-top:8px;font-style:italic">Tap a score to rate this category</div>';
-      return '<div class="scat" style="border-left:4px solid '+(v?accentFor(v):"#e2e8f0")+'"><div style="font-size:13px;font-weight:600">'+c.l+'</div><div class="schiprow">'+chips+'</div>'+desc+'</div>';
+      var noteV=(S.scoreNotes&&S.scoreNotes[c.k])||"";
+      var noteIn='<input value="'+esc(noteV)+'" oninput="S.scoreNotes=S.scoreNotes||{};S.scoreNotes[\''+c.k+'\']=this.value;debouncedSave()" placeholder="Why this score? (optional, e.g. specific incident)" style="width:100%;margin-top:8px;padding:7px 10px;border:1px solid rgba(15,23,42,0.08);border-radius:8px;font-size:11.5px;font-family:inherit;box-sizing:border-box;background:#fafbfc">';
+      return '<div class="scat" style="border-left:4px solid '+(v?accentFor(v):"#e2e8f0")+'"><div style="font-size:13px;font-weight:600">'+c.l+'</div><div class="schiprow">'+chips+'</div>'+desc+noteIn+'</div>';
     }).join("");
 
     // Live result panel
@@ -4022,12 +4139,16 @@ function page(){
     var eaBlock=total>0?(ea?'<div class="ea-warn"><div style="font-size:13px;font-weight:600;color:#92400e;margin-bottom:4px">&#9888; Enhanced Assessment may be required</div><div style="font-size:12px;color:#92400e">Review with senior staff before any rehoming decisions.</div></div>':'<div class="ea-clear"><div style="font-size:12px;font-weight:500;color:#166534">&#10003; No automatic EA flag triggered</div></div>'):"";
 
 
-    return '<h2>Behaviour scoring</h2><div class="sub">Rate each category 1–4. Total /24 sets the traffic light; any single 4 is flagged on its own.</div>'+resultPanel+flagHtml+eaBlock+cats+'<div class="brow"><button class="btn" data-go="assessment">&larr; Back</button><button class="btn btnp" data-go="outcome">Next: outcome &rarr;</button></div>';
+    return '<h2>Behaviour scoring</h2><div class="sub">Rate each category 1–4. Total /24 sets the traffic light; any single 4 is flagged on its own.</div>'+resultPanel+scoreHistoryCardHtml()+flagHtml+eaBlock+cats+secondAssessorCardHtml()+'<div class="brow"><button class="btn" data-go="assessment">&larr; Back</button><button class="btn btnp" data-go="outcome">Next: outcome &rarr;</button></div>';
   }
 
   if(t==="outcome"){
     var finFields=fld("Primary concern #1",f.c1,"fin.c1","text","e.g. High reactivity toward dogs")+fld("Primary concern #2",f.c2,"fin.c2","text","")+fld("Primary concern #3",f.c3,"fin.c3","text","")+ta("Recommended next steps",f.steps,"fin.steps","")+fld("Follow-up date",f.followUp,"fin.followUp","date")+ta("Additional notes",f.notes,"fin.notes","")+'<div class="sec">Outcome</div>'+(currentRole()==="staff"?'<div class="f"><label class="lbl">Outcome</label><div style="padding:10px 12px;background:#f6f7f9;border:1px solid rgba(15,23,42,0.08);border-radius:9px;font-size:13px;color:#0f172a">'+esc(f.outcome||"Not yet determined")+' <span style="font-size:10px;color:#94a3b8">&#128274; set by supervisors</span></div></div>':slct("Outcome",f.outcome,"fin.outcome",[["","Not yet determined"],["Active — in isolation","Active — in isolation"],["Finished Isolation","Finished Isolation"],["Moved to Kennels","Moved to Kennels"],["Moved to Foster","Moved to Foster"],["Rehomed","Rehomed"],["Returned to Owner","Returned to Owner"],["Transferred","Transferred to rescue/shelter"],["Died in care","Died in care"],["Escaped / Lost","Escaped / Lost"],["Euthanised","Euthanised"]]))+(f.outcome==="Euthanised"&&currentRole()!=="staff"?slct("Reason for euthanasia",f.euthReason,"fin.euthReason",[["","-- select reason --"],["Behavioural — unsafe to rehome","Behavioural — unsafe to rehome"],["Medical — terminal / untreatable","Medical — terminal / untreatable"],["Medical — quality of life / poor prognosis","Medical — quality of life / poor prognosis"],["Severe injury / trauma","Severe injury / trauma"],["Infectious disease — biosecurity","Infectious disease — biosecurity"],["Legal — court-ordered","Legal — court-ordered"],["Welfare — cruelty / seizure case","Welfare — cruelty / seizure case"]]):"")+fld("Outcome Date",f.outcomeDate,"fin.outcomeDate","date")+ta("Outcome Notes",f.outcomeNotes,"fin.outcomeNotes","")+'<div class="sec">5-Day Progress Summary</div>'+slct("Overall progress",f.overallProgress,"fin.overallProgress",[["Significantly improved","Significantly improved — much calmer"],["Slightly improved","Slightly improved"],["Stable","Stable — no significant change"],["Slightly deteriorated","Slightly deteriorated"],["Significantly deteriorated","Significantly deteriorated — urgent review"]])+ta("Kennel Handover Note",f.handoverNote,"fin.handoverNote","Key info for next shift...")+fld("Assessor Name",f.assessorName,"fin.assessorName","text","")+fld("Assessor Date",f.assessorDate,"fin.assessorDate","date")+fld("Second Assessor",f.secondAssessor,"fin.secondAssessor","text","")+fld("Second Assessor Date",f.secondAssessorDate,"fin.secondAssessorDate","date");
-    return '<h2>Final assessment &amp; outcome</h2><div class="sub">Concerns, next steps, outcome and sign-off.</div>'+finFields+'<div class="brow"><button class="btn" data-go="scoring">&larr; Back</button><button class="btn btnp" data-go="medical">Next: medical &rarr;</button></div>';
+    var _finalOut=f.outcome&&f.outcome!=="Active — in isolation"&&f.outcome!=="Active - in isolation";
+    var _scOk=Object.values(S.scores||{}).some(function(v){return (parseInt(v)||0)>0;});
+    var _asOk=S.assessment&&Object.keys(S.assessment).some(function(k){var v=S.assessment[k];return v!==""&&v!==null&&v!==undefined&&v!==false;});
+    var outWarn=(_finalOut&&(!_scOk||!_asOk))?'<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:11px 14px;margin-bottom:12px;font-size:12px;color:#854d0e;line-height:1.5"><strong>&#9888; Incomplete assessment.</strong> An outcome is set but '+(!_scOk&&!_asOk?"scoring and the behaviour assessment are":!_scOk?"scoring is":"the behaviour assessment is")+' still empty. Consider completing before the dog departs.</div>':"";
+    return '<h2>Final assessment &amp; outcome</h2><div class="sub">Concerns, next steps, outcome and sign-off.</div>'+outWarn+finFields+'<div class="brow"><button class="btn" data-go="scoring">&larr; Back</button><button class="btn btnp" data-go="medical">Next: medical &rarr;</button></div>';
   }
 
   if(t==="report"){
