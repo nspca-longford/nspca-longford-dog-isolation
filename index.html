@@ -31,9 +31,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 :root{--color-background-primary:#ffffff;--color-background-secondary:#f1f5f9;--color-text-primary:#0f172a;--color-text-secondary:#64748b;--color-border-secondary:#e2e8f0;--color-border-tertiary:#eef2f7;--color-teal:#0d9488;--border-radius-md:8px;}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;min-height:100vh}
+body{font-family:'Inter',system-ui,sans-serif;background:#f6f7f9;color:#0f172a;min-height:100vh}
 input,select,textarea{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:10px;font-family:inherit;font-size:13px;color:#0f172a;background:#fff;outline:none}
-input:focus,select:focus,textarea:focus{border-color:#378ADD;box-shadow:0 0 0 2px rgba(55,138,221,0.15)}
+input:focus,select:focus,textarea:focus{border-color:#a9d23f;box-shadow:0 0 0 3px rgba(169,210,63,0.16)}
 .f select{-webkit-appearance:none;-moz-appearance:none;appearance:none;padding-right:32px;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;background-size:13px}
 .asmt-chip{font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;color:#475569;cursor:pointer;font-family:inherit;white-space:nowrap}
 .asmt-chip:active{background:#f1f5f9}
@@ -41,7 +41,7 @@ textarea{resize:vertical;min-height:68px}
 .lbl{display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em}
 .f{margin-bottom:12px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
-.card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px 18px;margin-bottom:12px}
+.card{background:#fff;border:1px solid rgba(15,23,42,0.08);border-radius:16px;padding:16px 18px;margin-bottom:12px;box-shadow:0 1px 2px rgba(15,23,42,0.04),0 4px 16px rgba(15,23,42,0.05)}
 .sec{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#64748b;padding:8px 0 10px;margin-top:4px;border-top:1px solid #e2e8f0}
 #navwrap{position:sticky;top:0;z-index:10;background:#fff}
 nav{display:flex;align-items:flex-end;overflow-x:auto;border-bottom:1px solid #e2e8f0;background:#fff;scrollbar-width:none}
@@ -55,24 +55,24 @@ nav::-webkit-scrollbar{display:none}
 .cdot.done{background:#16a34a}
 .cdot.empty{background:transparent;box-shadow:inset 0 0 0 1.5px #cbd5e1}
 .nb{padding:11px 14px;border:none;background:transparent;cursor:pointer;font-size:12px;font-weight:500;color:#64748b;border-bottom:2px solid transparent;white-space:nowrap;font-family:inherit}
-.nb.on{color:#185FA5;border-bottom-color:#378ADD}
+.nb.on{color:#0f172a;font-weight:700;border-bottom-color:#a9d23f;border-bottom-width:2.5px}
 .nb:hover:not(.on){color:#0f172a}
-.btn{padding:9px 16px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;border:1px solid #e2e8f0;background:#fff;color:#0f172a;transition:all 0.15s}
+.btn{padding:9px 16px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;border:1px solid rgba(15,23,42,0.1);background:#fff;color:#0f172a;transition:all 0.15s}
 .btn:hover{background:#f8fafc}
-.btnp{background:#0f172a;color:#fff;border-color:#0f172a}.btnp:hover{background:#1e293b}
+.btnp{background:#C5E86C;color:#0f172a;border-color:#C5E86C;font-weight:600}.btnp:hover{background:#a9d23f;border-color:#a9d23f}
 .btng{background:#16a34a;color:#fff;border-color:#16a34a}.btng:hover{background:#15803d}
 .btnr{background:#dc2626;color:#fff;border-color:#dc2626;font-size:11px;padding:5px 10px}
 .brow{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
 h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .sub{font-size:12px;color:#64748b;margin-bottom:16px}
-.scat{border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.scat{border:1px solid rgba(15,23,42,0.08);border-radius:12px;padding:12px 14px;margin-bottom:8px;background:#fff}
 .sg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
-.sb{padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;font-size:11px;text-align:left;background:#fff;color:#0f172a;font-family:inherit;line-height:1.4;transition:all 0.12s}
+.sb{padding:8px 10px;border:1px solid rgba(15,23,42,0.1);border-radius:9px;cursor:pointer;font-size:11px;text-align:left;background:#fff;color:#0f172a;font-family:inherit;line-height:1.4;transition:all 0.12s}
 .sb .n{font-weight:600;font-size:12px;display:block;margin-bottom:1px}
 .schiprow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
-.schip{padding:9px 4px;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;text-align:center;background:#fff;color:#475569;font-family:inherit;transition:all 0.12s}
+.schip{padding:9px 4px;border:1.5px solid rgba(15,23,42,0.1);border-radius:9px;cursor:pointer;text-align:center;background:#fff;color:#475569;font-family:inherit;transition:all 0.12s}
 .schip:hover{border-color:#94a3b8}
-.totb{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.totb{background:#f8fafc;border:1px solid rgba(15,23,42,0.08);border-radius:12px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
 .rrow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:13px}
 .rk{color:#64748b}.rv{font-weight:500;text-align:right;max-width:65%}
@@ -80,10 +80,10 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .sr{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #e2e8f0;font-size:13px}
 .ea-warn{background:#fef3c7;border:1.5px solid #f59e0b;border-radius:10px;padding:14px 16px;margin-bottom:12px}
 .ea-clear{background:#dcfce7;border:1.5px solid #16a34a;border-radius:10px;padding:14px 16px;margin-bottom:12px}
-.rec-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.rec-card{background:#fff;border:1px solid rgba(15,23,42,0.08);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;box-shadow:0 1px 2px rgba(15,23,42,0.04),0 4px 16px rgba(15,23,42,0.05)}
 .save-dot{width:7px;height:7px;border-radius:50%;background:#16a34a;display:inline-block;margin-right:5px}
 #content{max-width:740px;margin:0 auto;padding:20px 16px 96px}
-.header{background:#0f172a;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.header{background:linear-gradient(180deg,#16202f,#1e293b);padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
 .subheader{background:#1e293b;padding:6px 20px}
 #overdue-sticky{position:sticky;top:0;z-index:9;pointer-events:none}
 #overdue-sticky:empty{display:none}
@@ -103,8 +103,8 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .med-overlay.show .med-modal{transform:translateY(0) scale(1)}
 .med-add-btn{background:#0f172a;color:#fff;border:none;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit}
 .med-add-btn:hover{background:#334155}
-.med-save-btn{width:100%;padding:10px;background:#0f172a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;margin-top:4px;font-family:inherit}
-.med-save-btn:hover{background:#1e293b}
+.med-save-btn{width:100%;padding:10px;background:#C5E86C;color:#0f172a;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px;font-family:inherit}
+.med-save-btn:hover{background:#a9d23f}
 .med-close-btn{background:#f1f5f9;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;color:#64748b;display:flex;align-items:center;justify-content:center;font-family:inherit}
 .med-close-btn:hover{background:#e2e8f0}
 .dmi{padding:10px 14px;font-size:12.5px;color:#0f172a;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;line-height:1.2;transition:background 0.1s}
@@ -166,6 +166,8 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
           <div onclick="dashMenuGo('records')" class="dmi">&#128203; Records</div>
           <div onclick="dashMenuGo('rounds')" class="dmi">&#128694; Daily Rounds</div>
           <div onclick="dashMenuGo('diary')" class="dmi">&#128214; Daily Diary</div>
+          <div onclick="closeDashMenu();printFeedingSheet()" class="dmi">&#127869; Feeding sheet</div>
+          <div onclick="closeDashMenu();downloadBackup()" class="dmi">&#128190; Download backup</div>
           <div onclick="dashMenuGo('readytogo')" class="dmi">&#9989; Ready to Go</div>
           <div onclick="dashMenuGo('upcomingMedical')" class="dmi">&#128137; Upcoming Medical</div>
           <div onclick="dashMenuGo('factsheets')" class="dmi">&#129440; Disease info</div>
@@ -189,9 +191,9 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
     <svg onclick="goToDashboard()" title="Back to Dashboard" style="cursor:pointer" width="160" height="35" viewBox="0 0 232 51" fill="none"><path d="M193.211 41.5648L191.972 46.3797H178.84L180.238 41.5648C180.572 40.428 180.839 39.4917 181.575 37.1512L192.074 2.51074H213.407L224.04 37.1512C224.708 39.4249 225.043 40.2942 225.444 41.5648L227.064 46.3797H209.199L208.064 41.5648C208.064 41.5648 207.547 39.3578 207.054 37.2849H194.281C193.679 39.5586 193.478 40.3611 193.211 41.5648ZM202.373 20.0316C202.105 18.9616 201.771 18.2929 200.835 18.2929C199.831 18.2929 199.497 18.9616 199.163 20.0316L196.956 27.9226H204.513L202.373 20.0316Z" fill="#C5E86C"/><path d="M154.633 46.3797C147.745 46.3797 136.109 39.4917 136.109 24.4452C136.109 9.39871 147.277 2.51074 155.703 2.51074H179.243V18.8279H170.081C169.279 14.6148 167.272 12.2743 162.391 12.2743C156.84 12.2743 153.496 16.8217 153.496 24.4452C153.496 31.6676 156.84 36.215 161.655 36.215C165.935 36.215 168.276 33.4731 169.613 29.4607H180.647C178.574 37.9537 173.425 46.3797 164.464 46.3797H154.633Z" fill="#C5E86C"/><path d="M108.068 34.6769V46.3797H91.3496V2.51074H123.984C129.735 2.51074 134.416 7.32563 134.416 15.4173C134.416 24.7127 128.598 32.1357 118.567 32.1357H111.144C108.67 32.1357 108.068 32.6038 108.068 34.6769ZM110.342 24.8465H110.475C114.956 24.8465 117.698 22.439 117.698 17.2229C117.698 13.1436 115.558 10.4687 111.211 10.4687H110.542C108.67 10.4687 108.068 10.9368 108.068 13.0099V22.3053C108.068 24.3784 108.67 24.8465 110.342 24.8465Z" fill="#C5E86C"/><path d="M66.159 37.9537C69.7033 37.9537 71.7095 36.7499 71.7095 34.2087C71.7095 26.0502 47.0332 33.9413 47.0332 15.4842C47.0332 7.05814 53.4531 2.51074 60.8091 2.51074H84.3486V15.1498H75.12C73.582 11.9399 70.8402 10.7362 67.229 10.7362C64.4203 10.7362 62.5478 11.6055 62.5478 13.5449C62.5478 20.0985 87.826 13.0099 87.826 31.4001C87.826 41.4311 79.3331 46.3797 72.3782 46.3797H47.3007V31.5338H56.5292C58.1342 36.0812 61.7454 37.9537 66.159 37.9537Z" fill="#C5E86C"/><path d="M14.3109 26.8527V46.3797H0V2.51074H17.454L25.8131 19.0954C26.5488 20.5666 27.0837 20.7672 27.6856 20.7672C28.555 20.7672 28.8893 20.0316 28.8893 18.6941V2.51074H43.2002V46.3797H29.3574L17.5208 26.4514C16.7852 25.1808 16.3171 24.7796 15.6484 24.7796C14.6453 24.7796 14.3109 25.5152 14.3109 26.8527Z" fill="#C5E86C"/></svg>
     <div style="display:flex;align-items:center;gap:8px">
       <div id="save-ind" style="display:none;align-items:center;font-size:11px;color:#94a3b8"><span class="save-dot"></span>Saved</div>
-      <button onclick="goToDashboard()" style="background:#1e293b;color:#94a3b8;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">&#8592; All Dogs</button>
+      <button onclick="goToDashboard()" style="background:rgba(255,255,255,0.07);color:#cbd5e1;border:1px solid rgba(255,255,255,0.1);padding:5px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit">&#8592; All Dogs</button>
       <img id="badge-photo" onclick="showPhotoLightbox(S.dog&&S.dog.photo)" style="display:none;width:26px;height:26px;border-radius:6px;object-fit:cover;border:1px solid #334155;cursor:zoom-in" alt="">
-      <div id="badge" style="display:none;background:#1e293b;border-radius:6px;padding:4px 12px;color:#e2e8f0;font-size:12px"></div>
+      <div id="badge" style="display:none;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:4px 12px;color:#e2e8f0;font-size:12px"></div>
       <div id="iso-chip" onclick="showIsolationOverlay()" title="5-day isolation status" style="display:none;align-items:center;gap:4px;border:1px solid #0d9488;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap"></div>
       <div id="warn-chip" onclick="showWarningOverlay()" title="Handling warnings" style="display:none;align-items:center;gap:4px;border:1px solid #f59e0b;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap"></div>
       <div id="notice-chip" onclick="showNoticeOverlay()" title="Notices" style="display:none;align-items:center;gap:4px;border:1px solid #0284c7;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap"></div>
@@ -240,6 +242,8 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.4",date:"2026-06-08",note:"A cleaner, sleeker look across the whole app. The blue accent is retired - active tabs are now ink with a lime underline, inputs glow lime when focused, and primary buttons (Save and friends) are now NSPCA lime. Cards everywhere sit on soft shadows with hairline borders and rounder corners instead of grey outlines, and the page background is a touch lighter. On the dashboard, a dog's traffic light shows as a slim coloured bar along the top of its card plus a small score tag on the photo (e.g. G - 8), replacing the heavy coloured border - same information, calmer grid. The kennels view tiles match, and the header controls are tidier. Purely visual: nothing moved, nothing removed."},
+  {version:"3.3",date:"2026-06-08",note:"Dashboard overhaul. A new status strip sits at the top showing the unit's traffic-light spread at a glance - All, Green, Yellow, Red, Black and Unscored counts as tappable chips that double as the filter (tap a colour to filter to it, tap again to clear), replacing the old traffic-light dropdown. The search box, kennel and sort selectors, view toggle and Print button now all share a single control row instead of stacking, and the Needs Attention bar is slimmer, so the dog grid starts higher up the page. Counts on the strip respect your search and kennel filters, so they always describe what you're looking at."},
   {version:"3.2",date:"2026-06-08",note:"The dog tabs are easier to read at a glance. They're now grouped into labelled clusters - Profile, Assessment, Care, Records and Output - with light dividers between them and a soft fade on the right edge so it's clear there's more to scroll to. Each data-entry tab also carries a small completion dot: filled green once it has entries, hollow when it's still empty, so you can see what's done and what's outstanding on a dog without opening every tab. Scoring lights up once a score exists, Outcome once an outcome is set, and EA only shows a dot when an Enhanced Assessment is actually required. The Timeline, Report and Briefing tabs have no dot since they generate themselves."},
   {version:"3.1",date:"2026-06-08",note:"New Daily Diary - a shared running log of the unit's day. Anyone can jot down cleaning, vet visits, deliveries, intakes and movements, staffing notes, visitors or general observations. Entries are grouped by date with the newest day on top and today highlighted, each tagged with a category and the person who wrote it, and they sync across the team. Open the full diary from the menu (backfill any date, edit or delete your own entries - supervisors and above can tidy any)."},
   {version:"3.0",date:"2026-06-05",note:"A much fuller behavioural assessment. There is a new Temperament & demeanour card (overall confidence, energy, demeanour, recovery from stress and biddability), and the Handling, Play, Environment and Trainability sections have all been deepened - grooming and nail handling, mouthing and bite inhibition, settling after play, frustration tolerance, favourite toys, house-training, time alone, crate behaviour, recall, toilet training and more. Everything new flows through to the printed report and the management briefing, and the briefing now captures the full assessment rather than just a few lines. There is also a new Ready to Go page in the menu, listing dogs that have finished isolation, are clear of infection and have been assessed - sorted by who has been waiting longest."},
@@ -1125,7 +1129,7 @@ function renderReadyToGo(){
   var list=records.filter(function(r){
     var st=r.state||{};var f=st.fin||{};var o=f.outcome||"";
     if(DEP.indexOf(o)>=0)return false;
-    var ii=isolationInfo(r.intakeDate,o);
+    var ii=isolationInfo(r.intakeDate,o,isoExtraDays(r.state&&r.state.dog));
     var isoDone=ii&&ii.state==="done";
     var clear=activeContagiousList(st.medical||null).length===0;
     var assessed=(r.score||0)>0;
@@ -1181,7 +1185,7 @@ function page_records(){
     var rd2=rec.state&&rec.state.dog?rec.state.dog:{};var rf=rec.state&&rec.state.fin?rec.state.fin:{};
     var outcome=rf.outcome||"";var days=daysInIsolation(rec.intakeDate);
     var ph2=rd2.photo?('<img src="'+rd2.photo+'" style="width:48px;height:48px;object-fit:cover;object-position:'+(rd2.photoPos||'50% 50%')+';border-radius:6px;flex-shrink:0;margin-right:2px">'):('<div style="width:48px;height:48px;border-radius:6px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;margin-right:2px">&#128062;</div>');
-    var prog=(function(){if(outcome==="Finished Isolation")return'<div style="display:inline-block;margin-top:4px;background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px">&#10003; Finished Isolation</div>';if(!(!outcome||outcome==="Active — in isolation"))return'<div style="font-size:11px;color:#94a3b8;margin-top:2px">'+esc(outcome)+'</div>';if(!days)return'';var pct=Math.min(100,Math.round((days/5)*100));var col=days>5?"#16a34a":days===4?"#f59e0b":"#0d9488";return'<div style="margin-top:5px"><div style="font-size:10px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of 5'+(days>5?' <span style="color:#16a34a">&#10003; complete</span>':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:5px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div></div>';})();
+    var prog=(function(){if(outcome==="Finished Isolation")return'<div style="display:inline-block;margin-top:4px;background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px">&#10003; Finished Isolation</div>';if(!(!outcome||outcome==="Active — in isolation"))return'<div style="font-size:11px;color:#94a3b8;margin-top:2px">'+esc(outcome)+'</div>';if(!days)return'';var tot=(ii&&ii.total)||5;var pct=Math.min(100,Math.round((days/tot)*100));var col=days>tot?"#16a34a":days===tot-1?"#f59e0b":"#0d9488";return'<div style="margin-top:5px"><div style="font-size:10px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of '+tot+(days>tot?' <span style="color:#16a34a">&#10003; complete</span>':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:5px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div></div>';})();
     var canDelete=currentRole()==="admin"||currentRole()==="manager"||currentRole()==="supervisor"||currentRole()==="coordinator";
     return'<div class="rec-card">'+ph2+'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;margin-bottom:2px">'+esc(rec.name)+'</div><div style="font-size:12px;color:var(--color-text-secondary)">'+[rec.breed,rec.refNo,rd2.kennel||"",date].filter(Boolean).join(' · ')+'</div>'+prog+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+(rec.score?('<span class="pill" style="background:'+parts[0]+';color:'+parts[1]+'">'+rec.trafficLight+' '+rec.score+'/24</span>'):'')+'<button class="btn" style="font-size:12px;padding:6px 12px" data-load="'+rec.id+'">Load</button>'+(canDelete?'<button class="btnr btn" data-delete="'+rec.id+'">Delete</button>':'')+'</div></div>';
   }
@@ -1645,7 +1649,7 @@ function tasksRollupHtml(activeRecords){
   var thisWeek=weekStart(today);
   function addDS(ds,n){var x=new Date(ds);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10);}
   var act=activeRecords.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
-  var cats={finishing:[],walks:[],vaccs:[],paras:[],weighs:[]};
+  var cats={finishing:[],walks:[],vaccs:[],paras:[],weighs:[],meds:[]};
   function vaccDue(med){
     var vl=(med&&med.vaccinations)||[];
     function dateOf(t){var e=vl.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(x){return x.type===t&&x.date;});return e?e.date:null;}
@@ -1657,7 +1661,8 @@ function tasksRollupHtml(activeRecords){
   }
   act.forEach(function(r){
     if(!r.state)return;var med=r.state.medical||{};
-    var _fo=r.state.fin?r.state.fin.outcome:"";if(_fo!=="Finished Isolation"&&daysInIsolation(r.intakeDate)===5)cats.finishing.push(r);
+    var _fo=r.state.fin?r.state.fin.outcome:"";if(_fo!=="Finished Isolation"&&daysInIsolation(r.intakeDate)===5+isoExtraDays(r.state.dog))cats.finishing.push(r);
+    if((med.medications||[]).some(function(mm){return !mm.endDate||mm.endDate>=today;}))cats.meds.push(r);
     var ex=(r.state.exercises||[]).filter(function(e){return e.date===today&&e.type==="Walked";});
     if(!ex.length)cats.walks.push(r);
     if(vaccDue(med))cats.vaccs.push(r);
@@ -1666,13 +1671,13 @@ function tasksRollupHtml(activeRecords){
     if(paraDue)cats.paras.push(r);
     var wts=r.state.weights||[];if((r.state.dog&&r.state.dog.intakeDate)&&!wts.find(function(w){return w.date>=thisWeek&&w.date<=today;}))cats.weighs.push(r);
   });
-  var defs=[["finishing","Finishing today","#0d9488","#ccfbf1"],["walks","Walks due","#a16207","#fef9c3"],["vaccs","Vaccines due","#a16207","#fef9c3"],["paras","Parasite tx due","#a16207","#fef9c3"],["weighs","Weigh-ins due","#0d9488","#ccfbf1"]];
+  var defs=[["finishing","Finishing today","#0d9488","#ccfbf1"],["meds","On medication","#9d174d","#fce7f3"],["walks","Walks due","#a16207","#fef9c3"],["vaccs","Vaccines due","#a16207","#fef9c3"],["paras","Parasite tx due","#a16207","#fef9c3"],["weighs","Weigh-ins due","#0d9488","#ccfbf1"]];
   var items=defs.filter(function(d){return cats[d[0]].length;});
   if(!items.length)return"";
   var total=items.reduce(function(a,d){return a+cats[d[0]].length;},0);
   var expand=window._taskExpand;
-  var h='<div class="card" style="margin-bottom:12px;padding:12px 14px;background:linear-gradient(135deg,#fafaf5,#f1f5f9)">'
-    +'<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#64748b">Needs attention</span><span style="font-size:11px;color:#64748b">'+total+' action'+(total!==1?"s":"")+'</span></div>'
+  var h='<div class="card" style="margin-bottom:10px;padding:9px 12px;background:linear-gradient(135deg,#fafaf5,#f1f5f9)">'
+    +'<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#64748b">Needs attention</span><span style="font-size:11px;color:#64748b">'+total+' action'+(total!==1?"s":"")+'</span></div>'
     +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
     +items.map(function(d){var n=cats[d[0]].length;var on=expand===d[0];return'<button onclick="setTaskExpand(\''+d[0]+'\')" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:'+d[3]+';color:'+d[2]+';border:1.5px solid '+(on?d[2]:"transparent")+';border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit"><strong style="font-size:13px">'+n+'</strong> <span style="font-weight:500">'+d[1]+'</span></button>';}).join("")
     +'</div>';
@@ -1712,7 +1717,7 @@ function recentlyEditedHtml(activeRecords){
 function viewToggleHtml(){
   var v=window._dbView||"cards";
   var opts=[["cards","Cards","&#9783;"],["rounds","Rounds","&#9745;"],["kennels","Kennels","&#127968;"],["list","List","&#9776;"]];
-  return '<div style="display:inline-flex;gap:0;background:#f1f5f9;border-radius:8px;padding:2px;border:0.5px solid #e2e8f0;margin-bottom:12px">'
+  return '<div style="display:inline-flex;gap:0;background:#f1f5f9;border-radius:8px;padding:2px;border:0.5px solid #e2e8f0">'
     +opts.map(function(o){var on=v===o[0];return '<button onclick="setDashFilter(\'View\',\''+o[0]+'\');renderDashboard()" style="padding:5px 11px;border:none;background:'+(on?"#0f172a":"transparent")+';color:'+(on?"#c5e86c":"#64748b")+';font-size:11px;font-weight:'+(on?"600":"500")+';border-radius:6px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px">'+o[2]+' '+o[1]+'</button>';}).join("")
   +'</div>';
 }
@@ -1734,7 +1739,7 @@ function roundsViewHtml(active){
     return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="openDog('+rec.id+')">'
       +ph
       +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:#0f172a">'+esc(rec.name)+'</div>'
-      +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+(d.kennel?'<strong>'+esc(d.kennel)+'</strong>':'No kennel')+(days?' &middot; Day '+days+' of 5':'')+'</div></div>'
+      +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+(d.kennel?'<strong>'+esc(d.kennel)+'</strong>':'No kennel')+(days?' &middot; Day '+days+' of '+((typeof ii!=="undefined"&&ii&&ii.total)||5):'')+'</div></div>'
       +'<div style="display:flex;gap:4px;flex-shrink:0">'+dots+'</div>'
     +'</div>';
   }).join("")+'</div>';
@@ -1749,7 +1754,7 @@ function kennelsViewHtml(active){
       var d=occupant.state.dog;
       var ph=d.photo?'<img src="'+d.photo+'" style="width:100%;height:80px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';display:block">':'<div style="width:100%;height:80px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:32px">&#128062;</div>';
       var bc=!occupant.score?"#e2e8f0":occupant.trafficLight==="Red"?"#dc2626":occupant.trafficLight==="Black"?"#0f172a":occupant.trafficLight==="Yellow"?"#f59e0b":occupant.trafficLight==="Green"?"#16a34a":"#e2e8f0";
-      return '<div onclick="openDog('+occupant.id+')" style="background:#fff;border:2px solid '+bc+';border-radius:12px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:8px"><div style="font-size:10px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.04em">'+esc(k)+'</div><div style="font-size:13px;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(occupant.name)+'</div></div></div>';
+      return '<div onclick="openDog('+occupant.id+')" style="background:#fff;border:1px solid rgba(15,23,42,0.08);border-top:4px solid '+bc+';border-radius:12px;overflow:hidden;cursor:pointer;box-shadow:0 1px 2px rgba(15,23,42,0.04),0 4px 16px rgba(15,23,42,0.05)">'+ph+'<div style="padding:8px"><div style="font-size:10px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.04em">'+esc(k)+'</div><div style="font-size:13px;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(occupant.name)+'</div></div></div>';
     }
     return '<div style="background:#f8fafc;border:1.5px dashed #cbd5e1;border-radius:12px;padding:14px 8px;text-align:center;min-height:124px;display:flex;flex-direction:column;justify-content:center"><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px">'+esc(k)+'</div><div style="font-size:11px;color:#cbd5e1">empty</div></div>';
   }).join("")+'</div>';
@@ -1772,6 +1777,38 @@ function listViewHtml(active){
 }
 
 // Daily print summary
+function printFeedingSheet(){
+  var todayLabel=fmtDMYwk(new Date());
+  var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
+  active.sort(function(a,b){var ka=(a.state&&a.state.dog?a.state.dog.kennel||"":"");var kb=(b.state&&b.state.dog?b.state.dog.kennel||"":"");return ka.localeCompare(kb,undefined,{numeric:true});});
+  var rows=active.map(function(r){
+    var d=r.state&&r.state.dog?r.state.dog:{};
+    var feeds=(r.state&&r.state.feeding)||[];
+    var last=feeds.length?feeds[feeds.length-1]:null;
+    var lastTxt=last?((last.grams?last.grams+"g":"")+(last.status?" · "+last.status:"")):"—";
+    return '<tr><td>'+esc(d.kennel||"—")+'</td><td><strong>'+esc(r.name||"")+'</strong></td><td>'+esc(d.weight||"")+'</td><td class="wr"></td><td>'+esc(lastTxt)+'</td><td class="bx">&#9744;</td><td class="bx">&#9744;</td><td class="wr"></td></tr>';
+  }).join("");
+  var w=window.open("","_blank");
+  w.document.write('<!DOCTYPE html><html><head><title>Feeding Sheet &middot; '+todayLabel+'</title><style>body{font-family:system-ui,sans-serif;padding:24px;color:#0f172a}h1{font-size:18px;margin:0 0 2px}h2{font-size:13px;font-weight:400;color:#555;margin:0 0 16px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #cbd5e1;padding:7px 9px;text-align:left;vertical-align:top}th{background:#f1f5f9;font-size:10px;text-transform:uppercase;letter-spacing:0.04em}td.bx{text-align:center;font-size:16px;width:42px}td.wr{min-width:110px}@media print{body{padding:8px}}</style></head><body>'
+    +'<h1>Daily Feeding Sheet &middot; NSPCA Longford Isolation</h1>'
+    +'<h2>'+todayLabel+' &middot; '+active.length+' dogs &middot; tick each meal, note food/amount per dog</h2>'
+    +'<table><thead><tr><th>Kennel</th><th>Name</th><th>Weight</th><th>Food / amount</th><th>Last fed</th><th>AM</th><th>PM</th><th>Notes</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<div style="font-size:10px;color:#666;margin-top:12px">Generated '+new Date().toLocaleString("en-IE")+' by '+esc(currentName())+'</div>'
+    +'</body></html>');
+  w.document.close();w.focus();setTimeout(function(){w.print();},300);
+}
+function downloadBackup(){
+  try{
+    var payload={app:"NSPCA Dog Isolation",exported:new Date().toISOString(),by:currentName(),recordCount:records.length,records:records};
+    var blob=new Blob([JSON.stringify(payload,null,1)],{type:"application/json"});
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="dog-isolation-backup-"+new Date().toISOString().slice(0,10)+".json";
+    document.body.appendChild(a);a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},800);
+    miniToast("Backup downloaded — "+records.length+" dogs");
+  }catch(e){appAlert("Backup failed: "+e.message);}
+}
 function printDailySummary(){
   var today=new Date().toISOString().slice(0,10);
   var todayLabel=fmtDMYwk(new Date());
@@ -1803,8 +1840,8 @@ function printKennelCard(){
   var tl=total<=10?"Green":total<=14?"Yellow":total<=20?"Red":"Black";
   var tlBg={Green:"#dcfce7",Yellow:"#fef9c3",Red:"#fee2e2",Black:"#1e293b"}[tl];
   var tlFg={Green:"#166534",Yellow:"#854d0e",Red:"#991b1b",Black:"#ffffff"}[tl];
-  var info=d.intakeDate?isolationInfo(d.intakeDate,S.fin&&S.fin.outcome):{state:"none"};
-  var isoTxt=info.state==="done"?"Isolation complete":(info.state==="none"?"\u2014":"Day "+info.day+" of 5");
+  var info=d.intakeDate?isolationInfo(d.intakeDate,S.fin&&S.fin.outcome,isoExtraDays(d)):{state:"none"};
+  var isoTxt=info.state==="done"?"Isolation complete":(info.state==="none"?"\u2014":"Day "+info.day+" of "+(info.total||5));
   var ws=(S.warnings||[]).slice().sort(function(a,b){return(a.level==="Critical"?0:1)-(b.level==="Critical"?0:1);});
   var ns=S.careNotices||[];
   var con=activeContagiousList(S.medical);
@@ -1830,11 +1867,19 @@ function renderDashboard(){
   var ue=document.getElementById("dash-user");
   if(ue){var col=avatarColor(currentName());var ini=initials(currentName());var role=currentRole();var roleLabel=role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":"Staff";ue.innerHTML='<span style="width:18px;height:18px;border-radius:50%;background:'+col+';color:#fff;font-size:8px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">'+ini+'</span><span>'+esc(currentName())+' &middot; '+roleLabel+'</span>';ue.style.display="inline-flex";ue.style.alignItems="center";ue.style.gap="6px";}
   var ks=[];records.forEach(function(r){var k=r.state&&r.state.dog?r.state.dog.kennel:"";if(k&&ks.indexOf(k)<0)ks.push(k);});ks.sort();
-  var fb='<div style="display:flex;gap:6px;margin-bottom:12px;align-items:center"><div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 10px;min-width:0"><span>&#128269;</span><input placeholder="Search..." value="'+esc(_s)+'" oninput="setDashFilter(\'S\',this.value);window._dbSearchActive=true;renderDashboard()" style="border:none;background:transparent;outline:none;font-size:12px;width:100%;font-family:inherit">'+(_s?'<span onclick="setDashFilter(\'S\',\'\');renderDashboard()" title="Clear" style="cursor:pointer;color:#94a3b8;font-size:14px;line-height:1;padding:0 2px;flex-shrink:0">&#10005;</span>':'')+'</div><select onchange="setDashFilter(\'K\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:100px"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select><select onchange="setDashFilter(\'T\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:80px"><option value="">All</option>'+["Green","Yellow","Red","Black"].map(function(t){return'<option value="'+t+'"'+(_t===t?' selected':'')+'>'+t+'</option>';}).join("")+'</select><select onchange="setDashFilter(\'O\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:90px">'+[["day","Day"],["name","Name"],["kennel","Kennel"],["tl","Score"]].map(function(o){return'<option value="'+o[0]+'"'+(_o===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select></div>';
+  var fb='<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap"><div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 10px;min-width:150px"><span>&#128269;</span><input placeholder="Search..." value="'+esc(_s)+'" oninput="setDashFilter(\'S\',this.value);window._dbSearchActive=true;renderDashboard()" style="border:none;background:transparent;outline:none;font-size:12px;width:100%;font-family:inherit">'+(_s?'<span onclick="setDashFilter(\'S\',\'\');renderDashboard()" title="Clear" style="cursor:pointer;color:#94a3b8;font-size:14px;line-height:1;padding:0 2px;flex-shrink:0">&#10005;</span>':'')+'</div><select onchange="setDashFilter(\'K\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:100px"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select><select onchange="setDashFilter(\'O\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:90px">'+[["day","Day"],["name","Name"],["kennel","Kennel"],["tl","Score"]].map(function(o){return'<option value="'+o[0]+'"'+(_o===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select>'+viewToggleHtml()+'<button onclick="printDailySummary()" style="background:#fff;border:0.5px solid #e2e8f0;color:#0f172a;padding:5px 11px;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px">&#128424; Print</button></div>';
   var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
   if(_s)active=active.filter(function(r){return(r.name||"").toLowerCase().includes(_s)||(r.breed||"").toLowerCase().includes(_s)||(r.refNo||"").toLowerCase().includes(_s);});
   if(_k)active=active.filter(function(r){return(r.state&&r.state.dog?r.state.dog.kennel:"")=== _k;});
-  if(_t)active=active.filter(function(r){return r.trafficLight===_t;});
+  var tlCounts={Green:0,Yellow:0,Red:0,Black:0,None:0};
+  active.forEach(function(r){if(r.trafficLight&&tlCounts[r.trafficLight]!==undefined)tlCounts[r.trafficLight]++;else tlCounts.None++;});
+  var chipDefs=[["Green","#dcfce7","#166534","#16a34a"],["Yellow","#fef9c3","#854d0e","#f59e0b"],["Red","#fee2e2","#991b1b","#dc2626"],["Black","#1e293b","#f1f5f9","#0f172a"],["None","#f1f5f9","#94a3b8","#cbd5e1"]];
+  var statusStrip='<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:8px">'
+    +'<button onclick="setDashFilter(\'T\',\'\');renderDashboard()" style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(!_t?"#0f172a":"#fff")+';color:'+(!_t?"#c5e86c":"#64748b")+';border:1.5px solid '+(!_t?"#0f172a":"#e2e8f0")+'">All <strong>'+active.length+'</strong></button>'
+    +chipDefs.map(function(c){var n=tlCounts[c[0]];if(!n)return"";var on=_t===c[0];var lbl=c[0]==="None"?"&mdash;":"&#9679;";return '<button onclick="setDashFilter(\'T\',\''+(on?"":c[0])+'\');renderDashboard()" title="'+(c[0]==="None"?"Unscored":c[0])+'" style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:'+c[1]+';color:'+c[2]+';border:1.5px solid '+(on?c[3]:"transparent")+'">'+lbl+' '+n+'</button>';}).join("")
+    +'</div>';
+  if(_t==="None")active=active.filter(function(r){return !r.trafficLight;});
+  else if(_t)active=active.filter(function(r){return r.trafficLight===_t;});
   active.sort(function(a,b){if(_o==="name")return(a.name||"").localeCompare(b.name||"");if(_o==="kennel"){var ka=a.state&&a.state.dog?a.state.dog.kennel||"":"",kb=b.state&&b.state.dog?b.state.dog.kennel||"":"";return ka.localeCompare(kb);}if(_o==="tl"){var ord={Black:0,Red:1,Yellow:2,Green:3,"":4};return(ord[a.trafficLight]||4)-(ord[b.trafficLight]||4);}return(daysInIsolation(b.intakeDate)||0)-(daysInIsolation(a.intakeDate)||0);});
   var tlC={"Green":"#dcfce7|#166534","Yellow":"#fef9c3|#854d0e","Red":"#fee2e2|#991b1b","Black":"#1e293b|#f1f5f9"};
   var overdueDogs=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return (!o||o==="Active — in isolation"||o==="Active - in isolation")&&daysInIsolation(r.intakeDate)>5;});
@@ -1845,35 +1890,35 @@ function renderDashboard(){
   }
   var stickyEl=document.getElementById("overdue-sticky");
   if(stickyEl)stickyEl.innerHTML=contagiousAlertHtml()+overdueBannerHtml;
-  if(!active.length){el.innerHTML=tasksRollupHtml(records)+fb+'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px">'+viewToggleHtml()+'<button onclick="printDailySummary()" style="background:#fff;border:0.5px solid #e2e8f0;color:#0f172a;padding:5px 11px;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit">&#128424; Print summary</button></div><div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+recentOutcomesHtml()+brandFooterHtml();return;}
+  if(!active.length){el.innerHTML=statusStrip+fb+tasksRollupHtml(records)+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+recentOutcomesHtml()+brandFooterHtml();return;}
   var cards=active.map(function(rec){
     var d=rec.state&&rec.state.dog?rec.state.dog:{};var f=rec.state&&rec.state.fin?rec.state.fin:{};
     var con=activeContagiousList(rec.state&&rec.state.medical?rec.state.medical:null);
     var warns=(rec.state&&rec.state.warnings)||[];var warnCrit=warns.some(function(w){return w.level==="Critical";});
     var noticesArr=(rec.state&&rec.state.careNotices)||[];
     var outcome=f.outcome||"";var finished=outcome==="Finished Isolation";
-    var days=daysInIsolation(rec.intakeDate);var overdue=days>5&&!finished;
-    var col=finished?"#0d9488":days>5?"#16a34a":days>=4?"#f59e0b":"#0d9488";
-    var pct=days?Math.min(100,Math.round((days/5)*100)):0;
+    var days=daysInIsolation(rec.intakeDate);var isoTot=5+isoExtraDays(d);var overdue=days>isoTot&&!finished;
+    var col=finished?"#0d9488":days>isoTot?"#16a34a":days>=isoTot-1?"#f59e0b":"#0d9488";
+    var pct=days?Math.min(100,Math.round((days/isoTot)*100)):0;
     var parts=(tlC[rec.trafficLight]||"#f1f5f9|#94a3b8").split("|");
     var bc=!rec.score?"#e2e8f0":rec.trafficLight==="Red"?"#dc2626":rec.trafficLight==="Black"?"#0f172a":rec.trafficLight==="Yellow"?"#f59e0b":rec.trafficLight==="Green"?"#16a34a":"#e2e8f0";
     var bg=finished?"#dcfce7":rec.trafficLight==="Red"?"#fee2e2":rec.trafficLight==="Black"?"#1e293b":rec.trafficLight==="Yellow"?"#fef9c3":"#f0fdf4";
     var ph=d.photo?'<img src="'+d.photo+'" style="width:100%;height:112px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';display:block">':'<div style="width:100%;height:112px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:40px">&#128062;</div>';
     var ta2="";if(rec.savedAt){var diff=Math.round((Date.now()-new Date(rec.savedAt).getTime())/60000);ta2=diff<1?"just now":diff<60?diff+"m ago":diff<1440?Math.round(diff/60)+"h ago":Math.round(diff/1440)+"d ago";}
-    var dayH=(finished||overdue)?'<div style="font-size:10px;font-weight:700;color:#166634;margin-bottom:3px">&#10003; Isolation complete</div><div style="background:#dcfce7;border-radius:20px;height:5px"><div style="background:#166634;width:100%;height:100%;border-radius:20px"></div></div>':days?'<div style="font-size:10px;font-weight:700;color:'+col+';margin-bottom:3px">&#128274; Isolation &middot; Day '+days+' of 5</div><div style="background:#e2e8f0;border-radius:20px;height:5px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
+    var dayH=(finished||overdue)?'<div style="font-size:10px;font-weight:700;color:#166634;margin-bottom:3px">&#10003; Isolation complete</div><div style="background:#dcfce7;border-radius:20px;height:5px"><div style="background:#166634;width:100%;height:100%;border-radius:20px"></div></div>':days?'<div style="font-size:10px;font-weight:700;color:'+col+';margin-bottom:3px">&#128274; Isolation &middot; Day '+days+' of '+isoTot+'</div><div style="background:#e2e8f0;border-radius:20px;height:5px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
     var savedBy=rec.savedBy||"";
     var lastEditHtml=savedBy?'<div style="display:flex;align-items:center;gap:4px;margin-top:5px;padding-top:4px;border-top:0.5px solid var(--color-border-secondary)"><div style="width:14px;height:14px;border-radius:50%;background:'+avatarColor(savedBy)+';color:#fff;font-size:6px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials(savedBy)+'</div><span style="font-size:9px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(savedBy)+' &middot; '+ta2+'</span></div>':"";
-    return'<div onclick="openDog('+rec.id+')" class="dog-card" style="background:var(--color-background-primary);border:2px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer">'+ph+'<div style="padding:11px"><div style="font-size:14px;font-weight:500;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(con.length?'<span title="'+esc(con.map(function(x){return diseaseShortName(x.type);}).join(", "))+'" style="background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">&#129440; Contagious</span>':'')+(warns.length?'<span title="'+esc(warns.map(function(w){return w.text;}).join(", "))+'" style="background:'+(warnCrit?"#dc2626":"#f59e0b")+';color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">&#9888; '+warns.length+'</span>':'')+'</div>'+dayH+exerciseDotsHtml(rec)+'</div></div>';
+    var tlTag=rec.score?'<span style="position:absolute;top:7px;right:7px;background:'+parts[0]+';color:'+parts[1]+';font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;box-shadow:0 1px 3px rgba(15,23,42,0.15)">'+(rec.trafficLight||"?")[0]+' &middot; '+rec.score+'</span>':'<span style="position:absolute;top:7px;right:7px;background:#eef1f5;color:#94a3b8;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px">Unscored</span>';
+    return'<div onclick="openDog('+rec.id+')" class="dog-card" style="background:var(--color-background-primary);border:1px solid rgba(15,23,42,0.08);border-top:4px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 1px 2px rgba(15,23,42,0.04),0 4px 16px rgba(15,23,42,0.05)"><div style="position:relative">'+ph+tlTag+'</div><div style="padding:11px"><div style="font-size:14px;font-weight:700;letter-spacing:-0.01em;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(con.length?'<span title="'+esc(con.map(function(x){return diseaseShortName(x.type);}).join(", "))+'" style="background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">&#129440; Contagious</span>':'')+(warns.length?'<span title="'+esc(warns.map(function(w){return w.text;}).join(", "))+'" style="background:'+(warnCrit?"#dc2626":"#f59e0b")+';color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">&#9888; '+warns.length+'</span>':'')+'</div>'+dayH+exerciseDotsHtml(rec)+'</div></div>';
   }).join("");
   var view=window._dbView||"cards";
   var rollupHtml=tasksRollupHtml(active);
-  var toggleBar='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px">'+viewToggleHtml()+'<button onclick="printDailySummary()" style="background:#fff;border:0.5px solid #e2e8f0;color:#0f172a;padding:5px 11px;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px">&#128424; Print summary</button></div>';
   var viewBody;
   if(view==="rounds")viewBody=roundsViewHtml(active);
   else if(view==="kennels")viewBody=kennelsViewHtml(active);
   else if(view==="list")viewBody=listViewHtml(active);
   else viewBody='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px">'+cards+'</div>';
-  el.innerHTML=rollupHtml+fb+toggleBar+viewBody+recentOutcomesHtml()+brandFooterHtml();
+  el.innerHTML=statusStrip+fb+rollupHtml+viewBody+recentOutcomesHtml()+brandFooterHtml();
   if(window._dbSearchActive){var si=el.querySelector('input[placeholder="Search..."]');if(si){si.focus();var l=si.value.length;si.setSelectionRange(l,l);}window._dbSearchActive=false;}
 }
 
@@ -1929,11 +1974,11 @@ function generateAutoNotices(){
     var f=r.state&&r.state.fin?r.state.fin:{};var outcome=f.outcome||"";
     var finished=outcome==="Finished Isolation";var active=!outcome||outcome==="Active — in isolation"||outcome==="Active - in isolation";
     if(!active&&!finished)return;
-    var days=daysInIsolation(r.intakeDate);var d=r.state&&r.state.dog?r.state.dog:{};
+    var d=r.state&&r.state.dog?r.state.dog:{};var days=daysInIsolation(r.intakeDate);var _tot=5+isoExtraDays(d);
     var name=r.name||"Unknown";var kennel=d.kennel?"("+d.kennel+")":"";
-    if(!finished&&days>5)notices.push({priority:"Urgent",text:name+" "+kennel+" is overdue — Day "+days+" in isolation",icon:"&#128680;"});
-    else if(!finished&&days===5)notices.push({priority:"Important",text:name+" "+kennel+" completes isolation today — Day 5",icon:"&#9989;"});
-    else if(!finished&&days===4)notices.push({priority:"Important",text:name+" "+kennel+" finishes isolation tomorrow",icon:"&#9888;"});
+    if(!finished&&days>_tot)notices.push({priority:"Urgent",text:name+" "+kennel+" is overdue — Day "+days+" in isolation",icon:"&#128680;"});
+    else if(!finished&&days===_tot)notices.push({priority:"Important",text:name+" "+kennel+" completes isolation today — Day "+_tot,icon:"&#9989;"});
+    else if(!finished&&days===_tot-1)notices.push({priority:"Important",text:name+" "+kennel+" finishes isolation tomorrow",icon:"&#9888;"});
     var weights=r.state&&r.state.weights?r.state.weights:[];
     if(!finished&&days){
       function weekStart(ds){var d=new Date(ds);var dy=d.getDay();var diff=dy===0?-6:1-dy;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
@@ -1995,19 +2040,59 @@ function daysInIsolation(d){if(!d)return null;return Math.max(1,Math.floor((new 
 
 // ── 5-day isolation status ────────────────────────────────────────
 // Day 1 = arrival day; isolation completes at the end of Day 5 (arrival + 4 days).
-function isoClearDate(intakeDate){return intakeDate?addDaysStr(intakeDate,4):"";}
-function isolationInfo(intakeDate,outcome){
+function isoPeriodCardHtml(){
+  var d=S.dog||{};var exts=d.isoExt||[];var extra=isoExtraDays(d);var tot=5+extra;
+  var canExt=currentRole()!=="staff";
+  var clears=d.intakeDate?isoClearDate(d.intakeDate,extra):"";
+  var rows=exts.map(function(e,i){
+    return '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-top:0.5px solid #eef1f5;font-size:12px"><span style="background:#fef9c3;color:#854d0e;font-weight:700;font-size:10px;padding:2px 9px;border-radius:20px;flex-shrink:0">+'+(parseInt(e.days)||0)+' day'+((parseInt(e.days)||0)!==1?'s':'')+'</span><div style="flex:1;min-width:0"><div style="color:#0f172a;line-height:1.4">'+esc(e.reason||"")+'</div><div style="font-size:10px;color:#94a3b8;margin-top:1px">'+esc(e.by||"")+(e.date?' &middot; '+fmtDMY(e.date):'')+'</div></div>'+(canExt?'<button onclick="isoExtRemove('+i+')" title="Remove extension" style="background:#fee2e2;color:#991b1b;border:none;border-radius:5px;padding:2px 8px;font-size:11px;cursor:pointer;flex-shrink:0">&#10005;</button>':'')+'</div>';
+  }).join("");
+  return '<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Isolation period</span>'+(canExt?'<button onclick="isoExtOpen()" style="background:#1e293b;color:#c5e86c;border:none;border-radius:8px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">+ Extend</button>':'')+'</div>'
+    +'<div style="font-size:13px;color:#0f172a"><strong>'+tot+' days</strong>'+(extra?' <span style="color:#854d0e">(standard 5 + '+extra+' extended)</span>':' <span style="color:#94a3b8">(standard)</span>')+(clears?'<span style="color:#64748b"> &middot; clears '+fmtDMY(clears)+'</span>':'')+'</div>'
+    +rows+'</div>';
+}
+function isoExtOpen(){
+  if(currentRole()==="staff")return;
+  var ov=document.createElement("div");ov.className="iso-ext-ov";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(15,23,42,0.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999";
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:380px;width:100%;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,0.3)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:15px;font-weight:700">Extend isolation</span><button onclick="this.closest(\'.iso-ext-ov\').remove()" style="background:#f1f5f9;border:none;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:13px">&#10005;</button></div><div style="font-size:11.5px;color:#64748b;margin-bottom:14px;line-height:1.45">Adds days to this dog\u2019s isolation clock. The dashboard, banners and reports all update.</div><div style="margin-bottom:12px"><label style="display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.04em">Extra days</label><select id="iso-ext-days" style="width:100%;padding:9px 10px;border:1px solid rgba(15,23,42,0.1);border-radius:9px;font-size:13px;font-family:inherit">'+[1,2,3,4,5,7,10,14].map(function(n){return '<option value="'+n+'">'+n+' day'+(n!==1?'s':'')+'</option>';}).join("")+'</select></div><div style="margin-bottom:14px"><label style="display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.04em">Reason (required)</label><textarea id="iso-ext-reason" placeholder="e.g. Kennel cough symptoms day 4 \u2014 holding until clear" style="width:100%;min-height:70px;padding:9px 11px;border:1px solid rgba(15,23,42,0.1);border-radius:9px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box"></textarea></div><button onclick="isoExtSave()" class="btn btnp" style="width:100%;padding:10px;font-weight:600">Extend isolation</button></div>';
+  document.body.appendChild(ov);
+  setTimeout(function(){var t=document.getElementById("iso-ext-reason");if(t)t.focus();},30);
+}
+function isoExtSave(){
+  var days=parseInt((document.getElementById("iso-ext-days")||{}).value)||0;
+  var reason=((document.getElementById("iso-ext-reason")||{}).value||"").trim();
+  if(!days)return;
+  if(!reason){appAlert("A reason is required to extend isolation.");return;}
+  if(!S.dog.isoExt)S.dog.isoExt=[];
+  S.dog.isoExt.push({days:days,reason:reason,by:currentName(),date:new Date().toISOString().slice(0,10)});
+  var ov=document.querySelector(".iso-ext-ov");if(ov)ov.remove();
+  render();debouncedSave();
+  miniToast("Isolation extended by "+days+" day"+(days!==1?"s":""));
+}
+function isoExtRemove(i){
+  if(currentRole()==="staff")return;
+  appConfirm("Remove this extension? The isolation clock will shorten accordingly.",function(){
+    (S.dog.isoExt||[]).splice(i,1);
+    render();debouncedSave();
+    miniToast("Extension removed");
+  },{danger:true});
+}
+function isoClearDate(intakeDate,extra){return intakeDate?addDaysStr(intakeDate,4+(extra||0)):"";}
+function isoExtraDays(dog){return ((dog&&dog.isoExt)||[]).reduce(function(a,e){return a+(parseInt(e.days)||0);},0);}
+function isolationInfo(intakeDate,outcome,extra){var TOT=5+(extra||0);
   var o=outcome||"";
   // Only an empty outcome or "Active — in isolation" means the dog is still in isolation.
   // Any other outcome (Moved to Kennels, Finished Isolation, Rehomed, etc.) = isolation over.
   var stillActive=(o===""||o==="Active — in isolation"||o==="Active - in isolation");
-  if(!stillActive)return{state:"done",day:null,outcome:o};
-  if(!intakeDate)return{state:"none",day:null};
+  if(!stillActive)return{state:"done",day:null,outcome:o,total:TOT};
+  if(!intakeDate)return{state:"none",day:null,total:TOT};
   var day=daysInIsolation(intakeDate);
-  var clears=isoClearDate(intakeDate);
-  if(day>5)return{state:"done",day:day,clears:clears};
-  if(day===5)return{state:"final",day:day,clears:clears};
-  return{state:"active",day:day,clears:clears};
+  var clears=isoClearDate(intakeDate,extra);
+  if(day>TOT)return{state:"done",day:day,clears:clears,total:TOT};
+  if(day===TOT)return{state:"final",day:day,clears:clears,total:TOT};
+  return{state:"active",day:day,clears:clears,total:TOT};
 }
 function isoTheme(state){
   // [bg, border, text, label, icon]
@@ -2018,7 +2103,7 @@ function isoTheme(state){
 }
 window._isoShown=window._isoShown||{};
 function showIsolationOverlay(){
-  var dog=S.dog||{};var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome);
+  var dog=S.dog||{};var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome,isoExtraDays(dog));
   if(info.state==="none"){appAlert("No arrival date recorded for this dog yet.");return;}
   var t=isoTheme(info.state);
   var ov=document.getElementById("iso-overlay");
@@ -2030,8 +2115,8 @@ function showIsolationOverlay(){
   }else{
     var pct=Math.min(100,Math.round((info.day/5)*100));
     var line=info.state==="overdue"?(name+' is <strong>overdue</strong> — Day '+info.day+', past the 5-day window. Review for clearance.'):
-      info.state==="final"?(name+' is on <strong>Day 5 of 5</strong> — the final day. Isolation ends today.'):
-      (name+' is in isolation — <strong>Day '+info.day+' of 5</strong>.');
+      info.state==="final"?(name+' is on <strong>Day '+info.day+' of '+(info.total||5)+'</strong> — the final day. Isolation ends today.'):
+      (name+' is in isolation — <strong>Day '+info.day+' of '+(info.total||5)+'</strong>.');
     bodyHtml='<div style="font-size:13px;color:#475569;line-height:1.5;margin-bottom:14px">'+line+'</div>'
       +'<div style="background:#e2e8f0;border-radius:20px;height:8px;overflow:hidden;margin-bottom:14px"><div style="background:'+t[1]+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>'
       +'<div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b">'
@@ -2079,7 +2164,7 @@ function showWalkLegend(level){
 function hideWalkLegend(){var ov=document.getElementById("walk-overlay");if(ov)ov.classList.remove("show");}
 function maybeAutoIsolationOverlay(){
   var dog=S.dog||{};if(!dog.intakeDate)return;
-  var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome);
+  var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome,isoExtraDays(dog));
   if(info.state==="done"||info.state==="none")return;
   var key=S._id||dog.name||"unsaved";
   if(window._isoShown[key])return;
@@ -2090,10 +2175,10 @@ function updateIsoChip(){
   var chip=document.getElementById("iso-chip");if(!chip)return;
   var dog=S.dog||{};
   if(!dog.intakeDate){chip.style.display="none";return;}
-  var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome);
+  var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome,isoExtraDays(dog));
   if(info.state==="none"){chip.style.display="none";return;}
   var t=isoTheme(info.state);
-  var txt=info.state==="done"?(t[4]+" Cleared"):(t[4]+" Day "+info.day+"/5");
+  var txt=info.state==="done"?(t[4]+" Cleared"):(t[4]+" Day "+info.day+"/"+(info.total||5));
   chip.innerHTML=txt;
   chip.style.display="inline-flex";
   chip.style.background=t[0];chip.style.color=t[2];chip.style.borderColor=t[1];
@@ -2792,6 +2877,7 @@ function renderNotes(){
   var todayLabel=fmtDMYwk(new Date());
   var h='<h2 style="margin-bottom:4px">Notes &amp; Journal</h2><div class="sub" style="margin-bottom:16px">Free-text observations &mdash; daily life that doesn\'t fit the structured forms.</div>';
   h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">New note &middot; '+todayLabel+'</div>';
+  h+='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">'+["Ate well","Ate partially","Not eating","Normal stool","Loose stool","No stool","Vomited","Drinking well","Settled","Restless","Quiet / withdrawn","Barking persistently"].map(function(q){return '<button onclick="quickNote(\''+q+'\')" style="background:#fff;border:1px solid rgba(15,23,42,0.1);border-radius:20px;padding:5px 12px;font-size:11.5px;color:#475569;cursor:pointer;font-family:inherit">'+q+'</button>';}).join("")+'</div>';
   h+='<textarea id="note-input" style="min-height:80px;margin-bottom:8px" placeholder="What did you notice? Behaviour, mood, interactions, anything worth recording..."></textarea>';
   h+='<button class="btn btnp" onclick="addNote()" style="width:100%;padding:10px">+ Save note</button></div>';
 
@@ -2830,6 +2916,12 @@ function renderNotes(){
 
   h+='<div class="brow"><button class="btn" data-go="feeding">&larr; Back</button><button class="btn btnp" data-go="files">Next: files &rarr;</button></div>';
   return h;
+}
+function quickNote(text){
+  if(!S.notes)S.notes=[];
+  var now=new Date();
+  S.notes.push({date:now.toISOString().slice(0,10),time:now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0"),text:text,staff:currentName()});
+  saveRecord();renderMain();miniToast("Logged: "+text);
 }
 function addNote(){
   var input=document.getElementById("note-input");if(!input)return;
@@ -3633,14 +3725,14 @@ function page(){
   if(t==="ea")return page_ea();
 
   if(t==="dog"){
-    var ii=d.intakeDate?isolationInfo(d.intakeDate,(f.outcome||"")):null;
+    var ii=d.intakeDate?isolationInfo(d.intakeDate,(f.outcome||""),isoExtraDays(d)):null;
     var meta=[d.breed,d.sex,d.age,d.kennel].filter(Boolean).join(" \u00b7 ");
     var photoEl=d.photo
       ? '<img src="'+d.photo+'" onclick="showPhotoLightbox(S.dog.photo)" style="width:66px;height:66px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';border-radius:13px;border:1px solid var(--color-border-secondary);cursor:zoom-in;flex-shrink:0">'
       : '<div style="width:66px;height:66px;border-radius:13px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;color:#94a3b8;flex-shrink:0;font-size:24px">&#128062;</div>';
     var tlPill=tl?'<span onclick="showWalkLegend(\''+tl.l+'\')" title="Who can walk this dog?" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;background:'+tl.bg+';color:'+tl.tc+';flex-shrink:0;cursor:pointer">'+tl.l+'<span style="display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;border:1.3px solid currentColor;font-size:8px;font-weight:700;font-style:italic;line-height:1;opacity:0.85">i</span></span>':'';
     var chips=[];
-    if(ii){var icl=ii.state==="done"?"\u2713 Isolation complete":(ii.state==="final"?"\ud83d\udd12 Isolation \u00b7 Day 5 of 5":"\ud83d\udd12 Isolation \u00b7 Day "+ii.day+" of 5");var ibg=ii.state==="done"?"#dcfce7":"#fef3c7",itc=ii.state==="done"?"#166534":"#92400e";chips.push('<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+ibg+';color:'+itc+'">'+icl+'</span>');}
+    if(ii){var icl=ii.state==="done"?"\u2713 Isolation complete":(ii.state==="final"?"\ud83d\udd12 Isolation \u00b7 Day "+ii.day+" of "+(ii.total||5):"\ud83d\udd12 Isolation \u00b7 Day "+ii.day+" of "+(ii.total||5));var ibg=ii.state==="done"?"#dcfce7":"#fef3c7",itc=ii.state==="done"?"#166534":"#92400e";chips.push('<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+ibg+';color:'+itc+'">'+icl+'</span>');}
     var _con=activeContagiousList(S.medical);if(_con&&_con.length){var _zoo=_con.some(function(x){return ZOONOTIC_DISEASES[x.type];});chips.push('<span title="'+esc(_con.map(function(x){return diseaseShortName(x.type);}).join(", "))+'" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:#fee2e2;color:#991b1b">&#129440; Infectious'+(_zoo?" \u00b7 zoonotic":"")+'</span>');}
     var _ea=eaCalc(S.ea);if(_ea.complete){chips.push('<span title="EA score '+_ea.score.toFixed(2)+' \u00b7 '+esc(_ea.mgmt)+'" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+_ea.col[0]+';color:'+_ea.col[1]+'">&#9888; EA '+esc(_ea.cat.replace("Category ","Cat "))+'</span>');}
     if(tl)chips.push('<span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:#dbeafe;color:#1e40af">Score '+total+'/24</span>');
@@ -3663,7 +3755,7 @@ function page(){
       +'<div class="g2">'+slct("Kennel / Pod",d.kennel,"dog.kennel",[["",'-- not assigned --'],["Kennel 1","Kennel 1"],["Kennel 2","Kennel 2"],["Kennel 3","Kennel 3"],["Kennel 4","Kennel 4"],["Kennel 5","Kennel 5"],["Kennel 6","Kennel 6"],["Pod 1","Pod 1"],["Pod 2","Pod 2"],["Pod 3","Pod 3"],["Pod 4","Pod 4"]])+fld("Assessor",d.assessor,"dog.assessor","text","e.g. Shane")+'</div>'
       +'<div class="g2">'+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()+slct("Reason for intake",d.intakeReason,"dog.intakeReason",[["Stray","Stray"],["Owner surrender","Owner surrender"],["Cruelty case","Cruelty case"],["Transfer","Transfer from another centre"],["Other","Other"]])+'</div></div>';
 
-    return hero+identity+intake+warningsCardHtml()+noticesCardHtml()+'<div class="brow"><button class="btn" onclick="printKennelCard()" style="white-space:nowrap">&#128424; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
+    return hero+identity+intake+isoPeriodCardHtml()+warningsCardHtml()+noticesCardHtml()+'<div class="brow"><button class="btn" onclick="printKennelCard()" style="white-space:nowrap">&#128424; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
   }
 
   if(t==="arrival") return'<h2>On-arrival observation</h2><div class="sub">Record the dog\'s behaviour on arrival.</div><div class="card">'+slct("Initial demeanour on arrival",a.demeanour,"arrival.demeanour",[["Engaging","Engaging — friendly, curious"],["Nervous","Nervous — withdrawn, avoidant"],["Reactive","Reactive — alert, tense, vocal"],["Shut down","Shut down — frozen, non-responsive"],["Neutral","Neutral — calm, no strong response"]])+slct("Muzzle required?",a.muzzle,"arrival.muzzle",[["No","No — handled safely without muzzle"],["Yes — accepted","Yes — accepted without issue"],["Yes — resistant","Yes — resistant to muzzling"],["Yes — required intervention","Yes — required significant intervention"]])+slct("Lead / handling acceptance",a.lead,"arrival.lead",[["Good","Good — relaxed, no tension"],["Moderate","Moderate — some pulling or resistance"],["Poor","Poor — strong pulling"],["Dangerous","Dangerous — unsafe on lead"]])+slct("First vet visit behaviour",a.vet,"arrival.vet",[["Cooperative","Cooperative"],["Nervous but manageable","Nervous but manageable"],["Resistant","Resistant — required restraint"],["Aggressive","Aggressive — unsafe to handle"],["Not yet seen","Not yet seen by vet"]])+ta("Arrival notes",a.notes,"arrival.notes","Describe arrival behaviour...")+'<div class="sec">Behaviour History</div>'+slct("Dog-to-Dog Reactivity",a.dogDog,"arrival.dogDog",[["Not tested","Not tested"],["None observed — settled","None observed — settled"],["Mild","Mild — some interest or pulling"],["Moderate","Moderate — barking or lunging"],["Severe","Severe — could not pass safely"]])+slct("Cat Tolerance",a.catTolerance,"arrival.catTolerance",[["Not tested","Not tested"],["Unknown","Unknown"],["Cat friendly","Known to be cat friendly"],["Reactive","Chased or reactive to cats"]])+slct("Horses / equine",a.equineHistory,"arrival.equineHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Good","Known to be good with horses"],["Reactive","Reactive / chased horses"]])+slct("Small mammals",a.smallMammalHistory,"arrival.smallMammalHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Safe","Known to be safe with small mammals"],["Reactive","Chased / high prey drive"]])+slct("Child History",a.childHistory,"arrival.childHistory",[["Not known","Not known"],["Good","Known to be good with children"],["No exposure","No known exposure"],["Caution","Owner advised caution"],["Incident","Known incident involving a child"]])+slct("Previous Bite History",a.biteHistory,"arrival.biteHistory",[["None","None declared"],["One","One bite declared by owner"],["Multiple","Multiple bites declared"],["Unknown details","Bite history — details unknown"]])+'</div><div class="brow"><button class="btn" data-go="dog">&larr; Back</button><button class="btn btnp" data-go="days">Next: 5-day report &rarr;</button></div>';
@@ -3726,7 +3818,7 @@ function page(){
   }
 
   if(t==="outcome"){
-    var finFields=fld("Primary concern #1",f.c1,"fin.c1","text","e.g. High reactivity toward dogs")+fld("Primary concern #2",f.c2,"fin.c2","text","")+fld("Primary concern #3",f.c3,"fin.c3","text","")+ta("Recommended next steps",f.steps,"fin.steps","")+fld("Follow-up date",f.followUp,"fin.followUp","date")+ta("Additional notes",f.notes,"fin.notes","")+'<div class="sec">Outcome</div>'+slct("Outcome",f.outcome,"fin.outcome",[["","Not yet determined"],["Active — in isolation","Active — in isolation"],["Finished Isolation","Finished Isolation"],["Moved to Kennels","Moved to Kennels"],["Moved to Foster","Moved to Foster"],["Rehomed","Rehomed"],["Returned to Owner","Returned to Owner"],["Transferred","Transferred to rescue/shelter"],["Died in care","Died in care"],["Escaped / Lost","Escaped / Lost"],["Euthanised","Euthanised"]])+(f.outcome==="Euthanised"?slct("Reason for euthanasia",f.euthReason,"fin.euthReason",[["","-- select reason --"],["Behavioural — unsafe to rehome","Behavioural — unsafe to rehome"],["Medical — terminal / untreatable","Medical — terminal / untreatable"],["Medical — quality of life / poor prognosis","Medical — quality of life / poor prognosis"],["Severe injury / trauma","Severe injury / trauma"],["Infectious disease — biosecurity","Infectious disease — biosecurity"],["Legal — court-ordered","Legal — court-ordered"],["Welfare — cruelty / seizure case","Welfare — cruelty / seizure case"]]):"")+fld("Outcome Date",f.outcomeDate,"fin.outcomeDate","date")+ta("Outcome Notes",f.outcomeNotes,"fin.outcomeNotes","")+'<div class="sec">5-Day Progress Summary</div>'+slct("Overall progress",f.overallProgress,"fin.overallProgress",[["Significantly improved","Significantly improved — much calmer"],["Slightly improved","Slightly improved"],["Stable","Stable — no significant change"],["Slightly deteriorated","Slightly deteriorated"],["Significantly deteriorated","Significantly deteriorated — urgent review"]])+ta("Kennel Handover Note",f.handoverNote,"fin.handoverNote","Key info for next shift...")+fld("Assessor Name",f.assessorName,"fin.assessorName","text","")+fld("Assessor Date",f.assessorDate,"fin.assessorDate","date")+fld("Second Assessor",f.secondAssessor,"fin.secondAssessor","text","")+fld("Second Assessor Date",f.secondAssessorDate,"fin.secondAssessorDate","date");
+    var finFields=fld("Primary concern #1",f.c1,"fin.c1","text","e.g. High reactivity toward dogs")+fld("Primary concern #2",f.c2,"fin.c2","text","")+fld("Primary concern #3",f.c3,"fin.c3","text","")+ta("Recommended next steps",f.steps,"fin.steps","")+fld("Follow-up date",f.followUp,"fin.followUp","date")+ta("Additional notes",f.notes,"fin.notes","")+'<div class="sec">Outcome</div>'+(currentRole()==="staff"?'<div class="f"><label class="lbl">Outcome</label><div style="padding:10px 12px;background:#f6f7f9;border:1px solid rgba(15,23,42,0.08);border-radius:9px;font-size:13px;color:#0f172a">'+esc(f.outcome||"Not yet determined")+' <span style="font-size:10px;color:#94a3b8">&#128274; set by supervisors</span></div></div>':slct("Outcome",f.outcome,"fin.outcome",[["","Not yet determined"],["Active — in isolation","Active — in isolation"],["Finished Isolation","Finished Isolation"],["Moved to Kennels","Moved to Kennels"],["Moved to Foster","Moved to Foster"],["Rehomed","Rehomed"],["Returned to Owner","Returned to Owner"],["Transferred","Transferred to rescue/shelter"],["Died in care","Died in care"],["Escaped / Lost","Escaped / Lost"],["Euthanised","Euthanised"]]))+(f.outcome==="Euthanised"&&currentRole()!=="staff"?slct("Reason for euthanasia",f.euthReason,"fin.euthReason",[["","-- select reason --"],["Behavioural — unsafe to rehome","Behavioural — unsafe to rehome"],["Medical — terminal / untreatable","Medical — terminal / untreatable"],["Medical — quality of life / poor prognosis","Medical — quality of life / poor prognosis"],["Severe injury / trauma","Severe injury / trauma"],["Infectious disease — biosecurity","Infectious disease — biosecurity"],["Legal — court-ordered","Legal — court-ordered"],["Welfare — cruelty / seizure case","Welfare — cruelty / seizure case"]]):"")+fld("Outcome Date",f.outcomeDate,"fin.outcomeDate","date")+ta("Outcome Notes",f.outcomeNotes,"fin.outcomeNotes","")+'<div class="sec">5-Day Progress Summary</div>'+slct("Overall progress",f.overallProgress,"fin.overallProgress",[["Significantly improved","Significantly improved — much calmer"],["Slightly improved","Slightly improved"],["Stable","Stable — no significant change"],["Slightly deteriorated","Slightly deteriorated"],["Significantly deteriorated","Significantly deteriorated — urgent review"]])+ta("Kennel Handover Note",f.handoverNote,"fin.handoverNote","Key info for next shift...")+fld("Assessor Name",f.assessorName,"fin.assessorName","text","")+fld("Assessor Date",f.assessorDate,"fin.assessorDate","date")+fld("Second Assessor",f.secondAssessor,"fin.secondAssessor","text","")+fld("Second Assessor Date",f.secondAssessorDate,"fin.secondAssessorDate","date");
     return '<h2>Final assessment &amp; outcome</h2><div class="sub">Concerns, next steps, outcome and sign-off.</div>'+finFields+'<div class="brow"><button class="btn" data-go="scoring">&larr; Back</button><button class="btn btnp" data-go="medical">Next: medical &rarr;</button></div>';
   }
 
