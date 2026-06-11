@@ -168,6 +168,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
           <div onclick="dashMenuGo('diary')" class="dmi">&#128214; Daily Diary</div>
           <div onclick="dashMenuGo('weighin')" class="dmi">&#9878;&#65039; Batch weigh-in</div>
           <div onclick="dashMenuGo('biosec')" class="dmi">&#129529; Biosecurity</div>
+          <div onclick="dashMenuGo('protocol')" class="dmi">&#128221; Isolation Protocol</div>
           <div onclick="dashMenuGo('incidents')" class="dmi">&#9888;&#65039; Incident register</div>
           <div onclick="closeDashMenu();printFeedingSheet()" class="dmi">&#127869; Feeding sheet</div>
           <div onclick="closeDashMenu();downloadBackup()" class="dmi">&#128190; Download backup</div>
@@ -246,6 +247,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.7",date:"2026-06-10",note:"Isolation Protocol, in two parts. PROTOCOL PAGE (menu): the unit's standing rules in eight sections - entry & exit, PPE & hygiene, clean-to-dirty working order, traffic-light handling, kennel cleaning, contagious case procedure, feeding & equipment, and visitors & movement. Supervisors and above can edit any section to match unit practice (edited sections are badged, and can be reset to default), and edits sync across the team. PER-DOG PROTOCOL CARD (Dog tab): shows exactly which rules apply to THIS dog - its traffic-light handling rule, barrier-nursing instructions if it's contagious, and a treat-as-Yellow rule while unscored - plus four setup ticks (signage up, dedicated equipment, handlers briefed, clean logged) stamped with who ticked them and when. ALSO FIXED: shared Disease info edits were silently saving to your device only while claiming to save for the team (a missing piece in the database client) - team saves now actually reach the team, for Disease info and the new Protocol page alike."},
   {version:"3.6",date:"2026-06-10",note:"Assessment depth and housekeeping. RE-ASSESSMENT HISTORY: snapshot the scores at any point (day 1, day 4...) and the Scoring tab shows the progression - e.g. 21 Red falling to 13 Yellow - with an improved/worsened trend line, so decompression is visible evidence rather than memory. SCORE NOTES: each scoring category now has an optional one-line 'why this score' note for defensible records. SECOND ASSESSOR: an optional second set of scores with its own total - the tab flags clearly whether the two assessors land on the same traffic light or disagree. DAILY REPORT DUE: Needs Attention now nags for dogs with no 5-Day Report entry for today. OUTCOME GUARD: setting a final outcome while scoring or the behaviour assessment is still empty shows a warning (soft - it never blocks). RESTORE BACKUP: admins can restore a downloaded backup file, with a clear overwrite/add summary before anything happens. ARCHIVE: departed dogs can be archived from the Records page to keep the list tidy - a Show Archived toggle brings them back, and nothing is ever deleted."},
   {version:"3.5",date:"2026-06-10",note:"The big one. ISOLATION EXTENSIONS: supervisors can extend a dog's isolation beyond 5 days (with a required reason) from the new Isolation Period card on the Dog tab - every day counter, banner and report recalculates, and extended dogs no longer show as awaiting outcome. NEW IN THE MENU: Batch weigh-in (enter every dog's weight on one screen), Incident register (every incident across all dogs, printable), Biosecurity (deep-clean log per kennel with block/unblock after contagious cases), Feeding sheet and Download backup. ON THE DOG: a new-arrival checklist that ticks itself off during the first week, a printable Vaccination & Treatment record on the Medical tab, and quick-tap observation chips on Notes. Plus: outcome is now locked to supervisors and above, and dogs on active medication show in Needs Attention."},
   {version:"3.4",date:"2026-06-08",note:"A cleaner, sleeker look across the whole app. The blue accent is retired - active tabs are now ink with a lime underline, inputs glow lime when focused, and primary buttons (Save and friends) are now NSPCA lime. Cards everywhere sit on soft shadows with hairline borders and rounder corners instead of grey outlines, and the page background is a touch lighter. On the dashboard, a dog's traffic light shows as a slim coloured bar along the top of its card plus a small score tag on the photo (e.g. G - 8), replacing the heavy coloured border - same information, calmer grid. The kennels view tiles match, and the header controls are tidier. Purely visual: nothing moved, nothing removed."},
@@ -1075,6 +1077,9 @@ function showDashSection(section){
     loadFactsheets().then(function(){el.innerHTML=renderFactsheets();});
   }else if(section==="readytogo"){
     el.innerHTML=renderReadyToGo();
+  }else if(section==="protocol"){
+    el.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">Loading\u2026</div>';
+    loadFactsheets().then(function(){el.innerHTML=renderProtocol();});
   }else if(section==="biosec"){
     el.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">Loading\u2026</div>';
     loadBio().then(function(){el.innerHTML=renderBiosec();});
@@ -1801,6 +1806,84 @@ function listViewHtml(active){
 
 
 
+
+
+// ── Isolation Protocol (unit SOP, editable, shared via factsheets table) ──
+var PROTO_SECTIONS=[
+ {key:"entry",title:"Entry & exit",icon:"&#128682;",body:"One-way flow where possible: enter through the clean side, exit through the dirty side. Foot dip on entry AND exit \u2014 check the dip is fresh (changed daily or when visibly soiled). Close every gate and door behind you. No food, drink or personal items inside the unit."},
+ {key:"ppe",title:"PPE & hygiene",icon:"&#129508;",body:"Gloves for all dog contact; change gloves between dogs. Gown or apron plus dedicated footwear (or overshoes) for any contagious or suspect case. Wash hands or sanitise between every kennel \u2014 gloves are not a substitute. Hair tied back; no loose lanyards inside kennels."},
+ {key:"order",title:"Working order (clean to dirty)",icon:"&#128260;",body:"Always work from lowest risk to highest: healthy and vaccinated dogs first, new arrivals next, suspect cases after, confirmed contagious cases LAST. Never go back to a clean kennel after a dirty one without full hand hygiene and glove change. Plan the round before you start."},
+ {key:"handling",title:"Traffic-light handling",icon:"&#128678;",body:"GREEN \u2014 all volunteers and TY students may walk and interact. YELLOW \u2014 ask staff before entering; muzzle may be required. RED \u2014 experienced volunteers only, with explicit staff approval; behaviour plan applies. BLACK \u2014 staff only, two-person handling, muzzle on movement, no exceptions. If unsure of a dog's light, treat it as the next level up and ask."},
+ {key:"cleaning",title:"Kennel cleaning",icon:"&#129529;",body:"Daily: remove waste, swap bedding if soiled, wash bowls, spot-clean surfaces. Deep clean on vacancy and weekly while occupied: strip kennel, degrease, disinfect at correct dilution and observe the full contact time before rinsing, then dry before re-bedding. Log every deep clean in Biosecurity (menu). Parvo-contaminated kennels stay BLOCKED until cleared by a supervisor."},
+ {key:"contagious",title:"Contagious case procedure",icon:"&#9763;",body:"Suspect case: isolate immediately, mark the dog contagious in the app (Medical tab), inform the supervisor, call the vet. Barrier nursing: dedicated equipment, gown, gloves, foot dip at the kennel front. The dog is handled LAST on every round. Block the kennel in Biosecurity on departure and do not reuse until cleared."},
+ {key:"feeding",title:"Feeding & equipment",icon:"&#127869;",body:"Each kennel keeps its own bowls, leads and grooming kit \u2014 nothing is shared between dogs. Feed in working order (clean to dirty). Wash bowls after every meal; contagious-case equipment is washed last and stored separately. Record feeding in the dog's Feeding tab; print the daily feeding sheet from the menu."},
+ {key:"visitors",title:"Visitors & movement",icon:"&#128101;",body:"No public access to the isolation unit. Volunteers only with staff approval and only to dogs their level allows (see traffic-light handling). Dogs do not leave the unit before completing isolation unless a supervisor signs it off. Movements out (kennels, rehoming, vet) are recorded as the outcome in the app."}
+];
+function protoText(key){var o=getFactsheetOverrides();var k="protocol-"+key;if(o[k]!==undefined&&o[k]!==null)return o[k];var d=PROTO_SECTIONS.find(function(s){return s.key===key;});return d?d.body:"";}
+function protoEdit(key){window._protoEditing=key;_protoRerender();setTimeout(function(){var t=document.getElementById("proto-edit-area");if(t)t.focus();},30);}
+function protoCancel(){window._protoEditing="";_protoRerender();}
+async function protoSave(key){
+  var t=document.getElementById("proto-edit-area");if(!t)return;
+  var val=t.value;var k="protocol-"+key;
+  var o=getFactsheetOverrides();o[k]=val;_fsCache=o;
+  try{localStorage.setItem("nspca-factsheets",JSON.stringify(o));}catch(e){}
+  var okShared=false;
+  if(typeof supabaseClient!=="undefined"&&supabaseClient&&_fsShared){
+    try{var res=await supabaseClient.from("factsheets").upsert({key:k,content:val,updated_at:new Date().toISOString(),updated_by:currentName()},{onConflict:"key"});if(!res||res.error)throw (res&&res.error)||new Error("save failed");okShared=true;}catch(e){}
+  }
+  window._protoEditing="";_protoRerender();
+  miniToast(okShared?"Protocol saved for the team":"Saved on this device");
+}
+async function protoReset(key){
+  appConfirm("Reset this section to the default text?",function(){(async function(){
+    var k="protocol-"+key;var o=getFactsheetOverrides();delete o[k];_fsCache=o;
+    try{localStorage.setItem("nspca-factsheets",JSON.stringify(o));}catch(e){}
+    if(typeof supabaseClient!=="undefined"&&supabaseClient&&_fsShared){try{await supabaseClient.from("factsheets").delete().eq("key",k);}catch(e){}}
+    window._protoEditing="";_protoRerender();miniToast("Section reset");
+  })();},{danger:true});
+}
+function _protoRerender(){var el=document.getElementById("dashboard-content");if(el)el.innerHTML=renderProtocol();}
+function renderProtocol(){
+  var canEdit=currentRole()!=="staff";
+  var head='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'+backToDashBtn()+'<h2 style="margin:0;flex:1;font-size:18px">Isolation Protocol</h2></div>'
+    +'<div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px">The unit&rsquo;s standing rules. '+(canEdit?'Tap &#9998; to edit a section to match unit practice.':'')+'</div>'
+    +'<div style="font-size:11px;color:#94a3b8;margin-bottom:14px">'+(_fsShared?'Edits sync across your team.':'Edits are saved on this device.')+'</div>';
+  var body=PROTO_SECTIONS.map(function(s){
+    var editing=window._protoEditing===s.key;
+    var o=getFactsheetOverrides();var edited=o["protocol-"+s.key]!==undefined&&o["protocol-"+s.key]!==null;
+    var hdr='<div style="display:flex;align-items:center;gap:9px;margin-bottom:8px"><span style="font-size:17px">'+s.icon+'</span><span style="font-size:13px;font-weight:700;flex:1">'+s.title+'</span>'+(edited?'<span style="font-size:9px;font-weight:700;background:#f3e8ff;color:#7c3aed;padding:1px 8px;border-radius:20px">EDITED</span>':'')+(canEdit&&!editing?'<button onclick="protoEdit(\''+s.key+'\')" style="background:#f1f5f9;border:none;border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer">&#9998;</button>':'')+'</div>';
+    var content=editing
+      ?'<textarea id="proto-edit-area" style="width:100%;min-height:130px;padding:10px 12px;border:1px solid rgba(15,23,42,0.1);border-radius:10px;font-size:12.5px;font-family:inherit;line-height:1.55;resize:vertical;box-sizing:border-box">'+esc(protoText(s.key))+'</textarea><div style="display:flex;gap:6px;margin-top:8px"><button onclick="protoSave(\''+s.key+'\')" class="btn btnp" style="font-size:12px;padding:7px 16px">Save</button><button onclick="protoCancel()" class="btn" style="font-size:12px;padding:7px 14px">Cancel</button>'+(edited?'<button onclick="protoReset(\''+s.key+'\')" class="btn" style="font-size:12px;padding:7px 14px;margin-left:auto;color:#991b1b">Reset to default</button>':'')+'</div>'
+      :'<div style="font-size:12.5px;line-height:1.6;color:#334155;white-space:pre-wrap">'+esc(protoText(s.key))+'</div>';
+    return '<div class="card" style="margin-bottom:10px;padding:14px 16px">'+hdr+content+'</div>';
+  }).join("");
+  return '<div style="max-width:720px;margin:0 auto">'+head+body+'</div>';
+}
+
+// ── Per-dog protocol card ─────────────────────────────────────────
+var PROTO_CHECKS=[["signage","Traffic-light signage on kennel"],["equipment","Dedicated equipment assigned"],["briefed","Handlers briefed on this dog"],["cleanlog","Kennel clean logged in Biosecurity"]];
+function protoCheckToggle(k){
+  if(!S.protoChecks)S.protoChecks={};
+  if(S.protoChecks[k])delete S.protoChecks[k];
+  else S.protoChecks[k]={by:currentName(),date:new Date().toISOString().slice(0,10)};
+  saveRecord();renderMain();
+}
+function dogProtocolCardHtml(){
+  var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
+  var t=tlc(total);
+  var con=activeContagiousList(S.medical||null);
+  var legend=t?WALK_LEGEND.find(function(w){return w.k===t.l;}):null;
+  var rules=[];
+  if(legend)rules.push({icon:"&#128678;",tx:"<strong>"+t.l+":</strong> "+legend.rule});
+  if(con.length)rules.push({icon:"&#9763;",tx:"<strong>Contagious ("+con.map(function(x){return diseaseShortName(x.type);}).join(", ")+"):</strong> barrier nursing \u2014 dedicated equipment, gown and gloves, handled LAST on every round. Kennel blocked on departure until cleared."});
+  if(!t&&!con.length)rules.push({icon:"&#128678;",tx:"Not yet scored \u2014 treat as <strong>Yellow</strong> until scoring is complete: ask staff before entering, muzzle if in doubt."});
+  var ruleRows=rules.map(function(r){return '<div style="display:flex;gap:9px;align-items:flex-start;padding:6px 0;border-top:0.5px solid #eef1f5"><span style="font-size:14px;flex-shrink:0">'+r.icon+'</span><div style="font-size:12px;line-height:1.55;color:#334155">'+r.tx+'</div></div>';}).join("");
+  var checks=PROTO_CHECKS.map(function(c){
+    var done=S.protoChecks&&S.protoChecks[c[0]];
+    return '<button onclick="protoCheckToggle(\''+c[0]+'\')" title="'+(done?esc(done.by)+' \u00b7 '+fmtDMY(done.date):'Tap when done')+'" style="display:inline-flex;align-items:center;gap:6px;background:'+(done?'#e7f6e9':'#fff')+';border:1px solid '+(done?'#bbe4c4':'rgba(15,23,42,0.1)')+';border-radius:20px;padding:5px 12px;font-size:11.5px;color:'+(done?'#166534':'#64748b')+';cursor:pointer;font-family:inherit">'+(done?'&#10003;':'&#9675;')+' '+c[1]+'</button>';
+  }).join("");
+  return '<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Isolation protocol</span><button onclick="showScreen(\'dashboard-screen\');showDashSection(\'protocol\')" style="background:none;border:none;font-size:11px;color:#0d9488;font-weight:600;cursor:pointer;font-family:inherit">Full protocol &rarr;</button></div>'+ruleRows+'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px">'+checks+'</div></div>';
+}
 
 // ── Re-assessment history ─────────────────────────────────────────
 function scoreSnapshot(){
@@ -4078,7 +4161,7 @@ function page(){
       +'<div class="g2">'+slct("Kennel / Pod",d.kennel,"dog.kennel",[["",'-- not assigned --'],["Kennel 1","Kennel 1"],["Kennel 2","Kennel 2"],["Kennel 3","Kennel 3"],["Kennel 4","Kennel 4"],["Kennel 5","Kennel 5"],["Kennel 6","Kennel 6"],["Pod 1","Pod 1"],["Pod 2","Pod 2"],["Pod 3","Pod 3"],["Pod 4","Pod 4"]])+fld("Assessor",d.assessor,"dog.assessor","text","e.g. Shane")+'</div>'
       +'<div class="g2">'+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()+slct("Reason for intake",d.intakeReason,"dog.intakeReason",[["Stray","Stray"],["Owner surrender","Owner surrender"],["Cruelty case","Cruelty case"],["Transfer","Transfer from another centre"],["Other","Other"]])+'</div></div>';
 
-    return hero+intakeChecklistHtml()+identity+intake+isoPeriodCardHtml()+warningsCardHtml()+noticesCardHtml()+'<div class="brow"><button class="btn" onclick="printKennelCard()" style="white-space:nowrap">&#128424; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
+    return hero+intakeChecklistHtml()+identity+intake+isoPeriodCardHtml()+dogProtocolCardHtml()+warningsCardHtml()+noticesCardHtml()+'<div class="brow"><button class="btn" onclick="printKennelCard()" style="white-space:nowrap">&#128424; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
   }
 
   if(t==="arrival") return'<h2>On-arrival observation</h2><div class="sub">Record the dog\'s behaviour on arrival.</div><div class="card">'+slct("Initial demeanour on arrival",a.demeanour,"arrival.demeanour",[["Engaging","Engaging — friendly, curious"],["Nervous","Nervous — withdrawn, avoidant"],["Reactive","Reactive — alert, tense, vocal"],["Shut down","Shut down — frozen, non-responsive"],["Neutral","Neutral — calm, no strong response"]])+slct("Muzzle required?",a.muzzle,"arrival.muzzle",[["No","No — handled safely without muzzle"],["Yes — accepted","Yes — accepted without issue"],["Yes — resistant","Yes — resistant to muzzling"],["Yes — required intervention","Yes — required significant intervention"]])+slct("Lead / handling acceptance",a.lead,"arrival.lead",[["Good","Good — relaxed, no tension"],["Moderate","Moderate — some pulling or resistance"],["Poor","Poor — strong pulling"],["Dangerous","Dangerous — unsafe on lead"]])+slct("First vet visit behaviour",a.vet,"arrival.vet",[["Cooperative","Cooperative"],["Nervous but manageable","Nervous but manageable"],["Resistant","Resistant — required restraint"],["Aggressive","Aggressive — unsafe to handle"],["Not yet seen","Not yet seen by vet"]])+ta("Arrival notes",a.notes,"arrival.notes","Describe arrival behaviour...")+'<div class="sec">Behaviour History</div>'+slct("Dog-to-Dog Reactivity",a.dogDog,"arrival.dogDog",[["Not tested","Not tested"],["None observed — settled","None observed — settled"],["Mild","Mild — some interest or pulling"],["Moderate","Moderate — barking or lunging"],["Severe","Severe — could not pass safely"]])+slct("Cat Tolerance",a.catTolerance,"arrival.catTolerance",[["Not tested","Not tested"],["Unknown","Unknown"],["Cat friendly","Known to be cat friendly"],["Reactive","Chased or reactive to cats"]])+slct("Horses / equine",a.equineHistory,"arrival.equineHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Good","Known to be good with horses"],["Reactive","Reactive / chased horses"]])+slct("Small mammals",a.smallMammalHistory,"arrival.smallMammalHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Safe","Known to be safe with small mammals"],["Reactive","Chased / high prey drive"]])+slct("Child History",a.childHistory,"arrival.childHistory",[["Not known","Not known"],["Good","Known to be good with children"],["No exposure","No known exposure"],["Caution","Owner advised caution"],["Incident","Known incident involving a child"]])+slct("Previous Bite History",a.biteHistory,"arrival.biteHistory",[["None","None declared"],["One","One bite declared by owner"],["Multiple","Multiple bites declared"],["Unknown details","Bite history — details unknown"]])+'</div><div class="brow"><button class="btn" data-go="dog">&larr; Back</button><button class="btn btnp" data-go="days">Next: 5-day report &rarr;</button></div>';
@@ -4389,6 +4472,10 @@ function initSupabase(){
           single:function(){return fetch(q,{headers:Object.assign({},headers,{"Accept":"application/vnd.pgrst.object+json"})}).then(function(r){return r.json().then(function(d){return r.ok?{data:d,error:null}:{data:null,error:d};});});},
           then:function(res,rej){return fetch(q,{headers:headers}).then(function(r){return r.json().then(function(d){var result=r.ok?{data:d,error:null}:{data:null,error:d};if(res)res(result);return result;});}).catch(function(e){var result={data:null,error:{message:e.message}};if(rej)rej(result);return result;});}
         };return chain;
+      },
+      upsert:function(row,opts){
+        var oc=(opts&&opts.onConflict)?("?on_conflict="+encodeURIComponent(opts.onConflict)):"";
+        return fetch(base+oc,{method:"POST",headers:Object.assign({},headers,{"Prefer":"resolution=merge-duplicates,return=representation"}),body:JSON.stringify(Array.isArray(row)?row:[row])}).then(function(r){return r.json().then(function(d){return r.ok?{data:Array.isArray(d)?d:[d],error:null}:{data:null,error:d};}).catch(function(){return r.ok?{data:[],error:null}:{data:null,error:{message:"upsert failed"}};});});
       },
       insert:function(rows){return fetch(base,{method:"POST",headers:Object.assign({},headers,{"Prefer":"return=representation"}),body:JSON.stringify(Array.isArray(rows)?rows[0]:rows)}).then(function(r){return r.json().then(function(d){return r.ok?{data:Array.isArray(d)?d:[d],error:null}:{data:null,error:d};});});},
       update:function(data){var q2=base;return{eq:function(col,val){q2+="?"+col+"=eq."+encodeURIComponent(val);return fetch(q2,{method:"PATCH",headers:Object.assign({},headers,{"Prefer":"return=representation"}),body:JSON.stringify(data)}).then(function(r){return r.json().then(function(d){return r.ok?{data:d,error:null}:{data:null,error:d};});});}};},
