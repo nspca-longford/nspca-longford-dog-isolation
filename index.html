@@ -251,6 +251,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.9",date:"2026-06-11",note:"Vaccines now know the difference between booked and given. Enter a vaccination with a future date - say the 1st Vaccination is booked for next week - and the Medical tab shows it as a teal Scheduled slot ('Booked - in 7 days') instead of marking it Done. On the day itself it counts as given automatically, no extra step. Upcoming Medical lists booked vaccines as their own entries (e.g. '1st Vaccination (booked)'), the next-vaccine banner says Scheduled rather than nagging that it's due, and the printed Vaccination & Treatment record marks future-dated entries as '(scheduled - not yet given)' so the paperwork never claims a jab that hasn't happened."},
   {version:"3.8",date:"2026-06-11",note:"The app now recognises restricted breeds the moment a breed is entered. Type any of the eleven restricted types from the Control of Dogs Regulations 1998 - or a cross, or common shorthand like GSD, staffie or rottie - and the Dog tab shows an amber legal notice: muzzled in public, strong lead no longer than 2m, handler over 16, owner-ID collar, and a reminder to flag it to adopters. XL Bullies get a red banner instead, because they're banned outright in Ireland - illegal to rehome, sell, breed or import - so the app says plainly that the dog cannot go through normal rehoming and the manager must be involved. Restricted dogs also carry a small RB chip (XL chip for XL Bullies) on their dashboard card, and printed kennel cards now carry the muzzle-in-public or no-rehoming pill so anyone walking the dog knows at a glance."},
   {version:"3.7",date:"2026-06-10",note:"Isolation Protocol, in two parts. PROTOCOL PAGE (menu): the unit's standing rules in eight sections - entry & exit, PPE & hygiene, clean-to-dirty working order, traffic-light handling, kennel cleaning, contagious case procedure, feeding & equipment, and visitors & movement. Supervisors and above can edit any section to match unit practice (edited sections are badged, and can be reset to default), edits sync across the team, and the page prints cleanly for the unit wall. ALSO FIXED: shared Disease info edits were silently saving to your device only while claiming to save for the team (a missing piece in the database client) - team saves now actually reach the team, for Disease info and the new Protocol page alike."},
   {version:"3.6",date:"2026-06-10",note:"Assessment depth and housekeeping. RE-ASSESSMENT HISTORY: snapshot the scores at any point (day 1, day 4...) and the Scoring tab shows the progression - e.g. 21 Red falling to 13 Yellow - with an improved/worsened trend line, so decompression is visible evidence rather than memory. SCORE NOTES: each scoring category now has an optional one-line 'why this score' note for defensible records. SECOND ASSESSOR: an optional second set of scores with its own total - the tab flags clearly whether the two assessors land on the same traffic light or disagree. DAILY REPORT DUE: Needs Attention now nags for dogs with no 5-Day Report entry for today. OUTCOME GUARD: setting a final outcome while scoring or the behaviour assessment is still empty shows a warning (soft - it never blocks). RESTORE BACKUP: admins can restore a downloaded backup file, with a clear overwrite/add summary before anything happens. ARCHIVE: departed dogs can be archived from the Records page to keep the list tidy - a Show Archived toggle brings them back, and nothing is ever deleted."},
@@ -661,13 +662,18 @@ function dogMedicalDue(r){
   var today=new Date().toISOString().slice(0,10);
   var items=[];
   var vl=med.vaccinations||[];
-  function vlatest(t){return vl.filter(function(v){return v.type===t&&v.date;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];}
-  function vhas(t){return vl.some(function(v){return v.type===t&&v.date;});}
+  function vlatest(t){return vl.filter(function(v){return v.type===t&&v.date&&v.date<=today;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];}
+  function vgiven(t){return vl.some(function(v){return v.type===t&&v.date&&v.date<=today;});}
+  function vbooked(t){var b=vl.filter(function(v){return v.type===t&&v.date&&v.date>today;}).sort(function(a,b){return(a.date||"").localeCompare(b.date||"");})[0];return b?b.date:null;}
   var vdue=null,vtype=null;
-  if(vhas("1st Vaccination")&&!vhas("2nd Vaccination")){vdue=addDaysStr(vlatest("1st Vaccination").date,28);vtype="2nd Vaccination";}
-  else if(vhas("2nd Vaccination")&&!vhas("Booster")){vdue=addDaysStr(vlatest("2nd Vaccination").date,365);vtype="Booster";}
+  if(vgiven("1st Vaccination")&&!vgiven("2nd Vaccination")){vdue=addDaysStr(vlatest("1st Vaccination").date,28);vtype="2nd Vaccination";}
+  else if(vgiven("2nd Vaccination")&&!vgiven("Booster")){vdue=addDaysStr(vlatest("2nd Vaccination").date,365);vtype="Booster";}
   vl.forEach(function(v){if(v.nextDue&&(!vdue||v.nextDue<vdue)){vdue=v.nextDue;vtype=v.type+" (next due)";}});
-  if(vdue)items.push({icon:"&#128137;",label:vtype,due:vdue});
+  ["1st Vaccination","Kennel Cough","2nd Vaccination","Booster"].forEach(function(t){
+    var bd=vbooked(t);
+    if(bd&&!vgiven(t)){items.push({icon:"&#128197;",label:t+" (booked)",due:bd,booked:true});if(vtype===t){vdue=null;vtype=null;}}
+  });
+  if(vdue&&vtype)items.push({icon:"&#128137;",label:vtype,due:vdue});
   var pl=med.parasiteTreatments||[];
   [["Milpro","Worm (Milpro)","&#129440;"],["Bravecto","Flea/tick (Bravecto)","&#128027;"]].forEach(function(d){
     var last=pl.filter(function(p){return(p.type||"").indexOf(d[0])===0||(p.product||"").indexOf(d[0])===0;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
@@ -675,7 +681,7 @@ function dogMedicalDue(r){
     var due=last.nextDue||addDaysStr(last.date,90);
     items.push({icon:d[2],label:d[1],due:due});
   });
-  items.forEach(function(it){it.state=it.due<today?"overdue":(it.due<=addDaysStr(today,14)?"soon":"upcoming");});
+  items.forEach(function(it){if(it.booked){it.state="booked";return;}it.state=it.due<today?"overdue":(it.due<=addDaysStr(today,14)?"soon":"upcoming");});
   return items;
 }
 function umDueText(due){var t=new Date().toISOString().slice(0,10);var diff=Math.round((new Date(due)-new Date(t))/86400000);var lab=fmtDMY(due);if(diff<0)return Math.abs(diff)+"d overdue &middot; "+lab;if(diff===0)return "today &middot; "+lab;if(diff===1)return "tomorrow &middot; "+lab;return "in "+diff+"d &middot; "+lab;}
@@ -693,7 +699,7 @@ function renderUpcomingMedical(){
   var chips=[["all","All"],["soon","Next 2 weeks"],["overdue","Overdue"]].map(function(c){var sel=filt===c[0];return '<button onclick="window._umFilt=\''+c[0]+'\';showDashSection(\'upcomingMedical\')" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--color-border-secondary);background:'+(sel?"#0f172a":"var(--color-background-primary)")+';color:'+(sel?"#fff":"var(--color-text-secondary)")+'">'+c[1]+'</button>';}).join("");
   head+='<div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">'+chips+'</div>';
   if(!shown.length)return head+'<div style="text-align:center;padding:40px;color:var(--color-text-secondary)">Nothing '+(filt==="overdue"?"overdue":(filt==="soon"?"due in the next 2 weeks":"coming up"))+'.</div>';
-  var SC={overdue:["#fee2e2","#991b1b"],soon:["#fef9c3","#854d0e"],upcoming:["#f1f5f9","#475569"]};
+  var SC={overdue:["#fee2e2","#991b1b"],soon:["#fef9c3","#854d0e"],upcoming:["#f1f5f9","#475569"],booked:["#ccfbf1","#0f6e56"]};
   var rows=shown.map(function(x){
     var r=x.r,it=x.it,d=(r.state&&r.state.dog)||{};
     var c=SC[it.state]||SC.upcoming;
@@ -2049,7 +2055,8 @@ function printVaccRecord(){
     if(!rows.length)return"";
     return '<h3>'+title+'</h3><table><thead><tr>'+heads.map(function(h){return '<th>'+h+'</th>';}).join("")+'</tr></thead><tbody>'+rows.join("")+'</tbody></table>';
   }
-  var vac=(m.vaccinations||[]).slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");}).map(function(v){return '<tr><td>'+fmtDMY(v.date)+'</td><td>'+esc(v.type||v.name||"")+'</td><td>'+esc(v.batch||v.notes||v.note||"")+'</td><td>'+esc(v.by||v.staff||v.vet||"")+'</td></tr>';});
+  var _vToday=new Date().toISOString().slice(0,10);
+  var vac=(m.vaccinations||[]).slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");}).map(function(v){return '<tr><td>'+fmtDMY(v.date)+(v.date&&v.date>_vToday?' <em>(scheduled — not yet given)</em>':'')+'</td><td>'+esc(v.type||v.name||"")+'</td><td>'+esc(v.batch||v.notes||v.note||"")+'</td><td>'+esc(v.by||v.staff||v.vet||"")+'</td></tr>';});
   var par=(m.parasiteTreatments||[]).slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");}).map(function(p){return '<tr><td>'+fmtDMY(p.date)+'</td><td>'+esc(p.type||p.product||p.name||"")+'</td><td>'+esc(p.product||p.notes||p.note||"")+'</td><td>'+esc(p.by||p.staff||"")+'</td></tr>';});
   var med=(m.medications||[]).map(function(x){return '<tr><td>'+esc(x.name||"")+'</td><td>'+esc(x.dose||"")+'</td><td>'+esc(x.frequency||x.freq||"")+'</td><td>'+(x.startDate?fmtDMY(x.startDate):"")+(x.endDate?' &ndash; '+fmtDMY(x.endDate):"")+'</td></tr>';});
   var vet=(m.vetVisits||[]).slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");}).map(function(v){return '<tr><td>'+fmtDMY(v.date)+'</td><td>'+esc(v.reason||v.notes||v.note||"")+'</td><td>'+esc(v.vet||v.by||v.staff||"")+'</td></tr>';});
@@ -2819,6 +2826,7 @@ function renderMedical(){
   // Compute status for each fixed vaccine type
   function vaxStatus(vt){
     var match=vacList.slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");}).find(function(v){return v.type===vt;});
+    if(match&&match.date&&match.date>todayStr)return{state:"booked",due:match.date,match:match};
     if(match)return{state:"done",match:match};
     // Honour an explicit nextDue from a previous entry first (overrides auto-calc)
     var nextDueEntry=vacList.find(function(v){return v.type===vt&&v.nextDue;});
@@ -2844,9 +2852,9 @@ function renderMedical(){
   h+='<div class="card">';
   h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;font-weight:600">Vaccinations</span><button class="med-add-btn" onclick="showMedOverlay(\'vac\')">+ Log vaccination</button></div>';
   var _vnext=null;
-  VAC_FIXED.forEach(function(vt){var s=vaxStatus(vt);if((s.state==="upcoming"||s.state==="overdue")&&s.due&&(!_vnext||s.due<_vnext.due))_vnext={type:vt,due:s.due,state:s.state};});
+  VAC_FIXED.forEach(function(vt){var s=vaxStatus(vt);if((s.state==="upcoming"||s.state==="overdue"||s.state==="booked")&&s.due&&(!_vnext||s.due<_vnext.due))_vnext={type:vt,due:s.due,state:s.state};});
   if(_vnext){
-    var _vc=_vnext.state==="overdue"?{bg:"#fee2e2",bd:"#dc2626",fg:"#991b1b",ic:"&#9888;&#65039;",lab:"Overdue"}:{bg:"#fffbeb",bd:"#f59e0b",fg:"#854d0e",ic:"&#128276;",lab:"Upcoming"};
+    var _vc=_vnext.state==="overdue"?{bg:"#fee2e2",bd:"#dc2626",fg:"#991b1b",ic:"&#9888;&#65039;",lab:"Overdue"}:_vnext.state==="booked"?{bg:"#ccfbf1",bd:"#0d9488",fg:"#0f6e56",ic:"&#128197;",lab:"Scheduled"}:{bg:"#fffbeb",bd:"#f59e0b",fg:"#854d0e",ic:"&#128276;",lab:"Upcoming"};
     h+='<div style="display:flex;align-items:center;gap:10px;background:'+_vc.bg+';border:1px solid '+_vc.bd+';border-radius:10px;padding:9px 12px;margin-bottom:12px">'
       +'<span style="font-size:16px;line-height:1">'+_vc.ic+'</span>'
       +'<div style="flex:1;font-size:12px;line-height:1.35;color:'+_vc.fg+'"><strong>Next vaccine: '+_vnext.type+'</strong><br>'+_vc.lab+' &middot; due '+fmtDue(_vnext.due)+'</div>'
@@ -2859,6 +2867,9 @@ function renderMedical(){
     if(st.state==="done"){
       bg="#dcfce7";bd="#16a34a";sub=fmtDMY(st.match.date)+(st.match.adminBy?" &middot; "+esc(st.match.adminBy):"");subc="#166534";
       pillBg="#16a34a";pillFg="#fff";pillText="&#10003; Done";
+    }else if(st.state==="booked"){
+      bg="#ccfbf1";bd="#0d9488";sub="Booked "+fmtDue(st.due);subc="#0f6e56";
+      pillBg="#0d9488";pillFg="#fff";pillText="&#128197; Scheduled";
     }else if(st.state==="upcoming"){
       bg="#fef9c3";bd="#f59e0b";sub="Due "+fmtDue(st.due);subc="#854d0e";
       pillBg="#f59e0b";pillFg="#fff";pillText="Upcoming";
