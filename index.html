@@ -251,6 +251,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.10",date:"2026-06-11",note:"Isolation now starts the day after a dog arrives, matching unit practice. The arrival day shows as \u201cArrival day\u201d everywhere (dog card, header, kennel card), and the 5-day count begins the next morning at Day 1 of 5, running to Day 5 and clearing the day after. Extensions still add on top. Every day counter, progress bar, banner, the finishing-today and overdue alerts, and the printed reports all follow the new start - nothing else changed."},
   {version:"3.9",date:"2026-06-11",note:"Vaccines now know the difference between booked and given. Enter a vaccination with a future date - say the 1st Vaccination is booked for next week - and the Medical tab shows it as a teal Scheduled slot ('Booked - in 7 days') instead of marking it Done. On the day itself it counts as given automatically, no extra step. Upcoming Medical lists booked vaccines as their own entries (e.g. '1st Vaccination (booked)'), the next-vaccine banner says Scheduled rather than nagging that it's due, and the printed Vaccination & Treatment record marks future-dated entries as '(scheduled - not yet given)' so the paperwork never claims a jab that hasn't happened."},
   {version:"3.8",date:"2026-06-11",note:"The app now recognises restricted breeds the moment a breed is entered. Type any of the eleven restricted types from the Control of Dogs Regulations 1998 - or a cross, or common shorthand like GSD, staffie or rottie - and the Dog tab shows an amber legal notice: muzzled in public, strong lead no longer than 2m, handler over 16, owner-ID collar, and a reminder to flag it to adopters. XL Bullies get a red banner instead, because they're banned outright in Ireland - illegal to rehome, sell, breed or import - so the app says plainly that the dog cannot go through normal rehoming and the manager must be involved. Restricted dogs also carry a small RB chip (XL chip for XL Bullies) on their dashboard card, and printed kennel cards now carry the muzzle-in-public or no-rehoming pill so anyone walking the dog knows at a glance."},
   {version:"3.7",date:"2026-06-10",note:"Isolation Protocol, in two parts. PROTOCOL PAGE (menu): the unit's standing rules in eight sections - entry & exit, PPE & hygiene, clean-to-dirty working order, traffic-light handling, kennel cleaning, contagious case procedure, feeding & equipment, and visitors & movement. Supervisors and above can edit any section to match unit practice (edited sections are badged, and can be reset to default), edits sync across the team, and the page prints cleanly for the unit wall. ALSO FIXED: shared Disease info edits were silently saving to your device only while claiming to save for the team (a missing piece in the database client) - team saves now actually reach the team, for Disease info and the new Protocol page alike."},
@@ -1213,7 +1214,7 @@ function page_records(){
     var rd2=rec.state&&rec.state.dog?rec.state.dog:{};var rf=rec.state&&rec.state.fin?rec.state.fin:{};
     var outcome=rf.outcome||"";var days=daysInIsolation(rec.intakeDate);
     var ph2=rd2.photo?('<img src="'+rd2.photo+'" style="width:48px;height:48px;object-fit:cover;object-position:'+(rd2.photoPos||'50% 50%')+';border-radius:6px;flex-shrink:0;margin-right:2px">'):('<div style="width:48px;height:48px;border-radius:6px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;margin-right:2px">&#128062;</div>');
-    var prog=(function(){if(outcome==="Finished Isolation")return'<div style="display:inline-block;margin-top:4px;background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px">&#10003; Finished Isolation</div>';if(!(!outcome||outcome==="Active — in isolation"))return'<div style="font-size:11px;color:#94a3b8;margin-top:2px">'+esc(outcome)+'</div>';if(!days)return'';var tot=5+isoExtraDays(rd2);var pct=Math.min(100,Math.round((days/tot)*100));var col=days>tot?"#16a34a":days===tot-1?"#f59e0b":"#0d9488";return'<div style="margin-top:5px"><div style="font-size:10px;font-weight:600;color:'+col+';margin-bottom:3px">Day '+days+' of '+tot+(days>tot?' <span style="color:#16a34a">&#10003; complete</span>':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:5px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div></div>';})();
+    var prog=(function(){if(outcome==="Finished Isolation")return'<div style="display:inline-block;margin-top:4px;background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px">&#10003; Finished Isolation</div>';if(!(!outcome||outcome==="Active — in isolation"))return'<div style="font-size:11px;color:#94a3b8;margin-top:2px">'+esc(outcome)+'</div>';if(days==null)return'';var tot=5+isoExtraDays(rd2);var pct=Math.min(100,Math.round((days/tot)*100));var col=days>tot?"#16a34a":days===tot-1?"#f59e0b":"#0d9488";return'<div style="margin-top:5px"><div style="font-size:10px;font-weight:600;color:'+col+';margin-bottom:3px">'+(days<=0?'Arrival day':'Day '+days+' of '+tot)+(days>tot?' <span style="color:#16a34a">&#10003; complete</span>':'')+'</div><div style="background:#e2e8f0;border-radius:20px;height:5px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div></div>';})();
     var canDelete=currentRole()==="admin"||currentRole()==="manager"||currentRole()==="supervisor"||currentRole()==="coordinator";
     var _ro=(rec.state&&rec.state.fin?rec.state.fin.outcome:"")||"";var _dep=_ro&&_ro!=="Active — in isolation"&&_ro!=="Active - in isolation"&&_ro!=="Finished Isolation";
     var archBtn=(_dep&&canDelete)?'<button onclick="event.stopPropagation();toggleArchive('+rec.id+')" title="'+(isArchived(rec)?"Restore from archive":"Archive")+'" style="background:'+(isArchived(rec)?"#e7f6e9":"#f1f5f9")+';color:'+(isArchived(rec)?"#166534":"#64748b")+';border:none;border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer;font-family:inherit">'+(isArchived(rec)?"&#9851; Restore":"&#128451; Archive")+'</button>':'';
@@ -1773,7 +1774,7 @@ function roundsViewHtml(active){
     return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="openDog('+rec.id+')">'
       +ph
       +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:#0f172a">'+esc(rec.name)+'</div>'
-      +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+(d.kennel?'<strong>'+esc(d.kennel)+'</strong>':'No kennel')+(days?' &middot; Day '+days+' of '+(5+isoExtraDays(d)):'')+'</div></div>'
+      +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+(d.kennel?'<strong>'+esc(d.kennel)+'</strong>':'No kennel')+(days!=null?' &middot; '+isoDayLabel(days,5+isoExtraDays(d)):'')+'</div></div>'
       +'<div style="display:flex;gap:4px;flex-shrink:0">'+dots+'</div>'
     +'</div>';
   }).join("")+'</div>';
@@ -2190,7 +2191,7 @@ function printKennelCard(){
   var tlBg={Green:"#dcfce7",Yellow:"#fef9c3",Red:"#fee2e2",Black:"#1e293b"}[tl];
   var tlFg={Green:"#166534",Yellow:"#854d0e",Red:"#991b1b",Black:"#ffffff"}[tl];
   var info=d.intakeDate?isolationInfo(d.intakeDate,S.fin&&S.fin.outcome,isoExtraDays(d)):{state:"none"};
-  var isoTxt=info.state==="done"?"Isolation complete":(info.state==="none"?"\u2014":"Day "+info.day+" of "+(info.total||5));
+  var isoTxt=info.state==="done"?"Isolation complete":(info.state==="none"?"\u2014":isoDayLabel(info.day,info.total||5));
   var ws=(S.warnings||[]).slice().sort(function(a,b){return(a.level==="Critical"?0:1)-(b.level==="Critical"?0:1);});
   var ns=S.careNotices||[];
   var con=activeContagiousList(S.medical);
@@ -2254,7 +2255,7 @@ function renderDashboard(){
     var bg=finished?"#dcfce7":rec.trafficLight==="Red"?"#fee2e2":rec.trafficLight==="Black"?"#1e293b":rec.trafficLight==="Yellow"?"#fef9c3":"#f0fdf4";
     var ph=d.photo?'<img src="'+d.photo+'" style="width:100%;height:112px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';display:block">':'<div style="width:100%;height:112px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:40px">&#128062;</div>';
     var ta2="";if(rec.savedAt){var diff=Math.round((Date.now()-new Date(rec.savedAt).getTime())/60000);ta2=diff<1?"just now":diff<60?diff+"m ago":diff<1440?Math.round(diff/60)+"h ago":Math.round(diff/1440)+"d ago";}
-    var dayH=(finished||overdue)?'<div style="font-size:10px;font-weight:700;color:#166634;margin-bottom:3px">&#10003; Isolation complete</div><div style="background:#dcfce7;border-radius:20px;height:5px"><div style="background:#166634;width:100%;height:100%;border-radius:20px"></div></div>':days?'<div style="font-size:10px;font-weight:700;color:'+col+';margin-bottom:3px">&#128274; Isolation &middot; Day '+days+' of '+isoTot+'</div><div style="background:#e2e8f0;border-radius:20px;height:5px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
+    var dayH=(finished||overdue)?'<div style="font-size:10px;font-weight:700;color:#166634;margin-bottom:3px">&#10003; Isolation complete</div><div style="background:#dcfce7;border-radius:20px;height:5px"><div style="background:#166634;width:100%;height:100%;border-radius:20px"></div></div>':days!=null?'<div style="font-size:10px;font-weight:700;color:'+col+';margin-bottom:3px">&#128274; '+(days<=0?'Arrival day':'Isolation &middot; Day '+days+' of '+isoTot)+'</div><div style="background:#e2e8f0;border-radius:20px;height:5px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
     var savedBy=rec.savedBy||"";
     var lastEditHtml=savedBy?'<div style="display:flex;align-items:center;gap:4px;margin-top:5px;padding-top:4px;border-top:0.5px solid var(--color-border-secondary)"><div style="width:14px;height:14px;border-radius:50%;background:'+avatarColor(savedBy)+';color:#fff;font-size:6px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials(savedBy)+'</div><span style="font-size:9px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(savedBy)+' &middot; '+ta2+'</span></div>':"";
     var tlTag=rec.score?'<span style="position:absolute;top:7px;right:7px;background:'+parts[0]+';color:'+parts[1]+';font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;box-shadow:0 1px 3px rgba(15,23,42,0.15)">'+(rec.trafficLight||"?")[0]+' &middot; '+rec.score+'</span>':'<span style="position:absolute;top:7px;right:7px;background:#eef1f5;color:#94a3b8;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px">Unscored</span>';
@@ -2385,7 +2386,7 @@ function generateAutoNotices(){
   return notices;
 }
 
-function daysInIsolation(d){if(!d)return null;return Math.max(1,Math.floor((new Date()-new Date(d))/(1000*60*60*24))+1);}
+function daysInIsolation(d){if(!d)return null;return Math.max(0,Math.floor((new Date()-new Date(d))/(1000*60*60*24)));}
 
 // ── 5-day isolation status ────────────────────────────────────────
 // Day 1 = arrival day; isolation completes at the end of Day 5 (arrival + 4 days).
@@ -2428,8 +2429,10 @@ function isoExtRemove(i){
     miniToast("Extension removed");
   },{danger:true});
 }
-function isoClearDate(intakeDate,extra){return intakeDate?addDaysStr(intakeDate,4+(extra||0)):"";}
+function isoClearDate(intakeDate,extra){return intakeDate?addDaysStr(intakeDate,5+(extra||0)):"";}
 function isoExtraDays(dog){return ((dog&&dog.isoExt)||[]).reduce(function(a,e){return a+(parseInt(e.days)||0);},0);}
+function isoDayLabel(day,total){if(day==null)return "";if(day<=0)return "Arrival day";return "Day "+day+" of "+total;}
+function isoDayShort(day,total){if(day==null)return "";if(day<=0)return "Arrival";return "Day "+day+"/"+total;}
 function isolationInfo(intakeDate,outcome,extra){var TOT=5+(extra||0);
   var o=outcome||"";
   // Only an empty outcome or "Active — in isolation" means the dog is still in isolation.
@@ -2465,7 +2468,7 @@ function showIsolationOverlay(){
     var pct=Math.min(100,Math.round((info.day/5)*100));
     var line=info.state==="overdue"?(name+' is <strong>overdue</strong> — Day '+info.day+', past the 5-day window. Review for clearance.'):
       info.state==="final"?(name+' is on <strong>Day '+info.day+' of '+(info.total||5)+'</strong> — the final day. Isolation ends today.'):
-      (name+' is in isolation — <strong>Day '+info.day+' of '+(info.total||5)+'</strong>.');
+      (info.day<=0?(name+' <strong>arrived today</strong> — the 5-day isolation begins tomorrow.'):(name+' is in isolation — <strong>Day '+info.day+' of '+(info.total||5)+'</strong>.'));
     bodyHtml='<div style="font-size:13px;color:#475569;line-height:1.5;margin-bottom:14px">'+line+'</div>'
       +'<div style="background:#e2e8f0;border-radius:20px;height:8px;overflow:hidden;margin-bottom:14px"><div style="background:'+t[1]+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>'
       +'<div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b">'
@@ -2527,7 +2530,7 @@ function updateIsoChip(){
   var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome,isoExtraDays(dog));
   if(info.state==="none"){chip.style.display="none";return;}
   var t=isoTheme(info.state);
-  var txt=info.state==="done"?(t[4]+" Cleared"):(t[4]+" Day "+info.day+"/"+(info.total||5));
+  var txt=info.state==="done"?(t[4]+" Cleared"):(t[4]+" "+isoDayShort(info.day,info.total||5));
   chip.innerHTML=txt;
   chip.style.display="inline-flex";
   chip.style.background=t[0];chip.style.color=t[2];chip.style.borderColor=t[1];
@@ -4085,7 +4088,7 @@ function page(){
       : '<div style="width:66px;height:66px;border-radius:13px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;color:#94a3b8;flex-shrink:0;font-size:24px">&#128062;</div>';
     var tlPill=tl?'<span onclick="showWalkLegend(\''+tl.l+'\')" title="Who can walk this dog?" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;background:'+tl.bg+';color:'+tl.tc+';flex-shrink:0;cursor:pointer">'+tl.l+'<span style="display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;border:1.3px solid currentColor;font-size:8px;font-weight:700;font-style:italic;line-height:1;opacity:0.85">i</span></span>':'';
     var chips=[];
-    if(ii){var icl=ii.state==="done"?"\u2713 Isolation complete":(ii.state==="final"?"\ud83d\udd12 Isolation \u00b7 Day "+ii.day+" of "+(ii.total||5):"\ud83d\udd12 Isolation \u00b7 Day "+ii.day+" of "+(ii.total||5));var ibg=ii.state==="done"?"#dcfce7":"#fef3c7",itc=ii.state==="done"?"#166534":"#92400e";chips.push('<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+ibg+';color:'+itc+'">'+icl+'</span>');}
+    if(ii){var icl=ii.state==="done"?"\u2713 Isolation complete":(ii.day<=0?"\ud83d\udd12 Arrived today":"\ud83d\udd12 Isolation \u00b7 "+isoDayLabel(ii.day,ii.total||5));var ibg=ii.state==="done"?"#dcfce7":"#fef3c7",itc=ii.state==="done"?"#166534":"#92400e";chips.push('<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+ibg+';color:'+itc+'">'+icl+'</span>');}
     var _con=activeContagiousList(S.medical);if(_con&&_con.length){var _zoo=_con.some(function(x){return ZOONOTIC_DISEASES[x.type];});chips.push('<span title="'+esc(_con.map(function(x){return diseaseShortName(x.type);}).join(", "))+'" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:#fee2e2;color:#991b1b">&#129440; Infectious'+(_zoo?" \u00b7 zoonotic":"")+'</span>');}
     var _ea=eaCalc(S.ea);if(_ea.complete){chips.push('<span title="EA score '+_ea.score.toFixed(2)+' \u00b7 '+esc(_ea.mgmt)+'" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+_ea.col[0]+';color:'+_ea.col[1]+'">&#9888; EA '+esc(_ea.cat.replace("Category ","Cat "))+'</span>');}
     if(tl)chips.push('<span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:#dbeafe;color:#1e40af">Score '+total+'/24</span>');
