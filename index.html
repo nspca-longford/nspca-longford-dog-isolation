@@ -251,6 +251,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.14",date:"2026-06-18",note:"The Dog tab's branded card is now a full Kennel Card. The 'Kennel card' button opens the generator auto-filled with everything on the dog's record \u2014 identity (name, reference, kennel, breed, crossbreed, sex, age, size, colour, weight, microchip), intake (date, reason), vaccination status, parasite status and live status: isolation day, traffic-light score, who-can-walk rule, EA category, contagious/zoonotic flag, restricted-breed banner, handling warnings, care notices, feeding plan and the dog's photo. The card carries the photo across automatically, and staff can also drop in or change a photo in the generator. Any text can be tweaked before printing. The old quick A5 print is still there as 'Quick card'. (The previous 'Adoption profile' button is replaced.)"},
   {version:"3.13",date:"2026-06-11",note:"New Adoption profile button on the Dog tab. It opens the Adoption Infographic generator already filled in with this dog's details \u2014 name, breed, age, sex, microchip, reference, neuter status and vaccination status \u2014 so staff only need to add a photo and the adoption write-up rather than retyping everything. (The generator file lives next to the app.)"},
   {version:"3.12",date:"2026-06-11",note:"Medical tab overhaul. A new Health at a glance panel sits at the top of every dog's Medical record \u2014 six live tiles showing vaccination status, neuter/spay, body condition, dental, infection status and active medication, so you can read a dog's health state without scrolling. Each tile updates itself from the records below. Every section underneath \u2014 on-arrival health, neuter/spay, dental, disease, vaccinations, parasite, medications and vet visits \u2014 now shares one clean header style with an icon and a tidy + button. No data changed; it's the same record, easier to read."},
   {version:"3.11",date:"2026-06-11",note:"Neuter/Spay and Dental are now their own sections on the Medical tab instead of being tucked inside On-Arrival Health. Each has a status, a date picker and its own notes field, so spay/neuter and dental work are recorded and dated clearly in their own right."},
@@ -2189,22 +2190,47 @@ function printDailySummary(){
 // Launch the adoption infographic generator, pre-filled from this dog's record.
 // The generator file must be deployed next to this app (same folder/repo).
 var ADOPTION_GEN_FILE="adoption-infographic-generator.html";
-function openAdoptionInfographic(){
-  var d=S.dog||{},m=getMedical();
+function openKennelCard(){
+  var d=S.dog||{};
   if(!d.name){appAlert("Add the dog's name first.");return;}
-  // neuter
-  var nc=m.neuteredConfirmed||"";var neut="";
-  if(nc.indexOf("Yes")===0)neut=(/^f/i.test(d.sex||"")?"Spayed":"Neutered");
-  else if(nc.indexOf("No")===0)neut="Not neutered";
-  else if(nc==="Booked")neut="Neuter booked";
-  // vaccinations
-  var vl=m.vaccinations||[];var tdy=new Date().toISOString().slice(0,10);
-  function given(t){return vl.some(function(v){return v.type===t&&v.date&&v.date<=tdy;});}
-  var vax=given("1st Vaccination")&&given("2nd Vaccination")?"Fully vaccinated":(given("1st Vaccination")?"Vaccinations in progress":"");
-  var params={name:d.name||"",breed:d.breed||"",age:d.age||"",sex:d.sex||"",chip:d.microchip||"",ref:d.refNo||"",neut:neut,vax:vax};
-  var qs=Object.keys(params).filter(function(k){return params[k];}).map(function(k){return k+"="+encodeURIComponent(params[k]);}).join("&");
+  var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
+  var tl=total?tlc(total):null;
+  var info=d.intakeDate?isolationInfo(d.intakeDate,(S.fin&&S.fin.outcome)||"",isoExtraDays(d)):{state:"none"};
+  var isoLabel=info.state==="done"?"Isolation complete":(info.state==="none"?"":(info.day<=0?"Arrival day":isoDayLabel(info.day,info.total||5)));
+  var walkRule="";
+  if(tl){var wl=WALK_LEGEND.filter(function(w){return w.k===tl.l;})[0];walkRule=wl?wl.rule:"";}
+  var ea=eaCalc(S.ea);
+  var con=activeContagiousList(S.medical);
+  var conNames=con.map(function(x){return diseaseShortName(x.type);});
+  var zoo=con.some(function(x){return ZOONOTIC_DISEASES[x.type];});
+  var rb=restrictedBreedInfo(d.breed);
+  var restrictedLabel=rb?(rb.xl?"XL Bully — no rehoming":"Restricted breed — muzzle in public"):"";
+  var ws=(S.warnings||[]).slice().sort(function(a,b){return(a.level==="Critical"?0:1)-(b.level==="Critical"?0:1);}).map(function(w){return{text:w.text,critical:w.level==="Critical"};});
+  var ns=(S.careNotices||[]).map(function(n){return{text:n.text};});
+  var fp=S.feedingPlan||{};
+  var feeding=[fp.brand,fp.grams?(fp.grams+"g"):"",fp.frequency].filter(Boolean).join(" \u00b7 ");
+  var wt=d.weight?(/kg/i.test(String(d.weight))?String(d.weight):(d.weight+" kg")):"";
+  var m=getMedical();var tdy=new Date().toISOString().slice(0,10);
+  var vl=m.vaccinations||[];
+  function _vg(t){return vl.some(function(v){return v.type===t&&v.date&&v.date<=tdy;});}
+  var vax=(_vg("1st Vaccination")&&_vg("2nd Vaccination"))?"Up to date":(_vg("1st Vaccination")?"In progress":"");
+  var pls=(m.parasiteTreatments||[]).slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");});
+  var parasite="";
+  if(pls.length){var last=pls[pls.length-1];var due=last.nextDue||(last.date?addDaysStr(last.date,90):"");var pstate="Up to date";if(due){var diff=Math.round((new Date(due)-new Date(tdy))/86400000);pstate=diff<0?"Overdue":(diff<=7?"Due soon":"Up to date");}var pn=(last.product||last.type||"").split(" ")[0];parasite=pn?(pstate+" \u00b7 "+pn):pstate;}
+  var payload={
+    name:d.name||"",ref:d.refNo||"",kennel:d.kennel||"",
+    breed:d.breed||"",breed2:(d.crossbreed?d.breed2:"")||"",sex:d.sex||"",
+    age:d.age||"",size:d.size||"",colour:d.colour||"",weight:wt,microchip:d.microchip||"",
+    intake:d.intakeDate||"",reason:d.intakeReason||"",vax:vax,parasite:parasite,
+    isoLabel:isoLabel,isoState:info.state,tl:tl?tl.l:"",score:tl?total:null,walkRule:walkRule,
+    eaCat:(ea&&ea.complete)?ea.cat.replace("Category ","Cat "):"",eaMgmt:(ea&&ea.complete)?(ea.mgmt||""):"",
+    contagious:conNames,zoonotic:zoo,restrictedLabel:restrictedLabel,restrictedXl:rb?!!rb.xl:false,
+    warnings:ws,notices:ns,feeding:feeding,photo:d.photo||"",
+    foot:"Printed "+new Date().toLocaleString("en-IE")+" \u00b7 "+currentName()
+  };
+  try{localStorage.setItem("nspca-kennelcard",JSON.stringify(payload));}catch(e){}
   var base=location.pathname.replace(/[^/]*$/,"")+ADOPTION_GEN_FILE;
-  window.open(base+"?"+qs,"_blank");
+  window.open(base,"_blank");
 }
 function printKennelCard(){
   if(!S.dog||!S.dog.name){appAlert("Add the dog's name first, then save.");return;}
@@ -4169,7 +4195,7 @@ function page(){
       +'<div class="g2">'+slct("Kennel / Pod",d.kennel,"dog.kennel",[["",'-- not assigned --'],["Kennel 1","Kennel 1"],["Kennel 2","Kennel 2"],["Kennel 3","Kennel 3"],["Kennel 4","Kennel 4"],["Kennel 5","Kennel 5"],["Kennel 6","Kennel 6"],["Pod 1","Pod 1"],["Pod 2","Pod 2"],["Pod 3","Pod 3"],["Pod 4","Pod 4"]])+fld("Assessor",d.assessor,"dog.assessor","text","e.g. Shane")+'</div>'
       +'<div class="g2">'+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()+slct("Reason for intake",d.intakeReason,"dog.intakeReason",[["Stray","Stray"],["Owner surrender","Owner surrender"],["Cruelty case","Cruelty case"],["Transfer","Transfer from another centre"],["Other","Other"]])+'</div></div>';
 
-    return hero+intakeChecklistHtml()+identity+intake+restrictedBreedCardHtml()+isoPeriodCardHtml()+warningsCardHtml()+noticesCardHtml()+'<div class="brow"><button class="btn" onclick="printKennelCard()" style="white-space:nowrap">&#128424; Kennel card</button><button class="btn" onclick="openAdoptionInfographic()" style="white-space:nowrap">&#128062; Adoption profile</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
+    return hero+intakeChecklistHtml()+identity+intake+restrictedBreedCardHtml()+isoPeriodCardHtml()+warningsCardHtml()+noticesCardHtml()+'<div class="brow"><button class="btn" onclick="printKennelCard()" style="white-space:nowrap">&#128424; Quick card</button><button class="btn" onclick="openKennelCard()" style="white-space:nowrap">&#128203; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
   }
 
   if(t==="arrival") return'<h2>On-arrival observation</h2><div class="sub">Record the dog\'s behaviour on arrival.</div><div class="card">'+slct("Initial demeanour on arrival",a.demeanour,"arrival.demeanour",[["Engaging","Engaging — friendly, curious"],["Nervous","Nervous — withdrawn, avoidant"],["Reactive","Reactive — alert, tense, vocal"],["Shut down","Shut down — frozen, non-responsive"],["Neutral","Neutral — calm, no strong response"]])+slct("Muzzle required?",a.muzzle,"arrival.muzzle",[["No","No — handled safely without muzzle"],["Yes — accepted","Yes — accepted without issue"],["Yes — resistant","Yes — resistant to muzzling"],["Yes — required intervention","Yes — required significant intervention"]])+slct("Lead / handling acceptance",a.lead,"arrival.lead",[["Good","Good — relaxed, no tension"],["Moderate","Moderate — some pulling or resistance"],["Poor","Poor — strong pulling"],["Dangerous","Dangerous — unsafe on lead"]])+slct("First vet visit behaviour",a.vet,"arrival.vet",[["Cooperative","Cooperative"],["Nervous but manageable","Nervous but manageable"],["Resistant","Resistant — required restraint"],["Aggressive","Aggressive — unsafe to handle"],["Not yet seen","Not yet seen by vet"]])+ta("Arrival notes",a.notes,"arrival.notes","Describe arrival behaviour...")+'<div class="sec">Behaviour History</div>'+slct("Dog-to-Dog Reactivity",a.dogDog,"arrival.dogDog",[["Not tested","Not tested"],["None observed — settled","None observed — settled"],["Mild","Mild — some interest or pulling"],["Moderate","Moderate — barking or lunging"],["Severe","Severe — could not pass safely"]])+slct("Cat Tolerance",a.catTolerance,"arrival.catTolerance",[["Not tested","Not tested"],["Unknown","Unknown"],["Cat friendly","Known to be cat friendly"],["Reactive","Chased or reactive to cats"]])+slct("Horses / equine",a.equineHistory,"arrival.equineHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Good","Known to be good with horses"],["Reactive","Reactive / chased horses"]])+slct("Small mammals",a.smallMammalHistory,"arrival.smallMammalHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Safe","Known to be safe with small mammals"],["Reactive","Chased / high prey drive"]])+slct("Child History",a.childHistory,"arrival.childHistory",[["Not known","Not known"],["Good","Known to be good with children"],["No exposure","No known exposure"],["Caution","Owner advised caution"],["Incident","Known incident involving a child"]])+slct("Previous Bite History",a.biteHistory,"arrival.biteHistory",[["None","None declared"],["One","One bite declared by owner"],["Multiple","Multiple bites declared"],["Unknown details","Bite history — details unknown"]])+'</div><div class="brow"><button class="btn" data-go="dog">&larr; Back</button><button class="btn btnp" data-go="days">Next: 5-day report &rarr;</button></div>';
