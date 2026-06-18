@@ -251,6 +251,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.11",date:"2026-06-11",note:"Neuter/Spay and Dental are now their own sections on the Medical tab instead of being tucked inside On-Arrival Health. Each has a status, a date picker and its own notes field, so spay/neuter and dental work are recorded and dated clearly in their own right."},
   {version:"3.10",date:"2026-06-11",note:"Isolation now starts the day after a dog arrives, matching unit practice. The arrival day shows as \u201cArrival day\u201d everywhere (dog card, header, kennel card), and the 5-day count begins the next morning at Day 1 of 5, running to Day 5 and clearing the day after. Extensions still add on top. Every day counter, progress bar, banner, the finishing-today and overdue alerts, and the printed reports all follow the new start - nothing else changed."},
   {version:"3.9",date:"2026-06-11",note:"Vaccines now know the difference between booked and given. Enter a vaccination with a future date - say the 1st Vaccination is booked for next week - and the Medical tab shows it as a teal Scheduled slot ('Booked - in 7 days') instead of marking it Done. On the day itself it counts as given automatically, no extra step. Upcoming Medical lists booked vaccines as their own entries (e.g. '1st Vaccination (booked)'), the next-vaccine banner says Scheduled rather than nagging that it's due, and the printed Vaccination & Treatment record marks future-dated entries as '(scheduled - not yet given)' so the paperwork never claims a jab that hasn't happened."},
   {version:"3.8",date:"2026-06-11",note:"The app now recognises restricted breeds the moment a breed is entered. Type any of the eleven restricted types from the Control of Dogs Regulations 1998 - or a cross, or common shorthand like GSD, staffie or rottie - and the Dog tab shows an amber legal notice: muzzled in public, strong lead no longer than 2m, handler over 16, owner-ID collar, and a reminder to flag it to adopters. XL Bullies get a red banner instead, because they're banned outright in Ireland - illegal to rehome, sell, breed or import - so the app says plainly that the dog cannot go through normal rehoming and the manager must be involved. Restricted dogs also carry a small RB chip (XL chip for XL Bullies) on their dashboard card, and printed kennel cards now carry the muzzle-in-public or no-rehoming pill so anyone walking the dog knows at a glance."},
@@ -2683,7 +2684,7 @@ function renderStats(){
 }
 
 // ── Default state ─────────────────────────────────────────────────
-function defaultMedical(){return{bcs:"",neuteredConfirmed:"",neuterDate:"",dental:"",dentalDate:"",skinCondition:"",injuries:"",arrivalHealthNotes:"",diseases:[],vaccinations:[],parasiteTreatments:[],medications:[],vetVisits:[],bodyMap:[]};}
+function defaultMedical(){return{bcs:"",neuteredConfirmed:"",neuterDate:"",neuterNotes:"",dental:"",dentalDate:"",dentalNotes:"",skinCondition:"",injuries:"",arrivalHealthNotes:"",diseases:[],vaccinations:[],parasiteTreatments:[],medications:[],vetVisits:[],bodyMap:[]};}
 
 // Shared infectious-disease lookups (used by Medical tab, dashboard cards and briefing)
 var CONTAGIOUS_DISEASES={"Parvovirus (CPV)":1,"Canine Distemper":1,"Kennel Cough (CIRDC)":1,"Canine Influenza":1,"Infectious Hepatitis (CAV-1)":1,"Leptospirosis":1,"Sarcoptic Mange (scabies)":1,"Demodectic Mange":0,"Ringworm":1,"Giardia":1,"Coccidiosis":1,"Lungworm":0,"Tick-borne (Babesia / Ehrlichia)":0,"Other":0};
@@ -2781,14 +2782,26 @@ function renderMedical(){
   // On-Arrival Health
   h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px">On-Arrival Health</div><div class="g2">';
   h+=slct("Body Condition Score",m.bcs||"","medical.bcs",[["","-- not assessed --"],["1 — Emaciated","1 — Emaciated"],["2 — Very thin","2 — Very thin"],["3 — Thin","3 — Thin"],["4 — Underweight","4 — Underweight"],["5 — Ideal weight","5 — Ideal weight"],["6 — Slightly overweight","6 — Slightly overweight"],["7 — Overweight","7 — Overweight"],["8 — Obese","8 — Obese"],["9 — Severely obese","9 — Severely obese"]]);
-  h+=slct("Neutered Confirmed by Vet",m.neuteredConfirmed||"","medical.neuteredConfirmed",[["","-- not checked --"],["Yes — confirmed by vet","Yes — confirmed by vet"],["No — confirmed intact","No — confirmed intact"],["Not yet checked","Not yet checked"],["Unknown","Unknown"]]);
-  h+=(m.neuteredConfirmed&&m.neuteredConfirmed.indexOf("Yes")===0)?fld("Date neutered / spayed",m.neuterDate||"","medical.neuterDate","date"):"";
-  h+=slct("Dental Condition",m.dental||"","medical.dental",[["","-- not assessed --"],["Good — clean, no issues","Good — clean, no issues"],["Mild tartar","Mild tartar"],["Moderate tartar","Moderate tartar"],["Heavy tartar — treatment needed","Heavy tartar — treatment needed"],["Broken / missing teeth","Broken / missing teeth"],["Gum disease / gingivitis","Gum disease / gingivitis"],["Not assessed","Not assessed"]]);
-  h+=fld("Date of dental treatment",m.dentalDate||"","medical.dentalDate","date");
   h+=slct("Coat & Skin Condition",m.skinCondition||"","medical.skinCondition",[["","-- not assessed --"],["Good — healthy coat","Good — healthy coat"],["Mild matting","Mild matting"],["Severe matting — required clipping","Severe matting — required clipping"],["Skin condition / lesions present","Skin condition / lesions present"],["Mange suspected","Mange suspected"],["Ringworm suspected","Ringworm suspected"],["Flea infestation on arrival","Flea infestation on arrival"],["Tick infestation on arrival","Tick infestation on arrival"]]);
   h+='</div>';
   h+=fld("Visible Injuries / Conditions",m.injuries||"","medical.injuries","text","e.g. Laceration on left hindleg...");
   h+=ta("On-arrival health notes",m.arrivalHealthNotes||"","medical.arrivalHealthNotes","Any further health observations on arrival...");
+  h+='</div>';
+
+  // Neuter / Spay
+  h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px">Neuter / Spay</div><div class="g2">';
+  h+=slct("Status",m.neuteredConfirmed||"","medical.neuteredConfirmed",[["","-- not checked --"],["Yes — confirmed by vet","Yes — confirmed by vet"],["No — confirmed intact","No — confirmed intact"],["Booked","Booked"],["Not yet checked","Not yet checked"],["Unknown","Unknown"]]);
+  h+=fld("Date neutered / spayed",m.neuterDate||"","medical.neuterDate","date");
+  h+='</div>';
+  h+=ta("Neuter / spay notes",m.neuterNotes||"","medical.neuterNotes","Vet, procedure details, follow-up...");
+  h+='</div>';
+
+  // Dental
+  h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px">Dental</div><div class="g2">';
+  h+=slct("Dental condition",m.dental||"","medical.dental",[["","-- not assessed --"],["Good — clean, no issues","Good — clean, no issues"],["Mild tartar","Mild tartar"],["Moderate tartar","Moderate tartar"],["Heavy tartar — treatment needed","Heavy tartar — treatment needed"],["Broken / missing teeth","Broken / missing teeth"],["Gum disease / gingivitis","Gum disease / gingivitis"],["Not assessed","Not assessed"]]);
+  h+=fld("Date of dental treatment",m.dentalDate||"","medical.dentalDate","date");
+  h+='</div>';
+  h+=ta("Dental notes",m.dentalNotes||"","medical.dentalNotes","Treatment details, extractions, follow-up...");
   h+='</div>';
 
   // Disease / Infection on Arrival
