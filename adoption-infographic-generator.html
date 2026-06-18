@@ -44,25 +44,6 @@
   textarea{resize:vertical;min-height:58px;line-height:1.5}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 
-  .drop{border:2px dashed var(--line);border-radius:11px;padding:18px;text-align:center;cursor:pointer;
-    font-size:12px;color:var(--slate-2);transition:.15s}
-  .drop:hover,.drop.over{border-color:var(--lime-deep);background:#f7fbed;color:var(--slate)}
-  .drop b{color:var(--ink)}
-  .drop input{display:none}
-
-  /* good-with editor */
-  .gwrow{display:flex;align-items:center;gap:8px;margin-bottom:7px}
-  .gwrow input[type=text]{flex:1}
-  .toggle{flex:0 0 auto;width:40px;height:34px;border:1.5px solid var(--line);border-radius:9px;cursor:pointer;
-    font-weight:900;font-size:15px;display:grid;place-items:center;background:#fff;color:#fff}
-  .toggle[data-s="yes"]{background:var(--lime-deep);border-color:var(--lime-deep)}
-  .toggle[data-s="ask"]{background:#f59e0b;border-color:#f59e0b}
-  .toggle[data-s="no"]{background:#cbd5e1;border-color:#cbd5e1}
-  .rm{flex:0 0 auto;width:30px;height:34px;border:1.5px solid var(--line);border-radius:9px;background:#fff;
-    color:var(--slate-3);font-size:16px;cursor:pointer}
-  .rm:hover{color:#dc2626;border-color:#fca5a5}
-  .addline{font-size:12px;font-weight:700;color:var(--lime-deep);background:none;border:0;cursor:pointer;padding:4px 0;margin-top:2px}
-
   /* ---------- preview pane ---------- */
   .previewPane{padding:24px;display:flex;justify-content:center;align-items:flex-start;overflow:auto;
     max-height:calc(100vh - 53px)}
@@ -83,11 +64,8 @@
   .s-status{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
     background:var(--lime);color:var(--ink);padding:7px 14px;border-radius:999px}
 
-  .s-hero{margin-top:14px;border-radius:16px;overflow:hidden;position:relative;aspect-ratio:1200/1593;max-height:118mm;background:#e2e8f0}
-  .s-hero img{width:100%;height:100%;object-fit:cover;display:block}
-  .s-hero .noimg{position:absolute;inset:0;display:grid;place-items:center;color:var(--slate-3);font-size:13px;font-weight:600}
-  .s-cap{position:absolute;left:0;right:0;bottom:0;padding:34px 18px 14px;
-    background:linear-gradient(transparent,rgba(15,23,42,.82));color:#fff}
+  .s-hero{margin-top:14px;border-radius:16px;overflow:hidden;position:relative;background:var(--ink)}
+  .s-cap{padding:26px 20px 22px;color:#fff}
   .s-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--lime);margin-bottom:2px}
   .s-name{font-size:46px;font-weight:900;line-height:.95;letter-spacing:-.02em}
   .s-tag{font-size:13px;font-weight:500;color:#e2e8f0;margin-top:6px;max-width:80%}
@@ -97,7 +75,7 @@
   .s-fact .k{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--slate-3)}
   .s-fact .v{font-size:14.5px;font-weight:800;margin-top:3px}
 
-  .s-body{display:grid;grid-template-columns:1.45fr 1fr;gap:16px;margin-top:16px;flex:1}
+  .s-body{display:block;margin-top:16px;flex:1}
   .s-sec{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--slate);
     display:flex;align-items:center;gap:8px;margin-bottom:9px}
   .s-sec::before{content:"";width:18px;height:3px;background:var(--lime-deep);border-radius:2px}
@@ -105,11 +83,6 @@
   .s-meta{margin-top:13px;border:1.5px dashed var(--line);border-radius:11px;padding:11px 12px}
   .s-meta .r{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;color:var(--slate-2)}
   .s-meta .r b{color:var(--ink);font-weight:700}
-  .s-gw{display:flex;flex-direction:column;gap:7px}
-  .s-gwi{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600;color:var(--slate)}
-  .s-dot{width:19px;height:19px;border-radius:6px;display:grid;place-items:center;flex:0 0 auto;font-size:12px;font-weight:900;color:#fff}
-  .s-dot.yes{background:var(--lime-deep)} .s-dot.ask{background:#f59e0b} .s-dot.no{background:#cbd5e1}
-  .s-key{font-size:10px;color:var(--slate-3);margin-top:9px;line-height:1.45}
   .s-foot{margin-top:16px;background:var(--ink);border-radius:14px;padding:15px 18px;display:flex;
     align-items:center;justify-content:space-between;gap:14px;color:#fff}
   .s-foot .c b{display:block;font-size:16px;font-weight:800}
@@ -146,14 +119,6 @@
     <!-- FORM -->
     <div class="form app-noprint">
       <div class="grp">
-        <h3>Photo</h3>
-        <label class="drop" id="drop">
-          <b>Click or drop a photo</b><br>portrait works best
-          <input type="file" id="file" accept="image/*">
-        </label>
-      </div>
-
-      <div class="grp">
         <h3>Identity</h3>
         <label>Name</label><input type="text" id="f_name" placeholder="Dog's name">
         <label>Tagline (one warm line)</label><input type="text" id="f_tag" placeholder="A sweet, playful pup…">
@@ -179,21 +144,12 @@
       </div>
 
       <div class="grp">
-        <h3>Health &amp; reference</h3>
+        <h3>Health</h3>
         <div class="row2">
           <div><label>Neutered / spayed</label><input type="text" id="f_neut" placeholder="Yes / No"></div>
           <div><label>Microchipped</label><input type="text" id="f_chip" placeholder="Yes / No"></div>
         </div>
-        <div class="row2">
-          <div><label>Vaccinations</label><input type="text" id="f_vax" placeholder="Up to date"></div>
-          <div><label>Reference</label><input type="text" id="f_ref" placeholder="DOG-000"></div>
-        </div>
-      </div>
-
-      <div class="grp">
-        <h3>I'm good with <span style="font-weight:600;text-transform:none;letter-spacing:0">— click box to cycle ✓ / ? / ✕</span></h3>
-        <div id="gwlist"></div>
-        <button class="addline" onclick="addGW('New line','yes')">+ Add line</button>
+        <label>Vaccinations</label><input type="text" id="f_vax" placeholder="Up to date">
       </div>
 
       <div class="grp">
@@ -216,8 +172,6 @@
           </div>
 
           <div class="s-hero">
-            <img id="o_img" alt="" style="display:none">
-            <div class="noimg" id="o_noimg">Add a photo →</div>
             <div class="s-cap">
               <div class="s-eyebrow">Meet</div>
               <div class="s-name" id="o_name">Dog name</div>
@@ -241,13 +195,7 @@
                 <div class="r"><span>Neutered / spayed</span><b id="o_neut">—</b></div>
                 <div class="r"><span>Microchipped</span><b id="o_chip">—</b></div>
                 <div class="r"><span>Vaccinations</span><b id="o_vax">—</b></div>
-                <div class="r"><span>Reference</span><b id="o_ref">—</b></div>
               </div>
-            </div>
-            <div>
-              <div class="s-sec">I'm good with</div>
-              <div class="s-gw" id="o_gw"></div>
-              <div class="s-key">✓ suits&nbsp;&nbsp;? to be assessed&nbsp;&nbsp;✕ not suited</div>
             </div>
           </div>
 
@@ -263,39 +211,8 @@
 
 <script>
   var imgData = "";
-  var gw = [];
 
   function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-
-  // ---- good-with editor ----
-  function renderGWEditor(){
-    var box = document.getElementById('gwlist');
-    box.innerHTML = "";
-    gw.forEach(function(item, i){
-      var row = document.createElement('div'); row.className = 'gwrow';
-      var tg = document.createElement('button'); tg.className='toggle'; tg.dataset.s=item.s;
-      tg.textContent = item.s==='yes'?'✓':item.s==='ask'?'?':'✕';
-      tg.onclick = function(){ var o=['yes','ask','no']; item.s=o[(o.indexOf(item.s)+1)%3];
-        tg.dataset.s=item.s; tg.textContent=item.s==='yes'?'✓':item.s==='ask'?'?':'✕'; renderSheetGW(); };
-      var inp = document.createElement('input'); inp.type='text'; inp.value=item.t;
-      inp.oninput=function(){ item.t=inp.value; renderSheetGW(); };
-      var rm = document.createElement('button'); rm.className='rm'; rm.textContent='×';
-      rm.onclick=function(){ gw.splice(i,1); renderGWEditor(); renderSheetGW(); };
-      row.appendChild(tg); row.appendChild(inp); row.appendChild(rm);
-      box.appendChild(row);
-    });
-  }
-  function renderSheetGW(){
-    var out = document.getElementById('o_gw'); out.innerHTML="";
-    gw.forEach(function(item){
-      var d=document.createElement('div'); d.className='s-gwi';
-      var dot=document.createElement('span'); dot.className='s-dot '+item.s;
-      dot.textContent=item.s==='yes'?'✓':item.s==='ask'?'?':'✕';
-      d.appendChild(dot); d.appendChild(document.createTextNode(' '+item.t));
-      out.appendChild(d);
-    });
-  }
-  function addGW(t,s){ gw.push({t:t,s:s}); renderGWEditor(); renderSheetGW(); }
 
   // ---- bind text fields ----
   function bind(id, outId, fallback){
@@ -319,28 +236,14 @@
   bind('f_neut','o_neut','—');
   bind('f_chip','o_chip','—');
   bind('f_vax','o_vax','—');
-  bind('f_ref','o_ref','—');
   bind('f_contact','o_contact','Phone · email · address');
-
-  // ---- photo upload ----
-  var drop=document.getElementById('drop'), file=document.getElementById('file');
-  file.addEventListener('change', function(e){ if(e.target.files[0]) readImg(e.target.files[0]); });
-  ['dragenter','dragover'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add('over');});});
-  ['dragleave','drop'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove('over');});});
-  drop.addEventListener('drop', function(e){ if(e.dataTransfer.files[0]) readImg(e.dataTransfer.files[0]); });
-  function readImg(f){ var r=new FileReader(); r.onload=function(){ setImg(r.result); }; r.readAsDataURL(f); }
-  function setImg(data){ imgData=data; var im=document.getElementById('o_img');
-    im.src=data; im.style.display='block'; document.getElementById('o_noimg').style.display='none'; }
 
   // ---- set / clear / download ----
   function setField(id,v){ var el=document.getElementById(id); el.value=v; el.dispatchEvent(new Event('input')); }
   function newDog(){
-    ['f_name','f_tag','f_breed','f_age','f_sex','f_size','f_about1','f_about2','f_neut','f_chip','f_vax','f_ref','f_contact'].forEach(function(id){setField(id,'');});
+    ['f_name','f_tag','f_breed','f_age','f_sex','f_size','f_about1','f_about2','f_neut','f_chip','f_vax','f_contact'].forEach(function(id){setField(id,'');});
     setField('f_status','Looking for a home');
-    imgData=""; var im=document.getElementById('o_img'); im.style.display='none'; im.src='';
-    document.getElementById('o_noimg').style.display='grid';
-    gw=[{t:'Other dogs',s:'yes'},{t:'Children',s:'ask'},{t:'Cats',s:'ask'},{t:'Other pets',s:'ask'}];
-    renderGWEditor(); renderSheetGW(); window.scrollTo(0,0);
+    window.scrollTo(0,0);
   }
   function downloadPage(){
     var clone=document.getElementById('sheet').cloneNode(true);
@@ -374,7 +277,7 @@
   (function(){
     try{
       var p=new URLSearchParams(location.search);
-      var keys=['name','tag','status','breed','age','sex','size','about1','about2','neut','chip','vax','ref','contact'];
+      var keys=['name','tag','status','breed','age','sex','size','about1','about2','neut','chip','vax','contact'];
       var any=keys.some(function(k){return p.has(k);});
       if(!any)return;
       // Launched from the app: start from a blank profile so nothing
