@@ -251,6 +251,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.12",date:"2026-06-11",note:"Medical tab overhaul. A new Health at a glance panel sits at the top of every dog's Medical record \u2014 six live tiles showing vaccination status, neuter/spay, body condition, dental, infection status and active medication, so you can read a dog's health state without scrolling. Each tile updates itself from the records below. Every section underneath \u2014 on-arrival health, neuter/spay, dental, disease, vaccinations, parasite, medications and vet visits \u2014 now shares one clean header style with an icon and a tidy + button. No data changed; it's the same record, easier to read."},
   {version:"3.11",date:"2026-06-11",note:"Neuter/Spay and Dental are now their own sections on the Medical tab instead of being tucked inside On-Arrival Health. Each has a status, a date picker and its own notes field, so spay/neuter and dental work are recorded and dated clearly in their own right."},
   {version:"3.10",date:"2026-06-11",note:"Isolation now starts the day after a dog arrives, matching unit practice. The arrival day shows as \u201cArrival day\u201d everywhere (dog card, header, kennel card), and the 5-day count begins the next morning at Day 1 of 5, running to Day 5 and clearing the day after. Extensions still add on top. Every day counter, progress bar, banner, the finishing-today and overdue alerts, and the printed reports all follow the new start - nothing else changed."},
   {version:"3.9",date:"2026-06-11",note:"Vaccines now know the difference between booked and given. Enter a vaccination with a future date - say the 1st Vaccination is booked for next week - and the Medical tab shows it as a teal Scheduled slot ('Booked - in 7 days') instead of marking it Done. On the day itself it counts as given automatically, no extra step. Upcoming Medical lists booked vaccines as their own entries (e.g. '1st Vaccination (booked)'), the next-vaccine banner says Scheduled rather than nagging that it's due, and the printed Vaccination & Treatment record marks future-dated entries as '(scheduled - not yet given)' so the paperwork never claims a jab that hasn't happened."},
@@ -2766,6 +2767,26 @@ function dueBadge(nextDue,warnDays){
   return'<span class="badge-ok">Up to date</span>';
 }
 
+function medSecHead(icon,title,addBtn){
+  return '<div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><span style="width:26px;height:26px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">'+icon+'</span><span style="font-size:13px;font-weight:800;flex:1;letter-spacing:-0.01em">'+title+'</span>'+(addBtn||'')+'</div>';
+}
+function medStatTile(label,value,dot){
+  return '<div style="background:#fff;border:1px solid rgba(15,23,42,0.08);border-radius:11px;padding:9px 11px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;margin-bottom:3px">'+label+'</div><div style="font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;line-height:1.25">'+(dot?'<span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:'+dot+'"></span>':'')+value+'</div></div>';
+}
+function medSummaryCard(m,vax){
+  m=m||{};var today=new Date().toISOString().slice(0,10);
+  var nc=m.neuteredConfirmed||"";
+  var neut=nc.indexOf("Yes")===0?["Neutered","#16a34a"]:nc.indexOf("No")===0?["Intact","#1e293b"]:nc==="Booked"?["Booked","#0d9488"]:nc?["Unknown","#94a3b8"]:["\u2014",""];
+  var bcsV=m.bcs?esc(m.bcs):"\u2014";
+  var dental=m.dental?esc(m.dental):"\u2014";
+  var act=(typeof activeContagiousList==="function")?activeContagiousList(m):[];
+  var hadDisease=(m.diseases||[]).length>0;
+  var inf=act.length?[esc(diseaseShortName(act[0].type))+(act.length>1?" +"+(act.length-1):"")+" active","#dc2626"]:(hadDisease?["Cleared","#16a34a"]:["Clear","#16a34a"]);
+  var meds=(m.medications||[]).filter(function(x){return !x.endDate||x.endDate>=today;}).length;
+  var medT=meds?[meds+" active","#9d174d"]:["None","#94a3b8"];
+  var tiles=[medStatTile("Vaccinations",vax.l,vax.c),medStatTile("Neuter / Spay",neut[0],neut[1]),medStatTile("Body condition",bcsV,""),medStatTile("Dental",dental,""),medStatTile("Infection",inf[0],inf[1]),medStatTile("Medication",medT[0],medT[1])].join("");
+  return '<div class="card" style="background:linear-gradient(135deg,#fafdf2,#f4f7fb)"><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:11px">Health at a glance</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+tiles+'</div></div>';
+}
 function renderMedical(){
   var m=getMedical();
   var today=new Date().toISOString().slice(0,10);
@@ -2778,9 +2799,10 @@ function renderMedical(){
     h+='<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#854d0e"><strong>&#9888; Migrated from Dog Details:</strong> '+(oldVax?"Vaccination: "+esc(oldVax)+". ":"")+(oldPara?"Parasite: "+esc(oldPara)+". ":"")+'Log below to clear.</div>';
   }
   h+='<h2 style="margin-bottom:4px">Medical Record</h2><div class="sub" style="margin-bottom:16px">Health, vaccinations, treatments and vet visits.</div>';
+  h+='<!--MEDSUMMARY-->';
 
   // On-Arrival Health
-  h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px">On-Arrival Health</div><div class="g2">';
+  h+='<div class="card">'+medSecHead("&#129658;","On-arrival health")+'<div class="g2">';
   h+=slct("Body Condition Score",m.bcs||"","medical.bcs",[["","-- not assessed --"],["1 — Emaciated","1 — Emaciated"],["2 — Very thin","2 — Very thin"],["3 — Thin","3 — Thin"],["4 — Underweight","4 — Underweight"],["5 — Ideal weight","5 — Ideal weight"],["6 — Slightly overweight","6 — Slightly overweight"],["7 — Overweight","7 — Overweight"],["8 — Obese","8 — Obese"],["9 — Severely obese","9 — Severely obese"]]);
   h+=slct("Coat & Skin Condition",m.skinCondition||"","medical.skinCondition",[["","-- not assessed --"],["Good — healthy coat","Good — healthy coat"],["Mild matting","Mild matting"],["Severe matting — required clipping","Severe matting — required clipping"],["Skin condition / lesions present","Skin condition / lesions present"],["Mange suspected","Mange suspected"],["Ringworm suspected","Ringworm suspected"],["Flea infestation on arrival","Flea infestation on arrival"],["Tick infestation on arrival","Tick infestation on arrival"]]);
   h+='</div>';
@@ -2789,7 +2811,7 @@ function renderMedical(){
   h+='</div>';
 
   // Neuter / Spay
-  h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px">Neuter / Spay</div><div class="g2">';
+  h+='<div class="card">'+medSecHead("&#9986;&#65039;","Neuter / Spay")+'<div class="g2">';
   h+=slct("Status",m.neuteredConfirmed||"","medical.neuteredConfirmed",[["","-- not checked --"],["Yes — confirmed by vet","Yes — confirmed by vet"],["No — confirmed intact","No — confirmed intact"],["Booked","Booked"],["Not yet checked","Not yet checked"],["Unknown","Unknown"]]);
   h+=fld("Date neutered / spayed",m.neuterDate||"","medical.neuterDate","date");
   h+='</div>';
@@ -2797,7 +2819,7 @@ function renderMedical(){
   h+='</div>';
 
   // Dental
-  h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px">Dental</div><div class="g2">';
+  h+='<div class="card">'+medSecHead("&#129463;","Dental")+'<div class="g2">';
   h+=slct("Dental condition",m.dental||"","medical.dental",[["","-- not assessed --"],["Good — clean, no issues","Good — clean, no issues"],["Mild tartar","Mild tartar"],["Moderate tartar","Moderate tartar"],["Heavy tartar — treatment needed","Heavy tartar — treatment needed"],["Broken / missing teeth","Broken / missing teeth"],["Gum disease / gingivitis","Gum disease / gingivitis"],["Not assessed","Not assessed"]]);
   h+=fld("Date of dental treatment",m.dentalDate||"","medical.dentalDate","date");
   h+='</div>';
@@ -2816,7 +2838,7 @@ function renderMedical(){
     return["#fef9c3","#854d0e"]; // Suspected
   }
   var activeContagious=disList.filter(function(p){return CONTAGIOUS[p.type]&&p.status!=="Recovered / cleared";});
-  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:'+(disList.length?"12px":"6px")+'"><span style="font-size:12px;font-weight:600">Disease / Infection on Arrival</span><button class="med-add-btn" onclick="showMedOverlay(\'dis\')">+ Log disease</button></div>';
+  h+='<div class="card">'+medSecHead("&#129440;","Disease / infection",'<button class="med-add-btn" onclick="showMedOverlay(\'dis\')">+ Log</button>');
   if(activeContagious.length){
     h+='<div style="background:#fee2e2;border:1px solid #dc2626;border-radius:8px;padding:9px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="font-size:16px">&#128680;</span><div style="font-size:11.5px;color:#991b1b;font-weight:600;line-height:1.4">Contagious disease present — '+activeContagious.map(function(p){return esc(p.type.replace(/ \(.*$/,""));}).join(", ")+'. Maintain strict isolation, PPE and hygiene barriers.'+(activeContagious.some(function(p){return ZOONOTIC_DISEASES[p.type];})?' One or more is <strong>zoonotic</strong> (can pass to people).':'')+'</div></div>';
   }
@@ -2866,9 +2888,10 @@ function renderMedical(){
     return label;
   }
   h+='<div class="card">';
-  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;font-weight:600">Vaccinations</span><button class="med-add-btn" onclick="showMedOverlay(\'vac\')">+ Log vaccination</button></div>';
-  var _vnext=null;
-  VAC_FIXED.forEach(function(vt){var s=vaxStatus(vt);if((s.state==="upcoming"||s.state==="overdue"||s.state==="booked")&&s.due&&(!_vnext||s.due<_vnext.due))_vnext={type:vt,due:s.due,state:s.state};});
+  h+=medSecHead("&#128137;","Vaccinations",'<button class="med-add-btn" onclick="showMedOverlay(\'vac\')">+ Log</button>');
+  var _vnext=null;var _vroll={overdue:0,upcoming:0,booked:0,done:0,pending:0};
+  VAC_FIXED.forEach(function(vt){var s=vaxStatus(vt);if(_vroll[s.state]!==undefined)_vroll[s.state]++;if((s.state==="upcoming"||s.state==="overdue"||s.state==="booked")&&s.due&&(!_vnext||s.due<_vnext.due))_vnext={type:vt,due:s.due,state:s.state};});
+  var _vaxSummary=_vroll.overdue?{l:"Overdue",c:"#dc2626"}:_vroll.upcoming?{l:"Upcoming",c:"#f59e0b"}:_vroll.booked?{l:"Scheduled",c:"#0d9488"}:_vroll.done?{l:"Up to date",c:"#16a34a"}:{l:"None recorded",c:"#94a3b8"};
   if(_vnext){
     var _vc=_vnext.state==="overdue"?{bg:"#fee2e2",bd:"#dc2626",fg:"#991b1b",ic:"&#9888;&#65039;",lab:"Overdue"}:_vnext.state==="booked"?{bg:"#ccfbf1",bd:"#0d9488",fg:"#0f6e56",ic:"&#128197;",lab:"Scheduled"}:{bg:"#fffbeb",bd:"#f59e0b",fg:"#854d0e",ic:"&#128276;",lab:"Upcoming"};
     h+='<div style="display:flex;align-items:center;gap:10px;background:'+_vc.bg+';border:1px solid '+_vc.bd+';border-radius:10px;padding:9px 12px;margin-bottom:12px">'
@@ -2919,7 +2942,7 @@ function renderMedical(){
 
   // Parasite Treatments
   var paraList=m.parasiteTreatments||[];
-  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:'+(paraList.length?"12px":"6px")+'"><span style="font-size:12px;font-weight:600">Parasite Treatment</span><button class="med-add-btn" onclick="showMedOverlay(\'para\')">+ Log treatment</button></div>';
+  h+='<div class="card">'+medSecHead("&#129713;","Parasite treatment",'<button class="med-add-btn" onclick="showMedOverlay(\'para\')">+ Log</button>');
 
   // Bravecto + Milpro auto 3-month status banners
   ["Bravecto","Milpro"].forEach(function(drug){
@@ -2954,7 +2977,7 @@ function renderMedical(){
   // Medications
   var medList=m.medications||[];
   var activeMeds=medList.filter(function(x){return x.active!==false;});
-  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;font-weight:600">Medications</span><button class="med-add-btn" onclick="showMedOverlay(\'med\')">+ Add medication</button></div>';
+  h+='<div class="card">'+medSecHead("&#128138;","Medications",'<button class="med-add-btn" onclick="showMedOverlay(\'med\')">+ Add</button>');
   if(activeMeds.length){
     h+='<div style="background:#dbeafe;border:1px solid #93c5fd;border-radius:8px;padding:10px 14px;margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:#1e40af;text-transform:uppercase;margin-bottom:5px">'+activeMeds.length+' Active Medication'+(activeMeds.length!==1?"s":"")+'</div>';
     activeMeds.forEach(function(med){h+='<div style="font-size:12px;color:#1e3a8a;margin-bottom:2px"><strong>'+esc(med.name)+'</strong>'+(med.dose?" &mdash; "+esc(med.dose):"")+(med.frequency?", "+esc(med.frequency):"")+'</div>';});
@@ -2973,7 +2996,7 @@ function renderMedical(){
 
   // Vet Visits
   var vetList=m.vetVisits||[];
-  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;font-weight:600">Vet Visits</span><button class="med-add-btn" onclick="showMedOverlay(\'vet\')">+ Log visit</button></div>';
+  h+='<div class="card">'+medSecHead("&#127973;","Vet visits",'<button class="med-add-btn" onclick="showMedOverlay(\'vet\')">+ Log</button>');
   if(vetList.length){
     vetList.forEach(function(v,i){
       var last=i===vetList.length-1;
@@ -3044,6 +3067,7 @@ function renderMedical(){
     "saveMedVet","Save vet visit");
 
   h+='<div class="brow"><button class="btn" data-go="scoring">&larr; Back</button><button class="btn" onclick="printVaccRecord()" style="white-space:nowrap">&#128424; Vacc record</button><button class="btn btnp" data-go="weights">Next: weights &rarr;</button></div>';
+  h=h.replace('<!--MEDSUMMARY-->',medSummaryCard(m,_vaxSummary));
   return h;
 }
 
