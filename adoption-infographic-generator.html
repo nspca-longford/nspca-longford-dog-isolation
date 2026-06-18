@@ -111,6 +111,11 @@
   .kc-tile{background:#f8fafc;border:1px solid var(--line);border-radius:11px;padding:10px 12px}
   .kc-tile .h{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--slate-3)}
   .kc-tile .t{font-size:13.5px;font-weight:700;margin-top:3px;line-height:1.4}
+  .kc-write{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+  .kc-wbox{border:1.5px solid var(--line);border-radius:11px;padding:11px 13px}
+  .kc-wbox .lab{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--slate-3);margin-bottom:9px}
+  .kc-rule{border-bottom:1px solid var(--line);height:9mm}
+  .kc-rule:last-child{border-bottom:0}
 
   /* ---------- print ---------- */
   @media print{
@@ -140,7 +145,7 @@
   <div class="layout">
     <!-- FORM -->
     <div class="form app-noprint">
-      <div class="hint app-noprint">Auto-filled from the Dog Isolation app. Edit anything here before printing — the status pills, alerts and feeding come straight from the dog's record. The photo loads from the record; you can also drop in a new one below.</div>
+      <div class="hint app-noprint">Auto-filled from the Dog Isolation app. Edit anything here before printing — the status pills and alerts come straight from the dog's record. Add a photo below if you want one, and the card leaves blank space for your own notes.</div>
 
       <div class="grp">
         <h3>Photo</h3>
@@ -221,6 +226,10 @@
 
           <div class="s-body">
             <div id="o_alerts"></div>
+            <div class="kc-write">
+              <div class="kc-wbox"><div class="lab">Notes</div><div class="kc-rule"></div><div class="kc-rule"></div><div class="kc-rule"></div></div>
+              <div class="kc-wbox"><div class="lab">Additional notes</div><div class="kc-rule"></div><div class="kc-rule"></div></div>
+            </div>
           </div>
 
           <div class="s-foot">
@@ -272,7 +281,6 @@
     if(DATA.warnings&&DATA.warnings.length)a.push('<div class="kc-box" style="border:1.5px solid #dc2626"><div class="h" style="color:#991b1b">\u26a0 Handling warnings</div><ul>'+DATA.warnings.map(function(w){return '<li style="color:'+(w.critical?'#991b1b':'#854d0e')+'">'+esc(w.text)+(w.critical?' (Critical)':'')+'</li>';}).join('')+'</ul></div>');
     if(DATA.notices&&DATA.notices.length)a.push('<div class="kc-box" style="border:1.5px solid #0284c7"><div class="h" style="color:#075985">\ud83d\udd14 Care notices</div><ul>'+DATA.notices.map(function(n){return '<li style="color:#075985">'+esc(n.text)+'</li>';}).join('')+'</ul></div>');
     var tiles=[];
-    if(DATA.feeding)tiles.push('<div class="kc-tile"><div class="h">Feeding</div><div class="t">'+esc(DATA.feeding)+'</div></div>');
     if(DATA.eaMgmt)tiles.push('<div class="kc-tile"><div class="h">EA management</div><div class="t">'+esc(DATA.eaMgmt)+'</div></div>');
     if(tiles.length)a.push('<div class="kc-tiles">'+tiles.join('')+'</div>');
     document.getElementById('o_alerts').innerHTML=a.join('');
@@ -301,7 +309,7 @@
       walkRule:pl.walkRule||'',eaCat:pl.eaCat||'',eaMgmt:pl.eaMgmt||'',
       contagious:pl.contagious||[],zoonotic:!!pl.zoonotic,
       restrictedLabel:pl.restrictedLabel||'',restrictedXl:!!pl.restrictedXl,
-      warnings:pl.warnings||[],notices:pl.notices||[],feeding:pl.feeding||'',photo:pl.photo||'',foot:pl.foot||''
+      warnings:pl.warnings||[],notices:pl.notices||[],photo:'',foot:pl.foot||''
     };
   }
 
