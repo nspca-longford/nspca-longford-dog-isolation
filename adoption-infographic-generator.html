@@ -64,11 +64,11 @@
   .s-status{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
     background:var(--lime);color:var(--ink);padding:7px 14px;border-radius:999px}
 
-  .s-hero{margin-top:14px;border-radius:16px;overflow:hidden;position:relative;aspect-ratio:1200/1593;max-height:112mm;background:#e2e8f0}
+  .s-hero{margin-top:14px;border-radius:16px;overflow:hidden;position:relative;aspect-ratio:1200/1593;max-height:118mm;background:#e2e8f0}
+  .s-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
   .s-hero img{width:100%;height:100%;object-fit:cover;display:block}
   .s-hero .noimg{position:absolute;inset:0;display:grid;place-items:center;color:var(--slate-3);font-size:13px;font-weight:600}
-  .s-cap{position:absolute;left:0;right:0;bottom:0;padding:34px 18px 14px;
-    background:linear-gradient(transparent,rgba(15,23,42,.86));color:#fff}
+  .s-cap{position:absolute;left:0;right:0;bottom:0;padding:34px 20px 16px;background:linear-gradient(transparent,rgba(15,23,42,.82));color:#fff}
   .s-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--lime);margin-bottom:2px}
   .s-name{font-size:46px;font-weight:900;line-height:.95;letter-spacing:-.02em}
   .s-tag{font-size:13px;font-weight:500;color:#e2e8f0;margin-top:6px;max-width:80%}
@@ -195,7 +195,6 @@
       <div class="grp">
         <h3>Intake</h3>
         <label>Intake date</label><input type="text" id="f_intake" placeholder="—">
-        <label>Reason for intake</label><input type="text" id="f_reason" placeholder="—">
       </div>
     </div>
 
@@ -212,6 +211,8 @@
           </div>
 
           <div class="s-hero">
+            <img id="o_photo" class="s-photo" alt="" style="display:none">
+            <div class="noimg" id="o_noimg">Add a photo →</div>
             <div class="s-cap">
               <div class="s-eyebrow">Kennel card</div>
               <div class="s-name" id="o_name">Dog name</div>
@@ -219,8 +220,6 @@
               <div class="s-pills" id="o_pills"></div>
             </div>
           </div>
-
-          <div class="kc-photo" id="o_photowrap" style="display:none"><img id="o_photo" alt=""></div>
 
           <div class="s-facts" id="o_facts"></div>
 
@@ -244,7 +243,7 @@
 <script>
   function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
   var TL={Green:["#dcfce7","#166534"],Yellow:["#fef9c3","#854d0e"],Red:["#fee2e2","#991b1b"],Black:["#1e293b","#ffffff"]};
-  var FIELDS=['f_name','f_ref','f_kennel','f_breed','f_breed2','f_sex','f_age','f_size','f_colour','f_weight','f_chip','f_vax','f_parasite','f_intake','f_reason'];
+  var FIELDS=['f_name','f_ref','f_kennel','f_breed','f_breed2','f_sex','f_age','f_size','f_colour','f_weight','f_chip','f_vax','f_parasite','f_intake'];
   var DATA={};
 
   function val(id){var e=document.getElementById(id);return e?e.value.trim():'';}
@@ -268,11 +267,11 @@
     document.getElementById('o_pills').innerHTML=pills.join('');
 
     var bd=val('f_breed')+(val('f_breed2')?(' \u00d7 '+val('f_breed2')):'');
-    var facts=[['Reference',val('f_ref')],['Kennel / Pod',val('f_kennel')],['Breed / Type',bd],['Sex',val('f_sex')],['Age',val('f_age')],['Size',val('f_size')],['Colour',val('f_colour')],['Weight',val('f_weight')],['Microchip',val('f_chip')],['Vaccinations',val('f_vax')],['Parasite',val('f_parasite')],['Intake date',val('f_intake')],['Reason',val('f_reason')]];
+    var facts=[['Reference',val('f_ref')],['Kennel / Pod',val('f_kennel')],['Breed / Type',bd],['Sex',val('f_sex')],['Age',val('f_age')],['Size',val('f_size')],['Colour',val('f_colour')],['Weight',val('f_weight')],['Microchip',val('f_chip')],['Vaccinations',val('f_vax')],['Parasite',val('f_parasite')],['Intake date',val('f_intake')]];
     document.getElementById('o_facts').innerHTML=facts.map(function(f){return '<div class="s-fact"><div class="k">'+esc(f[0])+'</div><div class="v">'+esc(f[1]||'\u2014')+'</div></div>';}).join('');
 
-    var pw=document.getElementById('o_photowrap');
-    if(DATA.photo){document.getElementById('o_photo').src=DATA.photo;pw.style.display='';}else{pw.style.display='none';}
+    var ph=document.getElementById('o_photo'),ni=document.getElementById('o_noimg');
+    if(DATA.photo){ph.src=DATA.photo;ph.style.display='';if(ni)ni.style.display='none';}else{ph.style.display='none';if(ni)ni.style.display='';}
 
     var a=[];
     if(DATA.contagious&&DATA.contagious.length)a.push('<div class="kc-box" style="background:#dc2626;color:#fff"><div class="h">\ud83e\udda0 Contagious — strict isolation &amp; PPE</div><div class="t">'+esc(DATA.contagious.join(', '))+(DATA.zoonotic?' · zoonotic risk':'')+'</div></div>');
@@ -293,7 +292,7 @@
   function loadPayload(){
     try{var raw=localStorage.getItem('nspca-kennelcard');if(raw)return JSON.parse(raw);}catch(e){}
     var p=new URLSearchParams(location.search),obj=null;
-    ['name','ref','kennel','breed','breed2','sex','age','size','colour','weight','chip','vax','parasite','intake','reason'].forEach(function(k){if(p.has(k)){obj=obj||{};obj[k]=p.get(k);}});
+    ['name','ref','kennel','breed','breed2','sex','age','size','colour','weight','chip','vax','parasite','intake'].forEach(function(k){if(p.has(k)){obj=obj||{};obj[k]=p.get(k);}});
     return obj;
   }
   function applyPayload(pl){
@@ -303,7 +302,6 @@
     setVal('f_age',pl.age);setVal('f_size',pl.size);setVal('f_colour',pl.colour);
     setVal('f_weight',pl.weight);setVal('f_chip',pl.chip!=null?pl.chip:pl.microchip);
     setVal('f_intake',pl.intake!=null?pl.intake:pl.intakeDate);setVal('f_vax',pl.vax);setVal('f_parasite',pl.parasite);
-    setVal('f_reason',pl.reason!=null?pl.reason:pl.intakeReason);
     DATA={
       isoLabel:pl.isoLabel||'',isoState:pl.isoState||'',tl:pl.tl||'',score:(pl.score!=null?pl.score:null),
       walkRule:pl.walkRule||'',eaCat:pl.eaCat||'',eaMgmt:pl.eaMgmt||'',
