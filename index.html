@@ -251,6 +251,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.15",date:"2026-06-19",note:"Kennel Card additions. The card now carries a Daily care band \u2014 current medication (drug, dose, frequency), feeding line, and handling equipment \u2014 plus two new facts: neuter status and the isolation-end date. Medication, neuter status and the iso-end date auto-fill from the dog's record; the handling line pre-fills a muzzle reminder for restricted breeds. All three care lines and the new cells are editable in the generator before printing, and the care band only appears when there's something to show. (QR-to-record still to come.)"},
   {version:"3.14",date:"2026-06-18",note:"The Dog tab's branded card is now a full Kennel Card. The 'Kennel card' button opens the generator auto-filled with everything on the dog's record \u2014 identity (name, reference, kennel, breed, crossbreed, sex, age, size, colour, weight, microchip), intake (date, reason), vaccination status, parasite status and live status: isolation day, traffic-light score, who-can-walk rule, EA category, contagious/zoonotic flag, restricted-breed banner, handling warnings, care notices, feeding plan and the dog's photo. The card carries the photo across automatically, and staff can also drop in or change a photo in the generator. Any text can be tweaked before printing. The old quick A5 print is still there as 'Quick card'. (The previous 'Adoption profile' button is replaced.)"},
   {version:"3.13",date:"2026-06-11",note:"New Adoption profile button on the Dog tab. It opens the Adoption Infographic generator already filled in with this dog's details \u2014 name, breed, age, sex, microchip, reference, neuter status and vaccination status \u2014 so staff only need to add a photo and the adoption write-up rather than retyping everything. (The generator file lives next to the app.)"},
   {version:"3.12",date:"2026-06-11",note:"Medical tab overhaul. A new Health at a glance panel sits at the top of every dog's Medical record \u2014 six live tiles showing vaccination status, neuter/spay, body condition, dental, infection status and active medication, so you can read a dog's health state without scrolling. Each tile updates itself from the records below. Every section underneath \u2014 on-arrival health, neuter/spay, dental, disease, vaccinations, parasite, medications and vet visits \u2014 now shares one clean header style with an icon and a tidy + button. No data changed; it's the same record, easier to read."},
@@ -2217,11 +2218,20 @@ function openKennelCard(){
   var pls=(m.parasiteTreatments||[]).slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");});
   var parasite="";
   if(pls.length){var last=pls[pls.length-1];var due=last.nextDue||(last.date?addDaysStr(last.date,90):"");var pstate="Up to date";if(due){var diff=Math.round((new Date(due)-new Date(tdy))/86400000);pstate=diff<0?"Overdue":(diff<=7?"Due soon":"Up to date");}var pn=(last.product||last.type||"").split(" ")[0];parasite=pn?(pstate+" \u00b7 "+pn):pstate;}
+  var nc=m.neuteredConfirmed||"",neutered="";
+  if(nc.indexOf("Yes")===0)neutered=(/^f/i.test(d.sex||"")?"Spayed":"Neutered");
+  else if(nc.indexOf("No")===0)neutered="Entire";
+  else if(nc==="Booked")neutered="Neuter booked";
+  var isoEnds=d.intakeDate?isoClearDate(d.intakeDate,isoExtraDays(d)):"";
+  if(isoEnds&&typeof fmtDMY==="function")isoEnds=fmtDMY(isoEnds);
+  var meds=(m.medications||[]).filter(function(x){return x.active!==false&&(!x.endDate||x.endDate>=tdy);}).map(function(x){return [x.name,x.dose,x.frequency].filter(Boolean).join(" ");}).filter(Boolean).join("; ");
+  var handling=rb?"Muzzle in public (legal requirement)":"";
   var payload={
     name:d.name||"",ref:d.refNo||"",kennel:d.kennel||"",
     breed:d.breed||"",breed2:(d.crossbreed?d.breed2:"")||"",sex:d.sex||"",
     age:d.age||"",size:d.size||"",colour:d.colour||"",weight:wt,microchip:d.microchip||"",
     intake:d.intakeDate||"",reason:d.intakeReason||"",vax:vax,parasite:parasite,
+    neutered:neutered,isoEnds:isoEnds,meds:meds,handling:handling,
     isoLabel:isoLabel,isoState:info.state,tl:tl?tl.l:"",score:tl?total:null,walkRule:walkRule,
     eaCat:(ea&&ea.complete)?ea.cat.replace("Category ","Cat "):"",eaMgmt:(ea&&ea.complete)?(ea.mgmt||""):"",
     contagious:conNames,zoonotic:zoo,restrictedLabel:restrictedLabel,restrictedXl:rb?!!rb.xl:false,
