@@ -111,6 +111,12 @@
   .kc-tile{background:#f8fafc;border:1px solid var(--line);border-radius:11px;padding:10px 12px}
   .kc-tile .h{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--slate-3)}
   .kc-tile .t{font-size:13.5px;font-weight:700;margin-top:3px;line-height:1.4}
+  .kc-care{margin-top:12px;border:1.5px solid #b9d65f;background:#f7fbed;border-radius:12px;padding:11px 14px}
+  .kc-care-h{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#5b7510;margin-bottom:7px}
+  .kc-care-row{display:flex;gap:12px;padding:4px 0;border-top:1px solid #e4eecb}
+  .kc-care-row:first-of-type{border-top:0}
+  .kc-care-k{flex:0 0 64px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#5b7510;padding-top:2px}
+  .kc-care-v{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4}
   .kc-write{margin-top:14px;display:flex;flex-direction:column;gap:10px}
   .kc-wbox{border:1.5px solid var(--line);border-radius:11px;padding:11px 13px}
   .kc-wbox .lab{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--slate-3);margin-bottom:9px}
@@ -190,11 +196,22 @@
           <div><label>Vaccinations</label><input type="text" id="f_vax" placeholder="—"></div>
           <div><label>Parasite treatment</label><input type="text" id="f_parasite" placeholder="—"></div>
         </div>
+        <label>Neutered / spayed</label><input type="text" id="f_neutered" placeholder="—">
       </div>
 
       <div class="grp">
         <h3>Intake</h3>
-        <label>Intake date</label><input type="text" id="f_intake" placeholder="—">
+        <div class="row2">
+          <div><label>Intake date</label><input type="text" id="f_intake" placeholder="—"></div>
+          <div><label>Isolation ends</label><input type="text" id="f_isoends" placeholder="—"></div>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h3>Daily care</h3>
+        <label>Medication</label><input type="text" id="f_meds" placeholder="Drug · dose · time · end date">
+        <label>Feeding</label><input type="text" id="f_feeding" placeholder="Diet · amount · times">
+        <label>Handling equipment</label><input type="text" id="f_handling" placeholder="Lead / harness / muzzle">
       </div>
     </div>
 
@@ -224,6 +241,7 @@
           <div class="s-facts" id="o_facts"></div>
 
           <div class="s-body">
+            <div id="o_care"></div>
             <div id="o_alerts"></div>
             <div class="kc-write">
               <div class="kc-wbox"><div class="lab">Notes</div><div class="kc-rule"></div><div class="kc-rule"></div><div class="kc-rule"></div></div>
@@ -243,7 +261,7 @@
 <script>
   function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
   var TL={Green:["#dcfce7","#166534"],Yellow:["#fef9c3","#854d0e"],Red:["#fee2e2","#991b1b"],Black:["#1e293b","#ffffff"]};
-  var FIELDS=['f_name','f_ref','f_kennel','f_breed','f_breed2','f_sex','f_age','f_size','f_colour','f_weight','f_chip','f_vax','f_parasite','f_intake'];
+  var FIELDS=['f_name','f_ref','f_kennel','f_breed','f_breed2','f_sex','f_age','f_size','f_colour','f_weight','f_chip','f_vax','f_parasite','f_neutered','f_intake','f_isoends','f_meds','f_feeding','f_handling'];
   var DATA={};
 
   function val(id){var e=document.getElementById(id);return e?e.value.trim():'';}
@@ -267,11 +285,16 @@
     document.getElementById('o_pills').innerHTML=pills.join('');
 
     var bd=val('f_breed')+(val('f_breed2')?(' \u00d7 '+val('f_breed2')):'');
-    var facts=[['Reference',val('f_ref')],['Kennel / Pod',val('f_kennel')],['Breed / Type',bd],['Sex',val('f_sex')],['Age',val('f_age')],['Size',val('f_size')],['Colour',val('f_colour')],['Weight',val('f_weight')],['Microchip',val('f_chip')],['Vaccinations',val('f_vax')],['Parasite',val('f_parasite')],['Intake date',val('f_intake')]];
+    var facts=[['Reference',val('f_ref')],['Kennel / Pod',val('f_kennel')],['Breed / Type',bd],['Sex',val('f_sex')],['Age',val('f_age')],['Size',val('f_size')],['Colour',val('f_colour')],['Weight',val('f_weight')],['Microchip',val('f_chip')],['Vaccinations',val('f_vax')],['Parasite',val('f_parasite')],['Neutered',val('f_neutered')],['Intake date',val('f_intake')],['Iso ends',val('f_isoends')]];
     document.getElementById('o_facts').innerHTML=facts.map(function(f){return '<div class="s-fact"><div class="k">'+esc(f[0])+'</div><div class="v">'+esc(f[1]||'\u2014')+'</div></div>';}).join('');
 
     var ph=document.getElementById('o_photo'),ni=document.getElementById('o_noimg');
     if(DATA.photo){ph.src=DATA.photo;ph.style.display='';if(ni)ni.style.display='none';}else{ph.style.display='none';if(ni)ni.style.display='';}
+
+    var care=[['Meds',val('f_meds')],['Feed',val('f_feeding')],['Handling',val('f_handling')]].filter(function(r){return r[1];});
+    document.getElementById('o_care').innerHTML = care.length
+      ? '<div class="kc-care"><div class="kc-care-h">Daily care</div>'+care.map(function(r){return '<div class="kc-care-row"><span class="kc-care-k">'+esc(r[0])+'</span><span class="kc-care-v">'+esc(r[1])+'</span></div>';}).join('')+'</div>'
+      : '';
 
     var a=[];
     if(DATA.contagious&&DATA.contagious.length)a.push('<div class="kc-box" style="background:#dc2626;color:#fff"><div class="h">\ud83e\udda0 Contagious — strict isolation &amp; PPE</div><div class="t">'+esc(DATA.contagious.join(', '))+(DATA.zoonotic?' · zoonotic risk':'')+'</div></div>');
@@ -292,7 +315,7 @@
   function loadPayload(){
     try{var raw=localStorage.getItem('nspca-kennelcard');if(raw)return JSON.parse(raw);}catch(e){}
     var p=new URLSearchParams(location.search),obj=null;
-    ['name','ref','kennel','breed','breed2','sex','age','size','colour','weight','chip','vax','parasite','intake'].forEach(function(k){if(p.has(k)){obj=obj||{};obj[k]=p.get(k);}});
+    ['name','ref','kennel','breed','breed2','sex','age','size','colour','weight','chip','vax','parasite','neutered','intake','isoends','meds','feeding','handling'].forEach(function(k){if(p.has(k)){obj=obj||{};obj[k]=p.get(k);}});
     return obj;
   }
   function applyPayload(pl){
@@ -302,6 +325,7 @@
     setVal('f_age',pl.age);setVal('f_size',pl.size);setVal('f_colour',pl.colour);
     setVal('f_weight',pl.weight);setVal('f_chip',pl.chip!=null?pl.chip:pl.microchip);
     setVal('f_intake',pl.intake!=null?pl.intake:pl.intakeDate);setVal('f_vax',pl.vax);setVal('f_parasite',pl.parasite);
+    setVal('f_neutered',pl.neutered);setVal('f_isoends',pl.isoEnds!=null?pl.isoEnds:pl.isoends);setVal('f_meds',pl.meds);setVal('f_feeding',pl.feeding);setVal('f_handling',pl.handling);
     DATA={
       isoLabel:pl.isoLabel||'',isoState:pl.isoState||'',tl:pl.tl||'',score:(pl.score!=null?pl.score:null),
       walkRule:pl.walkRule||'',eaCat:pl.eaCat||'',eaMgmt:pl.eaMgmt||'',
