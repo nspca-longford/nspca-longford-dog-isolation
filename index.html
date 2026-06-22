@@ -230,12 +230,12 @@ var USERS=[
 var CURRENT_USER=null;
 
 var CATS=[
-  {k:"excitability",l:"Excitability / Arousal",s:{1:"Calm, settles easily when handled or walked.",2:"Overexcited briefly but can calm with time.",3:"Hard to manage excitement (jumping, mouthing, humping, spinning, barking).",4:"Completely uncontrollable when stimulated; cannot be calmed."}},
-  {k:"reactivity",l:"Reactivity",s:{1:"Relaxed with people and dogs; no signs of threat.",2:"Occasional stiffness, staring, growling, avoidance, or barking.",3:"Frequent snapping, lunging, or warning behaviours.",4:"Biting or attacking without clear provocation."}},
-  {k:"fearAnxiety",l:"Fear & Anxiety",s:{1:"Confident, recovers quickly from startle.",2:"Some cowering or avoidance but can be reassured.",3:"Persistent fear or avoidance; trembling, hiding, freezing.",4:"Extreme panic, shuts down or tries to flee violently."}},
-  {k:"sepAnx",l:"Separation Anxiety",s:{1:"Settles quietly when left alone.",2:"Mild vocalising or pacing but stops with time.",3:"Persistent distress (barking, scratching, destroying).",4:"Severe panic (self-injury, urination, tearing kennel apart)."}},
-  {k:"training",l:"Training & Obedience",s:{1:"Follows lure easily, engages well.",2:"Responds with repetition, somewhat distracted.",3:"Rarely responds; loses focus quickly.",4:"Ignores all prompts; unmanageable."}},
-  {k:"misc",l:"Miscellaneous Behaviour",s:{1:"Normal play, calm in kennel, toilets normally.",2:"Some chewing, spinning or chasing behaviour.",3:"Persistent barking, inappropriate chewing, escape attempts.",4:"Dangerous or repetitive behaviours (self-mutilation, barrier aggression)."}}
+  {k:"excitability",l:"Excitability / Arousal",s:{1:"Calm and settled; handles and walks without over-arousing.",2:"Briefly over-excited but settles within a minute or two.",3:"Hard to settle once aroused — jumping, mouthing, spinning, mounting or barking that's tough to interrupt.",4:"Cannot be calmed when stimulated; arousal escalates until handling is unsafe."}},
+  {k:"reactivity",l:"Reactivity",s:{1:"Relaxed with people and dogs; no threat signals.",2:"Occasional low-level signals — stiffening, hard stare, a single growl, barking that settles.",3:"Frequent threat behaviour — repeated snapping, lunging or sustained warning.",4:"Bites or attacks with little or no warning or provocation."}},
+  {k:"fearAnxiety",l:"Fear & Anxiety",s:{1:"Confident; startles but recovers quickly on its own.",2:"Some cowering or avoidance but accepts reassurance and re-engages.",3:"Persistent fear — ongoing trembling, hiding, freezing or avoidance that reassurance doesn't ease.",4:"Extreme panic — shuts down or makes frantic, injurious escape attempts."}},
+  {k:"sepAnx",l:"Separation Anxiety",s:{1:"Settles quietly when left alone.",2:"Mild vocalising or pacing at first that soon stops.",3:"Persistent distress alone — sustained barking, scratching or destruction.",4:"Severe panic — self-injury, toileting, or wrecking the kennel."}},
+  {k:"training",l:"Training & Obedience",s:{1:"Engages readily; follows a lure or basic cue with ease.",2:"Responds with repetition or encouragement; somewhat distractible.",3:"Rarely responds; disengages or loses focus quickly.",4:"Ignores all prompts; can't be redirected with basic handling."}},
+  {k:"misc",l:"Miscellaneous Behaviour",s:{1:"Normal play, calm in kennel, toilets normally.",2:"Minor habits — some chewing, spinning, pacing or chasing.",3:"Persistent problems — sustained barking, destructive chewing, escape attempts.",4:"Dangerous or compulsive behaviour — self-mutilation, flank-sucking, barrier aggression."}}
 ];
 
 var TABS=[
@@ -249,11 +249,11 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.22",date:"2026-06-20",note:"Behaviour and Vet notes can now be edited (not just added or deleted), an unsaved note is kept if you switch away, and both now show in the printed Report. Scoring category descriptions reworded for clarity — the 1–4 scores and thresholds are unchanged, so existing assessments are unaffected."},
   {version:"3.21",date:"2026-06-20",note:"New Behaviour tab with a free-text box for ongoing behaviour observations (kennel behaviour, walks, handling, anything notable over time). And a Vet notes box on the Medical tab for vet-visit notes, treatment plans and follow-ups."},
   {version:"3.20",date:"2026-06-20",note:"Dashboard polish. Search no longer lags while you type and the cursor stays where you put it. Dog cards (and the search clear button) can now be opened with the keyboard. Plus a little dead code cleared out behind the scenes."},
   {version:"3.19",date:"2026-06-20",note:"You can now choose an existing photo from your gallery when adding a dog or staff photo, instead of only the camera. Plus small accessibility tidy-ups (photos now have proper labels)."},
   {version:"3.18",date:"2026-06-20",note:"Files & documents now upload to the shelter file store (Supabase Storage) instead of being saved inside the dog's record. This keeps records small and lets bigger scans and PDFs attach reliably. Existing files already in records still open as before, and if the file store can't be reached the app falls back to saving the file in the record so nothing is lost. Needs a one-time 'dog-files' bucket set up in Supabase."},
-  {version:"3.17",date:"2026-06-20",note:"Fixed: uploaded documents and scans (PDFs, Word files) couldn't be opened \u2014 only images were viewable. Tapping a document, or its new Open link, now opens it (PDFs in a new tab, other types download). Images are unchanged."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -2581,7 +2581,7 @@ function renderStats(){
 }
 
 // ── Default state ─────────────────────────────────────────────────
-function defaultMedical(){return{bcs:"",neuteredConfirmed:"",neuterDate:"",neuterNotes:"",dental:"",dentalDate:"",dentalNotes:"",skinCondition:"",injuries:"",arrivalHealthNotes:"",vetNotes:"",vetLog:[],diseases:[],vaccinations:[],parasiteTreatments:[],medications:[],vetVisits:[],bodyMap:[]};}
+function defaultMedical(){return{bcs:"",neuteredConfirmed:"",neuterDate:"",neuterNotes:"",dental:"",dentalDate:"",dentalNotes:"",skinCondition:"",injuries:"",arrivalHealthNotes:"",vetNotes:"",vetLog:[],vetDraft:"",diseases:[],vaccinations:[],parasiteTreatments:[],medications:[],vetVisits:[],bodyMap:[]};}
 
 // Shared infectious-disease lookups (used by Medical tab, dashboard cards and briefing)
 var CONTAGIOUS_DISEASES={"Parvovirus (CPV)":1,"Canine Distemper":1,"Kennel Cough (CIRDC)":1,"Canine Influenza":1,"Infectious Hepatitis (CAV-1)":1,"Leptospirosis":1,"Sarcoptic Mange (scabies)":1,"Demodectic Mange":0,"Ringworm":1,"Giardia":1,"Coccidiosis":1,"Lungworm":0,"Tick-borne (Babesia / Ehrlichia)":0,"Other":0};
@@ -2601,7 +2601,7 @@ function defaultState(){return{_id:null,tab:"dog",
   arrival:{demeanour:"",muzzle:"",lead:"",vet:"",notes:"",dogDog:"",catTolerance:"",equineHistory:"",smallMammalHistory:"",childHistory:"",biteHistory:""},
   days:[0,1,2,3,4].map(function(){return{date:"",demeanour:"",feeding:"",toileting:"",staffInt:"",incidents:"",notes:""}}),
   scores:{excitability:0,reactivity:0,fearAnxiety:0,sepAnx:0,training:0,misc:0},
-  medical:defaultMedical(),behaviour:{notes:"",log:[]},
+  medical:defaultMedical(),behaviour:{notes:"",log:[],draft:""},
   assessment:{touchHead:"",touchBody:"",touchPaws:"",touchEars:"",touchMouth:"",collarGrab:"",restraint:"",leadBehaviour:"",handlingNotes:"",grooming:"",nailHandling:"",liftHandling:"",confidence:"",energyLevel:"",demeanour:"",stressRecovery:"",biddability:"",temperamentNotes:"",houseTraining:"",aloneTime:"",crateBehaviour:"",recall:"",toiletTraining:"",barrierReaction:"",barrierIntensity:"",barrierTriggers:"",redirectedAggression:"",barrierNotes:"",strangerApproach:"",childrenSuitable:"",dogOnLead:"",dogOffLead:"",catResponse:"",equineResponse:"",smallMammalResponse:"",groupDogs:"",socialNotes:"",carTravel:"",noiseSensitivity:"",newEnvironments:"",kennelBehaviour:"",environmentNotes:"",toyInterest:"",retrieve:"",tug:"",foodMotivation:"",resourceGuarding:"",playStyle:"",playEngagement:"",dropCue:"",mouthing:"",settleAfterPlay:"",frustration:"",toyPreference:"",playNotes:"",attentionSpan:"",handlerFocus:"",basicCommands:"",previousTraining:"",trainNotes:"",homeType:"",suitableChildren:"",suitableOtherDogs:"",suitableCats:"",suitableEquine:"",suitableSmallMammals:"",exerciseNeeds:"",experienceLevel:"",suitabilityNotes:"",buddyWalks:[],playdates:[],muzzleRequired:"",muzzleType:"",muzzleStage:"",muzzleSessions:[]},
   fin:{c1:"",c2:"",c3:"",steps:"",followUp:"",notes:"",overallProgress:"",handoverNote:"",assessorName:"",assessorDate:"",secondAssessor:"",secondAssessorDate:"",outcome:"",outcomeDate:"",outcomeNotes:""},
   weights:[],files:[],exercises:[],notes:[],incidents:[],feeding:[],warnings:[],careNotices:[],feedingPlan:{brand:"",grams:"",frequency:"",dietType:"",notes:""},
@@ -2684,24 +2684,34 @@ function medSummaryCard(m,vax){
   return '<div class="card" style="background:linear-gradient(135deg,#fafdf2,#f4f7fb)"><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:11px">Health at a glance</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+tiles+'</div></div>';
 }
 function renderBehaviour(){
-  var b=S.behaviour||(S.behaviour={notes:"",log:[]});
+  var b=S.behaviour||(S.behaviour={notes:"",log:[],draft:""});
   if(!b.log)b.log=[];
   if(b.notes&&!b.log.length){b.log.unshift({date:new Date().toISOString().slice(0,10),by:currentName()||"",text:b.notes});b.notes="";debouncedSave();}
-  var add='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:8px">Add observation</div><textarea id="beh-entry" placeholder="What did you observe? Behaviour, triggers, progress, handling notes\u2026" style="width:100%;min-height:90px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box"></textarea><div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn btnp" onclick="addBehaviourNote()">Add note</button></div></div>';
-  var log=b.log.length?b.log.map(function(e,i){var who=e.by?esc(e.by):"";return '<div class="card" style="margin-bottom:10px;padding:12px 14px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:11px;font-weight:600;color:#0f172a">'+esc(e.date||"")+'</span>'+(who?'<span style="font-size:11px;color:#64748b">\u00b7 '+who+'</span>':'')+'<span style="flex:1"></span><span onclick="deleteBehaviourNote('+i+')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){this.click()}" title="Delete" style="cursor:pointer;color:#94a3b8;font-size:13px">\u2715</span></div><div style="font-size:13px;line-height:1.5;white-space:pre-wrap">'+esc(e.text||"")+'</div></div>';}).join(""):'<div style="text-align:center;padding:28px 16px;color:var(--color-text-secondary);font-size:13px">No behaviour notes yet. Add the first observation above.</div>';
+  var add='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:8px">Add observation</div><textarea id="beh-entry" oninput="if(S.behaviour)S.behaviour.draft=this.value;debouncedSave()" placeholder="What did you observe? Behaviour, triggers, progress, handling notes\u2026" style="width:100%;min-height:90px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box">'+esc(b.draft||"")+'</textarea><div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn btnp" onclick="addBehaviourNote()">Add note</button></div></div>';
+  var log=b.log.length?b.log.map(function(e,i){
+    if(window._behEdit===i){return '<div class="card" style="margin-bottom:10px;padding:12px 14px"><textarea id="beh-edit-'+i+'" style="width:100%;min-height:80px;padding:9px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box">'+esc(e.text||"")+'</textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn" onclick="cancelBehEdit()">Cancel</button><button class="btn btnp" onclick="saveBehEdit('+i+')">Save</button></div></div>';}
+    var who=e.by?esc(e.by):"";
+    return '<div class="card" style="margin-bottom:10px;padding:12px 14px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:11px;font-weight:600;color:#0f172a">'+esc(e.date||"")+'</span>'+(who?'<span style="font-size:11px;color:#64748b">\u00b7 '+who+'</span>':'')+'<span style="flex:1"></span><span onclick="editBehNote('+i+')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){this.click()}" title="Edit" style="cursor:pointer;color:#94a3b8;font-size:13px;margin-right:4px">\u270e</span><span onclick="deleteBehaviourNote('+i+')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){this.click()}" title="Delete" style="cursor:pointer;color:#94a3b8;font-size:13px">\u2715</span></div><div style="font-size:13px;line-height:1.5;white-space:pre-wrap">'+esc(e.text||"")+'</div></div>';
+  }).join(""):'<div style="text-align:center;padding:28px 16px;color:var(--color-text-secondary);font-size:13px">No behaviour notes yet. Add the first observation above.</div>';
   return '<h2>Behaviour</h2><div class="sub">A running log of behaviour observations \u2014 each note is dated and signed, so you can see how things change over the stay.</div>'+add+log+'<div class="brow"><button class="btn" data-go="assessment">&larr; Back</button><button class="btn btnp" data-go="scoring">Next: Scoring &rarr;</button></div>';
 }
 function addBehaviourNote(){
   var ta=document.getElementById("beh-entry");if(!ta)return;var txt=(ta.value||"").trim();if(!txt)return;
-  if(!S.behaviour)S.behaviour={notes:"",log:[]};if(!S.behaviour.log)S.behaviour.log=[];
+  if(!S.behaviour)S.behaviour={notes:"",log:[],draft:""};if(!S.behaviour.log)S.behaviour.log=[];
   S.behaviour.log.unshift({date:new Date().toISOString().slice(0,10),by:currentName()||"",text:txt});
-  saveRecord();renderMain();
+  S.behaviour.draft="";window._behEdit=null;saveRecord();renderMain();
 }
 function deleteBehaviourNote(i){
-  appConfirm("Delete this behaviour note?",function(){if(S.behaviour&&S.behaviour.log){S.behaviour.log.splice(i,1);saveRecord();renderMain();}},{danger:true});
+  appConfirm("Delete this behaviour note?",function(){if(S.behaviour&&S.behaviour.log){S.behaviour.log.splice(i,1);window._behEdit=null;saveRecord();renderMain();}},{danger:true});
 }
-function addVetNote(){var ta=document.getElementById("vet-entry");if(!ta)return;var txt=(ta.value||"").trim();if(!txt)return;var m=getMedical();if(!m.vetLog)m.vetLog=[];m.vetLog.unshift({date:new Date().toISOString().slice(0,10),text:txt});saveRecord();renderMain();}
-function deleteVetNote(i){appConfirm("Delete this vet note?",function(){var m=getMedical();if(m.vetLog){m.vetLog.splice(i,1);saveRecord();renderMain();}},{danger:true});}
+function editBehNote(i){window._behEdit=i;renderMain();}
+function cancelBehEdit(){window._behEdit=null;renderMain();}
+function saveBehEdit(i){var ta=document.getElementById("beh-edit-"+i);if(!ta)return;var t=(ta.value||"").trim();if(t&&S.behaviour&&S.behaviour.log[i]){S.behaviour.log[i].text=t;}window._behEdit=null;saveRecord();renderMain();}
+function addVetNote(){var ta=document.getElementById("vet-entry");if(!ta)return;var txt=(ta.value||"").trim();if(!txt)return;var m=getMedical();if(!m.vetLog)m.vetLog=[];m.vetLog.unshift({date:new Date().toISOString().slice(0,10),text:txt});m.vetDraft="";window._vetEdit=null;saveRecord();renderMain();}
+function deleteVetNote(i){appConfirm("Delete this vet note?",function(){var m=getMedical();if(m.vetLog){m.vetLog.splice(i,1);window._vetEdit=null;saveRecord();renderMain();}},{danger:true});}
+function editVetNote(i){window._vetEdit=i;renderMain();}
+function cancelVetEdit(){window._vetEdit=null;renderMain();}
+function saveVetEdit(i){var ta=document.getElementById("vet-edit-"+i);if(!ta)return;var t=(ta.value||"").trim();var m=getMedical();if(t&&m.vetLog[i]){m.vetLog[i].text=t;}window._vetEdit=null;saveRecord();renderMain();}
 function renderMedical(){
   var m=getMedical();
   var today=new Date().toISOString().slice(0,10);
@@ -2983,7 +2993,7 @@ function renderMedical(){
 
   if(!m.vetLog)m.vetLog=[];
   if(m.vetNotes&&!m.vetLog.length){m.vetLog.unshift({date:new Date().toISOString().slice(0,10),text:m.vetNotes});m.vetNotes="";debouncedSave();}
-  h+='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:8px">Vet notes</div><textarea id="vet-entry" placeholder="Vet visit notes, treatment plans, medication instructions, follow-ups\u2026" style="width:100%;min-height:90px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box"></textarea><div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn btnp" onclick="addVetNote()">Add note</button></div>'+(m.vetLog.length?m.vetLog.map(function(e,i){return '<div style="border-top:1px solid #eef2f7;padding:10px 0 0;margin-top:10px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:11px;font-weight:600;color:#0f172a">'+esc(e.date||"")+'</span><span style="flex:1"></span><span onclick="deleteVetNote('+i+')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){this.click()}" title="Delete" style="cursor:pointer;color:#94a3b8;font-size:13px">\u2715</span></div><div style="font-size:13px;line-height:1.5;white-space:pre-wrap">'+esc(e.text||"")+'</div></div>';}).join(""):'')+'</div>';
+  h+='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:8px">Vet notes</div><textarea id="vet-entry" oninput="var mm=getMedical();mm.vetDraft=this.value;debouncedSave()" placeholder="Vet visit notes, treatment plans, medication instructions, follow-ups\u2026" style="width:100%;min-height:90px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box">'+esc(m.vetDraft||"")+'</textarea><div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn btnp" onclick="addVetNote()">Add note</button></div>'+(m.vetLog.length?m.vetLog.map(function(e,i){if(window._vetEdit===i){return '<div style="border-top:1px solid #eef2f7;padding:10px 0 0;margin-top:10px"><textarea id="vet-edit-'+i+'" style="width:100%;min-height:80px;padding:9px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box">'+esc(e.text||"")+'</textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn" onclick="cancelVetEdit()">Cancel</button><button class="btn btnp" onclick="saveVetEdit('+i+')">Save</button></div></div>';}return '<div style="border-top:1px solid #eef2f7;padding:10px 0 0;margin-top:10px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:11px;font-weight:600;color:#0f172a">'+esc(e.date||"")+'</span><span style="flex:1"></span><span onclick="editVetNote('+i+')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){this.click()}" title="Edit" style="cursor:pointer;color:#94a3b8;font-size:13px;margin-right:4px">\u270e</span><span onclick="deleteVetNote('+i+')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){this.click()}" title="Delete" style="cursor:pointer;color:#94a3b8;font-size:13px">\u2715</span></div><div style="font-size:13px;line-height:1.5;white-space:pre-wrap">'+esc(e.text||"")+'</div></div>';}).join(""):'')+'</div>';
   h+='<div class="brow"><button class="btn" data-go="scoring">&larr; Back</button><button class="btn" onclick="printVaccRecord()" style="white-space:nowrap">&#128424; Vacc record</button><button class="btn btnp" data-go="weights">Next: weights &rarr;</button></div>';
   h=h.replace('<!--MEDSUMMARY-->',medSummaryCard(m,_vaxSummary));
   return h;
@@ -4202,9 +4212,11 @@ function page(){
         medCard+='</div>';
       });
     }
-    if(!arrivalRows&&!m2.arrivalHealthNotes&&!vacList.length&&!paraList.length&&!medList.length&&!vetList.length){
+    var _vetNotesList=(m2.vetLog||[]).slice();if(m2.vetNotes)_vetNotesList.push({date:"",text:m2.vetNotes});
+    if(!arrivalRows&&!m2.arrivalHealthNotes&&!vacList.length&&!paraList.length&&!medList.length&&!vetList.length&&!_vetNotesList.length){
       medCard+='<div style="font-size:12px;color:#94a3b8;font-style:italic">No medical data recorded.</div>';
     }
+    if(_vetNotesList.length){medCard+=subHead("Vet notes")+_vetNotesList.map(function(e){return '<div class="rrow"><span class="rk">'+esc(e.date||"")+'</span><span class="rv" style="white-space:pre-wrap">'+esc(e.text||"")+'</span></div>';}).join("");}
     medCard+='</div>';
 
     // ─── FULL ASSESSMENT CARD ───
@@ -4248,6 +4260,7 @@ function page(){
       asmtCard+='<div style="font-size:12px;color:#94a3b8;font-style:italic">No assessment data recorded.</div>';
     }
     asmtCard+='</div>';
+    var behBlock=(S.behaviour&&S.behaviour.log&&S.behaviour.log.length)?('<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">Behaviour log</div>'+S.behaviour.log.map(function(e){return '<div class="db"><div style="font-size:12px;font-weight:600;margin-bottom:3px">'+esc(e.date||"")+(e.by?' &middot; '+esc(e.by):'')+'</div><div style="font-size:12px;color:#0f172a;white-space:pre-wrap">'+esc(e.text||"")+'</div></div>';}).join("")+'</div>'):'';
 
     return'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="margin:0">Full assessment report</h2><button class="btn" onclick="printDoc(\'Assessment Report\')" style="font-size:12px">&#128424; PDF / Print</button></div>'
       +'<div style="background:#0f172a;border-radius:10px;padding:16px 18px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="color:#94a3b8;font-size:11px;margin-bottom:2px">'+esc(d2.refNo||"")+'</div><div style="color:#fff;font-size:22px;font-weight:600">'+esc(d2.name||"—")+'</div><div style="color:#94a3b8;font-size:12px;margin-top:2px">'+[d2.breed,d2.sex,d2.age].filter(Boolean).map(esc).join(" · ")+'</div></div><div style="text-align:right">'+tlb2+(total2?'<div style="color:#94a3b8;font-size:11px;margin-top:4px">Score: '+total2+'/24</div>':"")+'</div></div></div>'
@@ -4258,6 +4271,7 @@ function page(){
       +medCard
       +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">On-arrival &amp; behaviour history</div>'+arows+(a2.notes?'<div style="font-size:12px;margin-top:10px;padding:10px;background:#f8fafc;border-radius:6px;white-space:pre-wrap">'+esc(a2.notes)+'</div>':"")+'</div>'
       +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">5-Day isolation log</div>'+dblocks+'</div>'
+      +behBlock
       +asmtCard
       +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Behaviour scoring</div>'+srows+'<div style="display:flex;justify-content:space-between;padding:10px 0 0;font-weight:600;font-size:13px"><span>Total</span><span>'+total2+'/24</span></div></div>'
       +(function(){var er=eaCalc(S.ea||{});var e=S.ea||{};if((e.needed||"")!=="Yes"&&!er.complete)return"";var rows;if(er.complete){rows='<div class="rrow"><span class="rk">Severity (Freq + Size + Intensity + Bite)</span><span class="rv">'+er.severity+'</span></div><div class="rrow"><span class="rk">Probability</span><span class="rv">'+er.p+'</span></div><div class="rrow"><span class="rk">EA Score (Severity &times; Probability &divide; 72)</span><span class="rv">'+er.score.toFixed(2)+'</span></div><div class="rrow"><span class="rk">Risk category</span><span class="rv"><span style="font-size:11px;font-weight:700;padding:1px 9px;border-radius:20px;background:'+er.col[0]+';color:'+er.col[1]+'">'+esc(er.cat)+'</span></span></div><div class="rrow"><span class="rk">Management outcome</span><span class="rv">'+esc(er.mgmt)+'</span></div>';}else{rows='<div style="font-size:12px;color:#94a3b8;font-style:italic">EA flagged as required - scores not yet complete.</div>';}return'<div class="card" style="border-left:4px solid #dc2626"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#991b1b;margin-bottom:8px">&#9888; Enhanced Assessment (bite-risk)</div>'+rows+(e.incidentSummary?noteBlock("Incident summary",e.incidentSummary):"")+(e.concerns?noteBlock("Primary concerns",e.concerns):"")+(e.assessorName?'<div class="rrow"><span class="rk">Assessed by</span><span class="rv">'+esc(e.assessorName)+(e.assessorDate?" &middot; "+esc(e.assessorDate):"")+'</span></div>':"")+'</div>';})()
