@@ -249,11 +249,11 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.25",date:"2026-06-23",note:"The Scoring tab is rebuilt around weighted sub-criteria. Instead of one 1\u20134 score per category, you now rate several specific, weighted sub-items per category on a 0\u20133 concern scale (none to severe), each with its own plain-English descriptions and an optional Observed/Inferred tag. The sub-items roll up automatically to the same category band and /24 total as before, so the traffic light, walking rules, the worst-category floor and the incomplete-assessment guard all keep working \u2014 the guard now tracks completeness right down to the sub-item. Certain critical sub-items (e.g. bites with little warning, severe panic, barrier aggression) hold the category at Red on their own. Dogs scored under the previous system keep their result and are clearly marked; re-rate the sub-criteria to refine them."},
   {version:"3.24",date:"2026-06-23",note:"Scoring now reflects a single severe category instead of letting it average away. A dog calm in most areas but one serious problem &mdash; say it bites with little warning (Reactivity 4) &mdash; could total low enough to read Green on points alone. Now any category scored 4 holds the light at least Red, and any 3 at least Yellow, whatever the total; the Scoring tab shows which category is holding it and the dog's card shows the raised light. A dog with no 3s or 4s is unchanged. The dashboard and Ready to Go also now show a small trend arrow (e.g. \u21933) when a dog has more than one assessment snapshot, so you can see at a glance whether it's improving or worsening over the stay."},
   {version:"3.23",date:"2026-06-22",note:"Scoring now flags an incomplete assessment instead of quietly reading low. A half-scored dog totals less simply because the unscored categories count as nothing, which made it look greener — and lower-risk — than it really was. When not all six categories are scored, the traffic light is shown as Provisional, the Scoring tab shows the range the result could still reach once finished, and the dog appears with a small amber marker on the dashboard cards and Ready to Go. A fully scored dog is unchanged — same total, same light, same colour. Existing assessments are unaffected."},
   {version:"3.22",date:"2026-06-20",note:"Behaviour and Vet notes can now be edited (not just added or deleted), an unsaved note is kept if you switch away, and both now show in the printed Report. Scoring category descriptions reworded for clarity — the 1–4 scores and thresholds are unchanged, so existing assessments are unaffected."},
   {version:"3.21",date:"2026-06-20",note:"New Behaviour tab with a free-text box for ongoing behaviour observations (kennel behaviour, walks, handling, anything notable over time). And a Vet notes box on the Medical tab for vet-visit notes, treatment plans and follow-ups."},
-  {version:"3.20",date:"2026-06-20",note:"Dashboard polish. Search no longer lags while you type and the cursor stays where you put it. Dog cards (and the search clear button) can now be opened with the keyboard. Plus a little dead code cleared out behind the scenes."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1143,7 +1143,7 @@ function renderReadyToGo(){
     var warnLine=warns.length?'<div style="font-size:11px;font-weight:600;color:'+(warns.some(function(w){return w.level==="Critical";})?"#991b1b":"#92400e")+';margin-top:6px">&#9888; '+warns.length+' handling warning'+(warns.length!==1?"s":"")+'</div>':"";
     var rb=readyDays>=14?["#fee2e2","#991b1b"]:readyDays>=7?["#fef3c7","#92400e"]:["#f1f5f9","#64748b"];
     var readyBadge='<div style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:'+rb[0]+';color:'+rb[1]+';white-space:nowrap;flex-shrink:0">Ready '+readyDays+'d</div>';
-    return'<div onclick="openDog('+r.id+')" class="dog-card" style="background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-left:3px solid #16a34a;border-radius:14px;padding:13px;margin-bottom:12px;cursor:pointer"><div style="display:flex;gap:12px;align-items:flex-start">'+ph+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px"><div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">'+esc(r.name)+'</div>'+tlPill+provDot(r.state&&r.state.scores)+trajTag(r)+readyBadge+'</div>'+(idline?'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px">'+esc(idline)+'</div>':'')+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+chips+'</div>'+suitLine+warnLine+'</div>';
+    return'<div onclick="openDog('+r.id+')" class="dog-card" style="background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-left:3px solid #16a34a;border-radius:14px;padding:13px;margin-bottom:12px;cursor:pointer"><div style="display:flex;gap:12px;align-items:flex-start">'+ph+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px"><div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">'+esc(r.name)+'</div>'+tlPill+provDot(r.state)+trajTag(r)+readyBadge+'</div>'+(idline?'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px">'+esc(idline)+'</div>':'')+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+chips+'</div>'+suitLine+warnLine+'</div>';
   }).join("");
   var count='<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">'+list.length+' dog'+(list.length!==1?'s':'')+' ready \u00b7 longest-waiting first</div>';
   var legend='<div style="font-size:10px;color:#94a3b8;margin-bottom:12px">Rehoming marks: \u2713 suitable \u00b7 ~ with caution \u00b7 \u2717 not suitable. Amber chips are info, not blockers.</div>';
@@ -1173,7 +1173,7 @@ function page_records(){
     var canDelete=currentRole()==="admin"||currentRole()==="manager"||currentRole()==="supervisor"||currentRole()==="coordinator";
     var _ro=(rec.state&&rec.state.fin?rec.state.fin.outcome:"")||"";var _dep=_ro&&_ro!=="Active — in isolation"&&_ro!=="Active - in isolation"&&_ro!=="Finished Isolation";
     var archBtn=(_dep&&canDelete)?'<button onclick="event.stopPropagation();toggleArchive('+rec.id+')" title="'+(isArchived(rec)?"Restore from archive":"Archive")+'" style="background:'+(isArchived(rec)?"#e7f6e9":"#f1f5f9")+';color:'+(isArchived(rec)?"#166534":"#64748b")+';border:none;border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer;font-family:inherit">'+(isArchived(rec)?"&#9851; Restore":"&#128451; Archive")+'</button>':'';
-    return'<div class="rec-card"'+(isArchived(rec)?' style="opacity:0.6"':'')+'>'+ph2+'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;margin-bottom:2px">'+esc(rec.name)+(isArchived(rec)?' <span style="font-size:9px;font-weight:700;background:#e2e8f0;color:#64748b;padding:1px 7px;border-radius:20px;vertical-align:middle">ARCHIVED</span>':'')+'</div><div style="font-size:12px;color:var(--color-text-secondary)">'+[rec.breed,rec.refNo,rd2.kennel||"",date].filter(Boolean).join(' · ')+'</div>'+prog+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+archBtn+(rec.score?('<span class="pill" style="background:'+parts[0]+';color:'+parts[1]+'">'+rec.trafficLight+' '+rec.score+'/24</span>'+provDot(rec.state&&rec.state.scores)+trajTag(rec)):'')+'<button class="btn" style="font-size:12px;padding:6px 12px" data-load="'+rec.id+'">Load</button>'+(canDelete?'<button class="btnr btn" data-delete="'+rec.id+'">Delete</button>':'')+'</div></div>';
+    return'<div class="rec-card"'+(isArchived(rec)?' style="opacity:0.6"':'')+'>'+ph2+'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;margin-bottom:2px">'+esc(rec.name)+(isArchived(rec)?' <span style="font-size:9px;font-weight:700;background:#e2e8f0;color:#64748b;padding:1px 7px;border-radius:20px;vertical-align:middle">ARCHIVED</span>':'')+'</div><div style="font-size:12px;color:var(--color-text-secondary)">'+[rec.breed,rec.refNo,rd2.kennel||"",date].filter(Boolean).join(' · ')+'</div>'+prog+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+archBtn+(rec.score?('<span class="pill" style="background:'+parts[0]+';color:'+parts[1]+'">'+rec.trafficLight+' '+rec.score+'/24</span>'+provDot(rec.state)+trajTag(rec)):'')+'<button class="btn" style="font-size:12px;padding:6px 12px" data-load="'+rec.id+'">Load</button>'+(canDelete?'<button class="btnr btn" data-delete="'+rec.id+'">Delete</button>':'')+'</div></div>';
   }
   function recFolderOf(o){o=o||"";if(o==="Moved to Kennels")return"Moved to Kennels";if(o==="Rehomed")return"Rehomed";if(o==="Euthanised")return"Euthanised";if(o===""||o==="Not yet determined"||o.indexOf("Active")>=0||o==="Finished Isolation")return"In Isolation";return"Other";}
   var FOLDERS=["In Isolation","Moved to Kennels","Rehomed","Euthanised","Other"];
@@ -1761,7 +1761,7 @@ function listViewHtml(active){
     return '<div onclick="openDog('+rec.id+')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer'+(i>0?";border-top:1px solid #e2e8f0":"")+'">'
       +ph
       +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px">'+esc(rec.name)+(ea?'<span style="background:'+(ea.high?"#dc2626":"#f59e0b")+';color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px">&#9888; '+esc(ea.l)+'</span>':'')+'</div><div style="font-size:11px;color:#64748b">'+esc(d.kennel||"No kennel")+' &middot; '+esc(rec.breed||"")+(days?' &middot; Day '+days:'')+'</div></div>'
-      +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+tlPill+provDot(rec.state&&rec.state.scores)+trajTag(rec)+'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+tlPill+provDot(rec.state)+trajTag(rec)+'</div>'
     +'</div>';
   }).join("")+'</div>';
 }
@@ -2096,7 +2096,7 @@ function openKennelCard(){
     intake:d.intakeDate||"",reason:d.intakeReason||"",vax:vax,parasite:parasite,
     neutered:neutered,isoEnds:isoEnds,meds:meds,handling:handling,
     isoLabel:isoLabel,isoState:info.state,tl:tl?tl.l:"",score:tl?total:null,walkRule:walkRule,
-    scoreProvisional:(tl&&nScored(S.scores)<CATS.length),scoredN:nScored(S.scores),scoredOf:CATS.length,
+    scoreProvisional:subMeta(S).partial,scoredN:subMeta(S).catsComplete,scoredOf:CATS.length,
     eaCat:(ea&&ea.complete)?ea.cat.replace("Category ","Cat "):"",eaMgmt:(ea&&ea.complete)?(ea.mgmt||""):"",
     contagious:conNames,zoonotic:zoo,restrictedLabel:restrictedLabel,restrictedXl:rb?!!rb.xl:false,
     warnings:ws,notices:ns,feeding:feeding,photo:d.photo||"",
@@ -2159,7 +2159,7 @@ function renderDashboard(){
     var savedBy=rec.savedBy||"";
     var lastEditHtml=savedBy?'<div style="display:flex;align-items:center;gap:4px;margin-top:5px;padding-top:4px;border-top:0.5px solid var(--color-border-secondary)"><div style="width:14px;height:14px;border-radius:50%;background:'+avatarColor(savedBy)+';color:#fff;font-size:6px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials(savedBy)+'</div><span style="font-size:9px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(savedBy)+' &middot; '+ta2+'</span></div>':"";
     var tlTag=rec.score?'<span style="position:absolute;top:7px;right:7px;background:'+parts[0]+';color:'+parts[1]+';font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;box-shadow:0 1px 3px rgba(15,23,42,0.15)">'+(rec.trafficLight||"?")[0]+' &middot; '+rec.score+'</span>':'<span style="position:absolute;top:7px;right:7px;background:#eef1f5;color:#94a3b8;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px">Unscored</span>';
-    return'<div onclick="openDog('+rec.id+')" tabindex="0" role="button" aria-label="Open '+esc(rec.name)+'" onkeydown="if(event.key===\'Enter\'){openDog('+rec.id+')}" class="dog-card" style="background:var(--color-background-primary);border:1px solid rgba(15,23,42,0.08);border-top:4px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 1px 2px rgba(15,23,42,0.04),0 4px 16px rgba(15,23,42,0.05)"><div style="position:relative">'+ph+tlTag+(provData(rec.state&&rec.state.scores).partial?'<span title="Provisional \u2014 assessment incomplete" style="position:absolute;top:7px;left:7px;background:#fff;color:#b45309;border:1px solid #f59e0b;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px">PROV</span>':'')+'</div><div style="padding:11px"><div style="font-size:14px;font-weight:700;letter-spacing:-0.01em;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(con.length?'<span title="'+esc(con.map(function(x){return diseaseShortName(x.type);}).join(", "))+'" style="background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">&#129440; Contagious</span>':'')+(function(){var rb=restrictedBreedInfo(rec.state&&rec.state.dog?rec.state.dog.breed:rec.breed);return rb?('<span title="'+esc(rb.name)+(rb.xl?' — banned: cannot be rehomed':' — restricted breed: muzzle + lead in public')+'" style="background:'+(rb.xl?'#7f1d1d':'#f59e0b')+';color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">'+(rb.xl?'&#128683; XL':'&#9888; RB')+'</span>'):'';})()+(warns.length?'<span title="'+esc(warns.map(function(w){return w.text;}).join(", "))+'" style="background:'+(warnCrit?"#dc2626":"#f59e0b")+';color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">&#9888; '+warns.length+'</span>':'')+trajTag(rec)+'</div>'+dayH+'</div></div>';
+    return'<div onclick="openDog('+rec.id+')" tabindex="0" role="button" aria-label="Open '+esc(rec.name)+'" onkeydown="if(event.key===\'Enter\'){openDog('+rec.id+')}" class="dog-card" style="background:var(--color-background-primary);border:1px solid rgba(15,23,42,0.08);border-top:4px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 1px 2px rgba(15,23,42,0.04),0 4px 16px rgba(15,23,42,0.05)"><div style="position:relative">'+ph+tlTag+(subMeta(rec.state).partial?'<span title="Provisional \u2014 assessment incomplete" style="position:absolute;top:7px;left:7px;background:#fff;color:#b45309;border:1px solid #f59e0b;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px">PROV</span>':'')+'</div><div style="padding:11px"><div style="font-size:14px;font-weight:700;letter-spacing:-0.01em;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(con.length?'<span title="'+esc(con.map(function(x){return diseaseShortName(x.type);}).join(", "))+'" style="background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">&#129440; Contagious</span>':'')+(function(){var rb=restrictedBreedInfo(rec.state&&rec.state.dog?rec.state.dog.breed:rec.breed);return rb?('<span title="'+esc(rb.name)+(rb.xl?' — banned: cannot be rehomed':' — restricted breed: muzzle + lead in public')+'" style="background:'+(rb.xl?'#7f1d1d':'#f59e0b')+';color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">'+(rb.xl?'&#128683; XL':'&#9888; RB')+'</span>'):'';})()+(warns.length?'<span title="'+esc(warns.map(function(w){return w.text;}).join(", "))+'" style="background:'+(warnCrit?"#dc2626":"#f59e0b")+';color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">&#9888; '+warns.length+'</span>':'')+trajTag(rec)+'</div>'+dayH+'</div></div>';
   }).join("");
   var view=window._dbView||"cards";
   var rollupHtml=tasksRollupHtml(active);
@@ -3613,7 +3613,7 @@ function tlc(t){if(!t)return null;if(t<=10)return{l:"Green",bg:"#dcfce7",tc:"#16
 function nScored(sc){if(!sc)return 0;var n=0;for(var i=0;i<CATS.length;i++){if((parseInt(sc[CATS[i].k])||0)>0)n++;}return n;}
 function provData(sc){var n=nScored(sc);return {n:n,of:CATS.length,partial:(n>0&&n<CATS.length),done:n===CATS.length};}
 // Small hollow amber dot appended next to a traffic-light pill on cards
-function provDot(sc){var p=provData(sc);return p.partial?'<span title="Provisional \u2014 '+p.n+' of '+p.of+' categories scored" style="display:inline-block;width:7px;height:7px;border-radius:50%;border:1.5px solid #f59e0b;background:#fff;margin-left:3px;vertical-align:middle"></span>':'';}
+function provDot(st){var p=subMeta(st);return p.partial?'<span title="Provisional \u2014 '+p.catsComplete+' of '+CATS.length+' categories fully rated" style="display:inline-block;width:7px;height:7px;border-radius:50%;border:1.5px solid #f59e0b;background:#fff;margin-left:3px;vertical-align:middle"></span>':'';}
 // ── Worst-category floor ──────────────────────────────────────────
 // A single severe category outranks a low average: any 4 holds the
 // light at least Red, any 3 at least Yellow, regardless of total.
@@ -3625,6 +3625,56 @@ function effLight(total,sc){var base=tlc(total);var fl=scoreFloor(sc);if(!fl)ret
 // ── Score trajectory (dashboard arrow) ────────────────────────────
 // Lower score = less concerning, so a falling total is an improvement.
 function trajTag(rec){var h=(rec&&rec.state&&rec.state.scoreHistory)||[];if(h.length<2)return"";var first=h[0].total||0,last=h[h.length-1].total||0,diff=last-first;if(diff===0)return"";var better=diff<0;return '<span title="'+(better?"Improved":"Worsened")+" by "+Math.abs(diff)+" since first assessment ("+first+" \u2192 "+last+')" style="display:inline-flex;align-items:center;font-size:10px;font-weight:700;color:'+(better?"#16a34a":"#dc2626")+';margin-left:3px;vertical-align:middle">'+(better?"\u2193":"\u2191")+Math.abs(diff)+'</span>';}
+// ── Sub-criteria scoring engine ───────────────────────────────────
+// Each of the six categories breaks into weighted sub-criteria scored
+// 0 (none) to 3 (severe). The weighted mean maps back to the category's
+// 1-4 band, so the /24 total, traffic light, floor and guard are all
+// unchanged downstream. floor:true sub-items hold the category at 4 when
+// scored 3. Records scored under the old flat model fall back unchanged.
+var SUBCRIT={
+  excitability:[
+    {k:"arousal",l:"Arousal on stimulation / greeting",w:30,s:["Greets calmly; no jumping or mouthing.","Briefly excited \u2014 a little jumping or mouthing, settles quickly.","Strongly aroused \u2014 persistent jumping, mouthing, spinning or mounting.","Frantic arousal that can't be interrupted; handling becomes difficult."]},
+    {k:"settle",l:"Settle / recovery time",w:30,s:["Settles within seconds once the trigger passes.","Settles within a minute or two.","Slow to settle \u2014 stays wound up for several minutes.","Doesn't settle; arousal escalates rather than subsides."]},
+    {k:"baseline",l:"Baseline arousal at rest in kennel",w:25,s:["Calm and relaxed in the kennel at rest.","Mostly settled; rouses easily but returns to calm.","Often restless or pacing even without a trigger.","Rarely settles; near-constant high arousal."]},
+    {k:"vocal",l:"Vocal arousal (excitement barking)",w:15,s:["Quiet; no excitement barking.","Occasional excited barking that stops.","Frequent excitement barking, hard to interrupt.","Relentless barking when roused."]}
+  ],
+  reactivity:[
+    {k:"people",l:"Reactivity to people / handlers",w:30,s:["Relaxed with people; no threat signals.","Occasional low-level signals \u2014 stiffening, hard stare, a single growl.","Repeated threat behaviour \u2014 growling, snapping or lunging at people.","Attacks or attempts to bite people."]},
+    {k:"warning",l:"Warning before reacting",w:30,floor:true,s:["Gives clear, early warning and is easily read.","Warning is brief but present before escalating.","Minimal warning \u2014 escalates quickly with little signalling.","Bites or attacks with little or no warning."]},
+    {k:"dogs",l:"Reactivity to other dogs",w:25,s:["Calm and appropriate around other dogs.","Mild interest or arousal that settles.","Frequent lunging, barking or stiffness toward dogs.","Aggressive toward dogs \u2014 sustained or injurious."]},
+    {k:"threshold",l:"Trigger threshold & de-escalation",w:15,s:["High threshold; de-escalates on its own.","Reacts to strong triggers but recovers with space.","Low threshold; slow to de-escalate.","Reacts to minimal triggers and won't de-escalate."]}
+  ],
+  fearAnxiety:[
+    {k:"people",l:"Fear of people / approach / handling",w:30,s:["Confident with approach and handling.","Some wariness but accepts approach.","Cowers or avoids; tolerates handling poorly.","Extreme fear of people \u2014 flight, freeze or fear response to handling."]},
+    {k:"env",l:"Fear of environment / novelty",w:25,s:["Takes new sights, sounds and spaces in stride.","Startles at novelty but recovers quickly.","Persistently fearful of the environment.","Overwhelmed by surroundings; can't function."]},
+    {k:"recover",l:"Recoverability",w:25,s:["Recovers fast and re-engages on its own.","Recovers with brief reassurance.","Slow to recover; reassurance helps little.","Doesn't recover; stays in a fear state."]},
+    {k:"panic",l:"Panic / shutdown markers",w:20,floor:true,s:["No panic or shutdown.","Mild freezing or hiding.","Frequent freezing, hiding or trembling.","Severe panic \u2014 frantic escape attempts, self-injury or full shutdown."]}
+  ],
+  sepAnx:[
+    {k:"physical",l:"Physical distress alone",w:35,s:["Settles quietly when left alone.","Mild pacing or scratching at first.","Sustained scratching, chewing or destruction when alone.","Severe destruction or escape attempts when alone."]},
+    {k:"vocal",l:"Vocalising when alone",w:30,s:["Quiet when alone.","Brief vocalising that soon stops.","Prolonged barking or howling when alone.","Constant, frantic vocalising the whole time alone."]},
+    {k:"selfinjury",l:"Self-injury / distress toileting",w:25,floor:true,s:["No self-injury or distress toileting.","Occasional distress toileting.","Repeated distress toileting; minor self-trauma.","Self-injury or severe distress toileting when alone."]},
+    {k:"onset",l:"Onset & duration",w:10,s:["No distress, or settles almost immediately.","Distress only briefly at the start.","Distress persists for much of the time alone.","Distress is immediate and unrelenting."]}
+  ],
+  training:[
+    {k:"engage",l:"Engagement & focus",w:35,s:["Engages readily and holds focus.","Engages with encouragement; somewhat distractible.","Hard to engage; loses focus quickly.","Won't engage; can't be focused."]},
+    {k:"cue",l:"Response to basic cue / lure",w:35,s:["Follows a lure or basic cue with ease.","Responds with repetition.","Rarely responds to cues.","Ignores all prompts."]},
+    {k:"redirect",l:"Redirectability with basic handling",w:30,s:["Easily redirected with basic handling.","Redirects with some effort.","Hard to redirect.","Can't be redirected by basic handling."]}
+  ],
+  misc:[
+    {k:"compulsive",l:"Repetitive / compulsive behaviour",w:30,floor:true,s:["No repetitive or compulsive behaviour.","Minor habits \u2014 some spinning or pacing.","Frequent repetitive behaviour.","Compulsive or self-injurious \u2014 spinning, flank-sucking, self-mutilation."]},
+    {k:"kennel",l:"Kennel behaviour",w:25,s:["Calm and settled in the kennel.","Some barking, pacing or restlessness.","Persistent barking, pacing or mild destruction.","Constant distress or destruction in the kennel."]},
+    {k:"barrier",l:"Barrier behaviour",w:25,floor:true,s:["Calm at the kennel front and barriers.","Mild arousal at barriers that settles.","Frequent barrier reactivity \u2014 lunging or barking at the front.","Severe barrier aggression."]},
+    {k:"habits",l:"General habits",w:20,s:["Normal habits; toilets normally.","Minor chewing or chasing.","Persistent chewing, chasing or escape attempts.","Destructive or dangerous habits."]}
+  ]
+};
+function catRoll(ck,st){var subs=SUBCRIT[ck]||[];var m=(st&&st.subScores&&st.subScores[ck])||{};var acc=0,sw=0,scored=0,floored=false;for(var i=0;i<subs.length;i++){var v=m[subs[i].k];if(typeof v==="number"){acc+=v*subs[i].w;sw+=subs[i].w;scored++;if(subs[i].floor&&v>=3)floored=true;}}if(scored===0)return{has:false,scored:0,total:subs.length,complete:false};var avg=sw?acc/sw:0;var band=floored?4:(avg<0.75?1:avg<1.5?2:avg<2.25?3:4);return{has:true,avg:avg,band:band,floored:floored,scored:scored,total:subs.length,complete:scored===subs.length};}
+// Unified per-category state, with legacy (flat-score) fallback.
+function catState(ck,st){var m=st&&st.subScores?st.subScores[ck]:null;var inSub=m&&Object.keys(m).length>0;if(inSub){var r=catRoll(ck,st);return{has:r.has,band:r.has?r.band:0,complete:r.complete,legacy:false,scored:r.scored,total:r.total,floored:!!r.floored};}var lv=(st&&st.scores)?st.scores[ck]:0;var tot=(SUBCRIT[ck]||[]).length;if(lv>0)return{has:true,band:lv,complete:true,legacy:true,scored:0,total:tot,floored:lv>=4};return{has:false,band:0,complete:false,legacy:false,scored:0,total:tot,floored:false};}
+// Recompute a category's rolled 1-4 from its sub-scores and write to st.scores.
+function recalcCat(ck,st){st=st||S;if(!st.scores)st.scores={};var m=st.subScores&&st.subScores[ck];if(m){var r=catRoll(ck,st);if(r.has)st.scores[ck]=r.band;else delete st.scores[ck];}}
+// Completeness across all sub-criteria (drives the provisional guard).
+function subMeta(st){var scored=0,total=0,catsAny=0,catsComplete=0;for(var i=0;i<CATS.length;i++){var ck=CATS[i].k;var s=catState(ck,st);total+=(SUBCRIT[ck]||[]).length;scored+=s.scored;if(s.has)catsAny++;if(s.has&&s.complete)catsComplete++;}return{scored:scored,total:total,catsAny:catsAny,catsComplete:catsComplete,partial:(catsAny>0&&catsComplete<CATS.length),done:(catsComplete===CATS.length)};}
 function sc(v){if(!v)return"background:#f1f5f9;color:#64748b";if(v===1)return"background:#dcfce7;color:#166534";if(v===2)return"background:#fef9c3;color:#854d0e";if(v===3)return"background:#fee2e2;color:#991b1b";return"background:#1e293b;color:#f1f5f9";}
 function eaTriggered(){var total=Object.values(S.scores).reduce(function(a,b){return a+b},0);if(total>=15)return true;var serious=0,moderate=0;S.days.forEach(function(d){if(d.incidents&&d.incidents.indexOf("Serious")>=0)serious++;if(d.incidents&&d.incidents.indexOf("Injury")>=0)serious++;if(d.incidents&&d.incidents.indexOf("Moderate")>=0)moderate++;});return serious>0||moderate>=3;}
 function fld(l,val,sv,type,ph,extra){return'<div class="f"><label class="lbl">'+l+'</label><input type="'+(type||"text")+'" value="'+esc(val)+'" placeholder="'+(ph||"")+'" data-save="'+sv+'" '+(extra||"")+'></div>';}
@@ -4129,34 +4179,50 @@ function page(){
   if(t==="scoring"){
     var sevSevere=CATS.filter(function(c){return S.scores[c.k]===4;});
     var sevMod=CATS.filter(function(c){return S.scores[c.k]===3;});
-    var scoredCount=CATS.filter(function(c){return S.scores[c.k]>0;}).length;
-    var sevLabels={1:"Low",2:"Mild",3:"Mod.",4:"Severe"};
+    var meta=subMeta(S);
+    var scoredCount=meta.catsComplete;
     var accentFor=function(n){return n===1?"#16a34a":n===2?"#ca8a04":n===3?"#dc2626":"#1e293b";};
+    var concernLab=["None","Mild","Moderate","Severe"];
+    var concernCol=["#16a34a","#ca8a04","#ea580c","#dc2626"];
+    var bandLab={1:"Low",2:"Mild",3:"Moderate",4:"Severe"};
 
-    // Per-category 1-4 selector
+    // Per-category weighted sub-criteria
     var cats=CATS.map(function(c){
-      var v=S.scores[c.k];
-      var chips=[1,2,3,4].map(function(n){
-        var sel=v===n,ac=accentFor(n);
-        return '<button class="schip'+(sel?" on":"")+'" data-sc="'+c.k+'.'+n+'" style="'+(sel?"background:"+ac+";color:#fff;border-color:"+ac:"")+'"><span style="font-size:16px;font-weight:700;display:block;line-height:1.1">'+n+'</span><span style="font-size:9px;font-weight:600;'+(sel?"opacity:0.9":"color:"+ac)+'">'+sevLabels[n]+'</span></button>';
+      var cs=catState(c.k,S);
+      var subs=SUBCRIT[c.k]||[];
+      var m=(S.subScores&&S.subScores[c.k])||{};
+      var subHtml=subs.map(function(sub){
+        var v=m[sub.k],has=(typeof v==="number");
+        var btns=[0,1,2,3].map(function(n){var sel=has&&v===n,col=concernCol[n];return '<button data-sub="'+c.k+'.'+sub.k+'.'+n+'" style="flex:1;padding:6px 2px;border-radius:7px;border:1.5px solid '+(sel?col:"rgba(15,23,42,0.1)")+';background:'+(sel?col:"#fff")+';color:'+(sel?"#fff":"#64748b")+';font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;line-height:1.1">'+n+'<span style="display:block;font-size:8px;font-weight:600;'+(sel?"opacity:0.9":"color:"+col)+'">'+concernLab[n]+'</span></button>';}).join("");
+        var anchor=has?'<div style="font-size:11px;color:#475569;margin-top:5px;line-height:1.4">'+esc(sub.s[v])+'</div>':'';
+        var evv=(S.subEvidence&&S.subEvidence[c.k]&&S.subEvidence[c.k][sub.k])||"";
+        var evLab=evv==="obs"?"Observed":evv==="inf"?"Inferred":"Evidence?";
+        var evCol=evv==="obs"?"#166534":evv==="inf"?"#854d0e":"#94a3b8";
+        var ev=has?'<button data-ev="'+c.k+'.'+sub.k+'" style="margin-top:6px;font-size:9.5px;font-weight:700;color:'+evCol+';background:'+(evv?"#f1f5f9":"#fff")+';border:1px solid rgba(15,23,42,0.1);border-radius:20px;padding:2px 9px;cursor:pointer;font-family:inherit">'+(evv?"\u25cf ":"")+evLab+'</button>':'';
+        return '<div style="padding:9px 0;border-top:1px solid #f1f5f9"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-size:12px;font-weight:600;color:#0f172a">'+esc(sub.l)+(sub.floor?' <span title="Holds the category at Red when scored 3" style="color:#dc2626">\u2691</span>':'')+'</span><span style="font-size:10px;color:#94a3b8;font-weight:600">'+sub.w+'%</span></div><div style="display:flex;gap:4px;margin-top:6px">'+btns+'</div>'+anchor+ev+'</div>';
       }).join("");
-      var desc=v?'<div style="font-size:12px;color:#475569;margin-top:8px;line-height:1.45">'+esc(c.s[v])+'</div>':'<div style="font-size:11px;color:#94a3b8;margin-top:8px;font-style:italic">Tap a score to rate this category</div>';
+      var bandPill=cs.has?'<span style="font-size:11px;font-weight:700;color:#fff;background:'+accentFor(cs.band)+';border-radius:20px;padding:3px 11px">Band '+cs.band+' &middot; '+bandLab[cs.band]+(cs.floored?' &middot; floored':'')+'</span>':'<span style="font-size:11px;color:#94a3b8">Not rated</span>';
+      var prog=cs.legacy?'<span style="font-size:10px;color:#94a3b8">legacy score</span>':'<span style="font-size:10px;color:#94a3b8">'+cs.scored+'/'+subs.length+' rated</span>';
+      var legacyNote=cs.legacy?'<div style="font-size:10.5px;color:#854d0e;background:#fef9c3;border:1px solid #f59e0b;border-radius:7px;padding:6px 9px;margin-top:8px">Scored under the previous system (band '+cs.band+'). Rate the sub-criteria below to refine.</div>':'';
       var noteV=(S.scoreNotes&&S.scoreNotes[c.k])||"";
-      var noteIn='<input value="'+esc(noteV)+'" oninput="S.scoreNotes=S.scoreNotes||{};S.scoreNotes[\''+c.k+'\']=this.value;debouncedSave()" placeholder="Why this score? (optional, e.g. specific incident)" style="width:100%;margin-top:8px;padding:7px 10px;border:1px solid rgba(15,23,42,0.08);border-radius:8px;font-size:11.5px;font-family:inherit;box-sizing:border-box;background:#fafbfc">';
-      return '<div class="scat" style="border-left:4px solid '+(v?accentFor(v):"#e2e8f0")+'"><div style="font-size:13px;font-weight:600">'+c.l+'</div><div class="schiprow">'+chips+'</div>'+desc+noteIn+'</div>';
+      var noteIn='<input value="'+esc(noteV)+'" oninput="S.scoreNotes=S.scoreNotes||{};S.scoreNotes[\''+c.k+'\']=this.value;debouncedSave()" placeholder="Notes for this category (optional, e.g. specific incident)" style="width:100%;margin-top:10px;padding:7px 10px;border:1px solid rgba(15,23,42,0.08);border-radius:8px;font-size:11.5px;font-family:inherit;box-sizing:border-box;background:#fafbfc">';
+      return '<div class="scat" style="border-left:4px solid '+(cs.has?accentFor(cs.band):"#e2e8f0")+'"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-size:13px;font-weight:700">'+c.l+'</div>'+bandPill+'</div><div style="text-align:right;margin-top:2px">'+prog+'</div>'+legacyNote+subHtml+noteIn+'</div>';
     }).join("");
+
+    // Worst-case projection over per-category bands
+    var _cs=CATS.map(function(c){return catState(c.k,S);});
+    var _pMin=0,_pMax=0;_cs.forEach(function(s){if(s.complete){_pMin+=s.band;_pMax+=s.band;}else{_pMin+=(s.has?s.band:1);_pMax+=4;}});
 
     // Live result panel
     var bands=[[0,10,"#16a34a"],[10,14,"#ca8a04"],[14,20,"#dc2626"],[20,24,"#1e293b"]];
     var bandSeg=bands.map(function(b){return '<div style="width:'+((b[1]-b[0])/24*100).toFixed(2)+'%;background:'+b[2]+';height:100%"></div>';}).join("");
     var marker=total>0?'<div style="position:absolute;top:-3px;left:'+Math.min(100,total/24*100)+'%;transform:translateX(-50%);width:3px;height:16px;background:#0f172a;border-radius:2px;box-shadow:0 0 0 2px #fff"></div>':'';
     var _floored=!!(tl&&tl.floored);
-    var _complete=scoredCount===CATS.length, _provis=(tl&&!_complete&&!_floored);
-    var _rem=CATS.length-scoredCount, _pMin=total+_rem, _pMax=total+_rem*4;
-    var _projHtml=_provis?'<div style="font-size:11px;color:#b45309;font-weight:600;margin-top:5px;line-height:1.45">&#9888; Provisional &mdash; '+_rem+' categor'+(_rem>1?'ies':'y')+' still unscored. Once complete the result could land anywhere from <strong>'+((tlc(_pMin)||{l:""}).l)+' '+_pMin+'</strong> to <strong>'+((tlc(_pMax)||{l:""}).l)+' '+_pMax+'</strong>/24 &mdash; treat the light below as not final.</div>':'';
-    var _floorNote=_floored?'<div style="font-size:11px;color:#991b1b;font-weight:600;margin-top:5px;line-height:1.45;background:#fee2e2;border:1px solid #dc2626;border-radius:8px;padding:8px 10px">&#9888; '+esc(tl.floorCat)+' scored '+tl.floorFrom+' &mdash; held at <strong>'+tl.l+'</strong> regardless of the '+total+'/24 total.'+(!_complete?' ('+scoredCount+' of 6 scored.)':'')+'</div>':'';
-    var _pill = tl?('<span class="pill" style="'+(_provis?'background:#fff;color:'+tl.tc+';border:1.5px dashed '+tl.dot:'background:'+tl.bg+';color:'+tl.tc)+';font-size:13px;padding:6px 14px;font-weight:700"><span style="width:9px;height:9px;border-radius:50%;background:'+tl.dot+';display:inline-block;margin-right:7px"></span>'+tl.l+(_provis?' &middot; provisional':(_floored?' &middot; held':''))+'</span>'):'<span style="font-size:12px;color:#94a3b8">Score to see result</span>';
-    var resultPanel='<div class="card" style="padding:16px 18px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px"><div><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:2px">Total score</div><div style="font-size:30px;font-weight:700;line-height:1">'+total+'<span style="font-size:15px;color:#94a3b8;font-weight:500">/24</span></div><div style="font-size:11px;color:#94a3b8;margin-top:3px">'+scoredCount+' of 6 categories scored</div>'+_projHtml+_floorNote+'</div>'+_pill+'</div><div style="position:relative;margin:0 2px 5px"><div style="display:flex;height:10px;border-radius:20px;overflow:hidden">'+bandSeg+'</div>'+marker+'</div><div style="display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;font-weight:600;margin:0 2px"><span>Green</span><span>Yellow</span><span>Red</span><span>Black</span></div></div>';
+    var _complete=meta.done, _provis=(tl&&!_complete&&!_floored);
+    var _projHtml=_provis?'<div style="font-size:11px;color:#b45309;font-weight:600;margin-top:5px;line-height:1.45">&#9888; Provisional &mdash; '+meta.catsComplete+' of '+CATS.length+' categories fully rated ('+meta.scored+'/'+meta.total+' sub-items). Once complete the result could land anywhere from <strong>'+((tlc(_pMin)||{l:""}).l)+' '+_pMin+'</strong> to <strong>'+((tlc(_pMax)||{l:""}).l)+' '+_pMax+'</strong>/24 &mdash; treat the light below as not final.</div>':'';
+    var _floorNote=_floored?'<div style="font-size:11px;color:#991b1b;font-weight:600;margin-top:5px;line-height:1.45;background:#fee2e2;border:1px solid #dc2626;border-radius:8px;padding:8px 10px">&#9888; '+esc(tl.floorCat)+' scored '+tl.floorFrom+' &mdash; held at <strong>'+tl.l+'</strong> regardless of the '+total+'/24 total.'+(!_complete?' ('+meta.catsComplete+' of 6 categories fully rated.)':'')+'</div>':'';
+    var _pill = tl?('<span class="pill" style="'+(_provis?'background:#fff;color:'+tl.tc+';border:1.5px dashed '+tl.dot:'background:'+tl.bg+';color:'+tl.tc)+';font-size:13px;padding:6px 14px;font-weight:700"><span style="width:9px;height:9px;border-radius:50%;background:'+tl.dot+';display:inline-block;margin-right:7px"></span>'+tl.l+(_provis?' &middot; provisional':(_floored?' &middot; held':''))+'</span>'):'<span style="font-size:12px;color:#94a3b8">Rate to see result</span>';
+    var resultPanel='<div class="card" style="padding:16px 18px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px"><div><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:2px">Total score</div><div style="font-size:30px;font-weight:700;line-height:1">'+total+'<span style="font-size:15px;color:#94a3b8;font-weight:500">/24</span></div><div style="font-size:11px;color:#94a3b8;margin-top:3px">'+meta.catsComplete+' of 6 categories fully rated</div>'+_projHtml+_floorNote+'</div>'+_pill+'</div><div style="position:relative;margin:0 2px 5px"><div style="display:flex;height:10px;border-radius:20px;overflow:hidden">'+bandSeg+'</div>'+marker+'</div><div style="display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;font-weight:600;margin:0 2px"><span>Green</span><span>Yellow</span><span>Red</span><span>Black</span></div></div>';
 
     // Severe / moderate item flag (single-4 = critical on its own)
     var flagHtml='';
@@ -4169,7 +4235,7 @@ function page(){
     var eaBlock=total>0?(ea?'<div class="ea-warn"><div style="font-size:13px;font-weight:600;color:#92400e;margin-bottom:4px">&#9888; Enhanced Assessment may be required</div><div style="font-size:12px;color:#92400e">Review with senior staff before any rehoming decisions.</div></div>':'<div class="ea-clear"><div style="font-size:12px;font-weight:500;color:#166534">&#10003; No automatic EA flag triggered</div></div>'):"";
 
 
-    return '<h2>Behaviour scoring</h2><div class="sub">Rate each category 1&ndash;4. The /24 total sets the light &mdash; but a single severe category holds it up on its own: any 4 forces at least Red, any 3 at least Yellow.</div>'+resultPanel+scoreHistoryCardHtml()+flagHtml+eaBlock+cats+secondAssessorCardHtml()+'<div class="brow"><button class="btn" data-go="assessment">&larr; Back</button><button class="btn btnp" data-go="outcome">Next: outcome &rarr;</button></div>';
+    return '<h2>Behaviour scoring</h2><div class="sub">Rate the weighted sub-criteria in each category 0&ndash;3 (none &rarr; severe). Each category rolls up to its 1&ndash;4 band and the /24 total; a &#10145; sub-item holds the category at Red when scored 3, and any category at 4 forces at least Red.</div>'+resultPanel+scoreHistoryCardHtml()+flagHtml+eaBlock+cats+secondAssessorCardHtml()+'<div class="brow"><button class="btn" data-go="assessment">&larr; Back</button><button class="btn btnp" data-go="outcome">Next: outcome &rarr;</button></div>';
   }
 
   if(t==="outcome"){
@@ -4182,7 +4248,7 @@ function page(){
   }
 
   if(t==="report"){
-    var total2=Object.values(S.scores).reduce(function(a,b){return a+b},0),tl2=tlc(total2),ea2=eaTriggered();
+    var total2=Object.values(S.scores).reduce(function(a,b){return a+b},0),tl2=effLight(total2,S.scores),ea2=eaTriggered();
     var tlb2=tl2?'<span class="pill" style="background:'+tl2.bg+';color:'+tl2.tc+';font-size:13px;padding:5px 12px"><span style="width:8px;height:8px;border-radius:50%;background:'+tl2.dot+';display:inline-block;margin-right:6px"></span>'+tl2.l+'</span>':"";
     var d2=S.dog,a2=S.arrival,f2=S.fin,m2=S.medical||{},asmt=S.assessment||{};
     var rWarn=(S.warnings||[]).slice().sort(function(a,b){return(a.level==="Critical"?0:1)-(b.level==="Critical"?0:1);});var rCrit=rWarn.some(function(w){return w.level==="Critical";});
@@ -4370,6 +4436,8 @@ function updateSaveBar(){var ro=["report","briefing","timeline"].indexOf(S.tab)>
 
 function handleAppClick(e){
   var go=e.target.closest("[data-go]");if(go){S.tab=go.dataset.go;render();window.scrollTo(0,0);return;}
+  var sub=e.target.closest("[data-sub]");if(sub){var sp=sub.dataset.sub.split(".");var sck=sp[0],ssk=sp[1],sval=parseInt(sp[2]);if(!S.subScores)S.subScores={};if(!S.subScores[sck])S.subScores[sck]={};if(S.subScores[sck][ssk]===sval)delete S.subScores[sck][ssk];else S.subScores[sck][ssk]=sval;recalcCat(sck);renderMain();debouncedSave();return;}
+  var evb=e.target.closest("[data-ev]");if(evb){var ep=evb.dataset.ev.split(".");if(!S.subEvidence)S.subEvidence={};if(!S.subEvidence[ep[0]])S.subEvidence[ep[0]]={};var cur=S.subEvidence[ep[0]][ep[1]]||"";S.subEvidence[ep[0]][ep[1]]=cur==="obs"?"inf":cur==="inf"?"":"obs";renderMain();debouncedSave();return;}
   var sc2=e.target.closest("[data-sc]");if(sc2){var p=sc2.dataset.sc.split(".");S.scores[p[0]]=S.scores[p[0]]===parseInt(p[1])?0:parseInt(p[1]);renderMain();debouncedSave();return;}
   if(e.target.closest("[data-action='save-record']")){saveRecord();return;}
   if(e.target.closest("[data-action='new-dog']")){appConfirm("Start a new dog?",function(){S=defaultState();persistSave();render();});return;}
