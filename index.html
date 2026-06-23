@@ -301,11 +301,11 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.27",date:"2026-06-23",note:"Fixed a bug where some newer fields weren't coming back when you reopened a dog. The information was being saved correctly, but the app was only reloading an older list of fields \u2014 so sub-criteria scores, category notes, assessment snapshots, second-assessor scores and the Behaviour log could look blank after reopening or refreshing. Loading now restores everything that was saved, and is built so this can't happen again when new fields are added. Nothing you saved was lost \u2014 it reappears once you reload the dog."},
   {version:"3.26",date:"2026-06-23",note:"A visual refresh of the Scoring tab. The result panel is now a clearer hero \u2014 a big total, the traffic-light pill, a six-cell completion tracker that fills in as you rate each category, and the floor/provisional note in its own coloured strip. Each category card carries a coloured rail down its edge tinted by its band, so scrolling the tab reads as a risk profile at a glance, and the 0\u20133 concern buttons are now a single tidy segmented control with the evidence tag beside it. Same scoring, just much easier to read and faster to fill in."},
   {version:"3.25",date:"2026-06-23",note:"The Scoring tab is rebuilt around weighted sub-criteria. Instead of one 1\u20134 score per category, you now rate several specific, weighted sub-items per category on a 0\u20133 concern scale (none to severe), each with its own plain-English descriptions and an optional Observed/Inferred tag. The sub-items roll up automatically to the same category band and /24 total as before, so the traffic light, walking rules, the worst-category floor and the incomplete-assessment guard all keep working \u2014 the guard now tracks completeness right down to the sub-item. Certain critical sub-items (e.g. bites with little warning, severe panic, barrier aggression) hold the category at Red on their own. Dogs scored under the previous system keep their result and are clearly marked; re-rate the sub-criteria to refine them."},
   {version:"3.24",date:"2026-06-23",note:"Scoring now reflects a single severe category instead of letting it average away. A dog calm in most areas but one serious problem &mdash; say it bites with little warning (Reactivity 4) &mdash; could total low enough to read Green on points alone. Now any category scored 4 holds the light at least Red, and any 3 at least Yellow, whatever the total; the Scoring tab shows which category is holding it and the dog's card shows the raised light. A dog with no 3s or 4s is unchanged. The dashboard and Ready to Go also now show a small trend arrow (e.g. \u21933) when a dog has more than one assessment snapshot, so you can see at a glance whether it's improving or worsening over the stay."},
   {version:"3.23",date:"2026-06-22",note:"Scoring now flags an incomplete assessment instead of quietly reading low. A half-scored dog totals less simply because the unscored categories count as nothing, which made it look greener — and lower-risk — than it really was. When not all six categories are scored, the traffic light is shown as Provisional, the Scoring tab shows the range the result could still reach once finished, and the dog appears with a small amber marker on the dashboard cards and Ready to Go. A fully scored dog is unchanged — same total, same light, same colour. Existing assessments are unaffected."},
-  {version:"3.22",date:"2026-06-20",note:"Behaviour and Vet notes can now be edited (not just added or deleted), an unsaved note is kept if you switch away, and both now show in the printed Report. Scoring category descriptions reworded for clarity — the 1–4 scores and thresholds are unchanged, so existing assessments are unaffected."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -4583,43 +4583,25 @@ async function deleteRecord(id){
   else renderMain();
 }
 
+// Generic state restore — merges every saved key over defaults, so no field
+// is ever silently dropped on load. Replaces the old brittle key whitelists.
+function restoreState(saved){
+  var base=defaultState();
+  if(!saved||typeof saved!=="object")return base;
+  Object.keys(saved).forEach(function(k){
+    if(k==="_id"||k==="tab")return;
+    var sv=saved[k];
+    if(sv&&typeof sv==="object"&&!Array.isArray(sv)&&base[k]&&typeof base[k]==="object"&&!Array.isArray(base[k])){
+      base[k]=Object.assign({},base[k],sv);
+    }else{
+      base[k]=sv;
+    }
+  });
+  return base;
+}
 function loadRecord(id){
   var rec=records.find(function(r){return r.id===id;});if(!rec||!rec.state)return;
-  var saved=rec.state;S=defaultState();
-  if(saved.dog)S.dog=Object.assign({},S.dog,saved.dog);
-  if(saved.arrival)S.arrival=Object.assign({},S.arrival,saved.arrival);
-  if(saved.days)S.days=saved.days;
-  if(saved.scores)S.scores=Object.assign({},S.scores,saved.scores);
-  if(saved.fin)S.fin=Object.assign({},S.fin,saved.fin);
-  if(saved.assessment){
-    S.assessment=Object.assign({},S.assessment,saved.assessment);
-    if(saved.assessment.buddyWalks)S.assessment.buddyWalks=saved.assessment.buddyWalks;
-    if(saved.assessment.playdates)S.assessment.playdates=saved.assessment.playdates;
-    if(saved.assessment.muzzleSessions)S.assessment.muzzleSessions=saved.assessment.muzzleSessions;
-  }
-  if(saved.medical){
-    S.medical=Object.assign({},S.medical,saved.medical);
-    if(saved.medical.diseases)S.medical.diseases=saved.medical.diseases;
-    if(saved.medical.vaccinations)S.medical.vaccinations=saved.medical.vaccinations;
-    if(saved.medical.parasiteTreatments)S.medical.parasiteTreatments=saved.medical.parasiteTreatments;
-    if(saved.medical.medications)S.medical.medications=saved.medical.medications;
-    if(saved.medical.vetVisits)S.medical.vetVisits=saved.medical.vetVisits;
-  } else if(saved.dog){
-    if(saved.dog.bcs&&!S.medical.bcs)S.medical.bcs=saved.dog.bcs;
-    if(saved.dog.neuteredConfirmed&&!S.medical.neuteredConfirmed)S.medical.neuteredConfirmed=saved.dog.neuteredConfirmed;
-    if(saved.dog.injuries&&!S.medical.injuries)S.medical.injuries=saved.dog.injuries;
-  }
-  if(saved.weights)S.weights=saved.weights;
-  if(saved.files)S.files=saved.files;
-  if(saved.exercises)S.exercises=saved.exercises;
-  if(saved.notes)S.notes=saved.notes;
-  if(saved.incidents)S.incidents=saved.incidents;
-  if(saved.feeding)S.feeding=saved.feeding;
-  if(saved.warnings)S.warnings=saved.warnings;
-  if(saved.careNotices)S.careNotices=saved.careNotices;
-  if(saved.feedingPlan)S.feedingPlan=Object.assign({},S.feedingPlan,saved.feedingPlan);
-  if(saved.ea)S.ea=Object.assign({},S.ea,saved.ea);
-  if(saved.medical&&saved.medical.bodyMap)S.medical.bodyMap=saved.medical.bodyMap;
+  S=restoreState(rec.state);
   S._id=rec.id;S.tab="report";render();
 }
 
@@ -4637,7 +4619,7 @@ async function loadRecordsList(){
 function loadCurrent(){
   try{
     var s=localStorage.getItem("nspca-current");
-    if(s){var saved=JSON.parse(s);if(saved._id)S._id=saved._id;if(saved.dog)S.dog=Object.assign({},S.dog,saved.dog);if(saved.arrival)S.arrival=Object.assign({},S.arrival,saved.arrival);if(saved.days)S.days=saved.days;if(saved.scores)S.scores=Object.assign({},S.scores,saved.scores);if(saved.fin)S.fin=Object.assign({},S.fin,saved.fin);if(saved.weights)S.weights=saved.weights;if(saved.files)S.files=saved.files;if(saved.assessment)S.assessment=Object.assign({},S.assessment,saved.assessment);if(saved.medical)S.medical=Object.assign({},S.medical,saved.medical);if(saved.warnings)S.warnings=saved.warnings;if(saved.careNotices)S.careNotices=saved.careNotices;if(saved.ea)S.ea=Object.assign({},S.ea,saved.ea);}
+    if(s){var saved=JSON.parse(s);S=restoreState(saved);if(saved._id)S._id=saved._id;}
   }catch(e){}
 }
 
