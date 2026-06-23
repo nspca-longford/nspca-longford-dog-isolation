@@ -2149,6 +2149,7 @@ function openKennelCard(){
     neutered:neutered,isoEnds:isoEnds,meds:meds,handling:handling,
     isoLabel:isoLabel,isoState:info.state,tl:tl?tl.l:"",score:tl?total:null,walkRule:walkRule,
     scoreProvisional:subMeta(S).partial,scoredN:subMeta(S).catsComplete,scoredOf:CATS.length,
+    floored:tl?!!tl.floored:false,floorCat:(tl&&tl.floorCat)||"",
     eaCat:(ea&&ea.complete)?ea.cat.replace("Category ","Cat "):"",eaMgmt:(ea&&ea.complete)?(ea.mgmt||""):"",
     contagious:conNames,zoonotic:zoo,restrictedLabel:restrictedLabel,restrictedXl:rb?!!rb.xl:false,
     warnings:ws,notices:ns,feeding:feeding,photo:d.photo||"",
