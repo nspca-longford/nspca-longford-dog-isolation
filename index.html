@@ -185,6 +185,9 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .oc-cl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;margin-bottom:5px}
 .oc-cv{font-size:14px;font-weight:800;display:flex;align-items:center;gap:6px;line-height:1.2}
 .oc-two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
+.oc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 16px}
+.oc-grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+@media(max-width:760px){.oc-grid2{grid-template-columns:1fr}}
 @media(max-width:760px){.oc-ctx{grid-template-columns:repeat(2,1fr)}.oc-two{grid-template-columns:1fr}}
 /* Assessment tab — desktop context header + 2-up behaviour grid */
 .asmt-ctx{background:#0f172a;border-radius:14px;padding:13px 17px;margin-bottom:6px;display:flex;align-items:center;gap:13px;flex-wrap:wrap}
@@ -337,7 +340,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
-  {version:"3.35",date:"2026-06-25",note:"Fixed the empty-space problem on the Assessment and Outcome tabs, where a short card left a big blank gap beside a tall one. On Assessment the behaviour cards are now one per row at full width, with their fields laid out three across to use the screen \u2014 a fixed top-to-bottom order with no gaps, and nothing reshuffles when you collapse a card. On Outcome the two panels are now equal height so the shorter side no longer leaves a ragged gap."},
+  {version:"3.35",date:"2026-06-25",note:"Assessment and Outcome both move to a cleaner full-width layout. On Assessment the behaviour cards are now one per row at full width, with their fields laid out three across to use the screen \u2014 a fixed top-to-bottom order with no gaps, and nothing reshuffles when you collapse a card. Outcome follows the same pattern: Decision context, Progress over the stay, The decision and sign-off run straight down the page as full-width cards, with their fields spread across the width instead of squeezed into a narrow side column."},
   {version:"3.34",date:"2026-06-25",note:"A round of decluttering. Notes and Behaviour were two separate dated logs doing the same job, so they're now one \u2014 a single Notes & observations log for behaviour, daily life and anything worth recording. Any existing behaviour entries are folded into it automatically, nothing is lost. The Briefing is no longer its own tab: the Report now has a Report / Narrative toggle at the top, and Narrative is the same management briefing as before. The Timeline tab has been removed (it only ever mirrored what's already in the record), and Daily Rounds has been taken off the menu. Files stays."},
   {version:"3.33",date:"2026-06-25",note:"Two new features. The Unit Health Board (menu → Unit Health Board) puts every dog in the unit on one screen for morning rounds — health status, active conditions, active medications, days in isolation, next vet follow-up, latest weight and traffic light, sorted so anything needing attention (not fit, infectious, under treatment) rises to the top. And the Weights tab now draws a proper weight-trend chart — a line with dated points, a kg axis, the current body-condition score, net change since the first weigh-in and a flag if the dog has dropped 5% or more from its peak."},
   {version:"3.32",date:"2026-06-25",note:"The Assessment tab is rebuilt for the desktop. A pinned context header now shows the dog's name, traffic light, EA category and a behaviour completion meter, so you always see who you're assessing and how far along you are. The seven behaviour areas sit in a two-column grid that uses the screen width instead of one tall column, and they open by default since they're the main work; the Activities logs stay collapsed and full-width. The jump bar and per-card field counts are unchanged."},
@@ -4481,12 +4484,13 @@ function page(){
     var ctxCard='<div class="card"><div class="oc-ch"><span class="oc-ic">&#129517;</span><span class="oc-ti">Decision context</span><span class="oc-step">read-only &middot; from this dog</span></div><div class="oc-ctx">'+tlT+eaT+chT+isoT+warnT+'</div></div>';
     // ── Progress over the stay ──
     var progCard='<div class="card"><div class="oc-ch"><span class="oc-ic">&#128200;</span><span class="oc-ti">Progress over the stay</span></div>'
+      +'<div class="oc-grid">'
       +slct("Overall progress",f.overallProgress,"fin.overallProgress",[["Significantly improved","Significantly improved \u2014 much calmer"],["Slightly improved","Slightly improved"],["Stable","Stable \u2014 no significant change"],["Slightly deteriorated","Slightly deteriorated"],["Significantly deteriorated","Significantly deteriorated \u2014 urgent review"]])
       +fld("Primary concern #1",f.c1,"fin.c1","text","e.g. High reactivity toward dogs")
       +fld("Primary concern #2",f.c2,"fin.c2","text","")
       +fld("Primary concern #3",f.c3,"fin.c3","text","")
-      +ta("Recommended next steps",f.steps,"fin.steps","")
-      +ta("Additional notes",f.notes,"fin.notes","")
+      +'</div>'
+      +'<div class="oc-grid2">'+ta("Recommended next steps",f.steps,"fin.steps","")+ta("Additional notes",f.notes,"fin.notes","")+'</div>'
       +'</div>';
     // ── The decision ──
     function ogroup(label,pairs){return '<optgroup label="'+label+'">'+pairs.map(function(o){return '<option value="'+esc(o[0])+'"'+(f.outcome===o[0]?' selected':'')+'>'+esc(o[1])+'</option>';}).join("")+'</optgroup>';}
@@ -4502,16 +4506,14 @@ function page(){
     var reasonOpts=f.outcome==="Died in care"?[["","-- select reason --"],["Illness \u2014 natural causes","Illness \u2014 natural causes"],["Medical \u2014 died despite treatment","Medical \u2014 died despite treatment"],["Found deceased","Found deceased"],["Other \u2014 see notes","Other \u2014 see notes"]]:[["","-- select reason --"],["Behavioural \u2014 unsafe to rehome","Behavioural \u2014 unsafe to rehome"],["Medical \u2014 terminal / untreatable","Medical \u2014 terminal / untreatable"],["Medical \u2014 quality of life / poor prognosis","Medical \u2014 quality of life / poor prognosis"],["Severe injury / trauma","Severe injury / trauma"],["Infectious disease \u2014 biosecurity","Infectious disease \u2014 biosecurity"],["Legal \u2014 court-ordered","Legal \u2014 court-ordered"],["Welfare \u2014 cruelty / seizure case","Welfare \u2014 cruelty / seizure case"]];
     var reasonControl=(needsReason&&!isStaff)?'<div style="border-left:3px solid #dc2626;background:#fef2f5;border-radius:8px;padding:2px 12px 1px;margin-bottom:12px">'+slct("Reason \u2014 required",f.euthReason,"fin.euthReason",reasonOpts)+'</div>':"";
     var decCard='<div class="card"><div class="oc-ch"><span class="oc-ic">&#9989;</span><span class="oc-ti">The decision</span></div>'
-      +outControl
-      +fld("Outcome date",f.outcomeDate,"fin.outcomeDate","date")
+      +'<div class="oc-grid">'+outControl+fld("Outcome date",f.outcomeDate,"fin.outcomeDate","date")+fld("Follow-up date",f.followUp,"fin.followUp","date")+'</div>'
       +reasonControl
       +ta("Outcome notes",f.outcomeNotes,"fin.outcomeNotes","")
-      +fld("Follow-up date",f.followUp,"fin.followUp","date")
       +'</div>';
     // ── Handover & sign-off ──
     var signCard='<div class="card"><div class="oc-ch"><span class="oc-ic">&#9997;&#65039;</span><span class="oc-ti">Handover &amp; sign-off</span></div>'
       +ta("Kennel handover note",f.handoverNote,"fin.handoverNote","Key info for the next shift / receiving unit...")
-      +'<div class="g2">'+fld("Assessor name",f.assessorName,"fin.assessorName","text","")+fld("Assessor date",f.assessorDate,"fin.assessorDate","date")+fld("Second assessor",f.secondAssessor,"fin.secondAssessor","text","")+fld("Second assessor date",f.secondAssessorDate,"fin.secondAssessorDate","date")+'</div>'
+      +'<div class="oc-grid">'+fld("Assessor name",f.assessorName,"fin.assessorName","text","")+fld("Assessor date",f.assessorDate,"fin.assessorDate","date")+fld("Second assessor",f.secondAssessor,"fin.secondAssessor","text","")+fld("Second assessor date",f.secondAssessorDate,"fin.secondAssessorDate","date")+'</div>'
       +'</div>';
     // ── Completeness banners ──
     var miss=[];
@@ -4525,7 +4527,7 @@ function page(){
     var _scOk=Object.values(S.scores||{}).some(function(v){return (parseInt(v)||0)>0;});
     var _asOk=S.assessment&&Object.keys(S.assessment).some(function(k){var v=S.assessment[k];return v!==""&&v!==null&&v!==undefined&&v!==false;});
     var assessWarn=(_finalOut&&(!_scOk||!_asOk))?'<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:11px 14px;margin-bottom:12px;font-size:12px;color:#854d0e;line-height:1.5"><strong>&#9888; Incomplete assessment.</strong> An outcome is set but '+(!_scOk&&!_asOk?"scoring and the behaviour assessment are":!_scOk?"scoring is":"the behaviour assessment is")+' still empty. Consider completing before the dog departs.</div>':"";
-    return '<h2>Final assessment &amp; outcome</h2><div class="sub">The picture the decision rests on, how the stay went, the outcome, and sign-off.</div>'+outcomeWarn+assessWarn+ctxCard+'<div class="oc-two">'+progCard+decCard+'</div>'+signCard+'<div class="brow"><button class="btn" data-go="scoring">&larr; Back</button><button class="btn btnp" data-go="medical">Next: medical &rarr;</button></div>';
+    return '<h2>Final assessment &amp; outcome</h2><div class="sub">The picture the decision rests on, how the stay went, the outcome, and sign-off.</div>'+outcomeWarn+assessWarn+ctxCard+progCard+decCard+signCard+'<div class="brow"><button class="btn" data-go="scoring">&larr; Back</button><button class="btn btnp" data-go="medical">Next: medical &rarr;</button></div>';
   }
 
   if(t==="report"){
