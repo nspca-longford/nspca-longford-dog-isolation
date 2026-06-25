@@ -251,7 +251,6 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
         <button id="dash-menu-btn" onclick="toggleDashMenu(event)" style="background:#1e293b;color:#c5e86c;border:0.5px solid #334155;padding:5px 11px;border-radius:6px;font-size:14px;cursor:pointer;font-family:inherit;line-height:1" title="Menu" aria-label="Menu">&#9776;</button>
         <div id="dash-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,0.18);min-width:210px;z-index:50;overflow-y:auto;max-height:calc(100vh - 90px)">
           <div class="dml">Daily work</div>
-          <div onclick="dashMenuGo('rounds')" class="dmi">&#128694; Daily Rounds</div>
           <div onclick="dashMenuGo('diary')" class="dmi">&#128214; Daily Diary</div>
           <div onclick="dashMenuGo('weighin')" class="dmi">&#9878;&#65039; Batch weigh-in</div>
           <div onclick="dashMenuGo('readytogo')" class="dmi">&#9989; Ready to Go</div>
@@ -327,20 +326,20 @@ var CATS=[
 
 var TABS=[
   {id:"dog",l:"Dog",g:"Profile"},{id:"arrival",l:"Arrival",g:"Profile"},{id:"days",l:"5-Day Report",g:"Profile"},
-  {id:"assessment",l:"Assessment",g:"Assessment"},{id:"behaviour",l:"Behaviour",g:"Assessment"},{id:"scoring",l:"Scoring",g:"Assessment"},{id:"ea",l:"EA",g:"Assessment"},{id:"outcome",l:"Outcome",g:"Assessment"},
+  {id:"assessment",l:"Assessment",g:"Assessment"},{id:"scoring",l:"Scoring",g:"Assessment"},{id:"ea",l:"EA",g:"Assessment"},{id:"outcome",l:"Outcome",g:"Assessment"},
   {id:"medical",l:"Medical",g:"Care"},
   {id:"weights",l:"Weights",g:"Care"},{id:"exercise",l:"Exercise",g:"Care"},
   {id:"feeding",l:"Feeding",g:"Care"},{id:"notes",l:"Notes",g:"Records"},
-  {id:"files",l:"Files",g:"Records"},{id:"timeline",l:"Timeline",g:"Output"},{id:"report",l:"Report",g:"Output"},{id:"briefing",l:"Briefing",g:"Output"}
+  {id:"files",l:"Files",g:"Records"},{id:"report",l:"Report",g:"Output"}
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.34",date:"2026-06-25",note:"A round of decluttering. Notes and Behaviour were two separate dated logs doing the same job, so they're now one \u2014 a single Notes & observations log for behaviour, daily life and anything worth recording. Any existing behaviour entries are folded into it automatically, nothing is lost. The Briefing is no longer its own tab: the Report now has a Report / Narrative toggle at the top, and Narrative is the same management briefing as before. The Timeline tab has been removed (it only ever mirrored what's already in the record), and Daily Rounds has been taken off the menu. Files stays."},
   {version:"3.33",date:"2026-06-25",note:"Two new features. The Unit Health Board (menu → Unit Health Board) puts every dog in the unit on one screen for morning rounds — health status, active conditions, active medications, days in isolation, next vet follow-up, latest weight and traffic light, sorted so anything needing attention (not fit, infectious, under treatment) rises to the top. And the Weights tab now draws a proper weight-trend chart — a line with dated points, a kg axis, the current body-condition score, net change since the first weigh-in and a flag if the dog has dropped 5% or more from its peak."},
   {version:"3.32",date:"2026-06-25",note:"The Assessment tab is rebuilt for the desktop. A pinned context header now shows the dog's name, traffic light, EA category and a behaviour completion meter, so you always see who you're assessing and how far along you are. The seven behaviour areas sit in a two-column grid that uses the screen width instead of one tall column, and they open by default since they're the main work; the Activities logs stay collapsed and full-width. The jump bar and per-card field counts are unchanged."},
   {version:"3.31",date:"2026-06-25",note:"The Outcome tab is rebuilt around the decision. A read-only Decision context strip now sits at the top — traffic light and score, EA category, current health, days in isolation and open handling warnings — so the whole picture is in front of you when you set the outcome. Below it the fields are reordered into Progress over the stay and The decision side by side, then Handover & sign-off, instead of the old flat list with the decision buried in the middle. The outcome list is grouped into 'In the unit' and 'Departed' (same options, nothing changes on the dashboard). 'Died in care' now takes a reason like Euthanised does, and a new check warns when a departure outcome is missing its date, reason or sign-off."},
   {version:"3.30",date:"2026-06-25",note:"New Current health section at the top of the Medical tab. It records how the dog is right now — a health status (Healthy, Recovering, Under treatment, Monitoring, or Not fit for rehoming) and a free-text condition note — and auto-assembles a live picture underneath: active conditions, active medications, latest weight and body condition, all pulled from what's already logged so there's nothing to re-enter. The status flows through to the printed Report and to the Ready to Go board, where it shows as its own chip — a dog marked Not fit for rehoming, or carrying an active infection, now shows a red chip and a red edge there instead of reading as ready. The Ready to Go infection chip is now a real check rather than always-green."},
-  {version:"3.29",date:"2026-06-25",note:"The Medical tab is reorganised to match the Assessment tab. The nine cards are now grouped under three jump-to headers \u2014 On arrival, Ongoing care and Vet \u2014 with a sticky jump bar and collapsible sections, so it's far less scrolling on a phone. Health at a glance stays pinned at the top. Vet visits and the old free-text vet notes are now one combined Vet log \u2014 log a full structured visit or jot a quick note, all in one dated list. A fix: an ended medication now reads the same everywhere \u2014 the Health-at-a-glance tile no longer counts a medication you've ended as still active. Vaccinations are unchanged. Nothing logged is lost."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -3279,7 +3278,7 @@ function deleteWeight(idx){appConfirm("Delete this weight entry?",function(){S.w
 function renderFiles(){
   var files=S.files||[];
   var fileCards=files.map(function(f,i){return'<div class="card" style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">'+(f.type==="image"?'<img src="'+fileURL(f)+'" onclick="showFileImage('+i+')" style="width:60px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;cursor:zoom-in">':'<div onclick="openFile('+i+')" style="width:60px;height:60px;border-radius:6px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;cursor:pointer">&#128196;</div>')+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(f.name)+'</div><div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">'+fmtDMY(f.date)+(f.note?" &middot; "+esc(f.note):"")+'</div>'+(f.type==="image"?'<a href="'+fileURL(f)+'" download="'+esc(f.name)+'" style="font-size:11px;color:var(--color-teal)">Download</a>':'<a href="#" onclick="openFile('+i+');return false" style="font-size:11px;color:var(--color-teal)">Open</a>')+'</div><button class="btn btnr" style="font-size:11px;padding:4px 8px;flex-shrink:0" onclick="deleteFile('+i+')">&#10005;</button></div>';}).join("");
-  return'<h2 style="margin-bottom:4px">Files & Documents</h2><div class="sub" style="margin-bottom:16px">Upload photos, scans or documents for this dog</div><div class="card" style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Upload File</div><div class="f"><label class="lbl">Note (optional)</label><input id="f-note" placeholder="e.g. Vet report 12 May"></div><label style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:13px;color:var(--color-text-secondary)">&#128206; Choose file<input type="file" accept="image/*,application/pdf,.pdf,.doc,.docx" style="display:none" onchange="handleFileUpload(this)"></label><div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px">Up to 5 MB per file. Images, PDFs and documents.</div></div>'+(files.length?fileCards:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)"><div style="font-size:32px;margin-bottom:8px">&#128206;</div>No files uploaded yet</div>')+'<div class="brow"><button class="btn" data-go="notes">&larr; Back</button><button class="btn btnp" data-go="timeline">Next: timeline &rarr;</button></div>';
+  return'<h2 style="margin-bottom:4px">Files & Documents</h2><div class="sub" style="margin-bottom:16px">Upload photos, scans or documents for this dog</div><div class="card" style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Upload File</div><div class="f"><label class="lbl">Note (optional)</label><input id="f-note" placeholder="e.g. Vet report 12 May"></div><label style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:13px;color:var(--color-text-secondary)">&#128206; Choose file<input type="file" accept="image/*,application/pdf,.pdf,.doc,.docx" style="display:none" onchange="handleFileUpload(this)"></label><div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px">Up to 5 MB per file. Images, PDFs and documents.</div></div>'+(files.length?fileCards:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)"><div style="font-size:32px;margin-bottom:8px">&#128206;</div>No files uploaded yet</div>')+'<div class="brow"><button class="btn" data-go="notes">&larr; Back</button><button class="btn btnp" data-go="report">Next: report &rarr;</button></div>';
 }
 function compressPhoto(file,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var MAX=400,w=img.width,h=img.height;if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}var cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);cb(cv.toDataURL("image/jpeg",0.75));};img.src=e.target.result;};r.readAsDataURL(file);}
 function handlePhotoUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){appAlert("Photo too large. Max 5MB.");return;}compressPhoto(file,function(data){S.dog.photo=data;renderMain();});}
@@ -3441,9 +3440,16 @@ function deleteExerciseEntryS(idx){
 function renderNotes(){
   if(!S.notes)S.notes=[];
   if(!S.incidents)S.incidents=[];
+  // Merge legacy Behaviour log into the single Notes log (one-time, per dog).
+  if(S.behaviour&&((S.behaviour.log&&S.behaviour.log.length)||S.behaviour.notes)){
+    (S.behaviour.log||[]).forEach(function(n){S.notes.push({date:n.date||new Date().toISOString().slice(0,10),time:n.time||"",text:n.text||"",staff:n.by||""});});
+    if(S.behaviour.notes)S.notes.push({date:new Date().toISOString().slice(0,10),time:"",text:S.behaviour.notes,staff:""});
+    S.behaviour.log=[];S.behaviour.notes="";S.behaviour.draft="";
+    debouncedSave();
+  }
   var today=new Date().toISOString().slice(0,10);
   var todayLabel=fmtDMYwk(new Date());
-  var h='<h2 style="margin-bottom:4px">Notes &amp; Journal</h2><div class="sub" style="margin-bottom:16px">Free-text observations &mdash; daily life that doesn\'t fit the structured forms.</div>';
+  var h='<h2 style="margin-bottom:4px">Notes &amp; observations</h2><div class="sub" style="margin-bottom:16px">One running log &mdash; behaviour, daily life, anything worth recording. Each entry is dated and signed.</div>';
   h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">New note &middot; '+todayLabel+'</div>';
   h+='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">'+["Ate well","Ate partially","Not eating","Normal stool","Loose stool","No stool","Vomited","Drinking well","Settled","Restless","Quiet / withdrawn","Barking persistently"].map(function(q){return '<button onclick="quickNote(\''+q+'\')" style="background:#fff;border:1px solid rgba(15,23,42,0.1);border-radius:20px;padding:5px 12px;font-size:11.5px;color:#475569;cursor:pointer;font-family:inherit">'+q+'</button>';}).join("")+'</div>';
   h+='<textarea id="note-input" style="min-height:80px;margin-bottom:8px" placeholder="What did you notice? Behaviour, mood, interactions, anything worth recording..."></textarea>';
@@ -3903,6 +3909,9 @@ function copyBriefing(){
 }
 function fallbackCopy(node){try{var r=document.createRange();r.selectNode(node);var s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand("copy");s.removeAllRanges();appAlert("Briefing copied.");}catch(e){appAlert("Couldn't copy automatically — please select and copy manually.");}}
 
+function setReportView(v){window._reportView=v;renderMain();}
+function reportToggle(){var v=window._reportView||"report";function b(val,lbl){var on=v===val;return '<button onclick="setReportView(\''+val+'\')" style="border:none;border-radius:8px;padding:6px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:'+(on?"#fff":"transparent")+';color:'+(on?"#0f172a":"#64748b")+';box-shadow:'+(on?"0 1px 2px rgba(15,23,42,0.10)":"none")+'">'+lbl+'</button>';}
+  return '<div style="display:inline-flex;background:#f1f5f9;border-radius:10px;padding:3px;margin-bottom:14px;gap:2px">'+b("report","Report")+b("narrative","Narrative")+'</div>';}
 function renderBriefing(){
   var d=S.dog||{},a=S.arrival||{},f=S.fin||{},m=S.medical||{},asmt=S.assessment||{};
   var name=d.name||"This dog";
@@ -4310,13 +4319,16 @@ function renderBriefing(){
 
   h+='</div>'; // close briefing-doc
 
-  h+='<div class="brow"><button class="btn" data-go="report">&larr; Back to Report</button><button class="btn" onclick="printDoc(\'Management Briefing\')">&#128424; PDF / Print</button><button class="btn btng" onclick="copyBriefing()">&#128203; Copy</button></div>';
+  h+='<div class="brow"><button class="btn" onclick="setReportView(\'report\')">&larr; Back to Report</button><button class="btn" onclick="printDoc(\'Management Briefing\')">&#128424; PDF / Print</button><button class="btn btng" onclick="copyBriefing()">&#128203; Copy</button></div>';
   return h;
 }
 
 // ── Page renderer ─────────────────────────────────────────────────
 function page(){
   var t=S.tab,d=S.dog,a=S.arrival,f=S.fin;
+  if(t==="behaviour"){S.tab=t="notes";}
+  else if(t==="timeline"){S.tab=t="report";}
+  else if(t==="briefing"){S.tab=t="report";window._reportView="narrative";}
   var total=Object.values(S.scores).reduce(function(a,b){return a+b},0);
   var tl=effLight(total,S.scores);var ea=eaTriggered();
 
@@ -4515,6 +4527,7 @@ function page(){
   }
 
   if(t==="report"){
+    if((window._reportView||"report")==="narrative")return reportToggle()+renderBriefing();
     var total2=Object.values(S.scores).reduce(function(a,b){return a+b},0),tl2=effLight(total2,S.scores),ea2=eaTriggered();
     var tlb2=tl2?'<span class="pill" style="background:'+tl2.bg+';color:'+tl2.tc+';font-size:13px;padding:5px 12px"><span style="width:8px;height:8px;border-radius:50%;background:'+tl2.dot+';display:inline-block;margin-right:6px"></span>'+tl2.l+'</span>':"";
     var d2=S.dog,a2=S.arrival,f2=S.fin,m2=S.medical||{},asmt=S.assessment||{};
@@ -4625,9 +4638,13 @@ function page(){
       asmtCard+='<div style="font-size:12px;color:#94a3b8;font-style:italic">No assessment data recorded.</div>';
     }
     asmtCard+='</div>';
-    var behBlock=(S.behaviour&&S.behaviour.log&&S.behaviour.log.length)?('<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">Behaviour log</div>'+S.behaviour.log.map(function(e){return '<div class="db"><div style="font-size:12px;font-weight:600;margin-bottom:3px">'+esc(e.date||"")+(e.by?' &middot; '+esc(e.by):'')+'</div><div style="font-size:12px;color:#0f172a;white-space:pre-wrap">'+esc(e.text||"")+'</div></div>';}).join("")+'</div>'):'';
+    var _repLog=[];
+    (S.notes||[]).forEach(function(n){if(n.text)_repLog.push({date:n.date,time:n.time,text:n.text,by:n.staff});});
+    (S.behaviour&&S.behaviour.log||[]).forEach(function(e){if(e.text)_repLog.push({date:e.date,time:e.time,text:e.text,by:e.by});});
+    _repLog.sort(function(a,b){var c=(b.date||"").localeCompare(a.date||"");return c!==0?c:(b.time||"").localeCompare(a.time||"");});
+    var behBlock=_repLog.length?('<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">Notes &amp; observations</div>'+_repLog.map(function(e){return '<div class="db"><div style="font-size:12px;font-weight:600;margin-bottom:3px">'+esc(e.date||"")+(e.by?' &middot; '+esc(e.by):'')+'</div><div style="font-size:12px;color:#0f172a;white-space:pre-wrap">'+esc(e.text||"")+'</div></div>';}).join("")+'</div>'):'';
 
-    return'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="margin:0">Full assessment report</h2><button class="btn" onclick="printDoc(\'Assessment Report\')" style="font-size:12px">&#128424; PDF / Print</button></div>'
+    return reportToggle()+'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="margin:0">Full assessment report</h2><button class="btn" onclick="printDoc(\'Assessment Report\')" style="font-size:12px">&#128424; PDF / Print</button></div>'
       +'<div style="background:#0f172a;border-radius:10px;padding:16px 18px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="color:#94a3b8;font-size:11px;margin-bottom:2px">'+esc(d2.refNo||"")+'</div><div style="color:#fff;font-size:22px;font-weight:600">'+esc(d2.name||"—")+'</div><div style="color:#94a3b8;font-size:12px;margin-top:2px">'+[d2.breed,d2.sex,d2.age].filter(Boolean).map(esc).join(" · ")+'</div></div><div style="text-align:right">'+tlb2+(total2?'<div style="color:#94a3b8;font-size:11px;margin-top:4px">Score: '+total2+'/24</div>':"")+'</div></div></div>'
       +((ea2&&!(S.ea&&S.ea.needed==="Yes"))?'<div class="ea-warn" style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:#92400e">&#9888; High behaviour score - consider an Enhanced Assessment</div></div>':'')
       +(rBite.length?'<div class="card" style="border-left:4px solid #dc2626;background:#fef2f2"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#991b1b;margin-bottom:6px">&#9888; Assessment bite risk</div>'+rBite.map(function(t){return '<div style="font-size:12.5px;color:#991b1b;font-weight:600">&bull; '+esc(t)+'</div>';}).join("")+'<div style="font-size:11px;color:#854d0e;margin-top:6px">Recorded in the behavioural assessment. Confirm the traffic-light rating reflects this before rehoming or downgrading handling.</div></div>':"")
@@ -4643,19 +4660,16 @@ function page(){
       +(function(){var er=eaCalc(S.ea||{});var e=S.ea||{};if((e.needed||"")!=="Yes"&&!er.complete)return"";var rows;if(er.complete){rows='<div class="rrow"><span class="rk">Severity (Freq + Size + Intensity + Bite)</span><span class="rv">'+er.severity+'</span></div><div class="rrow"><span class="rk">Probability</span><span class="rv">'+er.p+'</span></div><div class="rrow"><span class="rk">EA Score (Severity &times; Probability &divide; 72)</span><span class="rv">'+er.score.toFixed(2)+'</span></div><div class="rrow"><span class="rk">Risk category</span><span class="rv"><span style="font-size:11px;font-weight:700;padding:1px 9px;border-radius:20px;background:'+er.col[0]+';color:'+er.col[1]+'">'+esc(er.cat)+'</span></span></div><div class="rrow"><span class="rk">Management outcome</span><span class="rv">'+esc(er.mgmt)+'</span></div>';}else{rows='<div style="font-size:12px;color:#94a3b8;font-style:italic">EA flagged as required - scores not yet complete.</div>';}return'<div class="card" style="border-left:4px solid #dc2626"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#991b1b;margin-bottom:8px">&#9888; Enhanced Assessment (bite-risk)</div>'+rows+(e.incidentSummary?noteBlock("Incident summary",e.incidentSummary):"")+(e.concerns?noteBlock("Primary concerns",e.concerns):"")+(e.assessorName?'<div class="rrow"><span class="rk">Assessed by</span><span class="rv">'+esc(e.assessorName)+(e.assessorDate?" &middot; "+esc(e.assessorDate):"")+'</span></div>':"")+'</div>';})()
       +((concerns||f2.steps||f2.handoverNote||f2.outcome||f2.overallProgress)?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">Final assessment output</div>'+concerns+(f2.steps?'<div style="background:#dbeafe;border-radius:6px;padding:11px;margin-top:8px"><div style="font-size:10px;font-weight:600;color:#0369a1;text-transform:uppercase;margin-bottom:3px">Recommended next steps</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.steps)+'</div></div>':"")+(f2.followUp?'<div class="rrow" style="margin-top:8px"><span class="rk">Follow-up date</span><span class="rv">'+esc(f2.followUp)+'</span></div>':"")+(f2.overallProgress?'<div class="rrow"><span class="rk">Overall progress</span><span class="rv">'+esc(f2.overallProgress)+'</span></div>':"")+(f2.outcome?'<div class="rrow"><span class="rk">Outcome</span><span class="rv">'+esc(f2.outcome)+(f2.outcomeDate?" &middot; "+esc(f2.outcomeDate):"")+'</span></div>':"")+(((f2.outcome==="Euthanised"||f2.outcome==="Died in care")&&f2.euthReason)?'<div class="rrow"><span class="rk">'+(f2.outcome==="Euthanised"?"Reason for euthanasia":"Cause / reason")+'</span><span class="rv">'+esc(f2.euthReason)+'</span></div>':"")+(f2.outcomeNotes?noteBlock("Outcome notes",f2.outcomeNotes):"")+(f2.notes?noteBlock("Additional notes",f2.notes):"")+(f2.handoverNote?'<div style="margin-top:10px;padding:10px;background:#f8fafc;border-radius:6px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:4px">Kennel handover note</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.handoverNote)+'</div></div>':"")+'</div>':"")
       +(f2.assessorName?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:8px">Sign-off</div><div class="rrow"><span class="rk">Assessor</span><span class="rv">'+esc(f2.assessorName)+(f2.assessorDate?' &mdash; '+esc(f2.assessorDate):'')+'</span></div>'+(f2.secondAssessor?'<div class="rrow"><span class="rk">Second assessor</span><span class="rv">'+esc(f2.secondAssessor)+(f2.secondAssessorDate?' &mdash; '+esc(f2.secondAssessorDate):'')+'</span></div>':'')+'</div>':'')
-      +'<div class="brow"><button class="btn" data-go="timeline">&larr; Back</button><button class="btn" onclick="printDoc(\'Assessment Report\')">&#128424; PDF / Print</button><button class="btn" data-go="briefing">Briefing &rarr;</button></div>';
+      +'<div class="brow"><button class="btn" data-go="files">&larr; Back</button><button class="btn" onclick="printDoc(\'Assessment Report\')">&#128424; PDF / Print</button></div>';
   }
 
-  if(t==="briefing")return renderBriefing();
   if(t==="assessment")return renderAssessment();
-  if(t==="behaviour")return renderBehaviour();
   if(t==="medical")return renderMedical();
   if(t==="weights")return renderWeights();
   if(t==="exercise")return renderExercise();
   if(t==="feeding")return renderFeeding();
   if(t==="notes")return renderNotes();
   if(t==="files")return renderFiles();
-  if(t==="timeline")return renderTimeline();
   return"";
 }
 
