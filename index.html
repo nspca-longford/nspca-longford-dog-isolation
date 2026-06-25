@@ -196,9 +196,11 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .asmt-ctx .pl{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;margin-bottom:5px;text-align:right}
 .asmt-ctx .bar{height:7px;border-radius:5px;background:#1e293b;overflow:hidden}
 .asmt-ctx .bar i{display:block;height:100%;background:#C5E86C}
-.asmt-bgrid{column-count:2;column-gap:14px}
-.asmt-bgrid>.card{break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;margin-bottom:14px}
-@media(max-width:820px){.asmt-bgrid{column-count:1}.asmt-ctx .prog{flex:1}}
+.asmt-bgrid{display:flex;flex-direction:column;gap:14px}
+.asmt-bgrid>.card{margin-bottom:0}
+.asmt-bgrid .g2{grid-template-columns:repeat(3,1fr)}
+@media(max-width:1040px){.asmt-bgrid .g2{grid-template-columns:1fr 1fr}}
+@media(max-width:820px){.asmt-bgrid .g2{grid-template-columns:1fr}.asmt-ctx .prog{flex:1}}
 </style>
 </head>
 <body>
@@ -335,7 +337,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
-  {version:"3.35",date:"2026-06-25",note:"Fixed the empty-space problem on the Assessment and Outcome tabs. The two columns were locked into rigid rows, so a short card (like Temperament) left a big blank gap beside a tall one (like Handling). On Assessment the behaviour cards now flow into two balanced columns that pack tightly with no dead space; on Outcome the two panels are now equal height so the shorter side no longer leaves a ragged gap."},
+  {version:"3.35",date:"2026-06-25",note:"Fixed the empty-space problem on the Assessment and Outcome tabs, where a short card left a big blank gap beside a tall one. On Assessment the behaviour cards are now one per row at full width, with their fields laid out three across to use the screen \u2014 a fixed top-to-bottom order with no gaps, and nothing reshuffles when you collapse a card. On Outcome the two panels are now equal height so the shorter side no longer leaves a ragged gap."},
   {version:"3.34",date:"2026-06-25",note:"A round of decluttering. Notes and Behaviour were two separate dated logs doing the same job, so they're now one \u2014 a single Notes & observations log for behaviour, daily life and anything worth recording. Any existing behaviour entries are folded into it automatically, nothing is lost. The Briefing is no longer its own tab: the Report now has a Report / Narrative toggle at the top, and Narrative is the same management briefing as before. The Timeline tab has been removed (it only ever mirrored what's already in the record), and Daily Rounds has been taken off the menu. Files stays."},
   {version:"3.33",date:"2026-06-25",note:"Two new features. The Unit Health Board (menu → Unit Health Board) puts every dog in the unit on one screen for morning rounds — health status, active conditions, active medications, days in isolation, next vet follow-up, latest weight and traffic light, sorted so anything needing attention (not fit, infectious, under treatment) rises to the top. And the Weights tab now draws a proper weight-trend chart — a line with dated points, a kg axis, the current body-condition score, net change since the first weigh-in and a flag if the dog has dropped 5% or more from its peak."},
   {version:"3.32",date:"2026-06-25",note:"The Assessment tab is rebuilt for the desktop. A pinned context header now shows the dog's name, traffic light, EA category and a behaviour completion meter, so you always see who you're assessing and how far along you are. The seven behaviour areas sit in a two-column grid that uses the screen width instead of one tall column, and they open by default since they're the main work; the Activities logs stay collapsed and full-width. The jump bar and per-card field counts are unchanged."},
