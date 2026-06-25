@@ -311,11 +311,11 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.30",date:"2026-06-25",note:"New Current health section at the top of the Medical tab. It records how the dog is right now — a health status (Healthy, Recovering, Under treatment, Monitoring, or Not fit for rehoming) and a free-text condition note — and auto-assembles a live picture underneath: active conditions, active medications, latest weight and body condition, all pulled from what's already logged so there's nothing to re-enter. The status flows through to the printed Report and to the Ready to Go board, where it shows as its own chip — a dog marked Not fit for rehoming, or carrying an active infection, now shows a red chip and a red edge there instead of reading as ready. The Ready to Go infection chip is now a real check rather than always-green."},
   {version:"3.29",date:"2026-06-25",note:"The Medical tab is reorganised to match the Assessment tab. The nine cards are now grouped under three jump-to headers \u2014 On arrival, Ongoing care and Vet \u2014 with a sticky jump bar and collapsible sections, so it's far less scrolling on a phone. Health at a glance stays pinned at the top. Vet visits and the old free-text vet notes are now one combined Vet log \u2014 log a full structured visit or jot a quick note, all in one dated list. A fix: an ended medication now reads the same everywhere \u2014 the Health-at-a-glance tile no longer counts a medication you've ended as still active. Vaccinations are unchanged. Nothing logged is lost."},
   {version:"3.28",date:"2026-06-23",note:"The Assessment and Scoring tabs now talk to each other on bite risk. If the assessment records a handler-directed bite risk that the six-category score has no place for \u2014 snapping or biting when handled, severe resource guarding, redirected aggression, aggression to strangers, dangerous on lead, no bite inhibition, or snapping when frustrated \u2014 it's now flagged in red on the Scoring tab, on the printed Report, and on the kennel card, even if the score itself comes out Green. A dog can no longer print as low-risk while its own assessment records a bite. Separately, the Battersea EA flag now follows the same effective traffic light as everything else, so a dog held at Red by a single severe finding now correctly triggers EA (previously it could be missed). Also: 'Expand all' on the assessment now opens the Temperament card too."},
   {version:"3.27",date:"2026-06-23",note:"Fixed a bug where some newer fields weren't coming back when you reopened a dog. The information was being saved correctly, but the app was only reloading an older list of fields \u2014 so sub-criteria scores, category notes, assessment snapshots, second-assessor scores and the Behaviour log could look blank after reopening or refreshing. Loading now restores everything that was saved, and is built so this can't happen again when new fields are added. Nothing you saved was lost \u2014 it reappears once you reload the dog."},
   {version:"3.26",date:"2026-06-23",note:"A visual refresh of the Scoring tab. The result panel is now a clearer hero \u2014 a big total, the traffic-light pill, a six-cell completion tracker that fills in as you rate each category, and the floor/provisional note in its own coloured strip. Each category card carries a coloured rail down its edge tinted by its band, so scrolling the tab reads as a risk profile at a glance, and the 0\u20133 concern buttons are now a single tidy segmented control with the evidence tag beside it. Same scoring, just much easier to read and faster to fill in."},
-  {version:"3.25",date:"2026-06-23",note:"The Scoring tab is rebuilt around weighted sub-criteria. Instead of one 1\u20134 score per category, you now rate several specific, weighted sub-items per category on a 0\u20133 concern scale (none to severe), each with its own plain-English descriptions and an optional Observed/Inferred tag. The sub-items roll up automatically to the same category band and /24 total as before, so the traffic light, walking rules, the worst-category floor and the incomplete-assessment guard all keep working \u2014 the guard now tracks completeness right down to the sub-item. Certain critical sub-items (e.g. bites with little warning, severe panic, barrier aggression) hold the category at Red on their own. Dogs scored under the previous system keep their result and are clearly marked; re-rate the sub-criteria to refine them."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1183,7 +1183,7 @@ function renderReadyToGo(){
   var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1;font-size:18px">Ready to Go</h2></div>';
   var sub='<div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px">Finished isolation, infection-clear and assessed - ready to move on.</div>';
   if(!list.length)return '<div style="max-width:760px;margin:0 auto">'+back+sub+'<div style="text-align:center;padding:36px 20px;color:var(--color-text-secondary)"><div style="font-size:34px;margin-bottom:8px">&#9989;</div>No dogs are ready to go right now.<div style="font-size:11px;margin-top:6px;opacity:0.8">A dog appears here once it has cleared its 5-day isolation, has no active disease, and has been assessed.</div></div></div>';
-  function rdChip(label,state){var c=state==="ok"?["#dcfce7","#166534"]:state==="warn"?["#fef3c7","#92400e"]:["#f1f5f9","#94a3b8"];return'<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:'+c[0]+';color:'+c[1]+'">'+(state==="ok"?"\u2713 ":"")+label+'</span>';}
+  function rdChip(label,state){var c=state==="ok"?["#dcfce7","#166534"]:state==="warn"?["#fef3c7","#92400e"]:state==="bad"?["#fee2e2","#991b1b"]:["#f1f5f9","#94a3b8"];return'<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:'+c[0]+';color:'+c[1]+'">'+(state==="ok"?"\u2713 ":state==="bad"?"\u2715 ":"")+label+'</span>';}
   function suitMark(v){if(!v)return null;v=(""+v).toLowerCase();if(v.indexOf("no")===0||v.indexOf("not suitable")>=0)return"\u2717";if(v.indexOf("caution")>=0||v.indexOf("selective")>=0||v.indexOf("adults only")>=0||v.indexOf("over ")>=0)return"~";return"\u2713";}
   var rows=list.map(function(r){
     var st=r.state||{};var d=st.dog||{};var m=st.medical||{};var a=st.assessment||{};
@@ -1196,7 +1196,11 @@ function renderReadyToGo(){
     var neutered=!!(m.neuteredConfirmed&&m.neuteredConfirmed.indexOf("Yes")===0);
     var vaxed=((m.vaccinations||[]).length>0);
     var profileDone=!!(a.homeType||a.suitableChildren||a.suitableOtherDogs||a.suitabilityNotes);
-    var chips=[rdChip("Isolation","ok"),rdChip("Infection-clear","ok"),rdChip("Assessed","ok"),rdChip(neutered?"Neutered":"Neuter pending",neutered?"ok":"warn"),rdChip(vaxed?"Vaccinated":"Vaccines pending",vaxed?"ok":"warn"),rdChip(chipped?"Microchipped":"Chip pending",chipped?"ok":"warn"),rdChip(profileDone?"Rehoming profile":"Profile incomplete",profileDone?"ok":"off")].join("");
+    var infActive=activeContagiousList(m).length>0;
+    var cs=m.currentStatus||"";
+    var notFit=cs==="Not fit for rehoming";
+    var healthChip=notFit?rdChip("Not fit for rehoming","bad"):cs==="Healthy"?rdChip("Healthy","ok"):cs?rdChip(cs,"warn"):rdChip("Health not set","off");
+    var chips=[rdChip("Isolation","ok"),rdChip(infActive?"Infection present":"Infection-clear",infActive?"bad":"ok"),healthChip,rdChip("Assessed","ok"),rdChip(neutered?"Neutered":"Neuter pending",neutered?"ok":"warn"),rdChip(vaxed?"Vaccinated":"Vaccines pending",vaxed?"ok":"warn"),rdChip(chipped?"Microchipped":"Chip pending",chipped?"ok":"warn"),rdChip(profileDone?"Rehoming profile":"Profile incomplete",profileDone?"ok":"off")].join("");
     var sk=suitMark(a.suitableChildren),sd=suitMark(a.suitableOtherDogs),sc=suitMark(a.suitableCats);
     var suitBits=[];if(sk)suitBits.push("Kids "+sk);if(sd)suitBits.push("Dogs "+sd);if(sc)suitBits.push("Cats "+sc);
     var extra=[a.homeType,a.exerciseNeeds].filter(Boolean).join(" \u00b7 ");
@@ -1205,7 +1209,8 @@ function renderReadyToGo(){
     var warnLine=warns.length?'<div style="font-size:11px;font-weight:600;color:'+(warns.some(function(w){return w.level==="Critical";})?"#991b1b":"#92400e")+';margin-top:6px">&#9888; '+warns.length+' handling warning'+(warns.length!==1?"s":"")+'</div>':"";
     var rb=readyDays>=14?["#fee2e2","#991b1b"]:readyDays>=7?["#fef3c7","#92400e"]:["#f1f5f9","#64748b"];
     var readyBadge='<div style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:'+rb[0]+';color:'+rb[1]+';white-space:nowrap;flex-shrink:0">Ready '+readyDays+'d</div>';
-    return'<div onclick="openDog('+r.id+')" class="dog-card" style="background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-left:3px solid #16a34a;border-radius:14px;padding:13px;margin-bottom:12px;cursor:pointer"><div style="display:flex;gap:12px;align-items:flex-start">'+ph+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px"><div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">'+esc(r.name)+'</div>'+tlPill+provDot(r.state)+trajTag(r)+readyBadge+'</div>'+(idline?'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px">'+esc(idline)+'</div>':'')+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+chips+'</div>'+suitLine+warnLine+'</div>';
+    var rbBorder=(notFit||infActive)?"#dc2626":"#16a34a";
+    return'<div onclick="openDog('+r.id+')" class="dog-card" style="background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-left:3px solid '+rbBorder+';border-radius:14px;padding:13px;margin-bottom:12px;cursor:pointer"><div style="display:flex;gap:12px;align-items:flex-start">'+ph+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px"><div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">'+esc(r.name)+'</div>'+tlPill+provDot(r.state)+trajTag(r)+readyBadge+'</div>'+(idline?'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px">'+esc(idline)+'</div>':'')+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+chips+'</div>'+suitLine+warnLine+'</div>';
   }).join("");
   var count='<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">'+list.length+' dog'+(list.length!==1?'s':'')+' ready \u00b7 longest-waiting first</div>';
   var legend='<div style="font-size:10px;color:#94a3b8;margin-bottom:12px">Rehoming marks: \u2713 suitable \u00b7 ~ with caution \u00b7 \u2717 not suitable. Amber chips are info, not blockers.</div>';
@@ -2646,7 +2651,7 @@ function renderStats(){
 }
 
 // ── Default state ─────────────────────────────────────────────────
-function defaultMedical(){return{bcs:"",neuteredConfirmed:"",neuterDate:"",neuterNotes:"",dental:"",dentalDate:"",dentalNotes:"",skinCondition:"",injuries:"",arrivalHealthNotes:"",vetNotes:"",vetLog:[],vetDraft:"",diseases:[],vaccinations:[],parasiteTreatments:[],medications:[],vetVisits:[]};}
+function defaultMedical(){return{bcs:"",neuteredConfirmed:"",neuterDate:"",neuterNotes:"",dental:"",dentalDate:"",dentalNotes:"",skinCondition:"",injuries:"",arrivalHealthNotes:"",currentStatus:"",currentNote:"",vetNotes:"",vetLog:[],vetDraft:"",diseases:[],vaccinations:[],parasiteTreatments:[],medications:[],vetVisits:[]};}
 
 // Shared infectious-disease lookups (used by Medical tab, dashboard cards and briefing)
 var CONTAGIOUS_DISEASES={"Parvovirus (CPV)":1,"Canine Distemper":1,"Kennel Cough (CIRDC)":1,"Canine Influenza":1,"Infectious Hepatitis (CAV-1)":1,"Leptospirosis":1,"Sarcoptic Mange (scabies)":1,"Demodectic Mange":0,"Ringworm":1,"Giardia":1,"Coccidiosis":1,"Lungworm":0,"Tick-borne (Babesia / Ehrlichia)":0,"Other":0};
@@ -2734,6 +2739,15 @@ function medSecHead(icon,title,addBtn){
 function medStatTile(label,value,dot){
   return '<div style="background:#fff;border:1px solid rgba(15,23,42,0.08);border-radius:11px;padding:9px 11px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;margin-bottom:3px">'+label+'</div><div style="font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;line-height:1.25">'+(dot?'<span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:'+dot+'"></span>':'')+value+'</div></div>';
 }
+function chStatus(s){
+  if(s==="Healthy")return{bg:"#dcfce7",fg:"#166534",dot:"#16a34a",l:"Healthy"};
+  if(s==="Recovering")return{bg:"#ccfbf1",fg:"#115e59",dot:"#0d9488",l:"Recovering"};
+  if(s==="Under treatment")return{bg:"#dbeafe",fg:"#1e40af",dot:"#2563eb",l:"Under treatment"};
+  if(s==="Monitoring")return{bg:"#fef9c3",fg:"#854d0e",dot:"#f59e0b",l:"Monitoring"};
+  if(s==="Not fit for rehoming")return{bg:"#fee2e2",fg:"#991b1b",dot:"#dc2626",l:"Not fit for rehoming"};
+  return null;
+}
+function latestWeight(){var ws=(S.weights||[]).slice().filter(function(w){return w.date;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");});return ws[0]||null;}
 function medSummaryCard(m,vax){
   m=m||{};var today=new Date().toISOString().slice(0,10);
   var nc=m.neuteredConfirmed||"";
@@ -2782,6 +2796,7 @@ function renderMedical(){
   var today=new Date().toISOString().slice(0,10);
   var todayStr=today;
   window._medOpen=window._medOpen||{};
+  if(window._medOpen.current===undefined)window._medOpen.current=true;
   function _open(id){return !!window._medOpen[id];}
   function _short(s){if(!s)return'';s=String(s).split(' \u2014 ')[0].split(' / ')[0];return s.length>16?s.slice(0,15)+'\u2026':s;}
   function _add(type,label){return '<button class="med-add-btn" onclick="event.stopPropagation();showMedOverlay(\''+type+'\')">'+(label||'+ Log')+'</button>';}
@@ -2806,6 +2821,7 @@ function renderMedical(){
 
   // Jump bar
   h+='<div class="med-jump">'
+    +'<button class="med-chip go" onclick="medJump(\'current\')">Current</button>'
     +'<button class="med-chip go" onclick="medJump(\'arrival\')">On arrival</button>'
     +'<button class="med-chip go" onclick="medJump(\'care\')">Ongoing care</button>'
     +'<button class="med-chip go" onclick="medJump(\'vet\')">Vet</button>'
@@ -2814,6 +2830,29 @@ function renderMedical(){
   +'</div>';
 
   h+='<!--MEDSUMMARY-->';
+
+  // ───────── CURRENT ─────────
+  h+='<div class="med-grp" id="medgrp-current">Current</div>';
+  var chS=chStatus(m.currentStatus);
+  var bCur='';
+  bCur+='<div style="display:flex;align-items:center;gap:8px;border-radius:10px;padding:9px 12px;margin-bottom:12px;background:'+(chS?chS.bg:"#f1f5f9")+';color:'+(chS?chS.fg:"#64748b")+'">'
+    +'<span style="width:9px;height:9px;border-radius:50%;flex-shrink:0;background:'+(chS?chS.dot:"#94a3b8")+'"></span>'
+    +'<span style="font-size:12.5px;font-weight:700">'+(chS?chS.l:"Health status not set")+'</span></div>';
+  bCur+='<div class="g2">';
+  bCur+=slct("Current health status",m.currentStatus||"","medical.currentStatus",[["","-- not set --"],["Healthy","Healthy — fit and well"],["Recovering","Recovering"],["Under treatment","Under treatment"],["Monitoring","Monitoring — keep an eye"],["Not fit for rehoming","Not fit for rehoming"]]);
+  var _lw=latestWeight();
+  bCur+='<div class="f"><label class="lbl">Latest weight</label><div style="border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12.5px;color:'+(_lw?"#0f172a":"#94a3b8")+';background:#f8fafc">'+(_lw?esc(_lw.weight||"")+' &middot; '+fmtDMY(_lw.date):"No weight logged \u2014 add on the Weights tab")+'</div></div>';
+  bCur+='</div>';
+  bCur+=ta("Current condition note",m.currentNote||"","medical.currentNote","How is the dog right now? e.g. settled, eating well, wound healing, energy good...");
+  // Auto-assembled live picture (read-only)
+  var _actCond=(m.diseases||[]).filter(function(p){return p.status!=="Recovered / cleared";});
+  var _actMeds=(m.medications||[]).filter(function(x){return x.active!==false&&(!x.endDate||x.endDate>=today);});
+  bCur+='<div style="margin-top:6px;border-top:1px solid #eef2f7;padding-top:10px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;margin-bottom:8px">Live picture</div>';
+  bCur+='<div class="rrow"><span class="rk">Active conditions</span><span class="rv" style="color:'+(_actCond.length?"#991b1b":"#166534")+'">'+(_actCond.length?_actCond.map(function(p){return esc(p.type.replace(/ \(.*$/,""))+" ("+esc(p.status||"Suspected")+")";}).join(", "):"None active")+'</span></div>';
+  bCur+='<div class="rrow"><span class="rk">Active medications</span><span class="rv">'+(_actMeds.length?_actMeds.map(function(x){return esc(x.name)+(x.dose?" "+esc(x.dose):"");}).join(", "):"None")+'</span></div>';
+  bCur+='<div class="rrow"><span class="rk">Body condition</span><span class="rv">'+(m.bcs?esc(m.bcs):"\u2014")+'</span></div>';
+  bCur+='</div>';
+  h+=medSection("current","&#10084;&#65039;","Current health","",bCur,chS?chS.l:"");
 
   // ───────── ON ARRIVAL ─────────
   h+='<div class="med-grp" id="medgrp-arrival">On arrival</div>';
@@ -3106,7 +3145,7 @@ function renderMedical(){
   return h;
 }
 function medTog(id){window._medOpen=window._medOpen||{};window._medOpen[id]=!window._medOpen[id];var open=window._medOpen[id];var b=document.getElementById("medbody-"+id);var c=document.getElementById("medchev-"+id);if(b)b.style.display=open?"":"none";if(c)c.style.transform="rotate("+(open?"90":"0")+"deg)";if(c){var sh=c.parentElement;if(sh){if(open)sh.classList.add("open");else sh.classList.remove("open");}}}
-function medSetAll(open){window._medOpen=window._medOpen||{};["arrival","neuter","dental","disease","vax","parasite","meds","vetlog"].forEach(function(id){window._medOpen[id]=open;});renderMain();}
+function medSetAll(open){window._medOpen=window._medOpen||{};["current","arrival","neuter","dental","disease","vax","parasite","meds","vetlog"].forEach(function(id){window._medOpen[id]=open;});renderMain();}
 function medJump(id){var el=document.getElementById("medgrp-"+id);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});}
 
 // ── Weights ───────────────────────────────────────────────────────
@@ -4332,6 +4371,12 @@ function page(){
     var vetList=(m2.vetVisits||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");});
 
     var medCard='<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Medical record</div>';
+    if(m2.currentStatus||m2.currentNote){
+      var _ch2=chStatus(m2.currentStatus);var _lw2=latestWeight();
+      medCard+='<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0f172a;margin-bottom:6px">Current health</div>';
+      if(_ch2)medCard+='<div style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:'+_ch2.bg+';color:'+_ch2.fg+';margin-bottom:6px"><span style="width:7px;height:7px;border-radius:50%;background:'+_ch2.dot+'"></span>'+_ch2.l+'</div>';
+      medCard+=kvRows([["Latest weight",_lw2?(_lw2.weight+" \u00b7 "+fmtDMY(_lw2.date)):""],["Body condition",m2.bcs]])+noteBlock("Current note",m2.currentNote);
+    }
     var arrivalRows=kvRows([["Body Condition Score",m2.bcs],["Neutered status",(m2.neuteredConfirmed||"")+(m2.neuterDate?" · "+fmtDMY(m2.neuterDate):"")],["Dental",(m2.dental||"")+(m2.dentalDate?" · treated "+fmtDMY(m2.dentalDate):"")],["Coat & skin",m2.skinCondition],["Visible injuries",m2.injuries]]);
     if(arrivalRows||m2.arrivalHealthNotes){
       medCard+='<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0f172a;margin-bottom:6px">On-arrival health</div>'+arrivalRows+noteBlock("Notes",m2.arrivalHealthNotes);
