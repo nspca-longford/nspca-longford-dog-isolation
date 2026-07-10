@@ -56,6 +56,70 @@ nav::-webkit-scrollbar{display:none}
 .cdot.empty{background:transparent;box-shadow:inset 0 0 0 1.5px #cbd5e1}
 .nb{padding:11px 14px;border:none;background:transparent;cursor:pointer;font-size:12px;font-weight:500;color:#64748b;border-bottom:2px solid transparent;white-space:nowrap;font-family:inherit}
 .nb.on{color:#0f172a;font-weight:700;border-bottom-color:#a9d23f;border-bottom-width:2.5px}
+/* V5 two-tier pill nav */
+#navwrap{background:#fff;padding-bottom:10px}
+.pnav{padding:10px 14px 0}
+.pnav-row{position:relative;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.pnav-row::-webkit-scrollbar{display:none}
+.pnav-row .pglide{position:absolute;top:0;left:0;height:100%;border-radius:999px;z-index:0;pointer-events:none;transition:transform .3s cubic-bezier(.34,1.2,.4,1),width .3s cubic-bezier(.34,1.2,.4,1)}
+.pnav-groups{padding:3px;background:#f1f3ee;border-radius:999px;display:inline-flex;min-width:min-content}
+.pnav-groups .pglide{background:#0f172a}
+.ppill{position:relative;z-index:1;border:none;background:transparent;cursor:pointer;font-family:inherit;white-space:nowrap;transition:color .18s ease;padding:8px 16px;font-size:12.5px;font-weight:700;color:#64748b;border-radius:999px}
+.pnav-groups .ppill.on{color:#fff}
+.pnav-subs{margin-top:8px;padding:2px;display:inline-flex;min-width:min-content}
+.pnav-subs .pglide{background:#C5E86C}
+.pnav-subs .ppill{font-size:12px;font-weight:600;padding:7px 13px}
+.pnav-subs .ppill.on{color:#0f172a}
+.pnav-subs .ppill .pcdot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-left:6px;vertical-align:middle}
+.pnav-subs .ppill .pcdot.done{background:#16a34a}
+.pnav-subs .ppill .pcdot.empty{background:transparent;box-shadow:inset 0 0 0 1.5px #cbd5e1}
+.pnav-subs.single{display:none}
+/* V5 dashboard — calm/dense cards */
+.statrail{display:flex;align-items:stretch;gap:0;margin-bottom:14px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden}
+.srstat{flex:1;padding:11px 14px;border-right:1px solid #e2e8f0;cursor:pointer;transition:background .12s;position:relative;background:none;font-family:inherit;text-align:left}
+.srstat:last-child{border-right:none}
+.srstat:hover{background:#fafafa}
+.srstat.sel{background:#fafafa}
+.srstat.sel::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:#0f172a}
+.srstat.sel.g::after{background:#16a34a}.srstat.sel.y::after{background:#f59e0b}
+.srstat.sel.r::after{background:#dc2626}.srstat.sel.b::after{background:#0f172a}
+.srstat .srn{font-size:19px;font-weight:800;letter-spacing:-.02em;line-height:1;display:flex;align-items:baseline;gap:6px;color:#0f172a}
+.srstat .srn .srd{width:7px;height:7px;border-radius:999px;margin-bottom:1px}
+.srstat.g .srd{background:#16a34a}.srstat.y .srd{background:#f59e0b}.srstat.r .srd{background:#dc2626}.srstat.b .srd{background:#0f172a}
+.srstat .srl{font-size:10.5px;color:#94a3b8;font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.04em}
+.dcardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.dcard{background:#fff;border:1px solid #e2e8f0;border-radius:13px;cursor:pointer;position:relative;box-shadow:0 1px 2px rgba(15,23,42,.03);transition:border-color .14s,box-shadow .14s,transform .14s}
+.dcard:hover{border-color:#cbd5e1;box-shadow:0 4px 16px -8px rgba(15,23,42,.18);transform:translateY(-1px)}
+.dcard .stripe{position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0}
+.dcard.tg .stripe{background:#16a34a}.dcard.ty .stripe{background:#f59e0b}.dcard.tr .stripe{background:#dc2626}.dcard.tb .stripe{background:#0f172a}.dcard.tn .stripe{background:#e2e8f0}
+.dcard-in{padding:12px 13px 12px 16px}
+.dtop{display:flex;gap:10px;align-items:flex-start}
+.dthumb{width:44px;height:44px;border-radius:10px;flex:none;overflow:hidden;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:19px}
+.dthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.dinfo{flex:1;min-width:0}
+.dname{font-size:14px;font-weight:700;letter-spacing:-.005em;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dmeta{font-size:11px;color:#94a3b8;font-weight:500;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dkennel{font-size:10px;font-weight:700;color:#475569;background:#f1f5f9;border-radius:6px;padding:2px 7px;white-space:nowrap;flex:none}
+.dbottom{margin-top:10px;padding-top:9px;border-top:1px solid #f1f5f9}
+.drow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.dstatus{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700}
+.dstatus .dd{width:7px;height:7px;border-radius:999px;flex:none}
+.dcard.tg .dstatus .dd{background:#16a34a}.dcard.tg .dstatus{color:#16a34a}
+.dcard.ty .dstatus .dd{background:#f59e0b}.dcard.ty .dstatus{color:#f59e0b}
+.dcard.tr .dstatus .dd{background:#dc2626}.dcard.tr .dstatus{color:#dc2626}
+.dcard.tb .dstatus .dd{background:#0f172a}.dcard.tb .dstatus{color:#0f172a}
+.dcard.tn .dstatus .dd{background:#cbd5e1}.dcard.tn .dstatus{color:#94a3b8}
+.dayno{font-size:10.5px;color:#94a3b8;font-weight:600;font-variant-numeric:tabular-nums}
+.dbarwrap{display:flex;gap:2px;margin-top:7px}
+.dbarwrap i{flex:1;height:4px;border-radius:99px;background:#eceef1}
+.dbarwrap i.on{background:#0f172a}
+.dflagrow{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.dflag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;display:inline-flex;align-items:center;gap:4px}
+.dflag.ea{background:#C5E86C;color:#3a4a16}
+.dflag.warn{background:#fef3e2;color:#b45309}
+.dflag.crit{background:#fee2e2;color:#b91c1c}
+.dflag.prov{background:#fff;color:#b45309;border:1px solid #f59e0b}
+.dflag.ok{background:#f1f5f9;color:#94a3b8;font-weight:600}
 .nb:hover:not(.on){color:#0f172a}
 .btn{padding:9px 16px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;border:1px solid rgba(15,23,42,0.1);background:#fff;color:#0f172a;transition:all 0.15s}
 .btn:hover{background:#f8fafc}
@@ -301,7 +365,13 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
   <div class="subheader">
     <div style="color:#94a3b8;font-size:11px">Isolation Unit — Intake Assessment &amp; 5-Day Report &nbsp;|&nbsp; Longford &nbsp;|&nbsp; <span style="color:#c5e86c">&#9679; Shared records enabled</span></div>
   </div>
-  <div id="navwrap"><nav id="nav"></nav><div id="navfade"></div></div>
+  <div id="navwrap">
+    <div class="pnav">
+      <div class="pnav-row pnav-groups" id="pnav-groups"><span class="pglide" id="pnav-gglide"></span></div>
+      <div class="pnav-row pnav-subs" id="pnav-subs"><span class="pglide" id="pnav-sglide"></span></div>
+    </div>
+  </div>
+  <nav id="nav" style="display:none"></nav>
   <div id="content"></div>
   <div id="save-bar" style="position:fixed;bottom:0;left:0;right:0;z-index:50;background:#fff;border-top:1px solid #e2e8f0;box-shadow:0 -4px 16px rgba(0,0,0,0.07);padding:10px 16px;padding-bottom:calc(10px + env(safe-area-inset-bottom))">
     <div style="max-width:740px;margin:0 auto"><div id="last-changed" style="font-size:10.5px;color:#94a3b8;text-align:right;margin-bottom:6px;min-height:13px;line-height:13px"></div><button id="save-btn" onclick="saveRecord()" class="btn btng" style="width:100%;font-size:14px;padding:11px;font-weight:600">Save</button></div>
@@ -331,21 +401,22 @@ var CATS=[
 ];
 
 var TABS=[
-  {id:"dog",l:"Dog",g:"Profile"},{id:"arrival",l:"Arrival",g:"Profile"},{id:"days",l:"5-Day Report",g:"Profile"},
-  {id:"assessment",l:"Assessment",g:"Assessment"},{id:"scoring",l:"Scoring",g:"Assessment"},{id:"ea",l:"EA",g:"Assessment"},{id:"outcome",l:"Outcome",g:"Assessment"},
-  {id:"medical",l:"Medical",g:"Care"},
-  {id:"weights",l:"Weights",g:"Care"},{id:"exercise",l:"Exercise",g:"Care"},
-  {id:"feeding",l:"Feeding",g:"Care"},{id:"notes",l:"Notes",g:"Records"},
-  {id:"files",l:"Files",g:"Records"},{id:"report",l:"Report",g:"Output"}
+  {id:"dog",l:"Dog",g:"Profile"},{id:"arrival",l:"Arrival",g:"Profile"},
+  {id:"assessment",l:"Assessment",g:"Assessment"},{id:"scoring",l:"Scoring",g:"Assessment"},{id:"ea",l:"EA",g:"Assessment"},
+  {id:"days",l:"5-Day Report",g:"Isolation"},{id:"medical",l:"Medical",g:"Isolation"},
+  {id:"weights",l:"Weights",g:"Isolation"},{id:"exercise",l:"Exercise",g:"Isolation"},
+  {id:"feeding",l:"Feeding",g:"Isolation"},{id:"notes",l:"Notes",g:"Isolation"},
+  {id:"outcome",l:"Outcome",g:"Outcome"},
+  {id:"files",l:"Files",g:"Records"},{id:"report",l:"Report",g:"Records"}
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"5.0",date:"2026-07-10",note:"V5 — the full navigation and dashboard overhaul. The flat row of 14 tabs is replaced by grouped pill navigation: Profile, Assessment, Isolation, Outcome and Records sit as five pills up top, with that group's own tabs as a second row underneath — so you only ever see a handful of tabs at once, and each group remembers where you last left off. The dashboard now leads with a plain-number status rail (All / Green / Yellow / Red / Black) that doubles as the filter, and every dog card carries its traffic light as a coloured stripe down the left edge rather than a banner across the photo — quicker to scan across the whole unit at a glance. Every screen, every field and every saved record is exactly as it was; this changes how you get to them, not what's in them."},
   {version:"3.40",date:"2026-06-25",note:"More dead-code cleanup. The dashboard's old Rounds/Kennels/List view-switcher (replaced by the cards-only view a couple of versions back) was still sitting in the file unused — it's gone now too. Nothing on screen changes."},
   {version:"3.39",date:"2026-06-25",note:"Cleanup pass after a full audit of the app. Daily Rounds was removed from the menu a few versions back, but its screen was still sitting in the code with no way to reach it — it's gone now. No screens, fields or data changed; this is just removing dead weight."},
   {version:"3.38",date:"2026-06-25",note:"The dashboard now has one view \u2014 the cards. The Rounds, Kennels and List view toggles have been removed, since the cards are what's actually used. The traffic-light filter, search, kennel filter, sort and print all stay."},
   {version:"3.37",date:"2026-06-25",note:"Dog details now uses the screen width. The Identity and Intake fields used to sit in two narrow columns down a tall card; they now flow across three or four to a row, so the same fields take far less scrolling. Nothing changed about what's captured \u2014 only the layout."},
-  {version:"3.36",date:"2026-06-25",note:"The Body Condition Score on the Medical tab is now a proper 1\u20139 picker instead of a plain dropdown. Tap a score and it shows the palpation description for that point \u2014 what the ribs, spine, waist and tuck should feel and look like \u2014 with 4\u20135 marked as the target range and the scale colour-coded under/ideal/over. It saves exactly as before, so the weight chart, report and Unit Health Board all read it unchanged."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -2187,10 +2258,10 @@ function renderDashboard(){
   if(_k)active=active.filter(function(r){return(r.state&&r.state.dog?r.state.dog.kennel:"")=== _k;});
   var tlCounts={Green:0,Yellow:0,Red:0,Black:0,None:0};
   active.forEach(function(r){if(r.trafficLight&&tlCounts[r.trafficLight]!==undefined)tlCounts[r.trafficLight]++;else tlCounts.None++;});
-  var chipDefs=[["Green","#dcfce7","#166534","#16a34a"],["Yellow","#fef9c3","#854d0e","#f59e0b"],["Red","#fee2e2","#991b1b","#dc2626"],["Black","#1e293b","#f1f5f9","#0f172a"],["None","#f1f5f9","#94a3b8","#cbd5e1"]];
-  var statusStrip='<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:8px">'
-    +'<button onclick="setDashFilter(\'T\',\'\');renderDashboard()" style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(!_t?"#0f172a":"#fff")+';color:'+(!_t?"#c5e86c":"#64748b")+';border:1.5px solid '+(!_t?"#0f172a":"#e2e8f0")+'">All <strong>'+active.length+'</strong></button>'
-    +chipDefs.map(function(c){var n=tlCounts[c[0]];if(!n)return"";var on=_t===c[0];var lbl=c[0]==="None"?"&mdash;":"&#9679;";return '<button onclick="setDashFilter(\'T\',\''+(on?"":c[0])+'\');renderDashboard()" title="'+(c[0]==="None"?"Unscored":c[0])+'" style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:'+c[1]+';color:'+c[2]+';border:1.5px solid '+(on?c[3]:"transparent")+'">'+lbl+' '+n+'</button>';}).join("")
+  var chipDefs=[["Green","g"],["Yellow","y"],["Red","r"],["Black","b"]];
+  var statusStrip='<div class="statrail">'
+    +'<button class="srstat'+(!_t?" sel":"")+'" onclick="setDashFilter(\'T\',\'\');renderDashboard()"><div class="srn">'+active.length+'</div><div class="srl">All</div></button>'
+    +chipDefs.map(function(c){var n=tlCounts[c[0]]||0;var on=_t===c[0];return '<button class="srstat '+c[1]+(on?" sel":"")+'" onclick="setDashFilter(\'T\',\''+(on?"":c[0])+'\');renderDashboard()"><div class="srn"><span class="srd"></span>'+n+'</div><div class="srl">'+(c[0]==="Yellow"?"Yellow":c[0])+'</div></button>';}).join("")
     +'</div>';
   if(_t==="None")active=active.filter(function(r){return !r.trafficLight;});
   else if(_t)active=active.filter(function(r){return r.trafficLight===_t;});
@@ -2214,19 +2285,23 @@ function renderDashboard(){
     var days=daysInIsolation(rec.intakeDate);var isoTot=5+isoExtraDays(d);var overdue=days>isoTot&&!finished;
     var col=finished?"#0d9488":days>isoTot?"#16a34a":days>=isoTot-1?"#f59e0b":"#0d9488";
     var pct=days?Math.min(100,Math.round((days/isoTot)*100)):0;
-    var parts=(tlC[rec.trafficLight]||"#f1f5f9|#94a3b8").split("|");
-    var bc=!rec.score?"#e2e8f0":rec.trafficLight==="Red"?"#dc2626":rec.trafficLight==="Black"?"#0f172a":rec.trafficLight==="Yellow"?"#f59e0b":rec.trafficLight==="Green"?"#16a34a":"#e2e8f0";
-    var bg=finished?"#dcfce7":rec.trafficLight==="Red"?"#fee2e2":rec.trafficLight==="Black"?"#1e293b":rec.trafficLight==="Yellow"?"#fef9c3":"#f0fdf4";
-    var ph=d.photo?'<img src="'+d.photo+'" alt="'+esc(d.name||'dog')+'" style="width:100%;height:112px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';display:block">':'<div style="width:100%;height:112px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:40px">&#128062;</div>';
+    var ph=d.photo?'<img src="'+d.photo+'" alt="'+esc(d.name||'dog')+'" style="object-position:'+(d.photoPos||'50% 50%')+'">':'&#128062;';
     var ta2="";if(rec.savedAt){var diff=Math.round((Date.now()-new Date(rec.savedAt).getTime())/60000);ta2=diff<1?"just now":diff<60?diff+"m ago":diff<1440?Math.round(diff/60)+"h ago":Math.round(diff/1440)+"d ago";}
-    var dayH=(finished||overdue)?'<div style="font-size:10px;font-weight:700;color:#166534;margin-bottom:3px">&#10003; Isolation complete</div><div style="background:#dcfce7;border-radius:20px;height:5px"><div style="background:#166534;width:100%;height:100%;border-radius:20px"></div></div>':days!=null?'<div style="font-size:10px;font-weight:700;color:'+col+';margin-bottom:3px">&#128274; '+(days<=0?'Arrival day':'Isolation &middot; Day '+days+' of '+isoTot)+'</div><div style="background:#e2e8f0;border-radius:20px;height:5px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>':"";
+    var tlClass=!rec.score?"tn":rec.trafficLight==="Red"?"tr":rec.trafficLight==="Black"?"tb":rec.trafficLight==="Yellow"?"ty":rec.trafficLight==="Green"?"tg":"tn";
+    var tlLabelTxt=rec.score?((rec.trafficLight||"?")+" &middot; "+rec.score):"Unscored";
+    var dayLabelTxt=(finished||overdue)?"Complete":days!=null?(days<=0?"Arrival day":"Day "+days+" of "+isoTot):"";
+    var barPct=(finished||overdue)?100:pct;
     var savedBy=rec.savedBy||"";
-    var lastEditHtml=savedBy?'<div style="display:flex;align-items:center;gap:4px;margin-top:5px;padding-top:4px;border-top:0.5px solid var(--color-border-secondary)"><div style="width:14px;height:14px;border-radius:50%;background:'+avatarColor(savedBy)+';color:#fff;font-size:6px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials(savedBy)+'</div><span style="font-size:9px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(savedBy)+' &middot; '+ta2+'</span></div>':"";
-    var tlTag=rec.score?'<span style="position:absolute;top:7px;right:7px;background:'+parts[0]+';color:'+parts[1]+';font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;box-shadow:0 1px 3px rgba(15,23,42,0.15)">'+(rec.trafficLight||"?")[0]+' &middot; '+rec.score+'</span>':'<span style="position:absolute;top:7px;right:7px;background:#eef1f5;color:#94a3b8;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px">Unscored</span>';
-    return'<div onclick="openDog('+rec.id+')" tabindex="0" role="button" aria-label="Open '+esc(rec.name)+'" onkeydown="if(event.key===\'Enter\'){openDog('+rec.id+')}" class="dog-card" style="background:var(--color-background-primary);border:1px solid rgba(15,23,42,0.08);border-top:4px solid '+bc+';border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 1px 2px rgba(15,23,42,0.04),0 4px 16px rgba(15,23,42,0.05)"><div style="position:relative">'+ph+tlTag+(subMeta(rec.state).partial?'<span title="Provisional \u2014 assessment incomplete" style="position:absolute;top:7px;left:7px;background:#fff;color:#b45309;border:1px solid #f59e0b;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px">PROV</span>':'')+'</div><div style="padding:11px"><div style="font-size:14px;font-weight:700;letter-spacing:-0.01em;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">'+(d.kennel?'<span style="background:#0f172a;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">'+esc(d.kennel)+'</span>':'')+(con.length?'<span title="'+esc(con.map(function(x){return diseaseShortName(x.type);}).join(", "))+'" style="background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">&#129440; Contagious</span>':'')+(function(){var rb=restrictedBreedInfo(rec.state&&rec.state.dog?rec.state.dog.breed:rec.breed);return rb?('<span title="'+esc(rb.name)+(rb.xl?' — banned: cannot be rehomed':' — restricted breed: muzzle + lead in public')+'" style="background:'+(rb.xl?'#7f1d1d':'#f59e0b')+';color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">'+(rb.xl?'&#128683; XL':'&#9888; RB')+'</span>'):'';})()+(warns.length?'<span title="'+esc(warns.map(function(w){return w.text;}).join(", "))+'" style="background:'+(warnCrit?"#dc2626":"#f59e0b")+';color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">&#9888; '+warns.length+'</span>':'')+trajTag(rec)+'</div>'+dayH+'</div></div>';
+    var flagsHtml=(d.kennel?'':'')+(con.length?'<span title="'+esc(con.map(function(x){return diseaseShortName(x.type);}).join(", "))+'" class="dflag crit">&#129440; Contagious</span>':'')+(function(){var rb=restrictedBreedInfo(rec.state&&rec.state.dog?rec.state.dog.breed:rec.breed);return rb?('<span title="'+esc(rb.name)+(rb.xl?' — banned: cannot be rehomed':' — restricted breed: muzzle + lead in public')+'" class="dflag '+(rb.xl?'crit':'warn')+'">'+(rb.xl?'&#128683; XL':'&#9888; RB')+'</span>'):'';})()+(warns.length?'<span title="'+esc(warns.map(function(w){return w.text;}).join(", "))+'" class="dflag '+(warnCrit?"crit":"warn")+'">&#9888; '+warns.length+'</span>':'')+trajTag(rec)+(subMeta(rec.state).partial?'<span title="Provisional — assessment incomplete" class="dflag prov">PROV</span>':'');
+    return'<div onclick="openDog('+rec.id+')" tabindex="0" role="button" aria-label="Open '+esc(rec.name)+'" onkeydown="if(event.key===\'Enter\'){openDog('+rec.id+')}" class="dcard '+tlClass+'"><div class="stripe"></div><div class="dcard-in">'
+      +'<div class="dtop"><div class="dthumb">'+ph+'</div><div class="dinfo"><div class="dname">'+esc(rec.name)+'</div>'+(d.breed||rec.breed?'<div class="dmeta">'+esc(d.breed||rec.breed)+'</div>':'')+'</div>'+(d.kennel?'<span class="dkennel">'+esc(d.kennel)+'</span>':'')+'</div>'
+      +'<div class="dbottom"><div class="drow"><div class="dstatus"><span class="dd"></span>'+tlLabelTxt+'</div>'+(dayLabelTxt?'<div class="dayno">'+dayLabelTxt+'</div>':'')+'</div>'
+      +(dayLabelTxt?'<div style="background:#eceef1;border-radius:20px;height:4px;overflow:hidden;margin-top:7px"><div style="background:'+col+';width:'+barPct+'%;height:100%;border-radius:20px"></div></div>':'')
+      +(flagsHtml?'<div class="dflagrow">'+flagsHtml+'</div>':'')
+      +'</div></div></div>';
   }).join("");
   var rollupHtml=tasksRollupHtml(active);
-  var viewBody='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px">'+cards+'</div>';
+  var viewBody='<div class="dcardgrid">'+cards+'</div>';
   el.innerHTML=statusStrip+fb+rollupHtml+viewBody+recentOutcomesHtml()+brandFooterHtml();
   if(window._dbSearchActive){var si=el.querySelector('input[placeholder="Search..."]');if(si){si.focus();var l=(window._dbCaret!=null?window._dbCaret:si.value.length);si.setSelectionRange(l,l);}window._dbSearchActive=false;window._dbCaret=null;}
 }
@@ -4606,20 +4681,46 @@ function tabDone(id){
     default: return null;
   }
 }
+var _navLastTab={}; // in-memory only: remembers last-visited tab per group (per session)
+function tabGroupOf(id){var t=TABS.find(function(x){return x.id===id;});return t?t.g:null;}
 function renderNav(){
   var groups=[],map={};
   TABS.forEach(function(tb){if(!map[tb.g]){map[tb.g]={g:tb.g,tabs:[]};groups.push(map[tb.g]);}map[tb.g].tabs.push(tb);});
-  var html=groups.map(function(grp){
-    var btns=grp.tabs.map(function(tb){
-      var done=tabDone(tb.id);
-      var dot=done===null?"":'<span class="cdot '+(done?"done":"empty")+'"></span>';
-      return '<button class="nb'+(S.tab===tb.id?" on":"")+'" data-go="'+tb.id+'">'+tb.l+dot+'</button>';
-    }).join("");
-    return '<div class="navseg"><div class="navglabel">'+grp.g+'</div><div class="navtabs">'+btns+'</div></div>';
-  }).join('<div class="navdiv"></div>');
-  document.getElementById("nav").innerHTML=html;
-  var on=document.querySelector("#nav .nb.on");if(on&&on.scrollIntoView){try{on.scrollIntoView({inline:"center",block:"nearest"});}catch(e){}}
+  var activeGroup=tabGroupOf(S.tab)||groups[0].g;
+  _navLastTab[activeGroup]=S.tab;
+
+  var gHtml=groups.map(function(grp){
+    return '<button class="ppill'+(grp.g===activeGroup?" on":"")+'" data-gogroup="'+grp.g+'">'+grp.g+'</button>';
+  }).join("");
+  document.getElementById("pnav-groups").innerHTML='<span class="pglide" id="pnav-gglide"></span>'+gHtml;
+
+  var curGrp=map[activeGroup];
+  var subsEl=document.getElementById("pnav-subs");
+  subsEl.classList.toggle("single",curGrp.tabs.length<=1);
+  var sHtml=curGrp.tabs.map(function(tb){
+    var done=tabDone(tb.id);
+    var dot=done===null?"":'<span class="pcdot '+(done?"done":"empty")+'"></span>';
+    return '<button class="ppill'+(S.tab===tb.id?" on":"")+'" data-go="'+tb.id+'">'+tb.l+dot+'</button>';
+  }).join("");
+  subsEl.innerHTML='<span class="pglide" id="pnav-sglide"></span>'+sHtml;
+
+  requestAnimationFrame(function(){
+    var gOn=document.querySelector("#pnav-groups .ppill.on");
+    pnavGlide(document.getElementById("pnav-gglide"),gOn);
+    var sOn=document.querySelector("#pnav-subs .ppill.on");
+    pnavGlide(document.getElementById("pnav-sglide"),sOn);
+    if(sOn&&sOn.scrollIntoView){try{sOn.scrollIntoView({inline:"center",block:"nearest"});}catch(e){}}
+  });
 }
+function pnavGlide(glideEl,btn){
+  if(!glideEl||!btn)return;
+  glideEl.style.width=btn.offsetWidth+"px";
+  glideEl.style.transform="translateX("+btn.offsetLeft+"px)";
+}
+window.addEventListener("resize",function(){
+  var gOn=document.querySelector("#pnav-groups .ppill.on");pnavGlide(document.getElementById("pnav-gglide"),gOn);
+  var sOn=document.querySelector("#pnav-subs .ppill.on");pnavGlide(document.getElementById("pnav-sglide"),sOn);
+});
 function renderMain(){document.getElementById("content").innerHTML=page();}
 function render(){renderNav();renderMain();updateIsoChip();updateWarnChip();updateNoticeChip();updateSaveBar();updateHeaderDog();checkDuplicateName();checkMicrochip();}
 var CHIP_CC={"372":"Ireland","826":"United Kingdom","250":"France","276":"Germany","380":"Italy","724":"Spain","528":"Netherlands","056":"Belgium","620":"Portugal","616":"Poland","642":"Romania","208":"Denmark","752":"Sweden","040":"Austria","348":"Hungary","203":"Czechia","372":"Ireland"};
@@ -4638,6 +4739,15 @@ function updateSaveBar(){var ro=["report","briefing","timeline"].indexOf(S.tab)>
 
 function handleAppClick(e){
   var go=e.target.closest("[data-go]");if(go){S.tab=go.dataset.go;render();window.scrollTo(0,0);return;}
+  var gogrp=e.target.closest("[data-gogroup]");if(gogrp){
+    var grpName=gogrp.dataset.gogroup;
+    var target=_navLastTab[grpName];
+    if(!target||tabGroupOf(target)!==grpName){
+      var first=TABS.find(function(tb){return tb.g===grpName;});
+      target=first?first.id:S.tab;
+    }
+    S.tab=target;render();window.scrollTo(0,0);return;
+  }
   var sub=e.target.closest("[data-sub]");if(sub){var sp=sub.dataset.sub.split(".");var sck=sp[0],ssk=sp[1],sval=parseInt(sp[2]);if(!S.subScores)S.subScores={};if(!S.subScores[sck])S.subScores[sck]={};if(S.subScores[sck][ssk]===sval)delete S.subScores[sck][ssk];else S.subScores[sck][ssk]=sval;recalcCat(sck);renderMain();debouncedSave();return;}
   var evb=e.target.closest("[data-ev]");if(evb){var ep=evb.dataset.ev.split(".");if(!S.subEvidence)S.subEvidence={};if(!S.subEvidence[ep[0]])S.subEvidence[ep[0]]={};var cur=S.subEvidence[ep[0]][ep[1]]||"";S.subEvidence[ep[0]][ep[1]]=cur==="obs"?"inf":cur==="inf"?"":"obs";renderMain();debouncedSave();return;}
   var sc2=e.target.closest("[data-sc]");if(sc2){var p=sc2.dataset.sc.split(".");S.scores[p[0]]=S.scores[p[0]]===parseInt(p[1])?0:parseInt(p[1]);renderMain();debouncedSave();return;}
