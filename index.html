@@ -412,7 +412,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
-  {version:"5.0",date:"2026-07-10",note:"V5 — the full navigation and dashboard overhaul. The flat row of 14 tabs is replaced by grouped pill navigation: Profile, Assessment, Isolation, Outcome and Records sit as five pills up top, with that group's own tabs as a second row underneath — so you only ever see a handful of tabs at once, and each group remembers where you last left off. The dashboard now leads with a plain-number status rail (All / Green / Yellow / Red / Black) that doubles as the filter, and every dog card carries its traffic light as a coloured stripe down the left edge rather than a banner across the photo — quicker to scan across the whole unit at a glance. Every screen, every field and every saved record is exactly as it was; this changes how you get to them, not what's in them."},
+  {version:"3.41",date:"2026-07-10",note:"The navigation and dashboard overhaul. The flat row of 14 tabs is replaced by grouped pill navigation: Profile, Assessment, Isolation, Outcome and Records sit as five pills up top, with that group's own tabs as a second row underneath \u2014 so you only ever see a handful of tabs at once, and each group remembers where you last left off. The dashboard now leads with a plain-number status rail that doubles as the filter, and every dog card carries its traffic light as a coloured stripe down the left edge \u2014 quicker to scan across the whole unit. Also fixes the nav indicator visibly re-sliding in from Profile on every tab click \u2014 it now stays put unless you actually change group. Every screen, field and saved record is exactly as it was."},
   {version:"3.40",date:"2026-06-25",note:"More dead-code cleanup. The dashboard's old Rounds/Kennels/List view-switcher (replaced by the cards-only view a couple of versions back) was still sitting in the file unused — it's gone now too. Nothing on screen changes."},
   {version:"3.39",date:"2026-06-25",note:"Cleanup pass after a full audit of the app. Daily Rounds was removed from the menu a few versions back, but its screen was still sitting in the code with no way to reach it — it's gone now. No screens, fields or data changed; this is just removing dead weight."},
   {version:"3.38",date:"2026-06-25",note:"The dashboard now has one view \u2014 the cards. The Rounds, Kennels and List view toggles have been removed, since the cards are what's actually used. The traffic-light filter, search, kennel filter, sort and print all stay."},
@@ -4682,6 +4682,7 @@ function tabDone(id){
   }
 }
 var _navLastTab={}; // in-memory only: remembers last-visited tab per group (per session)
+var _glidePos={};   // remembers each glide's last x/width so re-renders don't animate from 0
 function tabGroupOf(id){var t=TABS.find(function(x){return x.id===id;});return t?t.g:null;}
 function renderNav(){
   var groups=[],map={};
@@ -4704,22 +4705,34 @@ function renderNav(){
   }).join("");
   subsEl.innerHTML='<span class="pglide" id="pnav-sglide"></span>'+sHtml;
 
+  // Restore each glide to its remembered position instantly (no animation),
+  // so a re-render doesn't visibly re-slide the indicator in from the left.
+  var gGl=document.getElementById("pnav-gglide"),sGl=document.getElementById("pnav-sglide");
+  [ [gGl,"g"],[sGl,"s"] ].forEach(function(pair){
+    var el=pair[0],prev=_glidePos[pair[1]];
+    if(el&&prev){el.style.transition="none";el.style.width=prev.w+"px";el.style.transform="translateX("+prev.x+"px)";}
+  });
+  if(gGl)void gGl.offsetWidth; // force reflow so the no-transition position is committed
+
   requestAnimationFrame(function(){
+    if(gGl)gGl.style.transition="";
+    if(sGl)sGl.style.transition="";
     var gOn=document.querySelector("#pnav-groups .ppill.on");
-    pnavGlide(document.getElementById("pnav-gglide"),gOn);
+    pnavGlide(document.getElementById("pnav-gglide"),gOn,"g");
     var sOn=document.querySelector("#pnav-subs .ppill.on");
-    pnavGlide(document.getElementById("pnav-sglide"),sOn);
+    pnavGlide(document.getElementById("pnav-sglide"),sOn,"s");
     if(sOn&&sOn.scrollIntoView){try{sOn.scrollIntoView({inline:"center",block:"nearest"});}catch(e){}}
   });
 }
-function pnavGlide(glideEl,btn){
+function pnavGlide(glideEl,btn,key){
   if(!glideEl||!btn)return;
   glideEl.style.width=btn.offsetWidth+"px";
   glideEl.style.transform="translateX("+btn.offsetLeft+"px)";
+  if(key)_glidePos[key]={x:btn.offsetLeft,w:btn.offsetWidth};
 }
 window.addEventListener("resize",function(){
-  var gOn=document.querySelector("#pnav-groups .ppill.on");pnavGlide(document.getElementById("pnav-gglide"),gOn);
-  var sOn=document.querySelector("#pnav-subs .ppill.on");pnavGlide(document.getElementById("pnav-sglide"),sOn);
+  var gOn=document.querySelector("#pnav-groups .ppill.on");pnavGlide(document.getElementById("pnav-gglide"),gOn,"g");
+  var sOn=document.querySelector("#pnav-subs .ppill.on");pnavGlide(document.getElementById("pnav-sglide"),sOn,"s");
 });
 function renderMain(){document.getElementById("content").innerHTML=page();}
 function render(){renderNav();renderMain();updateIsoChip();updateWarnChip();updateNoticeChip();updateSaveBar();updateHeaderDog();checkDuplicateName();checkMicrochip();}
