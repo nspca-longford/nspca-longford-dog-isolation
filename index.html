@@ -79,7 +79,7 @@ nav::-webkit-scrollbar{display:none}
 .srstat{flex:1;padding:11px 14px;border-right:1px solid #e2e8f0;cursor:pointer;transition:background .12s;position:relative;background:none;font-family:inherit;text-align:left}
 .srstat:last-child{border-right:none}
 .srstat:hover{background:#fafafa}
-.srstat.sel{background:#fafafa}
+.srstat.sel{background:#f5fae7}
 .srstat.sel::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:#0f172a}
 .srstat.sel.g::after{background:#16a34a}.srstat.sel.y::after{background:#f59e0b}
 .srstat.sel.r::after{background:#dc2626}.srstat.sel.b::after{background:#0f172a}
@@ -94,7 +94,7 @@ nav::-webkit-scrollbar{display:none}
 .dcard.tg .stripe{background:#16a34a}.dcard.ty .stripe{background:#f59e0b}.dcard.tr .stripe{background:#dc2626}.dcard.tb .stripe{background:#0f172a}.dcard.tn .stripe{background:#e2e8f0}
 .dcard-in{padding:12px 13px 12px 16px}
 .dtop{display:flex;gap:10px;align-items:flex-start}
-.dthumb{width:44px;height:44px;border-radius:10px;flex:none;overflow:hidden;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:19px}
+.dthumb{width:64px;height:64px;border-radius:14px;flex:none;overflow:hidden;background:linear-gradient(135deg,#fbfdf4,#eef7d8);display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 0 0 1px rgba(19,22,27,.09),0 2px 6px -2px rgba(19,22,27,.12)}
 .dthumb img{width:100%;height:100%;object-fit:cover;display:block}
 .dinfo{flex:1;min-width:0}
 .dname{font-size:14px;font-weight:700;letter-spacing:-.005em;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -412,11 +412,11 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.42",date:"2026-07-10",note:"A little warmth on the dashboard. Dog photos on the cards are bigger (64px, up from 44) so dogs are recognisable by face at a glance, dogs without a photo yet get a soft paw mark on a lime wash instead of a plain grey box, and the selected status filter now shows a gentle lime tint. Nothing else changes."},
   {version:"3.41",date:"2026-07-10",note:"The navigation and dashboard overhaul. The flat row of 14 tabs is replaced by grouped pill navigation: Profile, Assessment, Isolation, Outcome and Records sit as five pills up top, with that group's own tabs as a second row underneath \u2014 so you only ever see a handful of tabs at once, and each group remembers where you last left off. The dashboard now leads with a plain-number status rail that doubles as the filter, and every dog card carries its traffic light as a coloured stripe down the left edge \u2014 quicker to scan across the whole unit. Also fixes the nav indicator visibly re-sliding in from Profile on every tab click \u2014 it now stays put unless you actually change group. Every screen, field and saved record is exactly as it was."},
   {version:"3.40",date:"2026-06-25",note:"More dead-code cleanup. The dashboard's old Rounds/Kennels/List view-switcher (replaced by the cards-only view a couple of versions back) was still sitting in the file unused — it's gone now too. Nothing on screen changes."},
   {version:"3.39",date:"2026-06-25",note:"Cleanup pass after a full audit of the app. Daily Rounds was removed from the menu a few versions back, but its screen was still sitting in the code with no way to reach it — it's gone now. No screens, fields or data changed; this is just removing dead weight."},
   {version:"3.38",date:"2026-06-25",note:"The dashboard now has one view \u2014 the cards. The Rounds, Kennels and List view toggles have been removed, since the cards are what's actually used. The traffic-light filter, search, kennel filter, sort and print all stay."},
-  {version:"3.37",date:"2026-06-25",note:"Dog details now uses the screen width. The Identity and Intake fields used to sit in two narrow columns down a tall card; they now flow across three or four to a row, so the same fields take far less scrolling. Nothing changed about what's captured \u2014 only the layout."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -2285,7 +2285,7 @@ function renderDashboard(){
     var days=daysInIsolation(rec.intakeDate);var isoTot=5+isoExtraDays(d);var overdue=days>isoTot&&!finished;
     var col=finished?"#0d9488":days>isoTot?"#16a34a":days>=isoTot-1?"#f59e0b":"#0d9488";
     var pct=days?Math.min(100,Math.round((days/isoTot)*100)):0;
-    var ph=d.photo?'<img src="'+d.photo+'" alt="'+esc(d.name||'dog')+'" style="object-position:'+(d.photoPos||'50% 50%')+'">':'&#128062;';
+    var ph=d.photo?'<img src="'+d.photo+'" alt="'+esc(d.name||'dog')+'" style="object-position:'+(d.photoPos||'50% 50%')+'">':'<svg viewBox="0 0 24 24" style="width:26px;height:26px;opacity:.45" fill="#8fae3f"><ellipse cx="8.5" cy="8" rx="1.8" ry="2.4"/><ellipse cx="15.5" cy="8" rx="1.8" ry="2.4"/><ellipse cx="5" cy="11.5" rx="1.6" ry="2.1"/><ellipse cx="19" cy="11.5" rx="1.6" ry="2.1"/><path d="M12 11c-2.8 0-5 2.4-5 4.7 0 1.6 1.2 2.8 2.8 2.8.8 0 1.5-.3 2.2-.3s1.4.3 2.2.3c1.6 0 2.8-1.2 2.8-2.8C17 13.4 14.8 11 12 11z"/></svg>';
     var ta2="";if(rec.savedAt){var diff=Math.round((Date.now()-new Date(rec.savedAt).getTime())/60000);ta2=diff<1?"just now":diff<60?diff+"m ago":diff<1440?Math.round(diff/60)+"h ago":Math.round(diff/1440)+"d ago";}
     var tlClass=!rec.score?"tn":rec.trafficLight==="Red"?"tr":rec.trafficLight==="Black"?"tb":rec.trafficLight==="Yellow"?"ty":rec.trafficLight==="Green"?"tg":"tn";
     var tlLabelTxt=rec.score?((rec.trafficLight||"?")+" &middot; "+rec.score):"Unscored";
