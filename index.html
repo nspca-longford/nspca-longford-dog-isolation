@@ -412,11 +412,11 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.48",date:"2026-07-13",note:"A full audit of the whole app, and a deep clean behind the scenes. Twenty leftover functions from removed features \u2014 the old Behaviour tab, the Timeline, the Handover button and their helpers \u2014 were still sitting in the code unreachable; all removed (226 lines). Every tab and every dashboard screen was then test-rendered against a realistic record, all navigation targets were verified to exist, and the assessment card registry, changelog and storage keys were all checked for consistency. No behaviour changes \u2014 the app is just leaner and every screen is verified working."},
   {version:"3.47",date:"2026-07-13",note:"Daily Diary has been removed \u2014 it was built but never used, so it\u0027s gone rather than sitting there half-filled. Also a fix on the new Picture tab: a dog whose record was missing its scoring data entirely would crash the tab instead of loading. Picture has now been tested against empty records, brand-new dogs, malformed weights and bad dates, and handles all of them."},
   {version:"3.46",date:"2026-07-13",note:"New Picture tab \u2014 the dog, read as a whole. Everything in the record is spread across fourteen tabs, so nobody ever sees it together. Picture assembles it into one reading. THE ARC: how the dog has changed since arrival \u2014 first score against latest, weight at intake against now, demeanour on arrival against the most recent daily entry, each marked as improving or going backwards. WHERE THE RECORD DISAGREES WITH ITSELF: contradictions nobody would otherwise spot \u2014 handling scored as accepting while the notes describe growling, a Green light on a dog with severe resource guarding, a dog listed as cat-suitable whose history says it chased cats, a muzzle required for walks with no muzzle training logged. WHAT WE STILL DON\u0027T KNOW: the gaps, ranked by what they actually cost rather than by count \u2014 a missing EA on a bite-history dog sits above a missing second weigh-in, each with a button straight to the tab that fills it. And IS ANYONE LOOKING AT THIS DOG: days since the last note, walk and weigh-in, because the dogs who get overlooked are the quiet green ones nobody worries about. No new data entry \u2014 it only reads what\u0027s already been entered."},
   {version:"3.45",date:"2026-07-13",note:"A bigger assessment. Two new cards: Resource guarding (food bowl, chews, toys, bed, stolen items, guarding a person, plus whether a warning is given and whether the dog will trade), and a Handler brief at the top \u2014 the ten-second read for anyone taking the dog out: known triggers, what the warning looks like, what helps, handler level needed and whether a muzzle is required. Arrival now also captures how the dog came in (surrender, stray, seizure, transfer, return), who brought them, whether a surrender form is signed, and the reported history \u2014 how long they were owned, the reason given, previous living setup, whether they lived with other animals, house training and any known medical or dietary history. And Scoring now warns you when a dog\u0027s traffic light is running on an assessment more than ten days old."},
   {version:"3.44",date:"2026-07-12",note:"New user and a new role. Suzanne joins with the access code SUZ01 as Director of Operations \u2014 a new role tier that sits alongside Manager with full record access including deletion (user management stays admin-only). The Director of Operations role is also now available in the Manage Users screen when adding or editing users."},
-  {version:"3.43",date:"2026-07-10",note:"The dashboard warmth carried into the dog's record. The photo on the dog's profile is a little bigger with a soft ring (and opens the lightbox as before), and every no-photo placeholder across the app \u2014 the profile, Health Board, Upcoming Medical, Ready to Go, All Records and recent outcomes \u2014 now shows the same soft paw mark on a lime wash instead of a grey or yellow box. Purely visual; photos, reposition and upload all work exactly as before."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -432,8 +432,6 @@ function userLastLogin(code){try{var v=localStorage.getItem("nspca-user-lastlogi
 function recordLastLogin(code){try{localStorage.setItem("nspca-user-lastlogin-"+code,Date.now().toString());}catch(e){}if(supabaseClient)supabaseClient.from("users").update({last_login_at:new Date().toISOString()}).eq("code",code).then(function(){},function(){});}
 
 // Map name → user record (search hardcoded + Supabase)
-function findUserByName(name){if(!name)return null;var all=getAllUsersSync();return all.find(function(u){return u.name===name;})||null;}
-function avatarByName(name){var u=findUserByName(name);if(u&&userPhoto(u.code))return userPhoto(u.code);return null;}
 
 // Cached merged user list — call refreshAllUsers() to repopulate
 function getAllUsersSync(){return _allUsersCache||USERS;}
@@ -621,24 +619,6 @@ function getTodaysExercises(rec){
 }
 
 
-function showExerciseOverlay(recId){
-  var rec=records.find(function(r){return r.id===recId;});
-  if(!rec)return;
-  if(!rec.state)rec.state={};
-  if(!rec.state.exercises)rec.state.exercises=[];
-  _exOverlayRec=rec;
-  var ov=document.getElementById("ex-overlay");
-  if(!ov){
-    ov=document.createElement("div");
-    ov.id="ex-overlay";
-    ov.className="med-overlay";
-    ov.onclick=function(e){if(e.target===ov)hideExerciseOverlay();};
-    ov.innerHTML='<div id="ex-overlay-content" style="background:#fff;border-radius:16px;max-width:420px;width:calc(100% - 24px);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25)"></div>';
-    document.body.appendChild(ov);
-  }
-  renderExerciseOverlay();
-  ov.classList.add("show");
-}
 
 function hideExerciseOverlay(){
   var ov=document.getElementById("ex-overlay");
@@ -1574,114 +1554,12 @@ function startDashRefresh(){
 function stopDashRefresh(){if(_dashRefreshTimer){clearInterval(_dashRefreshTimer);_dashRefreshTimer=null;}}
 
 // ── End-of-shift handover summary ─────────────────────────────────
-function generateHandover(hours){
-  var now=new Date();
-  var cutoff=new Date(now.getTime()-hours*60*60*1000);
-  var cutoffISOSec=cutoff.toISOString().slice(0,19);
-  var cutoffDate=cutoff.toISOString().slice(0,10);
-  var lines=[];
-  lines.push("=== NSPCA LONGFORD ISOLATION — HANDOVER ===");
-  lines.push("Period: last "+hours+" hours");
-  lines.push("Generated: "+now.toLocaleString("en-IE")+" by "+currentName());
-  lines.push("");
 
-  function tsInWindow(date,time){if(!date)return false;return(date+"T"+(time||"00:00")+":00")>=cutoffISOSec;}
-
-  var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
-  var anyActivity=false;
-  active.forEach(function(r){
-    var s=r.state||{};var d=s.dog||{};var L=[];
-    var exs=(s.exercises||[]).filter(function(e){return tsInWindow(e.date,e.time);});
-    if(exs.length){var byType={};exs.forEach(function(e){byType[e.type]=(byType[e.type]||0)+1;});var parts=Object.keys(byType).map(function(t){return byType[t]+"× "+t;});L.push("  Exercise: "+parts.join(", "));}
-    var feeds=(s.feeding||[]).filter(function(f){return tsInWindow(f.date,f.time);});
-    if(feeds.length){var total=feeds.reduce(function(a,f){return a+(parseFloat(f.grams)||0);},0);var refused=feeds.filter(function(f){return f.status==="partial";}).length;L.push("  Feeding: "+total+"g across "+feeds.length+" meal(s)"+(refused?(" ("+refused+" partial/refused)"):""));}
-    (s.notes||[]).filter(function(n){return tsInWindow(n.date,n.time);}).forEach(function(n){L.push("  Note ("+(n.time||"")+", "+(n.staff||"?")+"): "+n.text);});
-    (s.incidents||[]).filter(function(i){return tsInWindow(i.date,i.time);}).forEach(function(i){L.push("  *** INCIDENT ["+i.severity+"] ("+(i.time||"")+", "+(i.staff||"?")+"): "+i.text);});
-    var m=s.medical||{};
-    (m.vetVisits||[]).filter(function(v){return v.date>=cutoffDate;}).forEach(function(v){L.push("  Vet visit ("+fmtDMY(v.date)+"): "+(v.reason||"")+(v.treatment?(" — "+v.treatment):"")+(v.followUp?(" [Follow-up: "+v.followUp+"]"):""));});
-    (m.vaccinations||[]).filter(function(v){return v.date>=cutoffDate;}).forEach(function(v){L.push("  Vaccine: "+v.type+(v.adminBy?(" by "+v.adminBy):""));});
-    (m.parasiteTreatments||[]).filter(function(p){return p.date>=cutoffDate;}).forEach(function(p){L.push("  Parasite tx: "+(p.product||p.type));});
-    var newMeds=(m.medications||[]).filter(function(med){return med.startDate&&med.startDate>=cutoffDate;});
-    newMeds.forEach(function(med){L.push("  Started medication: "+med.name+(med.dose?(" "+med.dose):"")+(med.frequency?(" "+med.frequency):""));});
-    (s.weights||[]).filter(function(w){return w.date>=cutoffDate;}).forEach(function(w){L.push("  Weighed: "+w.weight+(w.note?(" — "+w.note):""));});
-    if(L.length){
-      anyActivity=true;
-      lines.push("● "+r.name+(d.kennel?(" — "+d.kennel):"")+(r.trafficLight?(" — "+r.trafficLight+" "+(r.score||"")):""));
-      L.forEach(function(l){lines.push(l);});
-      lines.push("");
-    }
-  });
-  if(!anyActivity){lines.push("(No activity logged in the last "+hours+" hours)");lines.push("");}
-
-  var newIntakes=records.filter(function(r){return r.intakeDate&&r.intakeDate>=cutoffDate;});
-  if(newIntakes.length){
-    lines.push("--- NEW INTAKES ---");
-    newIntakes.forEach(function(r){var d=r.state&&r.state.dog?r.state.dog:{};lines.push("• "+r.name+" — "+(r.breed||"unknown breed")+" — "+fmtDMY(r.intakeDate)+(d.kennel?(" — "+d.kennel):"")+(d.intakeReason?(" — "+d.intakeReason):""));});
-    lines.push("");
-  }
-
-  var notices=generateAutoNotices();
-  var urgent=notices.filter(function(n){return n.priority==="Urgent";});
-  var important=notices.filter(function(n){return n.priority==="Important";});
-  function stripEntities(s){return(s||"").replace(/&#[0-9]+;/g,"").replace(/&[a-z]+;/g,"").replace(/\s+/g," ").trim();}
-  if(urgent.length||important.length){
-    lines.push("--- STILL DUE / OUTSTANDING ---");
-    urgent.forEach(function(n){lines.push("⚠ URGENT: "+stripEntities(n.text));});
-    important.forEach(function(n){lines.push("• "+stripEntities(n.text));});
-    lines.push("");
-  }
-  lines.push("=== END HANDOVER ===");
-  return lines.join("\n");
-}
-
-function showHandoverModal(){
-  var summary=generateHandover(8);
-  var ov=document.createElement("div");
-  ov.className="handover-ov";
-  ov.style.cssText="position:fixed;inset:0;background:rgba(15,23,42,0.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999";
-  ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:600px;width:100%;max-height:90vh;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'
-      +'<span style="font-size:15px;font-weight:600">End-of-shift handover</span>'
-      +'<button onclick="this.closest(\'.handover-ov\').remove()" style="background:#f1f5f9;border:none;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px">&#10005;</button>'
-    +'</div>'
-    +'<div class="f"><label class="lbl">Time window</label><select id="ho-hours" onchange="refreshHandover()" style="font-size:13px"><option value="4">Last 4 hours</option><option value="8" selected>Last 8 hours (typical shift)</option><option value="12">Last 12 hours</option><option value="24">Last 24 hours</option></select></div>'
-    +'<textarea id="ho-text" readonly style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:1.5;flex:1;min-height:300px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;resize:none">'+esc(summary)+'</textarea>'
-    +'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button onclick="copyHandover()" class="btn btnp" style="flex:1;padding:10px;font-weight:600;min-width:140px">&#128203; Copy to clipboard</button><button onclick="printHandover()" class="btn" style="flex:1;padding:10px;min-width:100px">Print</button></div>'
-    +'</div>';
-  ov.onclick=function(e){if(e.target===ov)ov.remove();};
-  document.body.appendChild(ov);
-}
-function refreshHandover(){var hrs=parseInt((document.getElementById("ho-hours")||{}).value)||8;var ta=document.getElementById("ho-text");if(ta)ta.value=generateHandover(hrs);}
-function copyHandover(){
-  var ta=document.getElementById("ho-text");if(!ta)return;
-  var text=ta.value;
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(function(){appAlert("Handover copied. Paste it into WhatsApp / Slack / wherever.");},function(){ta.select();document.execCommand("copy");appAlert("Handover copied.");});
-  }else{ta.select();document.execCommand("copy");appAlert("Handover copied.");}
-}
-function printHandover(){
-  var ta=document.getElementById("ho-text");if(!ta)return;
-  var w=window.open("","_blank");
-  w.document.write('<!DOCTYPE html><html><head><title>NSPCA Handover</title><style>body{font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.5;padding:24px;color:#0f172a;white-space:pre-wrap}@media print{body{padding:12px}}</style></head><body>'+esc(ta.value)+'</body></html>');
-  w.document.close();setTimeout(function(){w.print();},250);
-}
 
 function setDashFilter(k,v){window["_db"+k]=v;try{var f={S:window._dbS||"",K:window._dbK||"",T:window._dbT||"",O:window._dbO||"day",V:window._dbView||"cards"};localStorage.setItem("nspca-dash-filters",JSON.stringify(f));}catch(e){}}
 function restoreDashFilters(){try{var raw=localStorage.getItem("nspca-dash-filters");if(!raw)return;var f=JSON.parse(raw);if(f.S)window._dbS=f.S;if(f.K)window._dbK=f.K;if(f.T)window._dbT=f.T;if(f.O)window._dbO=f.O;if(f.V)window._dbView=f.V;}catch(e){}}
 
 // Compute EA-flagged status for a record (score>=15 or serious/multiple moderate incidents)
-function recordEA(rec){
-  if(!rec.state)return false;
-  var total=Object.values(rec.state.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
-  if(total>=15)return true;
-  var serious=0,moderate=0;
-  (rec.state.days||[]).forEach(function(d){
-    if(d.incidents&&d.incidents.indexOf("Serious")>=0)serious++;
-    if(d.incidents&&d.incidents.indexOf("Injury")>=0)serious++;
-    if(d.incidents&&d.incidents.indexOf("Moderate")>=0)moderate++;
-  });
-  return serious>0||moderate>=3;
-}
 // Real (formal) EA category for a record, or null if none flagged
 function eaCatOf(rec){
   var e=rec&&rec.state&&rec.state.ea?rec.state.ea:null;
@@ -1761,27 +1639,6 @@ function tasksRollupHtml(activeRecords){
 }
 function setTaskExpand(cat){window._taskExpand=(window._taskExpand===cat)?null:cat;renderDashboard();}
 // "Recently edited" row — top 4 most recently saved dogs
-function recentlyEditedHtml(activeRecords){
-  var recent=activeRecords.slice().filter(function(r){return r.savedAt;}).sort(function(a,b){return(b.savedAt||"").localeCompare(a.savedAt||"");}).slice(0,4);
-  if(recent.length<2)return"";
-  return '<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#64748b;margin-bottom:6px">Recently edited</div>'
-    +'<div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px">'
-    +recent.map(function(r){
-      var d=r.state&&r.state.dog?r.state.dog:{};
-      var diff=Math.round((Date.now()-new Date(r.savedAt).getTime())/60000);
-      var ago=diff<1?"just now":diff<60?diff+"m":diff<1440?Math.round(diff/60)+"h":Math.round(diff/1440)+"d";
-      var by=r.savedBy?esc(r.savedBy):"";
-      var userPic=r.savedBy?avatarByName(r.savedBy):null;
-      var avTag=userPic?'<img src="'+userPic+'" style="position:absolute;bottom:-3px;right:-3px;width:16px;height:16px;border-radius:50%;object-fit:cover;border:1.5px solid #fff">':'';
-      var ph=d.photo?'<div style="position:relative;flex-shrink:0"><img src="'+d.photo+'" alt="'+esc(d.name||'dog')+'" style="width:32px;height:32px;border-radius:6px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+'">'+avTag+'</div>':'<div style="position:relative;flex-shrink:0"><div style="width:32px;height:32px;border-radius:6px;background:linear-gradient(135deg,#fbfdf4,#eef7d8);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" style="width:15px;height:15px;opacity:.45" fill="#8fae3f"><ellipse cx="8.5" cy="8" rx="1.8" ry="2.4"/><ellipse cx="15.5" cy="8" rx="1.8" ry="2.4"/><ellipse cx="5" cy="11.5" rx="1.6" ry="2.1"/><ellipse cx="19" cy="11.5" rx="1.6" ry="2.1"/><path d="M12 11c-2.8 0-5 2.4-5 4.7 0 1.6 1.2 2.8 2.8 2.8.8 0 1.5-.3 2.2-.3s1.4.3 2.2.3c1.6 0 2.8-1.2 2.8-2.8C17 13.4 14.8 11 12 11z"/></svg></div>'+avTag+'</div>';
-      return '<div onclick="openDog('+r.id+')" style="background:#fff;border:0.5px solid #e2e8f0;border-radius:10px;padding:7px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0;min-width:160px">'
-        +ph
-        +'<div style="min-width:0;flex:1"><div style="font-size:12px;font-weight:600;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.name)+'</div>'
-        +'<div style="font-size:10px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+by+(by?' &middot; ':'')+ago+'</div></div>'
-      +'</div>';
-    }).join("")
-    +'</div></div>';
-}
 
 
 // ── Restricted breeds (IE: Control of Dogs Regulations 1998 + XL Bully ban) ──
@@ -2712,20 +2569,9 @@ function cycleDiseaseStatus(idx){
   saveRecord();renderMain();
 }
 
-function toggleFinSection(){window._finOpen=!window._finOpen;renderMain();}
 function setDayView(n){window._dayView=Math.min(4,Math.max(0,n));renderMain();window.scrollTo(0,0);}
 
-function dueBadge(nextDue,warnDays){
-  if(!nextDue)return"";
-  var today=new Date().toISOString().slice(0,10);
-  if(nextDue<today)return'<span class="badge-err">Overdue</span>';
-  if(nextDue<=addDaysStr(today,warnDays||30))return'<span class="badge-warn">Due soon</span>';
-  return'<span class="badge-ok">Up to date</span>';
-}
 
-function medSecHead(icon,title,addBtn){
-  return '<div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><span style="width:26px;height:26px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">'+icon+'</span><span style="font-size:13px;font-weight:800;flex:1;letter-spacing:-0.01em">'+title+'</span>'+(addBtn||'')+'</div>';
-}
 function medStatTile(label,value,dot){
   return '<div style="background:#fff;border:1px solid rgba(15,23,42,0.08);border-radius:11px;padding:9px 11px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;margin-bottom:3px">'+label+'</div><div style="font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;line-height:1.25">'+(dot?'<span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:'+dot+'"></span>':'')+value+'</div></div>';
 }
@@ -2752,30 +2598,6 @@ function medSummaryCard(m,vax){
   var tiles=[medStatTile("Vaccinations",vax.l,vax.c),medStatTile("Neuter / Spay",neut[0],neut[1]),medStatTile("Body condition",bcsV,""),medStatTile("Dental",dental,""),medStatTile("Infection",inf[0],inf[1]),medStatTile("Medication",medT[0],medT[1])].join("");
   return '<div class="card" style="background:linear-gradient(135deg,#fafdf2,#f4f7fb)"><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:11px">Health at a glance</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+tiles+'</div></div>';
 }
-function renderBehaviour(){
-  var b=S.behaviour||(S.behaviour={notes:"",log:[],draft:""});
-  if(!b.log)b.log=[];
-  if(b.notes&&!b.log.length){b.log.unshift({date:new Date().toISOString().slice(0,10),by:currentName()||"",text:b.notes});b.notes="";debouncedSave();}
-  var add='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:8px">Add observation</div><textarea id="beh-entry" oninput="if(S.behaviour)S.behaviour.draft=this.value;debouncedSave()" placeholder="What did you observe? Behaviour, triggers, progress, handling notes\u2026" style="width:100%;min-height:90px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box">'+esc(b.draft||"")+'</textarea><div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn btnp" onclick="addBehaviourNote()">Add note</button></div></div>';
-  var log=b.log.length?b.log.map(function(e,i){
-    if(window._behEdit===i){return '<div class="card" style="margin-bottom:10px;padding:12px 14px"><textarea id="beh-edit-'+i+'" style="width:100%;min-height:80px;padding:9px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box">'+esc(e.text||"")+'</textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn" onclick="cancelBehEdit()">Cancel</button><button class="btn btnp" onclick="saveBehEdit('+i+')">Save</button></div></div>';}
-    var who=e.by?esc(e.by):"";
-    return '<div class="card" style="margin-bottom:10px;padding:12px 14px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:11px;font-weight:600;color:#0f172a">'+esc(e.date||"")+'</span>'+(who?'<span style="font-size:11px;color:#64748b">\u00b7 '+who+'</span>':'')+'<span style="flex:1"></span><span onclick="editBehNote('+i+')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){this.click()}" title="Edit" style="cursor:pointer;color:#94a3b8;font-size:13px;margin-right:4px">\u270e</span><span onclick="deleteBehaviourNote('+i+')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){this.click()}" title="Delete" style="cursor:pointer;color:#94a3b8;font-size:13px">\u2715</span></div><div style="font-size:13px;line-height:1.5;white-space:pre-wrap">'+esc(e.text||"")+'</div></div>';
-  }).join(""):'<div style="text-align:center;padding:28px 16px;color:var(--color-text-secondary);font-size:13px">No behaviour notes yet. Add the first observation above.</div>';
-  return '<h2>Behaviour</h2><div class="sub">A running log of behaviour observations \u2014 each note is dated and signed, so you can see how things change over the stay.</div>'+add+log+'<div class="brow"><button class="btn" data-go="assessment">&larr; Back</button><button class="btn btnp" data-go="scoring">Next: Scoring &rarr;</button></div>';
-}
-function addBehaviourNote(){
-  var ta=document.getElementById("beh-entry");if(!ta)return;var txt=(ta.value||"").trim();if(!txt)return;
-  if(!S.behaviour)S.behaviour={notes:"",log:[],draft:""};if(!S.behaviour.log)S.behaviour.log=[];
-  S.behaviour.log.unshift({date:new Date().toISOString().slice(0,10),by:currentName()||"",text:txt});
-  S.behaviour.draft="";window._behEdit=null;saveRecord();renderMain();
-}
-function deleteBehaviourNote(i){
-  appConfirm("Delete this behaviour note?",function(){if(S.behaviour&&S.behaviour.log){S.behaviour.log.splice(i,1);window._behEdit=null;saveRecord();renderMain();}},{danger:true});
-}
-function editBehNote(i){window._behEdit=i;renderMain();}
-function cancelBehEdit(){window._behEdit=null;renderMain();}
-function saveBehEdit(i){var ta=document.getElementById("beh-edit-"+i);if(!ta)return;var t=(ta.value||"").trim();if(t&&S.behaviour&&S.behaviour.log[i]){S.behaviour.log[i].text=t;}window._behEdit=null;saveRecord();renderMain();}
 function addVetNote(){var ta=document.getElementById("vet-entry");if(!ta)return;var txt=(ta.value||"").trim();if(!txt)return;var m=getMedical();if(!m.vetLog)m.vetLog=[];m.vetLog.unshift({date:new Date().toISOString().slice(0,10),text:txt});m.vetDraft="";window._vetEdit=null;saveRecord();renderMain();}
 function deleteVetNote(i){appConfirm("Delete this vet note?",function(){var m=getMedical();if(m.vetLog){m.vetLog.splice(i,1);window._vetEdit=null;saveRecord();renderMain();}},{danger:true});}
 function editVetNote(i){window._vetEdit=i;renderMain();}
@@ -3537,54 +3359,6 @@ function cancelFeedEdit(){window._feedEdit=null;var g=document.getElementById("f
 function deleteFeeding(idx){appConfirm("Delete this feeding entry?",function(){S.feeding.splice(idx,1);saveRecord();renderMain();},{danger:true});}
 
 // ── Timeline ──────────────────────────────────────────────────────
-function renderTimeline(){
-  var events=[];
-  if(S.dog&&S.dog.intakeDate){events.push({date:S.dog.intakeDate,time:"00:01",icon:"&#128062;",color:"#0d9488",title:"Intake",detail:S.dog.intakeReason||"Arrived at NSPCA Longford"});}
-  S.days.forEach(function(d,i){if(!d.date)return;var details=[];if(d.demeanour)details.push("Demeanour: "+d.demeanour);if(d.feeding)details.push("Feeding: "+d.feeding);if(d.incidents&&d.incidents!=="None"&&d.incidents!=="None — no incidents")details.push("Incidents: "+d.incidents);events.push({date:d.date,time:"12:00",icon:"&#128221;",color:"#7c3aed",title:"Day "+(i+1)+" report",detail:details.join(" &middot; ")});});
-  var m=S.medical||{};
-  (m.vaccinations||[]).forEach(function(v){if(!v.date)return;events.push({date:v.date,time:"10:00",icon:"&#128137;",color:"#16a34a",title:esc(v.type),detail:v.adminBy?"Given by "+esc(v.adminBy):""});});
-  (m.parasiteTreatments||[]).forEach(function(p){if(!p.date)return;events.push({date:p.date,time:"10:01",icon:"&#128737;",color:"#f59e0b",title:esc(p.product||p.type||""),detail:p.adminBy?"Given by "+esc(p.adminBy):""});});
-  (m.medications||[]).forEach(function(med){
-    if(med.startDate)events.push({date:med.startDate,time:"09:00",icon:"&#128138;",color:"#3b82f6",title:"Started "+esc(med.name||""),detail:[med.dose,med.frequency].filter(Boolean).map(esc).join(" &middot; ")});
-    if(med.endDate&&med.active===false)events.push({date:med.endDate,time:"09:01",icon:"&#128138;",color:"#64748b",title:"Ended "+esc(med.name||""),detail:""});
-  });
-  (m.vetVisits||[]).forEach(function(v){if(!v.date)return;events.push({date:v.date,time:"11:00",icon:"&#129657;",color:"#dc2626",title:"Vet visit"+(v.vet?" &middot; "+esc(v.vet):""),detail:[v.reason,v.findings,v.treatment].filter(Boolean).map(esc).join(" &middot; ")});});
-  (m.diseases||[]).forEach(function(ds){if(!ds.date)return;var crit=CONTAGIOUS_DISEASES[ds.type]&&ds.status!=="Recovered / cleared";events.push({date:ds.date,time:"10:30",icon:"&#129440;",color:crit?"#dc2626":"#0d9488",title:esc(ds.type)+" &middot; "+esc(ds.status||"Suspected"),detail:[ds.treatment,ds.notes].filter(Boolean).map(esc).join(" &middot; ")});});
-  if(m.neuterDate)events.push({date:m.neuterDate,time:"10:15",icon:"&#129658;",color:"#0891b2",title:"Neutered / spayed",detail:(m.neuteredConfirmed&&m.neuteredConfirmed.indexOf("Yes")===0)?"Confirmed by vet":""});
-  if(m.dentalDate)events.push({date:m.dentalDate,time:"10:20",icon:"&#129463;",color:"#0891b2",title:"Dental treatment",detail:esc(m.dental||"")});
-  (S.weights||[]).forEach(function(w){if(!w.date)return;events.push({date:w.date,time:"08:00",icon:"&#9878;",color:"#0ea5e9",title:"Weighed "+esc(w.weight||""),detail:esc(w.note||"")});});
-  (S.notes||[]).forEach(function(n){events.push({date:n.date,time:n.time||"15:00",icon:"&#128221;",color:"#7c3aed",title:"Note",detail:esc(n.text||""),staff:n.staff});});
-  (S.incidents||[]).forEach(function(inc){var sc=inc.severity==="Serious"||inc.severity==="Injury"?"#dc2626":inc.severity==="Moderate"?"#f59e0b":"#64748b";events.push({date:inc.date,time:inc.time||"15:00",icon:"&#9888;",color:sc,title:esc(inc.severity||"Incident")+" incident",detail:esc(inc.text||""),staff:inc.staff});});
-  (S.warnings||[]).forEach(function(w){if(!w.date)return;events.push({date:w.date,time:"07:30",icon:"&#9888;",color:w.level==="Critical"?"#dc2626":"#f59e0b",title:"Handling warning: "+esc(w.text),detail:esc(w.level||"Caution"),staff:w.by});});
-  // Exercise grouped per day
-  var exByDate={};(S.exercises||[]).forEach(function(e){if(!exByDate[e.date])exByDate[e.date]={};if(!exByDate[e.date][e.type])exByDate[e.date][e.type]=0;exByDate[e.date][e.type]++;});
-  Object.keys(exByDate).forEach(function(date){var c=exByDate[date];var parts=Object.keys(c).map(function(t){return c[t]+"\u00d7 "+t;});events.push({date:date,time:"23:55",icon:"&#128694;",color:"#0d9488",title:"Exercise",detail:parts.join(", ")});});
-  // Feeding grouped per day
-  var fByDate={};(S.feeding||[]).forEach(function(f){if(!fByDate[f.date])fByDate[f.date]={total:0,count:0,refused:0};fByDate[f.date].total+=(parseFloat(f.grams)||0);fByDate[f.date].count++;if(f.status==="partial")fByDate[f.date].refused++;});
-  Object.keys(fByDate).forEach(function(date){var b=fByDate[date];events.push({date:date,time:"23:50",icon:"&#127869;",color:"#84cc16",title:"Feeding &middot; "+b.total+"g",detail:b.count+" meal"+(b.count!==1?"s":"")+(b.refused?" &middot; "+b.refused+" partial/refused":"")});});
-  (S.files||[]).forEach(function(f){if(!f.date)return;events.push({date:f.date,time:"14:00",icon:"&#128206;",color:"#64748b",title:"File: "+esc(f.name||""),detail:esc(f.note||"")});});
-
-  events.sort(function(a,b){var c=(b.date||"").localeCompare(a.date||"");return c!==0?c:(b.time||"").localeCompare(a.time||"");});
-
-  var h='<h2 style="margin-bottom:4px">Timeline</h2><div class="sub" style="margin-bottom:16px">Complete chronological history &mdash; every event for this dog in one feed.</div>';
-  if(!events.length){h+='<div style="text-align:center;padding:40px;color:var(--color-text-secondary)"><div style="font-size:32px;margin-bottom:10px">&#128062;</div><div>No events yet</div></div>';}
-  else{
-    var byDate={};events.forEach(function(e){if(!byDate[e.date])byDate[e.date]=[];byDate[e.date].push(e);});
-    var today=new Date().toISOString().slice(0,10);
-    h+='<div class="card" style="padding:16px 14px">';
-    Object.keys(byDate).sort().reverse().forEach(function(date){
-      var dayLbl=fmtDMYwk(date);
-      h+='<div style="margin-bottom:20px"><div style="font-size:12px;font-weight:700;color:#0f172a;padding:6px 0;margin-bottom:10px;border-bottom:1px solid #e2e8f0">'+dayLbl+(date===today?' &middot; <span style="color:#0d9488">Today</span>':"")+'</div>';
-      byDate[date].forEach(function(ev){
-        h+='<div style="display:flex;gap:10px;padding:7px 0"><div style="width:30px;height:30px;border-radius:50%;background:'+ev.color+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">'+ev.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:#0f172a">'+ev.title+'</div>'+(ev.detail?'<div style="font-size:11px;color:#64748b;margin-top:2px;white-space:pre-wrap">'+ev.detail+'</div>':"")+(ev.staff?'<div style="font-size:10px;color:#94a3b8;margin-top:2px">'+esc(ev.staff)+'</div>':"")+'</div></div>';
-      });
-      h+='</div>';
-    });
-    h+='</div>';
-  }
-  h+='<div class="brow"><button class="btn" data-go="files">&larr; Back</button><button class="btn btnp" data-go="report">View report &rarr;</button></div>';
-  return h;
-}
 
 // ── Incident quick-log from dashboard ─────────────────────────────
 function showIncidentModal(){
