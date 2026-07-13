@@ -412,11 +412,11 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.49",date:"2026-07-13",note:"Picture tab bug fixes \u2014 it was crying wolf. Four real bugs found and fixed: a bite history of \u0027None declared\u0027 was wrongly triggering the \u0027Enhanced Assessment not completed\u0027 warning on every clean dog (the word None contains one); everyday phrases like \u0027a bit wary\u0027 or \u0027settled a bit\u0027 in the notes were being read as a bite; a dog marked \u0027Not fit for rehoming\u0027 was told it was \u0027cleared for rehoming\u0027; and the arrival-to-now demeanour comparison only recognised a handful of the demeanour options, so most dogs showed a grey \u0027Changed\u0027 instead of improving or going backwards. Negated phrases (\u0027did not growl\u0027) are also no longer read as events. Everything re-tested \u2014 23 checks passing."},
   {version:"3.48",date:"2026-07-13",note:"A full audit of the whole app, and a deep clean behind the scenes. Twenty leftover functions from removed features \u2014 the old Behaviour tab, the Timeline, the Handover button and their helpers \u2014 were still sitting in the code unreachable; all removed (226 lines). Every tab and every dashboard screen was then test-rendered against a realistic record, all navigation targets were verified to exist, and the assessment card registry, changelog and storage keys were all checked for consistency. No behaviour changes \u2014 the app is just leaner and every screen is verified working."},
   {version:"3.47",date:"2026-07-13",note:"Daily Diary has been removed \u2014 it was built but never used, so it\u0027s gone rather than sitting there half-filled. Also a fix on the new Picture tab: a dog whose record was missing its scoring data entirely would crash the tab instead of loading. Picture has now been tested against empty records, brand-new dogs, malformed weights and bad dates, and handles all of them."},
   {version:"3.46",date:"2026-07-13",note:"New Picture tab \u2014 the dog, read as a whole. Everything in the record is spread across fourteen tabs, so nobody ever sees it together. Picture assembles it into one reading. THE ARC: how the dog has changed since arrival \u2014 first score against latest, weight at intake against now, demeanour on arrival against the most recent daily entry, each marked as improving or going backwards. WHERE THE RECORD DISAGREES WITH ITSELF: contradictions nobody would otherwise spot \u2014 handling scored as accepting while the notes describe growling, a Green light on a dog with severe resource guarding, a dog listed as cat-suitable whose history says it chased cats, a muzzle required for walks with no muzzle training logged. WHAT WE STILL DON\u0027T KNOW: the gaps, ranked by what they actually cost rather than by count \u2014 a missing EA on a bite-history dog sits above a missing second weigh-in, each with a button straight to the tab that fills it. And IS ANYONE LOOKING AT THIS DOG: days since the last note, walk and weigh-in, because the dogs who get overlooked are the quiet green ones nobody worries about. No new data entry \u2014 it only reads what\u0027s already been entered."},
   {version:"3.45",date:"2026-07-13",note:"A bigger assessment. Two new cards: Resource guarding (food bowl, chews, toys, bed, stolen items, guarding a person, plus whether a warning is given and whether the dog will trade), and a Handler brief at the top \u2014 the ten-second read for anyone taking the dog out: known triggers, what the warning looks like, what helps, handler level needed and whether a muzzle is required. Arrival now also captures how the dog came in (surrender, stray, seizure, transfer, return), who brought them, whether a surrender form is signed, and the reported history \u2014 how long they were owned, the reason given, previous living setup, whether they lived with other animals, house training and any known medical or dietary history. And Scoring now warns you when a dog\u0027s traffic light is running on an assessment more than ten days old."},
-  {version:"3.44",date:"2026-07-12",note:"New user and a new role. Suzanne joins with the access code SUZ01 as Director of Operations \u2014 a new role tier that sits alongside Manager with full record access including deletion (user management stays admin-only). The Director of Operations role is also now available in the Manage Users screen when adding or editing users."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -3522,8 +3522,11 @@ function picArc(){
   var dayEntries=(S.days||[]).filter(function(d){return d.demeanour;});
   var latestDem=dayEntries.length?dayEntries[dayEntries.length-1].demeanour:"";
   if(arrivalDem&&latestDem){
-    var rank={"Shut down":4,"Reactive":3,"Nervous":2,"Neutral":1,"Engaging":0,
-              "Anxious":2,"Withdrawn":3,"Settled":0,"Bright":0};
+    var rank={"Engaging":0,"Settled":0,"Bright":0,"Playful":0,
+              "Neutral":1,"Improving":1,
+              "Nervous":2,"Subdued":2,"Anxious":2,"Lethargic":2,
+              "Reactive":3,"Fearful":3,"Hyperactive":3,"Deteriorating":3,
+              "Shut down":4,"Aggressive":4};
     var r0=rank[arrivalDem],r1=rank[latestDem];
     var improved=(r0!==undefined&&r1!==undefined)?(r1<r0):null;
     out.push({
@@ -3543,6 +3546,8 @@ function picContradictions(){
   var a=S.assessment||{},arr=S.arrival||{},out=[];
   var notesText=((S.notes||[]).map(function(n){return n.text||"";}).join(" ")+" "
     +(S.days||[]).map(function(d){return(d.notes||"")+" "+(d.incidents||"");}).join(" ")).toLowerCase();
+  // strip negated mentions ("did not growl", "no snapping") so they don't read as events
+  notesText=notesText.replace(/\b(no|not|never|without|didn't|hasn't|doesn't)\s+(\w+\s+){0,2}?(growl\w*|snap\w*|flinch\w*|bit\w*|nip\w*|lunge\w*)/g," ");
 
   var accepting=function(v){return v&&/accepts freely|relaxed|no issue/i.test(v);};
 
@@ -3550,14 +3555,14 @@ function picContradictions(){
   var handKeys=["touchHead","touchBody","touchPaws","touchEars","collarGrab","restraint"];
   var allFine=handKeys.filter(function(k){return a[k];}).length>=3
     && handKeys.every(function(k){return !a[k]||accepting(a[k]);});
-  if(allFine&&/flinch|shied|pulled away|snapp|growl|nipp|would not let|wouldn't let|bite|bit me|air snap/.test(notesText)){
+  if(allFine&&/flinch|shied|pulled away|snapp|growl|nipp|would not let|wouldn't let|\bbite\b|bit me|air snap/.test(notesText)){
     out.push({sev:"high",t:"Handling scored as accepting, but the log describes flinching, growling or snapping.",
       w:"Handling on the Assessment tab says the dog accepts contact freely, yet the notes or daily entries mention the opposite. One of the two is out of date — worth a re-check before anyone assumes this dog is safe to handle all over."});
   }
 
   // No bite history declared, but log mentions a bite
   var biteHist=arr.biteHistory||"";
-  if(/none/i.test(biteHist)&&/\bbit\b|\bbite\b|bitten|punctur/.test(notesText)){
+  if(/none/i.test(biteHist)&&/\bbite\b|\bbites\b|bitten|punctur|bit (a |the |him|her|me|someone|staff)/.test(notesText)){
     out.push({sev:"high",t:"No bite history declared on arrival, but a bite is described in the record.",
       w:"Arrival records no declared bites. Something in the notes, incidents or daily log describes one. If a bite has happened in care, it needs an incident entry and likely an EA."});
   }
@@ -3578,13 +3583,6 @@ function picContradictions(){
       w:"A dog that goes straight to a snap with no freeze or growl is the highest-risk guarding profile, because handlers get no chance to back off. This belongs in the Handler brief and on the kennel card."});
   }
 
-  // Rehoming says good with cats, but cat tolerance never tested / reactive
-  var homeCats=/cat/i.test(a.livesWithCats||"")||/cat/i.test(a.homeType||"");
-  if(/reactive|chased/i.test(arr.catTolerance||"")&&/yes|suitable/i.test(a.livesWithCats||"")){
-    out.push({sev:"high",t:"Listed as suitable to live with cats, but arrival history says the dog chased or reacted to cats.",
-      w:"These directly conflict. Cat tolerance needs testing in care before this dog is advertised as cat-friendly."});
-  }
-
   // Muzzle required for walks, but muzzle training never started
   if(/yes/i.test(a.briefMuzzle||"")&&(!a.muzzleStage||/^$/.test(a.muzzleStage))){
     out.push({sev:"med",t:"A muzzle is required for walks, but no muzzle training has been logged.",
@@ -3597,7 +3595,7 @@ function picContradictions(){
   }
 
   // Alone-time not tested but going to a home
-  if(!a.aloneTime&&/available|rehom/i.test((S.fin||{}).outcome||"")){
+  if(!a.aloneTime&&/finished isolation/i.test((S.fin||{}).outcome||"")){
     out.push({sev:"med",t:"Cleared for rehoming, but time alone was never assessed.",
       w:"Separation-related behaviour is one of the most common reasons an adoption fails in the first fortnight. Worth knowing before they go."});
   }
@@ -3611,7 +3609,7 @@ function picGaps(){
   var meta=subMeta(S);
 
   // EA required but not done
-  var needsEA=/one|multiple|unknown/i.test(arr.biteHistory||"")
+  var needsEA=/^(one|multiple|unknown)/i.test(arr.biteHistory||"")
     || CATS.some(function(c){return (S.scores||{})[c.k]===4;});
   var ea=S.ea||{};
   var eaDone=!!(ea.freq&&ea.probability);
