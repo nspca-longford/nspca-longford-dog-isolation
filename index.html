@@ -321,7 +321,6 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
         <button id="dash-menu-btn" onclick="toggleDashMenu(event)" style="background:#1e293b;color:#c5e86c;border:0.5px solid #334155;padding:5px 11px;border-radius:6px;font-size:14px;cursor:pointer;font-family:inherit;line-height:1" title="Menu" aria-label="Menu">&#9776;</button>
         <div id="dash-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,0.18);min-width:210px;z-index:50;overflow-y:auto;max-height:calc(100vh - 90px)">
           <div class="dml">Daily work</div>
-          <div onclick="dashMenuGo('diary')" class="dmi">&#128214; Daily Diary</div>
           <div onclick="dashMenuGo('weighin')" class="dmi">&#9878;&#65039; Batch weigh-in</div>
           <div onclick="dashMenuGo('readytogo')" class="dmi">&#9989; Ready to Go</div>
           <div onclick="dashMenuGo('healthboard')" class="dmi">&#10084;&#65039; Unit Health Board</div>
@@ -413,11 +412,11 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.47",date:"2026-07-13",note:"Daily Diary has been removed \u2014 it was built but never used, so it\u0027s gone rather than sitting there half-filled. Also a fix on the new Picture tab: a dog whose record was missing its scoring data entirely would crash the tab instead of loading. Picture has now been tested against empty records, brand-new dogs, malformed weights and bad dates, and handles all of them."},
   {version:"3.46",date:"2026-07-13",note:"New Picture tab \u2014 the dog, read as a whole. Everything in the record is spread across fourteen tabs, so nobody ever sees it together. Picture assembles it into one reading. THE ARC: how the dog has changed since arrival \u2014 first score against latest, weight at intake against now, demeanour on arrival against the most recent daily entry, each marked as improving or going backwards. WHERE THE RECORD DISAGREES WITH ITSELF: contradictions nobody would otherwise spot \u2014 handling scored as accepting while the notes describe growling, a Green light on a dog with severe resource guarding, a dog listed as cat-suitable whose history says it chased cats, a muzzle required for walks with no muzzle training logged. WHAT WE STILL DON\u0027T KNOW: the gaps, ranked by what they actually cost rather than by count \u2014 a missing EA on a bite-history dog sits above a missing second weigh-in, each with a button straight to the tab that fills it. And IS ANYONE LOOKING AT THIS DOG: days since the last note, walk and weigh-in, because the dogs who get overlooked are the quiet green ones nobody worries about. No new data entry \u2014 it only reads what\u0027s already been entered."},
   {version:"3.45",date:"2026-07-13",note:"A bigger assessment. Two new cards: Resource guarding (food bowl, chews, toys, bed, stolen items, guarding a person, plus whether a warning is given and whether the dog will trade), and a Handler brief at the top \u2014 the ten-second read for anyone taking the dog out: known triggers, what the warning looks like, what helps, handler level needed and whether a muzzle is required. Arrival now also captures how the dog came in (surrender, stray, seizure, transfer, return), who brought them, whether a surrender form is signed, and the reported history \u2014 how long they were owned, the reason given, previous living setup, whether they lived with other animals, house training and any known medical or dietary history. And Scoring now warns you when a dog\u0027s traffic light is running on an assessment more than ten days old."},
   {version:"3.44",date:"2026-07-12",note:"New user and a new role. Suzanne joins with the access code SUZ01 as Director of Operations \u2014 a new role tier that sits alongside Manager with full record access including deletion (user management stays admin-only). The Director of Operations role is also now available in the Manage Users screen when adding or editing users."},
   {version:"3.43",date:"2026-07-10",note:"The dashboard warmth carried into the dog's record. The photo on the dog's profile is a little bigger with a soft ring (and opens the lightbox as before), and every no-photo placeholder across the app \u2014 the profile, Health Board, Upcoming Medical, Ready to Go, All Records and recent outcomes \u2014 now shows the same soft paw mark on a lime wash instead of a grey or yellow box. Purely visual; photos, reposition and upload all work exactly as before."},
-  {version:"3.42",date:"2026-07-10",note:"A little warmth on the dashboard. Dog photos on the cards are bigger (64px, up from 44) so dogs are recognisable by face at a glance, dogs without a photo yet get a soft paw mark on a lime wash instead of a plain grey box, and the selected status filter now shows a gentle lime tint. Nothing else changes."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1204,10 +1203,6 @@ function showDashSection(section){
     el.innerHTML=renderBatchWeighIn();
   }else if(section==="incidents"){
     el.innerHTML=renderIncidentRegister();
-  }else if(section==="diary"){
-    _diaryEditing="";
-    el.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">Loading\u2026</div>';
-    loadDiary().then(function(){el.innerHTML=renderDiary();});
   }
 }
 
@@ -1523,123 +1518,6 @@ function renderFactsheets(){
   return '<div style="max-width:840px;margin:0 auto">'+back+disclaimer+html+'</div>';
 }
 
-// ── Daily Diary (shared unit log) ─────────────────────────────────
-var _diaryCache=null,_diaryShared=false,_diaryEditing="";
-var DIARY_CATS=[
-  ["General","General",["#e2e8f0","#475569"]],
-  ["Cleaning","Cleaning & maintenance",["#dbeafe","#1e40af"]],
-  ["Vet","Vet & medical",["#fee2e2","#991b1b"]],
-  ["Movements","Intakes & movements",["#dcfce7","#166534"]],
-  ["Staffing","Staffing & rota",["#f3e8ff","#6b21a8"]],
-  ["Visitors","Visitors & contractors",["#ffedd5","#9a3412"]],
-  ["Other","Other",["#fef9c3","#854d0e"]]
-];
-function diaryCatTheme(c){var f=DIARY_CATS.find(function(x){return x[0]===c;});return f?f[2]:["#e2e8f0","#475569"];}
-function diaryCatLabel(c){var f=DIARY_CATS.find(function(x){return x[0]===c;});return f?f[1]:(c||"General");}
-function getDiaryLocal(){try{var r=localStorage.getItem("nspca-diary");return r?JSON.parse(r):[];}catch(e){return[];}}
-function setDiaryLocal(a){try{localStorage.setItem("nspca-diary",JSON.stringify(a||[]));}catch(e){}}
-function getDiary(){return _diaryCache||getDiaryLocal();}
-async function loadDiary(){
-  _diaryCache=getDiaryLocal();_diaryShared=false;
-  if(typeof supabaseClient!=="undefined"&&supabaseClient){
-    try{
-      var res=await supabaseClient.from("diary").select("*").order("entry_date",{ascending:false});
-      if(res.error)throw res.error;
-      _diaryCache=(res.data||[]).map(function(r){return {id:String(r.id),date:r.entry_date,time:r.entry_time||"",cat:r.category||"General",text:r.text||"",author:r.author||"",created:r.created_at};});
-      _diaryShared=true;setDiaryLocal(_diaryCache);
-    }catch(e){_diaryShared=false;}
-  }
-}
-async function diaryAdd(){
-  var dEl=document.getElementById("diary-date"),cEl=document.getElementById("diary-cat"),tEl=document.getElementById("diary-text");
-  if(!tEl)return;
-  var text=(tEl.value||"").trim();
-  if(!text){appAlert("Write something first.");return;}
-  var date=(dEl&&dEl.value)||new Date().toISOString().slice(0,10);
-  var cat=(cEl&&cEl.value)||"General";
-  await diaryInsert(date,cat,text);
-  tEl.value="";_diaryRerender();
-  miniToast(_diaryShared?"Entry added for the team":"Entry saved on this device");
-}
-async function diaryInsert(date,cat,text){
-  var now=new Date();var time=("0"+now.getHours()).slice(-2)+":"+("0"+now.getMinutes()).slice(-2);
-  var author=currentName();
-  if(_diaryShared&&supabaseClient){
-    try{var res=await supabaseClient.from("diary").insert([{entry_date:date,entry_time:time,category:cat,text:text,author:author,created_at:now.toISOString()}]);if(res.error)throw res.error;}catch(e){_diaryShared=false;}
-  }
-  if(!_diaryShared){var arr=getDiary();arr.unshift({id:"local-"+Date.now(),date:date,time:time,cat:cat,text:text,author:author,created:now.toISOString()});_diaryCache=arr;setDiaryLocal(arr);}
-  await loadDiary();
-}
-
-function diaryEdit(id){_diaryEditing=String(id);_diaryRerender();setTimeout(function(){var t=document.getElementById("diary-edit-area");if(t)t.focus();},30);}
-function diaryCancelEdit(){_diaryEditing="";_diaryRerender();}
-async function diarySaveEdit(id){
-  id=String(id);
-  var tEl=document.getElementById("diary-edit-area"),cEl=document.getElementById("diary-edit-cat");
-  if(!tEl)return;var text=(tEl.value||"").trim();if(!text){appAlert("Entry can't be empty.");return;}
-  var cat=(cEl&&cEl.value)||"General";
-  if(_diaryShared&&supabaseClient&&id.indexOf("local-")!==0){
-    try{var res=await supabaseClient.from("diary").update({text:text,category:cat,updated_at:new Date().toISOString()}).eq("id",id);if(res.error)throw res.error;}catch(e){}
-  }else{
-    var arr=getDiary();var it=arr.find(function(x){return x.id===id;});if(it){it.text=text;it.cat=cat;}setDiaryLocal(arr);_diaryCache=arr;
-  }
-  _diaryEditing="";await loadDiary();_diaryRerender();miniToast("Entry updated");
-}
-function diaryDelete(id){
-  id=String(id);
-  appConfirm("Delete this diary entry?",function(){
-    (async function(){
-      if(_diaryShared&&supabaseClient&&id.indexOf("local-")!==0){
-        try{await supabaseClient.from("diary").delete().eq("id",id);}catch(e){}
-      }else{
-        var arr=getDiary().filter(function(x){return x.id!==id;});setDiaryLocal(arr);_diaryCache=arr;
-      }
-      await loadDiary();_diaryRerender();miniToast("Entry deleted");
-    })();
-  },{danger:true});
-}
-function diaryCanManage(entry){return (entry.author&&entry.author===currentName())||currentRole()!=="staff";}
-function _diaryRerender(){var el=document.getElementById("dashboard-content");if(el)el.innerHTML=renderDiary();}
-function renderDiary(){
-  var editing=_diaryEditing||"";
-  var entries=getDiary().slice();
-  entries.sort(function(a,b){var c=(b.date||"").localeCompare(a.date||"");return c!==0?c:(b.time||"").localeCompare(a.time||"");});
-  var today=new Date().toISOString().slice(0,10);
-  var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><button onclick="_diaryEditing=&quot;&quot;;loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1;font-size:18px">Daily Diary</h2></div>';
-  var sub='<div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px">Shared log of the unit&rsquo;s day &mdash; cleaning, vet visits, deliveries, intakes, staffing and general observations. '+(_diaryShared?'Entries sync across your team.':'Entries are saved on this device.')+'</div>';
-  var catOpts=DIARY_CATS.map(function(c){return '<option value="'+c[0]+'">'+esc(c[1])+'</option>';}).join("");
-  var composer='<div class="card" style="margin-bottom:16px">'
-    +'<div class="g2"><div class="f"><label class="lbl">Date</label><input type="date" id="diary-date" value="'+today+'" style="width:100%;padding:9px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box"></div>'
-    +'<div class="f"><label class="lbl">Category</label><select id="diary-cat" style="width:100%;padding:9px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box">'+catOpts+'</select></div></div>'
-    +'<div class="f" style="margin-bottom:10px"><label class="lbl">Note</label><textarea id="diary-text" placeholder="What happened today? Cleaning, vet visits, deliveries, intakes, observations\u2026" style="width:100%;min-height:90px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box"></textarea></div>'
-    +'<button onclick="diaryAdd()" style="background:#c5e86c;color:#0f172a;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">+ Add entry</button>'
-    +'</div>';
-  var body="";
-  if(!entries.length){
-    body='<div style="text-align:center;padding:36px 20px;color:var(--color-text-secondary)"><div style="font-size:32px;margin-bottom:8px">&#128214;</div>No diary entries yet.<div style="font-size:11px;margin-top:6px;opacity:0.8">Add the first one above.</div></div>';
-  }else{
-    var byDate={};entries.forEach(function(e){if(!byDate[e.date])byDate[e.date]=[];byDate[e.date].push(e);});
-    Object.keys(byDate).sort().reverse().forEach(function(date){
-      body+='<div style="margin-bottom:18px"><div style="font-size:12px;font-weight:700;color:#0f172a;padding:6px 0;margin-bottom:8px;border-bottom:1px solid #e2e8f0">'+fmtDMYwk(date)+(date===today?' &middot; <span style="color:#0d9488">Today</span>':"")+'</div>';
-      byDate[date].forEach(function(e){
-        var th=diaryCatTheme(e.cat);
-        if(editing===e.id){
-          var eo=DIARY_CATS.map(function(c){return '<option value="'+c[0]+'"'+(c[0]===e.cat?' selected':'')+'>'+esc(c[1])+'</option>';}).join("");
-          body+='<div class="card" style="margin-bottom:8px"><select id="diary-edit-cat" style="padding:6px 8px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;font-family:inherit;margin-bottom:8px">'+eo+'</select><textarea id="diary-edit-area" style="width:100%;min-height:90px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box">'+esc(e.text)+'</textarea><div style="display:flex;gap:6px;margin-top:8px"><button onclick="diarySaveEdit(\''+e.id+'\')" style="background:#c5e86c;color:#0f172a;border:none;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Save</button><button onclick="diaryCancelEdit()" style="background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid #e2e8f0;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Cancel</button></div></div>';
-        }else{
-          var actions=diaryCanManage(e)?'<div style="display:flex;gap:5px;flex-shrink:0"><button onclick="diaryEdit(\''+e.id+'\')" style="background:#e2e8f0;color:#475569;border:none;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer">&#9998;</button><button onclick="diaryDelete(\''+e.id+'\')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer">&#10005;</button></div>':'';
-          body+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:11px 13px;margin-bottom:8px">'
-            +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:'+th[0]+';color:'+th[1]+'">'+esc(diaryCatLabel(e.cat))+'</span>'+(e.time?'<span style="font-size:11px;color:#94a3b8">'+esc(e.time)+'</span>':'')+'<span style="flex:1"></span>'+actions+'</div>'
-            +'<div style="font-size:13px;line-height:1.55;color:#0f172a;white-space:pre-wrap">'+esc(e.text)+'</div>'
-            +(e.author?'<div style="font-size:10px;color:#94a3b8;margin-top:6px">&mdash; '+esc(e.author)+'</div>':'')
-            +'</div>';
-        }
-      });
-      body+='</div>';
-    });
-  }
-  return '<div style="max-width:760px;margin:0 auto">'+back+sub+composer+body+'</div>';
-}
 
 
 function updateClock(){
@@ -3914,7 +3792,7 @@ function picContradictions(){
   var guards=["guardFood","guardChew","guardToys","guardBed","guardStolen","guardPerson"];
   var severeGuard=guards.filter(function(k){return a[k]&&/severe/i.test(a[k]);});
   var meta=subMeta(S);
-  var lightNow=meta.catsAny?(effLight(picTotal(),S.scores)||{}).l:null;
+  var lightNow=meta.catsAny?(effLight(picTotal(),S.scores||{})||{}).l:null;
   if(severeGuard.length&&lightNow==="Green"){
     out.push({sev:"high",t:"Severe resource guarding recorded, but the dog is scored Green.",
       w:"Guarding at this level should be reflected in the Miscellaneous or Reactivity score. A Green light tells staff this dog is safe with anyone — the guarding record says otherwise."});
@@ -3960,7 +3838,7 @@ function picGaps(){
 
   // EA required but not done
   var needsEA=/one|multiple|unknown/i.test(arr.biteHistory||"")
-    || CATS.some(function(c){return S.scores[c.k]===4;});
+    || CATS.some(function(c){return (S.scores||{})[c.k]===4;});
   var ea=S.ea||{};
   var eaDone=!!(ea.freq&&ea.probability);
   if(needsEA&&!eaDone){
@@ -3979,7 +3857,7 @@ function picGaps(){
   }
 
   // Handler brief empty on a non-green dog
-  var lightNow=meta.catsAny?(effLight(picTotal(),S.scores)||{}).l:null;
+  var lightNow=meta.catsAny?(effLight(picTotal(),S.scores||{})||{}).l:null;
   if((lightNow==="Red"||lightNow==="Black"||lightNow==="Yellow")&&!a.briefTriggers&&!a.briefWarning){
     out.push({sev:"high",t:"No handler brief for a "+lightNow+" dog",
       w:"This dog is flagged as needing care, but there's nothing written down telling a handler what sets them off or what the warning looks like. That knowledge is currently only in someone's head.",go:"assessment"});
