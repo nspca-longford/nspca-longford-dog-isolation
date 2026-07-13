@@ -402,7 +402,7 @@ var CATS=[
 ];
 
 var TABS=[
-  {id:"dog",l:"Dog",g:"Profile"},{id:"arrival",l:"Arrival",g:"Profile"},
+  {id:"dog",l:"Dog",g:"Profile"},{id:"arrival",l:"Arrival",g:"Profile"},{id:"picture",l:"Picture",g:"Profile"},
   {id:"assessment",l:"Assessment",g:"Assessment"},{id:"scoring",l:"Scoring",g:"Assessment"},{id:"ea",l:"EA",g:"Assessment"},
   {id:"days",l:"5-Day Report",g:"Isolation"},{id:"medical",l:"Medical",g:"Isolation"},
   {id:"weights",l:"Weights",g:"Isolation"},{id:"exercise",l:"Exercise",g:"Isolation"},
@@ -413,11 +413,11 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.46",date:"2026-07-13",note:"New Picture tab \u2014 the dog, read as a whole. Everything in the record is spread across fourteen tabs, so nobody ever sees it together. Picture assembles it into one reading. THE ARC: how the dog has changed since arrival \u2014 first score against latest, weight at intake against now, demeanour on arrival against the most recent daily entry, each marked as improving or going backwards. WHERE THE RECORD DISAGREES WITH ITSELF: contradictions nobody would otherwise spot \u2014 handling scored as accepting while the notes describe growling, a Green light on a dog with severe resource guarding, a dog listed as cat-suitable whose history says it chased cats, a muzzle required for walks with no muzzle training logged. WHAT WE STILL DON\u0027T KNOW: the gaps, ranked by what they actually cost rather than by count \u2014 a missing EA on a bite-history dog sits above a missing second weigh-in, each with a button straight to the tab that fills it. And IS ANYONE LOOKING AT THIS DOG: days since the last note, walk and weigh-in, because the dogs who get overlooked are the quiet green ones nobody worries about. No new data entry \u2014 it only reads what\u0027s already been entered."},
+  {version:"3.45",date:"2026-07-13",note:"A bigger assessment. Two new cards: Resource guarding (food bowl, chews, toys, bed, stolen items, guarding a person, plus whether a warning is given and whether the dog will trade), and a Handler brief at the top \u2014 the ten-second read for anyone taking the dog out: known triggers, what the warning looks like, what helps, handler level needed and whether a muzzle is required. Arrival now also captures how the dog came in (surrender, stray, seizure, transfer, return), who brought them, whether a surrender form is signed, and the reported history \u2014 how long they were owned, the reason given, previous living setup, whether they lived with other animals, house training and any known medical or dietary history. And Scoring now warns you when a dog\u0027s traffic light is running on an assessment more than ten days old."},
   {version:"3.44",date:"2026-07-12",note:"New user and a new role. Suzanne joins with the access code SUZ01 as Director of Operations \u2014 a new role tier that sits alongside Manager with full record access including deletion (user management stays admin-only). The Director of Operations role is also now available in the Manage Users screen when adding or editing users."},
   {version:"3.43",date:"2026-07-10",note:"The dashboard warmth carried into the dog's record. The photo on the dog's profile is a little bigger with a soft ring (and opens the lightbox as before), and every no-photo placeholder across the app \u2014 the profile, Health Board, Upcoming Medical, Ready to Go, All Records and recent outcomes \u2014 now shows the same soft paw mark on a lime wash instead of a grey or yellow box. Purely visual; photos, reposition and upload all work exactly as before."},
   {version:"3.42",date:"2026-07-10",note:"A little warmth on the dashboard. Dog photos on the cards are bigger (64px, up from 44) so dogs are recognisable by face at a glance, dogs without a photo yet get a soft paw mark on a lime wash instead of a plain grey box, and the selected status filter now shows a gentle lime tint. Nothing else changes."},
-  {version:"3.41",date:"2026-07-10",note:"The navigation and dashboard overhaul. The flat row of 14 tabs is replaced by grouped pill navigation: Profile, Assessment, Isolation, Outcome and Records sit as five pills up top, with that group's own tabs as a second row underneath \u2014 so you only ever see a handful of tabs at once, and each group remembers where you last left off. The dashboard now leads with a plain-number status rail that doubles as the filter, and every dog card carries its traffic light as a coloured stripe down the left edge \u2014 quicker to scan across the whole unit. Also fixes the nav indicator visibly re-sliding in from Profile on every tab click \u2014 it now stays put unless you actually change group. Every screen, field and saved record is exactly as it was."},
-  {version:"3.40",date:"2026-06-25",note:"More dead-code cleanup. The dashboard's old Rounds/Kennels/List view-switcher (replaced by the cards-only view a couple of versions back) was still sitting in the file unused — it's gone now too. Nothing on screen changes."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1945,6 +1945,29 @@ function scoreSnapshot(){
   saveRecord();renderMain();miniToast("Assessment snapshot saved");
 }
 function scoreSnapDelete(i){appConfirm("Delete this snapshot?",function(){(S.scoreHistory||[]).splice(i,1);saveRecord();renderMain();},{danger:true});}
+function scoreStaleHtml(){
+  var h=S.scoreHistory||[];
+  var last=h.length?h[h.length-1]:null;
+  var lastDate=last&&last.date?last.date:null;
+  // fall back to intake date if never re-scored
+  if(!lastDate){
+    var rec=records.find(function(r){return r.id===S.id;});
+    lastDate=(rec&&rec.intakeDate)?rec.intakeDate:null;
+  }
+  if(!lastDate)return "";
+  var then=new Date(lastDate+"T00:00:00");
+  if(isNaN(then.getTime()))return "";
+  var days=Math.floor((new Date()-then)/86400000);
+  if(days<10)return "";
+  var what=last?"last re-scored":"scored on intake and never re-scored";
+  var msg=last
+    ? "This dog was "+what+" "+days+" days ago."
+    : "This dog was "+what+" ("+days+" days ago).";
+  return '<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px">'
+    +'<span style="font-size:16px">&#9203;</span>'
+    +'<div style="flex:1;font-size:12.5px;color:#854d0e"><strong>Score may be out of date.</strong> '+msg+' The traffic light shown is based on that assessment \u2014 re-score if the dog has changed.</div>'
+    +'</div>';
+}
 function scoreHistoryCardHtml(){
   var h=S.scoreHistory||[];
   var btn='<button onclick="scoreSnapshot()" class="btn" style="font-size:11px;padding:5px 12px">&#128247; Snapshot</button>';
@@ -3767,9 +3790,11 @@ function renderAssessment(){
   +'</div>';
   h+=asmtGroup("behaviour","Behaviour &amp; temperament");
   h+='<div class="asmt-bgrid">';
+  h+=acard("brief","Handler brief \u2014 read before walking",'<div style="background:#eef7d8;border:1px solid #a9d23f;border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#3a4a16">The ten-second version for anyone taking this dog out. Keep it short and plain.</div>'+ta("Known triggers",a.briefTriggers||"","assessment.briefTriggers","e.g. other dogs head-on, men in hi-vis, hands reaching over the head...")+ta("What the warning looks like",a.briefWarning||"","assessment.briefWarning","e.g. goes still, whale eye, low growl, tail high and stiff...")+ta("What helps / what works",a.briefHelps||"","assessment.briefHelps","e.g. cross the road early, scatter feed, give space and wait, high-value treats...")+'<div class="g2">'+slct("Handler level needed",a.briefHandler||"","assessment.briefHandler",[["","-- not set --"],["Any staff member","Any staff member"],["Experienced handler","Experienced handler only"],["Two people","Two people required"],["Named handlers only","Named handlers only"]])+slct("Muzzle for walks?",a.briefMuzzle||"","assessment.briefMuzzle",[["","-- not set --"],["No","No"],["Yes","Yes \u2014 muzzle on for all walks"],["Yes \u2014 off site only","Yes \u2014 off site only"]])+'</div>',asmtFilled(["briefTriggers","briefWarning","briefHelps","briefHandler","briefMuzzle"])+" / 5 set");
   h+=acard("temperament","Temperament &amp; demeanour",'<div class="g2">'+slct("Overall confidence",a.confidence||"","assessment.confidence",[["","-- not assessed --"],["Confident","Confident and bold"],["Middle","Middle of the road"],["Cautious","Cautious but recovers"],["Nervous","Nervous / timid"],["Fearful","Fearful / shut down"]])+slct("Energy level",a.energyLevel||"","assessment.energyLevel",[["","-- not assessed --"],["Low","Low - calm / placid"],["Moderate","Moderate"],["High","High"],["Very high","Very high - constant motion"]])+slct("General demeanour",a.demeanour||"","assessment.demeanour",[["","-- not assessed --"],["Friendly","Friendly / outgoing"],["Confident","Confident / bold"],["Calm","Calm / relaxed"],["Playful","Playful"],["Aloof","Aloof / independent"],["Anxious","Anxious / worried"],["Fearful","Fearful / timid"],["Excitable","Excitable / bouncy"],["Reactive","Reactive"],["Withdrawn","Withdrawn / flat"],["Shut down","Shut down / non-responsive"]])+slct("Recovery from stress",a.stressRecovery||"","assessment.stressRecovery",[["","-- not assessed --"],["Quick","Recovers quickly"],["Moderate","Takes a little time"],["Slow","Slow to recover"],["Cannot","Cannot self-soothe"]])+slct("Biddability",a.biddability||"","assessment.biddability",[["","-- not assessed --"],["Eager","Eager to please"],["Willing","Willing"],["Distractible","Distractible"],["Independent","Independent / stubborn"]])+'</div>'+ta("Temperament notes",a.temperamentNotes||"","assessment.temperamentNotes","Overall character, first impressions, how they present..."),asmtFilled(["confidence","energyLevel","demeanour","stressRecovery","biddability"])+" / 5 set");
   h+=acard("handling","Handling",'<div class="g2">'+slct("Touch — Head",a.touchHead||"","assessment.touchHead",touchOpts)+slct("Touch — Body",a.touchBody||"","assessment.touchBody",touchOpts)+slct("Touch — Paws",a.touchPaws||"","assessment.touchPaws",touchOpts)+slct("Touch — Ears",a.touchEars||"","assessment.touchEars",touchOpts)+slct("Touch — Mouth",a.touchMouth||"","assessment.touchMouth",touchOpts)+slct("Collar grab",a.collarGrab||"","assessment.collarGrab",touchOpts)+slct("Restraint",a.restraint||"","assessment.restraint",touchOpts)+slct("Grooming / brushing",a.grooming||"","assessment.grooming",touchOpts)+slct("Nail / paw handling",a.nailHandling||"","assessment.nailHandling",touchOpts)+slct("Being lifted / picked up",a.liftHandling||"","assessment.liftHandling",touchOpts)+slct("On lead",a.leadBehaviour||"","assessment.leadBehaviour",[["","-- not tested --"],["Relaxed","Relaxed — no tension"],["Moderate pulling","Moderate — some pulling"],["Strong puller","Strong puller — difficult to manage"],["Dangerous","Dangerous — unsafe on lead"]])+'</div>'+ta("Handling notes",a.handlingNotes||"","assessment.handlingNotes","Any handling observations..."),asmtFilled(["touchHead","touchBody","touchPaws","touchEars","touchMouth","collarGrab","restraint","grooming","nailHandling","liftHandling","leadBehaviour"])+" / 11 set");
   h+=acard("barrier","Barrier aggression",'<div class="g2">'+slct("Reaction at barrier",a.barrierReaction||"","assessment.barrierReaction",reactOpts)+slct("Intensity",a.barrierIntensity||"","assessment.barrierIntensity",[["","-- not assessed --"],["Redirects easily","Redirects easily"],["Hard to interrupt","Hard to interrupt"],["Cannot be interrupted","Cannot be interrupted"]])+slct("Triggers",a.barrierTriggers||"","assessment.barrierTriggers",[["","-- not assessed --"],["Dogs passing","Dogs passing"],["People passing","People passing"],["Both dogs and people","Both dogs and people"],["Feeding time","Feeding time"],["Multiple triggers","Multiple triggers"]])+slct("Redirected aggression",a.redirectedAggression||"","assessment.redirectedAggression",[["","-- not assessed --"],["None","None observed"],["Mild","Mild — minor mouthing"],["Moderate","Moderate — towards handler"],["Severe","Severe — bites handler"]])+'</div>'+ta("Barrier notes",a.barrierNotes||"","assessment.barrierNotes","Describe triggers, patterns, context..."),asmtFilled(["barrierReaction","barrierIntensity","barrierTriggers","redirectedAggression"])+" / 4 set");
+  h+=acard("guarding","Resource guarding",'<div class="g2">'+slct("Food bowl",a.guardFood||"","assessment.guardFood",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("High-value chew / bone",a.guardChew||"","assessment.guardChew",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("Toys",a.guardToys||"","assessment.guardToys",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("Bed / resting place",a.guardBed||"","assessment.guardBed",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("Stolen items",a.guardStolen||"","assessment.guardStolen",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("Guarding a person",a.guardPerson||"","assessment.guardPerson",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+'</div>'+'<div class="g2">'+slct("Warning given first?",a.guardWarning||"","assessment.guardWarning",[["","-- not assessed --"],["Clear warning","Clear warning — freeze, growl, lip curl"],["Minimal warning","Minimal warning — very brief"],["No warning","No warning — goes straight to snap/bite"],["N/A","N/A — no guarding seen"]])+slct("Trades / swaps willingly?",a.guardTrade||"","assessment.guardTrade",[["","-- not assessed --"],["Yes readily","Yes — swaps readily for better item"],["With work","Yes — but needs a high-value swap"],["No","No — will not release"],["Not tested","Not tested"]])+'</div>'+ta("Guarding notes",a.guardNotes||"","assessment.guardNotes","Which items, how close you can get, what the warning looks like, what works to defuse it...")+'<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:8px;padding:9px 12px;margin-top:10px;font-size:12px;color:#854d0e">Never test guarding by taking an item directly. Observe at a distance and trade up.</div>',asmtFilled(["guardFood","guardChew","guardToys","guardBed","guardStolen","guardPerson","guardWarning","guardTrade"])+" / 8 set");
   h+=acard("social","Social behaviour",'<div class="g2">'+slct("Strangers approaching",a.strangerApproach||"","assessment.strangerApproach",[["","-- not tested --"],["Friendly — seeks contact","Friendly — seeks contact"],["Neutral — accepts","Neutral — accepts approach"],["Nervous — avoids","Nervous — avoids"],["Reactive","Reactive — barks / lunges"],["Aggressive","Aggressive"]])+slct("Children",a.childrenSuitable||"","assessment.childrenSuitable",[["","-- not assessed --"],["All ages","Suitable — all ages"],["Over 12 only","Suitable — over 12 only"],["Adults only","Adults only"],["Not suitable","Not suitable with children"],["Caution","Unknown — caution advised"]])+slct("Other dogs — on lead",a.dogOnLead||"","assessment.dogOnLead",dogOpts)+slct("Other dogs — off lead",a.dogOffLead||"","assessment.dogOffLead",dogOpts)+slct("Cats",a.catResponse||"","assessment.catResponse",[["","-- not tested --"],["Cat friendly","Cat friendly"],["Ignores","Ignores cats"],["Chases / reactive","Chases / reactive"],["High prey drive","High prey drive — unsafe with cats"],["Unknown","Unknown"]])+slct("Horses / equine",a.equineResponse||"","assessment.equineResponse",[["","-- not tested --"],["Calm / safe","Calm — safe around horses"],["Ignores","Ignores"],["Wary / nervous","Wary / nervous"],["Chases / reactive","Chases / reactive"],["Unknown","Unknown"]])+slct("Small mammals",a.smallMammalResponse||"","assessment.smallMammalResponse",[["","-- not tested --"],["Safe","Calm / safe"],["Ignores","Ignores"],["Chases / reactive","Chases / reactive"],["High prey drive","High prey drive — unsafe"],["Unknown","Unknown"]])+slct("Group setting",a.groupDogs||"","assessment.groupDogs",[["","-- not tested --"],["Settled","Settled and appropriate"],["Over-excited","Over-excited"],["Selective","Selective — some dogs only"],["Not suitable","Not suitable in groups"]])+'</div>'+ta("Social notes",a.socialNotes||"","assessment.socialNotes","Any observations about social behaviour..."),asmtFilled(["strangerApproach","childrenSuitable","dogOnLead","dogOffLead","catResponse","equineResponse","smallMammalResponse","groupDogs"])+" / 8 set");
   h+=acard("environment","Environment",'<div class="g2">'+slct("Car travel",a.carTravel||"","assessment.carTravel",[["","-- not tested --"],["Settles well","Settles well"],["Anxious","Anxious but manageable"],["Very distressed","Very distressed"],["Not tested","Not tested"]])+slct("Noise sensitivity",a.noiseSensitivity||"","assessment.noiseSensitivity",[["","-- not assessed --"],["None observed","None observed"],["Mild — startles","Mild — startles but recovers"],["Moderate","Moderate — sustained anxiety"],["Severe","Severe — cannot settle"]])+slct("New environments",a.newEnvironments||"","assessment.newEnvironments",[["","-- not tested --"],["Confident","Confident — explores freely"],["Cautious","Cautious but settles"],["Very nervous","Very nervous"],["Shuts down","Shuts down"]])+slct("Kennel behaviour",a.kennelBehaviour||"","assessment.kennelBehaviour",[["","-- not assessed --"],["Settled","Settled and calm"],["Pacing","Pacing / repetitive behaviour"],["Vocal","Excessive vocalisation"],["Destructive","Destructive behaviour"],["Shutting down","Shutting down / withdrawn"]])+slct("House-training",a.houseTraining||"","assessment.houseTraining",[["","-- not assessed --"],["Fully","Fully house-trained"],["Mostly","Mostly - occasional accidents"],["In progress","In progress"],["Not trained","Not house-trained"],["Unknown","Unknown"]])+slct("Time left alone",a.aloneTime||"","assessment.aloneTime",[["","-- not assessed --"],["Fine","Settles fine alone"],["Short","OK for short periods"],["Struggles","Struggles - vocal / destructive"],["Cannot","Cannot be left"],["Unknown","Unknown"]])+slct("Crate behaviour",a.crateBehaviour||"","assessment.crateBehaviour",[["","-- not assessed --"],["Settles","Settles in crate"],["Tolerates","Tolerates crate"],["Distressed","Distressed in crate"],["Not tried","Not tried"]])+'</div>'+ta("Environment notes",a.environmentNotes||"","assessment.environmentNotes","Any environment observations..."),asmtFilled(["carTravel","noiseSensitivity","newEnvironments","kennelBehaviour","houseTraining","aloneTime","crateBehaviour"])+" / 7 set");
   h+=acard("play","Play &amp; drive",'<div class="g2">'+slct("Toy interest",a.toyInterest||"","assessment.toyInterest",driveOpts)+slct("Retrieve",a.retrieve||"","assessment.retrieve",driveOpts)+slct("Tug",a.tug||"","assessment.tug",driveOpts)+slct("Food motivation",a.foodMotivation||"","assessment.foodMotivation",driveOpts)+slct("Resource guarding",a.resourceGuarding||"","assessment.resourceGuarding",[["","-- not tested --"],["None observed","None observed"],["Mild — stiffens / stares","Mild — stiffens / stares"],["Moderate — growls / snaps","Moderate — growls / snaps"],["Severe","Severe — bites"]])+slct("Play style",a.playStyle||"","assessment.playStyle",[["","-- not assessed --"],["Appropriate — good self-regulation","Appropriate — good self-regulation"],["Boisterous — needs breaks","Boisterous — needs regular breaks"],["Over-aroused","Over-aroused — escalates quickly"],["Bully / mounting","Bully / mounting behaviour"],["Fearful","Fearful / submissive"]])+slct("Play with people",a.playEngagement||"","assessment.playEngagement",[["","-- not assessed --"],["Initiates readily","Initiates play readily"],["Joins when invited","Joins in when invited"],["Takes warming up","Takes warming up"],["Indifferent","Indifferent to play"],["Avoids","Avoids play"]])+slct("Drops / gives toy",a.dropCue||"","assessment.dropCue",[["","-- not tested --"],["Releases readily","Releases readily"],["With encouragement","Releases with encouragement"],["Reluctant","Reluctant to release"],["Won't release","Won't release / guards"]])+slct("Mouthing / bite inhibition",a.mouthing||"","assessment.mouthing",[["","-- not tested --"],["Soft mouth","Soft mouth - good inhibition"],["Mouthy but gentle","Mouthy but gentle"],["Hard mouth","Hard mouth - needs work"],["No inhibition","Painful - no inhibition"]])+slct("Settles after play",a.settleAfterPlay||"","assessment.settleAfterPlay",[["","-- not assessed --"],["Settles quickly","Settles quickly"],["Needs a little time","Needs a little time"],["Slow to wind down","Slow to wind down"],["Over-aroused","Stays over-aroused"]])+slct("Frustration tolerance",a.frustration||"","assessment.frustration",[["","-- not tested --"],["Calm if blocked","Calm if blocked"],["Mild","Mild frustration - recovers"],["Vocalises/mouths","Vocalises or mouths when frustrated"],["Snaps","Snaps when frustrated"]])+'</div>'+fld("Favourite toys",a.toyPreference||"","assessment.toyPreference","text","e.g. balls, tug, squeaky, soft toys")+ta("Play notes",a.playNotes||"","assessment.playNotes","Any play and drive observations..."),asmtFilled(["toyInterest","retrieve","tug","foodMotivation","resourceGuarding","playStyle","playEngagement","dropCue","mouthing","settleAfterPlay","frustration"])+" / 11 set");
@@ -3790,9 +3815,327 @@ function renderAssessment(){
 
 function asmtFilled(keys){var a=S.assessment||{};var n=0;for(var i=0;i<keys.length;i++){var v=a[keys[i]];if(v!==undefined&&v!=="")n++;}return n;}
 function asmtGroup(id,title){return '<div id="grp-'+id+'" style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;margin:16px 2px 8px;scroll-margin-top:54px">'+title+'</div>';}
+// ── Picture of the dog ────────────────────────────────────────────
+// A reading of what the record already knows: the arc, contradictions,
+// and the gaps that actually matter for THIS dog. No new data entry.
+
+function picDaysBetween(a,b){var d=Math.round((b-a)/86400000);return d;}
+function picParseDate(s){if(!s)return null;var d=new Date(s+"T00:00:00");return isNaN(d.getTime())?null:d;}
+function picTotal(){return Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);}
+function picNum(v){if(v===undefined||v===null||v==="")return null;var n=parseFloat(String(v).replace(/[^0-9.\-]/g,""));return isNaN(n)?null:n;}
+
+// ---------- THE ARC: how the dog has changed since arrival ----------
+function picArc(){
+  var rec=records.find(function(r){return r.id===S.id;})||{};
+  var out=[];
+
+  // Score: first vs latest
+  var hist=(S.scoreHistory||[]).slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");});
+  var meta=subMeta(S);
+  var curTotal=meta.done||meta.catsAny?picTotal():null;
+  var firstSnap=hist.length?hist[0]:null;
+  if(firstSnap&&curTotal!==null&&hist.length>=1){
+    var was=firstSnap.total,now=curTotal;
+    var delta=now-was;
+    var wasL=(tlc(was)||{}).l||"—",nowL=(effLight(now,S.scores)||{}).l||"—";
+    out.push({
+      k:"Behaviour score",
+      was:was+"/24 · "+wasL,
+      now:now+"/24 · "+nowL,
+      delta:delta,
+      good:delta<0, bad:delta>0,
+      note:delta<0?"Improving — settling in care":delta>0?"Getting worse in kennels":"No change"
+    });
+  }
+
+  // Weight: intake vs latest
+  var ws=(S.weights||[]).slice().filter(function(w){return w.date&&picNum(w.weight)!==null;})
+    .sort(function(a,b){return(a.date||"").localeCompare(b.date||"");});
+  if(ws.length>=2){
+    var w0=picNum(ws[0].weight),w1=picNum(ws[ws.length-1].weight);
+    var pct=w0?((w1-w0)/w0*100):0;
+    out.push({
+      k:"Weight",
+      was:w0.toFixed(2)+" kg",
+      now:w1.toFixed(2)+" kg",
+      delta:+(w1-w0).toFixed(2),
+      good:Math.abs(pct)<5&&pct>=0,
+      bad:pct<=-5,
+      note:pct<=-5?"Lost "+Math.abs(pct).toFixed(0)+"% since intake — check with vet":pct>=5?"Gained "+pct.toFixed(0)+"%":"Stable"
+    });
+  }
+
+  // Demeanour: arrival vs most recent 5-day entry
+  var arrivalDem=(S.arrival||{}).demeanour||"";
+  var dayEntries=(S.days||[]).filter(function(d){return d.demeanour;});
+  var latestDem=dayEntries.length?dayEntries[dayEntries.length-1].demeanour:"";
+  if(arrivalDem&&latestDem){
+    var rank={"Shut down":4,"Reactive":3,"Nervous":2,"Neutral":1,"Engaging":0,
+              "Anxious":2,"Withdrawn":3,"Settled":0,"Bright":0};
+    var r0=rank[arrivalDem],r1=rank[latestDem];
+    var improved=(r0!==undefined&&r1!==undefined)?(r1<r0):null;
+    out.push({
+      k:"Demeanour",
+      was:arrivalDem,
+      now:latestDem,
+      delta:null,
+      good:improved===true, bad:improved===false,
+      note:improved===true?"More settled than on arrival":improved===false?"Less settled than on arrival":"Changed"
+    });
+  }
+  return out;
+}
+
+// ---------- CONTRADICTIONS: where the record disagrees with itself ----------
+function picContradictions(){
+  var a=S.assessment||{},arr=S.arrival||{},out=[];
+  var notesText=((S.notes||[]).map(function(n){return n.text||"";}).join(" ")+" "
+    +(S.days||[]).map(function(d){return(d.notes||"")+" "+(d.incidents||"");}).join(" ")).toLowerCase();
+
+  var accepting=function(v){return v&&/accepts freely|relaxed|no issue/i.test(v);};
+
+  // Handling says fine, but the log describes handling trouble
+  var handKeys=["touchHead","touchBody","touchPaws","touchEars","collarGrab","restraint"];
+  var allFine=handKeys.filter(function(k){return a[k];}).length>=3
+    && handKeys.every(function(k){return !a[k]||accepting(a[k]);});
+  if(allFine&&/flinch|shied|pulled away|snapp|growl|nipp|would not let|wouldn't let|bite|bit me|air snap/.test(notesText)){
+    out.push({sev:"high",t:"Handling scored as accepting, but the log describes flinching, growling or snapping.",
+      w:"Handling on the Assessment tab says the dog accepts contact freely, yet the notes or daily entries mention the opposite. One of the two is out of date — worth a re-check before anyone assumes this dog is safe to handle all over."});
+  }
+
+  // No bite history declared, but log mentions a bite
+  var biteHist=arr.biteHistory||"";
+  if(/none/i.test(biteHist)&&/\bbit\b|\bbite\b|bitten|punctur/.test(notesText)){
+    out.push({sev:"high",t:"No bite history declared on arrival, but a bite is described in the record.",
+      w:"Arrival records no declared bites. Something in the notes, incidents or daily log describes one. If a bite has happened in care, it needs an incident entry and likely an EA."});
+  }
+
+  // Green traffic light but severe guarding recorded
+  var guards=["guardFood","guardChew","guardToys","guardBed","guardStolen","guardPerson"];
+  var severeGuard=guards.filter(function(k){return a[k]&&/severe/i.test(a[k]);});
+  var meta=subMeta(S);
+  var lightNow=meta.catsAny?(effLight(picTotal(),S.scores)||{}).l:null;
+  if(severeGuard.length&&lightNow==="Green"){
+    out.push({sev:"high",t:"Severe resource guarding recorded, but the dog is scored Green.",
+      w:"Guarding at this level should be reflected in the Miscellaneous or Reactivity score. A Green light tells staff this dog is safe with anyone — the guarding record says otherwise."});
+  }
+
+  // Guarding with no warning — flag regardless of light
+  if(a.guardWarning&&/no warning/i.test(a.guardWarning)){
+    out.push({sev:"high",t:"This dog guards without giving a warning.",
+      w:"A dog that goes straight to a snap with no freeze or growl is the highest-risk guarding profile, because handlers get no chance to back off. This belongs in the Handler brief and on the kennel card."});
+  }
+
+  // Rehoming says good with cats, but cat tolerance never tested / reactive
+  var homeCats=/cat/i.test(a.livesWithCats||"")||/cat/i.test(a.homeType||"");
+  if(/reactive|chased/i.test(arr.catTolerance||"")&&/yes|suitable/i.test(a.livesWithCats||"")){
+    out.push({sev:"high",t:"Listed as suitable to live with cats, but arrival history says the dog chased or reacted to cats.",
+      w:"These directly conflict. Cat tolerance needs testing in care before this dog is advertised as cat-friendly."});
+  }
+
+  // Muzzle required for walks, but muzzle training never started
+  if(/yes/i.test(a.briefMuzzle||"")&&(!a.muzzleStage||/^$/.test(a.muzzleStage))){
+    out.push({sev:"med",t:"A muzzle is required for walks, but no muzzle training has been logged.",
+      w:"The dog is being muzzled without having been conditioned to it. That's stressful and often makes handling worse — worth starting the training log."});
+  }
+
+  // Assessment complete but scored on nothing
+  if(meta.done===false&&meta.catsAny>0&&lightNow){
+    // partial score already warned elsewhere; skip
+  }
+
+  // Alone-time not tested but going to a home
+  if(!a.aloneTime&&/available|rehom/i.test((S.fin||{}).outcome||"")){
+    out.push({sev:"med",t:"Cleared for rehoming, but time alone was never assessed.",
+      w:"Separation-related behaviour is one of the most common reasons an adoption fails in the first fortnight. Worth knowing before they go."});
+  }
+
+  return out;
+}
+
+// ---------- GAPS THAT MATTER: unknowns ranked by consequence for THIS dog ----------
+function picGaps(){
+  var a=S.assessment||{},arr=S.arrival||{},m=S.medical||{},out=[];
+  var meta=subMeta(S);
+
+  // EA required but not done
+  var needsEA=/one|multiple|unknown/i.test(arr.biteHistory||"")
+    || CATS.some(function(c){return S.scores[c.k]===4;});
+  var ea=S.ea||{};
+  var eaDone=!!(ea.freq&&ea.probability);
+  if(needsEA&&!eaDone){
+    out.push({sev:"high",t:"Enhanced Assessment not completed",
+      w:"This dog has a declared bite history or a category scored 4. The Battersea EA is what turns that into a handling category — without it, staff have no agreed risk level to work to.",go:"ea"});
+  }
+
+  // Scoring incomplete
+  if(meta.catsAny>0&&!meta.done){
+    out.push({sev:"high",t:"Behaviour scoring is incomplete ("+meta.catsComplete+" of "+CATS.length+" categories)",
+      w:"A partial score reads greener than the dog really is, because unscored categories count as zero. The traffic light isn't trustworthy until every category is done.",go:"scoring"});
+  }
+  if(meta.catsAny===0){
+    out.push({sev:"high",t:"The dog has never been scored",
+      w:"There's no traffic light for this dog at all, so nobody knows what they're walking into.",go:"scoring"});
+  }
+
+  // Handler brief empty on a non-green dog
+  var lightNow=meta.catsAny?(effLight(picTotal(),S.scores)||{}).l:null;
+  if((lightNow==="Red"||lightNow==="Black"||lightNow==="Yellow")&&!a.briefTriggers&&!a.briefWarning){
+    out.push({sev:"high",t:"No handler brief for a "+lightNow+" dog",
+      w:"This dog is flagged as needing care, but there's nothing written down telling a handler what sets them off or what the warning looks like. That knowledge is currently only in someone's head.",go:"assessment"});
+  }
+
+  // Guarding untested
+  var guards=["guardFood","guardChew","guardToys","guardBed"];
+  if(guards.every(function(k){return !a[k];})){
+    out.push({sev:"med",t:"Resource guarding never assessed",
+      w:"Guarding is one of the most common reasons a rehoming breaks down, and it's invisible until someone reaches for the bowl.",go:"assessment"});
+  }
+
+  // Cat/child tolerance unknown — matters for placement
+  if(!arr.catTolerance||/not tested|unknown/i.test(arr.catTolerance)){
+    out.push({sev:"med",t:"Cat tolerance unknown",
+      w:"Limits which homes this dog can be offered to. Worth testing in care if there's any chance of a cat household.",go:"arrival"});
+  }
+  if(!arr.childHistory||/not known/i.test(arr.childHistory)){
+    out.push({sev:"med",t:"History with children unknown",
+      w:"Most enquiries are family homes. Without this, the dog defaults to adults-only by caution.",go:"arrival"});
+  }
+
+  // Medical basics
+  if(!m.bcs){
+    out.push({sev:"med",t:"No body condition score recorded",
+      w:"BCS is how you tell whether a weight is right for this dog rather than just a number.",go:"medical"});
+  }
+  var ws=(S.weights||[]).filter(function(w){return w.date;});
+  if(ws.length<2){
+    out.push({sev:"low",t:"Only one weigh-in on record",
+      w:"A second weight is what turns a number into a trend — the earliest sign a dog is struggling in kennels is usually weight loss.",go:"weights"});
+  }
+
+  // Alone time
+  if(!a.aloneTime){
+    out.push({sev:"med",t:"Time alone never tested",
+      w:"Separation problems are the most common reason a new adopter calls in the first two weeks.",go:"assessment"});
+  }
+
+  var rank={high:0,med:1,low:2};
+  out.sort(function(x,y){return rank[x.sev]-rank[y.sev];});
+  return out;
+}
+
+// ---------- SILENCE: is anyone actually looking at this dog? ----------
+function picSilence(){
+  var rec=records.find(function(r){return r.id===S.id;})||{};
+  var today=new Date();
+  var out=[];
+  var last=function(arr,key){
+    var ds=(arr||[]).map(function(x){return x[key||"date"];}).filter(Boolean).sort();
+    return ds.length?ds[ds.length-1]:null;
+  };
+  var checks=[
+    {l:"Note written",d:last(S.notes),warn:3,go:"notes"},
+    {l:"Walked / exercised",d:last(S.exercises),warn:2,go:"exercise"},
+    {l:"Weighed",d:last(S.weights),warn:14,go:"weights"},
+  ];
+  checks.forEach(function(c){
+    var dt=picParseDate(c.d);
+    if(!dt){out.push({l:c.l,days:null,over:true,go:c.go});return;}
+    var days=picDaysBetween(dt,today);
+    out.push({l:c.l,days:days,over:days>c.warn,go:c.go});
+  });
+  return out;
+}
+
+function renderPicture(){
+  var rec=records.find(function(r){return r.id===S.id;})||{};
+  var d=S.dog||{};
+  var meta=subMeta(S);
+  var arc=picArc(),contras=picContradictions(),gaps=picGaps(),silence=picSilence();
+
+  var h='<h2>Picture of the dog</h2><div class="sub">What the record already knows about '+esc(rec.name||"this dog")+', read together rather than tab by tab. Nothing here is new data \u2014 it\'s a reading of what\'s been entered.</div>';
+
+  // ── THE ARC
+  h+='<div class="sc-label">The arc \u2014 how they\'ve changed since arrival</div>';
+  if(!arc.length){
+    h+='<div class="card"><div style="color:#64748b;font-size:13px">Not enough history yet. Once there\'s a second score, weigh-in or daily entry, the change since arrival shows here.</div></div>';
+  }else{
+    h+='<div class="card" style="padding:0;overflow:hidden">';
+    arc.forEach(function(a,i){
+      var col=a.good?"#16a34a":a.bad?"#dc2626":"#64748b";
+      var arrow=a.good?"&#8600;":a.bad?"&#8599;":"&#8594;";
+      if(a.k==="Weight"&&a.delta>0)arrow="&#8599;";
+      h+='<div style="display:flex;align-items:center;gap:14px;padding:14px 16px;'+(i?'border-top:1px solid #e2e8f0':'')+'">'
+        +'<div style="min-width:120px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em">'+esc(a.k)+'</div>'
+        +'<div style="font-size:13.5px;color:#94a3b8">'+esc(a.was)+'</div>'
+        +'<div style="font-size:16px;color:'+col+'">'+arrow+'</div>'
+        +'<div style="font-size:14px;font-weight:700;color:#0f172a">'+esc(a.now)+'</div>'
+        +'<div style="flex:1"></div>'
+        +'<div style="font-size:12.5px;font-weight:600;color:'+col+'">'+esc(a.note)+'</div>'
+        +'</div>';
+    });
+    h+='</div>';
+  }
+
+  // ── CONTRADICTIONS
+  if(contras.length){
+    h+='<div class="sc-label">Where the record disagrees with itself</div>';
+    contras.forEach(function(c){
+      var bg=c.sev==="high"?"#fef2f2":"#fffbeb";
+      var bd=c.sev==="high"?"#fca5a5":"#fcd34d";
+      var tc=c.sev==="high"?"#991b1b":"#854d0e";
+      h+='<div style="background:'+bg+';border:1px solid '+bd+';border-radius:12px;padding:13px 15px;margin-bottom:10px">'
+        +'<div style="font-size:13.5px;font-weight:700;color:'+tc+';margin-bottom:5px">'+c.t+'</div>'
+        +'<div style="font-size:12.5px;color:'+tc+';opacity:.92;line-height:1.5">'+c.w+'</div>'
+        +'</div>';
+    });
+  }
+
+  // ── GAPS THAT MATTER
+  h+='<div class="sc-label">What we still don\'t know \u2014 ranked by what it costs</div>';
+  if(!gaps.length){
+    h+='<div class="card"><div style="color:#16a34a;font-size:13px;font-weight:600">&#10003; Nothing significant outstanding. The picture of this dog is as complete as the app can make it.</div></div>';
+  }else{
+    h+='<div class="card" style="padding:0;overflow:hidden">';
+    gaps.forEach(function(g,i){
+      var col=g.sev==="high"?"#dc2626":g.sev==="med"?"#ca8a04":"#94a3b8";
+      var lab=g.sev==="high"?"Matters most":g.sev==="med"?"Worth doing":"Nice to have";
+      h+='<div style="display:flex;gap:12px;padding:14px 16px;'+(i?'border-top:1px solid #e2e8f0':'')+'">'
+        +'<div style="width:4px;border-radius:3px;background:'+col+';flex:none"></div>'
+        +'<div style="flex:1;min-width:0">'
+          +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">'
+            +'<span style="font-size:13.5px;font-weight:700;color:#0f172a">'+esc(g.t)+'</span>'
+            +'<span style="font-size:9.5px;font-weight:700;color:'+col+';background:'+(g.sev==="high"?"#fee2e2":g.sev==="med"?"#fef9c3":"#f1f5f9")+';padding:2px 7px;border-radius:20px;white-space:nowrap">'+lab+'</span>'
+          +'</div>'
+          +'<div style="font-size:12.5px;color:#64748b;line-height:1.5">'+g.w+'</div>'
+        +'</div>'
+        +(g.go?'<button class="btn" data-go="'+g.go+'" style="font-size:11px;padding:5px 11px;align-self:center;white-space:nowrap">Go</button>':'')
+        +'</div>';
+    });
+    h+='</div>';
+  }
+
+  // ── SILENCE
+  h+='<div class="sc-label">Is anyone looking at this dog?</div>';
+  h+='<div class="card"><div style="display:flex;gap:10px;flex-wrap:wrap">';
+  silence.forEach(function(s){
+    var col=s.over?"#dc2626":"#16a34a";
+    var bg=s.over?"#fee2e2":"#dcfce7";
+    var txt=s.days===null?"never":s.days===0?"today":s.days===1?"yesterday":s.days+" days ago";
+    h+='<div style="flex:1;min-width:150px;background:'+bg+';border-radius:10px;padding:11px 13px">'
+      +'<div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:'+col+';opacity:.8">'+esc(s.l)+'</div>'
+      +'<div style="font-size:15px;font-weight:800;color:'+col+';margin-top:3px">'+txt+'</div>'
+      +'</div>';
+  });
+  h+='</div></div>';
+
+  h+='<div class="brow"><button class="btn" data-go="dog">&larr; Dog</button><button class="btn btnp" data-go="report">Report &rarr;</button></div>';
+  return h;
+}
+
 function acard(id,title,body,label){window._asmtOpen=window._asmtOpen||{};var open=!!window._asmtOpen[id];return '<div class="card">'+'<div onclick="toggleAsmt(\''+id+'\')" tabindex="0" role="button" aria-expanded="'+(open?'true':'false')+'" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();toggleAsmt(\''+id+'\')}" style="display:flex;align-items:center;gap:10px;cursor:pointer">'+'<span style="flex:1;font-size:14px;font-weight:700;color:#0f172a">'+title+'</span>'+'<span style="font-size:10px;font-weight:600;color:#64748b;background:#f1f5f9;padding:2px 9px;border-radius:20px;white-space:nowrap">'+label+'</span>'+'<span id="asmtchev-'+id+'" style="font-size:18px;line-height:1;color:#94a3b8;transition:transform 0.2s;transform:rotate('+(open?'90':'0')+'deg)">&#8250;</span>'+'</div>'+'<div id="asmtbody-'+id+'" style="'+(open?'':'display:none;')+'margin-top:12px">'+body+'</div>'+'</div>';}
 function toggleAsmt(id){window._asmtOpen=window._asmtOpen||{};window._asmtOpen[id]=!window._asmtOpen[id];var b=document.getElementById("asmtbody-"+id);var c=document.getElementById("asmtchev-"+id);if(b)b.style.display=window._asmtOpen[id]?"":"none";if(c)c.style.transform="rotate("+(window._asmtOpen[id]?"90":"0")+"deg)";}
-function asmtSetAll(open){window._asmtOpen=window._asmtOpen||{};["temperament","handling","barrier","social","environment","play","trainability","buddywalks","playdates","muzzle","rehoming"].forEach(function(id){window._asmtOpen[id]=open;});renderMain();}
+function asmtSetAll(open){window._asmtOpen=window._asmtOpen||{};["brief","temperament","handling","barrier","guarding","social","environment","play","trainability","buddywalks","playdates","muzzle","rehoming"].forEach(function(id){window._asmtOpen[id]=open;});renderMain();}
 function asmtJump(id){var el=document.getElementById("grp-"+id);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});}
 
 // ── Helper builders ───────────────────────────────────────────────
@@ -4358,7 +4701,9 @@ function page(){
     return hero+intakeChecklistHtml()+identity+intake+restrictedBreedCardHtml()+isoPeriodCardHtml()+warningsCardHtml()+noticesCardHtml()+'<div class="brow"><button class="btn" onclick="openKennelCard()" style="white-space:nowrap">&#128203; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
   }
 
-  if(t==="arrival") return'<h2>On-arrival observation</h2><div class="sub">Record the dog\'s behaviour on arrival.</div><div class="card">'+slct("Initial demeanour on arrival",a.demeanour,"arrival.demeanour",[["Engaging","Engaging — friendly, curious"],["Nervous","Nervous — withdrawn, avoidant"],["Reactive","Reactive — alert, tense, vocal"],["Shut down","Shut down — frozen, non-responsive"],["Neutral","Neutral — calm, no strong response"]])+slct("Muzzle required?",a.muzzle,"arrival.muzzle",[["No","No — handled safely without muzzle"],["Yes — accepted","Yes — accepted without issue"],["Yes — resistant","Yes — resistant to muzzling"],["Yes — required intervention","Yes — required significant intervention"]])+slct("Lead / handling acceptance",a.lead,"arrival.lead",[["Good","Good — relaxed, no tension"],["Moderate","Moderate — some pulling or resistance"],["Poor","Poor — strong pulling"],["Dangerous","Dangerous — unsafe on lead"]])+slct("First vet visit behaviour",a.vet,"arrival.vet",[["Cooperative","Cooperative"],["Nervous but manageable","Nervous but manageable"],["Resistant","Resistant — required restraint"],["Aggressive","Aggressive — unsafe to handle"],["Not yet seen","Not yet seen by vet"]])+ta("Arrival notes",a.notes,"arrival.notes","Describe arrival behaviour...")+'<div class="sec">Behaviour History</div>'+slct("Dog-to-Dog Reactivity",a.dogDog,"arrival.dogDog",[["Not tested","Not tested"],["None observed — settled","None observed — settled"],["Mild","Mild — some interest or pulling"],["Moderate","Moderate — barking or lunging"],["Severe","Severe — could not pass safely"]])+slct("Cat Tolerance",a.catTolerance,"arrival.catTolerance",[["Not tested","Not tested"],["Unknown","Unknown"],["Cat friendly","Known to be cat friendly"],["Reactive","Chased or reactive to cats"]])+slct("Horses / equine",a.equineHistory,"arrival.equineHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Good","Known to be good with horses"],["Reactive","Reactive / chased horses"]])+slct("Small mammals",a.smallMammalHistory,"arrival.smallMammalHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Safe","Known to be safe with small mammals"],["Reactive","Chased / high prey drive"]])+slct("Child History",a.childHistory,"arrival.childHistory",[["Not known","Not known"],["Good","Known to be good with children"],["No exposure","No known exposure"],["Caution","Owner advised caution"],["Incident","Known incident involving a child"]])+slct("Previous Bite History",a.biteHistory,"arrival.biteHistory",[["None","None declared"],["One","One bite declared by owner"],["Multiple","Multiple bites declared"],["Unknown details","Bite history — details unknown"]])+'</div><div class="brow"><button class="btn" data-go="dog">&larr; Back</button><button class="btn btnp" data-go="days">Next: 5-day report &rarr;</button></div>';
+  if(t==="picture") return renderPicture();
+
+  if(t==="arrival") return'<h2>On-arrival observation</h2><div class="sub">Record the dog\'s behaviour on arrival.</div><div class="card">'+slct("Initial demeanour on arrival",a.demeanour,"arrival.demeanour",[["Engaging","Engaging — friendly, curious"],["Nervous","Nervous — withdrawn, avoidant"],["Reactive","Reactive — alert, tense, vocal"],["Shut down","Shut down — frozen, non-responsive"],["Neutral","Neutral — calm, no strong response"]])+slct("Muzzle required?",a.muzzle,"arrival.muzzle",[["No","No — handled safely without muzzle"],["Yes — accepted","Yes — accepted without issue"],["Yes — resistant","Yes — resistant to muzzling"],["Yes — required intervention","Yes — required significant intervention"]])+slct("Lead / handling acceptance",a.lead,"arrival.lead",[["Good","Good — relaxed, no tension"],["Moderate","Moderate — some pulling or resistance"],["Poor","Poor — strong pulling"],["Dangerous","Dangerous — unsafe on lead"]])+slct("First vet visit behaviour",a.vet,"arrival.vet",[["Cooperative","Cooperative"],["Nervous but manageable","Nervous but manageable"],["Resistant","Resistant — required restraint"],["Aggressive","Aggressive — unsafe to handle"],["Not yet seen","Not yet seen by vet"]])+ta("Arrival notes",a.notes,"arrival.notes","Describe arrival behaviour...")+'<div class="sec">Source &amp; handover</div>'+slct("How the dog came in",a.source,"arrival.source",[["","-- not set --"],["Owner surrender","Owner surrender"],["Stray","Stray / found"],["Seizure","Seizure"],["Transfer","Transfer from another centre"],["Return","Return \u2014 previously rehomed by us"],["Born here","Born in care"]])+ta("Surrendered / brought in by",a.sourceBy,"arrival.sourceBy","Name, and contact number or address if given...")+slct("Surrender form signed?",a.sourceForm,"arrival.sourceForm",[["","-- not set --"],["Yes","Yes \u2014 on file"],["No","No"],["N/A","N/A \u2014 stray or seizure"]])+'<div class="sec">Reported history</div>'+slct("How long with previous owner",a.histDuration,"arrival.histDuration",[["","-- not known --"],["Since a puppy","Since a puppy"],["Under 1 year","Under 1 year"],["1 to 3 years","1 to 3 years"],["Over 3 years","Over 3 years"],["Unknown","Unknown"]])+ta("Reason given for surrender",a.histReason,"arrival.histReason","In the owner's own words where possible...")+slct("Previous living setup",a.histLiving,"arrival.histLiving",[["","-- not known --"],["Indoors \u2014 family home","Indoors \u2014 family home"],["Indoors and garden","Indoors with garden access"],["Outdoor kennel","Outdoor kennel / yard"],["Farm","Farm / working"],["Multiple homes","Multiple homes"],["Unknown","Unknown"]])+slct("Lived with other animals?",a.histAnimals,"arrival.histAnimals",[["","-- not known --"],["Lived with dogs","Lived with other dogs"],["Lived with cats","Lived with cats"],["Lived with both","Lived with dogs and cats"],["Lived alone","Lived as the only pet"],["Unknown","Unknown"]])+slct("House trained (as reported)",a.histHouseTrained,"arrival.histHouseTrained",[["","-- not known --"],["Yes","Yes"],["Mostly","Mostly \u2014 occasional accidents"],["No","No"],["Unknown","Unknown"]])+ta("Known medical or dietary history",a.histMedical,"arrival.histMedical","Conditions, medication, allergies, food the dog is used to...")+'<div class="sec">Behaviour History</div>'+slct("Dog-to-Dog Reactivity",a.dogDog,"arrival.dogDog",[["Not tested","Not tested"],["None observed — settled","None observed — settled"],["Mild","Mild — some interest or pulling"],["Moderate","Moderate — barking or lunging"],["Severe","Severe — could not pass safely"]])+slct("Cat Tolerance",a.catTolerance,"arrival.catTolerance",[["Not tested","Not tested"],["Unknown","Unknown"],["Cat friendly","Known to be cat friendly"],["Reactive","Chased or reactive to cats"]])+slct("Horses / equine",a.equineHistory,"arrival.equineHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Good","Known to be good with horses"],["Reactive","Reactive / chased horses"]])+slct("Small mammals",a.smallMammalHistory,"arrival.smallMammalHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Safe","Known to be safe with small mammals"],["Reactive","Chased / high prey drive"]])+slct("Child History",a.childHistory,"arrival.childHistory",[["Not known","Not known"],["Good","Known to be good with children"],["No exposure","No known exposure"],["Caution","Owner advised caution"],["Incident","Known incident involving a child"]])+slct("Previous Bite History",a.biteHistory,"arrival.biteHistory",[["None","None declared"],["One","One bite declared by owner"],["Multiple","Multiple bites declared"],["Unknown details","Bite history — details unknown"]])+'</div><div class="brow"><button class="btn" data-go="dog">&larr; Back</button><button class="btn btnp" data-go="days">Next: 5-day report &rarr;</button></div>';
 
   if(t==="days"){
     var dv=Math.min(4,Math.max(0,window._dayView||0));
@@ -4380,6 +4725,7 @@ function page(){
   }
 
   if(t==="scoring"){
+    var staleBanner=scoreStaleHtml();
     var sevSevere=CATS.filter(function(c){return S.scores[c.k]===4;});
     var sevMod=CATS.filter(function(c){return S.scores[c.k]===3;});
     var meta=subMeta(S);
@@ -4442,7 +4788,7 @@ function page(){
     var eaBlock=total>0?(ea?'<div class="ea-warn"><div style="font-size:13px;font-weight:600;color:#92400e;margin-bottom:4px">&#9888; Enhanced Assessment may be required</div><div style="font-size:12px;color:#92400e">Review with senior staff before any rehoming decisions.</div></div>':'<div class="ea-clear"><div style="font-size:12px;font-weight:500;color:#166534">&#10003; No automatic EA flag triggered</div></div>'):"";
 
 
-    return '<h2>Behaviour scoring</h2><div class="sub">Rate the weighted sub-criteria in each category 0&ndash;3 (none &rarr; severe). Each category rolls up to its 1&ndash;4 band and the /24 total; a &#10145; sub-item holds the category at Red when scored 3, and any category at 4 forces at least Red.</div>'+resultPanel+scoreHistoryCardHtml()+flagHtml+eaBlock+cats+'<div class="sc-label">Cross-check</div>'+secondAssessorCardHtml()+'<div class="brow"><button class="btn" data-go="assessment">&larr; Back</button><button class="btn btnp" data-go="outcome">Next: outcome &rarr;</button></div>';
+    return '<h2>Behaviour scoring</h2><div class="sub">Rate the weighted sub-criteria in each category 0&ndash;3 (none &rarr; severe). Each category rolls up to its 1&ndash;4 band and the /24 total; a &#10145; sub-item holds the category at Red when scored 3, and any category at 4 forces at least Red.</div>'+staleBanner+resultPanel+scoreHistoryCardHtml()+flagHtml+eaBlock+cats+'<div class="sc-label">Cross-check</div>'+secondAssessorCardHtml()+'<div class="brow"><button class="btn" data-go="assessment">&larr; Back</button><button class="btn btnp" data-go="outcome">Next: outcome &rarr;</button></div>';
   }
 
   if(t==="outcome"){
