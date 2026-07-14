@@ -407,16 +407,16 @@ var TABS=[
   {id:"weights",l:"Weights",g:"Isolation"},{id:"exercise",l:"Exercise",g:"Isolation"},
   {id:"feeding",l:"Feeding",g:"Isolation"},{id:"notes",l:"Notes",g:"Isolation"},
   {id:"outcome",l:"Outcome",g:"Outcome"},
-  {id:"files",l:"Files",g:"Records"},{id:"report",l:"Report",g:"Records"}
+  {id:"files",l:"Files",g:"Records"},{id:"breakdown",l:"Breakdown",g:"Records"},{id:"report",l:"Report",g:"Records"}
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.50",date:"2026-07-14",note:"New Breakdown tab (in Records) \u2014 the whole record on one dense screen. Every section of the record condensed to its key facts: identity, arrival and history, assessment (including worst guarding level and handler requirements), the six scoring bands with the traffic light, EA status, daily care counts, the full medical picture and the outcome. Colour-coded throughout: a grey dash means not recorded yet, amber means worth attention, red means flagged \u2014 so one glance shows both what we know and what\u0027s missing. Every section has an Open button straight to its tab. Also fixes the Picture tab wrongly showing \u0027Enhanced Assessment not completed\u0027 even after the EA was done."},
   {version:"3.49",date:"2026-07-13",note:"Picture tab bug fixes \u2014 it was crying wolf. Four real bugs found and fixed: a bite history of \u0027None declared\u0027 was wrongly triggering the \u0027Enhanced Assessment not completed\u0027 warning on every clean dog (the word None contains one); everyday phrases like \u0027a bit wary\u0027 or \u0027settled a bit\u0027 in the notes were being read as a bite; a dog marked \u0027Not fit for rehoming\u0027 was told it was \u0027cleared for rehoming\u0027; and the arrival-to-now demeanour comparison only recognised a handful of the demeanour options, so most dogs showed a grey \u0027Changed\u0027 instead of improving or going backwards. Negated phrases (\u0027did not growl\u0027) are also no longer read as events. Everything re-tested \u2014 23 checks passing."},
   {version:"3.48",date:"2026-07-13",note:"A full audit of the whole app, and a deep clean behind the scenes. Twenty leftover functions from removed features \u2014 the old Behaviour tab, the Timeline, the Handover button and their helpers \u2014 were still sitting in the code unreachable; all removed (226 lines). Every tab and every dashboard screen was then test-rendered against a realistic record, all navigation targets were verified to exist, and the assessment card registry, changelog and storage keys were all checked for consistency. No behaviour changes \u2014 the app is just leaner and every screen is verified working."},
   {version:"3.47",date:"2026-07-13",note:"Daily Diary has been removed \u2014 it was built but never used, so it\u0027s gone rather than sitting there half-filled. Also a fix on the new Picture tab: a dog whose record was missing its scoring data entirely would crash the tab instead of loading. Picture has now been tested against empty records, brand-new dogs, malformed weights and bad dates, and handles all of them."},
   {version:"3.46",date:"2026-07-13",note:"New Picture tab \u2014 the dog, read as a whole. Everything in the record is spread across fourteen tabs, so nobody ever sees it together. Picture assembles it into one reading. THE ARC: how the dog has changed since arrival \u2014 first score against latest, weight at intake against now, demeanour on arrival against the most recent daily entry, each marked as improving or going backwards. WHERE THE RECORD DISAGREES WITH ITSELF: contradictions nobody would otherwise spot \u2014 handling scored as accepting while the notes describe growling, a Green light on a dog with severe resource guarding, a dog listed as cat-suitable whose history says it chased cats, a muzzle required for walks with no muzzle training logged. WHAT WE STILL DON\u0027T KNOW: the gaps, ranked by what they actually cost rather than by count \u2014 a missing EA on a bite-history dog sits above a missing second weigh-in, each with a button straight to the tab that fills it. And IS ANYONE LOOKING AT THIS DOG: days since the last note, walk and weigh-in, because the dogs who get overlooked are the quiet green ones nobody worries about. No new data entry \u2014 it only reads what\u0027s already been entered."},
-  {version:"3.45",date:"2026-07-13",note:"A bigger assessment. Two new cards: Resource guarding (food bowl, chews, toys, bed, stolen items, guarding a person, plus whether a warning is given and whether the dog will trade), and a Handler brief at the top \u2014 the ten-second read for anyone taking the dog out: known triggers, what the warning looks like, what helps, handler level needed and whether a muzzle is required. Arrival now also captures how the dog came in (surrender, stray, seizure, transfer, return), who brought them, whether a surrender form is signed, and the reported history \u2014 how long they were owned, the reason given, previous living setup, whether they lived with other animals, house training and any known medical or dietary history. And Scoring now warns you when a dog\u0027s traffic light is running on an assessment more than ten days old."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -3467,6 +3467,158 @@ function renderAssessment(){
 
 function asmtFilled(keys){var a=S.assessment||{};var n=0;for(var i=0;i<keys.length;i++){var v=a[keys[i]];if(v!==undefined&&v!=="")n++;}return n;}
 function asmtGroup(id,title){return '<div id="grp-'+id+'" style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;margin:16px 2px 8px;scroll-margin-top:54px">'+title+'</div>';}
+// ── Breakdown ─────────────────────────────────────────────────────
+// The whole record on one dense screen. Every key field, colour-coded:
+// normal = filled · grey dash = missing · amber/red = flagged.
+
+function bdCell(label,val,flag){
+  // flag: undefined/"" normal, "warn" amber, "risk" red
+  var has=val!==undefined&&val!==null&&String(val).trim()!=="";
+  var v=has?esc(String(val)):"&mdash;";
+  var col=!has?"#b6bdc6":flag==="risk"?"#b91c1c":flag==="warn"?"#b45309":"#0f172a";
+  var bg=flag==="risk"&&has?"#fef2f2":flag==="warn"&&has?"#fffbeb":"transparent";
+  return '<div style="padding:7px 10px;border-radius:8px;background:'+bg+';min-width:0">'
+    +'<div style="font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+label+'</div>'
+    +'<div style="font-size:12.5px;font-weight:'+(has?'600':'400')+';color:'+col+';margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(has?esc(String(val)):'')+'">'+v+'</div>'
+    +'</div>';
+}
+function bdSection(title,go,cells,cols){
+  return '<div class="card" style="padding:12px 14px;margin-bottom:10px">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+      +'<div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#475569">'+title+'</div>'
+      +(go?'<button class="btn" data-go="'+go+'" style="font-size:10px;padding:3px 9px">Open</button>':'')
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat('+(cols||4)+',1fr);gap:2px 10px">'+cells.join("")+'</div>'
+    +'</div>';
+}
+function bdCount(n,unit,warnIfZero){
+  if(!n)return {v:warnIfZero?"None recorded":"None",f:warnIfZero?"warn":""};
+  return {v:n+" "+unit,f:""};
+}
+
+function renderBreakdown(){
+  var rec=records.find(function(r){return r.id===S.id;})||{};
+  var d=S.dog||{},arr=S.arrival||{},a=S.assessment||{},m=S.medical||{},f=S.fin||{},ea=S.ea||{};
+  var meta=subMeta(S);
+  var total=Object.values(S.scores||{}).reduce(function(x,y){return x+(parseInt(y)||0);},0);
+  var tl=meta.catsAny?effLight(total,S.scores||{}):null;
+  var todayStr=new Date().toISOString().slice(0,10);
+
+  var h='<h2>Breakdown</h2><div class="sub">The whole record on one screen. Grey dash = not recorded, amber = worth attention, red = flagged.</div>';
+
+  // ── Identity & intake
+  h+=bdSection("Identity &amp; intake","dog",[
+    bdCell("Name",rec.name||d.name),
+    bdCell("Ref",d.refNo),
+    bdCell("Breed",d.breed+(d.crossbreed&&d.breed2?" x "+d.breed2:"")),
+    bdCell("Sex",d.sex),
+    bdCell("Age",d.age),
+    bdCell("Size",d.size),
+    bdCell("Colour",d.colour),
+    bdCell("Microchip",d.microchip,!d.microchip?"warn":""),
+    bdCell("Kennel",d.kennel),
+    bdCell("Intake",rec.intakeDate||d.intakeDate),
+    bdCell("Days in",rec.intakeDate?daysInIsolation(rec.intakeDate):""),
+    bdCell("Assessor",d.assessor),
+  ]);
+
+  // ── Arrival & history
+  var biteFlag=arr.biteHistory&&!/^none/i.test(arr.biteHistory)?"risk":"";
+  h+=bdSection("Arrival &amp; history","arrival",[
+    bdCell("Came in as",arr.source),
+    bdCell("Brought by",arr.sourceBy),
+    bdCell("Surrender form",arr.sourceForm),
+    bdCell("Arrival demeanour",arr.demeanour),
+    bdCell("Bite history",arr.biteHistory,biteFlag),
+    bdCell("Cats",arr.catTolerance,/reactive/i.test(arr.catTolerance||"")?"risk":!arr.catTolerance||/not tested|unknown/i.test(arr.catTolerance)?"warn":""),
+    bdCell("Children",arr.childHistory,/caution|incident/i.test(arr.childHistory||"")?"risk":""),
+    bdCell("Other dogs",arr.dogDog),
+    bdCell("Time owned",arr.histDuration),
+    bdCell("Why surrendered",arr.histReason),
+    bdCell("Previous setup",arr.histLiving),
+    bdCell("Lived with pets",arr.histAnimals),
+  ]);
+
+  // ── Assessment (per-card fill + key flags)
+  var guardVals=["guardFood","guardChew","guardToys","guardBed","guardStolen","guardPerson"].map(function(k){return a[k]||"";});
+  var worstGuard=guardVals.find(function(v){return /severe/i.test(v);})?"Severe":guardVals.find(function(v){return /moderate/i.test(v);})?"Moderate":guardVals.find(function(v){return /mild/i.test(v);})?"Mild":guardVals.some(function(v){return v&&!/not tested/i.test(v);})?"None seen":"";
+  h+=bdSection("Assessment","assessment",[
+    bdCell("Handler brief",a.briefTriggers||a.briefWarning?"Written":"","" ),
+    bdCell("Handler level",a.briefHandler,/two people|named/i.test(a.briefHandler||"")?"warn":""),
+    bdCell("Muzzle for walks",a.briefMuzzle,/yes/i.test(a.briefMuzzle||"")?"warn":""),
+    bdCell("Guarding (worst)",worstGuard,worstGuard==="Severe"?"risk":worstGuard==="Moderate"?"warn":""),
+    bdCell("Guard warning given",a.guardWarning,/no warning/i.test(a.guardWarning||"")?"risk":""),
+    bdCell("Temperament",a.confidence||a.demeanour),
+    bdCell("On lead",a.leadBehaviour),
+    bdCell("House training",a.houseTraining),
+    bdCell("Time alone",a.aloneTime,!a.aloneTime?"warn":""),
+    bdCell("Recall",a.recall),
+    bdCell("Buddy walks",(a.buddyWalks||[]).length?(a.buddyWalks||[]).length+" logged":""),
+    bdCell("Muzzle training",a.muzzleStage),
+  ]);
+
+  // ── Scoring & EA
+  var cs=CATS.map(function(c){return {l:c.l,s:catState(c.k,S)};});
+  var scoreCells=cs.map(function(x){
+    var b=x.s.has?x.s.band:null;
+    return bdCell(x.l,b?("Band "+b+(x.s.floored?" · floored":"")):"",b===4?"risk":b===3?"warn":"");
+  });
+  scoreCells.unshift(bdCell("Traffic light",tl?tl.l+" · "+total+"/24":"",tl&&(tl.l==="Red"||tl.l==="Black")?"risk":tl&&tl.l==="Yellow"?"warn":""));
+  scoreCells.push(bdCell("Categories done",meta.catsComplete+" / "+CATS.length,meta.catsComplete<CATS.length?"warn":""));
+  var eaDone=!!(ea.frequency&&ea.probability);
+  scoreCells.push(bdCell("Battersea EA",ea.needed==="No"?"Not required":eaDone?"Done":(ea.needed?"Started":""),(ea.needed&&ea.needed!=="No"&&!eaDone)?"warn":""));
+  h+=bdSection("Scoring &amp; EA","scoring",scoreCells);
+
+  // ── Isolation & daily care
+  var daysDone=(S.days||[]).filter(function(x){return x.date||x.demeanour||x.feeding;}).length;
+  var lastNote=(S.notes||[]).map(function(n){return n.date;}).filter(Boolean).sort().pop();
+  var lastEx=(S.exercises||[]).map(function(e){return e.date;}).filter(Boolean).sort().pop();
+  var incid=(S.incidents||[]).length;
+  h+=bdSection("Isolation &amp; daily care","days",[
+    bdCell("5-day entries",daysDone+" / 5",daysDone===0?"warn":""),
+    bdCell("Notes",(S.notes||[]).length?(S.notes||[]).length+" · last "+fmtDMY(lastNote):"", !(S.notes||[]).length?"warn":""),
+    bdCell("Exercise",(S.exercises||[]).length?(S.exercises||[]).length+" · last "+fmtDMY(lastEx):"",!(S.exercises||[]).length?"warn":""),
+    bdCell("Incidents",incid?String(incid):"None",incid?"risk":""),
+    bdCell("Feeding plan",(S.feedingPlan&&(S.feedingPlan.food||S.feedingPlan.grams))?((S.feedingPlan.food||"")+(S.feedingPlan.grams?" · "+S.feedingPlan.grams+" g":"")).trim():""),
+    bdCell("Files",(S.files||[]).length?(S.files||[]).length+" attached":""),
+  ]);
+
+  // ── Medical
+  var vacList=m.vaccinations||[];
+  var vaxDone=vacList.filter(function(v){return v.date&&v.date<=todayStr;}).length;
+  var vaxOver=vacList.some(function(v){return v.nextDue&&v.nextDue<todayStr;});
+  var meds=(m.medications||[]).filter(function(x){return x.active!==false;}).length;
+  var dis=(m.diseases||[]).length;
+  var lastW=latestWeight();
+  h+=bdSection("Medical","medical",[
+    bdCell("Status",m.currentStatus,/unwell|concern/i.test(m.currentStatus||"")?"risk":""),
+    bdCell("BCS",m.bcs,!m.bcs?"warn":/^[1-3]\b|^[7-9]\b/.test(m.bcs)?"warn":""),
+    bdCell("Weight",lastW?lastW.weight+" kg ("+fmtDMY(lastW.date)+")":"",!lastW?"warn":""),
+    bdCell("Weigh-ins",(S.weights||[]).length),
+    bdCell("Vaccinations",vaxDone?vaxDone+" given":"",vaxOver?"risk":vaxDone===0?"warn":""),
+    bdCell("Parasite",(m.parasiteTreatments||[]).length?(m.parasiteTreatments||[]).length+" treatments":"",!(m.parasiteTreatments||[]).length?"warn":""),
+    bdCell("Neutered",m.neuteredConfirmed),
+    bdCell("Dental",m.dental),
+    bdCell("Disease flags",dis?dis+" recorded":"None",dis?"risk":""),
+    bdCell("Active meds",meds?String(meds):"None",meds?"warn":""),
+    bdCell("Injuries",m.injuries),
+    bdCell("Vet log",(m.vetLog||m.vetVisits||[]).length?(m.vetLog||m.vetVisits||[]).length+" entries":""),
+  ]);
+
+  // ── Outcome
+  h+=bdSection("Outcome","outcome",[
+    bdCell("Outcome",f.outcome,/euthan|unsafe|not fit/i.test(f.outcome||"")?"risk":""),
+    bdCell("Date",f.outcomeDate),
+    bdCell("Progress",f.overallProgress),
+    bdCell("Assessor",f.assessorName),
+    bdCell("Second assessor",f.secondAssessor),
+    bdCell("Follow-up",f.followUp),
+  ],3);
+
+  h+='<div class="brow"><button class="btn" data-go="picture">&larr; Picture</button><button class="btn btnp" data-go="report">Report &rarr;</button></div>';
+  return h;
+}
+
 // ── Picture of the dog ────────────────────────────────────────────
 // A reading of what the record already knows: the arc, contradictions,
 // and the gaps that actually matter for THIS dog. No new data entry.
@@ -3612,7 +3764,7 @@ function picGaps(){
   var needsEA=/^(one|multiple|unknown)/i.test(arr.biteHistory||"")
     || CATS.some(function(c){return (S.scores||{})[c.k]===4;});
   var ea=S.ea||{};
-  var eaDone=!!(ea.freq&&ea.probability);
+  var eaDone=!!(ea.frequency&&ea.probability);
   if(needsEA&&!eaDone){
     out.push({sev:"high",t:"Enhanced Assessment not completed",
       w:"This dog has a declared bite history or a category scored 4. The Battersea EA is what turns that into a handling category — without it, staff have no agreed risk level to work to.",go:"ea"});
@@ -4352,6 +4504,7 @@ function page(){
   }
 
   if(t==="picture") return renderPicture();
+  if(t==="breakdown") return renderBreakdown();
 
   if(t==="arrival") return'<h2>On-arrival observation</h2><div class="sub">Record the dog\'s behaviour on arrival.</div><div class="card">'+slct("Initial demeanour on arrival",a.demeanour,"arrival.demeanour",[["Engaging","Engaging — friendly, curious"],["Nervous","Nervous — withdrawn, avoidant"],["Reactive","Reactive — alert, tense, vocal"],["Shut down","Shut down — frozen, non-responsive"],["Neutral","Neutral — calm, no strong response"]])+slct("Muzzle required?",a.muzzle,"arrival.muzzle",[["No","No — handled safely without muzzle"],["Yes — accepted","Yes — accepted without issue"],["Yes — resistant","Yes — resistant to muzzling"],["Yes — required intervention","Yes — required significant intervention"]])+slct("Lead / handling acceptance",a.lead,"arrival.lead",[["Good","Good — relaxed, no tension"],["Moderate","Moderate — some pulling or resistance"],["Poor","Poor — strong pulling"],["Dangerous","Dangerous — unsafe on lead"]])+slct("First vet visit behaviour",a.vet,"arrival.vet",[["Cooperative","Cooperative"],["Nervous but manageable","Nervous but manageable"],["Resistant","Resistant — required restraint"],["Aggressive","Aggressive — unsafe to handle"],["Not yet seen","Not yet seen by vet"]])+ta("Arrival notes",a.notes,"arrival.notes","Describe arrival behaviour...")+'<div class="sec">Source &amp; handover</div>'+slct("How the dog came in",a.source,"arrival.source",[["","-- not set --"],["Owner surrender","Owner surrender"],["Stray","Stray / found"],["Seizure","Seizure"],["Transfer","Transfer from another centre"],["Return","Return \u2014 previously rehomed by us"],["Born here","Born in care"]])+ta("Surrendered / brought in by",a.sourceBy,"arrival.sourceBy","Name, and contact number or address if given...")+slct("Surrender form signed?",a.sourceForm,"arrival.sourceForm",[["","-- not set --"],["Yes","Yes \u2014 on file"],["No","No"],["N/A","N/A \u2014 stray or seizure"]])+'<div class="sec">Reported history</div>'+slct("How long with previous owner",a.histDuration,"arrival.histDuration",[["","-- not known --"],["Since a puppy","Since a puppy"],["Under 1 year","Under 1 year"],["1 to 3 years","1 to 3 years"],["Over 3 years","Over 3 years"],["Unknown","Unknown"]])+ta("Reason given for surrender",a.histReason,"arrival.histReason","In the owner's own words where possible...")+slct("Previous living setup",a.histLiving,"arrival.histLiving",[["","-- not known --"],["Indoors \u2014 family home","Indoors \u2014 family home"],["Indoors and garden","Indoors with garden access"],["Outdoor kennel","Outdoor kennel / yard"],["Farm","Farm / working"],["Multiple homes","Multiple homes"],["Unknown","Unknown"]])+slct("Lived with other animals?",a.histAnimals,"arrival.histAnimals",[["","-- not known --"],["Lived with dogs","Lived with other dogs"],["Lived with cats","Lived with cats"],["Lived with both","Lived with dogs and cats"],["Lived alone","Lived as the only pet"],["Unknown","Unknown"]])+slct("House trained (as reported)",a.histHouseTrained,"arrival.histHouseTrained",[["","-- not known --"],["Yes","Yes"],["Mostly","Mostly \u2014 occasional accidents"],["No","No"],["Unknown","Unknown"]])+ta("Known medical or dietary history",a.histMedical,"arrival.histMedical","Conditions, medication, allergies, food the dog is used to...")+'<div class="sec">Behaviour History</div>'+slct("Dog-to-Dog Reactivity",a.dogDog,"arrival.dogDog",[["Not tested","Not tested"],["None observed — settled","None observed — settled"],["Mild","Mild — some interest or pulling"],["Moderate","Moderate — barking or lunging"],["Severe","Severe — could not pass safely"]])+slct("Cat Tolerance",a.catTolerance,"arrival.catTolerance",[["Not tested","Not tested"],["Unknown","Unknown"],["Cat friendly","Known to be cat friendly"],["Reactive","Chased or reactive to cats"]])+slct("Horses / equine",a.equineHistory,"arrival.equineHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Good","Known to be good with horses"],["Reactive","Reactive / chased horses"]])+slct("Small mammals",a.smallMammalHistory,"arrival.smallMammalHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Safe","Known to be safe with small mammals"],["Reactive","Chased / high prey drive"]])+slct("Child History",a.childHistory,"arrival.childHistory",[["Not known","Not known"],["Good","Known to be good with children"],["No exposure","No known exposure"],["Caution","Owner advised caution"],["Incident","Known incident involving a child"]])+slct("Previous Bite History",a.biteHistory,"arrival.biteHistory",[["None","None declared"],["One","One bite declared by owner"],["Multiple","Multiple bites declared"],["Unknown details","Bite history — details unknown"]])+'</div><div class="brow"><button class="btn" data-go="dog">&larr; Back</button><button class="btn btnp" data-go="days">Next: 5-day report &rarr;</button></div>';
 
