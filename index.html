@@ -412,11 +412,11 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.53",date:"2026-07-15",note:"The Dog tab has been tidied. Identity and Intake now sit straight under the hero \u2014 no more scrolling past admin to reach the dog\u0027s details. Everything one-time or dormant lives below a Status &amp; admin divider as single fold-out lines: the isolation period shows its day count on the line, warnings show the first warning and a count (amber, hard to miss), care notices likewise, and when there are none, one quiet line offers tap-to-add. The new-arrival checklist stays fully open while incomplete, sits in the admin section, and disappears once done \u2014 exactly as before. A clean dog\u0027s page is now roughly half the height. Nothing removed, nothing moved in the data \u2014 just reordered and folded."},
+  {version:"3.52",date:"2026-07-14",note:"The Rehoming tab now has a proper Clearance decision at the top: Cleared for rehoming, Cleared with conditions (with a box for what the conditions are), Not cleared \u2014 needs more time, Not fit for rehoming, or Awaiting assessment \u2014 along with who made the call and when. The status shows as a colour-coded banner on the tab and appears in the Breakdown, so one glance tells you where a dog stands. Suitability fields below are unchanged."},
   {version:"3.51",date:"2026-07-14",note:"The record is now six groups instead of five, and flagged dogs announce themselves. Rehoming suitability has moved out of the bottom of the Assessment into its own tab beside Outcome \u2014 it was always a placement question, not a behaviour observation, and now the Outcome group reads as what home suits them, then the decision. Medical and Weights have moved into a new Health group, leaving Isolation as pure daily care: 5-Day Report, Exercise, Feeding, Notes. And opening a flagged dog now shows a read-before-handling glance first \u2014 Red or Black traffic light, bite history, severe or no-warning guarding, muzzle requirement, handler level \u2014 along with the Handler brief, shown once per session so it stays meaningful. Clean dogs open straight in with no interruption. All data stays exactly where it was saved."},
   {version:"3.50",date:"2026-07-14",note:"New Breakdown tab (in Records) \u2014 the whole record on one dense screen. Every section of the record condensed to its key facts: identity, arrival and history, assessment (including worst guarding level and handler requirements), the six scoring bands with the traffic light, EA status, daily care counts, the full medical picture and the outcome. Colour-coded throughout: a grey dash means not recorded yet, amber means worth attention, red means flagged \u2014 so one glance shows both what we know and what\u0027s missing. Every section has an Open button straight to its tab. Also fixes the Picture tab wrongly showing \u0027Enhanced Assessment not completed\u0027 even after the EA was done."},
   {version:"3.49",date:"2026-07-13",note:"Picture tab bug fixes \u2014 it was crying wolf. Four real bugs found and fixed: a bite history of \u0027None declared\u0027 was wrongly triggering the \u0027Enhanced Assessment not completed\u0027 warning on every clean dog (the word None contains one); everyday phrases like \u0027a bit wary\u0027 or \u0027settled a bit\u0027 in the notes were being read as a bite; a dog marked \u0027Not fit for rehoming\u0027 was told it was \u0027cleared for rehoming\u0027; and the arrival-to-now demeanour comparison only recognised a handful of the demeanour options, so most dogs showed a grey \u0027Changed\u0027 instead of improving or going backwards. Negated phrases (\u0027did not growl\u0027) are also no longer read as events. Everything re-tested \u2014 23 checks passing."},
-  {version:"3.48",date:"2026-07-13",note:"A full audit of the whole app, and a deep clean behind the scenes. Twenty leftover functions from removed features \u2014 the old Behaviour tab, the Timeline, the Handover button and their helpers \u2014 were still sitting in the code unreachable; all removed (226 lines). Every tab and every dashboard screen was then test-rendered against a realistic record, all navigation targets were verified to exist, and the assessment card registry, changelog and storage keys were all checked for consistency. No behaviour changes \u2014 the app is just leaner and every screen is verified working."},
-  {version:"3.47",date:"2026-07-13",note:"Daily Diary has been removed \u2014 it was built but never used, so it\u0027s gone rather than sitting there half-filled. Also a fix on the new Picture tab: a dog whose record was missing its scoring data entirely would crash the tab instead of loading. Picture has now been tested against empty records, brand-new dogs, malformed weights and bad dates, and handles all of them."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -3526,7 +3526,21 @@ function asmtGroup(id,title){return '<div id="grp-'+id+'" style="font-size:11px;
 function renderRehoming(){
   var a=S.assessment||{};
   var filledN=["homeType","suitableChildren","suitableOtherDogs","suitableCats","suitableEquine","suitableSmallMammals","exerciseNeeds","experienceLevel"].filter(function(k){var v=a[k];return v!==undefined&&v!==null&&String(v).trim()!=="";}).length;
+  var st=a.rehomingStatus||"";
+  var stCol=/^cleared for/i.test(st)?"#16a34a":/conditions/i.test(st)?"#ca8a04":/not cleared|not fit/i.test(st)?"#dc2626":"#94a3b8";
+  var banner=st?'<div style="display:inline-flex;align-items:center;gap:8px;background:'+(stCol==="#16a34a"?"#dcfce7":stCol==="#ca8a04"?"#fef9c3":stCol==="#dc2626"?"#fee2e2":"#f1f5f9")+';color:'+stCol+';border-radius:999px;padding:6px 14px;font-size:13px;font-weight:700;margin-bottom:12px"><span style="width:9px;height:9px;border-radius:99px;background:'+stCol+'"></span>'+esc(st)+'</div>':"";
+  var clearanceCard='<div class="card" style="margin-bottom:14px">'
+    +'<h3 style="margin:0 0 12px;font-size:14.5px;font-weight:700">Clearance</h3>'
+    +banner
+    +'<div class="g2">'
+    +slct("Rehoming status",st,"assessment.rehomingStatus",[["","-- not decided --"],["Cleared for rehoming","Cleared for rehoming"],["Cleared with conditions","Cleared with conditions"],["Not cleared \u2014 needs work","Not cleared \u2014 needs more time / work"],["Not fit for rehoming","Not fit for rehoming"],["Awaiting assessment","Awaiting assessment"]])
+    +slct("Cleared / decided by",a.rehomingBy||"","assessment.rehomingBy",USERS.filter(function(u){return u.role!=="staff";}).map(function(u){var rl=u.role==="admin"?"Admin":u.role==="director"?"Director of Operations":u.role==="manager"?"Manager":u.role==="supervisor"?"Supervisor":u.role==="coordinator"?"Rehoming Co-Ordinator":"Staff";return[u.name,u.name+" ("+rl+")"];}))
+    +fld("Decision date",a.rehomingDate||"","assessment.rehomingDate","date")
+    +'</div>'
+    +(/conditions/i.test(st)?ta("Conditions",a.rehomingConditions||"","assessment.rehomingConditions","e.g. adult-only home, must be only pet, secure garden essential..."):"")
+    +'</div>';
   return '<h2>Rehoming suitability</h2><div class="sub">What home suits this dog \u2014 feeds the adoption profile and the final decision. '+filledN+' of '+["homeType","suitableChildren","suitableOtherDogs","suitableCats","suitableEquine","suitableSmallMammals","exerciseNeeds","experienceLevel"].length+' set.</div>'
+    +clearanceCard
     +'<div class="card">'+'<div class="g2">'+slct("Home type",a.homeType||"","assessment.homeType",[["","-- not assessed --"],["Any home","Any home"],["House with garden","House with garden required"],["Rural — large space","Rural — large space preferred"],["Experienced owner only","Experienced owner only"],["Single dog household","Single dog household only"],["Quiet home","Quiet home — no young children"]])+slct("Suitable with children",a.suitableChildren||"","assessment.suitableChildren",[["","-- not assessed --"],["All ages","Yes — all ages"],["Over 12","Yes — over 12 only"],["Adults only","Adults only"],["No","Not suitable with children"]])+slct("Suitable with other dogs",a.suitableOtherDogs||"","assessment.suitableOtherDogs",[["","-- not assessed --"],["Yes","Yes — good with other dogs"],["Female only","Yes — female dogs only"],["Male only","Yes — male dogs only"],["Selective","Selective — case by case"],["No","No — only dog"]])+slct("Suitable with cats",a.suitableCats||"","assessment.suitableCats",[["","-- not assessed --"],["Yes","Yes — cat tested"],["Caution","With caution"],["No","No — not safe with cats"]])+slct("Suitable with horses / livestock",a.suitableEquine||"","assessment.suitableEquine",[["","-- not assessed --"],["Yes","Yes — safe with horses / livestock"],["Caution","With caution"],["No","No — not safe"]])+slct("Suitable with small mammals",a.suitableSmallMammals||"","assessment.suitableSmallMammals",[["","-- not assessed --"],["Yes","Yes — safe with small mammals"],["Caution","With caution"],["No","No — high prey drive"]])+slct("Exercise needs",a.exerciseNeeds||"","assessment.exerciseNeeds",[["","-- not assessed --"],["Low — short walks","Low — short walks"],["Moderate — 1hr daily","Moderate — 1hr daily"],["High — 2hr+ daily","High — 2hr+ daily"],["Very high","Very high — working breed level"]])+slct("Owner experience required",a.experienceLevel||"","assessment.experienceLevel",[["","-- not assessed --"],["First time owner","Suitable for first time owner"],["Some experience","Some dog experience recommended"],["Experienced only","Experienced owner required"],["Specialist","Specialist handler only"]])+'</div>'+ta("Suitability notes",a.suitabilityNotes||"","assessment.suitabilityNotes","Ideal home description, any specific requirements...")+'</div>'
     +'<div class="brow"><button class="btn" data-go="notes">&larr; Notes</button><button class="btn btnp" data-go="outcome">Outcome &rarr;</button></div>';
 }
@@ -3671,6 +3685,7 @@ function renderBreakdown(){
 
   // ── Outcome
   h+=bdSection("Outcome","outcome",[
+    bdCell("Rehoming status",a.rehomingStatus,/not cleared|not fit/i.test(a.rehomingStatus||"")?"risk":/conditions/i.test(a.rehomingStatus||"")?"warn":""),
     bdCell("Outcome",f.outcome,/euthan|unsafe|not fit/i.test(f.outcome||"")?"risk":""),
     bdCell("Date",f.outcomeDate),
     bdCell("Progress",f.overallProgress),
@@ -3681,6 +3696,27 @@ function renderBreakdown(){
 
   h+='<div class="brow"><button class="btn" data-go="picture">&larr; Picture</button><button class="btn btnp" data-go="report">Report &rarr;</button></div>';
   return h;
+}
+
+window._dogFoldOpen=window._dogFoldOpen||{};
+function toggleDogFold(id){
+  window._dogFoldOpen=window._dogFoldOpen||{};
+  var open=window._dogFoldOpen[id]=!window._dogFoldOpen[id];
+  var b=document.getElementById("dfold-"+id),ch=document.getElementById("dfoldch-"+id);
+  if(b)b.style.display=open?"":"none";
+  if(ch)ch.style.transform="rotate("+(open?90:0)+"deg)";
+}
+function dogFold(id,icon,title,sub,status,tone,inner){
+  window._dogFoldOpen=window._dogFoldOpen||{};var open=!!window._dogFoldOpen[id];
+  var bg=tone==="done"?"#dcfce7":tone==="warn"?"#fef9c3":"#f1f5f9";
+  return '<div class="card" style="padding:0;margin-bottom:8px;overflow:hidden">'
+    +'<div onclick="toggleDogFold(\''+id+'\')" tabindex="0" role="button" onkeydown="if(event.key===\'Enter\'){toggleDogFold(\''+id+'\')}" style="display:flex;align-items:center;gap:11px;padding:12px 16px;cursor:pointer">'
+    +'<span style="width:26px;height:26px;border-radius:8px;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:13px;flex:none">'+icon+'</span>'
+    +'<span style="flex:1;min-width:0"><span style="font-size:13.5px;font-weight:700;display:block">'+title+'</span>'+(sub?'<span style="font-size:11px;color:#94a3b8;font-weight:500">'+sub+'</span>':'')+'</span>'
+    +(status?'<span style="font-size:12px;font-weight:600;color:#64748b;white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis">'+status+'</span>':'')
+    +'<span id="dfoldch-'+id+'" style="font-size:16px;color:#94a3b8;transition:transform .2s;transform:rotate('+(open?90:0)+'deg)">&#8250;</span>'
+    +'</div>'
+    +'<div id="dfold-'+id+'" style="'+(open?'':'display:none;')+'padding:2px 16px 14px">'+inner+'</div></div>';
 }
 
 // ── Picture of the dog ────────────────────────────────────────────
@@ -4564,7 +4600,29 @@ function page(){
 
     var intake='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Intake</div>'+'<div class="dog-fg">'+slct("Kennel / Pod",d.kennel,"dog.kennel",[["",'-- not assigned --'],["Kennel 1","Kennel 1"],["Kennel 2","Kennel 2"],["Kennel 3","Kennel 3"],["Kennel 4","Kennel 4"],["Kennel 5","Kennel 5"],["Kennel 6","Kennel 6"],["Pod 1","Pod 1"],["Pod 2","Pod 2"],["Pod 3","Pod 3"],["Pod 4","Pod 4"]])+fld("Assessor",d.assessor,"dog.assessor","text","e.g. Shane")+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()+slct("Reason for intake",d.intakeReason,"dog.intakeReason",[["Stray","Stray"],["Owner surrender","Owner surrender"],["Cruelty case","Cruelty case"],["Transfer","Transfer from another centre"],["Other","Other"]])+'</div></div>';
 
-    return hero+intakeChecklistHtml()+identity+intake+restrictedBreedCardHtml()+isoPeriodCardHtml()+warningsCardHtml()+noticesCardHtml()+'<div class="brow"><button class="btn" onclick="openKennelCard()" style="white-space:nowrap">&#128203; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
+    var admDivider='<div style="font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin:18px 0 10px;display:flex;align-items:center;gap:10px">Status &amp; admin<span style="flex:1;height:1px;background:#e2e8f0"></span></div>';
+    var isoStatus=ii?(ii.state==="done"?"Complete":(ii.day<=0?"Arrived today":"Day "+ii.day+" of "+ii.tot)):"No intake date";
+    var isoTone=ii&&ii.state==="done"?"done":"plain";
+    var isoFold=dogFold("iso","\ud83d\udd52","Isolation period","",isoStatus,isoTone,isoPeriodCardHtml());
+    var ws=S.warnings||[],ns=S.careNotices||[];
+    var wnFolds="";
+    if(ws.length||ns.length){
+      if(ws.length){
+        var wSum=esc(ws[0].text||"")+(ws.length>1?" +"+(ws.length-1)+" more":"");
+        wnFolds+=dogFold("warn","\u26a0","Warnings",ws.length+" active",wSum,"warn",warningsCardHtml());
+      }else{
+        wnFolds+=dogFold("warn","\u26a0","Warnings","None active \u2014 tap to add","","plain",warningsCardHtml());
+      }
+      if(ns.length){
+        var nSum=esc(ns[0].text||"")+(ns.length>1?" +"+(ns.length-1)+" more":"");
+        wnFolds+=dogFold("notice","\ud83d\udccb","Care notices",ns.length+" active",nSum,"plain",noticesCardHtml());
+      }else{
+        wnFolds+=dogFold("notice","\ud83d\udccb","Care notices","None active \u2014 tap to add","","plain",noticesCardHtml());
+      }
+    }else{
+      wnFolds=dogFold("warnnotice","\uff0b","Warnings &amp; notices","None active \u2014 tap to add","","plain",warningsCardHtml()+noticesCardHtml());
+    }
+    return hero+identity+intake+restrictedBreedCardHtml()+admDivider+intakeChecklistHtml()+isoFold+wnFolds+'<div class="brow"><button class="btn" onclick="openKennelCard()" style="white-space:nowrap">&#128203; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
   }
 
   if(t==="picture") return renderPicture();
