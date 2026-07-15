@@ -403,7 +403,7 @@ var CATS=[
 var TABS=[
   {id:"dog",l:"Dog",g:"Profile"},{id:"arrival",l:"Arrival",g:"Profile"},{id:"picture",l:"Picture",g:"Profile"},
   {id:"assessment",l:"Assessment",g:"Assessment"},{id:"scoring",l:"Scoring",g:"Assessment"},{id:"ea",l:"EA",g:"Assessment"},
-  {id:"days",l:"5-Day Report",g:"Isolation"},{id:"exercise",l:"Exercise",g:"Isolation"},
+  {id:"days",l:"5-Day Report",g:"Isolation"},
   {id:"feeding",l:"Feeding",g:"Isolation"},{id:"notes",l:"Notes",g:"Isolation"},
   {id:"medical",l:"Medical",g:"Health"},{id:"weights",l:"Weights",g:"Health"},
   {id:"rehoming",l:"Rehoming",g:"Outcome"},{id:"outcome",l:"Outcome",g:"Outcome"},
@@ -412,11 +412,11 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.54",date:"2026-07-15",note:"Three tidy-ups. The Exercise tab has been removed for now (it was waiting on the laptop reaching the unit) \u2014 any existing exercise history is kept and still shows on the Health Board and reports, and the tab can come back later. The Feeding tab loses its per-meal quick log for the same reason \u2014 the feeding plan, suggested grams, today\u0027s total and history all stay. And the 5-Day Report now fills in its own dates: enter the intake date and Day 1 through Day 5 are set automatically starting the following day \u2014 you can still change any date by hand."},
   {version:"3.53",date:"2026-07-15",note:"The Dog tab has been tidied. Identity and Intake now sit straight under the hero \u2014 no more scrolling past admin to reach the dog\u0027s details. Everything one-time or dormant lives below a Status &amp; admin divider as single fold-out lines: the isolation period shows its day count on the line, warnings show the first warning and a count (amber, hard to miss), care notices likewise, and when there are none, one quiet line offers tap-to-add. The new-arrival checklist stays fully open while incomplete, sits in the admin section, and disappears once done \u2014 exactly as before. A clean dog\u0027s page is now roughly half the height. Nothing removed, nothing moved in the data \u2014 just reordered and folded."},
   {version:"3.52",date:"2026-07-14",note:"The Rehoming tab now has a proper Clearance decision at the top: Cleared for rehoming, Cleared with conditions (with a box for what the conditions are), Not cleared \u2014 needs more time, Not fit for rehoming, or Awaiting assessment \u2014 along with who made the call and when. The status shows as a colour-coded banner on the tab and appears in the Breakdown, so one glance tells you where a dog stands. Suitability fields below are unchanged."},
   {version:"3.51",date:"2026-07-14",note:"The record is now six groups instead of five, and flagged dogs announce themselves. Rehoming suitability has moved out of the bottom of the Assessment into its own tab beside Outcome \u2014 it was always a placement question, not a behaviour observation, and now the Outcome group reads as what home suits them, then the decision. Medical and Weights have moved into a new Health group, leaving Isolation as pure daily care: 5-Day Report, Exercise, Feeding, Notes. And opening a flagged dog now shows a read-before-handling glance first \u2014 Red or Black traffic light, bite history, severe or no-warning guarding, muzzle requirement, handler level \u2014 along with the Handler brief, shown once per session so it stays meaningful. Clean dogs open straight in with no interruption. All data stays exactly where it was saved."},
   {version:"3.50",date:"2026-07-14",note:"New Breakdown tab (in Records) \u2014 the whole record on one dense screen. Every section of the record condensed to its key facts: identity, arrival and history, assessment (including worst guarding level and handler requirements), the six scoring bands with the traffic light, EA status, daily care counts, the full medical picture and the outcome. Colour-coded throughout: a grey dash means not recorded yet, amber means worth attention, red means flagged \u2014 so one glance shows both what we know and what\u0027s missing. Every section has an Open button straight to its tab. Also fixes the Picture tab wrongly showing \u0027Enhanced Assessment not completed\u0027 even after the EA was done."},
-  {version:"3.49",date:"2026-07-13",note:"Picture tab bug fixes \u2014 it was crying wolf. Four real bugs found and fixed: a bite history of \u0027None declared\u0027 was wrongly triggering the \u0027Enhanced Assessment not completed\u0027 warning on every clean dog (the word None contains one); everyday phrases like \u0027a bit wary\u0027 or \u0027settled a bit\u0027 in the notes were being read as a bite; a dog marked \u0027Not fit for rehoming\u0027 was told it was \u0027cleared for rehoming\u0027; and the arrival-to-now demeanour comparison only recognised a handful of the demeanour options, so most dogs showed a grey \u0027Changed\u0027 instead of improving or going backwards. Negated phrases (\u0027did not growl\u0027) are also no longer read as events. Everything re-tested \u2014 23 checks passing."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -3106,115 +3106,8 @@ function handleFileUpload(inp){var file=inp.files[0];if(!file)return;if(file.siz
 function deleteFile(idx){appConfirm("Delete this file?",function(){var f=S.files&&S.files[idx];if(f&&f.storage)storageDelete(f.storage);S.files.splice(idx,1);saveRecord();renderMain();},{danger:true});}
 
 // ── Exercise (detail-view tab) ────────────────────────────────────
-function renderExercise(){
-  if(!S.exercises)S.exercises=[];
-  var today=new Date().toISOString().slice(0,10);
-  var todayLabel=fmtDMYwk(new Date());
-  var _exNow=new Date();var nowHM=_exNow.getHours().toString().padStart(2,"0")+":"+_exNow.getMinutes().toString().padStart(2,"0");
-  function weekStart(ds){var d=new Date(ds);var day=d.getDay();var diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
-  var thisWeek=weekStart(today);
-  var todaysList=S.exercises.filter(function(e){return e.date===today;});
-  var thisWeekEntries=S.exercises.filter(function(e){return e.date>=thisWeek&&e.date<=today;});
 
-  var h='<h2 style="margin-bottom:4px">Exercise &amp; Enrichment</h2><div class="sub" style="margin-bottom:16px">Daily activity log &mdash; walks, compound, round pen/pond, enrichment.</div>';
 
-  // ── Quick log card ──
-  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary)">Quick Log</span><span style="font-size:11px;color:var(--color-text-secondary)">'+todayLabel+'</span></div>';
-  h+='<div class="f"><label class="lbl">Optional note (attaches to next entry)</label><input id="ex-detail-note" type="text" placeholder="e.g. Took round the back field, settled well"></div>';
-  h+='<div class="g2" style="margin-bottom:8px"><div class="f"><label class="lbl">Date</label><input type="date" id="ex-date" value="'+today+'"></div><div class="f"><label class="lbl">Time</label><input type="time" id="ex-time" value="'+nowHM+'"></div></div>';
-  h+='<div class="f"><label class="lbl">Duration (mins, optional)</label><input type="number" id="ex-dur" min="0" inputmode="numeric" placeholder="e.g. 20"></div>';
-  h+='<div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:8px">Set date/time/duration above, then tap an activity to log it.</div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
-  EX_TYPES.forEach(function(t){
-    var sessions=todaysList.filter(function(e){return e.type===t.key;});
-    var done=sessions.length>0;
-    var last=done?sessions[sessions.length-1]:null;
-    var status=last?("Last "+last.time+(sessions.length>1?" &middot; "+sessions.length+"\u00d7":"")):"Tap to log";
-    var bg=done?"#dcfce7":"#f8fafc";
-    var bd=done?"#16a34a":"#e2e8f0";
-    var sc=done?"#166534":"#94a3b8";
-    h+='<button onclick="logExerciseS(\''+t.key.replace(/'/g,"\\'")+'\')" style="background:'+bg+';border:1px solid '+bd+';border-radius:10px;padding:12px;text-align:left;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:6px;min-height:78px;justify-content:space-between;position:relative">';
-    if(done)h+='<div style="position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">&#10003;</div>';
-    h+='<div style="font-size:18px;line-height:1">'+t.icon+'</div>';
-    h+='<div><div style="font-size:13px;font-weight:600;color:#0f172a">'+t.key+'</div>';
-    h+='<div style="font-size:10.5px;color:'+sc+';font-weight:'+(done?"600":"500")+';margin-top:1px">'+status+'</div></div>';
-    h+='</button>';
-  });
-  h+='</div></div>';
-
-  // ── This week summary ──
-  var weekByType={};
-  EX_TYPES.forEach(function(t){weekByType[t.key]=thisWeekEntries.filter(function(e){return e.type===t.key;}).length;});
-  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary)">This Week</span><span style="font-size:11px;color:var(--color-text-secondary)">'+thisWeek+' &mdash; '+today+'</span></div>';
-  h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">';
-  EX_TYPES.forEach(function(t){
-    var n=weekByType[t.key];
-    var bg=n>0?"#dcfce7":"#f8fafc";var bd=n>0?"#16a34a":"#e2e8f0";var nc=n>0?"#166534":"#94a3b8";
-    h+='<div style="text-align:center;padding:10px 8px;border-radius:8px;background:'+bg+';border:1px solid '+bd+'">';
-    h+='<div style="font-size:18px;line-height:1;margin-bottom:5px">'+t.icon+'</div>';
-    h+='<div style="font-size:22px;font-weight:700;color:'+nc+';line-height:1">'+n+'</div>';
-    h+='<div style="font-size:9px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-top:5px">'+t.key+'</div>';
-    h+='</div>';
-  });
-  h+='</div>';
-  h+='<div style="font-size:11px;color:var(--color-text-secondary);text-align:center;margin-top:10px"><strong style="color:#0f172a">'+thisWeekEntries.length+'</strong> total session'+(thisWeekEntries.length!==1?"s":"")+' this week</div>';
-  h+='</div>';
-
-  // ── Full history grouped by date ──
-  if(S.exercises.length){
-    var sorted=S.exercises.slice().sort(function(a,b){var c=(b.date||"").localeCompare(a.date||"");return c!==0?c:(b.time||"").localeCompare(a.time||"");});
-    var byDate={};
-    sorted.forEach(function(e){if(!byDate[e.date])byDate[e.date]=[];byDate[e.date].push(e);});
-    var dates=Object.keys(byDate).sort().reverse();
-    h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px">Full History &middot; '+S.exercises.length+' entr'+(S.exercises.length===1?"y":"ies")+'</div>';
-    dates.forEach(function(date){
-      var dayEntries=byDate[date];
-      var dayLbl=fmtDMYwk(date);
-      h+='<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:#0f172a;padding:6px 0;border-bottom:1px solid #e2e8f0;margin-bottom:6px;display:flex;justify-content:space-between"><span>'+dayLbl+(date===today?' &middot; <span style="color:#0d9488">Today</span>':'')+'</span><span style="font-weight:500;color:var(--color-text-secondary);font-size:11px">'+dayEntries.length+' session'+(dayEntries.length!==1?"s":"")+'</span></div>';
-      dayEntries.forEach(function(e){
-        var origIdx=S.exercises.indexOf(e);
-        h+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px">';
-        h+='<span style="font-size:11px;color:#64748b;min-width:44px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(e.time||"")+'</span>';
-        h+='<span style="font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:20px;background:#dcfce7;color:#166534;text-transform:uppercase;letter-spacing:0.03em;white-space:nowrap">'+esc(e.type)+'</span>';
-        h+='<span style="flex:1;color:#64748b;overflow:hidden;text-overflow:ellipsis;font-size:11.5px">'+esc(e.staff||"")+(e.mins?' &middot; '+e.mins+' min':"")+(e.notes?' &middot; '+esc(e.notes):"")+'</span>';
-        h+='<button onclick="deleteExerciseEntryS('+origIdx+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer">&#10005;</button>';
-        h+='</div>';
-      });
-      h+='</div>';
-    });
-    h+='</div>';
-  }else{
-    h+='<div style="text-align:center;padding:30px;color:var(--color-text-secondary);font-size:13px">No exercise entries yet. Use Quick Log above to start.</div>';
-  }
-
-  h+='<div class="brow"><button class="btn" data-go="weights">&larr; Back</button><button class="btn btnp" data-go="feeding">Next: feeding &rarr;</button></div>';
-  return h;
-}
-
-function logExerciseS(type){
-  if(!S.exercises)S.exercises=[];
-  var now=new Date();
-  var dEl=document.getElementById("ex-date"),tEl=document.getElementById("ex-time"),durEl=document.getElementById("ex-dur");
-  var date=(dEl&&dEl.value)?dEl.value:now.toISOString().slice(0,10);
-  var time=(tEl&&tEl.value)?tEl.value:(now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0"));
-  var mins=durEl&&durEl.value?parseInt(durEl.value,10):null;
-  var noteInput=document.getElementById("ex-detail-note");
-  var notes=noteInput?noteInput.value.trim():"";
-  var entry={date:date,time:time,type:type,staff:currentName(),notes:notes};
-  if(mins&&!isNaN(mins)&&mins>0)entry.mins=mins;
-  S.exercises.push(entry);
-  if(noteInput)noteInput.value="";
-  saveRecord();
-  renderMain();
-}
-
-function deleteExerciseEntryS(idx){
-  appConfirm("Delete this exercise entry?",function(){
-    S.exercises.splice(idx,1);
-    saveRecord();
-    renderMain();
-  },{danger:true});
-}
 
 // ── Notes / Journal ───────────────────────────────────────────────
 function renderNotes(){
@@ -3291,7 +3184,6 @@ function deleteIncident(idx){appConfirm("Delete this incident?",function(){S.inc
 // ── Feeding ───────────────────────────────────────────────────────
 function renderFeeding(){
   if(!S.feeding)S.feeding=[];
-  window._feedEdit=null;
   if(!S.feedingPlan)S.feedingPlan={};
   var fp=S.feedingPlan;
   var today=new Date().toISOString().slice(0,10);
@@ -3320,17 +3212,6 @@ function renderFeeding(){
   h+=ta("Special notes (allergies, restrictions, vet-prescribed amounts...)",fp.notes||"","feedingPlan.notes","");
   h+='</div>';
 
-  // Quick log
-  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary)">Quick Log</span><span style="font-size:11px;color:var(--color-text-secondary)">'+todayLabel+'</span></div>';
-  h+='<div class="g2">';
-  h+='<div class="f"><label class="lbl">Grams given</label><input id="feed-grams" type="number" inputmode="decimal" placeholder="'+(fp.grams||"200")+'" min="0" value="'+esc(fp.grams||"")+'" onkeydown="if(event.key===\'Enter\')logFeeding(\'ate\')"></div>';
-  h+='<div class="f"><label class="lbl">Meal</label><select id="feed-meal"><option value="">-- select --</option><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option><option>Treats</option></select></div>';
-  h+='</div>';
-  h+='<div class="f"><label class="lbl">Notes (optional)</label><input id="feed-notes" type="text" placeholder="e.g. ate slowly, picky, scoffed it" onkeydown="if(event.key===\'Enter\')logFeeding(\'ate\')"></div>';
-  h+='<div id="feed-edit-banner" style="display:none;align-items:center;justify-content:space-between;gap:8px;background:#dbeafe;border-radius:8px;padding:7px 11px;margin-bottom:8px"><span style="font-size:11px;font-weight:600;color:#1e40af">Editing entry &mdash; pick a status to save</span><button onclick="cancelFeedEdit()" style="background:#fff;border:0.5px solid #93c5fd;color:#1e40af;font-size:11px;font-weight:600;padding:4px 11px;border-radius:7px;cursor:pointer;font-family:inherit">Cancel</button></div>';
-  h+='<div class="g2"><button class="btn btng" onclick="logFeeding(\'ate\')" style="padding:11px;font-weight:600">&#127869; Ate well</button><button class="btn" onclick="logFeeding(\'partial\')" style="padding:11px;font-weight:600;background:#fef9c3;color:#854d0e;border-color:#f59e0b">&#9888; Partial / refused</button></div>';
-  h+='</div>';
-
   // Today's total
   var todaysList=S.feeding.filter(function(f){return f.date===today;});
   var todayTotal=todaysList.reduce(function(a,f){return a+(parseFloat(f.grams)||0);},0);
@@ -3351,7 +3232,7 @@ function renderFeeding(){
       h+='<div style="margin-top:14px;padding-top:10px;border-top:1px solid #e2e8f0">';
       todaysList.slice().sort(function(a,b){return(b.time||"").localeCompare(a.time||"");}).forEach(function(f){
         var oi=S.feeding.indexOf(f);
-        h+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px"><span style="font-size:11px;color:#64748b;min-width:40px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(f.time||"")+'</span><span style="font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:20px;background:'+(f.status==="partial"?"#fef9c3":"#dcfce7")+';color:'+(f.status==="partial"?"#854d0e":"#166534")+';white-space:nowrap">'+esc(f.meal||"Meal")+'</span><span style="flex:1;color:#64748b;font-size:11px">'+f.grams+'g'+(f.notes?" &middot; "+esc(f.notes):"")+'</span><button onclick="editFeeding('+oi+')" style="background:#e2e8f0;color:#475569;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;margin-right:4px">&#9998;</button><button onclick="deleteFeeding('+oi+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer">&#10005;</button></div>';
+        h+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px"><span style="font-size:11px;color:#64748b;min-width:40px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(f.time||"")+'</span><span style="font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:20px;background:'+(f.status==="partial"?"#fef9c3":"#dcfce7")+';color:'+(f.status==="partial"?"#854d0e":"#166534")+';white-space:nowrap">'+esc(f.meal||"Meal")+'</span><span style="flex:1;color:#64748b;font-size:11px">'+f.grams+'g'+(f.notes?" &middot; "+esc(f.notes):"")+'</span><button onclick="deleteFeeding('+oi+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer">&#10005;</button></div>';
       });
       h+='</div>';
     }
@@ -3384,7 +3265,7 @@ function renderFeeding(){
       h+='<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e2e8f0;margin-bottom:5px"><span style="font-size:12px;font-weight:700;color:#0f172a">'+dayLbl+(date===today?" &middot; Today":"")+'</span><span style="font-size:11px;color:#0d9488;font-weight:700">'+dayTotal+'g</span></div>';
       byDate[date].forEach(function(f){
         var oi=S.feeding.indexOf(f);
-        h+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:11px"><span style="color:#64748b;min-width:40px">'+esc(f.time||"")+'</span><span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;background:'+(f.status==="partial"?"#fef9c3":"#dcfce7")+';color:'+(f.status==="partial"?"#854d0e":"#166534")+';white-space:nowrap">'+esc(f.meal||"")+'</span><span style="flex:1;color:#64748b">'+f.grams+'g'+(f.notes?" &middot; "+esc(f.notes):"")+'</span><button onclick="editFeeding('+oi+')" style="background:#e2e8f0;color:#475569;border:none;border-radius:4px;padding:1px 6px;font-size:9px;cursor:pointer;margin-right:3px">&#9998;</button><button onclick="deleteFeeding('+oi+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:1px 6px;font-size:9px;cursor:pointer">&#10005;</button></div>';
+        h+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:11px"><span style="color:#64748b;min-width:40px">'+esc(f.time||"")+'</span><span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;background:'+(f.status==="partial"?"#fef9c3":"#dcfce7")+';color:'+(f.status==="partial"?"#854d0e":"#166534")+';white-space:nowrap">'+esc(f.meal||"")+'</span><span style="flex:1;color:#64748b">'+f.grams+'g'+(f.notes?" &middot; "+esc(f.notes):"")+'</span><button onclick="deleteFeeding('+oi+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:1px 6px;font-size:9px;cursor:pointer">&#10005;</button></div>';
       });
       h+='</div>';
     });
@@ -3394,26 +3275,6 @@ function renderFeeding(){
   h+='<div class="brow"><button class="btn" data-go="exercise">&larr; Back</button><button class="btn btnp" data-go="notes">Next: notes &rarr;</button></div>';
   return h;
 }
-function logFeeding(status){
-  var gramsRaw=(document.getElementById("feed-grams")||{}).value||"";
-  var grams=parseFloat(gramsRaw);
-  var meal=(document.getElementById("feed-meal")||{}).value||"";
-  var notes=((document.getElementById("feed-notes")||{}).value||"").trim();
-  if(status==="ate"&&(!grams||grams<=0)){appAlert("Please enter grams given.");return;}
-  if(status==="partial"&&!notes&&(!grams||grams<=0)){appAlert("For partial / refused, add either grams eaten or a note.");return;}
-  if(!grams)grams=0;
-  if(!S.feeding)S.feeding=[];
-  if(window._feedEdit!=null&&S.feeding[window._feedEdit]){
-    S.feeding[window._feedEdit]=Object.assign({},S.feeding[window._feedEdit],{grams:grams,meal:meal,status:status,notes:notes});
-    window._feedEdit=null;
-  }else{
-    var now=new Date();
-    S.feeding.push({date:now.toISOString().slice(0,10),time:now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0"),grams:grams,meal:meal,status:status,notes:notes,staff:currentName()});
-  }
-  saveRecord();renderMain();
-}
-function editFeeding(idx){var f=S.feeding&&S.feeding[idx];if(!f)return;var g=document.getElementById("feed-grams"),me=document.getElementById("feed-meal"),no=document.getElementById("feed-notes");if(g)g.value=f.grams||"";if(me)me.value=f.meal||"";if(no)no.value=f.notes||"";window._feedEdit=idx;var bn=document.getElementById("feed-edit-banner");if(bn)bn.style.display="flex";if(g&&g.scrollIntoView)g.scrollIntoView({behavior:"smooth",block:"center"});if(g)g.focus();}
-function cancelFeedEdit(){window._feedEdit=null;var g=document.getElementById("feed-grams"),me=document.getElementById("feed-meal"),no=document.getElementById("feed-notes");if(g)g.value="";if(me)me.value="";if(no)no.value="";var bn=document.getElementById("feed-edit-banner");if(bn)bn.style.display="none";}
 function deleteFeeding(idx){appConfirm("Delete this feeding entry?",function(){S.feeding.splice(idx,1);saveRecord();renderMain();},{danger:true});}
 
 // ── Timeline ──────────────────────────────────────────────────────
@@ -3569,10 +3430,6 @@ function bdSection(title,go,cells,cols){
     +'<div style="display:grid;grid-template-columns:repeat('+(cols||4)+',1fr);gap:2px 10px">'+cells.join("")+'</div>'
     +'</div>';
 }
-function bdCount(n,unit,warnIfZero){
-  if(!n)return {v:warnIfZero?"None recorded":"None",f:warnIfZero?"warn":""};
-  return {v:n+" "+unit,f:""};
-}
 
 function renderBreakdown(){
   var rec=records.find(function(r){return r.id===S.id;})||{};
@@ -3650,12 +3507,10 @@ function renderBreakdown(){
   // ── Isolation & daily care
   var daysDone=(S.days||[]).filter(function(x){return x.date||x.demeanour||x.feeding;}).length;
   var lastNote=(S.notes||[]).map(function(n){return n.date;}).filter(Boolean).sort().pop();
-  var lastEx=(S.exercises||[]).map(function(e){return e.date;}).filter(Boolean).sort().pop();
   var incid=(S.incidents||[]).length;
   h+=bdSection("Isolation &amp; daily care","days",[
     bdCell("5-day entries",daysDone+" / 5",daysDone===0?"warn":""),
     bdCell("Notes",(S.notes||[]).length?(S.notes||[]).length+" · last "+fmtDMY(lastNote):"", !(S.notes||[]).length?"warn":""),
-    bdCell("Exercise",(S.exercises||[]).length?(S.exercises||[]).length+" · last "+fmtDMY(lastEx):"",!(S.exercises||[]).length?"warn":""),
     bdCell("Incidents",incid?String(incid):"None",incid?"risk":""),
     bdCell("Feeding plan",(S.feedingPlan&&(S.feedingPlan.food||S.feedingPlan.grams))?((S.feedingPlan.food||"")+(S.feedingPlan.grams?" · "+S.feedingPlan.grams+" g":"")).trim():""),
     bdCell("Files",(S.files||[]).length?(S.files||[]).length+" attached":""),
@@ -3937,7 +3792,6 @@ function picSilence(){
   };
   var checks=[
     {l:"Note written",d:last(S.notes),warn:3,go:"notes"},
-    {l:"Walked / exercised",d:last(S.exercises),warn:2,go:"exercise"},
     {l:"Weighed",d:last(S.weights),warn:14,go:"weights"},
   ];
   checks.forEach(function(c){
@@ -4573,6 +4427,7 @@ function page(){
   if(t==="behaviour"){S.tab=t="notes";}
   else if(t==="timeline"){S.tab=t="report";}
   else if(t==="briefing"){S.tab=t="report";window._reportView="narrative";}
+  else if(t==="exercise"){S.tab=t="days";}
   var total=Object.values(S.scores).reduce(function(a,b){return a+b},0);
   var tl=effLight(total,S.scores);var ea=eaTriggered();
 
@@ -4632,6 +4487,8 @@ function page(){
   if(t==="arrival") return'<h2>On-arrival observation</h2><div class="sub">Record the dog\'s behaviour on arrival.</div><div class="card">'+slct("Initial demeanour on arrival",a.demeanour,"arrival.demeanour",[["Engaging","Engaging — friendly, curious"],["Nervous","Nervous — withdrawn, avoidant"],["Reactive","Reactive — alert, tense, vocal"],["Shut down","Shut down — frozen, non-responsive"],["Neutral","Neutral — calm, no strong response"]])+slct("Muzzle required?",a.muzzle,"arrival.muzzle",[["No","No — handled safely without muzzle"],["Yes — accepted","Yes — accepted without issue"],["Yes — resistant","Yes — resistant to muzzling"],["Yes — required intervention","Yes — required significant intervention"]])+slct("Lead / handling acceptance",a.lead,"arrival.lead",[["Good","Good — relaxed, no tension"],["Moderate","Moderate — some pulling or resistance"],["Poor","Poor — strong pulling"],["Dangerous","Dangerous — unsafe on lead"]])+slct("First vet visit behaviour",a.vet,"arrival.vet",[["Cooperative","Cooperative"],["Nervous but manageable","Nervous but manageable"],["Resistant","Resistant — required restraint"],["Aggressive","Aggressive — unsafe to handle"],["Not yet seen","Not yet seen by vet"]])+ta("Arrival notes",a.notes,"arrival.notes","Describe arrival behaviour...")+'<div class="sec">Source &amp; handover</div>'+slct("How the dog came in",a.source,"arrival.source",[["","-- not set --"],["Owner surrender","Owner surrender"],["Stray","Stray / found"],["Seizure","Seizure"],["Transfer","Transfer from another centre"],["Return","Return \u2014 previously rehomed by us"],["Born here","Born in care"]])+ta("Surrendered / brought in by",a.sourceBy,"arrival.sourceBy","Name, and contact number or address if given...")+slct("Surrender form signed?",a.sourceForm,"arrival.sourceForm",[["","-- not set --"],["Yes","Yes \u2014 on file"],["No","No"],["N/A","N/A \u2014 stray or seizure"]])+'<div class="sec">Reported history</div>'+slct("How long with previous owner",a.histDuration,"arrival.histDuration",[["","-- not known --"],["Since a puppy","Since a puppy"],["Under 1 year","Under 1 year"],["1 to 3 years","1 to 3 years"],["Over 3 years","Over 3 years"],["Unknown","Unknown"]])+ta("Reason given for surrender",a.histReason,"arrival.histReason","In the owner's own words where possible...")+slct("Previous living setup",a.histLiving,"arrival.histLiving",[["","-- not known --"],["Indoors \u2014 family home","Indoors \u2014 family home"],["Indoors and garden","Indoors with garden access"],["Outdoor kennel","Outdoor kennel / yard"],["Farm","Farm / working"],["Multiple homes","Multiple homes"],["Unknown","Unknown"]])+slct("Lived with other animals?",a.histAnimals,"arrival.histAnimals",[["","-- not known --"],["Lived with dogs","Lived with other dogs"],["Lived with cats","Lived with cats"],["Lived with both","Lived with dogs and cats"],["Lived alone","Lived as the only pet"],["Unknown","Unknown"]])+slct("House trained (as reported)",a.histHouseTrained,"arrival.histHouseTrained",[["","-- not known --"],["Yes","Yes"],["Mostly","Mostly \u2014 occasional accidents"],["No","No"],["Unknown","Unknown"]])+ta("Known medical or dietary history",a.histMedical,"arrival.histMedical","Conditions, medication, allergies, food the dog is used to...")+'<div class="sec">Behaviour History</div>'+slct("Dog-to-Dog Reactivity",a.dogDog,"arrival.dogDog",[["Not tested","Not tested"],["None observed — settled","None observed — settled"],["Mild","Mild — some interest or pulling"],["Moderate","Moderate — barking or lunging"],["Severe","Severe — could not pass safely"]])+slct("Cat Tolerance",a.catTolerance,"arrival.catTolerance",[["Not tested","Not tested"],["Unknown","Unknown"],["Cat friendly","Known to be cat friendly"],["Reactive","Chased or reactive to cats"]])+slct("Horses / equine",a.equineHistory,"arrival.equineHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Good","Known to be good with horses"],["Reactive","Reactive / chased horses"]])+slct("Small mammals",a.smallMammalHistory,"arrival.smallMammalHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Safe","Known to be safe with small mammals"],["Reactive","Chased / high prey drive"]])+slct("Child History",a.childHistory,"arrival.childHistory",[["Not known","Not known"],["Good","Known to be good with children"],["No exposure","No known exposure"],["Caution","Owner advised caution"],["Incident","Known incident involving a child"]])+slct("Previous Bite History",a.biteHistory,"arrival.biteHistory",[["None","None declared"],["One","One bite declared by owner"],["Multiple","Multiple bites declared"],["Unknown details","Bite history — details unknown"]])+'</div><div class="brow"><button class="btn" data-go="dog">&larr; Back</button><button class="btn btnp" data-go="days">Next: 5-day report &rarr;</button></div>';
 
   if(t==="days"){
+    // Auto-fill day dates from intake: Day 1 = the day after intake
+    if(S.dog&&S.dog.intakeDate){for(var _di=0;_di<5;_di++){if(S.days[_di]&&!S.days[_di].date)S.days[_di].date=addDaysStr(S.dog.intakeDate,_di+1);}}
     var dv=Math.min(4,Math.max(0,window._dayView||0));
     var dayHasData=function(idx){var x=S.days[idx];return!!(x.demeanour||x.feeding||x.toileting||x.staffInt||x.incidents||x.notes);};
     var dayPillSub=function(idx){var x=S.days[idx];if(dayHasData(idx))return"&#10003; done";if(x.date){var d=new Date(x.date);if(!isNaN(d))return fmtDMY(x.date);}return "&mdash;";};
@@ -4927,7 +4784,6 @@ function page(){
   if(t==="assessment")return renderAssessment();
   if(t==="medical")return renderMedical();
   if(t==="weights")return renderWeights();
-  if(t==="exercise")return renderExercise();
   if(t==="feeding")return renderFeeding();
   if(t==="notes")return renderNotes();
   if(t==="files")return renderFiles();
