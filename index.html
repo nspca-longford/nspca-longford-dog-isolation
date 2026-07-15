@@ -412,11 +412,11 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.55",date:"2026-07-15",note:"Two additions for litter season. Dogs can now be linked as a family: on a pup\u0027s record, use Link to mum on the Dog tab (in the Family line under Status &amp; admin) to point at the mum\u0027s record \u2014 once linked, the Dog tab shows a Family card with the mum and any littermates as tap-to-open chips, and the mum\u0027s own record lists all her pups the same way, with a + Add pup button that starts a new record already linked and carrying over her breed, kennel and intake date. And Parazole (fenbendazole) \u2014 the standard litter wormer \u2014 has been added to the parasite Treatment list."},
   {version:"3.54",date:"2026-07-15",note:"Three tidy-ups. The Exercise tab has been removed for now (it was waiting on the laptop reaching the unit) \u2014 any existing exercise history is kept and still shows on the Health Board and reports, and the tab can come back later. The Feeding tab loses its per-meal quick log for the same reason \u2014 the feeding plan, suggested grams, today\u0027s total and history all stay. And the 5-Day Report now fills in its own dates: enter the intake date and Day 1 through Day 5 are set automatically starting the following day \u2014 you can still change any date by hand."},
   {version:"3.53",date:"2026-07-15",note:"The Dog tab has been tidied. Identity and Intake now sit straight under the hero \u2014 no more scrolling past admin to reach the dog\u0027s details. Everything one-time or dormant lives below a Status &amp; admin divider as single fold-out lines: the isolation period shows its day count on the line, warnings show the first warning and a count (amber, hard to miss), care notices likewise, and when there are none, one quiet line offers tap-to-add. The new-arrival checklist stays fully open while incomplete, sits in the admin section, and disappears once done \u2014 exactly as before. A clean dog\u0027s page is now roughly half the height. Nothing removed, nothing moved in the data \u2014 just reordered and folded."},
   {version:"3.52",date:"2026-07-14",note:"The Rehoming tab now has a proper Clearance decision at the top: Cleared for rehoming, Cleared with conditions (with a box for what the conditions are), Not cleared \u2014 needs more time, Not fit for rehoming, or Awaiting assessment \u2014 along with who made the call and when. The status shows as a colour-coded banner on the tab and appears in the Breakdown, so one glance tells you where a dog stands. Suitability fields below are unchanged."},
   {version:"3.51",date:"2026-07-14",note:"The record is now six groups instead of five, and flagged dogs announce themselves. Rehoming suitability has moved out of the bottom of the Assessment into its own tab beside Outcome \u2014 it was always a placement question, not a behaviour observation, and now the Outcome group reads as what home suits them, then the decision. Medical and Weights have moved into a new Health group, leaving Isolation as pure daily care: 5-Day Report, Exercise, Feeding, Notes. And opening a flagged dog now shows a read-before-handling glance first \u2014 Red or Black traffic light, bite history, severe or no-warning guarding, muzzle requirement, handler level \u2014 along with the Handler brief, shown once per session so it stays meaningful. Clean dogs open straight in with no interruption. All data stays exactly where it was saved."},
-  {version:"3.50",date:"2026-07-14",note:"New Breakdown tab (in Records) \u2014 the whole record on one dense screen. Every section of the record condensed to its key facts: identity, arrival and history, assessment (including worst guarding level and handler requirements), the six scoring bands with the traffic light, EA status, daily care counts, the full medical picture and the outcome. Colour-coded throughout: a grey dash means not recorded yet, amber means worth attention, red means flagged \u2014 so one glance shows both what we know and what\u0027s missing. Every section has an Open button straight to its tab. Also fixes the Picture tab wrongly showing \u0027Enhanced Assessment not completed\u0027 even after the EA was done."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -2067,6 +2067,68 @@ function renderDashboard(){
 
 function openDog(id){var rec=records.find(function(r){return r.id===id;});if(!rec)return;window._dayView=0;loadRecord(id);showScreen("wrap");S.tab="dog";render();if(!maybeAutoHandlingGlance()){if(!maybeAutoContagiousOverlay()){if(!maybeAutoWarningOverlay()){if(!maybeAutoNoticeOverlay())maybeAutoIsolationOverlay();}}}}
 function openNewDog(){appConfirm("Start a new dog? Current unsaved data will be cleared.",function(){S=defaultState();persistSave();showScreen("wrap");S.tab="dog";render();});}
+
+// ── Family trail (mums, pups, litters) ────────────────────────────
+// Lean model: dog.mumId points at the mum's saved record id. Pups are
+// derived (records whose mumId is this dog); littermates share a mumId.
+function familyInfo(){
+  var mumId=(S.dog&&S.dog.mumId)||"";
+  var mum=mumId?records.find(function(r){return r.id===mumId;}):null;
+  var mates=mumId?records.filter(function(r){return r.id!==S._id&&r.state&&r.state.dog&&r.state.dog.mumId===mumId;}):[];
+  var pups=S._id?records.filter(function(r){return r.state&&r.state.dog&&r.state.dog.mumId===S._id;}):[];
+  return{mumId:mumId,mum:mum,mates:mates,pups:pups};
+}
+async function openFamilyDog(id){
+  if(S.dog&&S.dog.name){try{await saveRecord();}catch(e){}}
+  else if(supabaseClient){try{await loadRecordsList();}catch(e){}}
+  loadRecord(id);S.tab="dog";render();
+}
+function setMumLink(id){if(!S.dog)return;S.dog.mumId=id?(isNaN(+id)?id:+id):"";debouncedSave();renderMain();}
+function addPupFromMum(){
+  if(!S._id){appAlert("Save this record first \u2014 pups link to the saved mum.");return;}
+  var mumId=S._id,mumName=(S.dog&&S.dog.name)||"the mum";
+  var breed=S.dog.breed||"",cross=!!S.dog.crossbreed,breed2=S.dog.breed2||"",kennel=S.dog.kennel||"",intake=S.dog.intakeDate||"";
+  appConfirm("Start a new pup linked to "+mumName+"? Current unsaved data will be cleared.",function(){
+    S=defaultState();
+    S.dog.mumId=mumId;S.dog.breed=breed;S.dog.crossbreed=cross;if(cross&&breed2)S.dog.breed2=breed2;
+    S.dog.kennel=kennel;S.dog.intakeDate=intake;
+    persistSave();showScreen("wrap");S.tab="dog";render();
+    setTimeout(function(){var el=document.getElementById("dog-name-input");if(el)el.focus();},60);
+  });
+}
+function famChip(rec,tag){
+  var nm=esc(rec.name||"Unnamed");
+  return '<button onclick="openFamilyDog('+rec.id+')" title="Open '+nm+'\u2019s record" style="display:inline-flex;align-items:center;gap:5px;background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.08);color:#0f172a;border-radius:20px;padding:4px 11px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit">'+(tag?'<span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#94a3b8">'+tag+'</span>':'')+nm+'</button>';
+}
+function familyCardInner(fi){
+  var h='';
+  if(fi.mumId){
+    if(fi.mum){
+      h+='<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:'+(fi.mates.length?'8px':'2px')+'">'+famChip(fi.mum,"Mum")+'<button onclick="appConfirm(\'Unlink this pup from its mum?\',function(){setMumLink(\'\');})" style="background:none;border:none;color:#94a3b8;font-size:11px;cursor:pointer;font-family:inherit;text-decoration:underline">Unlink</button></div>';
+      if(fi.mates.length)h+='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#94a3b8;margin-bottom:5px">Littermates</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:2px">'+fi.mates.map(function(r){return famChip(r);}).join("")+'</div>';
+    }else{
+      h+='<div style="font-size:11.5px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin-bottom:6px">\u26a0 Linked mum isn\u2019t in the loaded records (deleted, or beyond the last 50). <button onclick="setMumLink(\'\')" style="background:none;border:none;color:#854d0e;font-weight:700;font-size:11px;cursor:pointer;font-family:inherit;text-decoration:underline">Unlink</button></div>';
+    }
+  }
+  if(fi.pups.length){
+    h+='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#94a3b8;margin:'+(fi.mumId?'10px':'0')+' 0 5px">Pups \u00b7 '+fi.pups.length+'</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+fi.pups.map(function(r){return famChip(r);}).join("")+'</div>';
+  }
+  if(!fi.mumId){
+    var canPup=!!S._id;
+    h+='<div style="margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+      +'<button onclick="addPupFromMum()" '+(canPup?'':'disabled')+' style="background:'+(canPup?'#0f172a':'#e2e8f0')+';color:'+(canPup?'#c5e86c':'#94a3b8')+';border:none;padding:6px 13px;border-radius:20px;font-size:11px;font-weight:600;cursor:'+(canPup?'pointer':'default')+';font-family:inherit">+ Add pup</button>'
+      +(canPup?'':'<span style="font-size:10.5px;color:#94a3b8">Save this record first, then pups can be added</span>')+'</div>';
+  }
+  if(!fi.mumId){
+    var cands=records.filter(function(r){return r.id!==S._id&&!isArchived(r)&&!(r.state&&r.state.dog&&r.state.dog.mumId===S._id);});
+    if(cands.length){
+      h+='<div style="margin-top:10px"><label class="lbl">Link to mum</label><select onchange="if(this.value)setMumLink(this.value)" style="width:100%"><option value="">-- this dog\u2019s mum, if she\u2019s on file --</option>'+cands.map(function(r){return '<option value="'+r.id+'">'+esc(r.name||"Unnamed")+(r.refNo?' \u00b7 '+esc(r.refNo):'')+'</option>';}).join("")+'</select></div>';
+    }else if(!fi.pups.length){
+      h+='<div style="font-size:11.5px;color:#94a3b8;margin-top:8px">No other records on file to link yet.</div>';
+    }
+  }
+  return h;
+}
 function goToDashboard(){loadRecordsList().then(function(){showDashboard();});}
 
 function brandFooterHtml(){
@@ -2572,7 +2634,7 @@ function contagiousAlertHtml(){
 function diseaseShortName(t){return(t||"").replace(/ \(.*$/,"");}
 
 function defaultState(){return{_id:null,tab:"dog",
-  dog:{name:"",breed:"",sex:"",age:"",colour:"",weight:"",microchip:"",intakeDate:"",intakeReason:"",assessor:"",refNo:"",photo:"",kennel:"",crossbreed:false,size:""},
+  dog:{name:"",breed:"",sex:"",age:"",colour:"",weight:"",microchip:"",intakeDate:"",intakeReason:"",assessor:"",refNo:"",photo:"",kennel:"",crossbreed:false,size:"",mumId:""},
   arrival:{demeanour:"",muzzle:"",lead:"",vet:"",notes:"",dogDog:"",catTolerance:"",equineHistory:"",smallMammalHistory:"",childHistory:"",biteHistory:""},
   days:[0,1,2,3,4].map(function(){return{date:"",demeanour:"",feeding:"",toileting:"",staffInt:"",incidents:"",notes:""}}),
   scores:{excitability:0,reactivity:0,fearAnxiety:0,sepAnx:0,training:0,misc:0},
@@ -2988,7 +3050,7 @@ function renderMedical(){
     "saveMedVac","Save vaccination");
 
   h+=buildOv("para","Log parasite treatment",
-    ovS("Treatment","med-para-type",["Advocate (Bayer) — fleas, roundworms, lungworm","Frontline Combo — fleas, ticks","Frontline Spot-On — fleas, ticks","Bravecto Oral — fleas, ticks (3 month)","NexGard — fleas, ticks (monthly)","Seresto Collar — fleas, ticks (8 month)","Stronghold — fleas, roundworms","Panacur — roundworms, hookworms, whipworms","Milbemax — roundworms, tapeworms","Drontal Plus — roundworms, tapeworms","Milpro — roundworms, hookworms, whipworms, tapeworms","Other"])+
+    ovS("Treatment","med-para-type",["Advocate (Bayer) — fleas, roundworms, lungworm","Frontline Combo — fleas, ticks","Frontline Spot-On — fleas, ticks","Bravecto Oral — fleas, ticks (3 month)","NexGard — fleas, ticks (monthly)","Seresto Collar — fleas, ticks (8 month)","Stronghold — fleas, roundworms","Panacur — roundworms, hookworms, whipworms","Milbemax — roundworms, tapeworms","Drontal Plus — roundworms, tapeworms","Milpro — roundworms, hookworms, whipworms, tapeworms","Parazole (fenbendazole) — roundworms, hookworms, whipworms; puppy litters","Other"])+
     '<div class="g2">'+ovF("Date given","med-para-date","date","",today)+ovF("Given by","med-para-admin","text","Name","")+'</div>'+
     ovF("Notes (dose, batch...)","med-para-notes","text","Optional",""),
     "saveMedPara","Save treatment");
@@ -4477,7 +4539,13 @@ function page(){
     }else{
       wnFolds=dogFold("warnnotice","\uff0b","Warnings &amp; notices","None active \u2014 tap to add","","plain",warningsCardHtml()+noticesCardHtml());
     }
-    return hero+identity+intake+restrictedBreedCardHtml()+admDivider+intakeChecklistHtml()+isoFold+wnFolds+'<div class="brow"><button class="btn" onclick="openKennelCard()" style="white-space:nowrap">&#128203; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
+    var _fi=familyInfo(),famCard="",famFold="";
+    if(_fi.mumId||_fi.pups.length){
+      famCard='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:10px">Family</div>'+familyCardInner(_fi)+'</div>';
+    }else{
+      famFold=dogFold("family","\ud83d\udc3e","Family","Mums, pups and litters","Not linked \u2014 tap to link","plain",familyCardInner(_fi));
+    }
+    return hero+identity+intake+famCard+restrictedBreedCardHtml()+admDivider+intakeChecklistHtml()+isoFold+wnFolds+famFold+'<div class="brow"><button class="btn" onclick="openKennelCard()" style="white-space:nowrap">&#128203; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
   }
 
   if(t==="picture") return renderPicture();
