@@ -412,7 +412,7 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
-  {version:"3.56",date:"2026-07-16",note:"Puppy season, part two \u2014 plus one tidy-up. Give a dog a date of birth on the Dog tab and the record adapts: a Puppy card appears showing age in weeks, litter size (born and surviving), how the pups are being reared, and an age-based schedule \u2014 Parazole worming at 2, 4, 6 and 8 weeks and first vaccination from 6 weeks \u2014 that ticks itself off from entries on the Medical tab and flags anything due or overdue. Pups also get a weigh-every-1\u20132-days reminder on the Weights tab with a red alert if the latest weight has dropped, a too-young-to-assess note on the Assessment and Scoring tabs under 12 weeks, and a clear line on the Rehoming tab that a pup can\u0027t leave before 8 weeks \u2014 with the exact date it becomes possible. A mum\u0027s Family card gains the litter size fields too. And the tidy-up: the Clearance card loses its Cleared / decided by dropdown \u2014 the decision and its date are enough."},
+  {version:"3.56",date:"2026-07-16",note:"Puppy season, part two \u2014 plus one tidy-up. Give a dog a date of birth on the Dog tab and the record adapts: a Puppy card appears showing age in weeks, litter size (born and surviving), how the pups are being reared, and an age-based schedule \u2014 Parazole worming at 2, 4, 6 and 8 weeks and first vaccination from 6 weeks \u2014 that ticks itself off from entries on the Medical tab and flags anything due or overdue. Pups also get a weigh-every-1\u20132-days reminder on the Weights tab with a red alert if the latest weight has dropped, a too-young-to-assess note on the Assessment and Scoring tabs under 12 weeks, and a clear line on the Rehoming tab that a pup can\u0027t leave before 8 weeks \u2014 with the exact date it becomes possible. A mum\u0027s Family card gains the litter size fields too. And the tidy-up: the Clearance card loses its Cleared / decided by dropdown \u2014 the decision and its date are enough. Under the hood, a full audit cleared out a leftover exercise quick-log overlay that lost its opener when the Exercise tab was parked, plus two ghost references and some duplicated date helpers \u2014 about 7KB lighter, nothing visible changes."},
   {version:"3.55",date:"2026-07-15",note:"Two additions for litter season. Dogs can now be linked as a family: on a pup\u0027s record, use Link to mum on the Dog tab (in the Family line under Status &amp; admin) to point at the mum\u0027s record \u2014 once linked, the Dog tab shows a Family card with the mum and any littermates as tap-to-open chips, and the mum\u0027s own record lists all her pups the same way, with a + Add pup button that starts a new record already linked and carrying over her breed, kennel and intake date. And Parazole (fenbendazole) \u2014 the standard litter wormer \u2014 has been added to the parasite Treatment list."},
   {version:"3.54",date:"2026-07-15",note:"Three tidy-ups. The Exercise tab has been removed for now (it was waiting on the laptop reaching the unit) \u2014 any existing exercise history is kept and still shows on the Health Board and reports, and the tab can come back later. The Feeding tab loses its per-meal quick log for the same reason \u2014 the feeding plan, suggested grams, today\u0027s total and history all stay. And the 5-Day Report now fills in its own dates: enter the intake date and Day 1 through Day 5 are set automatically starting the following day \u2014 you can still change any date by hand."},
   {version:"3.53",date:"2026-07-15",note:"The Dog tab has been tidied. Identity and Intake now sit straight under the hero \u2014 no more scrolling past admin to reach the dog\u0027s details. Everything one-time or dormant lives below a Status &amp; admin divider as single fold-out lines: the isolation period shows its day count on the line, warnings show the first warning and a count (amber, hard to miss), care notices likewise, and when there are none, one quiet line offers tap-to-add. The new-arrival checklist stays fully open while incomplete, sits in the admin section, and disappears once done \u2014 exactly as before. A clean dog\u0027s page is now roughly half the height. Nothing removed, nothing moved in the data \u2014 just reordered and folded."},
@@ -578,6 +578,7 @@ function esc(s){return(s===null||s===undefined?"":""+s).replace(/&/g,"&amp;").re
 function persistSave(){try{localStorage.setItem("nspca-current",JSON.stringify(S));}catch(e){}}
 function debouncedSave(){if(_dSt)clearTimeout(_dSt);_dSt=setTimeout(function(){saveRecord();},1500);}
 function addDaysStr(ds,n){var d=new Date(ds);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+function weekStartStr(ds){var d=new Date(ds);if(isNaN(d.getTime()))return new Date().toISOString().slice(0,10);var day=d.getDay();var diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
 function showScreen(id){["login-screen","dashboard-screen","wrap"].forEach(function(s){var el=document.getElementById(s);if(el)el.style.display=(s===id?"block":"none");});if(id==="login-screen"){var lc=document.getElementById("login-code");if(lc)setTimeout(function(){try{lc.focus();}catch(e){}},60);}}
 
 // ── Medical overlay controls (THE FIX — these now live in <script>, not <style>) ─
@@ -604,7 +605,6 @@ function editMedEntry(section,idx){
 // ── Exercise tracking ─────────────────────────────────────────────
 // Stored per-dog on rec.state.exercises[]: {date, time, type, staff, notes}
 // Four types: Walked, Compound, Round Pen/Pond, Enrichment
-var _exOverlayRec=null;
 var EX_TYPES=[
   {key:"Walked",icon:"&#128694;",short:"W"},
   {key:"Compound",icon:"&#127968;",short:"C"},
@@ -620,98 +620,9 @@ function getTodaysExercises(rec){
 
 
 
-function hideExerciseOverlay(){
-  var ov=document.getElementById("ex-overlay");
-  if(ov)ov.classList.remove("show");
-  _exOverlayRec=null;
-}
 
-function renderExerciseOverlay(){
-  var rec=_exOverlayRec;if(!rec)return;
-  var d=(rec.state&&rec.state.dog)||{};
-  var todays=getTodaysExercises(rec);
-  var dateLabel=fmtDMYwk(new Date());
 
-  var h='<div style="padding:16px 18px 12px;border-bottom:0.5px solid var(--color-border-secondary);display:flex;align-items:center;gap:10px">'
-    +(d.photo?'<img src="'+d.photo+'" alt="'+esc(d.name||'dog')+'" style="width:38px;height:38px;border-radius:8px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';flex-shrink:0">':'<div style="width:38px;height:38px;border-radius:8px;background:linear-gradient(135deg,#fbfdf4,#eef7d8);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" style="width:17px;height:17px;opacity:.45" fill="#8fae3f"><ellipse cx="8.5" cy="8" rx="1.8" ry="2.4"/><ellipse cx="15.5" cy="8" rx="1.8" ry="2.4"/><ellipse cx="5" cy="11.5" rx="1.6" ry="2.1"/><ellipse cx="19" cy="11.5" rx="1.6" ry="2.1"/><path d="M12 11c-2.8 0-5 2.4-5 4.7 0 1.6 1.2 2.8 2.8 2.8.8 0 1.5-.3 2.2-.3s1.4.3 2.2.3c1.6 0 2.8-1.2 2.8-2.8C17 13.4 14.8 11 12 11z"/></svg></div>')
-    +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:14px;font-weight:600;color:var(--color-text-primary);line-height:1.15">'+esc(rec.name)+' &middot; Exercise</div>'
-      +'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">'+dateLabel+(d.kennel?' &middot; '+esc(d.kennel):'')+'</div>'
-    +'</div>'
-    +'<button onclick="hideExerciseOverlay()" style="background:none;border:none;color:var(--color-text-secondary);font-size:20px;line-height:1;cursor:pointer;width:30px;height:30px;border-radius:50%">&times;</button>'
-  +'</div>';
 
-  h+='<div style="padding:12px 18px 0">'
-    +'<input id="ex-note-input" type="text" placeholder="Optional note (attached to next entry)" style="width:100%;padding:8px 11px;border:0.5px solid var(--color-border-secondary);border-radius:8px;font-size:12px;font-family:inherit;background:var(--color-background-primary)">'
-  +'</div>';
-
-  h+='<div style="padding:10px 18px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px">';
-  EX_TYPES.forEach(function(t){
-    var sessions=todays.filter(function(e){return e.type===t.key;});
-    var done=sessions.length>0;
-    var last=done?sessions[sessions.length-1]:null;
-    var status=last?("Last "+last.time+(sessions.length>1?" &middot; "+sessions.length+"\u00d7":"")):"Tap to log";
-    var bg=done?"#edf6cf":"var(--color-background-primary)";
-    var bd=done?"#9bc23e":"var(--color-border-secondary)";
-    var statusColor=done?"#3a4a16":"var(--color-text-secondary)";
-    h+='<button onclick="logExerciseEntry(\''+t.key.replace(/'/g,"\\'")+'\')" style="background:'+bg+';border:1px solid '+bd+';border-radius:10px;padding:11px;text-align:left;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:5px;min-height:76px;justify-content:space-between;position:relative">'
-      +(done?'<div style="position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:#9bc23e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">&#10003;</div>':'')
-      +'<div style="font-size:18px;line-height:1">'+t.icon+'</div>'
-      +'<div>'
-        +'<div style="font-size:12px;font-weight:600;color:var(--color-text-primary);letter-spacing:-0.005em">'+t.key+'</div>'
-        +'<div style="font-size:10px;color:'+statusColor+';font-weight:'+(done?'600':'500')+';margin-top:1px">'+status+'</div>'
-      +'</div>'
-    +'</button>';
-  });
-  h+='</div>';
-
-  if(todays.length){
-    var logRows=todays.slice().sort(function(a,b){return(b.time||"").localeCompare(a.time||"");}).map(function(e){
-      var origIdx=rec.state.exercises.indexOf(e);
-      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;font-size:11.5px;border-bottom:0.5px solid var(--color-border-secondary)">'
-        +'<span style="font-size:10.5px;color:var(--color-text-secondary);min-width:40px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(e.time||"")+'</span>'
-        +'<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;background:#edf6cf;color:#3a4a16;text-transform:uppercase;letter-spacing:0.03em;white-space:nowrap">'+esc(e.type)+'</span>'
-        +'<span style="flex:1;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;font-size:11px">'+esc(e.staff||"")+(e.mins?' &middot; '+e.mins+' min':'')+(e.notes?' &middot; '+esc(e.notes):'')+'</span>'
-        +'<button onclick="deleteExerciseEntry('+origIdx+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer">&#10005;</button>'
-      +'</div>';
-    }).join("");
-    h+='<div style="padding:10px 18px 8px;border-top:0.5px solid var(--color-border-secondary)">'
-      +'<div style="font-size:10px;font-weight:700;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Today\'s log &middot; '+todays.length+'</div>'
-      +logRows
-    +'</div>';
-  }
-
-  h+='<div style="padding:12px 18px 14px;border-top:0.5px solid var(--color-border-secondary);background:#f8fafc">'
-    +'<button onclick="hideExerciseOverlay()" style="width:100%;padding:11px;border-radius:8px;border:none;background:#0f172a;color:#c5e86c;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-0.005em">Done</button>'
-  +'</div>';
-
-  document.getElementById("ex-overlay-content").innerHTML=h;
-}
-
-async function logExerciseEntry(type){
-  if(!_exOverlayRec)return;
-  var now=new Date();
-  var date=now.toISOString().slice(0,10);
-  var time=now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0");
-  var noteInput=document.getElementById("ex-note-input");
-  var notes=noteInput?noteInput.value.trim():"";
-  if(!_exOverlayRec.state.exercises)_exOverlayRec.state.exercises=[];
-  _exOverlayRec.state.exercises.push({date:date,time:time,type:type,staff:currentName(),notes:notes});
-  if(noteInput)noteInput.value="";
-  await saveExerciseChange(_exOverlayRec);
-  renderExerciseOverlay();
-  renderDashboard();
-}
-
-function deleteExerciseEntry(idx){
-  if(!_exOverlayRec)return;
-  appConfirm("Delete this exercise entry?",async function(){
-    _exOverlayRec.state.exercises.splice(idx,1);
-    await saveExerciseChange(_exOverlayRec);
-    renderExerciseOverlay();
-    renderDashboard();
-  },{danger:true});
-}
 
 async function saveExerciseChange(rec){
   if(!supabaseClient)return;
@@ -1546,7 +1457,7 @@ function startDashRefresh(){
     // Skip if user is actively typing or has a modal open
     var ae=document.activeElement;
     if(ae){var tag=(ae.tagName||"").toLowerCase();if(tag==="input"||tag==="textarea"||tag==="select")return;}
-    if(document.querySelector('.med-overlay.show, .incident-ov, .add-user-ov, .edit-user-ov, .handover-ov, #app-confirm-overlay[style*="display:flex"], #ex-overlay.show'))return;
+    if(document.querySelector('.med-overlay.show, .incident-ov, .add-user-ov, .edit-user-ov, #app-confirm-overlay[style*="display:flex"]'))return;
     // Refresh quietly
     try{await loadRecordsList();var ds=document.getElementById("dashboard-content");if(ds&&ds.children.length)renderDashboard();}catch(e){console.warn("Auto-refresh failed:",e);}
   },60000);
@@ -1592,18 +1503,16 @@ function recentOutcomesHtml(){
 }
 function tasksRollupHtml(activeRecords){
   var today=new Date().toISOString().slice(0,10);
-  function weekStart(ds){var d=new Date(ds);var day=d.getDay();var diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
-  var thisWeek=weekStart(today);
-  function addDS(ds,n){var x=new Date(ds);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10);}
+  var thisWeek=weekStartStr(today);
   var act=activeRecords.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
   var cats={finishing:[],walks:[],vaccs:[],paras:[],weighs:[],meds:[],reports:[]};
   function vaccDue(med){
     var vl=(med&&med.vaccinations)||[];
     function dateOf(t){var e=vl.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(x){return x.type===t&&x.date;});return e?e.date:null;}
     var due=false;
-    ["1st Vaccination","Kennel Cough","2nd Vaccination","Booster"].forEach(function(vt){if(vl.some(function(v){return v.type===vt;}))return;var ex=vl.find(function(v){return v.type===vt&&v.nextDue;});if(ex&&ex.nextDue&&ex.nextDue<=addDS(today,14))due=true;});
-    var first=dateOf("1st Vaccination");if(first&&!vl.some(function(v){return v.type==="2nd Vaccination";})&&addDS(first,28)<=addDS(today,14))due=true;
-    var second=dateOf("2nd Vaccination");if(second&&!vl.some(function(v){return v.type==="Booster";})){var dy=new Date(second);dy.setFullYear(dy.getFullYear()+1);if(dy.toISOString().slice(0,10)<=addDS(today,14))due=true;}
+    ["1st Vaccination","Kennel Cough","2nd Vaccination","Booster"].forEach(function(vt){if(vl.some(function(v){return v.type===vt;}))return;var ex=vl.find(function(v){return v.type===vt&&v.nextDue;});if(ex&&ex.nextDue&&ex.nextDue<=addDaysStr(today,14))due=true;});
+    var first=dateOf("1st Vaccination");if(first&&!vl.some(function(v){return v.type==="2nd Vaccination";})&&addDaysStr(first,28)<=addDaysStr(today,14))due=true;
+    var second=dateOf("2nd Vaccination");if(second&&!vl.some(function(v){return v.type==="Booster";})){var dy=new Date(second);dy.setFullYear(dy.getFullYear()+1);if(dy.toISOString().slice(0,10)<=addDaysStr(today,14))due=true;}
     return due;
   }
   act.forEach(function(r){
@@ -1615,7 +1524,7 @@ function tasksRollupHtml(activeRecords){
     if(!ex.length)cats.walks.push(r);
     if(vaccDue(med))cats.vaccs.push(r);
     var pl=med.parasiteTreatments||[];var paraDue=false;
-    ["Bravecto","Milpro"].forEach(function(drug){var last=pl.filter(function(p){return(p.type||"").indexOf(drug)===0||(p.product||"").indexOf(drug)===0;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];if(!last||!last.date)return;var nextDue=last.nextDue||addDS(last.date,90);if(nextDue<=addDS(today,7))paraDue=true;});
+    ["Bravecto","Milpro"].forEach(function(drug){var last=pl.filter(function(p){return(p.type||"").indexOf(drug)===0||(p.product||"").indexOf(drug)===0;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];if(!last||!last.date)return;var nextDue=last.nextDue||addDaysStr(last.date,90);if(nextDue<=addDaysStr(today,7))paraDue=true;});
     if(paraDue)cats.paras.push(r);
     var wts=r.state.weights||[];if((r.state.dog&&r.state.dog.intakeDate)&&!wts.find(function(w){return w.date>=thisWeek&&w.date<=today;}))cats.weighs.push(r);
   });
@@ -2244,8 +2153,7 @@ function generateAutoNotices(){
     else if(!finished&&days===_tot-1)notices.push({priority:"Important",text:name+" "+kennel+" finishes isolation tomorrow",icon:"&#9888;"});
     var weights=r.state&&r.state.weights?r.state.weights:[];
     if(!finished&&days){
-      function weekStart(ds){var d=new Date(ds);var dy=d.getDay();var diff=dy===0?-6:1-dy;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
-      var thisWeek=weekStart(today);
+      var thisWeek=weekStartStr(today);
       var hasWeighIn=weights.find(function(w){return w.date>=thisWeek&&w.date<=today;});
       if(!hasWeighIn)notices.push({priority:"Normal",text:"Weigh-in due this week for "+name+" "+kennel,icon:"&#9878;"});
     }
@@ -2257,7 +2165,6 @@ function generateAutoNotices(){
     if(active||finished){
       var med=r.state&&r.state.medical?r.state.medical:{};var vl=med.vaccinations||[];
       var VAC=["1st Vaccination","Kennel Cough","2nd Vaccination","Booster"];
-      function addDS(ds,n){var x=new Date(ds);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10);}
       VAC.forEach(function(vt){
         if(vl.some(function(v){return v.type===vt;}))return;
         var explicit=vl.find(function(v){return v.type===vt&&v.nextDue;});
@@ -2274,7 +2181,7 @@ function generateAutoNotices(){
       ["Bravecto","Milpro"].forEach(function(drug){
         var lastDose=pl.filter(function(p){return(p.type||"").indexOf(drug)===0||(p.product||"").indexOf(drug)===0;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
         if(!lastDose||!lastDose.date)return;
-        var nextDue=lastDose.nextDue||addDS(lastDose.date,90);
+        var nextDue=lastDose.nextDue||addDaysStr(lastDose.date,90);
         var diff=Math.round((new Date(nextDue)-new Date(today))/(86400000));
         if(diff<0)notices.push({priority:"Urgent",text:name+" "+kennel+" — "+drug+" overdue by "+Math.abs(diff)+" day"+(Math.abs(diff)!==1?"s":""),icon:"&#128737;"});
         else if(diff===0)notices.push({priority:"Important",text:name+" "+kennel+" — "+drug+" due today",icon:"&#128737;"});
@@ -3144,9 +3051,8 @@ function renderWeights(){
   try{
     window._weightEdit=null;
     var weights=S.weights||[];var intakeDate=(S.dog&&S.dog.intakeDate)?S.dog.intakeDate:new Date().toISOString().slice(0,10);var today=new Date().toISOString().slice(0,10);
-    function weekStart(ds){var d=new Date(ds);if(isNaN(d.getTime()))return today;var day=d.getDay();var diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
-    var weeks=[];var ws=weekStart(intakeDate);var limit=0;
-    while(ws<=today&&limit<52){var we=addDaysStr(ws,6);var entry=weights.find(function(w){return w.date>=ws&&w.date<=we;})||null;weeks.push({ws:ws,we:we,entry:entry,current:ws===weekStart(today)});ws=addDaysStr(ws,7);limit++;}
+    var weeks=[];var ws=weekStartStr(intakeDate);var limit=0;
+    while(ws<=today&&limit<52){var we=addDaysStr(ws,6);var entry=weights.find(function(w){return w.date>=ws&&w.date<=we;})||null;weeks.push({ws:ws,we:we,entry:entry,current:ws===weekStartStr(today)});ws=addDaysStr(ws,7);limit++;}
     var dueThisWeek=weeks.length>0&&!weeks[weeks.length-1].entry;
     var banner=dueThisWeek?'<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><div style="font-size:13px;font-weight:700;color:#854d0e">&#9888; Weekly weigh-in due</div><div style="font-size:12px;color:#92400e;margin-top:2px">No weight recorded this week</div></div><button class="btn btnp" onclick="document.getElementById(&quot;w-val&quot;).focus()">Log Weight Now</button></div>':"";
     banner=pupWeightBanners()+banner;
