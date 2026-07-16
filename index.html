@@ -412,11 +412,11 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.56",date:"2026-07-16",note:"Puppy season, part two \u2014 plus one tidy-up. Give a dog a date of birth on the Dog tab and the record adapts: a Puppy card appears showing age in weeks, litter size (born and surviving), how the pups are being reared, and an age-based schedule \u2014 Parazole worming at 2, 4, 6 and 8 weeks and first vaccination from 6 weeks \u2014 that ticks itself off from entries on the Medical tab and flags anything due or overdue. Pups also get a weigh-every-1\u20132-days reminder on the Weights tab with a red alert if the latest weight has dropped, a too-young-to-assess note on the Assessment and Scoring tabs under 12 weeks, and a clear line on the Rehoming tab that a pup can\u0027t leave before 8 weeks \u2014 with the exact date it becomes possible. A mum\u0027s Family card gains the litter size fields too. And the tidy-up: the Clearance card loses its Cleared / decided by dropdown \u2014 the decision and its date are enough."},
   {version:"3.55",date:"2026-07-15",note:"Two additions for litter season. Dogs can now be linked as a family: on a pup\u0027s record, use Link to mum on the Dog tab (in the Family line under Status &amp; admin) to point at the mum\u0027s record \u2014 once linked, the Dog tab shows a Family card with the mum and any littermates as tap-to-open chips, and the mum\u0027s own record lists all her pups the same way, with a + Add pup button that starts a new record already linked and carrying over her breed, kennel and intake date. And Parazole (fenbendazole) \u2014 the standard litter wormer \u2014 has been added to the parasite Treatment list."},
   {version:"3.54",date:"2026-07-15",note:"Three tidy-ups. The Exercise tab has been removed for now (it was waiting on the laptop reaching the unit) \u2014 any existing exercise history is kept and still shows on the Health Board and reports, and the tab can come back later. The Feeding tab loses its per-meal quick log for the same reason \u2014 the feeding plan, suggested grams, today\u0027s total and history all stay. And the 5-Day Report now fills in its own dates: enter the intake date and Day 1 through Day 5 are set automatically starting the following day \u2014 you can still change any date by hand."},
   {version:"3.53",date:"2026-07-15",note:"The Dog tab has been tidied. Identity and Intake now sit straight under the hero \u2014 no more scrolling past admin to reach the dog\u0027s details. Everything one-time or dormant lives below a Status &amp; admin divider as single fold-out lines: the isolation period shows its day count on the line, warnings show the first warning and a count (amber, hard to miss), care notices likewise, and when there are none, one quiet line offers tap-to-add. The new-arrival checklist stays fully open while incomplete, sits in the admin section, and disappears once done \u2014 exactly as before. A clean dog\u0027s page is now roughly half the height. Nothing removed, nothing moved in the data \u2014 just reordered and folded."},
   {version:"3.52",date:"2026-07-14",note:"The Rehoming tab now has a proper Clearance decision at the top: Cleared for rehoming, Cleared with conditions (with a box for what the conditions are), Not cleared \u2014 needs more time, Not fit for rehoming, or Awaiting assessment \u2014 along with who made the call and when. The status shows as a colour-coded banner on the tab and appears in the Breakdown, so one glance tells you where a dog stands. Suitability fields below are unchanged."},
-  {version:"3.51",date:"2026-07-14",note:"The record is now six groups instead of five, and flagged dogs announce themselves. Rehoming suitability has moved out of the bottom of the Assessment into its own tab beside Outcome \u2014 it was always a placement question, not a behaviour observation, and now the Outcome group reads as what home suits them, then the decision. Medical and Weights have moved into a new Health group, leaving Isolation as pure daily care: 5-Day Report, Exercise, Feeding, Notes. And opening a flagged dog now shows a read-before-handling glance first \u2014 Red or Black traffic light, bite history, severe or no-warning guarding, muzzle requirement, handler level \u2014 along with the Handler brief, shown once per session so it stays meaningful. Clean dogs open straight in with no interruption. All data stays exactly where it was saved."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -2084,6 +2084,64 @@ async function openFamilyDog(id){
   loadRecord(id);S.tab="dog";render();
 }
 function setMumLink(id){if(!S.dog)return;S.dog.mumId=id?(isNaN(+id)?id:+id):"";debouncedSave();renderMain();}
+
+// \u2500\u2500 Puppy / litter support \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// dog.dob drives everything: age in weeks, the Puppy card, the worming/vax
+// schedule, weigh-often + weight-drop alerts, too-young-to-assess and the
+// 8-week rehoming gate. Pup mode = DOB set and under 26 weeks.
+function dogAgeWeeks(){var dob=S.dog&&S.dog.dob;if(!dob)return null;var t=new Date(dob).getTime();if(isNaN(t))return null;var ms=Date.now()-t;if(ms<0)return null;return Math.floor(ms/6048e5);}
+function isPup(){var w=dogAgeWeeks();return w!==null&&w<26;}
+function pupMilestones(){
+  var dob=S.dog.dob,today=new Date().toISOString().slice(0,10),intake=S.dog.intakeDate||"";
+  var pl=(S.medical&&S.medical.parasiteTreatments)||[],vl=(S.medical&&S.medical.vaccinations)||[];
+  var ms=[2,4,6,8].map(function(wk){
+    var due=addDaysStr(dob,wk*7);
+    var done=pl.some(function(p){if(!p.date)return false;var diff=(new Date(p.date)-new Date(due))/864e5;return diff>=-7&&diff<=10;});
+    return{label:"Worming \u00b7 "+wk+" weeks",due:due,done:done,win:0};
+  });
+  var vaxDone=vl.some(function(v){return v.date&&v.date>=dob&&v.date<=today;});
+  ms.push({label:"First vaccination \u00b7 6\u20138 weeks",due:addDaysStr(dob,42),done:vaxDone,win:14});
+  return ms.map(function(m){
+    if(m.done)m.state="done";
+    else if(intake&&m.due<intake)m.state="past";
+    else if(today>addDaysStr(m.due,m.win+7))m.state="overdue";
+    else if(today>=m.due)m.state="due";
+    else m.state="upcoming";
+    return m;});
+}
+function pupCardHtml(){
+  if(!isPup())return"";
+  var d=S.dog,w=dogAgeWeeks();
+  var rows=pupMilestones().map(function(m){
+    var c=m.state==="done"?["#dcfce7","#166534","\u2713 done"]:m.state==="due"?["#fef9c3","#854d0e","due now"]:m.state==="overdue"?["#fee2e2","#991b1b","overdue"]:m.state==="past"?["#f1f5f9","#94a3b8","before arrival"]:["#f1f5f9","#64748b","upcoming"];
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span style="flex:1;font-size:12.5px;font-weight:600">'+m.label+'</span><span style="font-size:10.5px;color:#94a3b8;white-space:nowrap">'+fmtDMY(m.due)+'</span><span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:'+c[0]+';color:'+c[1]+';white-space:nowrap">'+c[2]+'</span></div>';
+  }).join("");
+  return '<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:10px">Puppy \u00b7 '+w+(w===1?" week":" weeks")+' old</div>'
+    +'<div class="g2">'+fld("Litter size (born)",d.litterBorn||"","dog.litterBorn","number","e.g. 6")+fld("Surviving",d.litterSurviving||"","dog.litterSurviving","number","e.g. 5")+'</div>'
+    +slct("Rearing",d.rearing||"","dog.rearing",[["With mum","With mum"],["Hand-reared","Hand-reared"],["Partly hand-reared","Partly hand-reared"]])
+    +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#94a3b8;margin:8px 0 2px">Age-based schedule</div>'+rows
+    +'<div style="font-size:10.5px;color:#94a3b8;margin-top:8px">From date of birth: Parazole worming at 2, 4, 6 and 8 weeks, first vaccination from 6 weeks. Ticks off automatically from entries on the Medical tab.</div></div>';
+}
+function pupWeightBanners(){
+  if(!isPup())return"";
+  var h='<div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;padding:11px 14px;margin-bottom:12px;font-size:12px;color:#1e40af"><b>\ud83d\udc36 Puppy</b> \u2014 weigh every 1\u20132 days rather than weekly. Weight loss in a young pup is urgent, not a trend.</div>';
+  var ws=(S.weights||[]).filter(function(x){return x.date&&x.weight;}).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");});
+  if(ws.length>=2){
+    var a=parseFloat((""+ws[0].weight).replace(/[^0-9.]/g,"")),b=parseFloat((""+ws[1].weight).replace(/[^0-9.]/g,""));
+    if(a&&b&&a<b)h+='<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:11px 14px;margin-bottom:12px;font-size:12px;color:#991b1b"><b>\u26a0 Weight has dropped</b> \u2014 '+b+' kg \u2192 '+a+' kg since the previous weigh-in. Flag to the vet today.</div>';
+  }
+  return h;
+}
+function pupAssessBanner(){
+  var w=dogAgeWeeks();
+  if(w===null||w>=12)return"";
+  return '<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:11px 14px;margin-bottom:12px;font-size:12px;color:#854d0e"><b>\ud83d\udc36 Too young for formal assessment</b> \u2014 '+w+(w===1?" week":" weeks")+' old. Scores and observations before about 12 weeks are indicative only; reassess nearer rehoming age.</div>';
+}
+function pupRehomeGate(){
+  var w=dogAgeWeeks();
+  if(w===null||w>=8)return"";
+  return '<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:11px 14px;margin-bottom:12px;font-size:12px;color:#991b1b"><b>\ud83d\udc36 Under 8 weeks</b> \u2014 cannot leave for rehoming before '+fmtDMY(addDaysStr(S.dog.dob,56))+', when this pup turns 8 weeks old.</div>';
+}
 function addPupFromMum(){
   if(!S._id){appAlert("Save this record first \u2014 pups link to the saved mum.");return;}
   var mumId=S._id,mumName=(S.dog&&S.dog.name)||"the mum";
@@ -2112,6 +2170,7 @@ function familyCardInner(fi){
   }
   if(fi.pups.length){
     h+='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#94a3b8;margin:'+(fi.mumId?'10px':'0')+' 0 5px">Pups \u00b7 '+fi.pups.length+'</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+fi.pups.map(function(r){return famChip(r);}).join("")+'</div>';
+    if(!isPup())h+='<div class="g2" style="margin-top:10px">'+fld("Litter size (born)",S.dog.litterBorn||"","dog.litterBorn","number","e.g. 6")+fld("Surviving",S.dog.litterSurviving||"","dog.litterSurviving","number","e.g. 5")+'</div>';
   }
   if(!fi.mumId){
     var canPup=!!S._id;
@@ -2634,7 +2693,7 @@ function contagiousAlertHtml(){
 function diseaseShortName(t){return(t||"").replace(/ \(.*$/,"");}
 
 function defaultState(){return{_id:null,tab:"dog",
-  dog:{name:"",breed:"",sex:"",age:"",colour:"",weight:"",microchip:"",intakeDate:"",intakeReason:"",assessor:"",refNo:"",photo:"",kennel:"",crossbreed:false,size:"",mumId:""},
+  dog:{name:"",breed:"",sex:"",age:"",colour:"",weight:"",microchip:"",intakeDate:"",intakeReason:"",assessor:"",refNo:"",photo:"",kennel:"",crossbreed:false,size:"",mumId:"",dob:"",litterBorn:"",litterSurviving:"",rearing:""},
   arrival:{demeanour:"",muzzle:"",lead:"",vet:"",notes:"",dogDog:"",catTolerance:"",equineHistory:"",smallMammalHistory:"",childHistory:"",biteHistory:""},
   days:[0,1,2,3,4].map(function(){return{date:"",demeanour:"",feeding:"",toileting:"",staffInt:"",incidents:"",notes:""}}),
   scores:{excitability:0,reactivity:0,fearAnxiety:0,sepAnx:0,training:0,misc:0},
@@ -3090,6 +3149,7 @@ function renderWeights(){
     while(ws<=today&&limit<52){var we=addDaysStr(ws,6);var entry=weights.find(function(w){return w.date>=ws&&w.date<=we;})||null;weeks.push({ws:ws,we:we,entry:entry,current:ws===weekStart(today)});ws=addDaysStr(ws,7);limit++;}
     var dueThisWeek=weeks.length>0&&!weeks[weeks.length-1].entry;
     var banner=dueThisWeek?'<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><div style="font-size:13px;font-weight:700;color:#854d0e">&#9888; Weekly weigh-in due</div><div style="font-size:12px;color:#92400e;margin-top:2px">No weight recorded this week</div></div><button class="btn btnp" onclick="document.getElementById(&quot;w-val&quot;).focus()">Log Weight Now</button></div>':"";
+    banner=pupWeightBanners()+banner;
     var recorded=weeks.filter(function(w){return w.entry;}).length;
     var tableRows=weeks.slice().reverse().map(function(w,i){
       var revWeeks=weeks.slice().reverse();var prevW=revWeeks[i+1]||null;
@@ -3452,12 +3512,12 @@ function renderRehoming(){
   var st=a.rehomingStatus||"";
   var stCol=/^cleared for/i.test(st)?"#16a34a":/conditions/i.test(st)?"#ca8a04":/not cleared|not fit/i.test(st)?"#dc2626":"#94a3b8";
   var banner=st?'<div style="display:inline-flex;align-items:center;gap:8px;background:'+(stCol==="#16a34a"?"#dcfce7":stCol==="#ca8a04"?"#fef9c3":stCol==="#dc2626"?"#fee2e2":"#f1f5f9")+';color:'+stCol+';border-radius:999px;padding:6px 14px;font-size:13px;font-weight:700;margin-bottom:12px"><span style="width:9px;height:9px;border-radius:99px;background:'+stCol+'"></span>'+esc(st)+'</div>':"";
+  banner=pupRehomeGate()+banner;
   var clearanceCard='<div class="card" style="margin-bottom:14px">'
     +'<h3 style="margin:0 0 12px;font-size:14.5px;font-weight:700">Clearance</h3>'
     +banner
     +'<div class="g2">'
     +slct("Rehoming status",st,"assessment.rehomingStatus",[["","-- not decided --"],["Cleared for rehoming","Cleared for rehoming"],["Cleared with conditions","Cleared with conditions"],["Not cleared \u2014 needs work","Not cleared \u2014 needs more time / work"],["Not fit for rehoming","Not fit for rehoming"],["Awaiting assessment","Awaiting assessment"]])
-    +slct("Cleared / decided by",a.rehomingBy||"","assessment.rehomingBy",USERS.filter(function(u){return u.role!=="staff";}).map(function(u){var rl=u.role==="admin"?"Admin":u.role==="director"?"Director of Operations":u.role==="manager"?"Manager":u.role==="supervisor"?"Supervisor":u.role==="coordinator"?"Rehoming Co-Ordinator":"Staff";return[u.name,u.name+" ("+rl+")"];}))
     +fld("Decision date",a.rehomingDate||"","assessment.rehomingDate","date")
     +'</div>'
     +(/conditions/i.test(st)?ta("Conditions",a.rehomingConditions||"","assessment.rehomingConditions","e.g. adult-only home, must be only pet, secure garden essential..."):"")
@@ -4507,13 +4567,14 @@ function page(){
     var _con=activeContagiousList(S.medical);if(_con&&_con.length){var _zoo=_con.some(function(x){return ZOONOTIC_DISEASES[x.type];});chips.push('<span title="'+esc(_con.map(function(x){return diseaseShortName(x.type);}).join(", "))+'" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:#fee2e2;color:#991b1b">&#129440; Infectious'+(_zoo?" \u00b7 zoonotic":"")+'</span>');}
     var _ea=eaCalc(S.ea);if(_ea.complete){chips.push('<span title="EA score '+_ea.score.toFixed(2)+' \u00b7 '+esc(_ea.mgmt)+'" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+_ea.col[0]+';color:'+_ea.col[1]+'">&#9888; EA '+esc(_ea.cat.replace("Category ","Cat "))+'</span>');}
     if(tl)chips.push('<span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:#dbeafe;color:#1e40af">Score '+total+'/24</span>');
+    if(isPup())chips.push('<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:#eff6ff;color:#1e40af">\ud83d\udc36 '+dogAgeWeeks()+' wks</span>');
     if(d.refNo)chips.push('<span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:#f1f5f9;color:#475569">Ref '+esc(d.refNo)+'</span>');
     var hero='<div class="card" style="margin-bottom:14px"><div style="display:flex;gap:13px;align-items:center">'+photoEl
       +'<div style="flex:1;min-width:0"><div style="font-size:19px;font-weight:800;line-height:1.1">'+esc(d.name||"Unnamed dog")+'</div>'+(meta?'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">'+esc(meta)+'</div>':'')+'</div>'+tlPill+'</div>'
       +(chips.length?'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:11px;padding-top:10px;border-top:0.5px solid var(--color-border-tertiary)">'+chips.join("")+'</div>':'')
       +'<div style="margin-top:11px;display:flex;align-items:center;gap:8px"><label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:8px;cursor:pointer;font-size:11px;color:var(--color-text-secondary)">&#128247; '+(d.photo?"Change photo":"Add photo")+'<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>'+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px" onclick="showRepositionPhoto()">&#10021; Reposition</button>':'')+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px;background:#fee2e2;color:#991b1b;border:none" onclick="removePhoto()">Remove</button>':'')+'</div></div>';
 
-    var identity='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Identity</div>'+'<div class="dog-fg">'+fld("Dog name",d.name,"dog.name","text","e.g. Bailey",'onblur="checkDuplicateName()" id="dog-name-input"')+fld("Reference no.",d.refNo,"dog.refNo","text","e.g. 023-MH-2026")+breedSlct(d.breed)+slct("Sex",d.sex,"dog.sex",[["Male","Male"],["Female","Female"],["Male (N)","Male (Neutered)"],["Female (S)","Female (Spayed)"],["Unknown","Unknown"]])+'</div>'+'<div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">&#9888; There&rsquo;s already an active dog with this name.</div>'+'<div class="f"><label class="lbl">Crossbreed</label><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0"><input type="checkbox" data-save="dog.crossbreed" '+(d.crossbreed?"checked":"")+' onchange="S.dog.crossbreed=this.checked;debouncedSave();renderMain()" style="width:18px;height:18px;cursor:pointer"><span style="font-size:13px">This dog is a crossbreed</span></label></div>'+(d.crossbreed?breedSlct(d.breed2,"dog.breed2","Crossed with"):'')+'<div class="dog-fg">'+slct("Age (approx.)",d.age,"dog.age",ageOptions(d.age))+slct("Size",d.size,"dog.size",[["","-- select --"],["Small (under 10kg)","Small (under 10kg)"],["Medium (10-25kg)","Medium (10-25kg)"],["Large (25-40kg)","Large (25-40kg)"],["XL (over 40kg)","XL (over 40kg)"]])+slct("Colour / markings",d.colour,"dog.colour",[["","-- select --"],["Black","Black"],["White","White"],["Cream","Cream"],["Golden","Golden"],["Fawn","Fawn"],["Tan","Tan"],["Red / Chestnut","Red / Chestnut"],["Brown / Chocolate","Brown / Chocolate"],["Blue / Grey","Blue / Grey"],["Sable","Sable"],["Black and White","Black and White"],["Black and Tan","Black and Tan"],["Brown and White","Brown and White"],["Tri-colour","Tri-colour"],["Brindle","Brindle"],["Merle","Merle"],["Other","Other"]])+wfld(d.weight)+fld("Microchip no.",d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')+'</div>'+'<div id="chip-info" style="margin:0 0 4px;font-size:11px">'+chipInfoHtml(d.microchip)+'</div></div>';
+    var identity='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Identity</div>'+'<div class="dog-fg">'+fld("Dog name",d.name,"dog.name","text","e.g. Bailey",'onblur="checkDuplicateName()" id="dog-name-input"')+fld("Reference no.",d.refNo,"dog.refNo","text","e.g. 023-MH-2026")+breedSlct(d.breed)+slct("Sex",d.sex,"dog.sex",[["Male","Male"],["Female","Female"],["Male (N)","Male (Neutered)"],["Female (S)","Female (Spayed)"],["Unknown","Unknown"]])+'</div>'+'<div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">&#9888; There&rsquo;s already an active dog with this name.</div>'+'<div class="f"><label class="lbl">Crossbreed</label><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0"><input type="checkbox" data-save="dog.crossbreed" '+(d.crossbreed?"checked":"")+' onchange="S.dog.crossbreed=this.checked;debouncedSave();renderMain()" style="width:18px;height:18px;cursor:pointer"><span style="font-size:13px">This dog is a crossbreed</span></label></div>'+(d.crossbreed?breedSlct(d.breed2,"dog.breed2","Crossed with"):'')+'<div class="dog-fg">'+fld("Date of birth (if known)",d.dob||"","dog.dob","date")+slct("Age (approx.)",d.age,"dog.age",ageOptions(d.age))+slct("Size",d.size,"dog.size",[["","-- select --"],["Small (under 10kg)","Small (under 10kg)"],["Medium (10-25kg)","Medium (10-25kg)"],["Large (25-40kg)","Large (25-40kg)"],["XL (over 40kg)","XL (over 40kg)"]])+slct("Colour / markings",d.colour,"dog.colour",[["","-- select --"],["Black","Black"],["White","White"],["Cream","Cream"],["Golden","Golden"],["Fawn","Fawn"],["Tan","Tan"],["Red / Chestnut","Red / Chestnut"],["Brown / Chocolate","Brown / Chocolate"],["Blue / Grey","Blue / Grey"],["Sable","Sable"],["Black and White","Black and White"],["Black and Tan","Black and Tan"],["Brown and White","Brown and White"],["Tri-colour","Tri-colour"],["Brindle","Brindle"],["Merle","Merle"],["Other","Other"]])+wfld(d.weight)+fld("Microchip no.",d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')+'</div>'+'<div id="chip-info" style="margin:0 0 4px;font-size:11px">'+chipInfoHtml(d.microchip)+'</div></div>';
 
     var intake='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Intake</div>'+'<div class="dog-fg">'+slct("Kennel / Pod",d.kennel,"dog.kennel",[["",'-- not assigned --'],["Kennel 1","Kennel 1"],["Kennel 2","Kennel 2"],["Kennel 3","Kennel 3"],["Kennel 4","Kennel 4"],["Kennel 5","Kennel 5"],["Kennel 6","Kennel 6"],["Pod 1","Pod 1"],["Pod 2","Pod 2"],["Pod 3","Pod 3"],["Pod 4","Pod 4"]])+fld("Assessor",d.assessor,"dog.assessor","text","e.g. Shane")+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()+slct("Reason for intake",d.intakeReason,"dog.intakeReason",[["Stray","Stray"],["Owner surrender","Owner surrender"],["Cruelty case","Cruelty case"],["Transfer","Transfer from another centre"],["Other","Other"]])+'</div></div>';
 
@@ -4545,7 +4606,7 @@ function page(){
     }else{
       famFold=dogFold("family","\ud83d\udc3e","Family","Mums, pups and litters","Not linked \u2014 tap to link","plain",familyCardInner(_fi));
     }
-    return hero+identity+intake+famCard+restrictedBreedCardHtml()+admDivider+intakeChecklistHtml()+isoFold+wnFolds+famFold+'<div class="brow"><button class="btn" onclick="openKennelCard()" style="white-space:nowrap">&#128203; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
+    return hero+identity+intake+famCard+pupCardHtml()+restrictedBreedCardHtml()+admDivider+intakeChecklistHtml()+isoFold+wnFolds+famFold+'<div class="brow"><button class="btn" onclick="openKennelCard()" style="white-space:nowrap">&#128203; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
   }
 
   if(t==="picture") return renderPicture();
@@ -4576,7 +4637,7 @@ function page(){
   }
 
   if(t==="scoring"){
-    var staleBanner=scoreStaleHtml();
+    var staleBanner=pupAssessBanner()+scoreStaleHtml();
     var sevSevere=CATS.filter(function(c){return S.scores[c.k]===4;});
     var sevMod=CATS.filter(function(c){return S.scores[c.k]===3;});
     var meta=subMeta(S);
@@ -4849,7 +4910,7 @@ function page(){
       +'<div class="brow"><button class="btn" data-go="files">&larr; Back</button><button class="btn" onclick="printDoc(\'Assessment Report\')">&#128424; PDF / Print</button></div>';
   }
 
-  if(t==="assessment")return renderAssessment();
+  if(t==="assessment")return pupAssessBanner()+renderAssessment();
   if(t==="medical")return renderMedical();
   if(t==="weights")return renderWeights();
   if(t==="feeding")return renderFeeding();
