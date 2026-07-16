@@ -412,11 +412,11 @@ var TABS=[
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
 var CHANGELOG=[
+  {version:"3.57",date:"2026-07-16",note:"Isolation now understands puppies. A pup\u0027s isolation runs until their first vaccination \u2014 not a fixed five days \u2014 so the isolation chip, the fold on the Dog tab, the popup and the Breakdown all show \u0027until 1st vax\u0027 with a running day count, the end date appears as soon as a vaccination is booked on the Medical tab, and a pup can\u0027t drift onto the Ready to Go board until that first vaccination is actually given (never earlier than the standard five days either). The 5-Day Report also speaks puppy when it needs to: on a pup\u0027s record the demeanour list gains bright-and-feeding, sleepy-but-rousable and floppy/weak \u2014 urgent, the feeding list gains suckling, bottle-fed and weaning options, and each day shows whether the pup was weighed that day with a one-tap jump to log it. Also fixes the Isolation period line showing \u0027Day 3 of undefined\u0027."},
   {version:"3.56",date:"2026-07-16",note:"Puppy season, part two \u2014 plus one tidy-up. Give a dog a date of birth on the Dog tab and the record adapts: a Puppy card appears showing age in weeks, litter size (born and surviving), how the pups are being reared, and an age-based schedule \u2014 Parazole worming at 2, 4, 6 and 8 weeks and first vaccination from 6 weeks \u2014 that ticks itself off from entries on the Medical tab and flags anything due or overdue. Pups also get a weigh-every-1\u20132-days reminder on the Weights tab with a red alert if the latest weight has dropped, a too-young-to-assess note on the Assessment and Scoring tabs under 12 weeks, and a clear line on the Rehoming tab that a pup can\u0027t leave before 8 weeks \u2014 with the exact date it becomes possible. A mum\u0027s Family card gains the litter size fields too. And the tidy-up: the Clearance card loses its Cleared / decided by dropdown \u2014 the decision and its date are enough. Under the hood, a full audit cleared out a leftover exercise quick-log overlay that lost its opener when the Exercise tab was parked, plus two ghost references and some duplicated date helpers \u2014 about 7KB lighter, nothing visible changes."},
   {version:"3.55",date:"2026-07-15",note:"Two additions for litter season. Dogs can now be linked as a family: on a pup\u0027s record, use Link to mum on the Dog tab (in the Family line under Status &amp; admin) to point at the mum\u0027s record \u2014 once linked, the Dog tab shows a Family card with the mum and any littermates as tap-to-open chips, and the mum\u0027s own record lists all her pups the same way, with a + Add pup button that starts a new record already linked and carrying over her breed, kennel and intake date. And Parazole (fenbendazole) \u2014 the standard litter wormer \u2014 has been added to the parasite Treatment list."},
   {version:"3.54",date:"2026-07-15",note:"Three tidy-ups. The Exercise tab has been removed for now (it was waiting on the laptop reaching the unit) \u2014 any existing exercise history is kept and still shows on the Health Board and reports, and the tab can come back later. The Feeding tab loses its per-meal quick log for the same reason \u2014 the feeding plan, suggested grams, today\u0027s total and history all stay. And the 5-Day Report now fills in its own dates: enter the intake date and Day 1 through Day 5 are set automatically starting the following day \u2014 you can still change any date by hand."},
   {version:"3.53",date:"2026-07-15",note:"The Dog tab has been tidied. Identity and Intake now sit straight under the hero \u2014 no more scrolling past admin to reach the dog\u0027s details. Everything one-time or dormant lives below a Status &amp; admin divider as single fold-out lines: the isolation period shows its day count on the line, warnings show the first warning and a count (amber, hard to miss), care notices likewise, and when there are none, one quiet line offers tap-to-add. The new-arrival checklist stays fully open while incomplete, sits in the admin section, and disappears once done \u2014 exactly as before. A clean dog\u0027s page is now roughly half the height. Nothing removed, nothing moved in the data \u2014 just reordered and folded."},
-  {version:"3.52",date:"2026-07-14",note:"The Rehoming tab now has a proper Clearance decision at the top: Cleared for rehoming, Cleared with conditions (with a box for what the conditions are), Not cleared \u2014 needs more time, Not fit for rehoming, or Awaiting assessment \u2014 along with who made the call and when. The status shows as a colour-coded banner on the tab and appears in the Breakdown, so one glance tells you where a dog stands. Suitability fields below are unchanged."},
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1150,7 +1150,7 @@ function renderReadyToGo(){
   var list=records.filter(function(r){
     var st=r.state||{};var f=st.fin||{};var o=f.outcome||"";
     if(DEP.indexOf(o)>=0)return false;
-    var ii=isolationInfo(r.intakeDate,o,isoExtraDays(r.state&&r.state.dog));
+    var ii=isolationInfo(r.intakeDate,o,isoExtraDays(r.state&&r.state.dog),pupIsoVax(r.state&&r.state.dog,r.state&&r.state.medical));
     var isoDone=ii&&ii.state==="done";
     var clear=activeContagiousList(st.medical||null).length===0;
     var assessed=(r.score||0)>0;
@@ -1860,7 +1860,7 @@ function openKennelCard(){
   if(!d.name){appAlert("Add the dog's name first.");return;}
   var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
   var tl=total?effLight(total,S.scores):null;
-  var info=d.intakeDate?isolationInfo(d.intakeDate,(S.fin&&S.fin.outcome)||"",isoExtraDays(d)):{state:"none"};
+  var info=d.intakeDate?isolationInfo(d.intakeDate,(S.fin&&S.fin.outcome)||"",isoExtraDays(d),pupIsoVax(d,S.medical)):{state:"none"};
   var isoLabel=info.state==="done"?"Isolation complete":(info.state==="none"?"":(info.day<=0?"Arrival day":isoDayLabel(info.day,info.total||5)));
   var walkRule="";
   if(tl){var wl=WALK_LEGEND.filter(function(w){return w.k===tl.l;})[0];walkRule=wl?wl.rule:"";}
@@ -2045,6 +2045,22 @@ function pupAssessBanner(){
   var w=dogAgeWeeks();
   if(w===null||w>=12)return"";
   return '<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:11px 14px;margin-bottom:12px;font-size:12px;color:#854d0e"><b>\ud83d\udc36 Too young for formal assessment</b> \u2014 '+w+(w===1?" week":" weeks")+' old. Scores and observations before about 12 weeks are indicative only; reassess nearer rehoming age.</div>';
+}
+function pupIsoVax(d,medical){
+  // Pups isolate until first vaccination. Returns null unless this dog is a
+  // pup (dob set, under 26 weeks); else {given: earliest vax already given,
+  // next: earliest scheduled future vax}.
+  if(!d||!d.dob)return null;
+  var t=new Date(d.dob).getTime();if(isNaN(t))return null;
+  var w=Math.floor((Date.now()-t)/6048e5);if(w<0||w>=26)return null;
+  var today=new Date().toISOString().slice(0,10);
+  var given=null,next=null;
+  ((medical&&medical.vaccinations)||[]).forEach(function(v){
+    if(!v.date)return;
+    if(v.date<=today){if(!given||v.date<given)given=v.date;}
+    else{if(!next||v.date<next)next=v.date;}
+  });
+  return{given:given,next:next};
 }
 function pupRehomeGate(){
   var w=dogAgeWeeks();
@@ -2253,7 +2269,7 @@ function isoClearDate(intakeDate,extra){return intakeDate?addDaysStr(intakeDate,
 function isoExtraDays(dog){return ((dog&&dog.isoExt)||[]).reduce(function(a,e){return a+(parseInt(e.days)||0);},0);}
 function isoDayLabel(day,total){if(day==null)return "";if(day<=0)return "Arrival day";return "Day "+day+" of "+total;}
 function isoDayShort(day,total){if(day==null)return "";if(day<=0)return "Arrival";return "Day "+day+"/"+total;}
-function isolationInfo(intakeDate,outcome,extra){var TOT=5+(extra||0);
+function isolationInfo(intakeDate,outcome,extra,pupVax){var TOT=5+(extra||0);
   var o=outcome||"";
   // Only an empty outcome or "Active — in isolation" means the dog is still in isolation.
   // Any other outcome (Moved to Kennels, Finished Isolation, Rehomed, etc.) = isolation over.
@@ -2262,6 +2278,18 @@ function isolationInfo(intakeDate,outcome,extra){var TOT=5+(extra||0);
   if(!intakeDate)return{state:"none",day:null,total:TOT};
   var day=daysInIsolation(intakeDate);
   var clears=isoClearDate(intakeDate,extra);
+  if(pupVax){
+    // Pups stay in isolation until their first vaccination (and never less
+    // than the standard period). No vax yet = open-ended, never auto-clears.
+    var today=new Date().toISOString().slice(0,10);
+    if(pupVax.given){
+      var eff=pupVax.given>clears?pupVax.given:clears;
+      if(today>eff)return{state:"done",day:day,clears:eff,total:TOT,pup:true};
+      if(today===eff)return{state:"final",day:day,clears:eff,total:TOT,pup:true};
+      return{state:"active",day:day,clears:eff,total:TOT,pup:true};
+    }
+    return{state:"active",day:day,clears:pupVax.next||"",total:TOT,pup:true,awaitVax:true};
+  }
   if(day>TOT)return{state:"done",day:day,clears:clears,total:TOT};
   if(day===TOT)return{state:"final",day:day,clears:clears,total:TOT};
   return{state:"active",day:day,clears:clears,total:TOT};
@@ -2275,7 +2303,7 @@ function isoTheme(state){
 }
 window._isoShown=window._isoShown||{};
 function showIsolationOverlay(){
-  var dog=S.dog||{};var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome,isoExtraDays(dog));
+  var dog=S.dog||{};var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome,isoExtraDays(dog),pupIsoVax(dog,S.medical));
   if(info.state==="none"){appAlert("No arrival date recorded for this dog yet.");return;}
   var t=isoTheme(info.state);
   var ov=document.getElementById("iso-overlay");
@@ -2286,14 +2314,15 @@ function showIsolationOverlay(){
     bodyHtml='<div style="font-size:13px;color:#475569;line-height:1.5">'+name+' has <strong>completed the 5-day isolation period</strong>'+((info.outcome&&info.outcome!=="Finished Isolation")?' &mdash; current status: <strong>'+esc(info.outcome)+'</strong>.':' and has been cleared.')+'</div>';
   }else{
     var pct=Math.min(100,Math.round((info.day/5)*100));
-    var line=info.state==="overdue"?(name+' is <strong>overdue</strong> — Day '+info.day+', past the 5-day window. Review for clearance.'):
+    var line=info.awaitVax?(name+' is in isolation <strong>until their first vaccination</strong> — day '+info.day+'.'+(info.clears?' Next vaccination is scheduled for <strong>'+fmtDMY(info.clears)+'</strong>.':' No vaccination scheduled yet.')):
+      info.state==="overdue"?(name+' is <strong>overdue</strong> — Day '+info.day+', past the 5-day window. Review for clearance.'):
       info.state==="final"?(name+' is on <strong>Day '+info.day+' of '+(info.total||5)+'</strong> — the final day. Isolation ends today.'):
       (info.day<=0?(name+' <strong>arrived today</strong> — the 5-day isolation begins tomorrow.'):(name+' is in isolation — <strong>Day '+info.day+' of '+(info.total||5)+'</strong>.'));
     bodyHtml='<div style="font-size:13px;color:#475569;line-height:1.5;margin-bottom:14px">'+line+'</div>'
-      +'<div style="background:#e2e8f0;border-radius:20px;height:8px;overflow:hidden;margin-bottom:14px"><div style="background:'+t[1]+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>'
+      +(info.awaitVax?'':'<div style="background:#e2e8f0;border-radius:20px;height:8px;overflow:hidden;margin-bottom:14px"><div style="background:'+t[1]+';width:'+pct+'%;height:100%;border-radius:20px"></div></div>')
       +'<div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b">'
       +'<div><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;color:#94a3b8;margin-bottom:2px">Arrived</div><strong style="color:#0f172a">'+fmtDMY(dog.intakeDate)+'</strong></div>'
-      +'<div style="text-align:right"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;color:#94a3b8;margin-bottom:2px">Isolation ends</div><strong style="color:#0f172a">'+fmtDMY(info.clears)+'</strong></div>'
+      +'<div style="text-align:right"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;color:#94a3b8;margin-bottom:2px">Isolation ends</div><strong style="color:#0f172a">'+(info.awaitVax?(info.clears?fmtDMY(info.clears)+' (vax booked)':'At 1st vaccination'):fmtDMY(info.clears))+'</strong></div>'
       +'</div>'+(dog.kennel?'<div style="margin-top:12px;font-size:12px;color:#64748b">Kennel <strong style="color:#0f172a">'+esc(dog.kennel)+'</strong></div>':'');
   }
   ov.innerHTML='<div class="med-modal" style="border-top:5px solid '+t[1]+'">'
@@ -2336,7 +2365,7 @@ function showWalkLegend(level){
 function hideWalkLegend(){var ov=document.getElementById("walk-overlay");if(ov)ov.classList.remove("show");}
 function maybeAutoIsolationOverlay(){
   var dog=S.dog||{};if(!dog.intakeDate)return;
-  var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome,isoExtraDays(dog));
+  var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome,isoExtraDays(dog),pupIsoVax(dog,S.medical));
   if(info.state==="done"||info.state==="none")return;
   var key=S._id||dog.name||"unsaved";
   if(window._isoShown[key])return;
@@ -2347,10 +2376,10 @@ function updateIsoChip(){
   var chip=document.getElementById("iso-chip");if(!chip)return;
   var dog=S.dog||{};
   if(!dog.intakeDate){chip.style.display="none";return;}
-  var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome,isoExtraDays(dog));
+  var info=isolationInfo(dog.intakeDate,S.fin&&S.fin.outcome,isoExtraDays(dog),pupIsoVax(dog,S.medical));
   if(info.state==="none"){chip.style.display="none";return;}
   var t=isoTheme(info.state);
-  var txt=info.state==="done"?(t[4]+" Cleared"):(t[4]+" "+isoDayShort(info.day,info.total||5));
+  var txt=info.state==="done"?(t[4]+" Cleared"):(info.awaitVax?(t[4]+" Until 1st vax"):(t[4]+" "+isoDayShort(info.day,info.total||5)));
   chip.innerHTML=txt;
   chip.style.display="inline-flex";
   chip.style.background=t[0];chip.style.color=t[2];chip.style.borderColor=t[1];
@@ -4462,14 +4491,14 @@ function page(){
   if(t==="ea")return page_ea();
 
   if(t==="dog"){
-    var ii=d.intakeDate?isolationInfo(d.intakeDate,(f.outcome||""),isoExtraDays(d)):null;
+    var ii=d.intakeDate?isolationInfo(d.intakeDate,(f.outcome||""),isoExtraDays(d),pupIsoVax(d,S.medical)):null;
     var meta=[d.breed,d.sex,d.age,d.kennel].filter(Boolean).join(" \u00b7 ");
     var photoEl=d.photo
       ? '<img src="'+d.photo+'" alt="'+esc(d.name||'dog')+'" onclick="showPhotoLightbox(S.dog.photo)" style="width:72px;height:72px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';border-radius:16px;box-shadow:0 0 0 1px rgba(19,22,27,.09),0 2px 6px -2px rgba(19,22,27,.12);cursor:zoom-in;flex-shrink:0">'
       : '<div style="width:72px;height:72px;border-radius:16px;background:linear-gradient(135deg,#fbfdf4,#eef7d8);box-shadow:0 0 0 1px rgba(19,22,27,.09),0 2px 6px -2px rgba(19,22,27,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" style="width:30px;height:30px;opacity:.45" fill="#8fae3f"><ellipse cx="8.5" cy="8" rx="1.8" ry="2.4"/><ellipse cx="15.5" cy="8" rx="1.8" ry="2.4"/><ellipse cx="5" cy="11.5" rx="1.6" ry="2.1"/><ellipse cx="19" cy="11.5" rx="1.6" ry="2.1"/><path d="M12 11c-2.8 0-5 2.4-5 4.7 0 1.6 1.2 2.8 2.8 2.8.8 0 1.5-.3 2.2-.3s1.4.3 2.2.3c1.6 0 2.8-1.2 2.8-2.8C17 13.4 14.8 11 12 11z"/></svg></div>';
     var tlPill=tl?'<span onclick="showWalkLegend(\''+tl.l+'\')" title="Who can walk this dog?" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;background:'+tl.bg+';color:'+tl.tc+';flex-shrink:0;cursor:pointer">'+tl.l+'<span style="display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;border:1.3px solid currentColor;font-size:8px;font-weight:700;font-style:italic;line-height:1;opacity:0.85">i</span></span>':'';
     var chips=[];
-    if(ii){var icl=ii.state==="done"?"\u2713 Isolation complete":(ii.day<=0?"\ud83d\udd12 Arrived today":"\ud83d\udd12 Isolation \u00b7 "+isoDayLabel(ii.day,ii.total||5));var ibg=ii.state==="done"?"#dcfce7":"#fef3c7",itc=ii.state==="done"?"#166534":"#92400e";chips.push('<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+ibg+';color:'+itc+'">'+icl+'</span>');}
+    if(ii){var icl=ii.state==="done"?"\u2713 Isolation complete":(ii.awaitVax?"\ud83d\udd12 Isolation \u00b7 until 1st vax \u00b7 day "+ii.day:(ii.day<=0?"\ud83d\udd12 Arrived today":"\ud83d\udd12 Isolation \u00b7 "+isoDayLabel(ii.day,ii.total||5)));var ibg=ii.state==="done"?"#dcfce7":"#fef3c7",itc=ii.state==="done"?"#166534":"#92400e";chips.push('<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+ibg+';color:'+itc+'">'+icl+'</span>');}
     var _con=activeContagiousList(S.medical);if(_con&&_con.length){var _zoo=_con.some(function(x){return ZOONOTIC_DISEASES[x.type];});chips.push('<span title="'+esc(_con.map(function(x){return diseaseShortName(x.type);}).join(", "))+'" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:#fee2e2;color:#991b1b">&#129440; Infectious'+(_zoo?" \u00b7 zoonotic":"")+'</span>');}
     var _ea=eaCalc(S.ea);if(_ea.complete){chips.push('<span title="EA score '+_ea.score.toFixed(2)+' \u00b7 '+esc(_ea.mgmt)+'" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+_ea.col[0]+';color:'+_ea.col[1]+'">&#9888; EA '+esc(_ea.cat.replace("Category ","Cat "))+'</span>');}
     if(tl)chips.push('<span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:#dbeafe;color:#1e40af">Score '+total+'/24</span>');
@@ -4485,9 +4514,9 @@ function page(){
     var intake='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Intake</div>'+'<div class="dog-fg">'+slct("Kennel / Pod",d.kennel,"dog.kennel",[["",'-- not assigned --'],["Kennel 1","Kennel 1"],["Kennel 2","Kennel 2"],["Kennel 3","Kennel 3"],["Kennel 4","Kennel 4"],["Kennel 5","Kennel 5"],["Kennel 6","Kennel 6"],["Pod 1","Pod 1"],["Pod 2","Pod 2"],["Pod 3","Pod 3"],["Pod 4","Pod 4"]])+fld("Assessor",d.assessor,"dog.assessor","text","e.g. Shane")+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()+slct("Reason for intake",d.intakeReason,"dog.intakeReason",[["Stray","Stray"],["Owner surrender","Owner surrender"],["Cruelty case","Cruelty case"],["Transfer","Transfer from another centre"],["Other","Other"]])+'</div></div>';
 
     var admDivider='<div style="font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin:18px 0 10px;display:flex;align-items:center;gap:10px">Status &amp; admin<span style="flex:1;height:1px;background:#e2e8f0"></span></div>';
-    var isoStatus=ii?(ii.state==="done"?"Complete":(ii.day<=0?"Arrived today":"Day "+ii.day+" of "+ii.tot)):"No intake date";
+    var isoStatus=ii?(ii.state==="done"?"Complete":(ii.awaitVax?"Until 1st vax \u00b7 day "+ii.day:(ii.day<=0?"Arrived today":"Day "+ii.day+" of "+ii.total))):"No intake date";
     var isoTone=ii&&ii.state==="done"?"done":"plain";
-    var isoFold=dogFold("iso","\ud83d\udd52","Isolation period","",isoStatus,isoTone,isoPeriodCardHtml());
+    var isoFold=dogFold("iso","\ud83d\udd52","Isolation period","",isoStatus,isoTone,(ii&&ii.awaitVax?'<div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:11.5px;color:#1e40af"><b>\ud83d\udc36 Puppy</b> \u2014 isolation runs until the first vaccination is logged on the Medical tab'+(ii.clears?', scheduled '+fmtDMY(ii.clears):'; none scheduled yet')+'.</div>':"")+isoPeriodCardHtml());
     var ws=S.warnings||[],ns=S.careNotices||[];
     var wnFolds="";
     if(ws.length||ns.length){
@@ -4533,7 +4562,18 @@ function page(){
       return '<button onclick="setDayView('+idx+')" style="flex:1;min-width:0;border:1.5px solid '+bd+';background:'+bg+';color:'+fg+';border-radius:10px;padding:7px 3px;cursor:pointer;font-family:inherit;text-align:center"><div style="font-size:12px;font-weight:700">Day '+(idx+1)+'</div><div style="font-size:8.5px;margin-top:2px;color:'+sc2+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+dayPillSub(idx)+'</div></button>';
     }).join("");
     var i=dv,dy=S.days[i];
-    var form=dfld("Date",dy.date,i,"date","date")+dslct("General demeanour",dy.demeanour,i,"demeanour",[["Settled","Settled — calm & relaxed"],["Bright","Bright & alert"],["Playful","Playful — engaging"],["Subdued","Subdued — quiet / flat"],["Shut down","Shut down — frozen / non-responsive"],["Anxious","Anxious — unsettled"],["Fearful","Fearful — frightened"],["Hyperactive","Hyperactive — unable to settle"],["Reactive","Reactive — responding strongly"],["Aggressive","Aggressive — threatening"],["Lethargic","Lethargic — low energy / unwell"],["Improving","Improving — calmer than yesterday"],["Deteriorating","Deteriorating — more stressed"]])+dslct("Feeding",dy.feeding,i,"feeding",[["Ate well","Ate well — full portion"],["Ate eagerly","Ate eagerly — very keen"],["Ate partially","Ate partially"],["Slow to eat","Slow / reluctant to eat"],["Ate but anxious","Ate but anxious"],["Guarded food","Guarded food"],["Vomited","Vomited after eating"],["Refused food","Refused food"],["Not fed yet","Not fed yet"]])+dslct("Toileting",dy.toileting,i,"toileting",[["Normal","Normal"],["Loose stools","Loose stools — possible stress"],["Diarrhoea","Diarrhoea"],["Blood present","Blood in stool / urine"],["Constipated","Constipated / straining"],["Not toileting","Not toileting — concern"],["Kennel only","Toileting in kennel only"],["Outdoors","Toileting outdoors"]])+dslct("Staff interaction",dy.staffInt,i,"staffInt",[["Friendly","Friendly — seeking contact"],["Affectionate","Affectionate — leans in"],["Playful","Playful with staff"],["Neutral","Neutral — accepts handling"],["Wary","Wary — watchful"],["Avoidant","Avoidant — withdraws"],["Fearful","Fearful — cowers / hides"],["Nervous improving","Nervous but improving"],["Reactive","Reactive toward staff"],["Aggressive","Aggressive toward staff"]])+dslct("Incidents today?",dy.incidents,i,"incidents",[["None","None — no incidents"],["Mouthing","Mouthing / nipping — no injury"],["Minor — growling","Minor — growling or warning"],["Resource guarding","Resource guarding incident"],["Barrier reactivity","Barrier reactivity at kennel"],["Moderate — snapping","Moderate — snapping or lunging"],["Escape attempt","Escape attempt / scaling"],["Serious — bite","Serious — bite or contact"],["Injury / self-harm","Self-harm or injury observed"]])+dta("Daily notes",dy.notes,i,"notes","Describe behaviours, changes, anything notable...");
+    var _pup=isPup();
+    var _demPre=_pup?[["Bright & feeding","Bright & feeding — normal pup"],["Sleepy but rousable","Sleepy but rousable — normal for a young pup"],["Floppy / weak","Floppy / weak — URGENT, vet today"]]:[];
+    var _feedPre=_pup?[["Suckling well","Suckling well — with mum"],["Suckling poorly","Suckling poorly — flag to vet"],["Bottle-fed well","Bottle-fed — took full feed"],["Bottle-fed poorly","Bottle-fed — reluctant / partial"],["Weaning — soft food","Weaning — eating soft food"]]:[];
+    var _pupWeighNote="";
+    if(_pup){
+      var _dd=dy.date||"";
+      var _weighed=_dd&&(S.weights||[]).some(function(w){return w.date===_dd;});
+      _pupWeighNote=_dd?(_weighed
+        ?'<div style="background:#dcfce7;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:11.5px;color:#166534">\u2713 Weighed this day</div>'
+        :'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fef9c3;border-radius:8px;padding:8px 12px;margin-bottom:10px"><span style="font-size:11.5px;color:#854d0e">\ud83d\udc36 No weight logged for this day \u2014 pups are weighed daily</span><button class="btn" data-go="weights" style="font-size:11px;padding:5px 11px;white-space:nowrap">Log weight</button></div>'):"";
+    }
+    var form=dfld("Date",dy.date,i,"date","date")+_pupWeighNote+dslct("General demeanour",dy.demeanour,i,"demeanour",_demPre.concat([["Settled","Settled — calm & relaxed"],["Bright","Bright & alert"],["Playful","Playful — engaging"],["Subdued","Subdued — quiet / flat"],["Shut down","Shut down — frozen / non-responsive"],["Anxious","Anxious — unsettled"],["Fearful","Fearful — frightened"],["Hyperactive","Hyperactive — unable to settle"],["Reactive","Reactive — responding strongly"],["Aggressive","Aggressive — threatening"],["Lethargic","Lethargic — low energy / unwell"],["Improving","Improving — calmer than yesterday"],["Deteriorating","Deteriorating — more stressed"]]))+dslct("Feeding",dy.feeding,i,"feeding",_feedPre.concat([["Ate well","Ate well — full portion"],["Ate eagerly","Ate eagerly — very keen"],["Ate partially","Ate partially"],["Slow to eat","Slow / reluctant to eat"],["Ate but anxious","Ate but anxious"],["Guarded food","Guarded food"],["Vomited","Vomited after eating"],["Refused food","Refused food"],["Not fed yet","Not fed yet"]]))+dslct("Toileting",dy.toileting,i,"toileting",[["Normal","Normal"],["Loose stools","Loose stools — possible stress"],["Diarrhoea","Diarrhoea"],["Blood present","Blood in stool / urine"],["Constipated","Constipated / straining"],["Not toileting","Not toileting — concern"],["Kennel only","Toileting in kennel only"],["Outdoors","Toileting outdoors"]])+dslct("Staff interaction",dy.staffInt,i,"staffInt",[["Friendly","Friendly — seeking contact"],["Affectionate","Affectionate — leans in"],["Playful","Playful with staff"],["Neutral","Neutral — accepts handling"],["Wary","Wary — watchful"],["Avoidant","Avoidant — withdraws"],["Fearful","Fearful — cowers / hides"],["Nervous improving","Nervous but improving"],["Reactive","Reactive toward staff"],["Aggressive","Aggressive toward staff"]])+dslct("Incidents today?",dy.incidents,i,"incidents",[["None","None — no incidents"],["Mouthing","Mouthing / nipping — no injury"],["Minor — growling","Minor — growling or warning"],["Resource guarding","Resource guarding incident"],["Barrier reactivity","Barrier reactivity at kennel"],["Moderate — snapping","Moderate — snapping or lunging"],["Escape attempt","Escape attempt / scaling"],["Serious — bite","Serious — bite or contact"],["Injury / self-harm","Self-harm or injury observed"]])+dta("Daily notes",dy.notes,i,"notes","Describe behaviours, changes, anything notable...");
     var prevBtn=i>0?'<button class="btn" onclick="setDayView('+(i-1)+')">&larr; Day '+i+'</button>':'<button class="btn" data-go="arrival">&larr; Arrival</button>';
     var nextBtn=i<4?'<button class="btn btnp" onclick="setDayView('+(i+1)+')">Day '+(i+2)+' &rarr;</button>':'<button class="btn btnp" data-go="assessment">Next: assessment &rarr;</button>';
     return '<h2>5-Day Isolation Report</h2><div class="sub">Daily observations across the isolation period. Tap a day to switch.</div>'
@@ -4620,14 +4660,14 @@ function page(){
     var _ea=eaCalc(S.ea||{});
     var _ch=chStatus((S.medical||{}).currentStatus);
     var _ext=isoExtraDays(S.dog);
-    var _iso=isolationInfo((S.dog||{}).intakeDate,f.outcome,_ext);
+    var _iso=isolationInfo((S.dog||{}).intakeDate,f.outcome,_ext,pupIsoVax(S.dog,S.medical));
     var _warns=(S.warnings||[]);var _crit=_warns.filter(function(w){return w.level==="Critical";}).length;
     function odot(c){return '<span style="width:9px;height:9px;border-radius:50%;flex-shrink:0;background:'+c+'"></span>';}
     function ctile(l,v){return '<div class="oc-ctile"><div class="oc-cl">'+l+'</div><div class="oc-cv">'+v+'</div></div>';}
     var tlT=_tl?ctile("Traffic light",odot(_tl.dot)+_tl.l+' &middot; '+_tot):ctile("Traffic light",'<span style="color:#94a3b8;font-weight:600">Not scored</span>');
     var eaT=(_ea&&_ea.complete)?ctile("Enhanced assessment",'<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:'+_ea.col[0]+';color:'+_ea.col[1]+'">'+esc(_ea.cat.replace("Category ","Cat "))+'</span>'):ctile("Enhanced assessment",'<span style="color:#94a3b8;font-weight:600">'+((S.ea&&S.ea.needed==="Yes")?"In progress":"Not flagged")+'</span>');
     var chT=_ch?ctile("Current health",odot(_ch.dot)+_ch.l):ctile("Current health",'<span style="color:#94a3b8;font-weight:600">Not set</span>');
-    var isoLabel=(_iso.state==="active"||_iso.state==="final")?("Day "+_iso.day+" / "+_iso.total):(_iso.state==="done"?"Complete":"\u2014");
+    var isoLabel=_iso.awaitVax?("Until 1st vax \u00b7 day "+_iso.day):((_iso.state==="active"||_iso.state==="final")?("Day "+_iso.day+" / "+_iso.total):(_iso.state==="done"?"Complete":"\u2014"));
     var isoT=ctile("In isolation",isoLabel+(_ext?' <span style="font-size:10px;font-weight:600;color:#94a3b8">+'+_ext+' ext</span>':''));
     var warnT=ctile("Handling warnings",_warns.length?(odot(_crit?"#dc2626":"#f59e0b")+_warns.length+" open"):'<span style="color:#16a34a;font-weight:700">None</span>');
     var ctxCard='<div class="card"><div class="oc-ch"><span class="oc-ic">&#129517;</span><span class="oc-ti">Decision context</span><span class="oc-step">read-only &middot; from this dog</span></div><div class="oc-ctx">'+tlT+eaT+chT+isoT+warnT+'</div></div>';
