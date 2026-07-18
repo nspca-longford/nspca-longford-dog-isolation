@@ -398,12 +398,12 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.60",date:"2026-07-17",note:"The Outcome tab\u0027s concerns and next steps are now proper lists. Add as many concerns as a dog needs and tag each one \u2014 behaviour, medical, home, legal \u2014 and give the next steps as tickable line-items instead of one box. The Formal report reads straight from these: concerns appear under their type, recommendations come out as a numbered list with completed steps marked, and the report now also pulls in the rehoming conditions from the assessment so nothing is typed twice. Existing records carry over untouched \u2014 old concerns and steps read straight into the new lists. And the Rehoming tab now works the same way as Medical: the clearance verdict sits on top as a colour banner, with a Blockers list underneath that the app works out for itself \u2014 isolation still running, a pup under 8 weeks, no scoring yet, or an assessment gone stale \u2014 and the decision and suitability details live as two tidy rows below. The Assessment tab joins the hybrid family too: the traffic light, score, confidence and days-since-assessment sit at the top with a Reassess button, the handler brief shows as a one-line card for anyone in a hurry, and every section \u2014 temperament, handling, guarding, social, play, training, buddy walks, muzzle work \u2014 now carries its own one-line summary so the whole assessment reads at a glance, with amber flags where anything concerning was recorded. The jump bar and expand-all buttons are gone; they are no longer needed. The Dog tab gets the same tidy-up: once a record is established, the Identity and Intake forms fold into single readable lines \u2014 breed, sex, age, chip status, intake date and reason at a glance, tap to open the full fields \u2014 while new arrivals still see the forms fully open for filling in. Under the hood, the clean Medical row is now a shared building block used across all three tabs."},
+var CHANGELOG=[{version:"3.61",date:"2026-07-18",note:"Two rollbacks after a few days of real use. The Dog tab returns to its familiar layout \u2014 Identity and Intake open on every record, no folding. And the Formal report view has been retired from the Report tab, which goes back to its two views, Report and Narrative; any narratives already typed are still safely stored in the records, nothing is lost. The Outcome tab is next in line for a proper overhaul."},
+  {version:"3.60",date:"2026-07-17",note:"The Outcome tab\u0027s concerns and next steps are now proper lists. Add as many concerns as a dog needs and tag each one \u2014 behaviour, medical, home, legal \u2014 and give the next steps as tickable line-items instead of one box. Existing records carry over untouched \u2014 old concerns and steps read straight into the new lists. The Rehoming tab now works the same way as Medical: the clearance verdict sits on top as a colour banner, with a Blockers list underneath that the app works out for itself \u2014 isolation still running, a pup under 8 weeks, no scoring yet, or an assessment gone stale \u2014 and the decision and suitability details live as two tidy rows below. The Assessment tab joins the hybrid family too: the traffic light, score, confidence and days-since-assessment sit at the top with a Reassess button, the handler brief shows as a one-line card, and every section carries its own one-line summary with amber flags where anything concerning was recorded \u2014 the jump bar and expand-all buttons are gone."},
   {version:"3.59",date:"2026-07-17",note:"New Formal view on the Report tab \u2014 the branded intake assessment report, generated straight from the record. Write the dog\u2019s behavioural summary in the narrative box, and the report builds itself: scores with the traffic-light verdict and floor logic, the EA senior-review banner when the threshold is met, restricted-breed and bite-risk flags, concerns and next steps from the Outcome tab, and a sign-off block with an approval line. Re-assessments cite the prior score automatically. Print to PDF from the button as usual."},
 
   {version:"3.58",date:"2026-07-16",note:"The Medical tab has been rebuilt around one idea: what matters now sits on top, everything else is one tap away \u2014 not three. The live picture opens the page: health status, weight, active conditions and medications, and a Due list that gathers the next vaccine, the next parasite dose, the puppy schedule and any booked neuter into one glance. Below a Record divider, every section \u2014 vaccinations, parasite treatments, medications, vet log, disease, current health, on-arrival, neuter, dental \u2014 shows its full story on a single readable line, and opens in place only when the detail is needed. The accordion groups, the jump bar and the five scattered log buttons are gone; one + Log button opens a picker and routes to the familiar entry forms, which are unchanged \u2014 as is every scrap of data. Facts edit in place; events log through + Log."},
-  {version:"3.57",date:"2026-07-16",note:"Isolation now understands puppies. A pup\u0027s isolation runs until their first vaccination \u2014 not a fixed five days \u2014 so the isolation chip, the fold on the Dog tab, the popup and the Breakdown all show \u0027until 1st vax\u0027 with a running day count, the end date appears as soon as a vaccination is booked on the Medical tab, and a pup can\u0027t drift onto the Ready to Go board until that first vaccination is actually given (never earlier than the standard five days either). The 5-Day Report also speaks puppy when it needs to: on a pup\u0027s record the demeanour list gains bright-and-feeding, sleepy-but-rousable and floppy/weak \u2014 urgent, the feeding list gains suckling, bottle-fed and weaning options, and each day shows whether the pup was weighed that day with a one-tap jump to log it. Also fixes the Isolation period line showing \u0027Day 3 of undefined\u0027."},
-  {version:"3.56",date:"2026-07-16",note:"Puppy season, part two \u2014 plus one tidy-up. Give a dog a date of birth on the Dog tab and the record adapts: a Puppy card appears showing age in weeks, litter size (born and surviving), how the pups are being reared, and an age-based schedule \u2014 Parazole worming at 2, 4, 6 and 8 weeks and first vaccination from 6 weeks \u2014 that ticks itself off from entries on the Medical tab and flags anything due or overdue. Pups also get a weigh-every-1\u20132-days reminder on the Weights tab with a red alert if the latest weight has dropped, a too-young-to-assess note on the Assessment and Scoring tabs under 12 weeks, and a clear line on the Rehoming tab that a pup can\u0027t leave before 8 weeks \u2014 with the exact date it becomes possible. A mum\u0027s Family card gains the litter size fields too. And the tidy-up: the Clearance card loses its Cleared / decided by dropdown \u2014 the decision and its date are enough. Under the hood, a full audit cleared out a leftover exercise quick-log overlay that lost its opener when the Exercise tab was parked, plus two ghost references and some duplicated date helpers \u2014 about 7KB lighter, nothing visible changes."}
+  {version:"3.57",date:"2026-07-16",note:"Isolation now understands puppies. A pup\u0027s isolation runs until their first vaccination \u2014 not a fixed five days \u2014 so the isolation chip, the fold on the Dog tab, the popup and the Breakdown all show \u0027until 1st vax\u0027 with a running day count, the end date appears as soon as a vaccination is booked on the Medical tab, and a pup can\u0027t drift onto the Ready to Go board until that first vaccination is actually given (never earlier than the standard five days either). The 5-Day Report also speaks puppy when it needs to: on a pup\u0027s record the demeanour list gains bright-and-feeding, sleepy-but-rousable and floppy/weak \u2014 urgent, the feeding list gains suckling, bottle-fed and weaning options, and each day shows whether the pup was weighed that day with a one-tap jump to log it. Also fixes the Isolation period line showing \u0027Day 3 of undefined\u0027."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -4229,92 +4229,7 @@ function fallbackCopy(node){try{var r=document.createRange();r.selectNode(node);
 
 function setReportView(v){window._reportView=v;renderMain();}
 function reportToggle(){var v=window._reportView||"report";function b(val,lbl){var on=v===val;return '<button onclick="setReportView(\''+val+'\')" style="border:none;border-radius:8px;padding:6px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:'+(on?"#fff":"transparent")+';color:'+(on?"#0f172a":"#64748b")+';box-shadow:'+(on?"0 1px 2px rgba(15,23,42,0.10)":"none")+'">'+lbl+'</button>';}
-  return '<div style="display:inline-flex;background:#f1f5f9;border-radius:10px;padding:3px;margin-bottom:14px;gap:2px">'+b("report","Report")+b("narrative","Narrative")+b("formal","Formal")+'</div>';}
-// ── Formal branded intake assessment report (Report tab · Formal view) ──
-function renderFormalReport(){
-  var d=S.dog||{},m=S.medical||{},f=S.fin||{},asmt=S.assessment||{},e=S.ea||{};
-  var name=d.name||"\u2014";
-  var total=Object.values(S.scores).reduce(function(x,y){return x+(parseInt(y)||0);},0);
-  var tl=effLight(total,S.scores);
-  var eaGate=(e.needed==="Yes")||eaTriggered();
-  var LIME="#C5E86C",INK="#0f172a",SL5="#64748b",SL6="#475569",HAIR="#e2e8f0",PANEL="#f1f5f9";
-  // prior score: last scoreHistory entry whose scores differ from current (else the previous snapshot)
-  var hist=(S.scoreHistory||[]).slice(),prior=null;
-  for(var i=hist.length-1;i>=0;i--){var ht=Object.values(hist[i].scores||{}).reduce(function(x,y){return x+(parseInt(y)||0);},0);if(ht&&ht!==total){prior={total:ht,light:effLight(ht,hist[i].scores),date:hist[i].date};break;}}
-  var isReassess=!!prior;
-  function chip(v){var st={1:"background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0",2:"background:#fffbeb;color:#b45309;border:1px solid #fcd9a6",3:"background:#fef2f2;color:#b91c1c;border:1px solid #fbc4c4",4:"background:#7f1d1d;color:#fff;border:1px solid #7f1d1d"}[v]||"background:#fff;color:#94a3b8;border:1px dashed #94a3b8";
-    return '<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;font-weight:800;font-size:13px;'+st+'">'+(v||"\u2013")+'</span>';}
-  function vColor(l){return l==="Green"?"#15803d":l==="Yellow"?"#b45309":"#b91c1c";}
-  function vPill(l){var bg=l==="Green"?"#15803d":l==="Yellow"?"#b45309":"#b91c1c";return '<span style="display:inline-block;font-weight:800;letter-spacing:0.07em;font-size:12px;padding:3px 13px;border-radius:999px;background:'+bg+';color:#fff">'+l.toUpperCase()+'</span>';}
-
-  // Toolbar + narrative editor (textarea is stripped by printDoc, so screen-only)
-  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap"><div><h2 style="margin:0">Formal assessment report</h2><div class="sub" style="margin-top:2px">Branded intake assessment for management and senior review.</div></div>';
-  h+='<button class="btn" onclick="printDoc(\'Behavioural Intake Assessment\')" style="font-size:12px">&#128424; PDF / Print</button></div>';
-  h+='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:'+SL5+';margin-bottom:6px">Behavioural summary \u2014 written narrative</div><textarea data-save="assessment.reportNarrative" rows="8" placeholder="Write the dog\u2019s behavioural summary here \u2014 arrival presentation, progress, current picture. Blank lines split paragraphs.">'+esc(asmt.reportNarrative||"")+'</textarea><div style="font-size:11px;color:#94a3b8;margin-top:4px">Appears as Section 1 of the printed report. Concerns and next steps from the Outcome tab feed Sections 3\u20134.</div></div>';
-
-  // Document
-  h+='<div class="card" style="padding:26px 28px;max-width:800px;font-size:13px;color:'+INK+'">';
-  // Masthead
-  h+='<div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:8px;border-bottom:3px solid '+LIME+';margin-bottom:18px"><span style="font-weight:800;letter-spacing:0.06em;font-size:13px">NSPCA LONGFORD</span><span style="font-size:12px;color:'+SL5+'">Dog Isolation Unit</span></div>';
-  h+='<div style="font-size:23px;font-weight:800;margin-bottom:2px">Behavioural Intake Assessment</div>';
-  h+='<div style="color:'+SL5+';font-size:13px;margin-bottom:16px">Management report \u00b7 '+(isReassess?"Re-assessment \u2014 supersedes initial intake scoring":"Behavioural assessment")+'</div>';
-  // Detail table
-  function drow(k,v){return v?'<tr><td style="border:1px solid '+HAIR+';padding:6px 11px;background:'+PANEL+';font-weight:600;color:'+SL6+';width:32%;font-size:12px">'+k+'</td><td style="border:1px solid '+HAIR+';padding:6px 11px;font-size:12px">'+v+'</td></tr>':"";}
-  var neut=m.neuteredConfirmed?(m.neuteredConfirmed==="Yes"?"neutered":m.neuteredConfirmed==="No"?"entire":esc(m.neuteredConfirmed)):"";
-  var scoreCell=total?('<span style="font-weight:700;color:'+vColor(tl.l)+'">'+total+' / 24 \u2014 '+tl.l+'</span>'+(isReassess?' <span style="color:'+SL5+'">(re-assessment; prior scoring '+prior.total+'/24 '+(prior.light?prior.light.l:"")+(prior.date?" \u00b7 "+fmtDMY(prior.date):"")+')</span>':"")):'<span style="color:#94a3b8">Not yet scored</span>';
-  h+='<table style="width:100%;border-collapse:collapse;margin-bottom:18px">'
-    +drow("Subject",esc(name))
-    +drow("Breed / sex",[esc(d.breed||""),esc(d.sex||""),neut].filter(Boolean).join(" \u00b7 "))
-    +drow("Ref. no.",esc(d.refNo||""))
-    +drow("Location","Dog Isolation Unit, NSPCA Longford")
-    +drow("Intake",[d.intakeDate?fmtDMY(d.intakeDate):"",esc(d.intakeReason||"")].filter(Boolean).join(" \u00b7 "))
-    +drow("Behavioural score",scoreCell)
-    +(eaGate?drow("Enhanced Assessment",'<span style="font-weight:700;color:#b91c1c">Threshold met \u2014 senior review required before any placement decision</span>'):"")
-    +drow("Report date",fmtDMY(new Date()))
-    +drow("Prepared by",esc(currentName()))
-    +'</table>';
-  function secHead(n,t){return '<div style="font-size:15px;font-weight:700;margin:20px 0 8px;padding-bottom:4px;border-bottom:2px solid '+LIME+'"><span style="color:#94a3b8;font-weight:800;margin-right:7px">'+n+'</span>'+t+'</div>';}
-  // 1 Narrative
-  h+=secHead(1,"Behavioural summary");
-  var narr=(asmt.reportNarrative||"").trim();
-  h+=narr?narr.split(/\n\s*\n/).map(function(p){return '<p style="margin:0 0 10px;line-height:1.6">'+esc(p).replace(/\n/g,"<br>")+'</p>';}).join(""):'<p style="color:#94a3b8;font-style:italic">Narrative not yet written \u2014 add it in the editor above.</p>';
-  // 2 Scoring
-  h+=secHead(2,"Behavioural scoring"+(isReassess?" \u2014 re-assessment":""));
-  h+='<p style="margin:0 0 10px;line-height:1.55;font-size:12.5px;color:'+SL6+'">Scored across all six categories on the unit\u2019s 1\u20134 concern scale (1 = no concern, 4 = severe). Lower is better; the six categories sum to a score out of 24, which sets the traffic-light verdict.</p>';
-  if(total&&tl){
-    var driver=tl.floored?('The verdict is set by the <b>worst-category floor</b>: '+esc(tl.floorCat)+' scored '+tl.floorFrom+'.'):(tl.l==="Green"?"No category scored 3 or 4, so the worst-category floor does not apply.":"The total places this score in the "+tl.l+" band; no single category triggers a higher floor.");
-    h+='<div style="display:flex;align-items:center;gap:18px;background:'+PANEL+';border:1px solid '+HAIR+';border-left:5px solid '+vColor(tl.l)+';border-radius:8px;padding:12px 16px;margin:6px 0 12px"><div style="display:flex;align-items:baseline;gap:4px;flex:0 0 auto"><span style="font-size:34px;font-weight:800;line-height:1">'+total+'</span><span style="font-size:15px;color:'+SL5+';font-weight:600">/ 24</span></div><div style="display:flex;flex-direction:column;gap:5px">'+vPill(tl.l)+'<span style="font-size:12px;color:'+SL6+';line-height:1.45">'+driver+'</span></div></div>';
-  }
-  h+='<table style="width:100%;border-collapse:collapse;font-size:12px"><tr><th style="background:'+INK+';color:#fff;text-align:left;font-weight:600;padding:7px 10px">Category</th><th style="background:'+INK+';color:#fff;text-align:left;font-weight:600;padding:7px 10px;width:56px">Score</th><th style="background:'+INK+';color:#fff;text-align:left;font-weight:600;padding:7px 10px">Descriptor</th></tr>';
-  CATS.forEach(function(c){var v=parseInt(S.scores[c.k])||0;var isFloor=tl&&tl.floored&&tl.floorCat===c.l;
-    h+='<tr'+(isFloor?' style="background:#fef2f2"':'')+'><td style="border:1px solid '+HAIR+';padding:7px 10px;font-weight:700">'+c.l+(isFloor?' <span style="font-size:9px;font-weight:700;color:#b91c1c;border:1px solid #fbc4c4;border-radius:4px;padding:1px 5px;margin-left:5px;letter-spacing:0.03em;vertical-align:middle">FLOOR</span>':'')+'</td><td style="border:1px solid '+HAIR+';padding:7px 10px;text-align:center">'+chip(v)+'</td><td style="border:1px solid '+HAIR+';padding:7px 10px;color:'+SL6+'">'+(v?esc(c.s[v]):"Not scored")+'</td></tr>';});
-  h+='</table>';
-  if(eaGate)h+='<div style="background:#fef2f2;border:1px solid #fbc4c4;border-left:5px solid #b91c1c;border-radius:6px;padding:11px 14px;margin:12px 0"><b style="color:#b91c1c">ENHANCED ASSESSMENT THRESHOLD MET.</b> <span style="font-size:12.5px">This case requires review by senior staff before any rehoming or placement decisions are finalised.</span></div>';
-  // 3 Considerations — auto flags + Outcome-tab concerns
-  var cons=[];
-  var rb=restrictedBreedInfo(d.breed);if(rb)cons.push("<b>Restricted breed:</b> "+esc(d.breed)+" is a restricted breed \u2014 in public places: muzzled, on a strong lead no longer than 2m, handled by a person over 16.");
-  assessmentBiteFlags(S).forEach(function(t){cons.push("<b>Bite risk (assessment):</b> "+esc(t));});
-  (S.warnings||[]).forEach(function(w){cons.push("<b>Handling warning"+(w.level?" \u2014 "+esc(w.level):"")+":</b> "+esc(w.text));});
-  finConcerns(f).forEach(function(c){cons.push((c.cat?"<b>"+esc(c.cat)+":</b> ":"")+esc(c.text));});
-  var _rhc=(S.assessment&&S.assessment.rehomingConditions)||"";
-  if(_rhc)cons.push("<b>Rehoming condition:</b> "+esc(_rhc));
-  if(cons.length||true){h+=secHead(3,"Considerations and welfare");
-    h+=cons.length?('<ul style="margin:0 0 10px;padding-left:2px;list-style:none">'+cons.map(function(c){return '<li style="position:relative;padding-left:16px;margin-bottom:6px;line-height:1.5;font-size:12.5px"><span style="position:absolute;left:0;color:#94a3b8;font-weight:700">\u2013</span>'+c+'</li>';}).join("")+'</ul>'):'<p style="color:#94a3b8;font-style:italic;font-size:12.5px">No flags or concerns recorded.</p>';}
-  // 4 Recommendations
-  h+=secHead(4,"Recommendations");
-  var _fs=finSteps(f);
-  h+=_fs.length?('<ol style="margin:0 0 10px;padding-left:20px">'+_fs.map(function(s){return '<li style="margin-bottom:5px;line-height:1.5;font-size:12.5px'+(s.done?';color:#94a3b8':'')+'">'+esc(s.text)+(s.done?' <span style="font-size:10px;color:#15803d">(completed)</span>':'')+'</li>';}).join("")+'</ol>'):'<p style="color:#94a3b8;font-style:italic;font-size:12.5px">No next steps recorded \u2014 add them on the Outcome tab.</p>';
-  // Sign-off
-  h+='<div style="border-top:1px solid '+HAIR+';margin-top:22px;padding-top:12px;font-size:12.5px">';
-  h+='<div style="margin-bottom:6px"><b>Prepared by:</b> '+esc(f.assessorName||currentName())+(f.assessorDate?' \u2014 '+esc(f.assessorDate):'')+'</div>';
-  if(f.secondAssessor)h+='<div style="margin-bottom:6px"><b>Second assessor:</b> '+esc(f.secondAssessor)+(f.secondAssessorDate?' \u2014 '+esc(f.secondAssessorDate):'')+'</div>';
-  h+='<div style="margin-bottom:6px"><b>Status:</b> '+(total?(total+"/24 \u2014 "+tl.l+(tl.floored?" (worst-category floor)":"")+(eaGate?". Enhanced Assessment threshold met.":"")):"Scoring pending.")+'</div>';
-  h+='<div><b>Reviewed / approved:</b> <span style="color:#94a3b8;letter-spacing:0.04em">______________________________&nbsp;&nbsp;&nbsp;&nbsp;Date: ____________</span></div></div>';
-  h+='<div style="display:flex;justify-content:space-between;margin-top:20px;padding-top:8px;border-top:1px solid '+HAIR+';font-size:10.5px;color:'+SL5+'"><span>Behavioural Intake Assessment \u2014 '+esc(name)+' \u2014 CONFIDENTIAL</span><span>NSPCA Longford</span></div>';
-  h+='</div>';
-  h+='<div class="brow"><button class="btn" data-go="files">&larr; Back</button><button class="btn" onclick="printDoc(\'Behavioural Intake Assessment\')">&#128424; PDF / Print</button></div>';
-  return h;
-}
+  return '<div style="display:inline-flex;background:#f1f5f9;border-radius:10px;padding:3px;margin-bottom:14px;gap:2px">'+b("report","Report")+b("narrative","Narrative")+'</div>';}
 function renderBriefing(){
   var d=S.dog||{},a=S.arrival||{},f=S.fin||{},m=S.medical||{},asmt=S.assessment||{};
   var name=d.name||"This dog";
@@ -4790,15 +4705,6 @@ function page(){
     }else{
       famFold=dogFold("family","\ud83d\udc3e","Family","Mums, pups and litters","Not linked \u2014 tap to link","plain",familyCardInner(_fi));
     }
-    var _est=!!(S._id&&d.name&&d.breed&&d.intakeDate);
-    if(_est){
-      var _idSum=[d.breed+(d.crossbreed?" cross":""),d.sex,(isPup()?dogAgeWeeks()+" wks":d.age),d.colour,(d.microchip?"chip \u2713":"no chip")].filter(Boolean).join(" \u00b7 ");
-      var _inSum=[fmtDMY(d.intakeDate),d.intakeReason,d.assessor].filter(Boolean).join(" \u00b7 ");
-      identity=hybridRow("dog-id","\ud83c\udd94","Identity",esc(_idSum),identity,"");
-      intake=hybridRow("dog-intake","\ud83d\udeaa","Intake",esc(_inSum),intake,"");
-      identity='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:2px 0 2px;display:flex;align-items:center;gap:10px">Details<span style="flex:1;height:1px;background:var(--color-border-tertiary)"></span></div>'+identity;
-      intake=intake+'<div style="height:10px"></div>';
-    }
     return hero+identity+intake+famCard+pupCardHtml()+restrictedBreedCardHtml()+admDivider+intakeChecklistHtml()+isoFold+wnFolds+famFold+'<div class="brow"><button class="btn" onclick="openKennelCard()" style="white-space:nowrap">&#128203; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
   }
 
@@ -4978,7 +4884,6 @@ function page(){
 
   if(t==="report"){
     if((window._reportView||"report")==="narrative")return reportToggle()+renderBriefing();
-    if((window._reportView||"report")==="formal")return reportToggle()+renderFormalReport();
     var total2=Object.values(S.scores).reduce(function(a,b){return a+b},0),tl2=effLight(total2,S.scores),ea2=eaTriggered();
     var tlb2=tl2?'<span class="pill" style="background:'+tl2.bg+';color:'+tl2.tc+';font-size:13px;padding:5px 12px"><span style="width:8px;height:8px;border-radius:50%;background:'+tl2.dot+';display:inline-block;margin-right:6px"></span>'+tl2.l+'</span>':"";
     var d2=S.dog,a2=S.arrival,f2=S.fin,m2=S.medical||{},asmt=S.assessment||{};
