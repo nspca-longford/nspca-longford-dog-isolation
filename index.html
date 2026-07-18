@@ -400,7 +400,7 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.60",date:"2026-07-17",note:"The Outcome tab\u0027s concerns and next steps are now proper lists. Add as many concerns as a dog needs and tag each one \u2014 behaviour, medical, home, legal \u2014 and give the next steps as tickable line-items instead of one box. The Formal report reads straight from these: concerns appear under their type, recommendations come out as a numbered list with completed steps marked, and the report now also pulls in the rehoming conditions from the assessment so nothing is typed twice. Existing records carry over untouched \u2014 old concerns and steps read straight into the new lists. Under the hood, the clean Medical row is now a shared building block ready for the rest of the app."},
+var CHANGELOG=[{version:"3.60",date:"2026-07-17",note:"The Outcome tab\u0027s concerns and next steps are now proper lists. Add as many concerns as a dog needs and tag each one \u2014 behaviour, medical, home, legal \u2014 and give the next steps as tickable line-items instead of one box. The Formal report reads straight from these: concerns appear under their type, recommendations come out as a numbered list with completed steps marked, and the report now also pulls in the rehoming conditions from the assessment so nothing is typed twice. Existing records carry over untouched \u2014 old concerns and steps read straight into the new lists. And the Rehoming tab now works the same way as Medical: the clearance verdict sits on top as a colour banner, with a Blockers list underneath that the app works out for itself \u2014 isolation still running, a pup under 8 weeks, no scoring yet, or an assessment gone stale \u2014 and the decision and suitability details live as two tidy rows below. The Dog tab gets the same tidy-up: once a record is established, the Identity and Intake forms fold into single readable lines \u2014 breed, sex, age, chip status, intake date and reason at a glance, tap to open the full fields \u2014 while new arrivals still see the forms fully open for filling in. Under the hood, the clean Medical row is now a shared building block used across all three tabs."},
   {version:"3.59",date:"2026-07-17",note:"New Formal view on the Report tab \u2014 the branded intake assessment report, generated straight from the record. Write the dog\u2019s behavioural summary in the narrative box, and the report builds itself: scores with the traffic-light verdict and floor logic, the EA senior-review banner when the threshold is met, restricted-breed and bite-risk flags, concerns and next steps from the Outcome tab, and a sign-off block with an approval line. Re-assessments cite the prior score automatically. Print to PDF from the button as usual."},
 
   {version:"3.58",date:"2026-07-16",note:"The Medical tab has been rebuilt around one idea: what matters now sits on top, everything else is one tap away \u2014 not three. The live picture opens the page: health status, weight, active conditions and medications, and a Due list that gathers the next vaccine, the next parasite dose, the puppy schedule and any booked neuter into one glance. Below a Record divider, every section \u2014 vaccinations, parasite treatments, medications, vet log, disease, current health, on-arrival, neuter, dental \u2014 shows its full story on a single readable line, and opens in place only when the detail is needed. The accordion groups, the jump bar and the five scattered log buttons are gone; one + Log button opens a picker and routes to the familiar entry forms, which are unchanged \u2014 as is every scrap of data. Facts edit in place; events log through + Log."},
@@ -2787,7 +2787,6 @@ function renderMedical(){
   var todayStr=today;
   window._medOpen=window._medOpen||{};
   if(window._medOpen.current===undefined)window._medOpen.current=true;
-  function _open(id){return !!window._medOpen[id];}
   function _short(s){if(!s)return'';s=String(s).split(' \u2014 ')[0].split(' / ')[0];return s.length>16?s.slice(0,15)+'\u2026':s;}
   var h='';
 
@@ -3541,31 +3540,59 @@ function renderAssessment(){
 function asmtFilled(keys){var a=S.assessment||{};var n=0;for(var i=0;i<keys.length;i++){var v=a[keys[i]];if(v!==undefined&&v!=="")n++;}return n;}
 function asmtGroup(id,title){return '<div id="grp-'+id+'" style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;margin:16px 2px 8px;scroll-margin-top:54px">'+title+'</div>';}
 function renderRehoming(){
-  var a=S.assessment||{};
-  var filledN=["homeType","suitableChildren","suitableOtherDogs","suitableCats","suitableEquine","suitableSmallMammals","exerciseNeeds","experienceLevel"].filter(function(k){var v=a[k];return v!==undefined&&v!==null&&String(v).trim()!=="";}).length;
+  var a=S.assessment||{};var d=S.dog||{};
   var st=a.rehomingStatus||"";
-  var stCol=/^cleared for/i.test(st)?"#16a34a":/conditions/i.test(st)?"#ca8a04":/not cleared|not fit/i.test(st)?"#dc2626":"#94a3b8";
-  var banner=st?'<div style="display:inline-flex;align-items:center;gap:8px;background:'+(stCol==="#16a34a"?"#dcfce7":stCol==="#ca8a04"?"#fef9c3":stCol==="#dc2626"?"#fee2e2":"#f1f5f9")+';color:'+stCol+';border-radius:999px;padding:6px 14px;font-size:13px;font-weight:700;margin-bottom:12px"><span style="width:9px;height:9px;border-radius:99px;background:'+stCol+'"></span>'+esc(st)+'</div>':"";
+  // ── live picture: clearance banner ──
+  var tone=/^cleared for/i.test(st)?"ok":/conditions/i.test(st)?"warn":/not cleared|not fit/i.test(st)?"alert":"";
+  var banner=hybridBanner(st?esc(st):"No clearance decision yet",tone);
   banner=pupRehomeGate()+banner;
-  var clearanceCard='<div class="card" style="margin-bottom:14px">'
-    +'<h3 style="margin:0 0 12px;font-size:14.5px;font-weight:700">Clearance</h3>'
-    +banner
-    +'<div class="g2">'
-    +slct("Rehoming status",st,"assessment.rehomingStatus",[["","-- not decided --"],["Cleared for rehoming","Cleared for rehoming"],["Cleared with conditions","Cleared with conditions"],["Not cleared \u2014 needs work","Not cleared \u2014 needs more time / work"],["Not fit for rehoming","Not fit for rehoming"],["Awaiting assessment","Awaiting assessment"]])
+  // ── derived blockers ──
+  var blockers=rehomeBlockers();
+  var blockHtml=blockers.length?hybridList("Blockers",blockers):(tone==="ok"?"":hybridList("Blockers",[{icon:"\u2713",text:"No blockers found \u2014 isolation, age and assessment all clear",tone:""}]));
+  // ── record rows ──
+  var total=Object.values(S.scores||{}).reduce(function(x,y){return x+y;},0);
+  var clearBody=slct("Rehoming status",a.rehomingStatus||"","assessment.rehomingStatus",[["","-- not decided --"],["Cleared for rehoming","Cleared for rehoming"],["Cleared with conditions","Cleared with conditions"],["Not cleared \u2014 needs work","Not cleared \u2014 needs more time / work"],["Not fit for rehoming","Not fit for rehoming"],["Awaiting assessment","Awaiting assessment"]])
     +fld("Decision date",a.rehomingDate||"","assessment.rehomingDate","date")
-    +'</div>'
-    +(/conditions/i.test(st)?ta("Conditions",a.rehomingConditions||"","assessment.rehomingConditions","e.g. adult-only home, must be only pet, secure garden essential..."):"")
-    +'</div>';
-  return '<h2>Rehoming suitability</h2><div class="sub">What home suits this dog \u2014 feeds the adoption profile and the final decision. '+filledN+' of '+["homeType","suitableChildren","suitableOtherDogs","suitableCats","suitableEquine","suitableSmallMammals","exerciseNeeds","experienceLevel"].length+' set.</div>'
-    +clearanceCard
-    +'<div class="card">'+'<div class="g2">'+slct("Home type",a.homeType||"","assessment.homeType",[["","-- not assessed --"],["Any home","Any home"],["House with garden","House with garden required"],["Rural — large space","Rural — large space preferred"],["Experienced owner only","Experienced owner only"],["Single dog household","Single dog household only"],["Quiet home","Quiet home — no young children"]])+slct("Suitable with children",a.suitableChildren||"","assessment.suitableChildren",[["","-- not assessed --"],["All ages","Yes — all ages"],["Over 12","Yes — over 12 only"],["Adults only","Adults only"],["No","Not suitable with children"]])+slct("Suitable with other dogs",a.suitableOtherDogs||"","assessment.suitableOtherDogs",[["","-- not assessed --"],["Yes","Yes — good with other dogs"],["Female only","Yes — female dogs only"],["Male only","Yes — male dogs only"],["Selective","Selective — case by case"],["No","No — only dog"]])+slct("Suitable with cats",a.suitableCats||"","assessment.suitableCats",[["","-- not assessed --"],["Yes","Yes — cat tested"],["Caution","With caution"],["No","No — not safe with cats"]])+slct("Suitable with horses / livestock",a.suitableEquine||"","assessment.suitableEquine",[["","-- not assessed --"],["Yes","Yes — safe with horses / livestock"],["Caution","With caution"],["No","No — not safe"]])+slct("Suitable with small mammals",a.suitableSmallMammals||"","assessment.suitableSmallMammals",[["","-- not assessed --"],["Yes","Yes — safe with small mammals"],["Caution","With caution"],["No","No — high prey drive"]])+slct("Exercise needs",a.exerciseNeeds||"","assessment.exerciseNeeds",[["","-- not assessed --"],["Low — short walks","Low — short walks"],["Moderate — 1hr daily","Moderate — 1hr daily"],["High — 2hr+ daily","High — 2hr+ daily"],["Very high","Very high — working breed level"]])+slct("Owner experience required",a.experienceLevel||"","assessment.experienceLevel",[["","-- not assessed --"],["First time owner","Suitable for first time owner"],["Some experience","Some dog experience recommended"],["Experienced only","Experienced owner required"],["Specialist","Specialist handler only"]])+'</div>'+ta("Suitability notes",a.suitabilityNotes||"","assessment.suitabilityNotes","Ideal home description, any specific requirements...")+'</div>'
-    +'<div class="brow"><button class="btn" data-go="notes">&larr; Notes</button><button class="btn btnp" data-go="outcome">Outcome &rarr;</button></div>';
+    +ta("Conditions",a.rehomingConditions||"","assessment.rehomingConditions","e.g. adult-only home, no cats, experienced owner");
+  var suitBody='<div class="g2">'
+    +slct("Home type",a.homeType||"","assessment.homeType",[["","-- not assessed --"],["Any home","Any home"],["House with garden","House with garden required"],["Rural — large space","Rural — large space preferred"],["Experienced owner only","Experienced owner only"],["Single dog household","Single dog household only"],["Quiet home","Quiet home — no young children"]])
+    +slct("Suitable with children",a.suitableChildren||"","assessment.suitableChildren",[["","-- not assessed --"],["All ages","Yes — all ages"],["Over 12","Yes — over 12 only"],["Adults only","Adults only"],["No","Not suitable with children"]])
+    +slct("Suitable with other dogs",a.suitableOtherDogs||"","assessment.suitableOtherDogs",[["","-- not assessed --"],["Yes","Yes — good with other dogs"],["Female only","Yes — female dogs only"],["Male only","Yes — male dogs only"],["Selective","Selective — case by case"],["No","No — only dog"]])
+    +slct("Suitable with cats",a.suitableCats||"","assessment.suitableCats",[["","-- not assessed --"],["Yes","Yes — cat tested"],["Caution","With caution"],["No","No — not safe with cats"]])
+    +slct("Suitable with horses / livestock",a.suitableEquine||"","assessment.suitableEquine",[["","-- not assessed --"],["Yes","Yes — safe with horses / livestock"],["Caution","With caution"],["No","No — not safe"]])
+    +slct("Suitable with small mammals",a.suitableSmallMammals||"","assessment.suitableSmallMammals",[["","-- not assessed --"],["Yes","Yes — safe with small mammals"],["Caution","With caution"],["No","No — high prey drive"]])
+    +slct("Exercise needs",a.exerciseNeeds||"","assessment.exerciseNeeds",[["","-- not assessed --"],["Low — short walks","Low — short walks"],["Moderate — 1hr daily","Moderate — 1hr daily"],["High — 2hr+ daily","High — 2hr+ daily"],["Very high","Very high — working breed level"]])
+    +slct("Owner experience required",a.experienceLevel||"","assessment.experienceLevel",[["","-- not assessed --"],["First time owner","Suitable for first time owner"],["Some experience","Some dog experience recommended"],["Experienced only","Experienced owner required"],["Specialist","Specialist handler only"]])
+    +'</div>'+ta("Suitability notes",a.suitabilityNotes||"","assessment.suitabilityNotes","");
+  var filledN=["homeType","suitableChildren","suitableOtherDogs","suitableCats","suitableEquine","suitableSmallMammals","exerciseNeeds","experienceLevel"].filter(function(kk){var v=a[kk];return v!==undefined&&v!==null&&String(v).trim()!=="";}).length;
+  var clearSum=st?(esc(st)+(a.rehomingDate?" \u00b7 "+fmtDMY(a.rehomingDate):"")+(a.rehomingConditions?" \u00b7 conditions set":"")):"No decision recorded \u2014 tap to decide";
+  var suitSum=filledN?(filledN+" of 8 recorded"+(a.suitableChildren?" \u00b7 children: "+esc(a.suitableChildren):"")):"Nothing recorded yet";
+  var rows='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:4px 0 2px;display:flex;align-items:center;gap:10px">Record<span style="flex:1;height:1px;background:var(--color-border-tertiary)"></span></div>'
+    +hybridRow("rh-clear","\u2696\ufe0f","Clearance decision",clearSum,clearBody,tone==="alert"?"alert":tone==="warn"?"warn":"")
+    +hybridRow("rh-suit","\ud83c\udfe1","Suitability",suitSum,suitBody,"");
+  return '<h2 style="margin-bottom:4px">Rehoming</h2><div class="sub" style="margin-bottom:14px">Clearance first \u2014 the record below</div>'
+    +'<div class="card">'+banner+blockHtml+rows+'</div>'
+    +'<div class="brow"><button class="btn" data-go="outcome">Next: outcome &rarr;</button></div>';
 }
-
-// ── Breakdown ─────────────────────────────────────────────────────
-// The whole record on one dense screen. Every key field, colour-coded:
-// normal = filled · grey dash = missing · amber/red = flagged.
-
+function rehomeBlockers(){
+  var out=[];var f=S.fin||{};
+  var ii=isolationInfo((S.dog||{}).intakeDate,f.outcome,isoExtraDays(S.dog),pupIsoVax(S.dog,S.medical));
+  if(ii.state==="active"||ii.state==="final"){
+    out.push(ii.awaitVax?{icon:"\ud83d\udd12",text:"Isolation \u2014 until 1st vaccination",tag:"day "+ii.day,tone:"alert"}
+      :{icon:"\ud83d\udd12",text:"Isolation in progress",tag:"day "+ii.day+" of "+ii.total,tone:"warn"});
+  }
+  var w=dogAgeWeeks();
+  if(w!==null&&w<8)out.push({icon:"\ud83d\udc36",text:"Under 8 weeks old",tag:"eligible "+fmtDMY(addDaysStr(S.dog.dob,56)),tone:"warn"});
+  var total=Object.values(S.scores||{}).reduce(function(x,y){return x+y;},0);
+  if(!total){out.push({icon:"\ud83d\udccb",text:"Not yet scored \u2014 assessment incomplete",tag:"scoring",tone:"warn"});}
+  else{
+    var hh=S.scoreHistory||[];var last=hh.length?hh[hh.length-1]:null;
+    var lastDate=last&&last.date?last.date:((S.dog||{}).intakeDate||null);
+    if(lastDate){var dd=Math.floor((Date.now()-new Date(lastDate).getTime())/864e5);
+      if(dd>10)out.push({icon:"\ud83d\udccb",text:"Assessment stale",tag:dd+" days old",tone:"warn"});}
+  }
+  return out;
+}
 function bdCell(label,val,flag){
   // flag: undefined/"" normal, "warn" amber, "risk" red
   var has=val!==undefined&&val!==null&&String(val).trim()!=="";
@@ -4320,7 +4347,7 @@ function renderBriefing(){
     sumParts.push(sl);
   }
   if(ea)sumParts.push('<strong style="color:#991b1b">Enhanced Assessment flag triggered</strong> — review with senior staff required before any rehoming decisions.');
-  var concerns=[f.c1,f.c2,f.c3].filter(Boolean);
+  var concerns=finConcerns(f).map(function(c){return c.text+(c.cat?" ("+c.cat.toLowerCase()+")":"");});
   if(concerns.length)sumParts.push("Primary concerns identified: "+joinNicely(concerns.map(esc))+".");
   if(f.outcome){var ol="Current status: <strong>"+esc(f.outcome)+"</strong>";if(f.outcomeDate)ol+=" (as of "+fmtDateLong(f.outcomeDate)+")";ol+=".";sumParts.push(ol);}
   h+=p(sumParts.join(" "));
@@ -4615,9 +4642,10 @@ function renderBriefing(){
   }
 
   // ── RECOMMENDED NEXT STEPS ──
-  if(f.steps){
+  var _nsteps=finSteps(f);
+  if(_nsteps.length){
     h+=sectionHead("Recommended Next Steps");
-    h+='<div style="white-space:pre-wrap;margin:0 0 10px;line-height:1.65">'+esc(f.steps)+'</div>';
+    h+='<div style="margin:0 0 10px;line-height:1.65">'+_nsteps.map(function(s){return '<div style="margin-bottom:4px">'+esc(s.text)+(s.done?' <span style="font-size:11px;color:#15803d">(completed)</span>':'')+'</div>';}).join("")+'</div>';
   }
 
   // ── REHOMING SUITABILITY ──
@@ -4724,6 +4752,15 @@ function page(){
       famCard='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:10px">Family</div>'+familyCardInner(_fi)+'</div>';
     }else{
       famFold=dogFold("family","\ud83d\udc3e","Family","Mums, pups and litters","Not linked \u2014 tap to link","plain",familyCardInner(_fi));
+    }
+    var _est=!!(S._id&&d.name&&d.breed&&d.intakeDate);
+    if(_est){
+      var _idSum=[d.breed+(d.crossbreed?" cross":""),d.sex,(isPup()?dogAgeWeeks()+" wks":d.age),d.colour,(d.microchip?"chip \u2713":"no chip")].filter(Boolean).join(" \u00b7 ");
+      var _inSum=[fmtDMY(d.intakeDate),d.intakeReason,d.assessor].filter(Boolean).join(" \u00b7 ");
+      identity=hybridRow("dog-id","\ud83c\udd94","Identity",esc(_idSum),identity,"");
+      intake=hybridRow("dog-intake","\ud83d\udeaa","Intake",esc(_inSum),intake,"");
+      identity='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:2px 0 2px;display:flex;align-items:center;gap:10px">Details<span style="flex:1;height:1px;background:var(--color-border-tertiary)"></span></div>'+identity;
+      intake=intake+'<div style="height:10px"></div>';
     }
     return hero+identity+intake+famCard+pupCardHtml()+restrictedBreedCardHtml()+admDivider+intakeChecklistHtml()+isoFold+wnFolds+famFold+'<div class="brow"><button class="btn" onclick="openKennelCard()" style="white-space:nowrap">&#128203; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
   }
@@ -4914,7 +4951,7 @@ function page(){
     var arows=[["Demeanour",a2.demeanour],["Muzzle",a2.muzzle],["Lead handling",a2.lead],["First vet visit",a2.vet],["Dog-to-dog",a2.dogDog],["Cat tolerance",a2.catTolerance],["Horses / equine",a2.equineHistory],["Small mammals",a2.smallMammalHistory],["Child history",a2.childHistory],["Bite history",a2.biteHistory]].filter(function(r){return r[1]}).map(function(r){return'<div class="rrow"><span class="rk">'+r[0]+'</span><span class="rv">'+esc(r[1])+'</span></div>'}).join("");
     var dblocks=S.days.map(function(dy,i){var rows=[["Demeanour",dy.demeanour],["Feeding",dy.feeding],["Toileting",dy.toileting],["Staff interaction",dy.staffInt],["Incidents",dy.incidents]].filter(function(r){return r[1]}).map(function(r){return'<div style="font-size:12px;margin-bottom:3px"><span style="color:#64748b">'+r[0]+': </span><span style="font-weight:500">'+esc(r[1])+'</span></div>'}).join("");return'<div class="db"><div style="font-size:13px;font-weight:600;margin-bottom:5px">Day '+(i+1)+(dy.date?" — "+dy.date:"")+'</div>'+(rows||'<span style="font-size:12px;color:#64748b">No data.</span>')+(dy.notes?'<div style="font-size:12px;color:#64748b;margin-top:5px">'+esc(dy.notes)+'</div>':'')+'</div>';}).join("");
     var srows=CATS.map(function(c){var v=S.scores[c.k];return'<div class="sr"><span>'+c.l+'</span><div style="display:flex;align-items:center;gap:8px">'+(v?'<span style="font-size:11px;color:#64748b">'+c.s[v]+'</span>':'')+'<span class="pill" style="'+sc(v)+'">'+v+'</span></div></div>';}).join("");
-    var concerns=[f2.c1,f2.c2,f2.c3].filter(Boolean).map(function(c,i){return'<div style="display:flex;gap:10px;margin-bottom:8px"><div style="width:20px;height:20px;border-radius:50%;background:#fee2e2;color:#991b1b;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">'+(i+1)+'</div><span style="font-size:13px">'+esc(c)+'</span></div>'}).join("");
+    var concerns=finConcerns(f2).map(function(cc){return cc.text+(cc.cat?" \u2014 "+cc.cat:"");}).map(function(c,i){return'<div style="display:flex;gap:10px;margin-bottom:8px"><div style="width:20px;height:20px;border-radius:50%;background:#fee2e2;color:#991b1b;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">'+(i+1)+'</div><span style="font-size:13px">'+esc(c)+'</span></div>'}).join("");
 
     // ─── Helper: render a section of key/value rows ───
     function kvRows(pairs){return pairs.filter(function(r){return r[1];}).map(function(r){return'<div class="rrow"><span class="rk">'+r[0]+'</span><span class="rv">'+esc(r[1])+'</span></div>';}).join("");}
@@ -5035,7 +5072,7 @@ function page(){
       +asmtCard
       +'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px">Behaviour scoring</div>'+srows+'<div style="display:flex;justify-content:space-between;padding:10px 0 0;font-weight:600;font-size:13px"><span>Total</span><span>'+total2+'/24</span></div></div>'
       +(function(){var er=eaCalc(S.ea||{});var e=S.ea||{};if((e.needed||"")!=="Yes"&&!er.complete)return"";var rows;if(er.complete){rows='<div class="rrow"><span class="rk">Severity (Freq + Size + Intensity + Bite)</span><span class="rv">'+er.severity+'</span></div><div class="rrow"><span class="rk">Probability</span><span class="rv">'+er.p+'</span></div><div class="rrow"><span class="rk">EA Score (Severity &times; Probability &divide; 72)</span><span class="rv">'+er.score.toFixed(2)+'</span></div><div class="rrow"><span class="rk">Risk category</span><span class="rv"><span style="font-size:11px;font-weight:700;padding:1px 9px;border-radius:20px;background:'+er.col[0]+';color:'+er.col[1]+'">'+esc(er.cat)+'</span></span></div><div class="rrow"><span class="rk">Management outcome</span><span class="rv">'+esc(er.mgmt)+'</span></div>';}else{rows='<div style="font-size:12px;color:#94a3b8;font-style:italic">EA flagged as required - scores not yet complete.</div>';}return'<div class="card" style="border-left:4px solid #dc2626"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#991b1b;margin-bottom:8px">&#9888; Enhanced Assessment (bite-risk)</div>'+rows+(e.incidentSummary?noteBlock("Incident summary",e.incidentSummary):"")+(e.concerns?noteBlock("Primary concerns",e.concerns):"")+(e.assessorName?'<div class="rrow"><span class="rk">Assessed by</span><span class="rv">'+esc(e.assessorName)+(e.assessorDate?" &middot; "+esc(e.assessorDate):"")+'</span></div>':"")+'</div>';})()
-      +((concerns||f2.steps||f2.handoverNote||f2.outcome||f2.overallProgress)?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">Final assessment output</div>'+concerns+(f2.steps?'<div style="background:#dbeafe;border-radius:6px;padding:11px;margin-top:8px"><div style="font-size:10px;font-weight:600;color:#0369a1;text-transform:uppercase;margin-bottom:3px">Recommended next steps</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.steps)+'</div></div>':"")+(f2.followUp?'<div class="rrow" style="margin-top:8px"><span class="rk">Follow-up date</span><span class="rv">'+esc(f2.followUp)+'</span></div>':"")+(f2.overallProgress?'<div class="rrow"><span class="rk">Overall progress</span><span class="rv">'+esc(f2.overallProgress)+'</span></div>':"")+(f2.outcome?'<div class="rrow"><span class="rk">Outcome</span><span class="rv">'+esc(f2.outcome)+(f2.outcomeDate?" &middot; "+esc(f2.outcomeDate):"")+'</span></div>':"")+(((f2.outcome==="Euthanised"||f2.outcome==="Died in care")&&f2.euthReason)?'<div class="rrow"><span class="rk">'+(f2.outcome==="Euthanised"?"Reason for euthanasia":"Cause / reason")+'</span><span class="rv">'+esc(f2.euthReason)+'</span></div>':"")+(f2.outcomeNotes?noteBlock("Outcome notes",f2.outcomeNotes):"")+(f2.notes?noteBlock("Additional notes",f2.notes):"")+(f2.handoverNote?'<div style="margin-top:10px;padding:10px;background:#f8fafc;border-radius:6px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:4px">Kennel handover note</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.handoverNote)+'</div></div>':"")+'</div>':"")
+      +((concerns||finSteps(f2).length||f2.handoverNote||f2.outcome||f2.overallProgress)?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:10px">Final assessment output</div>'+concerns+(finSteps(f2).length?'<div style="background:#dbeafe;border-radius:6px;padding:11px;margin-top:8px"><div style="font-size:10px;font-weight:600;color:#0369a1;text-transform:uppercase;margin-bottom:3px">Recommended next steps</div><div style="font-size:13px">'+finSteps(f2).map(function(s){return '<div style="margin-bottom:3px">'+esc(s.text)+(s.done?' <span style="font-size:10px;color:#15803d">(completed)</span>':'')+'</div>';}).join("")+'</div></div>':"")+(f2.followUp?'<div class="rrow" style="margin-top:8px"><span class="rk">Follow-up date</span><span class="rv">'+esc(f2.followUp)+'</span></div>':"")+(f2.overallProgress?'<div class="rrow"><span class="rk">Overall progress</span><span class="rv">'+esc(f2.overallProgress)+'</span></div>':"")+(f2.outcome?'<div class="rrow"><span class="rk">Outcome</span><span class="rv">'+esc(f2.outcome)+(f2.outcomeDate?" &middot; "+esc(f2.outcomeDate):"")+'</span></div>':"")+(((f2.outcome==="Euthanised"||f2.outcome==="Died in care")&&f2.euthReason)?'<div class="rrow"><span class="rk">'+(f2.outcome==="Euthanised"?"Reason for euthanasia":"Cause / reason")+'</span><span class="rv">'+esc(f2.euthReason)+'</span></div>':"")+(f2.outcomeNotes?noteBlock("Outcome notes",f2.outcomeNotes):"")+(f2.notes?noteBlock("Additional notes",f2.notes):"")+(f2.handoverNote?'<div style="margin-top:10px;padding:10px;background:#f8fafc;border-radius:6px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:4px">Kennel handover note</div><div style="font-size:13px;white-space:pre-wrap">'+esc(f2.handoverNote)+'</div></div>':"")+'</div>':"")
       +(f2.assessorName?'<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:8px">Sign-off</div><div class="rrow"><span class="rk">Assessor</span><span class="rv">'+esc(f2.assessorName)+(f2.assessorDate?' &mdash; '+esc(f2.assessorDate):'')+'</span></div>'+(f2.secondAssessor?'<div class="rrow"><span class="rk">Second assessor</span><span class="rv">'+esc(f2.secondAssessor)+(f2.secondAssessorDate?' &mdash; '+esc(f2.secondAssessorDate):'')+'</span></div>':'')+'</div>':'')
       +'<div class="brow"><button class="btn" data-go="files">&larr; Back</button><button class="btn" onclick="printDoc(\'Assessment Report\')">&#128424; PDF / Print</button></div>';
   }
