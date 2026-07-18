@@ -35,8 +35,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:#f6f7f9;color:#0f172a;m
 input,select,textarea{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:10px;font-family:inherit;font-size:13px;color:#0f172a;background:#fff;outline:none}
 input:focus,select:focus,textarea:focus{border-color:#a9d23f;box-shadow:0 0 0 3px rgba(169,210,63,0.16)}
 .f select{-webkit-appearance:none;-moz-appearance:none;appearance:none;padding-right:32px;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;background-size:13px}
-.asmt-chip{font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;color:#475569;cursor:pointer;font-family:inherit;white-space:nowrap}
-.asmt-chip:active{background:#f1f5f9}
 textarea{resize:vertical;min-height:68px}
 .lbl{display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em}
 .f{margin-bottom:12px}
@@ -400,7 +398,7 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.60",date:"2026-07-17",note:"The Outcome tab\u0027s concerns and next steps are now proper lists. Add as many concerns as a dog needs and tag each one \u2014 behaviour, medical, home, legal \u2014 and give the next steps as tickable line-items instead of one box. The Formal report reads straight from these: concerns appear under their type, recommendations come out as a numbered list with completed steps marked, and the report now also pulls in the rehoming conditions from the assessment so nothing is typed twice. Existing records carry over untouched \u2014 old concerns and steps read straight into the new lists. And the Rehoming tab now works the same way as Medical: the clearance verdict sits on top as a colour banner, with a Blockers list underneath that the app works out for itself \u2014 isolation still running, a pup under 8 weeks, no scoring yet, or an assessment gone stale \u2014 and the decision and suitability details live as two tidy rows below. The Dog tab gets the same tidy-up: once a record is established, the Identity and Intake forms fold into single readable lines \u2014 breed, sex, age, chip status, intake date and reason at a glance, tap to open the full fields \u2014 while new arrivals still see the forms fully open for filling in. Under the hood, the clean Medical row is now a shared building block used across all three tabs."},
+var CHANGELOG=[{version:"3.60",date:"2026-07-17",note:"The Outcome tab\u0027s concerns and next steps are now proper lists. Add as many concerns as a dog needs and tag each one \u2014 behaviour, medical, home, legal \u2014 and give the next steps as tickable line-items instead of one box. The Formal report reads straight from these: concerns appear under their type, recommendations come out as a numbered list with completed steps marked, and the report now also pulls in the rehoming conditions from the assessment so nothing is typed twice. Existing records carry over untouched \u2014 old concerns and steps read straight into the new lists. And the Rehoming tab now works the same way as Medical: the clearance verdict sits on top as a colour banner, with a Blockers list underneath that the app works out for itself \u2014 isolation still running, a pup under 8 weeks, no scoring yet, or an assessment gone stale \u2014 and the decision and suitability details live as two tidy rows below. The Assessment tab joins the hybrid family too: the traffic light, score, confidence and days-since-assessment sit at the top with a Reassess button, the handler brief shows as a one-line card for anyone in a hurry, and every section \u2014 temperament, handling, guarding, social, play, training, buddy walks, muzzle work \u2014 now carries its own one-line summary so the whole assessment reads at a glance, with amber flags where anything concerning was recorded. The jump bar and expand-all buttons are gone; they are no longer needed. The Dog tab gets the same tidy-up: once a record is established, the Identity and Intake forms fold into single readable lines \u2014 breed, sex, age, chip status, intake date and reason at a glance, tap to open the full fields \u2014 while new arrivals still see the forms fully open for filling in. Under the hood, the clean Medical row is now a shared building block used across all three tabs."},
   {version:"3.59",date:"2026-07-17",note:"New Formal view on the Report tab \u2014 the branded intake assessment report, generated straight from the record. Write the dog\u2019s behavioural summary in the narrative box, and the report builds itself: scores with the traffic-light verdict and floor logic, the EA senior-review banner when the threshold is met, restricted-breed and bite-risk flags, concerns and next steps from the Outcome tab, and a sign-off block with an approval line. Re-assessments cite the prior score automatically. Print to PDF from the button as usual."},
 
   {version:"3.58",date:"2026-07-16",note:"The Medical tab has been rebuilt around one idea: what matters now sits on top, everything else is one tap away \u2014 not three. The live picture opens the page: health status, weight, active conditions and medications, and a Due list that gathers the next vaccine, the next parasite dose, the puppy schedule and any booked neuter into one glance. Below a Record divider, every section \u2014 vaccinations, parasite treatments, medications, vet log, disease, current health, on-arrival, neuter, dental \u2014 shows its full story on a single readable line, and opens in place only when the detail is needed. The accordion groups, the jump bar and the five scattered log buttons are gone; one + Log button opens a picker and routes to the familiar entry forms, which are unchanged \u2014 as is every scrap of data. Facts edit in place; events log through + Log."},
@@ -3506,13 +3504,24 @@ function renderAssessment(){
   var _tlPill=_tl?'<span class="pill" style="background:'+_tl.bg+';color:'+_tl.tc+'"><span class="dot" style="background:'+_tl.dot+'"></span>'+_tl.l+' &middot; '+_tot+'</span>':'';
   var _eaPill=(_ea&&_ea.complete)?'<span class="pill" style="background:'+_ea.col[0]+';color:'+_ea.col[1]+'">EA '+esc(_ea.cat.replace("Category ","Cat "))+'</span>':'';
   h+='<div class="asmt-ctx"><div style="flex:1;min-width:120px"><div class="nm">'+esc(_d.name||"Dog Assessment")+'</div>'+(_meta?'<div class="mt">'+esc(_meta)+'</div>':'')+'</div>'+_tlPill+_eaPill+'<div class="prog"><div class="pl">'+_started+' / '+_keys.length+' behaviour areas started</div><div class="bar"><i style="width:'+_pct+'%"></i></div></div></div>';
-  // jump bar + expand controls
-  h+='<div style="position:sticky;top:0;z-index:6;display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--color-background-primary);padding:6px 2px 10px;margin-bottom:2px">'
-    +'<button class="asmt-chip" onclick="asmtJump(\'behaviour\')">Behaviour</button>'
-    +'<button class="asmt-chip" onclick="asmtJump(\'activities\')">Activities</button>'
-    +'<button class="asmt-chip" onclick="asmtSetAll(true)">Expand all</button>'
-    +'<button class="asmt-chip" onclick="asmtSetAll(false)">Collapse</button>'
-  +'</div>';
+  // ── live picture (hybrid) ──
+  var _tot=Object.values(S.scores||{}).reduce(function(x,y){return x+y;},0);
+  var _tl=_tot?effLight(_tot,S.scores):null;
+  var _tone=_tl?(_tl.l==="Green"?"ok":_tl.l==="Yellow"?"warn":"alert"):"";
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Assessment</div><button class="btn btnp" data-go="scoring" style="font-size:12px;padding:6px 14px">Reassess</button></div>';
+  h+=hybridBanner(_tl?(_tl.l+(_tl.floored?" (worst-category floor)":"")+" \u2014 score "+_tot+"/24"):"Not yet scored",_tone);
+  var _hh=S.scoreHistory||[];var _last=_hh.length?_hh[_hh.length-1]:null;
+  var _ldate=(_last&&_last.date)?_last.date:((S.dog||{}).intakeDate||null);
+  var _days=_ldate?Math.floor((Date.now()-new Date(_ldate).getTime())/864e5):null;
+  h+=hybridTiles([
+    {label:"Score",value:_tot?_tot+" / 24":"\u2014",tone:_tone==="alert"?"alert":""},
+    {label:"Confidence",value:a.confidence?esc(String(a.confidence).split(" \u2014 ")[0]):"\u2014"},
+    {label:"Assessed",value:_days===null?"\u2014":(_days<=0?"today":_days+" days ago"),tone:(_days!==null&&_days>10)?"warn":""}
+  ]);
+  if(a.briefTriggers||a.briefWarning||a.briefHelps||a.briefHandler){
+    var _bb=[a.briefTriggers?("Triggers: "+a.briefTriggers):null,a.briefHelps?("Helps: "+a.briefHelps):null].filter(Boolean).join(" \u00b7 ")||a.briefWarning||"";
+    h+='<div style="display:flex;align-items:flex-start;gap:8px;border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:9px 12px;margin-bottom:14px"><span style="font-size:14px;flex-shrink:0">\u270b</span><div style="font-size:12px;color:#334155;line-height:1.5"><b>Handler brief'+(a.briefHandler?" \u2014 "+esc(a.briefHandler):"")+'.</b> '+esc(_bb).slice(0,220)+'</div></div>';
+  }
   h+=asmtGroup("behaviour","Behaviour &amp; temperament");
   h+='<div class="asmt-bgrid">';
   h+=acard("brief","Handler brief \u2014 read before walking",'<div style="background:#eef7d8;border:1px solid #a9d23f;border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#3a4a16">The ten-second version for anyone taking this dog out. Keep it short and plain.</div>'+ta("Known triggers",a.briefTriggers||"","assessment.briefTriggers","e.g. other dogs head-on, men in hi-vis, hands reaching over the head...")+ta("What the warning looks like",a.briefWarning||"","assessment.briefWarning","e.g. goes still, whale eye, low growl, tail high and stiff...")+ta("What helps / what works",a.briefHelps||"","assessment.briefHelps","e.g. cross the road early, scatter feed, give space and wait, high-value treats...")+'<div class="g2">'+slct("Handler level needed",a.briefHandler||"","assessment.briefHandler",[["","-- not set --"],["Any staff member","Any staff member"],["Experienced handler","Experienced handler only"],["Two people","Two people required"],["Named handlers only","Named handlers only"]])+slct("Muzzle for walks?",a.briefMuzzle||"","assessment.briefMuzzle",[["","-- not set --"],["No","No"],["Yes","Yes \u2014 muzzle on for all walks"],["Yes \u2014 off site only","Yes \u2014 off site only"]])+'</div>',asmtFilled(["briefTriggers","briefWarning","briefHelps","briefHandler","briefMuzzle"])+" / 5 set");
@@ -4072,10 +4081,38 @@ function renderPicture(){
   return h;
 }
 
-function acard(id,title,body,label){window._asmtOpen=window._asmtOpen||{};var open=!!window._asmtOpen[id];return '<div class="card">'+'<div onclick="toggleAsmt(\''+id+'\')" tabindex="0" role="button" aria-expanded="'+(open?'true':'false')+'" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();toggleAsmt(\''+id+'\')}" style="display:flex;align-items:center;gap:10px;cursor:pointer">'+'<span style="flex:1;font-size:14px;font-weight:700;color:#0f172a">'+title+'</span>'+'<span style="font-size:10px;font-weight:600;color:#64748b;background:#f1f5f9;padding:2px 9px;border-radius:20px;white-space:nowrap">'+label+'</span>'+'<span id="asmtchev-'+id+'" style="font-size:18px;line-height:1;color:#94a3b8;transition:transform 0.2s;transform:rotate('+(open?'90':'0')+'deg)">&#8250;</span>'+'</div>'+'<div id="asmtbody-'+id+'" style="'+(open?'':'display:none;')+'margin-top:12px">'+body+'</div>'+'</div>';}
+function acard(id,title,body,label){window._asmtOpen=window._asmtOpen||{};var open=!!window._asmtOpen[id];
+  var sm=asmtCardSummary(id);
+  return '<div class="card" style="padding:0 14px">'
+    +'<div onclick="toggleAsmt(\''+id+'\')" role="button" tabindex="0" aria-expanded="'+open+'" onkeydown="if(event.key===\'Enter\')toggleAsmt(\''+id+'\')" style="display:flex;align-items:flex-start;gap:10px;padding:12px 0;cursor:pointer">'
+    +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#0f172a">'+title+'</div>'
+    +(sm.text?'<div style="font-size:11.5px;color:'+(sm.tone==="warn"?"#854d0e":"#64748b")+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+sm.text+'</div>':'')
+    +'</div>'
+    +'<span class="med-chev" id="asmtchev-'+id+'" style="transform:rotate('+(open?'90':'0')+'deg);align-self:center">&#8250;</span>'
+    +'</div>'
+    +'<div id="asmtbody-'+id+'" style="padding:2px 0 14px;'+(open?'':'display:none')+'">'+body+'</div>'
+  +'</div>';}
+function asmtCardSummary(id){
+  var a=S.assessment||{};
+  function sh(v){return v?esc(String(v).split(" \u2014 ")[0]):null;}
+  function cnt(keys){return keys.filter(function(k2){var v=a[k2];return v!==undefined&&v!==null&&String(v).trim()!=="";}).length;}
+  function anyBad(keys){return keys.some(function(k2){return /snap|bite|lunge|aggress/i.test(String(a[k2]||""));});}
+  var t="",tone="";
+  if(id==="brief"){t=[sh(a.briefHandler),a.briefMuzzle?("muzzle: "+sh(a.briefMuzzle)):null,a.briefTriggers?"triggers noted":null].filter(Boolean).join(" \u00b7 ")||"Not written yet \u2014 the ten-second version for walkers";}
+  else if(id==="temperament"){t=[sh(a.demeanour),a.confidence?("confidence: "+sh(a.confidence)):null,sh(a.energyLevel)].filter(Boolean).join(" \u00b7 ")||"Nothing recorded yet";}
+  else if(id==="handling"){var hk=["touchHead","touchBody","touchPaws","touchEars","touchMouth","collarGrab","restraint","grooming","liftHandling","nailHandling"];var n=cnt(hk);t=n?(n+" of "+hk.length+" tested"+(anyBad(hk)?" \u00b7 concerns noted":"")):"Not tested yet";if(anyBad(hk))tone="warn";}
+  else if(id==="barrier"){t=sh(a.barrierReaction)||"Not tested yet";if(anyBad(["barrierReaction","barrierIntensity"]))tone="warn";}
+  else if(id==="guarding"){t=[a.resourceGuarding?("overall: "+sh(a.resourceGuarding)):null,a.guardFood?("food: "+sh(a.guardFood)):null,a.guardToys?("toys: "+sh(a.guardToys)):null].filter(Boolean).join(" \u00b7 ")||"Not tested yet";if(anyBad(["guardFood","guardToys","guardBed","guardStolen","guardPerson"]))tone="warn";}
+  else if(id==="social"){t=[a.strangerApproach?("strangers: "+sh(a.strangerApproach)):null,a.dogOnLead?("dogs on lead: "+sh(a.dogOnLead)):null].filter(Boolean).join(" \u00b7 ")||"Nothing recorded yet";if(anyBad(["strangerApproach","dogOnLead","dogOffLead"]))tone="warn";}
+  else if(id==="environment"){var ek=["carTravel","noiseSensitivity","newEnvironments","crateBehaviour","kennelBehaviour","aloneTime"];var ne=cnt(ek);t=ne?(ne+" of "+ek.length+" noted"):"Nothing recorded yet";}
+  else if(id==="play"){t=[a.toyInterest?("toys: "+sh(a.toyInterest)):null,sh(a.playStyle)].filter(Boolean).join(" \u00b7 ")||"Nothing recorded yet";}
+  else if(id==="trainability"){t=[a.recall?("recall: "+sh(a.recall)):null,a.basicCommands?("commands: "+sh(a.basicCommands)):null].filter(Boolean).join(" \u00b7 ")||"Nothing recorded yet";}
+  else if(id==="buddywalks"){var bw=(a.buddyWalks||[]).length;t=bw?(bw+" logged"):"None logged yet";}
+  else if(id==="playdates"){var pd=(a.playdates||[]).length;t=pd?(pd+" logged"):"None logged yet";}
+  else if(id==="muzzle"){t=a.muzzleRequired?("required: "+sh(a.muzzleRequired)+(a.muzzleStage?" \u00b7 "+sh(a.muzzleStage):"")):"Not required / not started";}
+  return{text:t,tone:tone};
+}
 function toggleAsmt(id){window._asmtOpen=window._asmtOpen||{};window._asmtOpen[id]=!window._asmtOpen[id];var b=document.getElementById("asmtbody-"+id);var c=document.getElementById("asmtchev-"+id);if(b)b.style.display=window._asmtOpen[id]?"":"none";if(c)c.style.transform="rotate("+(window._asmtOpen[id]?"90":"0")+"deg)";}
-function asmtSetAll(open){window._asmtOpen=window._asmtOpen||{};["brief","temperament","handling","barrier","guarding","social","environment","play","trainability","buddywalks","playdates","muzzle"].forEach(function(id){window._asmtOpen[id]=open;});renderMain();}
-function asmtJump(id){var el=document.getElementById("grp-"+id);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});}
 
 // ── Helper builders ───────────────────────────────────────────────
 function tlc(t){if(!t)return null;if(t<=10)return{l:"Green",bg:"#dcfce7",tc:"#166534",dot:"#16a34a"};if(t<=14)return{l:"Yellow",bg:"#fef9c3",tc:"#854d0e",dot:"#ca8a04"};if(t<=20)return{l:"Red",bg:"#fee2e2",tc:"#991b1b",dot:"#dc2626"};return{l:"Black",bg:"#1e293b",tc:"#f1f5f9",dot:"#94a3b8"};}
