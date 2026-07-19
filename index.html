@@ -45,10 +45,6 @@ textarea{resize:vertical;min-height:68px}
 nav{display:flex;align-items:flex-end;overflow-x:auto;border-bottom:1px solid #e2e8f0;background:#fff;scrollbar-width:none}
 nav::-webkit-scrollbar{display:none}
 #navfade{position:absolute;top:0;right:0;bottom:0;width:30px;background:linear-gradient(to right,rgba(255,255,255,0),#fff);pointer-events:none}
-.navseg{display:flex;flex-direction:column;flex-shrink:0}
-.navglabel{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:#94a3b8;padding:7px 14px 2px;white-space:nowrap}
-.navtabs{display:flex}
-.navdiv{width:1px;background:#eef2f6;align-self:stretch;margin:20px 0 9px;flex-shrink:0}
 .cdot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:5px;vertical-align:middle}
 .cdot.done{background:#16a34a}
 .cdot.empty{background:transparent;box-shadow:inset 0 0 0 1.5px #cbd5e1}
@@ -127,14 +123,11 @@ nav::-webkit-scrollbar{display:none}
 .brow{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
 h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .sub{font-size:12px;color:#64748b;margin-bottom:16px}
-.scat{border:1px solid rgba(15,23,42,0.08);border-radius:12px;padding:12px 14px;margin-bottom:8px;background:#fff}
 .sg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
 .sb{padding:8px 10px;border:1px solid rgba(15,23,42,0.1);border-radius:9px;cursor:pointer;font-size:11px;text-align:left;background:#fff;color:#0f172a;font-family:inherit;line-height:1.4;transition:all 0.12s}
 .sb .n{font-weight:600;font-size:12px;display:block;margin-bottom:1px}
-.schiprow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
 .schip{padding:9px 4px;border:1.5px solid rgba(15,23,42,0.1);border-radius:9px;cursor:pointer;text-align:center;background:#fff;color:#475569;font-family:inherit;transition:all 0.12s}
 .schip:hover{border-color:#94a3b8}
-.totb{background:#f8fafc;border:1px solid rgba(15,23,42,0.08);border-radius:12px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
 .rrow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:13px}
 .rk{color:#64748b}.rv{font-weight:500;text-align:right;max-width:65%}
@@ -153,10 +146,6 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .med-tbl th{padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--color-text-secondary)}
 .med-tbl td{padding:8px 10px;font-size:12px;border-bottom:1px solid var(--color-border-secondary)}
 .med-tbl tr:last-child td{border-bottom:none}
-.badge-ok{background:#dcfce7;color:#166534;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
-.badge-warn{background:#fef9c3;color:#854d0e;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
-.badge-err{background:#fee2e2;color:#991b1b;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
-.badge-off{background:#f1f5f9;color:#64748b;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
 @media print{nav,.brow{display:none !important}body{background:white}}
 /* Medical overlays */
 .med-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity 0.18s}
@@ -235,12 +224,10 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .oc-ctile{border:1px solid rgba(15,23,42,0.08);border-radius:11px;padding:11px 13px;background:#fafdf2}
 .oc-cl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;margin-bottom:5px}
 .oc-cv{font-size:14px;font-weight:800;display:flex;align-items:center;gap:6px;line-height:1.2}
-.oc-two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
 .oc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 16px}
 .dog-fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 16px}
-.oc-grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
-@media(max-width:760px){.oc-grid2{grid-template-columns:1fr}}
-@media(max-width:760px){.oc-ctx{grid-template-columns:repeat(2,1fr)}.oc-two{grid-template-columns:1fr}}
+@media(max-width:760px){}
+@media(max-width:760px){.oc-ctx{grid-template-columns:repeat(2,1fr)}}
 /* Assessment tab — desktop context header + 2-up behaviour grid */
 .asmt-ctx{background:#0f172a;border-radius:14px;padding:13px 17px;margin-bottom:6px;display:flex;align-items:center;gap:13px;flex-wrap:wrap}
 .asmt-ctx .nm{font-size:18px;font-weight:800;color:#fff;letter-spacing:-0.01em;line-height:1.1}
@@ -398,7 +385,7 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.63",date:"2026-07-19",note:"The Rehoming pipeline arrives \u2014 first slice. A new Rehoming button on the dashboard opens the applicant board: everyone who has enquired about adopting, grouped by stage \u2014 Enquiry, Home check, Approved, Adopted, Withdrawn, Declined \u2014 with how long each has been waiting. Tap an applicant for their record: contact details (phone numbers show masked on the board), their situation in the same language as a dog\u0027s suitability \u2014 home, children, other dogs, cats, experience, activity \u2014 which dog they\u0027re interested in (linked straight to the record), a contact log for the voicemails and callbacks, and a reason line when someone withdraws or is declined. Cat enquiries can be logged from day one too. And a deliberate privacy touch: once an applicant adopts, withdraws or is declined, one tap clears their personal details for good while the pipeline history stays. More to come \u2014 matching, waitlists and the adoption handoff are the next slices."},
+var CHANGELOG=[{version:"3.63",date:"2026-07-19",note:"The Rehoming pipeline arrives \u2014 first slice. A new Rehoming button on the dashboard opens the applicant board: everyone who has enquired about adopting, grouped by stage \u2014 Enquiry, Home check, Approved, Adopted, Withdrawn, Declined \u2014 with how long each has been waiting. Tap an applicant for their record: contact details (phone numbers show masked on the board), their situation in the same language as a dog\u0027s suitability \u2014 home, children, other dogs, cats, experience, activity \u2014 which dog they\u0027re interested in (linked straight to the record), a contact log for the voicemails and callbacks, and a reason line when someone withdraws or is declined. Cat enquiries can be logged from day one too. And a deliberate privacy touch: once an applicant adopts, withdraws or is declined, one tap clears their personal details for good while the pipeline history stays. More to come \u2014 matching, waitlists and the adoption handoff are the next slices. A full audit rode along too: the app came back structurally clean, and a handful of long-dead styling rules from old layouts were cleared out."},
   {version:"3.62",date:"2026-07-18",note:"The Outcome tab now does one job: it is the departure record. The decision, its date and reason, outcome notes, follow-up and the sign-off \u2014 and nothing else. The behavioural conclusion has moved to where it actually forms: the Assessment tab gains a Conclusions section holding progress over the stay, the concerns list and the recommended next steps, closing the assessment the way it should \u2014 observations first, then what you made of them. The kennel handover note field has been retired as unused. All existing data carries over \u2014 concerns, steps and progress simply live on Assessment now, and the Narrative and Report views read them exactly as before."},
   {version:"3.61",date:"2026-07-18",note:"Two rollbacks after a few days of real use. The Dog tab returns to its familiar layout \u2014 Identity and Intake open on every record, no folding. And the Formal report view has been retired from the Report tab, which goes back to its two views, Report and Narrative; any narratives already typed are still safely stored in the records, nothing is lost. The Outcome tab is next in line for a proper overhaul."},
   {version:"3.60",date:"2026-07-17",note:"The Outcome tab\u0027s concerns and next steps are now proper lists. Add as many concerns as a dog needs and tag each one \u2014 behaviour, medical, home, legal \u2014 and give the next steps as tickable line-items instead of one box. Existing records carry over untouched \u2014 old concerns and steps read straight into the new lists. The Rehoming tab now works the same way as Medical: the clearance verdict sits on top as a colour banner, with a Blockers list underneath that the app works out for itself \u2014 isolation still running, a pup under 8 weeks, no scoring yet, or an assessment gone stale \u2014 and the decision and suitability details live as two tidy rows below. The Assessment tab joins the hybrid family too: the traffic light, score, confidence and days-since-assessment sit at the top with a Reassess button, the handler brief shows as a one-line card, and every section carries its own one-line summary with amber flags where anything concerning was recorded \u2014 the jump bar and expand-all buttons are gone."},
