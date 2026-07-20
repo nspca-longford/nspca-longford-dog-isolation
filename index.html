@@ -385,7 +385,7 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.64",date:"2026-07-19",note:"Fixes the pipeline duplicating applicants. On a slow connection, saving a brand-new applicant could fire again before the first save had finished, creating a fresh copy each time \u2014 one person could end up scattered across the board at whatever stage each stray copy was created at. Saves are now strictly one-at-a-time: the first one creates the record, everything after updates it. Existing duplicates need a one-line clean-up in the database \u2014 ask for the line."},
+var CHANGELOG=[{version:"3.64",date:"2026-07-19",note:"Fixes the pipeline duplicating applicants. On a slow connection, saving a brand-new applicant could fire again before the first save had finished, creating a fresh copy each time \u2014 one person could end up scattered across the board at whatever stage each stray copy was created at. Saves are now strictly one-at-a-time: the first one creates the record, everything after updates it. Existing duplicates need a one-line clean-up in the database \u2014 ask for the line. Also tidies the dashboard: the Needs attention panel no longer nags about walks \u2014 with the Exercise tab parked until the laptop reaches the unit, every dog was flagged as due a walk forever. The category comes back when Exercise does."},
   {version:"3.63",date:"2026-07-19",note:"The Rehoming pipeline arrives \u2014 first slice. A new Rehoming button on the dashboard opens the applicant board: everyone who has enquired about adopting, grouped by stage \u2014 Enquiry, Home check, Approved, Adopted, Withdrawn, Declined \u2014 with how long each has been waiting. Tap an applicant for their record: contact details (phone numbers show masked on the board), their situation in the same language as a dog\u0027s suitability \u2014 home, children, other dogs, cats, experience, activity \u2014 which dog they\u0027re interested in (linked straight to the record), a contact log for the voicemails and callbacks, and a reason line when someone withdraws or is declined. Cat enquiries can be logged from day one too. And a deliberate privacy touch: once an applicant adopts, withdraws or is declined, one tap clears their personal details for good while the pipeline history stays. More to come \u2014 matching, waitlists and the adoption handoff are the next slices. A full audit rode along too: the app came back structurally clean, and a handful of long-dead styling rules from old layouts were cleared out."},
   {version:"3.62",date:"2026-07-18",note:"The Outcome tab now does one job: it is the departure record. The decision, its date and reason, outcome notes, follow-up and the sign-off \u2014 and nothing else. The behavioural conclusion has moved to where it actually forms: the Assessment tab gains a Conclusions section holding progress over the stay, the concerns list and the recommended next steps, closing the assessment the way it should \u2014 observations first, then what you made of them. The kennel handover note field has been retired as unused. All existing data carries over \u2014 concerns, steps and progress simply live on Assessment now, and the Narrative and Report views read them exactly as before."},
   {version:"3.61",date:"2026-07-18",note:"Two rollbacks after a few days of real use. The Dog tab returns to its familiar layout \u2014 Identity and Intake open on every record, no folding. And the Formal report view has been retired from the Report tab, which goes back to its two views, Report and Narrative; any narratives already typed are still safely stored in the records, nothing is lost. The Outcome tab is next in line for a proper overhaul."},
@@ -1478,7 +1478,7 @@ function tasksRollupHtml(activeRecords){
   var today=new Date().toISOString().slice(0,10);
   var thisWeek=weekStartStr(today);
   var act=activeRecords.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
-  var cats={finishing:[],walks:[],vaccs:[],paras:[],weighs:[],meds:[],reports:[]};
+  var cats={finishing:[],vaccs:[],paras:[],weighs:[],meds:[],reports:[]};
   function vaccDue(med){
     var vl=(med&&med.vaccinations)||[];
     function dateOf(t){var e=vl.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(x){return x.type===t&&x.date;});return e?e.date:null;}
@@ -1493,15 +1493,13 @@ function tasksRollupHtml(activeRecords){
     var _fo=r.state.fin?r.state.fin.outcome:"";if(_fo!=="Finished Isolation"&&daysInIsolation(r.intakeDate)===5+isoExtraDays(r.state.dog))cats.finishing.push(r);
     if((med.medications||[]).some(function(mm){return !mm.endDate||mm.endDate>=today;}))cats.meds.push(r);
     (function(){var _o2=r.state.fin?r.state.fin.outcome:"";if(_o2&&_o2!=="Active — in isolation"&&_o2!=="Active - in isolation")return;var _dn=daysInIsolation(r.intakeDate);if(!_dn||_dn>5+isoExtraDays(r.state.dog))return;var _de=(r.state.days||[])[Math.min(_dn,5)-1];var _has=_de&&(_de.demeanour||_de.feeding||_de.toileting||_de.staffInt||_de.incidents||_de.notes);if(!_has)cats.reports.push(r);})();
-    var ex=(r.state.exercises||[]).filter(function(e){return e.date===today&&e.type==="Walked";});
-    if(!ex.length)cats.walks.push(r);
     if(vaccDue(med))cats.vaccs.push(r);
     var pl=med.parasiteTreatments||[];var paraDue=false;
     ["Bravecto","Milpro"].forEach(function(drug){var last=pl.filter(function(p){return(p.type||"").indexOf(drug)===0||(p.product||"").indexOf(drug)===0;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];if(!last||!last.date)return;var nextDue=last.nextDue||addDaysStr(last.date,90);if(nextDue<=addDaysStr(today,7))paraDue=true;});
     if(paraDue)cats.paras.push(r);
     var wts=r.state.weights||[];if((r.state.dog&&r.state.dog.intakeDate)&&!wts.find(function(w){return w.date>=thisWeek&&w.date<=today;}))cats.weighs.push(r);
   });
-  var defs=[["finishing","Finishing today","#0d9488","#ccfbf1"],["reports","Daily report due","#7c3aed","#f3e8ff"],["meds","On medication","#9d174d","#fce7f3"],["walks","Walks due","#a16207","#fef9c3"],["vaccs","Vaccines due","#a16207","#fef9c3"],["paras","Parasite tx due","#a16207","#fef9c3"],["weighs","Weigh-ins due","#0d9488","#ccfbf1"]];
+  var defs=[["finishing","Finishing today","#0d9488","#ccfbf1"],["reports","Daily report due","#7c3aed","#f3e8ff"],["meds","On medication","#9d174d","#fce7f3"],["vaccs","Vaccines due","#a16207","#fef9c3"],["paras","Parasite tx due","#a16207","#fef9c3"],["weighs","Weigh-ins due","#0d9488","#ccfbf1"]];
   var items=defs.filter(function(d){return cats[d[0]].length;});
   if(!items.length)return"";
   var total=items.reduce(function(a,d){return a+cats[d[0]].length;},0);
