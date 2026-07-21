@@ -385,11 +385,11 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.65",date:"2026-07-19",note:"Two additions. A dog\u0027s Intake details now carry a return or reclaim line: choose whether the dog has come back from an adoption, is due back from a foster or trial, or is a stray inside its owner-reclaim window, and the date field renames itself to suit \u2014 date returned, due back, or reclaim deadline. It stays out of the way on the majority of dogs that aren\u0027t returns. And the Team Directory now shows management accounts to admins only: everyone else sees their own card and the rest of the team, without the admin, director and manager accounts listed."},
+var CHANGELOG=[{version:"3.66",date:"2026-07-21",note:"A deeper fix for the applicant duplicates, found by this audit. The 3.64 fix stopped saves racing each other, but a second fault was hiding underneath: the app never actually captured the new applicant\u0027s record number after the first save, so every later save could still quietly create a fresh copy. That is now fixed properly \u2014 first save creates, every save after updates, guaranteed. The same protective lock has been added to dog saves too, which had the same theoretical weakness on slow connections, caught before it ever bit. Housekeeping alongside: the Team Directory now sorts the newer roles in their proper place, and an old internal function has been renamed to say what it actually does. If any duplicate applicants appeared before this update, the one-line clean-up applies \u2014 ask for it."},
+  {version:"3.65",date:"2026-07-19",note:"Two additions. A dog\u0027s Intake details now carry a return or reclaim line: choose whether the dog has come back from an adoption, is due back from a foster or trial, or is a stray inside its owner-reclaim window, and the date field renames itself to suit \u2014 date returned, due back, or reclaim deadline. It stays out of the way on the majority of dogs that aren\u0027t returns. And the Team Directory now shows management accounts to admins only: everyone else sees their own card and the rest of the team, without the admin, director and manager accounts listed."},
   {version:"3.64",date:"2026-07-19",note:"Fixes the pipeline duplicating applicants. On a slow connection, saving a brand-new applicant could fire again before the first save had finished, creating a fresh copy each time \u2014 one person could end up scattered across the board at whatever stage each stray copy was created at. Saves are now strictly one-at-a-time: the first one creates the record, everything after updates it. Existing duplicates need a one-line clean-up in the database \u2014 ask for the line. Also tidies the dashboard: the Needs attention panel no longer nags about walks \u2014 with the Exercise tab parked until the laptop reaches the unit, every dog was flagged as due a walk forever. The category comes back when Exercise does."},
   {version:"3.63",date:"2026-07-19",note:"The Rehoming pipeline arrives \u2014 first slice. A new Rehoming button on the dashboard opens the applicant board: everyone who has enquired about adopting, grouped by stage \u2014 Enquiry, Home check, Approved, Adopted, Withdrawn, Declined \u2014 with how long each has been waiting. Tap an applicant for their record: contact details (phone numbers show masked on the board), their situation in the same language as a dog\u0027s suitability \u2014 home, children, other dogs, cats, experience, activity \u2014 which dog they\u0027re interested in (linked straight to the record), a contact log for the voicemails and callbacks, and a reason line when someone withdraws or is declined. Cat enquiries can be logged from day one too. And a deliberate privacy touch: once an applicant adopts, withdraws or is declined, one tap clears their personal details for good while the pipeline history stays. More to come \u2014 matching, waitlists and the adoption handoff are the next slices. A full audit rode along too: the app came back structurally clean, and a handful of long-dead styling rules from old layouts were cleared out."},
-  {version:"3.62",date:"2026-07-18",note:"The Outcome tab now does one job: it is the departure record. The decision, its date and reason, outcome notes, follow-up and the sign-off \u2014 and nothing else. The behavioural conclusion has moved to where it actually forms: the Assessment tab gains a Conclusions section holding progress over the stay, the concerns list and the recommended next steps, closing the assessment the way it should \u2014 observations first, then what you made of them. The kennel handover note field has been retired as unused. All existing data carries over \u2014 concerns, steps and progress simply live on Assessment now, and the Narrative and Report views read them exactly as before."},
-  {version:"3.61",date:"2026-07-18",note:"Two rollbacks after a few days of real use. The Dog tab returns to its familiar layout \u2014 Identity and Intake open on every record, no folding. And the Formal report view has been retired from the Report tab, which goes back to its two views, Report and Narrative; any narratives already typed are still safely stored in the records, nothing is lost. The Outcome tab is next in line for a proper overhaul."}
+  {version:"3.62",date:"2026-07-18",note:"The Outcome tab now does one job: it is the departure record. The decision, its date and reason, outcome notes, follow-up and the sign-off \u2014 and nothing else. The behavioural conclusion has moved to where it actually forms: the Assessment tab gains a Conclusions section holding progress over the stay, the concerns list and the recommended next steps, closing the assessment the way it should \u2014 observations first, then what you made of them. The kennel handover note field has been retired as unused. All existing data carries over \u2014 concerns, steps and progress simply live on Assessment now, and the Narrative and Report views read them exactly as before."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -597,7 +597,7 @@ function getTodaysExercises(rec){
 
 
 
-async function saveExerciseChange(rec){
+async function saveRecordChange(rec){
   if(!supabaseClient)return;
   var st=JSON.parse(JSON.stringify(rec.state));delete st._id;st._savedBy=currentName();
   var row={name:rec.name,breed:rec.breed||"",ref_no:rec.refNo||"",intake_date:rec.intakeDate||null,assessor:rec.assessor||"",score:rec.score||0,traffic_light:rec.trafficLight||"",saved_at:new Date().toISOString(),data:st};
@@ -894,7 +894,7 @@ function renderTeamDirectory(){
   var all=getAllUsersSync();
   var meName=currentName();
   // Sort by role priority then name
-  var roleOrder={admin:0,manager:1,supervisor:2,staff:3};
+  var roleOrder={admin:0,director:1,manager:2,supervisor:3,coordinator:4,staff:5};
   all=all.slice().sort(function(a,b){var ra=roleOrder[a.role||"staff"]||9;var rb=roleOrder[b.role||"staff"]||9;return ra===rb?(a.name||"").localeCompare(b.name||""):ra-rb;});
   var canManage=currentRole()==="admin";
   // Elevated accounts are visible to admin only (you always see yourself).
@@ -1676,7 +1676,7 @@ function isArchived(rec){return !!(rec&&rec.state&&rec.state._archived);}
 async function toggleArchive(id){
   var rec=records.find(function(r){return r.id===id;});if(!rec||!rec.state)return;
   rec.state._archived=!rec.state._archived;
-  try{await saveExerciseChange(rec);}catch(e){}
+  try{await saveRecordChange(rec);}catch(e){}
   var el=document.getElementById("dashboard-content");if(el)el.innerHTML=page_records();
   miniToast(rec.state._archived?"Archived":"Restored from archive");
 }
@@ -1708,7 +1708,7 @@ async function batchWeighSave(){
     recs.push(rec);saved++;
   });
   if(!saved){miniToast("No weights entered");return;}
-  for(var i=0;i<recs.length;i++){try{await saveExerciseChange(recs[i]);}catch(e){}}
+  for(var i=0;i<recs.length;i++){try{await saveRecordChange(recs[i]);}catch(e){}}
   showDashSection("weighin");
   miniToast(saved+" weight"+(saved!==1?"s":"")+" saved");
 }
@@ -1909,7 +1909,7 @@ async function saveApplicant(){
   var row={name:A.name||"",stage:A.stage||"Enquiry",species:A.species||"dog",animal_id:A.animal_id||null,enquiry_date:A.enquiry_date||null,saved_at:new Date().toISOString(),state:A.state||{}};
   try{
     if(A.id){await supabaseClient.from("applicants").update(row).eq("id",A.id);}
-    else{var res=await supabaseClient.from("applicants").insert(row).select();if(res&&res.data&&res.data[0])A.id=res.data[0].id;}
+    else{var res=await supabaseClient.from("applicants").insert(row);if(res&&res.data&&res.data[0])A.id=res.data[0].id;}
     await loadApplicants();
   }catch(e){}
   finally{
@@ -5282,9 +5282,12 @@ function initSupabase(){
 
 function showSaved(){var btn=document.getElementById("save-btn");if(btn){btn.textContent="Saved ✓";btn.style.background="#15803d";setTimeout(function(){btn.textContent="Save";btn.style.background="";},2000);}}
 
+var _recSaveBusy=false,_recSaveAgain=false;
 async function saveRecord(){
   if(!supabaseClient){persistSave();showSaved();return;}
   if(!S.dog||!S.dog.name){persistSave();return;}
+  if(_recSaveBusy){_recSaveAgain=true;return;}
+  _recSaveBusy=true;
   var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
   var tl=(effLight(total,S.scores)||{}).l||"";
   var st=JSON.parse(JSON.stringify(S));delete st._id;st._savedBy=currentName();
@@ -5294,6 +5297,7 @@ async function saveRecord(){
     else{var res=await supabaseClient.from("dogs").insert([row]);if(res.data&&res.data[0]){S._id=res.data[0].id;}}
     persistSave();showSaved();await loadRecordsList();updateSaveBar();
   }catch(e){console.error("saveRecord:",e);persistSave();}
+  finally{_recSaveBusy=false;if(_recSaveAgain){_recSaveAgain=false;saveRecord();}}
 }
 
 async function deleteRecord(id){
