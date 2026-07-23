@@ -385,11 +385,11 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.67",date:"2026-07-21",note:"The pipeline learns to think \u2014 stage two. Link an applicant to a dog and the app compares them line by line: the dog\u0027s suitability against the applicant\u0027s situation, in the same words both were recorded in. Real conflicts are called out plainly \u2014 a no-cats dog and a cat-owning home is a stop, not a lower score \u2014 while softer things to check (careful introductions, energy mismatches, anything untested) are listed underneath, and the dog\u0027s own readiness (still in isolation, too young, not yet scored) shows alongside. When more than one applicant wants the same dog, the board shows who\u0027s first in line by enquiry date, and it warns loudly if two people end up approved for one dog. The Home check stage gets its own small block \u2014 visit date, outcome, brief notes. And when an applicant is marked Adopted, the app offers to close the circle: one confirm marks the dog\u0027s own record Rehomed with the date, so nothing is typed twice."},
+var CHANGELOG=[{version:"3.68",date:"2026-07-23",note:"Rehoming made quicker to read and quicker to fill. The tab now opens with three plain figures \u2014 where clearance stands, how much of the suitability picture is recorded, and how many people are waiting on this dog with whether they look like a match. The suitability questions are no longer dropdowns: every answer is a single tap, all the options visible at once, so eight questions take eight taps instead of eight menus. Nothing about the answers themselves has changed \u2014 what is already saved stays exactly as it was, and the matching reads them the same way. The clearance section opens itself while a dog is still undecided and settles back to a tidy line once you have decided and the picture is filled in. The applicant record gets the same tap-to-answer treatment for their home, children, pets and experience."},
+  {version:"3.67",date:"2026-07-21",note:"The pipeline learns to think \u2014 stage two. Link an applicant to a dog and the app compares them line by line: the dog\u0027s suitability against the applicant\u0027s situation, in the same words both were recorded in. Real conflicts are called out plainly \u2014 a no-cats dog and a cat-owning home is a stop, not a lower score \u2014 while softer things to check (careful introductions, energy mismatches, anything untested) are listed underneath, and the dog\u0027s own readiness (still in isolation, too young, not yet scored) shows alongside. When more than one applicant wants the same dog, the board shows who\u0027s first in line by enquiry date, and it warns loudly if two people end up approved for one dog. The Home check stage gets its own small block \u2014 visit date, outcome, brief notes. And when an applicant is marked Adopted, the app offers to close the circle: one confirm marks the dog\u0027s own record Rehomed with the date, so nothing is typed twice. And the door swings both ways now: a dog\u0027s own Rehoming tab lists everyone applying for them \u2014 stage, place in line, match verdict \u2014 tap any name to jump straight to their record, and once the dog goes home, the tab remembers who adopted them."},
   {version:"3.66",date:"2026-07-21",note:"A deeper fix for the applicant duplicates, found by this audit. The 3.64 fix stopped saves racing each other, but a second fault was hiding underneath: the app never actually captured the new applicant\u0027s record number after the first save, so every later save could still quietly create a fresh copy. That is now fixed properly \u2014 first save creates, every save after updates, guaranteed. The same protective lock has been added to dog saves too, which had the same theoretical weakness on slow connections, caught before it ever bit. Housekeeping alongside: the Team Directory now sorts the newer roles in their proper place, and an old internal function has been renamed to say what it actually does. If any duplicate applicants appeared before this update, the one-line clean-up applies \u2014 ask for it."},
   {version:"3.65",date:"2026-07-19",note:"Two additions. A dog\u0027s Intake details now carry a return or reclaim line: choose whether the dog has come back from an adoption, is due back from a foster or trial, or is a stray inside its owner-reclaim window, and the date field renames itself to suit \u2014 date returned, due back, or reclaim deadline. It stays out of the way on the majority of dogs that aren\u0027t returns. And the Team Directory now shows management accounts to admins only: everyone else sees their own card and the rest of the team, without the admin, director and manager accounts listed."},
-  {version:"3.64",date:"2026-07-19",note:"Fixes the pipeline duplicating applicants. On a slow connection, saving a brand-new applicant could fire again before the first save had finished, creating a fresh copy each time \u2014 one person could end up scattered across the board at whatever stage each stray copy was created at. Saves are now strictly one-at-a-time: the first one creates the record, everything after updates it. Existing duplicates need a one-line clean-up in the database \u2014 ask for the line. Also tidies the dashboard: the Needs attention panel no longer nags about walks \u2014 with the Exercise tab parked until the laptop reaches the unit, every dog was flagged as due a walk forever. The category comes back when Exercise does."},
-  {version:"3.63",date:"2026-07-19",note:"The Rehoming pipeline arrives \u2014 first slice. A new Rehoming button on the dashboard opens the applicant board: everyone who has enquired about adopting, grouped by stage \u2014 Enquiry, Home check, Approved, Adopted, Withdrawn, Declined \u2014 with how long each has been waiting. Tap an applicant for their record: contact details (phone numbers show masked on the board), their situation in the same language as a dog\u0027s suitability \u2014 home, children, other dogs, cats, experience, activity \u2014 which dog they\u0027re interested in (linked straight to the record), a contact log for the voicemails and callbacks, and a reason line when someone withdraws or is declined. Cat enquiries can be logged from day one too. And a deliberate privacy touch: once an applicant adopts, withdraws or is declined, one tap clears their personal details for good while the pipeline history stays. More to come \u2014 matching, waitlists and the adoption handoff are the next slices. A full audit rode along too: the app came back structurally clean, and a handful of long-dead styling rules from old layouts were cleared out."}
+  {version:"3.64",date:"2026-07-19",note:"Fixes the pipeline duplicating applicants. On a slow connection, saving a brand-new applicant could fire again before the first save had finished, creating a fresh copy each time \u2014 one person could end up scattered across the board at whatever stage each stray copy was created at. Saves are now strictly one-at-a-time: the first one creates the record, everything after updates it. Existing duplicates need a one-line clean-up in the database \u2014 ask for the line. Also tidies the dashboard: the Needs attention panel no longer nags about walks \u2014 with the Exercise tab parked until the laptop reaches the unit, every dog was flagged as due a walk forever. The category comes back when Exercise does."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1918,6 +1918,12 @@ async function saveApplicant(){
   }
 }
 function saveApplicantSoon(){clearTimeout(_pipeTimer);_pipeTimer=setTimeout(function(){saveApplicant();},700);}
+function setAppPill(k,v){if(!A)return;if(A.state[k]===v)v="";setAppF(k,v);renderPipeline();}
+function appPillGroup(label,key,current,opts){
+  var pills=opts.map(function(o){var on=current===o;
+    return '<button onclick="setAppPill(\''+key+'\',\''+o.replace(/'/g,"\\'")+'\')" style="font-size:11.5px;padding:5px 13px;border-radius:16px;cursor:pointer;font-family:inherit;'+(on?'background:#0f172a;color:#fff;border:1px solid #0f172a;font-weight:600':'background:#fff;color:#475569;border:0.5px solid rgba(15,23,42,0.18)')+'">'+o+'</button>';}).join("");
+  return '<div style="margin-bottom:10px"><div style="font-size:11.5px;color:#64748b;margin-bottom:4px">'+label+'</div><div style="display:flex;gap:5px;flex-wrap:wrap">'+pills+'</div></div>';
+}
 function setAppF(k,v){if(!A)return;if(k==="name"||k==="stage"||k==="species"||k==="enquiry_date")A[k]=v;else if(k==="animal_id")A.animal_id=v?(+v||null):null;else A.state[k]=v;saveApplicantSoon();if(k==="stage"||k==="animal_id"||k==="species")renderPipeline();if(k==="stage"&&v==="Adopted")maybeOfferAdoptionHandoff();}
 function openPipeline(){window._pipeView={mode:"board"};var ov=document.getElementById("pipeline-ov");if(ov)ov.style.display="block";renderPipeline();loadApplicants().then(function(){renderPipeline();});}
 function closePipeline(){var ov=document.getElementById("pipeline-ov");if(ov)ov.style.display="none";A=null;}
@@ -2078,13 +2084,13 @@ function pipelineApplicantHtml(){
       +'</div>'+pf("Home check notes","hcNotes",st.hcNotes,"text","brief \u2014 garden secure, other pets met, etc.");
   }
   if(A.stage==="Adopted"&&st.adoptionDate)h+='<div style="font-size:11.5px;color:#166534;margin:4px 0 8px">Adopted '+fmtDMY(st.adoptionDate)+(A.animal_id?" \u00b7 "+esc(pipeDogName(A.animal_id))+"\u0027s record updated":"")+'</div>';
-  h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:10px 0 6px">Their situation</div><div class="g2">'
-    +ps("Home","homeType",st.homeType,["House with garden","House without garden","Apartment","Rural / farm"])
-    +ps("Children","children",st.children,["None","Over 12","Under 12"])
-    +ps("Other dogs","otherDogs",st.otherDogs,["None","One","Two or more"])
-    +ps("Cats","cats",st.cats,["None","One or more"])
-    +ps("Experience","experience",st.experience,["First-time","Some","Experienced","Specialist"])
-    +ps("Activity","activity",st.activity,["Low","Daily walks","Very active"])+'</div>';
+  h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:10px 0 6px">Their situation \u2014 tap to set</div>'
+    +appPillGroup("Home","homeType",st.homeType,["House with garden","House without garden","Apartment","Rural / farm"])
+    +appPillGroup("Children","children",st.children,["None","Over 12","Under 12"])
+    +appPillGroup("Other dogs","otherDogs",st.otherDogs,["None","One","Two or more"])
+    +appPillGroup("Cats","cats",st.cats,["None","One or more"])
+    +appPillGroup("Experience","experience",st.experience,["First-time","Some","Experienced","Specialist"])
+    +appPillGroup("Activity","activity",st.activity,["Low","Daily walks","Very active"]);
   h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:10px 0 6px">Contact log</div>';
   h+=((st.contactLog||[]).slice().reverse().map(function(c){return '<div style="font-size:12px;color:#334155;padding:4px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span style="color:#94a3b8">'+fmtDMY(c.date)+'</span> \u00b7 '+esc(c.text)+'</div>';}).join("")||'<div style="font-size:11.5px;color:#cbd5e1">nothing logged</div>');
   h+='<div style="display:flex;gap:8px;margin:8px 0 12px"><input id="pipe-contact" type="text" placeholder="e.g. left voicemail" style="flex:1;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit"><button onclick="addContactLine()" style="background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);padding:8px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Add</button></div>';
@@ -3750,6 +3756,32 @@ function renderAssessment(){
 
 function asmtFilled(keys){var a=S.assessment||{};var n=0;for(var i=0;i<keys.length;i++){var v=a[keys[i]];if(v!==undefined&&v!=="")n++;}return n;}
 function asmtGroup(id,title){return '<div id="grp-'+id+'" style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;margin:16px 2px 8px;scroll-margin-top:54px">'+title+'</div>';}
+// \u2500\u2500 v3.68: one-tap pill selectors (write same paths as the old dropdowns) \u2500\u2500
+function setPill(path,v){
+  var p=path.split(".");if(!S[p[0]])S[p[0]]={};
+  S[p[0]][p[1]]=(S[p[0]][p[1]]===v)?"":v; // tap the set pill again to unset
+  debouncedSave();renderMain();
+}
+function pillGroup(label,path,current,opts){
+  var pills=opts.map(function(o){
+    var v=o[0],show=o[1]||o[0];var on=current===v;
+    return '<button onclick="setPill(\''+path+'\',\''+v.replace(/'/g,"\\'")+'\')" style="font-size:11.5px;padding:5px 13px;border-radius:16px;cursor:pointer;font-family:inherit;'+(on?'background:#0f172a;color:#fff;border:1px solid #0f172a;font-weight:600':'background:#fff;color:#475569;border:0.5px solid rgba(15,23,42,0.18)')+'">'+show+'</button>';
+  }).join("");
+  return '<div style="margin-bottom:10px"><div style="font-size:11.5px;color:#64748b;margin-bottom:4px">'+label+'</div><div style="display:flex;gap:5px;flex-wrap:wrap">'+pills+'</div></div>';
+}
+var SUIT_PILLS=[
+ ["Home","assessment.homeType",[["Any home","Any"],["House with garden","Garden"],["Rural \u2014 large space","Rural"],["Experienced owner only","Exp. owner"],["Single dog household","Single dog"],["Quiet home","Quiet"]]],
+ ["Children","assessment.suitableChildren",[["All ages"],["Over 12"],["Adults only"],["No"]]],
+ ["Other dogs","assessment.suitableOtherDogs",[["Yes"],["Selective"],["Female only","\u2640 only"],["Male only","\u2642 only"],["No"]]],
+ ["Cats","assessment.suitableCats",[["Yes"],["Caution"],["No"]]],
+ ["Horses / livestock","assessment.suitableEquine",[["Yes"],["Caution"],["No"]]],
+ ["Small mammals","assessment.suitableSmallMammals",[["Yes"],["Caution"],["No"]]],
+ ["Exercise","assessment.exerciseNeeds",[["Low \u2014 short walks","Low"],["Moderate \u2014 1hr daily","Moderate"],["High \u2014 2hr+ daily","High"],["Very high"]]],
+ ["Owner experience","assessment.experienceLevel",[["First time owner","First-time OK"],["Some experience","Some"],["Experienced only"],["Specialist"]]]
+];
+function suitPillsHtml(a){
+  return SUIT_PILLS.map(function(sp){return pillGroup(sp[0],sp[1],a[sp[1].split(".")[1]]||"",sp[2]);}).join("");
+}
 function renderRehoming(){
   var a=S.assessment||{};var d=S.dog||{};
   var st=a.rehomingStatus||"";
@@ -3765,27 +3797,71 @@ function renderRehoming(){
   var clearBody=slct("Rehoming status",a.rehomingStatus||"","assessment.rehomingStatus",[["","-- not decided --"],["Cleared for rehoming","Cleared for rehoming"],["Cleared with conditions","Cleared with conditions"],["Not cleared \u2014 needs work","Not cleared \u2014 needs more time / work"],["Not fit for rehoming","Not fit for rehoming"],["Awaiting assessment","Awaiting assessment"]])
     +fld("Decision date",a.rehomingDate||"","assessment.rehomingDate","date")
     +ta("Conditions",a.rehomingConditions||"","assessment.rehomingConditions","e.g. adult-only home, no cats, experienced owner");
-  var suitBody='<div class="g2">'
-    +slct("Home type",a.homeType||"","assessment.homeType",[["","-- not assessed --"],["Any home","Any home"],["House with garden","House with garden required"],["Rural — large space","Rural — large space preferred"],["Experienced owner only","Experienced owner only"],["Single dog household","Single dog household only"],["Quiet home","Quiet home — no young children"]])
-    +slct("Suitable with children",a.suitableChildren||"","assessment.suitableChildren",[["","-- not assessed --"],["All ages","Yes — all ages"],["Over 12","Yes — over 12 only"],["Adults only","Adults only"],["No","Not suitable with children"]])
-    +slct("Suitable with other dogs",a.suitableOtherDogs||"","assessment.suitableOtherDogs",[["","-- not assessed --"],["Yes","Yes — good with other dogs"],["Female only","Yes — female dogs only"],["Male only","Yes — male dogs only"],["Selective","Selective — case by case"],["No","No — only dog"]])
-    +slct("Suitable with cats",a.suitableCats||"","assessment.suitableCats",[["","-- not assessed --"],["Yes","Yes — cat tested"],["Caution","With caution"],["No","No — not safe with cats"]])
-    +slct("Suitable with horses / livestock",a.suitableEquine||"","assessment.suitableEquine",[["","-- not assessed --"],["Yes","Yes — safe with horses / livestock"],["Caution","With caution"],["No","No — not safe"]])
-    +slct("Suitable with small mammals",a.suitableSmallMammals||"","assessment.suitableSmallMammals",[["","-- not assessed --"],["Yes","Yes — safe with small mammals"],["Caution","With caution"],["No","No — high prey drive"]])
-    +slct("Exercise needs",a.exerciseNeeds||"","assessment.exerciseNeeds",[["","-- not assessed --"],["Low — short walks","Low — short walks"],["Moderate — 1hr daily","Moderate — 1hr daily"],["High — 2hr+ daily","High — 2hr+ daily"],["Very high","Very high — working breed level"]])
-    +slct("Owner experience required",a.experienceLevel||"","assessment.experienceLevel",[["","-- not assessed --"],["First time owner","Suitable for first time owner"],["Some experience","Some dog experience recommended"],["Experienced only","Experienced owner required"],["Specialist","Specialist handler only"]])
-    +'</div>'+ta("Suitability notes",a.suitabilityNotes||"","assessment.suitabilityNotes","");
+  var suitNotes=ta("Suitability notes",a.suitabilityNotes||"","assessment.suitabilityNotes","");
   var filledN=["homeType","suitableChildren","suitableOtherDogs","suitableCats","suitableEquine","suitableSmallMammals","exerciseNeeds","experienceLevel"].filter(function(kk){var v=a[kk];return v!==undefined&&v!==null&&String(v).trim()!=="";}).length;
   var clearSum=st?(esc(st)+(a.rehomingDate?" \u00b7 "+fmtDMY(a.rehomingDate):"")+(a.rehomingConditions?" \u00b7 conditions set":"")):"No decision recorded \u2014 tap to decide";
-  var suitSum=filledN?(filledN+" of 8 recorded"+(a.suitableChildren?" \u00b7 children: "+esc(a.suitableChildren):"")):"Nothing recorded yet";
+  // status tiles under the banner
+  var _apps=(typeof applicants!=="undefined"?applicants:[]).filter(function(x){return S._id&&x.animal_id===S._id&&APP_ACTIVE.indexOf(x.stage)>-1;});
+  var _best="";
+  _apps.forEach(function(x){var v=matchApplicantToDog(x,{state:S}).verdict;
+    if(v==="good")_best="\u2713 match";
+    else if(v==="caution"&&_best!=="\u2713 match")_best="\u25b3 checks";
+    else if(v==="blocked"&&!_best)_best="\u2715 conflict";});
+  var tiles=hybridTiles([
+    {label:"Clearance",value:st?esc(String(st).split(" \u2014 ")[0]):"Undecided",tone:tone==="alert"?"alert":(st?"":"warn")},
+    {label:"Suitability",value:filledN+" of 8",tone:filledN<8?"warn":""},
+    {label:"Applicants",value:_apps.length?(_apps.length+(_best?" \u00b7 "+_best:"")):"\u2014"}
+  ]);
+  var appsHtml=dogApplicantsHtml();
+  // clearance opens itself while undecided
+  window._medOpen=window._medOpen||{};
+  if(!st&&window._medOpen["rh-clear"]===undefined)window._medOpen["rh-clear"]=true;
   var rows='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:4px 0 2px;display:flex;align-items:center;gap:10px">Record<span style="flex:1;height:1px;background:var(--color-border-tertiary)"></span></div>'
-    +hybridRow("rh-clear","\u2696\ufe0f","Clearance decision",clearSum,clearBody,tone==="alert"?"alert":tone==="warn"?"warn":"")
-    +hybridRow("rh-suit","\ud83c\udfe1","Suitability",suitSum,suitBody,"");
+    +hybridRow("rh-clear","\u2696\ufe0f","Clearance decision",clearSum,clearBody,tone==="alert"?"alert":tone==="warn"?"warn":"");
+  var suitSection;
+  if(filledN===8&&st){
+    // complete + decided: settle back to a compact row, pills inside
+    suitSection=hybridRow("rh-suit","\ud83c\udfe1","Suitability","8 of 8 recorded"+(a.suitableChildren?" \u00b7 children: "+esc(String(a.suitableChildren).split(" \u2014 ")[0]):""),suitPillsHtml(a)+suitNotes,"");
+    rows+=suitSection;suitSection="";
+  }else{
+    suitSection='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:12px 0 6px">Suitability \u2014 tap to set</div>'+suitPillsHtml(a)+suitNotes;
+  }
   return '<h2 style="margin-bottom:4px">Rehoming</h2><div class="sub" style="margin-bottom:14px">Clearance first \u2014 the record below</div>'
-    +'<div class="card">'+banner+blockHtml+rows+'</div>'
+    +'<div class="card">'+banner+tiles+blockHtml+appsHtml+rows+suitSection+'</div>'
     +'<div class="brow"><button class="btn" data-go="outcome">Next: outcome &rarr;</button></div>';
 }
 function ageWeeksOf(dob){if(!dob)return null;var t=new Date(dob).getTime();if(isNaN(t))return null;var ms=Date.now()-t;if(ms<0)return null;return Math.floor(ms/6048e5);}
+function dogApplicantsHtml(){
+  if(!S._id)return"";
+  if(!window._appsLoadedOnce&&supabaseClient){window._appsLoadedOnce=1;loadApplicants().then(function(){if(S.tab==="rehoming")renderMain();});}
+  var mine=applicants.filter(function(a){return a.animal_id===S._id&&a.species==="dog";});
+  if(!mine.length)return"";
+  var order={"Approved":1,"Home check":2,"Enquiry":3,"Adopted":4,"Withdrawn":5,"Declined":6};
+  mine.sort(function(x,y){return (order[x.stage]||9)-(order[y.stage]||9)||String(x.enquiry_date||"").localeCompare(String(y.enquiry_date||""));});
+  var shown=mine.filter(function(a){return a.stage!=="Withdrawn"&&a.stage!=="Declined";});
+  if(!shown.length)return"";
+  var me={state:S};
+  var rowsH=shown.map(function(a){
+    var m=matchApplicantToDog(a,me);
+    var chip=m.verdict==="blocked"?'<span style="font-size:10.5px;font-weight:700;background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:8px">\u2715 conflict</span>'
+      :m.verdict==="caution"?'<span style="font-size:10.5px;font-weight:700;background:#fef9c3;color:#854d0e;padding:2px 8px;border-radius:8px">\u25b3 checks</span>'
+      :m.verdict==="good"?'<span style="font-size:10.5px;font-weight:700;background:#dcfce7;color:#166534;padding:2px 8px;border-radius:8px">\u2713 match</span>':"";
+    var qi=appQueueInfo(a);
+    var sub=[a.stage,(qi&&qi.total>1)?(qi.pos===1?"first in line":"#"+qi.pos+" of "+qi.total):null,a.state&&a.state.hcDate&&a.stage==="Home check"?("visit "+fmtDMY(a.state.hcDate)):null].filter(Boolean).join(" \u00b7 ");
+    return '<div onclick="openApplicantFromDog('+a.id+')" style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer">'
+      +'<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600;color:#0f172a">'+esc(a.name||"Unnamed")+'</div><div style="font-size:11px;color:#64748b">'+sub+'</div></div>'+chip+'<span class="med-chev">&#8250;</span></div>';
+  }).join("");
+  var adoptedBy=null;
+  if(S.fin&&S.fin.outcome==="Rehomed"){var ad=mine.find(function(a){return a.stage==="Adopted";});if(ad)adoptedBy='<div style="font-size:11.5px;color:#166534;padding:6px 0 0">Adopted by '+esc(ad.name||"")+(ad.state&&ad.state.adoptionDate?" \u00b7 "+fmtDMY(ad.state.adoptionDate):"")+'</div>';}
+  return '<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:0 0 4px">Applicants \u00b7 '+shown.length+'</div>'
+    +'<div style="border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:0 12px;margin-bottom:14px">'+rowsH+(adoptedBy||"")+'</div>';
+}
+function openApplicantFromDog(id){
+  var ov=document.getElementById("pipeline-ov");if(ov)ov.style.display="block";
+  window._pipeView={mode:"board"};
+  loadApplicants().then(function(){openApplicant(id);});
+  renderPipeline();
+}
 function rehomeBlockersFor(st){
   var out=[];st=st||{};var f=st.fin||{};var d=st.dog||{};
   var ii=isolationInfo(d.intakeDate,f.outcome,isoExtraDays(d),pupIsoVax(d,st.medical));
