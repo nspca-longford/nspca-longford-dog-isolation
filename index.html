@@ -385,11 +385,11 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.73",date:"2026-07-23",note:"The Rehoming board now shows the dogs as well as the people. Above the applicant list there is a Dogs available section: every dog cleared for rehoming, with their photo, whether they carry conditions, any blockers still standing, and whether anyone has enquired \u2014 with the number waiting and whether the best of them looks like a match, or plainly none yet. Tap a dog to go straight to its record. So the board answers both halves of the question in one place: who is looking for a home, and who is looking for a dog."},
+var CHANGELOG=[{version:"3.74",date:"2026-07-24",note:"You can now set the handling level yourself, whatever the score says. On the Assessment tab there is a Handling level card \u2014 pick Green, Yellow, Red or Black and that becomes the level the dog is handled at, on the kennel card, the boards, the walking rule and the handling glance. It is for the dog that assesses well but should still be staff-only around the public or volunteers, or one being watched for a while. The app records who set it and when, keeps your reason with the record, and never alters the assessed score \u2014 the Assessment banner shows both, so a dog reads as Black, set manually, assessed Green. Tap the level again to go back to following the assessment. Score history, the assessor comparison and the escalation gate all keep using the assessed light, since those are about what the dog scored, not how it is handled."},
+  {version:"3.73",date:"2026-07-23",note:"The Rehoming board now shows the dogs as well as the people. Above the applicant list there is a Dogs available section: every dog cleared for rehoming, with their photo, whether they carry conditions, any blockers still standing, and whether anyone has enquired \u2014 with the number waiting and whether the best of them looks like a match, or plainly none yet. Tap a dog to go straight to its record. So the board answers both halves of the question in one place: who is looking for a home, and who is looking for a dog."},
   {version:"3.72",date:"2026-07-23",note:"The Rehoming tab now matches the Medical tab properly: the verdict, the figures and the blockers up top, then Record, then two tidy rows \u2014 clearance and suitability \u2014 that open when you want them. The suitability questions no longer spill down the page below the record; they sit inside their own row like everything else, and nothing opens itself uninvited."},
   {version:"3.71",date:"2026-07-23",note:"The pipeline now follows an adoption through to the door. Once someone is approved, an Adoption row appears on their record for the collection date, the fee if there is one, whether the contract has been signed and whether the microchip has been transferred. It nudges rather than nags: an approved applicant with no collection date says so, and an adoption marked complete while the contract or chip transfer is still outstanding keeps showing in Needs checking until both are ticked off."},
-  {version:"3.70",date:"2026-07-23",note:"The rehoming pipeline now looks and works like the Medical tab. Open a person and the picture is on top \u2014 what stage they are at and which dog, then how long they have waited, whether they match, and where they sit in the queue \u2014 followed by a Needs checking list that spells out any conflicts, whether the dog is cleared yet, and if someone else is already approved for it. Below that is the Record: tidy one-line rows for contact, the dog they want, their situation, home check, contact log and notes, each opening to the full detail exactly like the medical rows do. The board gets the same treatment: counts by stage across the top, then anything needing attention \u2014 people waiting weeks, home checks not booked, two people approved for one dog \u2014 and then the list itself."},
-  {version:"3.69",date:"2026-07-23",note:"Applicants can now be deleted outright. Open the person and there is a Delete button beside Clear personal details \u2014 it asks once, names who you are deleting, and then the record is gone for good. Useful for mistakes, test entries and any stray duplicates left over from the earlier saving fault. Clearing personal details is still there for the gentler case, where you want the pipeline history kept but the person\u0027s details gone."}
+  {version:"3.70",date:"2026-07-23",note:"The rehoming pipeline now looks and works like the Medical tab. Open a person and the picture is on top \u2014 what stage they are at and which dog, then how long they have waited, whether they match, and where they sit in the queue \u2014 followed by a Needs checking list that spells out any conflicts, whether the dog is cleared yet, and if someone else is already approved for it. Below that is the Record: tidy one-line rows for contact, the dog they want, their situation, home check, contact log and notes, each opening to the full detail exactly like the medical rows do. The board gets the same treatment: counts by stage across the top, then anything needing attention \u2014 people waiting weeks, home checks not booked, two people approved for one dog \u2014 and then the list itself."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1834,7 +1834,7 @@ function openKennelCard(){
   var d=S.dog||{};
   if(!d.name){appAlert("Add the dog's name first.");return;}
   var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
-  var tl=total?effLight(total,S.scores):null;
+  var tl=total?handlingLight(total,S.scores):null;
   var info=d.intakeDate?isolationInfo(d.intakeDate,(S.fin&&S.fin.outcome)||"",isoExtraDays(d),pupIsoVax(d,S.medical)):{state:"none"};
   var isoLabel=info.state==="done"?"Isolation complete":(info.state==="none"?"":(info.day<=0?"Arrival day":isoDayLabel(info.day,info.total||5)));
   var walkRule="";
@@ -2756,7 +2756,7 @@ function handlingGlanceFlags(){
   var a=S.assessment||{},arr=S.arrival||{},flags=[];
   var meta=subMeta(S);
   var total=Object.values(S.scores||{}).reduce(function(x,y){return x+(parseInt(y)||0);},0);
-  var tl=meta.catsAny?effLight(total,S.scores||{}):null;
+  var tl=meta.catsAny?handlingLight(total,S.scores||{}):null;
   if(tl&&(tl.l==="Red"||tl.l==="Black"))flags.push({t:tl.l+" traffic light \u00b7 "+total+"/24",c:"#dc2626"});
   if(arr.biteHistory&&!/^none/i.test(arr.biteHistory))flags.push({t:"Bite history: "+arr.biteHistory,c:"#dc2626"});
   var guards=["guardFood","guardChew","guardToys","guardBed","guardStolen","guardPerson"];
@@ -2957,7 +2957,7 @@ function defaultState(){return{_id:null,tab:"dog",
   days:[0,1,2,3,4].map(function(){return{date:"",demeanour:"",feeding:"",toileting:"",staffInt:"",incidents:"",notes:""}}),
   scores:{excitability:0,reactivity:0,fearAnxiety:0,sepAnx:0,training:0,misc:0},
   medical:defaultMedical(),behaviour:{notes:"",log:[],draft:""},
-  assessment:{touchHead:"",touchBody:"",touchPaws:"",touchEars:"",touchMouth:"",collarGrab:"",restraint:"",leadBehaviour:"",handlingNotes:"",grooming:"",nailHandling:"",liftHandling:"",confidence:"",energyLevel:"",demeanour:"",stressRecovery:"",biddability:"",temperamentNotes:"",houseTraining:"",aloneTime:"",crateBehaviour:"",recall:"",toiletTraining:"",barrierReaction:"",barrierIntensity:"",barrierTriggers:"",redirectedAggression:"",barrierNotes:"",strangerApproach:"",childrenSuitable:"",dogOnLead:"",dogOffLead:"",catResponse:"",equineResponse:"",smallMammalResponse:"",groupDogs:"",socialNotes:"",carTravel:"",noiseSensitivity:"",newEnvironments:"",kennelBehaviour:"",environmentNotes:"",toyInterest:"",retrieve:"",tug:"",foodMotivation:"",resourceGuarding:"",playStyle:"",playEngagement:"",dropCue:"",mouthing:"",settleAfterPlay:"",frustration:"",toyPreference:"",playNotes:"",attentionSpan:"",handlerFocus:"",basicCommands:"",previousTraining:"",trainNotes:"",homeType:"",suitableChildren:"",suitableOtherDogs:"",suitableCats:"",suitableEquine:"",suitableSmallMammals:"",exerciseNeeds:"",experienceLevel:"",suitabilityNotes:"",buddyWalks:[],playdates:[],muzzleRequired:"",muzzleType:"",muzzleStage:"",muzzleSessions:[]},
+  assessment:{lightOverride:"",lightOverrideReason:"",lightOverrideBy:"",lightOverrideDate:"",touchHead:"",touchBody:"",touchPaws:"",touchEars:"",touchMouth:"",collarGrab:"",restraint:"",leadBehaviour:"",handlingNotes:"",grooming:"",nailHandling:"",liftHandling:"",confidence:"",energyLevel:"",demeanour:"",stressRecovery:"",biddability:"",temperamentNotes:"",houseTraining:"",aloneTime:"",crateBehaviour:"",recall:"",toiletTraining:"",barrierReaction:"",barrierIntensity:"",barrierTriggers:"",redirectedAggression:"",barrierNotes:"",strangerApproach:"",childrenSuitable:"",dogOnLead:"",dogOffLead:"",catResponse:"",equineResponse:"",smallMammalResponse:"",groupDogs:"",socialNotes:"",carTravel:"",noiseSensitivity:"",newEnvironments:"",kennelBehaviour:"",environmentNotes:"",toyInterest:"",retrieve:"",tug:"",foodMotivation:"",resourceGuarding:"",playStyle:"",playEngagement:"",dropCue:"",mouthing:"",settleAfterPlay:"",frustration:"",toyPreference:"",playNotes:"",attentionSpan:"",handlerFocus:"",basicCommands:"",previousTraining:"",trainNotes:"",homeType:"",suitableChildren:"",suitableOtherDogs:"",suitableCats:"",suitableEquine:"",suitableSmallMammals:"",exerciseNeeds:"",experienceLevel:"",suitabilityNotes:"",buddyWalks:[],playdates:[],muzzleRequired:"",muzzleType:"",muzzleStage:"",muzzleSessions:[]},
   fin:{c1:"",c2:"",c3:"",steps:"",followUp:"",notes:"",overallProgress:"",handoverNote:"",assessorName:"",assessorDate:"",secondAssessor:"",secondAssessorDate:"",outcome:"",outcomeDate:"",outcomeNotes:""},
   weights:[],files:[],exercises:[],notes:[],incidents:[],feeding:[],warnings:[],careNotices:[],feedingPlan:{brand:"",grams:"",frequency:"",dietType:"",notes:""},
   ea:{needed:"",frequency:"",size:"",intensity:"",biteScore:"",punctures:false,probability:"",concerns:"",incidentSummary:"",assessorName:"",assessorDate:""}
@@ -3831,7 +3831,7 @@ function renderAssessment(){
   ["temperament","handling","barrier","social","environment","play","trainability","rehoming"].forEach(function(id){if(window._asmtOpen[id]===undefined)window._asmtOpen[id]=true;});
   var _d=S.dog||{};
   var _tot=Object.values(S.scores||{}).reduce(function(x,y){return x+y;},0);
-  var _tl=effLight(_tot,S.scores||{});
+  var _tl=handlingLight(_tot,S.scores||{});
   var _ea=eaCalc(S.ea||{});
   var _BK={temperament:["confidence","energyLevel","demeanour","stressRecovery","biddability"],handling:["touchHead","touchBody","touchPaws","touchEars","touchMouth","collarGrab","restraint","grooming","nailHandling","liftHandling","leadBehaviour"],barrier:["barrierReaction","barrierIntensity","barrierTriggers","redirectedAggression"],social:["strangerApproach","childrenSuitable","dogOnLead","dogOffLead","catResponse","equineResponse","smallMammalResponse","groupDogs"],environment:["carTravel","noiseSensitivity","newEnvironments","kennelBehaviour","houseTraining","aloneTime","crateBehaviour"],play:["toyInterest","retrieve","tug","foodMotivation","resourceGuarding","playStyle","playEngagement","dropCue","mouthing","settleAfterPlay","frustration"],trainability:["attentionSpan","handlerFocus","basicCommands","previousTraining","recall","toiletTraining"]};
   var _keys=Object.keys(_BK),_started=0;_keys.forEach(function(k){if(asmtFilled(_BK[k])>0)_started++;});
@@ -3842,10 +3842,10 @@ function renderAssessment(){
   h+='<div class="asmt-ctx"><div style="flex:1;min-width:120px"><div class="nm">'+esc(_d.name||"Dog Assessment")+'</div>'+(_meta?'<div class="mt">'+esc(_meta)+'</div>':'')+'</div>'+_tlPill+_eaPill+'<div class="prog"><div class="pl">'+_started+' / '+_keys.length+' behaviour areas started</div><div class="bar"><i style="width:'+_pct+'%"></i></div></div></div>';
   // ── live picture (hybrid) ──
   var _tot=Object.values(S.scores||{}).reduce(function(x,y){return x+y;},0);
-  var _tl=_tot?effLight(_tot,S.scores):null;
+  var _tl=_tot?handlingLight(_tot,S.scores):null;
   var _tone=_tl?(_tl.l==="Green"?"ok":_tl.l==="Yellow"?"warn":"alert"):"";
   h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Assessment</div><button class="btn btnp" data-go="scoring" style="font-size:12px;padding:6px 14px">Reassess</button></div>';
-  h+=hybridBanner(_tl?(_tl.l+(_tl.floored?" (worst-category floor)":"")+" \u2014 score "+_tot+"/24"):"Not yet scored",_tone);
+  h+=hybridBanner(_tl?(_tl.l+(_tl.overridden?" \u2014 set manually"+(_tl.assessed?" (assessed "+_tl.assessed+")":""):(_tl.floored?" (worst-category floor)":""))+" \u2014 score "+_tot+"/24"):"Not yet scored",_tone);
   var _hh=S.scoreHistory||[];var _last=_hh.length?_hh[_hh.length-1]:null;
   var _ldate=(_last&&_last.date)?_last.date:((S.dog||{}).intakeDate||null);
   var _days=_ldate?Math.floor((Date.now()-new Date(_ldate).getTime())/864e5):null;
@@ -3860,7 +3860,23 @@ function renderAssessment(){
   }
   h+=asmtGroup("behaviour","Behaviour &amp; temperament");
   h+='<div class="asmt-bgrid">';
-  h+=acard("brief","Handler brief \u2014 read before walking",'<div style="background:#eef7d8;border:1px solid #a9d23f;border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#3a4a16">The ten-second version for anyone taking this dog out. Keep it short and plain.</div>'+ta("Known triggers",a.briefTriggers||"","assessment.briefTriggers","e.g. other dogs head-on, men in hi-vis, hands reaching over the head...")+ta("What the warning looks like",a.briefWarning||"","assessment.briefWarning","e.g. goes still, whale eye, low growl, tail high and stiff...")+ta("What helps / what works",a.briefHelps||"","assessment.briefHelps","e.g. cross the road early, scatter feed, give space and wait, high-value treats...")+'<div class="g2">'+slct("Handler level needed",a.briefHandler||"","assessment.briefHandler",[["","-- not set --"],["Any staff member","Any staff member"],["Experienced handler","Experienced handler only"],["Two people","Two people required"],["Named handlers only","Named handlers only"]])+slct("Muzzle for walks?",a.briefMuzzle||"","assessment.briefMuzzle",[["","-- not set --"],["No","No"],["Yes","Yes \u2014 muzzle on for all walks"],["Yes \u2014 off site only","Yes \u2014 off site only"]])+'</div>',asmtFilled(["briefTriggers","briefWarning","briefHelps","briefHandler","briefMuzzle"])+" / 5 set");
+  h+=acard("hlevel","Handling level \u2014 who may take this dog",'<div style="background:#f1f5f9;border:1px solid rgba(15,23,42,0.1);border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#334155">Sets the level this dog is handled at, whatever the score says \u2014 for when a dog assesses well but should still be staff-only around the public or volunteers. It changes the kennel card, the boards and the walking rule. The assessed score itself is never altered.</div>'
+  +(function(){
+    var A2=S.assessment||{};var cur=A2.lightOverride||"";
+    var _t2=Object.values(S.scores||{}).reduce(function(x,y){return x+(parseInt(y)||0);},0);
+    var asd=_t2?(effLight(_t2,S.scores)||{}).l:null;
+    var pills=["Green","Yellow","Red","Black"].map(function(L){
+      var on=cur===L;var o=tlObj(L);
+      return '<button onclick="setLightOverride(\''+L+'\')" style="font-size:11.5px;padding:5px 13px;border-radius:16px;cursor:pointer;font-family:inherit;'+(on?'background:'+o.bg+';color:'+o.tc+';border:1.5px solid '+o.dot+';font-weight:700':'background:#fff;color:#475569;border:0.5px solid rgba(15,23,42,0.15)')+'">'+L+'</button>';
+    }).join(" ");
+    var line=cur
+      ? '<div style="font-size:12px;color:#991b1b;font-weight:600;margin-bottom:8px">Handled as '+cur+(asd?" \u00b7 assessed "+asd:"")+(A2.lightOverrideBy?' \u00b7 set by '+esc(A2.lightOverrideBy)+(A2.lightOverrideDate?" on "+fmtDMY(A2.lightOverrideDate):""):"")+'</div>'
+      : '<div style="font-size:12px;color:#64748b;margin-bottom:8px">Following the assessment'+(asd?" \u00b7 "+asd:" \u2014 not scored yet")+'</div>';
+    return line+'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">'+pills+'</div>'
+      +'<div style="font-size:11px;color:#94a3b8;margin-bottom:10px">Tap the set level again to go back to the assessment.</div>'
+      +(cur?ta("Why \u2014 kept with the record",A2.lightOverrideReason||"","assessment.lightOverrideReason","e.g. bite history under review \u2014 staff only for now"):"");
+  })());
+h+=acard("brief","Handler brief \u2014 read before walking",'<div style="background:#eef7d8;border:1px solid #a9d23f;border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#3a4a16">The ten-second version for anyone taking this dog out. Keep it short and plain.</div>'+ta("Known triggers",a.briefTriggers||"","assessment.briefTriggers","e.g. other dogs head-on, men in hi-vis, hands reaching over the head...")+ta("What the warning looks like",a.briefWarning||"","assessment.briefWarning","e.g. goes still, whale eye, low growl, tail high and stiff...")+ta("What helps / what works",a.briefHelps||"","assessment.briefHelps","e.g. cross the road early, scatter feed, give space and wait, high-value treats...")+'<div class="g2">'+slct("Handler level needed",a.briefHandler||"","assessment.briefHandler",[["","-- not set --"],["Any staff member","Any staff member"],["Experienced handler","Experienced handler only"],["Two people","Two people required"],["Named handlers only","Named handlers only"]])+slct("Muzzle for walks?",a.briefMuzzle||"","assessment.briefMuzzle",[["","-- not set --"],["No","No"],["Yes","Yes \u2014 muzzle on for all walks"],["Yes \u2014 off site only","Yes \u2014 off site only"]])+'</div>',asmtFilled(["briefTriggers","briefWarning","briefHelps","briefHandler","briefMuzzle"])+" / 5 set");
   h+=acard("temperament","Temperament &amp; demeanour",'<div class="g2">'+slct("Overall confidence",a.confidence||"","assessment.confidence",[["","-- not assessed --"],["Confident","Confident and bold"],["Middle","Middle of the road"],["Cautious","Cautious but recovers"],["Nervous","Nervous / timid"],["Fearful","Fearful / shut down"]])+slct("Energy level",a.energyLevel||"","assessment.energyLevel",[["","-- not assessed --"],["Low","Low - calm / placid"],["Moderate","Moderate"],["High","High"],["Very high","Very high - constant motion"]])+slct("General demeanour",a.demeanour||"","assessment.demeanour",[["","-- not assessed --"],["Friendly","Friendly / outgoing"],["Confident","Confident / bold"],["Calm","Calm / relaxed"],["Playful","Playful"],["Aloof","Aloof / independent"],["Anxious","Anxious / worried"],["Fearful","Fearful / timid"],["Excitable","Excitable / bouncy"],["Reactive","Reactive"],["Withdrawn","Withdrawn / flat"],["Shut down","Shut down / non-responsive"]])+slct("Recovery from stress",a.stressRecovery||"","assessment.stressRecovery",[["","-- not assessed --"],["Quick","Recovers quickly"],["Moderate","Takes a little time"],["Slow","Slow to recover"],["Cannot","Cannot self-soothe"]])+slct("Biddability",a.biddability||"","assessment.biddability",[["","-- not assessed --"],["Eager","Eager to please"],["Willing","Willing"],["Distractible","Distractible"],["Independent","Independent / stubborn"]])+'</div>'+ta("Temperament notes",a.temperamentNotes||"","assessment.temperamentNotes","Overall character, first impressions, how they present..."),asmtFilled(["confidence","energyLevel","demeanour","stressRecovery","biddability"])+" / 5 set");
   h+=acard("handling","Handling",'<div class="g2">'+slct("Touch — Head",a.touchHead||"","assessment.touchHead",touchOpts)+slct("Touch — Body",a.touchBody||"","assessment.touchBody",touchOpts)+slct("Touch — Paws",a.touchPaws||"","assessment.touchPaws",touchOpts)+slct("Touch — Ears",a.touchEars||"","assessment.touchEars",touchOpts)+slct("Touch — Mouth",a.touchMouth||"","assessment.touchMouth",touchOpts)+slct("Collar grab",a.collarGrab||"","assessment.collarGrab",touchOpts)+slct("Restraint",a.restraint||"","assessment.restraint",touchOpts)+slct("Grooming / brushing",a.grooming||"","assessment.grooming",touchOpts)+slct("Nail / paw handling",a.nailHandling||"","assessment.nailHandling",touchOpts)+slct("Being lifted / picked up",a.liftHandling||"","assessment.liftHandling",touchOpts)+slct("On lead",a.leadBehaviour||"","assessment.leadBehaviour",[["","-- not tested --"],["Relaxed","Relaxed — no tension"],["Moderate pulling","Moderate — some pulling"],["Strong puller","Strong puller — difficult to manage"],["Dangerous","Dangerous — unsafe on lead"]])+'</div>'+ta("Handling notes",a.handlingNotes||"","assessment.handlingNotes","Any handling observations..."),asmtFilled(["touchHead","touchBody","touchPaws","touchEars","touchMouth","collarGrab","restraint","grooming","nailHandling","liftHandling","leadBehaviour"])+" / 11 set");
   h+=acard("barrier","Barrier aggression",'<div class="g2">'+slct("Reaction at barrier",a.barrierReaction||"","assessment.barrierReaction",reactOpts)+slct("Intensity",a.barrierIntensity||"","assessment.barrierIntensity",[["","-- not assessed --"],["Redirects easily","Redirects easily"],["Hard to interrupt","Hard to interrupt"],["Cannot be interrupted","Cannot be interrupted"]])+slct("Triggers",a.barrierTriggers||"","assessment.barrierTriggers",[["","-- not assessed --"],["Dogs passing","Dogs passing"],["People passing","People passing"],["Both dogs and people","Both dogs and people"],["Feeding time","Feeding time"],["Multiple triggers","Multiple triggers"]])+slct("Redirected aggression",a.redirectedAggression||"","assessment.redirectedAggression",[["","-- not assessed --"],["None","None observed"],["Mild","Mild — minor mouthing"],["Moderate","Moderate — towards handler"],["Severe","Severe — bites handler"]])+'</div>'+ta("Barrier notes",a.barrierNotes||"","assessment.barrierNotes","Describe triggers, patterns, context..."),asmtFilled(["barrierReaction","barrierIntensity","barrierTriggers","redirectedAggression"])+" / 4 set");
@@ -4028,7 +4044,7 @@ function renderBreakdown(){
   var d=S.dog||{},arr=S.arrival||{},a=S.assessment||{},m=S.medical||{},f=S.fin||{},ea=S.ea||{};
   var meta=subMeta(S);
   var total=Object.values(S.scores||{}).reduce(function(x,y){return x+(parseInt(y)||0);},0);
-  var tl=meta.catsAny?effLight(total,S.scores||{}):null;
+  var tl=meta.catsAny?handlingLight(total,S.scores||{}):null;
   var todayStr=new Date().toISOString().slice(0,10);
 
   var h='<h2>Breakdown</h2><div class="sub">The whole record on one screen. Grey dash = not recorded, amber = worth attention, red = flagged.</div>';
@@ -4498,7 +4514,16 @@ function asmtCardSummary(id){
   function cnt(keys){return keys.filter(function(k2){var v=a[k2];return v!==undefined&&v!==null&&String(v).trim()!=="";}).length;}
   function anyBad(keys){return keys.some(function(k2){return /snap|bite|lunge|aggress/i.test(String(a[k2]||""));});}
   var t="",tone="";
-  if(id==="brief"){t=[sh(a.briefHandler),a.briefMuzzle?("muzzle: "+sh(a.briefMuzzle)):null,a.briefTriggers?"triggers noted":null].filter(Boolean).join(" \u00b7 ")||"Not written yet \u2014 the ten-second version for walkers";}
+  if(id==="hlevel"){
+    var ov=a.lightOverride||"";
+    if(!ov){var _t3=Object.values(S.scores||{}).reduce(function(x,y){return x+(parseInt(y)||0);},0);
+      t=_t3?("Following the assessment \u00b7 "+((effLight(_t3,S.scores)||{}).l||"")):"Following the assessment";}
+    else{var _t4=Object.values(S.scores||{}).reduce(function(x,y){return x+(parseInt(y)||0);},0);
+      var _as=_t4?(effLight(_t4,S.scores)||{}).l:null;
+      t="Handled as "+ov+(_as&&_as!==ov?" \u00b7 assessed "+_as:"")+(a.lightOverrideReason?" \u00b7 "+String(a.lightOverrideReason).slice(0,40):"");
+      tone="warn";}
+  }
+  else if(id==="brief"){t=[sh(a.briefHandler),a.briefMuzzle?("muzzle: "+sh(a.briefMuzzle)):null,a.briefTriggers?"triggers noted":null].filter(Boolean).join(" \u00b7 ")||"Not written yet \u2014 the ten-second version for walkers";}
   else if(id==="temperament"){t=[sh(a.demeanour),a.confidence?("confidence: "+sh(a.confidence)):null,sh(a.energyLevel)].filter(Boolean).join(" \u00b7 ")||"Nothing recorded yet";}
   else if(id==="handling"){var hk=["touchHead","touchBody","touchPaws","touchEars","touchMouth","collarGrab","restraint","grooming","liftHandling","nailHandling"];var n=cnt(hk);t=n?(n+" of "+hk.length+" tested"+(anyBad(hk)?" \u00b7 concerns noted":"")):"Not tested yet";if(anyBad(hk))tone="warn";}
   else if(id==="barrier"){t=sh(a.barrierReaction)||"Not tested yet";if(anyBad(["barrierReaction","barrierIntensity"]))tone="warn";}
@@ -4530,6 +4555,30 @@ function tlObj(name){return name==="Yellow"?tlc(12):name==="Red"?tlc(17):name===
 function scoreFloor(sc){if(!sc)return null;var worst=0,wk="";for(var i=0;i<CATS.length;i++){var v=parseInt(sc[CATS[i].k])||0;if(v>worst){worst=v;wk=CATS[i].l;}}if(worst>=4)return{level:"Red",cat:wk,from:4};if(worst>=3)return{level:"Yellow",cat:wk,from:3};return null;}
 // Effective light = points light, raised to the floor if a severe category demands it.
 function effLight(total,sc){var base=tlc(total);var fl=scoreFloor(sc);if(!fl)return base;if(!base||TL_ORDER[fl.level]>TL_ORDER[base.l]){var o=tlObj(fl.level);return{l:o.l,bg:o.bg,tc:o.tc,dot:o.dot,floored:true,floorCat:fl.cat,floorFrom:fl.from};}return base;}
+// The light a dog is HANDLED at. Normally the assessed light, but it can be set
+// deliberately higher (or lower) — e.g. green on paper yet staff-only in practice.
+// Analysis views (score history, assessor comparison, EA gate) keep using effLight.
+function handlingLight(total,sc,st){
+  st=(st===undefined&&typeof S!=="undefined")?S:st;
+  var base=effLight(total,sc);
+  var ov=(st&&st.assessment)?st.assessment.lightOverride:"";
+  if(!ov||!TL_ORDER[ov])return base;
+  var o=tlObj(ov);
+  return{l:o.l,bg:o.bg,tc:o.tc,dot:o.dot,overridden:true,assessed:(base&&base.l)||null,
+    overrideReason:(st.assessment.lightOverrideReason||""),
+    overrideBy:(st.assessment.lightOverrideBy||""),overrideDate:(st.assessment.lightOverrideDate||"")};
+}
+function setLightOverride(v){
+  S.assessment=S.assessment||{};
+  if((S.assessment.lightOverride||"")===v){
+    S.assessment.lightOverride="";S.assessment.lightOverrideBy="";S.assessment.lightOverrideDate="";
+  }else{
+    S.assessment.lightOverride=v;
+    S.assessment.lightOverrideBy=currentName();
+    S.assessment.lightOverrideDate=new Date().toISOString().slice(0,10);
+  }
+  debouncedSave();renderMain();
+}
 // ── Assessment bite-risk cross-check ──────────────────────────────
 // The behavioural assessment can record handler-directed bite risks
 // (handling, guarding, redirection) that the 6-category score has no
@@ -4636,7 +4685,7 @@ function renderBriefing(){
   var name=d.name||"This dog";
   var heShe=pronoun(d.sex),hisHer=pronounPossessive(d.sex);
   var total=Object.values(S.scores).reduce(function(x,y){return x+y;},0);
-  var tl=effLight(total,S.scores);var ea=eaTriggered();
+  var tl=handlingLight(total,S.scores);var ea=eaTriggered();
   function nr(text){return text||'<em style="color:#94a3b8">Not yet recorded.</em>';}
   function sectionHead(t){return'<h3 style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#0f172a;margin:24px 0 10px;padding-bottom:5px;border-bottom:1px solid #cbd5e1">'+t+'</h3>';}
   function p(text){return'<p style="margin:0 0 10px;line-height:1.65">'+text+'</p>';}
@@ -5051,7 +5100,7 @@ function page(){
   else if(t==="briefing"){S.tab=t="report";window._reportView="narrative";}
   else if(t==="exercise"){S.tab=t="days";}
   var total=Object.values(S.scores).reduce(function(a,b){return a+b},0);
-  var tl=effLight(total,S.scores);var ea=eaTriggered();
+  var tl=handlingLight(total,S.scores);var ea=eaTriggered();
 
   if(t==="ea")return page_ea();
 
@@ -5221,7 +5270,7 @@ function page(){
     var needsReason=(f.outcome==="Euthanised"||f.outcome==="Died in care");
     // ── Decision context (read-only) ──
     var _tot=Object.values(S.scores||{}).reduce(function(a,b){return a+b;},0);
-    var _tl=effLight(_tot,S.scores||{});
+    var _tl=handlingLight(_tot,S.scores||{});
     var _ea=eaCalc(S.ea||{});
     var _ch=chStatus((S.medical||{}).currentStatus);
     var _ext=isoExtraDays(S.dog);
@@ -5276,7 +5325,7 @@ function page(){
 
   if(t==="report"){
     if((window._reportView||"report")==="narrative")return reportToggle()+renderBriefing();
-    var total2=Object.values(S.scores).reduce(function(a,b){return a+b},0),tl2=effLight(total2,S.scores),ea2=eaTriggered();
+    var total2=Object.values(S.scores).reduce(function(a,b){return a+b},0),tl2=handlingLight(total2,S.scores),ea2=eaTriggered();
     var tlb2=tl2?'<span class="pill" style="background:'+tl2.bg+';color:'+tl2.tc+';font-size:13px;padding:5px 12px"><span style="width:8px;height:8px;border-radius:50%;background:'+tl2.dot+';display:inline-block;margin-right:6px"></span>'+tl2.l+'</span>':"";
     var d2=S.dog,a2=S.arrival,f2=S.fin,m2=S.medical||{},asmt=S.assessment||{};
     var rWarn=(S.warnings||[]).slice().sort(function(a,b){return(a.level==="Critical"?0:1)-(b.level==="Critical"?0:1);});var rCrit=rWarn.some(function(w){return w.level==="Critical";});
@@ -5598,7 +5647,7 @@ async function saveRecord(){
   if(_recSaveBusy){_recSaveAgain=true;return;}
   _recSaveBusy=true;
   var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
-  var tl=(effLight(total,S.scores)||{}).l||"";
+  var tl=(handlingLight(total,S.scores)||{}).l||"";
   var st=JSON.parse(JSON.stringify(S));delete st._id;st._savedBy=currentName();
   var row={name:S.dog.name,breed:S.dog.breed||"",ref_no:S.dog.refNo||"",intake_date:S.dog.intakeDate||null,assessor:S.dog.assessor||"",score:total,traffic_light:tl,saved_at:new Date().toISOString(),data:st};
   try{
@@ -5647,7 +5696,7 @@ async function loadRecordsList(){
   records=(res.data||[]).map(function(row){
     var st=null;try{st=typeof row.data==="string"?JSON.parse(row.data):row.data;}catch(e){}
     var savedBy=st&&st._savedBy?st._savedBy:"";
-    return{id:row.id,savedAt:row.saved_at,savedBy:savedBy,name:row.name||"Unknown",breed:row.breed,refNo:row.ref_no,intakeDate:row.intake_date,assessor:row.assessor,score:row.score,trafficLight:((effLight(row.score,st&&st.scores)||{}).l||row.traffic_light),state:st};
+    return{id:row.id,savedAt:row.saved_at,savedBy:savedBy,name:row.name||"Unknown",breed:row.breed,refNo:row.ref_no,intakeDate:row.intake_date,assessor:row.assessor,score:row.score,trafficLight:((handlingLight(row.score,st&&st.scores,st)||{}).l||row.traffic_light),state:st};
   });
 }
 
