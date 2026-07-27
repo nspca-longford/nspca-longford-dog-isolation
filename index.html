@@ -45,10 +45,8 @@ textarea{resize:vertical;min-height:68px}
 nav{display:flex;align-items:flex-end;overflow-x:auto;border-bottom:1px solid #e2e8f0;background:#fff;scrollbar-width:none}
 nav::-webkit-scrollbar{display:none}
 #navfade{position:absolute;top:0;right:0;bottom:0;width:30px;background:linear-gradient(to right,rgba(255,255,255,0),#fff);pointer-events:none}
-.cdot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:5px;vertical-align:middle}
 .cdot.done{background:#16a34a}
 .cdot.empty{background:transparent;box-shadow:inset 0 0 0 1.5px #cbd5e1}
-.nb{padding:11px 14px;border:none;background:transparent;cursor:pointer;font-size:12px;font-weight:500;color:#64748b;border-bottom:2px solid transparent;white-space:nowrap;font-family:inherit}
 .nb.on{color:#0f172a;font-weight:700;border-bottom-color:#a9d23f;border-bottom-width:2.5px}
 /* V5 two-tier pill nav */
 #navwrap{background:#fff;padding-bottom:10px}
@@ -73,8 +71,7 @@ nav::-webkit-scrollbar{display:none}
 .srstat{flex:1;padding:11px 14px;border-right:1px solid #e2e8f0;cursor:pointer;transition:background .12s;position:relative;background:none;font-family:inherit;text-align:left}
 .srstat:last-child{border-right:none}
 .srstat:hover{background:#fafafa}
-.srstat.sel{background:#f5fae7}
-.srstat.sel::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:#0f172a}
+.srstat.srstat.sel::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:#0f172a}
 .srstat.sel.g::after{background:#16a34a}.srstat.sel.y::after{background:#f59e0b}
 .srstat.sel.r::after{background:#dc2626}.srstat.sel.b::after{background:#0f172a}
 .srstat .srn{font-size:19px;font-weight:800;letter-spacing:-.02em;line-height:1;display:flex;align-items:baseline;gap:6px;color:#0f172a}
@@ -104,7 +101,6 @@ nav::-webkit-scrollbar{display:none}
 .dcard.tb .dstatus .dd{background:#0f172a}.dcard.tb .dstatus{color:#0f172a}
 .dcard.tn .dstatus .dd{background:#cbd5e1}.dcard.tn .dstatus{color:#94a3b8}
 .dayno{font-size:10.5px;color:#94a3b8;font-weight:600;font-variant-numeric:tabular-nums}
-.dbarwrap{display:flex;gap:2px;margin-top:7px}
 .dbarwrap i{flex:1;height:4px;border-radius:99px;background:#eceef1}
 .dbarwrap i.on{background:#0f172a}
 .dflagrow{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
@@ -123,10 +119,8 @@ nav::-webkit-scrollbar{display:none}
 .brow{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
 h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .sub{font-size:12px;color:#64748b;margin-bottom:16px}
-.sg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
 .sb{padding:8px 10px;border:1px solid rgba(15,23,42,0.1);border-radius:9px;cursor:pointer;font-size:11px;text-align:left;background:#fff;color:#0f172a;font-family:inherit;line-height:1.4;transition:all 0.12s}
 .sb .n{font-weight:600;font-size:12px;display:block;margin-bottom:1px}
-.schip{padding:9px 4px;border:1.5px solid rgba(15,23,42,0.1);border-radius:9px;cursor:pointer;text-align:center;background:#fff;color:#475569;font-family:inherit;transition:all 0.12s}
 .schip:hover{border-color:#94a3b8}
 .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
 .rrow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:13px}
@@ -348,8 +342,12 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
   </div>
   <nav id="nav" style="display:none"></nav>
   <div id="content"></div>
-  <div id="save-bar" style="position:fixed;bottom:0;left:0;right:0;z-index:50;background:#fff;border-top:1px solid #e2e8f0;box-shadow:0 -4px 16px rgba(0,0,0,0.07);padding:10px 16px;padding-bottom:calc(10px + env(safe-area-inset-bottom))">
-    <div style="max-width:740px;margin:0 auto"><div id="last-changed" style="font-size:10.5px;color:#94a3b8;text-align:right;margin-bottom:6px;min-height:13px;line-height:13px"></div><button id="save-btn" onclick="saveRecord()" class="btn btng" style="width:100%;font-size:14px;padding:11px;font-weight:600">Save</button></div>
+  <div id="save-bar" style="position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,0.94);backdrop-filter:saturate(1.6) blur(8px);-webkit-backdrop-filter:saturate(1.6) blur(8px);border-top:0.5px solid rgba(15,23,42,0.1);padding:6px 14px;padding-bottom:calc(6px + env(safe-area-inset-bottom))">
+    <div style="max-width:740px;margin:0 auto;display:flex;align-items:center;gap:10px">
+      <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:#cbd5e1;flex-shrink:0"></span>
+      <div id="last-changed" style="flex:1;min-width:0;font-size:10.5px;color:#94a3b8;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+      <button id="save-btn" onclick="saveRecord()" class="btn btng" style="font-size:12px;padding:6px 16px;font-weight:600;flex-shrink:0">Save</button>
+    </div>
   </div>
 </div>
 
@@ -387,11 +385,11 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.81",date:"2026-07-26",note:"The Assessment and Sessions tabs now look the way they were meant to. Each group is one tidy card with its sections as rows inside it, separated by a hairline, instead of every section being its own card floating apart from the next. Every row carries an icon so you can find the one you want without reading — the traffic light for the handling level, hands for handling, a bone for guarding. Nothing else changed: the same rows, the same order, the same summaries, everything opens exactly as it did."},
-  {version:"3.80",date:"2026-07-26",note:"The last of the information that was being recorded and then going nowhere. Horses and small pets now work in both directions: the applicant record asks whether they keep them, and a dog marked unsafe with stock is a straight stop against a farm home rather than something you would have to remember. What arrivals told us about horses and small mammals now appears in the record instead of sitting only on the Arrival tab, and if the assessment later says the dog is calm with them, the Picture tab points out that the two accounts disagree. And a buddy walk or playdate that ended in aggression no longer stays in Sessions: it shows on the social summary, stands as a rehoming blocker, and is flagged if the dog is recorded elsewhere as good with other dogs."},
-  {version:"3.79",date:"2026-07-26",note:"A sweep for information the app was recording but never passing on. Three things now reach the people who need them. The pre-walk glance knows the handling tests: a dog that snaps while being harnessed, resists the lead going on, lunges on lead or jumps hard enough to knock someone over now says so before anyone opens the kennel, instead of that sitting quietly in the assessment. A contagious condition under treatment now stands as a rehoming blocker \u2014 until this, a dog mid kennel cough could read as cleared with nothing in the way. And the return or reclaim date finally does something: a stray inside its reclaim window or a dog due back from foster appears in Needs attention on the day and the day before, rather than being a date nobody ever saw again."},
-  {version:"3.78",date:"2026-07-26",note:"The Assessment tab is reorganised. Buddy walks, playdates and muzzle training now have their own Sessions tab beside Scoring, where the logs you add to week after week get the top of a page instead of the bottom of a long scroll \u2014 same entries, same fields, nothing to move across. What is left is ordered the way it gets read: the verdict and figures first, then Conclusions right underneath \u2014 progress, concerns and next steps, which used to sit at the very bottom \u2014 then a short Before you walk group holding the handling level, the handler brief and the handling tests, and the seven behaviour observations below that. Eleven rows where there were fourteen, and the two you read most are now the first things on the page."},
-  {version:"3.77",date:"2026-07-24",note:"The Handling card now covers the moments that actually go wrong at the kennel door. Alongside the touch tests there are four new ones: how the dog is while a harness goes on, how it is while the lead is clipped, whether it jumps up, and whether it reacts on lead \u2014 barking, lunging or worse. Harness and lead use the same wording as the other handling tests, so a dog that snaps while being harnessed reads the same as one that snaps having its ears touched. All four carry through to the record and the printed report, and the card flags concerns properly now: lunging on lead and knocking people over used to slip past the warning, and no longer do."}
+var CHANGELOG=[{version:"3.85",date:"2026-07-27",note:"The most important change in a while: your work can no longer go missing. Until now, if a save failed \u2014 a dead spot in the block, wifi dropping \u2014 the app kept a copy on the phone and said nothing, and that copy was never sent. Now a failed save is held and retried by itself, and the moment the signal returns it goes up. The bar along the bottom tells you the truth while that happens: a green dot when everything is saved, amber while changes are waiting, red when you are offline, with a count of what is still to go. That bar is also slimmer now \u2014 one line with a small Save button rather than a block across the screen. Other honesty fixes: the pipeline says so when a save or delete fails instead of pretending, and marking someone Adopted tells you if the dog\u0027s own record could not be updated. And the dashboard now holds far more dogs before older ones drop off the list."},
+  {version:"3.84",date:"2026-07-27",note:"The Assessment and Sessions tabs are quieter. The icons are gone from the rows, and every section now starts closed \u2014 seven of them used to open themselves the moment you arrived, which is why the tab always looked like a wall. Now you get eleven summary lines and you open the one you want. What you open stays open while you are working on that dog, and closes again when you move to another one."},
+  {version:"3.83",date:"2026-07-27",note:"The rehoming pipeline says what is actually happening. A person who has adopted a dog now reads as having adopted it \u2014 on the board, on their record and on the dog\u0027s own row, which names who took it and when instead of still asking for applicants. Everyone else reads by where they are: interested in, home check for, approved for, withdrew from. Applicants now take a proper address \u2014 street, town, county and eircode, with an email alongside the phone \u2014 and once there is one, a map link sits on the record and directions sit on the home check row, so nobody is copying an address into their phone before a visit. The town shows on the board so you can see at a glance where people are coming from. And the icons are gone from the pipeline rows."},
+  {version:"3.82",date:"2026-07-26",note:"You can now say when an assessment actually happened. The Scoring tab has an Assessed on date beside the Snapshot button \u2014 set it to the day you did the work, whether that was this morning or last Tuesday, and everything follows it: the days-since figure on the Assessment tab, the out-of-date warning, and the stale-assessment blocker on Rehoming. Snapshots are stamped with that date too, so a re-assessment written up the next day still reads as having happened when it did. Leave it alone and it behaves as before, filling itself in the first time you score a dog. It will not accept a date in the future."},
+  {version:"3.81",date:"2026-07-26",note:"The Assessment and Sessions tabs now look the way they were meant to. Each group is one tidy card with its sections as rows inside it, separated by a hairline, instead of every section being its own card floating apart from the next. Every row carries an icon so you can find the one you want without reading — the traffic light for the handling level, hands for handling, a bone for guarding. Nothing else changed: the same rows, the same order, the same summaries, everything opens exactly as it did."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -551,6 +549,58 @@ function initials(n){var p=(n||"").trim().split(/\s+/);return p.length>=2?(p[0][
 function avatarColor(n){var c=["#0d9488","#7c3aed","#dc2626","#d97706","#2563eb","#16a34a","#db2777"];var h=0;for(var i=0;i<(n||"").length;i++)h=(h*31+n.charCodeAt(i))&0xfffffff;return c[h%c.length];}
 function esc(s){return(s===null||s===undefined?"":""+s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
 function persistSave(){try{localStorage.setItem("nspca-current",JSON.stringify(S));}catch(e){}}
+// ── Unsaved-changes safety net ──────────────────────────────────
+// A save that fails is parked here and retried, so a dead spot in the
+// kennels can never quietly lose an assessment.
+var _pendingRetry=null;
+function pendingGet(){try{return JSON.parse(localStorage.getItem("nspca-pending")||"{}");}catch(e){return {};}}
+function pendingSet(o){try{localStorage.setItem("nspca-pending",JSON.stringify(o));}catch(e){}}
+function pendingCount(){var p=pendingGet();return Object.keys(p).length;}
+function pendingPark(id,row){
+  if(!id)id="new";
+  var p=pendingGet();p[id]={row:row,at:new Date().toISOString()};pendingSet(p);
+  syncStatus();schedulePendingRetry();
+}
+function pendingClear(id){var p=pendingGet();delete p[id||"new"];pendingSet(p);syncStatus();}
+function schedulePendingRetry(){
+  if(_pendingRetry||!pendingCount())return;
+  _pendingRetry=setTimeout(function(){_pendingRetry=null;retryPending();},15000);
+}
+async function retryPending(){
+  if(!supabaseClient||!pendingCount())return;
+  var p=pendingGet();var ids=Object.keys(p);
+  for(var i=0;i<ids.length;i++){
+    var id=ids[i];var entry=p[id];
+    try{
+      if(id==="new"){
+        var res=await supabaseClient.from("dogs").insert([entry.row]);
+        if(res&&res.error)throw res.error;
+      }else{
+        var r2=await supabaseClient.from("dogs").update(entry.row).eq("id",id);
+        if(r2&&r2.error)throw r2.error;
+      }
+      pendingClear(id);
+    }catch(e){ /* still down — leave it parked and try again later */ }
+  }
+  syncStatus();
+  if(pendingCount())schedulePendingRetry();
+  else{try{await loadRecordsList();}catch(e){}}
+}
+// The dot and the line above the Save button tell the truth about sync.
+function syncStatus(){
+  var n=pendingCount();
+  var dot=document.getElementById("sync-dot");
+  var lc=document.getElementById("last-changed");
+  var online=(typeof navigator!=="undefined"&&navigator.onLine!==false);
+  if(dot)dot.style.background=n?(online?"#f59e0b":"#dc2626"):"#86efac";
+  if(lc&&n){
+    lc.textContent=(online?"Saving \u2014 ":"Offline \u2014 ")+n+" change"+(n>1?"s":"")+" waiting";
+    lc.style.color=online?"#854d0e":"#991b1b";
+    return true;
+  }
+  if(lc)lc.style.color="#94a3b8";
+  return false;
+}
 function debouncedSave(){if(_dSt)clearTimeout(_dSt);_dSt=setTimeout(function(){saveRecord();},1500);}
 function addDaysStr(ds,n){var d=new Date(ds);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
 function weekStartStr(ds){var d=new Date(ds);if(isNaN(d.getTime()))return new Date().toISOString().slice(0,10);var day=d.getDay();var diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
@@ -1597,12 +1647,23 @@ function assessedInfo(st){
   }
   return{date:null,basis:"never",scored:false,days:null};
 }
+// The day the assessment actually happened \u2014 typed in, not assumed from intake.
+function setScoredDate(v){
+  if(!S.assessment)S.assessment={};
+  var today=new Date().toISOString().slice(0,10);
+  if(v&&v>today)v=today;
+  S.assessment.scoredDate=v||"";
+  debouncedSave();renderMain();
+}
 function scoreSnapshot(){
   var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
   if(!total){appAlert("Score at least one category before saving a snapshot.");return;}
   if(!S.scoreHistory)S.scoreHistory=[];
   var now=new Date();
-  S.scoreHistory.push({date:now.toISOString().slice(0,10),time:now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0"),scores:JSON.parse(JSON.stringify(S.scores)),notes:JSON.parse(JSON.stringify(S.scoreNotes||{})),total:total,light:(effLight(total,S.scores)||{}).l||"",by:currentName()});
+  var el=document.getElementById("score-on");
+  var when=(el&&el.value)?el.value:now.toISOString().slice(0,10);
+  if(when>now.toISOString().slice(0,10))when=now.toISOString().slice(0,10); // never in the future
+  S.scoreHistory.push({date:when,time:now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0"),scores:JSON.parse(JSON.stringify(S.scores)),notes:JSON.parse(JSON.stringify(S.scoreNotes||{})),total:total,light:(effLight(total,S.scores)||{}).l||"",by:currentName()});
   saveRecord();renderMain();miniToast("Assessment snapshot saved");
 }
 function scoreSnapDelete(i){appConfirm("Delete this snapshot?",function(){(S.scoreHistory||[]).splice(i,1);saveRecord();renderMain();},{danger:true});}
@@ -1622,7 +1683,12 @@ function scoreStaleHtml(){
 }
 function scoreHistoryCardHtml(){
   var h=S.scoreHistory||[];
-  var btn='<button onclick="scoreSnapshot()" class="btn" style="font-size:11px;padding:5px 12px">&#128247; Snapshot</button>';
+  var _ai=assessedInfo(S);
+  var _def=(S.assessment&&S.assessment.scoredDate)||new Date().toISOString().slice(0,10);
+  var dateField='<div style="display:flex;align-items:center;gap:7px;margin-right:8px"><label class="lbl" style="margin:0;white-space:nowrap">Assessed on</label>'
+    +'<input type="date" id="score-on" value="'+esc(_def)+'" max="'+new Date().toISOString().slice(0,10)+'" onchange="setScoredDate(this.value)" style="padding:5px 8px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:12px;font-family:inherit">'
+    +'</div>';
+  var btn=dateField+'<button onclick="scoreSnapshot()" class="btn" style="font-size:11px;padding:5px 12px">&#128247; Snapshot</button>';
   if(!h.length)return '<div class="card" style="margin-bottom:12px;padding:11px 14px;display:flex;align-items:center;gap:10px"><div style="flex:1"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Re-assessment history</div><div style="font-size:11px;color:#94a3b8;margin-top:2px">Snapshot the current scores to track change over the stay (e.g. day 1 vs day 4).</div></div>'+btn+'</div>';
   var chips=h.map(function(s,i){
     var t=(s.light&&tlObj(s.light))||tlc(s.total)||{bg:"#eef1f5",tc:"#64748b",dot:"#94a3b8"};
@@ -1923,7 +1989,7 @@ function dashSearchRender(){clearTimeout(window._dbSrchT);window._dbSrchT=setTim
 var applicants=[];var A=null;var _pipeTimer=null;
 var APP_STAGES=["Enquiry","Home check","Approved","Adopted","Withdrawn","Declined"];
 var APP_ACTIVE=["Enquiry","Home check","Approved"];
-function defaultApplicant(){return{id:null,name:"",stage:"Enquiry",species:"dog",animal_id:null,enquiry_date:new Date().toISOString().slice(0,10),state:{phone:"",county:"",homeType:"",children:"",otherDogs:"",cats:"",livestock:"",smallPets:"",experience:"",activity:"",interestNote:"",contactLog:[],notes:"",reason:"",anonymised:false}};}
+function defaultApplicant(){return{id:null,name:"",stage:"Enquiry",species:"dog",animal_id:null,enquiry_date:new Date().toISOString().slice(0,10),state:{phone:"",email:"",addr1:"",addr2:"",town:"",county:"",eircode:"",homeType:"",children:"",otherDogs:"",cats:"",livestock:"",smallPets:"",experience:"",activity:"",interestNote:"",contactLog:[],notes:"",reason:"",anonymised:false}};}
 function maskPhone(p){p=String(p||"");if(p.length<4)return p?"\u00b7\u00b7\u00b7":"";return p.slice(0,3)+" \u00b7\u00b7\u00b7 \u00b7\u00b7"+p.slice(-2);}
 function appDaysWaiting(ap){if(!ap.enquiry_date)return null;var d=Math.floor((Date.now()-new Date(ap.enquiry_date).getTime())/864e5);return d<0?null:d;}
 async function loadApplicants(){
@@ -1932,7 +1998,7 @@ async function loadApplicants(){
     if(!res.error&&res.data)applicants=res.data.map(function(r){r.state=r.state||{};return r;});
   }catch(e){}
 }
-var _appSaveBusy=false,_appSaveAgain=false;
+var _appSaveBusy=false,_appSaveAgain=false,_appSaveFailed=false;
 async function saveApplicant(){
   if(!A||!supabaseClient)return;
   // Serialise saves: only one in flight. Prevents the duplicate-insert race
@@ -1944,7 +2010,11 @@ async function saveApplicant(){
     if(A.id){await supabaseClient.from("applicants").update(row).eq("id",A.id);}
     else{var res=await supabaseClient.from("applicants").insert(row);if(res&&res.data&&res.data[0])A.id=res.data[0].id;}
     await loadApplicants();
-  }catch(e){}
+    _appSaveFailed=false;
+  }catch(e){
+    console.error("saveApplicant:",e);
+    if(!_appSaveFailed){_appSaveFailed=true;miniToast("Not saved \u2014 check your connection");}
+  }
   finally{
     _appSaveBusy=false;
     if(_appSaveAgain){_appSaveAgain=false;saveApplicant();}
@@ -1982,7 +2052,11 @@ function deleteApplicant(){
     if(wasId&&supabaseClient){
       supabaseClient.from("applicants").delete().eq("id",wasId).then(function(){
         return loadApplicants();
-      }).then(function(){renderPipeline();}).catch(function(){});
+      }).then(function(){renderPipeline();}).catch(function(e){
+        console.error("deleteApplicant:",e);
+        miniToast("Couldn\u0027t delete \u2014 check your connection and try again");
+        loadApplicants().then(function(){renderPipeline();});
+      });
     }
   });
 }
@@ -2061,13 +2135,33 @@ async function adoptLinkedDog(rec){
   var st=JSON.parse(JSON.stringify(rec.state||{}));
   st.fin=st.fin||{};st.fin.outcome="Rehomed";st.fin.outcomeDate=new Date().toISOString().slice(0,10);
   try{
-    await supabaseClient.from("dogs").update({saved_at:new Date().toISOString(),data:st}).eq("id",rec.id);
+    var up=await supabaseClient.from("dogs").update({saved_at:new Date().toISOString(),data:st}).eq("id",rec.id);
+    if(up&&up.error)throw up.error;
     await loadRecordsList();
     if(A){A.state.adoptionDate=st.fin.outcomeDate;saveApplicantSoon();}
     renderPipeline();
-  }catch(e){}
+  }catch(e){
+    console.error("adoptLinkedDog:",e);
+    miniToast("Couldn\u0027t update "+(rec.name||"the dog")+"\u0027s record \u2014 mark the outcome by hand");
+  }
 }
 function pipeDogName(id){var r=records.find(function(x){return x.id===id;});return r?(r.name||"Unnamed"):"record #"+id;}
+// How this person relates to that dog, in the words of where they are now.
+function appRelation(ap){
+  var s=(ap&&ap.stage)||"";
+  return s==="Adopted"?"adopted":s==="Approved"?"approved for":s==="Home check"?"home check for":
+    s==="Withdrawn"?"withdrew from":s==="Declined"?"declined for":"interested in";
+}
+function appAddressLines(st){
+  st=st||{};
+  return [st.addr1,st.addr2,st.town,st.county,st.eircode].filter(function(x){return x&&String(x).trim();});
+}
+function appAddressOneLine(st){return appAddressLines(st).join(", ");}
+function appMapUrl(st){
+  var a=appAddressOneLine(st);
+  if(!a)return "";
+  return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(a+", Ireland");
+}
 function applicantRowHtml(ap){
   var w=appDaysWaiting(ap);
   var extra=[];
@@ -2082,7 +2176,7 @@ function applicantRowHtml(ap){
     if(q2&&q2.approvedOther&&ap.stage==="Approved")extra.push("\u26a0 two approved");
   }
   if(ap.stage==="Home check"&&ap.state.hcDate)extra.push("visit "+fmtDMY(ap.state.hcDate));
-  var sub=[ap.species==="dog"?(ap.animal_id?("interested in "+esc(pipeDogName(ap.animal_id))):"no dog linked yet"):("cat"+(ap.state.interestNote?": "+esc(ap.state.interestNote):" enquiry")),ap.state.phone?maskPhone(ap.state.phone):null,(w!==null&&APP_ACTIVE.indexOf(ap.stage)>-1)?("waiting "+w+"d"):null].concat(extra).filter(Boolean).join(" \u00b7 ");
+  var sub=[ap.species==="dog"?(ap.animal_id?(appRelation(ap)+" "+esc(pipeDogName(ap.animal_id))):"no dog linked yet"):("cat"+(ap.state.interestNote?": "+esc(ap.state.interestNote):" enquiry")),ap.state.town||ap.state.county||null,ap.state.phone?maskPhone(ap.state.phone):null,(w!==null&&APP_ACTIVE.indexOf(ap.stage)>-1)?("waiting "+w+"d"):null].concat(extra).filter(Boolean).join(" \u00b7 ");
   return '<div onclick="openApplicant('+ap.id+')" style="display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer">'
     +'<div style="width:30px;height:30px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#64748b;flex-shrink:0">'+esc((ap.name||"?").split(/\s+/).map(function(x){return x[0]||"";}).join("").slice(0,2).toUpperCase())+'</div>'
     +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#0f172a">'+esc(ap.name||"Unnamed")+'</div><div style="font-size:11.5px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+sub+'</div></div>'
@@ -2111,6 +2205,7 @@ function pipeDogsHtml(){
   h+=av.map(function(r){
     var d=(r.state&&r.state.dog)||{};
     var s=(r.state&&r.state.assessment?r.state.assessment.rehomingStatus:"")||"";
+    var adopter=applicants.find(function(x){return x.animal_id===r.id&&x.stage==="Adopted";});
     var mine=applicants.filter(function(x){return x.animal_id===r.id&&APP_ACTIVE.indexOf(x.stage)>-1;});
     var best="";
     mine.forEach(function(x){var v=matchApplicantToDog(x,r).verdict;
@@ -2118,8 +2213,12 @@ function pipeDogsHtml(){
       else if(v==="caution"&&best!=="\u2713 match")best="\u25b3 checks";
       else if(v==="blocked"&&!best)best="\u2715 conflict";});
     var bl=rehomeBlockersFor(r.state||{});
-    var sub=[/conditions/i.test(s)?"with conditions":null,bl.length?(bl.length+" blocker"+(bl.length>1?"s":"")):null,d.kennel||null].filter(Boolean).join(" \u00b7 ")||"cleared for rehoming";
-    var chip=mine.length
+    var sub=adopter
+      ? ("adopted by "+esc(adopter.name||"someone")+(adopter.state&&adopter.state.adoptionDate?" \u00b7 "+fmtDMY(adopter.state.adoptionDate):""))
+      : ([/conditions/i.test(s)?"with conditions":null,bl.length?(bl.length+" blocker"+(bl.length>1?"s":"")):null,d.kennel||null].filter(Boolean).join(" \u00b7 ")||"cleared for rehoming");
+    var chip=adopter
+      ? '<span style="font-size:11px;font-weight:600;color:#166534;background:#dcfce7;padding:2px 9px;border-radius:9px;white-space:nowrap">adopted</span>'
+      : mine.length
       ? '<span style="font-size:11px;font-weight:600;color:#166534;background:#dcfce7;padding:2px 9px;border-radius:9px;white-space:nowrap">'+mine.length+(best?" \u00b7 "+best:"")+'</span>'
       : '<span style="font-size:11px;color:#94a3b8;white-space:nowrap">none yet</span>';
     var av2=d.photo
@@ -2174,10 +2273,16 @@ function pipelineApplicantHtml(){
   var h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><button onclick="backToBoard()" style="background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">&larr; Board</button><div style="flex:1;font-size:15px;font-weight:700;color:#0f172a">'+esc(A.name||"New applicant")+'</div></div>';
   // \u2500\u2500 live picture \u2500\u2500
   var sTone=(A.stage==="Approved"||A.stage==="Adopted")?"ok":A.stage==="Home check"?"warn":(A.stage==="Declined"||A.stage==="Withdrawn")?"alert":"";
-  var sLine=A.stage
-    +(A.stage==="Adopted"&&st.adoptionDate?" \u00b7 "+fmtDMY(st.adoptionDate):"")
-    +(A.stage==="Home check"&&st.hcDate?" \u00b7 visit "+fmtDMY(st.hcDate):"")
-    +(A.animal_id?" \u00b7 "+esc(pipeDogName(A.animal_id)):"");
+  var sLine=(A.animal_id&&A.species==="dog")
+    ? (A.stage==="Adopted"?("Adopted "+esc(pipeDogName(A.animal_id))):
+       A.stage==="Approved"?("Approved for "+esc(pipeDogName(A.animal_id))):
+       A.stage==="Home check"?("Home check for "+esc(pipeDogName(A.animal_id))):
+       A.stage==="Withdrawn"?("Withdrew from "+esc(pipeDogName(A.animal_id))):
+       A.stage==="Declined"?("Declined for "+esc(pipeDogName(A.animal_id))):
+       ("Enquiry \u2014 "+esc(pipeDogName(A.animal_id))))
+    : (A.stage+(A.species==="cat"?" \u2014 cat enquiry":" \u2014 no dog linked yet"));
+  sLine+=(A.stage==="Adopted"&&st.adoptionDate?" \u00b7 "+fmtDMY(st.adoptionDate):"")
+    +(A.stage==="Home check"&&st.hcDate?" \u00b7 visit "+fmtDMY(st.hcDate):"");
   h+=hybridBanner(esc(sLine),sTone);
   var mTile=mm?(mm.verdict==="blocked"?{v:"Conflict",t:"alert"}:mm.verdict==="caution"?{v:"Check",t:"warn"}:mm.verdict==="good"?{v:"Good",t:""}:{v:"\u2014",t:""}):{v:"\u2014",t:""};
   h+=hybridTiles([
@@ -2208,14 +2313,25 @@ function pipelineApplicantHtml(){
   // \u2500\u2500 Record \u2500\u2500
   h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:4px 0 2px;display:flex;align-items:center;gap:10px">Record<span style="flex:1;height:1px;background:var(--color-border-tertiary)"></span></div>';
   // contact
-  var cSum=[st.phone?maskPhone(st.phone):null,st.county||null].filter(Boolean).join(" \u00b7 ")||"No contact details yet";
-  h+=hybridRow("ap-contact","\ud83d\udc64","Contact",esc(cSum),
-    pf("Name","name",A.name)+'<div class="g2">'+pf("Phone","phone",st.phone,"tel")+pf("County","county",st.county)+'</div>'
+  var _addr=appAddressOneLine(st);
+  var _map=appMapUrl(st);
+  var cSum=[st.phone?maskPhone(st.phone):null,st.town||st.county||null].filter(Boolean).join(" \u00b7 ")||"No contact details yet";
+  h+=hybridRow("ap-contact","","Contact",esc(cSum),
+    pf("Name","name",A.name)
+    +'<div class="g2">'+pf("Phone","phone",st.phone,"tel")+pf("Email","email",st.email,"email")+'</div>'
+    +'<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:8px 0 6px">Address</div>'
+    +pf("Address line 1","addr1",st.addr1,"text","house name or number and street")
+    +pf("Address line 2","addr2",st.addr2,"text","optional")
+    +'<div class="g2">'+pf("Town","town",st.town)+pf("County","county",st.county)+'</div>'
+    +pf("Eircode","eircode",st.eircode,"text","e.g. N39 XY12")
+    +(_map?'<a href="'+_map+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin:2px 0 8px;padding:7px 13px;border-radius:8px;background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);font-size:12px;color:#0f172a;text-decoration:none">View on the map \u2192</a><div style="font-size:11px;color:#94a3b8;margin-bottom:6px">'+esc(_addr)+'</div>'
+      :'<div style="font-size:11px;color:#cbd5e1;margin-bottom:6px">Add an address to get a map link for the home check.</div>')
     +'<div style="font-size:11px;color:#94a3b8">Enquired '+(A.enquiry_date?fmtDMY(A.enquiry_date):"\u2014")+'</div>',"");
   // interested in
+  var _adopted=A.stage==="Adopted";
   var iSum=A.species==="cat"?("Cat"+(st.interestNote?" \u00b7 "+esc(st.interestNote):" \u2014 no record linked")) 
-    :(A.animal_id?(esc(pipeDogName(A.animal_id))+(mm?(mm.verdict==="blocked"?" \u00b7 \u2715 conflict":mm.verdict==="caution"?" \u00b7 \u25b3 checks":mm.verdict==="good"?" \u00b7 \u2713 match":""):"")):"No dog linked yet");
-  h+=hybridRow("ap-interest","\ud83d\udc3e","Interested in",iSum,
+    :(A.animal_id?(esc(pipeDogName(A.animal_id))+(_adopted?" \u00b7 adopted"+(st.adoptionDate?" "+fmtDMY(st.adoptionDate):""):(mm?(mm.verdict==="blocked"?" \u00b7 \u2715 conflict":mm.verdict==="caution"?" \u00b7 \u25b3 checks":mm.verdict==="good"?" \u00b7 \u2713 match":""):""))):"No dog linked yet");
+  h+=hybridRow(_adopted?"ap-adopted-dog":"ap-interest","",(_adopted?"Adopted":"Interested in"),iSum,
     '<div class="g2"><div style="margin-bottom:9px"><label class="lbl">Species</label><select onchange="setAppF(\'species\',this.value)" style="width:100%"><option value="dog"'+(A.species==="dog"?" selected":"")+'>Dog</option><option value="cat"'+(A.species==="cat"?" selected":"")+'>Cat</option></select></div>'
     +(A.species==="dog"?'<div style="margin-bottom:9px"><label class="lbl">Dog</label><select onchange="setAppF(\'animal_id\',this.value)" style="width:100%"><option value="">\u2014 none yet \u2014</option>'+records.filter(function(r){return !isArchived(r);}).map(function(r){return '<option value="'+r.id+'"'+(A.animal_id===r.id?' selected':'')+'>'+esc(r.name||"Unnamed")+'</option>';}).join("")+'</select></div>':pf("Which cat / what kind","interestNote",st.interestNote))+'</div>',
     mm&&mm.verdict==="blocked"?"alert":mm&&mm.verdict==="caution"?"warn":"");
@@ -2223,7 +2339,7 @@ function pipelineApplicantHtml(){
   var sitKeys=["homeType","children","otherDogs","cats","livestock","smallPets","experience","activity"];
   var sitN=sitKeys.filter(function(k){return st[k];}).length;
   var sitSum=sitN?(sitN+" of 8 recorded"+(st.homeType?" \u00b7 "+esc(st.homeType):"")):"Nothing recorded yet";
-  h+=hybridRow("ap-situation","\ud83c\udfe0","Their situation",sitSum,
+  h+=hybridRow("ap-situation","","Their situation",sitSum,
     appPillGroup("Home","homeType",st.homeType,["House with garden","House without garden","Apartment","Rural / farm"])
     +appPillGroup("Children","children",st.children,["None","Over 12","Under 12"])
     +appPillGroup("Other dogs","otherDogs",st.otherDogs,["None","One","Two or more"])
@@ -2236,9 +2352,11 @@ function pipelineApplicantHtml(){
   // home check
   if(A.stage==="Home check"||A.stage==="Approved"||A.stage==="Adopted"){
     var hSum=[st.hcOutcome||null,st.hcDate?fmtDMY(st.hcDate):null].filter(Boolean).join(" \u00b7 ")||"Not booked yet";
-    h+=hybridRow("ap-hc","\ud83d\udd0d","Home check",esc(hSum),
+    h+=hybridRow("ap-hc","","Home check",esc(hSum),
       '<div class="g2">'+pf("Visit date","hcDate",st.hcDate,"date")+ps("Outcome","hcOutcome",st.hcOutcome,["Booked","Passed","Passed with advice","Failed"])+'</div>'
-      +pf("Home check notes","hcNotes",st.hcNotes,"text","brief \u2014 garden secure, other pets met, etc."),
+      +pf("Home check notes","hcNotes",st.hcNotes,"text","brief \u2014 garden secure, other pets met, etc.")
+      +(appMapUrl(st)?'<a href="'+appMapUrl(st)+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:7px 13px;border-radius:8px;background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);font-size:12px;color:#0f172a;text-decoration:none">Directions to '+esc(st.town||st.county||"the address")+' \u2192</a>'
+        :'<div style="font-size:11px;color:#854d0e">No address recorded \u2014 add one on the Contact row for directions.</div>'),
       st.hcOutcome==="Failed"?"alert":(!st.hcOutcome?"warn":""));
   }
   // adoption completion
@@ -2249,7 +2367,7 @@ function pipelineApplicantHtml(){
       st.fee?esc(st.fee):null].filter(Boolean);
     var aSum=aBits.length?aBits.join(" \u00b7 "):"Nothing recorded yet";
     var aOutstanding=A.stage==="Adopted"&&(st.contractSigned!=="Signed"||st.chipTransferred!=="Transferred");
-    h+=hybridRow("ap-adopt","\ud83d\udccb","Adoption",esc(aSum),
+    h+=hybridRow("ap-adopt","","Adoption",esc(aSum),
       '<div class="g2">'+pf("Collection date","collectionDate",st.collectionDate,"date")+pf("Adoption fee","fee",st.fee,"text","e.g. \u20ac150 \u2014 leave blank if none")+'</div>'
       +appPillGroup("Contract","contractSigned",st.contractSigned,["Signed","Not yet"])
       +appPillGroup("Microchip","chipTransferred",st.chipTransferred,["Transferred","Not yet"]),
@@ -2258,12 +2376,12 @@ function pipelineApplicantHtml(){
   // contact log
   var lg=(st.contactLog||[]);
   var lSum=lg.length?(lg.length+" logged \u00b7 last "+fmtDMY(lg[lg.length-1].date)):"Nothing logged";
-  h+=hybridRow("ap-log","\ud83d\udcac","Contact log",lSum,
+  h+=hybridRow("ap-log","","Contact log",lSum,
     (lg.slice().reverse().map(function(c){return '<div style="font-size:12px;color:#334155;padding:4px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span style="color:#94a3b8">'+fmtDMY(c.date)+'</span> \u00b7 '+esc(c.text)+'</div>';}).join("")||'<div style="font-size:11.5px;color:#cbd5e1">nothing logged</div>')
     +'<div style="display:flex;gap:8px;margin:8px 0 2px"><input id="pipe-contact" type="text" placeholder="e.g. left voicemail" style="flex:1;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit"><button onclick="addContactLine()" style="background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);padding:8px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Add</button></div>',"");
   // notes
   var nSum=st.notes?esc(String(st.notes).replace(/\s+/g," ").slice(0,60)):"None";
-  h+=hybridRow("ap-notes","\ud83d\udcdd","Notes",nSum,
+  h+=hybridRow("ap-notes","","Notes",nSum,
     '<textarea oninput="setAppF(\'notes\',this.value)" style="width:100%;min-height:60px;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit">'+esc(st.notes||"")+'</textarea>',"");
   // footer actions
   h+='<div style="display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid var(--color-border-tertiary);padding-top:10px;margin-top:12px"><span style="font-size:11px;color:#94a3b8">'+(st.anonymised?"Personal details cleared":"After adoption, withdrawal or decline:")+'</span>'+'<div style="display:flex;gap:6px">'
@@ -3083,7 +3201,7 @@ function hybridRow(id,icon,title,summary,body,tone){
   var sc=tone==="warn"?"#854d0e":tone==="alert"?"#991b1b":"#64748b";
   return '<div style="border-bottom:0.5px solid var(--color-border-tertiary)">'
     +'<div onclick="medTog(\''+id+'\')" role="button" tabindex="0" aria-expanded="'+open+'" onkeydown="if(event.key===\'Enter\')medTog(\''+id+'\')" style="display:flex;align-items:flex-start;gap:10px;padding:11px 2px;cursor:pointer">'
-    +'<span style="font-size:15px;line-height:1.3;flex-shrink:0">'+icon+'</span>'
+    +(icon?'<span style="font-size:15px;line-height:1.3;flex-shrink:0">'+icon+'</span>':'')
     +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#0f172a">'+title+'</div>'
     +(summary?'<div style="font-size:11.5px;color:'+sc+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+summary+'</div>':'')
     +'</div>'
@@ -3902,7 +4020,6 @@ function renderAssessment(){
   var dogOpts=[["","-- not tested --"],["Friendly — calm","Friendly — calm greeting"],["Interested — pulls toward","Interested — pulls toward"],["Nervous — avoids","Nervous — avoids"],["Reactive — barks / lunges","Reactive — barks / lunges"],["Aggressive","Aggressive — requires space"]];
   var driveOpts=[["","-- not tested --"],["High","High"],["Medium","Medium"],["Low","Low"],["None","None"]];
   window._asmtOpen=window._asmtOpen||{};
-  ["temperament","handling","barrier","social","environment","play","trainability","rehoming"].forEach(function(id){if(window._asmtOpen[id]===undefined)window._asmtOpen[id]=true;});
   var _d=S.dog||{};
   var _tot=Object.values(S.scores||{}).reduce(function(x,y){return x+y;},0);
   var _tl=handlingLight(_tot,S.scores||{});
@@ -3954,18 +4071,18 @@ function renderAssessment(){
       +'<div style="font-size:11px;color:#94a3b8;margin-bottom:10px">Tap the set level again to go back to the assessment.</div>'
       +(cur?ta("Why \u2014 kept with the record",A2.lightOverrideReason||"","assessment.lightOverrideReason","e.g. bite history under review \u2014 staff only for now"):"");
   })());
-h+=acard("brief","Handler brief \u2014 read before walking",'<div style="background:#eef7d8;border:1px solid #a9d23f;border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#3a4a16">The ten-second version for anyone taking this dog out. Keep it short and plain.</div>'+ta("Known triggers",a.briefTriggers||"","assessment.briefTriggers","e.g. other dogs head-on, men in hi-vis, hands reaching over the head...")+ta("What the warning looks like",a.briefWarning||"","assessment.briefWarning","e.g. goes still, whale eye, low growl, tail high and stiff...")+ta("What helps / what works",a.briefHelps||"","assessment.briefHelps","e.g. cross the road early, scatter feed, give space and wait, high-value treats...")+'<div class="g2">'+slct("Handler level needed",a.briefHandler||"","assessment.briefHandler",[["","-- not set --"],["Any staff member","Any staff member"],["Experienced handler","Experienced handler only"],["Two people","Two people required"],["Named handlers only","Named handlers only"]])+slct("Muzzle for walks?",a.briefMuzzle||"","assessment.briefMuzzle",[["","-- not set --"],["No","No"],["Yes","Yes \u2014 muzzle on for all walks"],["Yes \u2014 off site only","Yes \u2014 off site only"]])+'</div>',asmtFilled(["briefTriggers","briefWarning","briefHelps","briefHandler","briefMuzzle"])+" / 5 set");
-  h+=acard("handling","Handling",'<div class="g2">'+slct("Touch — Head",a.touchHead||"","assessment.touchHead",touchOpts)+slct("Touch — Body",a.touchBody||"","assessment.touchBody",touchOpts)+slct("Touch — Paws",a.touchPaws||"","assessment.touchPaws",touchOpts)+slct("Touch — Ears",a.touchEars||"","assessment.touchEars",touchOpts)+slct("Touch — Mouth",a.touchMouth||"","assessment.touchMouth",touchOpts)+slct("Collar grab",a.collarGrab||"","assessment.collarGrab",touchOpts)+slct("Restraint",a.restraint||"","assessment.restraint",touchOpts)+slct("Grooming / brushing",a.grooming||"","assessment.grooming",touchOpts)+slct("Nail / paw handling",a.nailHandling||"","assessment.nailHandling",touchOpts)+slct("Being lifted / picked up",a.liftHandling||"","assessment.liftHandling",touchOpts)+slct("On lead",a.leadBehaviour||"","assessment.leadBehaviour",[["","-- not tested --"],["Relaxed","Relaxed — no tension"],["Moderate pulling","Moderate — some pulling"],["Strong puller","Strong puller — difficult to manage"],["Dangerous","Dangerous — unsafe on lead"]])+slct("Harness going on",a.harnessOn||"","assessment.harnessOn",touchOpts)+slct("Lead clipped on",a.leadOn||"","assessment.leadOn",touchOpts)+slct("Jumping up",a.jumpingUp||"","assessment.jumpingUp",[["","-- not tested --"],["None observed","None observed"],["Occasional — settles","Occasional — settles quickly"],["Persistent","Persistent — jumps repeatedly"],["Knocks people","Jumps hard — knocks people over"]])+slct("Lead reactivity",a.leadReactivity||"","assessment.leadReactivity",reactOpts)+'</div>'+ta("Handling notes",a.handlingNotes||"","assessment.handlingNotes","Any handling observations..."),asmtFilled(["touchHead","touchBody","touchPaws","touchEars","touchMouth","collarGrab","restraint","grooming","nailHandling","liftHandling","leadBehaviour","harnessOn","leadOn","jumpingUp","leadReactivity"])+" / 15 set");
+h+=acard("brief","Handler brief \u2014 read before walking",'<div style="background:#eef7d8;border:1px solid #a9d23f;border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#3a4a16">The ten-second version for anyone taking this dog out. Keep it short and plain.</div>'+ta("Known triggers",a.briefTriggers||"","assessment.briefTriggers","e.g. other dogs head-on, men in hi-vis, hands reaching over the head...")+ta("What the warning looks like",a.briefWarning||"","assessment.briefWarning","e.g. goes still, whale eye, low growl, tail high and stiff...")+ta("What helps / what works",a.briefHelps||"","assessment.briefHelps","e.g. cross the road early, scatter feed, give space and wait, high-value treats...")+'<div class="g2">'+slct("Handler level needed",a.briefHandler||"","assessment.briefHandler",[["","-- not set --"],["Any staff member","Any staff member"],["Experienced handler","Experienced handler only"],["Two people","Two people required"],["Named handlers only","Named handlers only"]])+slct("Muzzle for walks?",a.briefMuzzle||"","assessment.briefMuzzle",[["","-- not set --"],["No","No"],["Yes","Yes \u2014 muzzle on for all walks"],["Yes \u2014 off site only","Yes \u2014 off site only"]])+'</div>');
+  h+=acard("handling","Handling",'<div class="g2">'+slct("Touch — Head",a.touchHead||"","assessment.touchHead",touchOpts)+slct("Touch — Body",a.touchBody||"","assessment.touchBody",touchOpts)+slct("Touch — Paws",a.touchPaws||"","assessment.touchPaws",touchOpts)+slct("Touch — Ears",a.touchEars||"","assessment.touchEars",touchOpts)+slct("Touch — Mouth",a.touchMouth||"","assessment.touchMouth",touchOpts)+slct("Collar grab",a.collarGrab||"","assessment.collarGrab",touchOpts)+slct("Restraint",a.restraint||"","assessment.restraint",touchOpts)+slct("Grooming / brushing",a.grooming||"","assessment.grooming",touchOpts)+slct("Nail / paw handling",a.nailHandling||"","assessment.nailHandling",touchOpts)+slct("Being lifted / picked up",a.liftHandling||"","assessment.liftHandling",touchOpts)+slct("On lead",a.leadBehaviour||"","assessment.leadBehaviour",[["","-- not tested --"],["Relaxed","Relaxed — no tension"],["Moderate pulling","Moderate — some pulling"],["Strong puller","Strong puller — difficult to manage"],["Dangerous","Dangerous — unsafe on lead"]])+slct("Harness going on",a.harnessOn||"","assessment.harnessOn",touchOpts)+slct("Lead clipped on",a.leadOn||"","assessment.leadOn",touchOpts)+slct("Jumping up",a.jumpingUp||"","assessment.jumpingUp",[["","-- not tested --"],["None observed","None observed"],["Occasional — settles","Occasional — settles quickly"],["Persistent","Persistent — jumps repeatedly"],["Knocks people","Jumps hard — knocks people over"]])+slct("Lead reactivity",a.leadReactivity||"","assessment.leadReactivity",reactOpts)+'</div>'+ta("Handling notes",a.handlingNotes||"","assessment.handlingNotes","Any handling observations..."));
   h+='</div>';
   h+=asmtGroup("behaviour","Behaviour");
   h+='<div class="asmt-bgrid">';
-  h+=acard("temperament","Temperament &amp; demeanour",'<div class="g2">'+slct("Overall confidence",a.confidence||"","assessment.confidence",[["","-- not assessed --"],["Confident","Confident and bold"],["Middle","Middle of the road"],["Cautious","Cautious but recovers"],["Nervous","Nervous / timid"],["Fearful","Fearful / shut down"]])+slct("Energy level",a.energyLevel||"","assessment.energyLevel",[["","-- not assessed --"],["Low","Low - calm / placid"],["Moderate","Moderate"],["High","High"],["Very high","Very high - constant motion"]])+slct("General demeanour",a.demeanour||"","assessment.demeanour",[["","-- not assessed --"],["Friendly","Friendly / outgoing"],["Confident","Confident / bold"],["Calm","Calm / relaxed"],["Playful","Playful"],["Aloof","Aloof / independent"],["Anxious","Anxious / worried"],["Fearful","Fearful / timid"],["Excitable","Excitable / bouncy"],["Reactive","Reactive"],["Withdrawn","Withdrawn / flat"],["Shut down","Shut down / non-responsive"]])+slct("Recovery from stress",a.stressRecovery||"","assessment.stressRecovery",[["","-- not assessed --"],["Quick","Recovers quickly"],["Moderate","Takes a little time"],["Slow","Slow to recover"],["Cannot","Cannot self-soothe"]])+slct("Biddability",a.biddability||"","assessment.biddability",[["","-- not assessed --"],["Eager","Eager to please"],["Willing","Willing"],["Distractible","Distractible"],["Independent","Independent / stubborn"]])+'</div>'+ta("Temperament notes",a.temperamentNotes||"","assessment.temperamentNotes","Overall character, first impressions, how they present..."),asmtFilled(["confidence","energyLevel","demeanour","stressRecovery","biddability"])+" / 5 set");
-  h+=acard("barrier","Barrier aggression",'<div class="g2">'+slct("Reaction at barrier",a.barrierReaction||"","assessment.barrierReaction",reactOpts)+slct("Intensity",a.barrierIntensity||"","assessment.barrierIntensity",[["","-- not assessed --"],["Redirects easily","Redirects easily"],["Hard to interrupt","Hard to interrupt"],["Cannot be interrupted","Cannot be interrupted"]])+slct("Triggers",a.barrierTriggers||"","assessment.barrierTriggers",[["","-- not assessed --"],["Dogs passing","Dogs passing"],["People passing","People passing"],["Both dogs and people","Both dogs and people"],["Feeding time","Feeding time"],["Multiple triggers","Multiple triggers"]])+slct("Redirected aggression",a.redirectedAggression||"","assessment.redirectedAggression",[["","-- not assessed --"],["None","None observed"],["Mild","Mild — minor mouthing"],["Moderate","Moderate — towards handler"],["Severe","Severe — bites handler"]])+'</div>'+ta("Barrier notes",a.barrierNotes||"","assessment.barrierNotes","Describe triggers, patterns, context..."),asmtFilled(["barrierReaction","barrierIntensity","barrierTriggers","redirectedAggression"])+" / 4 set");
-  h+=acard("guarding","Resource guarding",'<div class="g2">'+slct("Food bowl",a.guardFood||"","assessment.guardFood",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("High-value chew / bone",a.guardChew||"","assessment.guardChew",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("Toys",a.guardToys||"","assessment.guardToys",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("Bed / resting place",a.guardBed||"","assessment.guardBed",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("Stolen items",a.guardStolen||"","assessment.guardStolen",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("Guarding a person",a.guardPerson||"","assessment.guardPerson",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+'</div>'+'<div class="g2">'+slct("Warning given first?",a.guardWarning||"","assessment.guardWarning",[["","-- not assessed --"],["Clear warning","Clear warning — freeze, growl, lip curl"],["Minimal warning","Minimal warning — very brief"],["No warning","No warning — goes straight to snap/bite"],["N/A","N/A — no guarding seen"]])+slct("Trades / swaps willingly?",a.guardTrade||"","assessment.guardTrade",[["","-- not assessed --"],["Yes readily","Yes — swaps readily for better item"],["With work","Yes — but needs a high-value swap"],["No","No — will not release"],["Not tested","Not tested"]])+'</div>'+ta("Guarding notes",a.guardNotes||"","assessment.guardNotes","Which items, how close you can get, what the warning looks like, what works to defuse it...")+'<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:8px;padding:9px 12px;margin-top:10px;font-size:12px;color:#854d0e">Never test guarding by taking an item directly. Observe at a distance and trade up.</div>',asmtFilled(["guardFood","guardChew","guardToys","guardBed","guardStolen","guardPerson","guardWarning","guardTrade"])+" / 8 set");
-  h+=acard("social","Social behaviour",'<div class="g2">'+slct("Strangers approaching",a.strangerApproach||"","assessment.strangerApproach",[["","-- not tested --"],["Friendly — seeks contact","Friendly — seeks contact"],["Neutral — accepts","Neutral — accepts approach"],["Nervous — avoids","Nervous — avoids"],["Reactive","Reactive — barks / lunges"],["Aggressive","Aggressive"]])+slct("Children",a.childrenSuitable||"","assessment.childrenSuitable",[["","-- not assessed --"],["All ages","Suitable — all ages"],["Over 12 only","Suitable — over 12 only"],["Adults only","Adults only"],["Not suitable","Not suitable with children"],["Caution","Unknown — caution advised"]])+slct("Other dogs — on lead",a.dogOnLead||"","assessment.dogOnLead",dogOpts)+slct("Other dogs — off lead",a.dogOffLead||"","assessment.dogOffLead",dogOpts)+slct("Cats",a.catResponse||"","assessment.catResponse",[["","-- not tested --"],["Cat friendly","Cat friendly"],["Ignores","Ignores cats"],["Chases / reactive","Chases / reactive"],["High prey drive","High prey drive — unsafe with cats"],["Unknown","Unknown"]])+slct("Horses / equine",a.equineResponse||"","assessment.equineResponse",[["","-- not tested --"],["Calm / safe","Calm — safe around horses"],["Ignores","Ignores"],["Wary / nervous","Wary / nervous"],["Chases / reactive","Chases / reactive"],["Unknown","Unknown"]])+slct("Small mammals",a.smallMammalResponse||"","assessment.smallMammalResponse",[["","-- not tested --"],["Safe","Calm / safe"],["Ignores","Ignores"],["Chases / reactive","Chases / reactive"],["High prey drive","High prey drive — unsafe"],["Unknown","Unknown"]])+slct("Group setting",a.groupDogs||"","assessment.groupDogs",[["","-- not tested --"],["Settled","Settled and appropriate"],["Over-excited","Over-excited"],["Selective","Selective — some dogs only"],["Not suitable","Not suitable in groups"]])+'</div>'+ta("Social notes",a.socialNotes||"","assessment.socialNotes","Any observations about social behaviour..."),asmtFilled(["strangerApproach","childrenSuitable","dogOnLead","dogOffLead","catResponse","equineResponse","smallMammalResponse","groupDogs"])+" / 8 set");
-  h+=acard("environment","Environment",'<div class="g2">'+slct("Car travel",a.carTravel||"","assessment.carTravel",[["","-- not tested --"],["Settles well","Settles well"],["Anxious","Anxious but manageable"],["Very distressed","Very distressed"],["Not tested","Not tested"]])+slct("Noise sensitivity",a.noiseSensitivity||"","assessment.noiseSensitivity",[["","-- not assessed --"],["None observed","None observed"],["Mild — startles","Mild — startles but recovers"],["Moderate","Moderate — sustained anxiety"],["Severe","Severe — cannot settle"]])+slct("New environments",a.newEnvironments||"","assessment.newEnvironments",[["","-- not tested --"],["Confident","Confident — explores freely"],["Cautious","Cautious but settles"],["Very nervous","Very nervous"],["Shuts down","Shuts down"]])+slct("Kennel behaviour",a.kennelBehaviour||"","assessment.kennelBehaviour",[["","-- not assessed --"],["Settled","Settled and calm"],["Pacing","Pacing / repetitive behaviour"],["Vocal","Excessive vocalisation"],["Destructive","Destructive behaviour"],["Shutting down","Shutting down / withdrawn"]])+slct("House-training",a.houseTraining||"","assessment.houseTraining",[["","-- not assessed --"],["Fully","Fully house-trained"],["Mostly","Mostly - occasional accidents"],["In progress","In progress"],["Not trained","Not house-trained"],["Unknown","Unknown"]])+slct("Time left alone",a.aloneTime||"","assessment.aloneTime",[["","-- not assessed --"],["Fine","Settles fine alone"],["Short","OK for short periods"],["Struggles","Struggles - vocal / destructive"],["Cannot","Cannot be left"],["Unknown","Unknown"]])+slct("Crate behaviour",a.crateBehaviour||"","assessment.crateBehaviour",[["","-- not assessed --"],["Settles","Settles in crate"],["Tolerates","Tolerates crate"],["Distressed","Distressed in crate"],["Not tried","Not tried"]])+'</div>'+ta("Environment notes",a.environmentNotes||"","assessment.environmentNotes","Any environment observations..."),asmtFilled(["carTravel","noiseSensitivity","newEnvironments","kennelBehaviour","houseTraining","aloneTime","crateBehaviour"])+" / 7 set");
-  h+=acard("play","Play &amp; drive",'<div class="g2">'+slct("Toy interest",a.toyInterest||"","assessment.toyInterest",driveOpts)+slct("Retrieve",a.retrieve||"","assessment.retrieve",driveOpts)+slct("Tug",a.tug||"","assessment.tug",driveOpts)+slct("Food motivation",a.foodMotivation||"","assessment.foodMotivation",driveOpts)+slct("Resource guarding",a.resourceGuarding||"","assessment.resourceGuarding",[["","-- not tested --"],["None observed","None observed"],["Mild — stiffens / stares","Mild — stiffens / stares"],["Moderate — growls / snaps","Moderate — growls / snaps"],["Severe","Severe — bites"]])+slct("Play style",a.playStyle||"","assessment.playStyle",[["","-- not assessed --"],["Appropriate — good self-regulation","Appropriate — good self-regulation"],["Boisterous — needs breaks","Boisterous — needs regular breaks"],["Over-aroused","Over-aroused — escalates quickly"],["Bully / mounting","Bully / mounting behaviour"],["Fearful","Fearful / submissive"]])+slct("Play with people",a.playEngagement||"","assessment.playEngagement",[["","-- not assessed --"],["Initiates readily","Initiates play readily"],["Joins when invited","Joins in when invited"],["Takes warming up","Takes warming up"],["Indifferent","Indifferent to play"],["Avoids","Avoids play"]])+slct("Drops / gives toy",a.dropCue||"","assessment.dropCue",[["","-- not tested --"],["Releases readily","Releases readily"],["With encouragement","Releases with encouragement"],["Reluctant","Reluctant to release"],["Won't release","Won't release / guards"]])+slct("Mouthing / bite inhibition",a.mouthing||"","assessment.mouthing",[["","-- not tested --"],["Soft mouth","Soft mouth - good inhibition"],["Mouthy but gentle","Mouthy but gentle"],["Hard mouth","Hard mouth - needs work"],["No inhibition","Painful - no inhibition"]])+slct("Settles after play",a.settleAfterPlay||"","assessment.settleAfterPlay",[["","-- not assessed --"],["Settles quickly","Settles quickly"],["Needs a little time","Needs a little time"],["Slow to wind down","Slow to wind down"],["Over-aroused","Stays over-aroused"]])+slct("Frustration tolerance",a.frustration||"","assessment.frustration",[["","-- not tested --"],["Calm if blocked","Calm if blocked"],["Mild","Mild frustration - recovers"],["Vocalises/mouths","Vocalises or mouths when frustrated"],["Snaps","Snaps when frustrated"]])+'</div>'+fld("Favourite toys",a.toyPreference||"","assessment.toyPreference","text","e.g. balls, tug, squeaky, soft toys")+ta("Play notes",a.playNotes||"","assessment.playNotes","Any play and drive observations..."),asmtFilled(["toyInterest","retrieve","tug","foodMotivation","resourceGuarding","playStyle","playEngagement","dropCue","mouthing","settleAfterPlay","frustration"])+" / 11 set");
-  h+=acard("trainability","Trainability",'<div class="g2">'+slct("Attention span",a.attentionSpan||"","assessment.attentionSpan",[["","-- not assessed --"],["Excellent","Excellent — sustained focus"],["Good","Good — reasonable focus"],["Moderate","Moderate — easily distracted"],["Poor","Poor — unable to focus"]])+slct("Handler focus",a.handlerFocus||"","assessment.handlerFocus",[["","-- not assessed --"],["High","High — checks in frequently"],["Moderate","Moderate — responds when prompted"],["Low","Low — largely independent"],["None","None — ignores handler"]])+slct("Known commands",a.basicCommands||"","assessment.basicCommands",[["","-- not assessed --"],["None known","None known"],["Sit","Sit"],["Sit / Down","Sit and Down"],["Sit / Down / Stay","Sit, Down and Stay"],["Sit / Down / Stay / Come","Multiple commands"],["Fully trained","Fully trained"]])+slct("Previous training",a.previousTraining||"","assessment.previousTraining",[["","-- unknown --"],["None","None"],["Basic home training","Basic home training"],["Puppy class","Puppy class"],["Obedience classes","Obedience classes"],["Professional training","Professional training"]])+slct("Recall",a.recall||"","assessment.recall",[["","-- not tested --"],["Reliable","Reliable off lead"],["Good","Good - with distractions sometimes"],["Inconsistent","Inconsistent"],["Poor","Poor - no recall"]])+slct("Toilet training cue",a.toiletTraining||"","assessment.toiletTraining",[["","-- not assessed --"],["Yes","Toilets on cue / signals"],["Sometimes","Sometimes signals"],["No","No signal yet"],["Unknown","Unknown"]])+'</div>'+ta("Training notes",a.trainNotes||"","assessment.trainNotes","Any training observations or recommendations..."),asmtFilled(["attentionSpan","handlerFocus","basicCommands","previousTraining","recall","toiletTraining"])+" / 6 set");
+  h+=acard("temperament","Temperament &amp; demeanour",'<div class="g2">'+slct("Overall confidence",a.confidence||"","assessment.confidence",[["","-- not assessed --"],["Confident","Confident and bold"],["Middle","Middle of the road"],["Cautious","Cautious but recovers"],["Nervous","Nervous / timid"],["Fearful","Fearful / shut down"]])+slct("Energy level",a.energyLevel||"","assessment.energyLevel",[["","-- not assessed --"],["Low","Low - calm / placid"],["Moderate","Moderate"],["High","High"],["Very high","Very high - constant motion"]])+slct("General demeanour",a.demeanour||"","assessment.demeanour",[["","-- not assessed --"],["Friendly","Friendly / outgoing"],["Confident","Confident / bold"],["Calm","Calm / relaxed"],["Playful","Playful"],["Aloof","Aloof / independent"],["Anxious","Anxious / worried"],["Fearful","Fearful / timid"],["Excitable","Excitable / bouncy"],["Reactive","Reactive"],["Withdrawn","Withdrawn / flat"],["Shut down","Shut down / non-responsive"]])+slct("Recovery from stress",a.stressRecovery||"","assessment.stressRecovery",[["","-- not assessed --"],["Quick","Recovers quickly"],["Moderate","Takes a little time"],["Slow","Slow to recover"],["Cannot","Cannot self-soothe"]])+slct("Biddability",a.biddability||"","assessment.biddability",[["","-- not assessed --"],["Eager","Eager to please"],["Willing","Willing"],["Distractible","Distractible"],["Independent","Independent / stubborn"]])+'</div>'+ta("Temperament notes",a.temperamentNotes||"","assessment.temperamentNotes","Overall character, first impressions, how they present..."));
+  h+=acard("barrier","Barrier aggression",'<div class="g2">'+slct("Reaction at barrier",a.barrierReaction||"","assessment.barrierReaction",reactOpts)+slct("Intensity",a.barrierIntensity||"","assessment.barrierIntensity",[["","-- not assessed --"],["Redirects easily","Redirects easily"],["Hard to interrupt","Hard to interrupt"],["Cannot be interrupted","Cannot be interrupted"]])+slct("Triggers",a.barrierTriggers||"","assessment.barrierTriggers",[["","-- not assessed --"],["Dogs passing","Dogs passing"],["People passing","People passing"],["Both dogs and people","Both dogs and people"],["Feeding time","Feeding time"],["Multiple triggers","Multiple triggers"]])+slct("Redirected aggression",a.redirectedAggression||"","assessment.redirectedAggression",[["","-- not assessed --"],["None","None observed"],["Mild","Mild — minor mouthing"],["Moderate","Moderate — towards handler"],["Severe","Severe — bites handler"]])+'</div>'+ta("Barrier notes",a.barrierNotes||"","assessment.barrierNotes","Describe triggers, patterns, context..."));
+  h+=acard("guarding","Resource guarding",'<div class="g2">'+slct("Food bowl",a.guardFood||"","assessment.guardFood",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("High-value chew / bone",a.guardChew||"","assessment.guardChew",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("Toys",a.guardToys||"","assessment.guardToys",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("Bed / resting place",a.guardBed||"","assessment.guardBed",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("Stolen items",a.guardStolen||"","assessment.guardStolen",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+slct("Guarding a person",a.guardPerson||"","assessment.guardPerson",[["","-- not assessed --"],["None observed","None observed — relaxed"],["Mild","Mild — freezes or eats faster"],["Moderate","Moderate — stiffens, growls, hovers"],["Severe","Severe — snaps, lunges or bites"],["Not tested","Not tested — do not test"]])+'</div>'+'<div class="g2">'+slct("Warning given first?",a.guardWarning||"","assessment.guardWarning",[["","-- not assessed --"],["Clear warning","Clear warning — freeze, growl, lip curl"],["Minimal warning","Minimal warning — very brief"],["No warning","No warning — goes straight to snap/bite"],["N/A","N/A — no guarding seen"]])+slct("Trades / swaps willingly?",a.guardTrade||"","assessment.guardTrade",[["","-- not assessed --"],["Yes readily","Yes — swaps readily for better item"],["With work","Yes — but needs a high-value swap"],["No","No — will not release"],["Not tested","Not tested"]])+'</div>'+ta("Guarding notes",a.guardNotes||"","assessment.guardNotes","Which items, how close you can get, what the warning looks like, what works to defuse it...")+'<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:8px;padding:9px 12px;margin-top:10px;font-size:12px;color:#854d0e">Never test guarding by taking an item directly. Observe at a distance and trade up.</div>');
+  h+=acard("social","Social behaviour",'<div class="g2">'+slct("Strangers approaching",a.strangerApproach||"","assessment.strangerApproach",[["","-- not tested --"],["Friendly — seeks contact","Friendly — seeks contact"],["Neutral — accepts","Neutral — accepts approach"],["Nervous — avoids","Nervous — avoids"],["Reactive","Reactive — barks / lunges"],["Aggressive","Aggressive"]])+slct("Children",a.childrenSuitable||"","assessment.childrenSuitable",[["","-- not assessed --"],["All ages","Suitable — all ages"],["Over 12 only","Suitable — over 12 only"],["Adults only","Adults only"],["Not suitable","Not suitable with children"],["Caution","Unknown — caution advised"]])+slct("Other dogs — on lead",a.dogOnLead||"","assessment.dogOnLead",dogOpts)+slct("Other dogs — off lead",a.dogOffLead||"","assessment.dogOffLead",dogOpts)+slct("Cats",a.catResponse||"","assessment.catResponse",[["","-- not tested --"],["Cat friendly","Cat friendly"],["Ignores","Ignores cats"],["Chases / reactive","Chases / reactive"],["High prey drive","High prey drive — unsafe with cats"],["Unknown","Unknown"]])+slct("Horses / equine",a.equineResponse||"","assessment.equineResponse",[["","-- not tested --"],["Calm / safe","Calm — safe around horses"],["Ignores","Ignores"],["Wary / nervous","Wary / nervous"],["Chases / reactive","Chases / reactive"],["Unknown","Unknown"]])+slct("Small mammals",a.smallMammalResponse||"","assessment.smallMammalResponse",[["","-- not tested --"],["Safe","Calm / safe"],["Ignores","Ignores"],["Chases / reactive","Chases / reactive"],["High prey drive","High prey drive — unsafe"],["Unknown","Unknown"]])+slct("Group setting",a.groupDogs||"","assessment.groupDogs",[["","-- not tested --"],["Settled","Settled and appropriate"],["Over-excited","Over-excited"],["Selective","Selective — some dogs only"],["Not suitable","Not suitable in groups"]])+'</div>'+ta("Social notes",a.socialNotes||"","assessment.socialNotes","Any observations about social behaviour..."));
+  h+=acard("environment","Environment",'<div class="g2">'+slct("Car travel",a.carTravel||"","assessment.carTravel",[["","-- not tested --"],["Settles well","Settles well"],["Anxious","Anxious but manageable"],["Very distressed","Very distressed"],["Not tested","Not tested"]])+slct("Noise sensitivity",a.noiseSensitivity||"","assessment.noiseSensitivity",[["","-- not assessed --"],["None observed","None observed"],["Mild — startles","Mild — startles but recovers"],["Moderate","Moderate — sustained anxiety"],["Severe","Severe — cannot settle"]])+slct("New environments",a.newEnvironments||"","assessment.newEnvironments",[["","-- not tested --"],["Confident","Confident — explores freely"],["Cautious","Cautious but settles"],["Very nervous","Very nervous"],["Shuts down","Shuts down"]])+slct("Kennel behaviour",a.kennelBehaviour||"","assessment.kennelBehaviour",[["","-- not assessed --"],["Settled","Settled and calm"],["Pacing","Pacing / repetitive behaviour"],["Vocal","Excessive vocalisation"],["Destructive","Destructive behaviour"],["Shutting down","Shutting down / withdrawn"]])+slct("House-training",a.houseTraining||"","assessment.houseTraining",[["","-- not assessed --"],["Fully","Fully house-trained"],["Mostly","Mostly - occasional accidents"],["In progress","In progress"],["Not trained","Not house-trained"],["Unknown","Unknown"]])+slct("Time left alone",a.aloneTime||"","assessment.aloneTime",[["","-- not assessed --"],["Fine","Settles fine alone"],["Short","OK for short periods"],["Struggles","Struggles - vocal / destructive"],["Cannot","Cannot be left"],["Unknown","Unknown"]])+slct("Crate behaviour",a.crateBehaviour||"","assessment.crateBehaviour",[["","-- not assessed --"],["Settles","Settles in crate"],["Tolerates","Tolerates crate"],["Distressed","Distressed in crate"],["Not tried","Not tried"]])+'</div>'+ta("Environment notes",a.environmentNotes||"","assessment.environmentNotes","Any environment observations..."));
+  h+=acard("play","Play &amp; drive",'<div class="g2">'+slct("Toy interest",a.toyInterest||"","assessment.toyInterest",driveOpts)+slct("Retrieve",a.retrieve||"","assessment.retrieve",driveOpts)+slct("Tug",a.tug||"","assessment.tug",driveOpts)+slct("Food motivation",a.foodMotivation||"","assessment.foodMotivation",driveOpts)+slct("Resource guarding",a.resourceGuarding||"","assessment.resourceGuarding",[["","-- not tested --"],["None observed","None observed"],["Mild — stiffens / stares","Mild — stiffens / stares"],["Moderate — growls / snaps","Moderate — growls / snaps"],["Severe","Severe — bites"]])+slct("Play style",a.playStyle||"","assessment.playStyle",[["","-- not assessed --"],["Appropriate — good self-regulation","Appropriate — good self-regulation"],["Boisterous — needs breaks","Boisterous — needs regular breaks"],["Over-aroused","Over-aroused — escalates quickly"],["Bully / mounting","Bully / mounting behaviour"],["Fearful","Fearful / submissive"]])+slct("Play with people",a.playEngagement||"","assessment.playEngagement",[["","-- not assessed --"],["Initiates readily","Initiates play readily"],["Joins when invited","Joins in when invited"],["Takes warming up","Takes warming up"],["Indifferent","Indifferent to play"],["Avoids","Avoids play"]])+slct("Drops / gives toy",a.dropCue||"","assessment.dropCue",[["","-- not tested --"],["Releases readily","Releases readily"],["With encouragement","Releases with encouragement"],["Reluctant","Reluctant to release"],["Won't release","Won't release / guards"]])+slct("Mouthing / bite inhibition",a.mouthing||"","assessment.mouthing",[["","-- not tested --"],["Soft mouth","Soft mouth - good inhibition"],["Mouthy but gentle","Mouthy but gentle"],["Hard mouth","Hard mouth - needs work"],["No inhibition","Painful - no inhibition"]])+slct("Settles after play",a.settleAfterPlay||"","assessment.settleAfterPlay",[["","-- not assessed --"],["Settles quickly","Settles quickly"],["Needs a little time","Needs a little time"],["Slow to wind down","Slow to wind down"],["Over-aroused","Stays over-aroused"]])+slct("Frustration tolerance",a.frustration||"","assessment.frustration",[["","-- not tested --"],["Calm if blocked","Calm if blocked"],["Mild","Mild frustration - recovers"],["Vocalises/mouths","Vocalises or mouths when frustrated"],["Snaps","Snaps when frustrated"]])+'</div>'+fld("Favourite toys",a.toyPreference||"","assessment.toyPreference","text","e.g. balls, tug, squeaky, soft toys")+ta("Play notes",a.playNotes||"","assessment.playNotes","Any play and drive observations..."));
+  h+=acard("trainability","Trainability",'<div class="g2">'+slct("Attention span",a.attentionSpan||"","assessment.attentionSpan",[["","-- not assessed --"],["Excellent","Excellent — sustained focus"],["Good","Good — reasonable focus"],["Moderate","Moderate — easily distracted"],["Poor","Poor — unable to focus"]])+slct("Handler focus",a.handlerFocus||"","assessment.handlerFocus",[["","-- not assessed --"],["High","High — checks in frequently"],["Moderate","Moderate — responds when prompted"],["Low","Low — largely independent"],["None","None — ignores handler"]])+slct("Known commands",a.basicCommands||"","assessment.basicCommands",[["","-- not assessed --"],["None known","None known"],["Sit","Sit"],["Sit / Down","Sit and Down"],["Sit / Down / Stay","Sit, Down and Stay"],["Sit / Down / Stay / Come","Multiple commands"],["Fully trained","Fully trained"]])+slct("Previous training",a.previousTraining||"","assessment.previousTraining",[["","-- unknown --"],["None","None"],["Basic home training","Basic home training"],["Puppy class","Puppy class"],["Obedience classes","Obedience classes"],["Professional training","Professional training"]])+slct("Recall",a.recall||"","assessment.recall",[["","-- not tested --"],["Reliable","Reliable off lead"],["Good","Good - with distractions sometimes"],["Inconsistent","Inconsistent"],["Poor","Poor - no recall"]])+slct("Toilet training cue",a.toiletTraining||"","assessment.toiletTraining",[["","-- not assessed --"],["Yes","Toilets on cue / signals"],["Sometimes","Sometimes signals"],["No","No signal yet"],["Unknown","Unknown"]])+'</div>'+ta("Training notes",a.trainNotes||"","assessment.trainNotes","Any training observations or recommendations..."));
   h+='</div>';
   h+='<div class="brow"><button class="btn" data-go="days">&larr; Back</button><button class="btn btnp" data-go="scoring">Next: scoring &rarr;</button></div>';
   return h;
@@ -4591,16 +4708,11 @@ function renderPicture(){
   return h;
 }
 
-var ASMT_ICONS={conclusions:"\ud83d\udccb",hlevel:"\ud83d\udea6",brief:"\u270b",handling:"\ud83e\udd32",
-  temperament:"\ud83d\udc3e",barrier:"\ud83d\udea7",guarding:"\ud83e\uddb4",social:"\ud83d\udc65",
-  environment:"\ud83c\udfe1",play:"\ud83c\udfbe",trainability:"\ud83c\udf93",
-  buddywalks:"\ud83d\udc15",playdates:"\ud83e\udd38",muzzle:"\ud83d\ude37"};
+
 function acard(id,title,body,label){window._asmtOpen=window._asmtOpen||{};var open=!!window._asmtOpen[id];
   var sm=asmtCardSummary(id);
-  var ic=ASMT_ICONS[id]||"\u2022";
   return '<div class="asmt-row">'
     +'<div onclick="toggleAsmt(\''+id+'\')" role="button" tabindex="0" aria-expanded="'+open+'" onkeydown="if(event.key===\'Enter\')toggleAsmt(\''+id+'\')" style="display:flex;align-items:flex-start;gap:10px;padding:11px 0;cursor:pointer">'
-    +'<span style="font-size:15px;line-height:1.3;flex-shrink:0">'+ic+'</span>'
     +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#0f172a">'+title+'</div>'
     +(sm.text?'<div style="font-size:11.5px;color:'+(sm.tone==="warn"?"#854d0e":"#64748b")+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+sm.text+'</div>':'')
     +'</div>'
@@ -5673,7 +5785,7 @@ function chipInfoHtml(v){
 function checkMicrochip(v){var el=document.getElementById("chip-info");if(!el)return;el.innerHTML=chipInfoHtml(v!=null?v:((S.dog&&S.dog.microchip)||""));}
 function updateHeaderDog(){var bg=document.getElementById("badge");if(bg){var nm=S.dog&&S.dog.name?S.dog.name:"";bg.textContent=nm;bg.style.display=nm?"block":"none";}var ph=document.getElementById("badge-photo");if(ph){if(S.dog&&S.dog.photo){ph.src=S.dog.photo;ph.style.display="block";}else{ph.style.display="none";ph.removeAttribute("src");}}}
 function checkDuplicateName(){var el=document.getElementById("dup-name-hint");if(!el)return;var nm=((S.dog&&S.dog.name)||"").trim().toLowerCase();if(!nm){el.style.display="none";return;}var dup=records.some(function(r){if(r.id===S._id)return false;var o=r.state&&r.state.fin?r.state.fin.outcome:"";var act=!o||o.indexOf("Active")>=0||o==="Finished Isolation";return act&&r.name&&r.name.trim().toLowerCase()===nm;});el.style.display=dup?"block":"none";}
-function updateSaveBar(){var ro=["report","briefing","timeline"].indexOf(S.tab)>=0;var sb=document.getElementById("save-bar");if(sb)sb.style.display=ro?"none":"";var c=document.getElementById("content");if(c)c.style.paddingBottom=ro?"24px":"";var lc=document.getElementById("last-changed");if(lc){var rec=S._id?records.find(function(r){return r.id===S._id;}):null;if(rec&&rec.savedBy){lc.textContent="Last changed by "+rec.savedBy+(rec.savedAt?" \u00b7 "+fmtAgo(rec.savedAt):"");}else{lc.textContent="Not saved yet";}}}
+function updateSaveBar(){var ro=["report","briefing","timeline"].indexOf(S.tab)>=0;var sb=document.getElementById("save-bar");if(sb)sb.style.display=ro?"none":"";var c=document.getElementById("content");if(c)c.style.paddingBottom=ro?"24px":"";var lc=document.getElementById("last-changed");if(lc){if(syncStatus())return;var rec=S._id?records.find(function(r){return r.id===S._id;}):null;if(rec&&rec.savedBy){lc.textContent="Last changed by "+rec.savedBy+(rec.savedAt?" \u00b7 "+fmtAgo(rec.savedAt):"");}else{lc.textContent="Not saved yet";}}}
 
 function handleAppClick(e){
   var go=e.target.closest("[data-go]");if(go){S.tab=go.dataset.go;render();window.scrollTo(0,0);return;}
@@ -5688,7 +5800,7 @@ function handleAppClick(e){
   }
   var sub=e.target.closest("[data-sub]");if(sub){var sp=sub.dataset.sub.split(".");var sck=sp[0],ssk=sp[1],sval=parseInt(sp[2]);if(!S.subScores)S.subScores={};if(!S.subScores[sck])S.subScores[sck]={};if(S.subScores[sck][ssk]===sval)delete S.subScores[sck][ssk];else S.subScores[sck][ssk]=sval;recalcCat(sck);renderMain();debouncedSave();return;}
   var evb=e.target.closest("[data-ev]");if(evb){var ep=evb.dataset.ev.split(".");if(!S.subEvidence)S.subEvidence={};if(!S.subEvidence[ep[0]])S.subEvidence[ep[0]]={};var cur=S.subEvidence[ep[0]][ep[1]]||"";S.subEvidence[ep[0]][ep[1]]=cur==="obs"?"inf":cur==="inf"?"":"obs";renderMain();debouncedSave();return;}
-  var sc2=e.target.closest("[data-sc]");if(sc2){var p=sc2.dataset.sc.split(".");S.scores[p[0]]=S.scores[p[0]]===parseInt(p[1])?0:parseInt(p[1]);if(!S.assessment)S.assessment={};S.assessment.scoredDate=new Date().toISOString().slice(0,10);renderMain();debouncedSave();return;}
+  var sc2=e.target.closest("[data-sc]");if(sc2){var p=sc2.dataset.sc.split(".");S.scores[p[0]]=S.scores[p[0]]===parseInt(p[1])?0:parseInt(p[1]);if(!S.assessment)S.assessment={};if(!S.assessment.scoredDate)S.assessment.scoredDate=new Date().toISOString().slice(0,10);renderMain();debouncedSave();return;}
   if(e.target.closest("[data-action='save-record']")){saveRecord();return;}
   if(e.target.closest("[data-action='new-dog']")){appConfirm("Start a new dog?",function(){S=defaultState();persistSave();render();});return;}
   var ld=e.target.closest("[data-load]");if(ld){openDog(parseInt(ld.dataset.load));return;}
@@ -5729,6 +5841,10 @@ document.getElementById("wrap").addEventListener("change",function(e){
 });
 
 // ── Supabase ──────────────────────────────────────────────────────
+if(typeof window!=="undefined"&&window.addEventListener){
+  window.addEventListener("online",function(){syncStatus();retryPending();});
+  window.addEventListener("offline",function(){syncStatus();});
+}
 function initSupabase(){
   supabaseClient={from:function(table){
     var base=SUPABASE_URL+"/rest/v1/"+table;
@@ -5768,10 +5884,21 @@ async function saveRecord(){
   var st=JSON.parse(JSON.stringify(S));delete st._id;st._savedBy=currentName();
   var row={name:S.dog.name,breed:S.dog.breed||"",ref_no:S.dog.refNo||"",intake_date:S.dog.intakeDate||null,assessor:S.dog.assessor||"",score:total,traffic_light:tl,saved_at:new Date().toISOString(),data:st};
   try{
-    if(S._id){await supabaseClient.from("dogs").update(row).eq("id",S._id);}
-    else{var res=await supabaseClient.from("dogs").insert([row]);if(res.data&&res.data[0]){S._id=res.data[0].id;}}
+    if(S._id){
+      var up=await supabaseClient.from("dogs").update(row).eq("id",S._id);
+      if(up&&up.error)throw up.error;
+    }
+    else{var res=await supabaseClient.from("dogs").insert([row]);
+      if(res&&res.error)throw res.error;
+      if(res.data&&res.data[0]){S._id=res.data[0].id;}}
+    pendingClear(S._id);
     persistSave();showSaved();await loadRecordsList();updateSaveBar();
-  }catch(e){console.error("saveRecord:",e);persistSave();}
+  }catch(e){
+    console.error("saveRecord:",e);
+    persistSave();
+    pendingPark(S._id,row);          // nothing is lost — it retries
+    updateSaveBar();
+  }
   finally{_recSaveBusy=false;if(_recSaveAgain){_recSaveAgain=false;saveRecord();}}
 }
 
@@ -5803,12 +5930,14 @@ function restoreState(saved){
 function loadRecord(id){
   var rec=records.find(function(r){return r.id===id;});if(!rec||!rec.state)return;
   S=restoreState(rec.state);
+  window._asmtOpen={};window._medOpen={};   // every card starts closed on a fresh dog
   S._id=rec.id;S.tab="report";render();
 }
 
 async function loadRecordsList(){
   if(!supabaseClient){records=[];return;}
-  var res=await supabaseClient.from("dogs").select("*").order("saved_at",{ascending:false}).limit(50);
+  if(typeof pendingCount==="function"&&pendingCount())schedulePendingRetry();
+  var res=await supabaseClient.from("dogs").select("*").order("saved_at",{ascending:false}).limit(400);
   if(res.error){console.error(res.error);records=[];return;}
   records=(res.data||[]).map(function(row){
     var st=null;try{st=typeof row.data==="string"?JSON.parse(row.data):row.data;}catch(e){}
