@@ -50,7 +50,17 @@ nav::-webkit-scrollbar{display:none}
 .nb.on{color:#0f172a;font-weight:700;border-bottom-color:#a9d23f;border-bottom-width:2.5px}
 /* V5 two-tier pill nav */
 #navwrap{background:#fff;padding-bottom:10px}
-.pnav{padding:10px 14px 0}
+.pnav{padding:8px 14px 0}
+.hide-narrow{display:inline-block}
+@media (max-width:430px){.hide-narrow{display:none}}
+/* one header for every full-screen overlay */
+.ov-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.ov-title{font-size:16px;font-weight:700;color:#0f172a;line-height:1.2}
+.ov-sub{font-size:12px;color:#94a3b8}
+.ov-x{background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);padding:7px 12px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;color:#0f172a}
+/* the sub-tab row can scroll rather than cramp when a group has four tabs */
+#pnav-subs{-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none}
+#pnav-subs::-webkit-scrollbar{display:none}
 .pnav-row{position:relative;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
 .pnav-row::-webkit-scrollbar{display:none}
 .pnav-row .pglide{position:absolute;top:0;left:0;height:100%;border-radius:999px;z-index:0;pointer-events:none;transition:transform .3s cubic-bezier(.34,1.2,.4,1),width .3s cubic-bezier(.34,1.2,.4,1)}
@@ -60,7 +70,7 @@ nav::-webkit-scrollbar{display:none}
 .pnav-groups .ppill.on{color:#fff}
 .pnav-subs{margin-top:8px;padding:2px;display:inline-flex;min-width:min-content}
 .pnav-subs .pglide{background:#C5E86C}
-.pnav-subs .ppill{font-size:12px;font-weight:600;padding:7px 13px}
+.pnav-subs .ppill{font-size:11.5px;font-weight:600;padding:6px 11px}
 .pnav-subs .ppill.on{color:#0f172a}
 .pnav-subs .ppill .pcdot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-left:6px;vertical-align:middle}
 .pnav-subs .ppill .pcdot.done{background:#16a34a}
@@ -277,17 +287,17 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 </div>
 
 <div id="dashboard-screen" style="display:none;min-height:100vh;background:var(--color-background-secondary)">
-  <div style="background:#0f172a;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+  <div style="background:rgba(15,23,42,0.97);backdrop-filter:saturate(1.5) blur(8px);-webkit-backdrop-filter:saturate(1.5) blur(8px);padding:7px 12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:8px;position:sticky;top:0;z-index:40">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <svg width="116" height="26" viewBox="0 0 232 51" fill="none" style="display:block"><path d="M193.211 41.5648L191.972 46.3797H178.84L180.238 41.5648C180.572 40.428 180.839 39.4917 181.575 37.1512L192.074 2.51074H213.407L224.04 37.1512C224.708 39.4249 225.043 40.2942 225.444 41.5648L227.064 46.3797H209.199L208.064 41.5648C208.064 41.5648 207.547 39.3578 207.054 37.2849H194.281C193.679 39.5586 193.478 40.3611 193.211 41.5648ZM202.373 20.0316C202.105 18.9616 201.771 18.2929 200.835 18.2929C199.831 18.2929 199.497 18.9616 199.163 20.0316L196.956 27.9226H204.513L202.373 20.0316Z" fill="#C5E86C"/><path d="M154.633 46.3797C147.745 46.3797 136.109 39.4917 136.109 24.4452C136.109 9.39871 147.277 2.51074 155.703 2.51074H179.243V18.8279H170.081C169.279 14.6148 167.272 12.2743 162.391 12.2743C156.84 12.2743 153.496 16.8217 153.496 24.4452C153.496 31.6676 156.84 36.215 161.655 36.215C165.935 36.215 168.276 33.4731 169.613 29.4607H180.647C178.574 37.9537 173.425 46.3797 164.464 46.3797H154.633Z" fill="#C5E86C"/><path d="M108.068 34.6769V46.3797H91.3496V2.51074H123.984C129.735 2.51074 134.416 7.32563 134.416 15.4173C134.416 24.7127 128.598 32.1357 118.567 32.1357H111.144C108.67 32.1357 108.068 32.6038 108.068 34.6769ZM110.342 24.8465H110.475C114.956 24.8465 117.698 22.439 117.698 17.2229C117.698 13.1436 115.558 10.4687 111.211 10.4687H110.542C108.67 10.4687 108.068 10.9368 108.068 13.0099V22.3053C108.068 24.3784 108.67 24.8465 110.342 24.8465Z" fill="#C5E86C"/><path d="M66.159 37.9537C69.7033 37.9537 71.7095 36.7499 71.7095 34.2087C71.7095 26.0502 47.0332 33.9413 47.0332 15.4842C47.0332 7.05814 53.4531 2.51074 60.8091 2.51074H84.3486V15.1498H75.12C73.582 11.9399 70.8402 10.7362 67.229 10.7362C64.4203 10.7362 62.5478 11.6055 62.5478 13.5449C62.5478 20.0985 87.826 13.0099 87.826 31.4001C87.826 41.4311 79.3331 46.3797 72.3782 46.3797H47.3007V31.5338H56.5292C58.1342 36.0812 61.7454 37.9537 66.159 37.9537Z" fill="#C5E86C"/><path d="M14.3109 26.8527V46.3797H0V2.51074H17.454L25.8131 19.0954C26.5488 20.5666 27.0837 20.7672 27.6856 20.7672C28.555 20.7672 28.8893 20.0316 28.8893 18.6941V2.51074H43.2002V46.3797H29.3574L17.5208 26.4514C16.7852 25.1808 16.3171 24.7796 15.6484 24.7796C14.6453 24.7796 14.3109 25.5152 14.3109 26.8527Z" fill="#C5E86C"/></svg>
-      <span id="dash-clock" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8"></span>
+      <svg width="98" height="22" viewBox="0 0 232 51" fill="none" style="display:block"><path d="M193.211 41.5648L191.972 46.3797H178.84L180.238 41.5648C180.572 40.428 180.839 39.4917 181.575 37.1512L192.074 2.51074H213.407L224.04 37.1512C224.708 39.4249 225.043 40.2942 225.444 41.5648L227.064 46.3797H209.199L208.064 41.5648C208.064 41.5648 207.547 39.3578 207.054 37.2849H194.281C193.679 39.5586 193.478 40.3611 193.211 41.5648ZM202.373 20.0316C202.105 18.9616 201.771 18.2929 200.835 18.2929C199.831 18.2929 199.497 18.9616 199.163 20.0316L196.956 27.9226H204.513L202.373 20.0316Z" fill="#C5E86C"/><path d="M154.633 46.3797C147.745 46.3797 136.109 39.4917 136.109 24.4452C136.109 9.39871 147.277 2.51074 155.703 2.51074H179.243V18.8279H170.081C169.279 14.6148 167.272 12.2743 162.391 12.2743C156.84 12.2743 153.496 16.8217 153.496 24.4452C153.496 31.6676 156.84 36.215 161.655 36.215C165.935 36.215 168.276 33.4731 169.613 29.4607H180.647C178.574 37.9537 173.425 46.3797 164.464 46.3797H154.633Z" fill="#C5E86C"/><path d="M108.068 34.6769V46.3797H91.3496V2.51074H123.984C129.735 2.51074 134.416 7.32563 134.416 15.4173C134.416 24.7127 128.598 32.1357 118.567 32.1357H111.144C108.67 32.1357 108.068 32.6038 108.068 34.6769ZM110.342 24.8465H110.475C114.956 24.8465 117.698 22.439 117.698 17.2229C117.698 13.1436 115.558 10.4687 111.211 10.4687H110.542C108.67 10.4687 108.068 10.9368 108.068 13.0099V22.3053C108.068 24.3784 108.67 24.8465 110.342 24.8465Z" fill="#C5E86C"/><path d="M66.159 37.9537C69.7033 37.9537 71.7095 36.7499 71.7095 34.2087C71.7095 26.0502 47.0332 33.9413 47.0332 15.4842C47.0332 7.05814 53.4531 2.51074 60.8091 2.51074H84.3486V15.1498H75.12C73.582 11.9399 70.8402 10.7362 67.229 10.7362C64.4203 10.7362 62.5478 11.6055 62.5478 13.5449C62.5478 20.0985 87.826 13.0099 87.826 31.4001C87.826 41.4311 79.3331 46.3797 72.3782 46.3797H47.3007V31.5338H56.5292C58.1342 36.0812 61.7454 37.9537 66.159 37.9537Z" fill="#C5E86C"/><path d="M14.3109 26.8527V46.3797H0V2.51074H17.454L25.8131 19.0954C26.5488 20.5666 27.0837 20.7672 27.6856 20.7672C28.555 20.7672 28.8893 20.0316 28.8893 18.6941V2.51074H43.2002V46.3797H29.3574L17.5208 26.4514C16.7852 25.1808 16.3171 24.7796 15.6484 24.7796C14.6453 24.7796 14.3109 25.5152 14.3109 26.8527Z" fill="#C5E86C"/></svg>
+      <span id="dash-clock" class="hide-narrow" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8"></span>
       <span id="dash-count" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8;display:none"></span>
     </div>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap">
       <button id="notif-bell" onclick="openNotifications()" style="position:relative;background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:4px 11px;font-size:12px;color:#e2e8f0;cursor:pointer;font-family:inherit" title="Recent activity">&#128276;<span id="notif-count" style="display:none;position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#dc2626;color:#fff;font-size:10px;font-weight:700;line-height:16px;text-align:center"></span></button>
       <span id="dash-user" onclick="showDashSection('profile')" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8;display:none;align-items:center;gap:6px;cursor:pointer"></span>
-      <button onclick="showIncidentModal()" style="background:#7f1d1d;color:#fecaca;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600" title="Quickly log an incident">&#9888; Incident</button>
-      <button onclick="openPipeline()" style="background:#f1f5f9;color:#0f172a;border:0.5px solid rgba(15,23,42,0.12);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" title="Rehoming pipeline">Rehoming</button> <button onclick="openNewDog()" style="background:#c5e86c;color:#0f172a;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" title="Start a new dog">+ New</button>
+      <button onclick="showIncidentModal()" style="background:rgba(127,29,29,0.85);color:#fecaca;border:0.5px solid rgba(254,202,202,0.25);padding:4px 11px;border-radius:20px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600" title="Quickly log an incident">&#9888;</button>
+      <button onclick="openPipeline()" style="background:#1e293b;color:#e2e8f0;border:0.5px solid #334155;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit" title="Rehoming pipeline">Rehoming</button> <button onclick="openNewDog()" style="background:#c5e86c;color:#0f172a;border:none;padding:4px 13px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit" title="Start a new dog">+ New</button>
       <div style="position:relative">
         <button id="dash-menu-btn" onclick="toggleDashMenu(event)" style="background:#1e293b;color:#c5e86c;border:0.5px solid #334155;padding:5px 11px;border-radius:6px;font-size:14px;cursor:pointer;font-family:inherit;line-height:1" title="Menu" aria-label="Menu">&#9776;</button>
         <div id="dash-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,0.18);min-width:210px;z-index:50;overflow-y:auto;max-height:calc(100vh - 90px)">
@@ -386,11 +396,11 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.86",date:"2026-07-28",note:"A bell on the dashboard. Tap it and you get what has happened since you were last in the app: anything that needs you now \u2014 a contagious dog, an isolation clearing today, a reclaim deadline, two people approved for the same dog \u2014 then what changed and who changed it, then any app updates you have not seen. Tap a line to go straight to that dog or to the pipeline. The count on the bell tells you how much is waiting, and Mark all as read clears it, though anything genuinely urgent stays until it is actually dealt with. The little messages that pop up when something saves or fails now match the new bar along the bottom, and sit above it rather than over it."},
+var CHANGELOG=[{version:"3.87",date:"2026-07-28",note:"A tidy-up of the edges. The dashboard header is slimmer and now stays with you as you scroll, with the buttons quietened to match the rest of the app and the clock stepping aside on a narrow phone so nothing wraps onto a second line. The pipeline, the applicant record and the new Recent panel all share one header now, so moving between them feels like the same app rather than three. The tab pills are a shade smaller, which lets the four in the Assessment group sit comfortably on a phone instead of squeezing, and the row scrolls cleanly if it ever needs to. Empty spaces now say what is actually missing rather than just \u0027nothing\u0027 \u2014 a stage with no one in it says so, a cleared dog nobody has asked about says so. Nothing moved and nothing changed what it does \u2014 it just sits better."},
+  {version:"3.86",date:"2026-07-28",note:"A bell on the dashboard. Tap it and you get what has happened since you were last in the app: anything that needs you now \u2014 a contagious dog, an isolation clearing today, a reclaim deadline, two people approved for the same dog \u2014 then what changed and who changed it, then any app updates you have not seen. Tap a line to go straight to that dog or to the pipeline. The count on the bell tells you how much is waiting, and Mark all as read clears it, though anything genuinely urgent stays until it is actually dealt with. The little messages that pop up when something saves or fails now match the new bar along the bottom, and sit above it rather than over it."},
   {version:"3.85",date:"2026-07-27",note:"The most important change in a while: your work can no longer go missing. Until now, if a save failed \u2014 a dead spot in the block, wifi dropping \u2014 the app kept a copy on the phone and said nothing, and that copy was never sent. Now a failed save is held and retried by itself, and the moment the signal returns it goes up. The bar along the bottom tells you the truth while that happens: a green dot when everything is saved, amber while changes are waiting, red when you are offline, with a count of what is still to go. That bar is also slimmer now \u2014 one line with a small Save button rather than a block across the screen. Other honesty fixes: the pipeline says so when a save or delete fails instead of pretending, and marking someone Adopted tells you if the dog\u0027s own record could not be updated. And the dashboard now holds far more dogs before older ones drop off the list."},
   {version:"3.84",date:"2026-07-27",note:"The Assessment and Sessions tabs are quieter. The icons are gone from the rows, and every section now starts closed \u2014 seven of them used to open themselves the moment you arrived, which is why the tab always looked like a wall. Now you get eleven summary lines and you open the one you want. What you open stays open while you are working on that dog, and closes again when you move to another one."},
-  {version:"3.83",date:"2026-07-27",note:"The rehoming pipeline says what is actually happening. A person who has adopted a dog now reads as having adopted it \u2014 on the board, on their record and on the dog\u0027s own row, which names who took it and when instead of still asking for applicants. Everyone else reads by where they are: interested in, home check for, approved for, withdrew from. Applicants now take a proper address \u2014 street, town, county and eircode, with an email alongside the phone \u2014 and once there is one, a map link sits on the record and directions sit on the home check row, so nobody is copying an address into their phone before a visit. The town shows on the board so you can see at a glance where people are coming from. And the icons are gone from the pipeline rows."},
-  {version:"3.82",date:"2026-07-26",note:"You can now say when an assessment actually happened. The Scoring tab has an Assessed on date beside the Snapshot button \u2014 set it to the day you did the work, whether that was this morning or last Tuesday, and everything follows it: the days-since figure on the Assessment tab, the out-of-date warning, and the stale-assessment blocker on Rehoming. Snapshots are stamped with that date too, so a re-assessment written up the next day still reads as having happened when it did. Leave it alone and it behaves as before, filling itself in the first time you score a dog. It will not accept a date in the future."}
+  {version:"3.83",date:"2026-07-27",note:"The rehoming pipeline says what is actually happening. A person who has adopted a dog now reads as having adopted it \u2014 on the board, on their record and on the dog\u0027s own row, which names who took it and when instead of still asking for applicants. Everyone else reads by where they are: interested in, home check for, approved for, withdrew from. Applicants now take a proper address \u2014 street, town, county and eircode, with an email alongside the phone \u2014 and once there is one, a map link sits on the record and directions sit on the home check row, so nobody is copying an address into their phone before a visit. The town shows on the board so you can see at a glance where people are coming from. And the icons are gone from the pipeline rows."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -2221,7 +2231,7 @@ function pipeDogsHtml(){
       ? '<span style="font-size:11px;font-weight:600;color:#166534;background:#dcfce7;padding:2px 9px;border-radius:9px;white-space:nowrap">adopted</span>'
       : mine.length
       ? '<span style="font-size:11px;font-weight:600;color:#166534;background:#dcfce7;padding:2px 9px;border-radius:9px;white-space:nowrap">'+mine.length+(best?" \u00b7 "+best:"")+'</span>'
-      : '<span style="font-size:11px;color:#94a3b8;white-space:nowrap">none yet</span>';
+      : '<span style="font-size:11px;color:#94a3b8;white-space:nowrap">no interest yet</span>';
     var av2=d.photo
       ? '<img src="'+d.photo+'" alt="" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0">'
       : '<div style="width:30px;height:30px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">\ud83d\udc36</div>';
@@ -2234,7 +2244,7 @@ function pipeDogsHtml(){
   return h+'</div>';
 }
 function pipelineBoardHtml(){
-  var h='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px"><div><div style="font-size:16px;font-weight:700;color:#0f172a">Rehoming</div><div style="font-size:12px;color:#94a3b8">'+applicants.filter(function(a){return APP_ACTIVE.indexOf(a.stage)>-1;}).length+' active applicants</div></div><div style="display:flex;gap:8px"><button onclick="newApplicant()" style="background:#0f172a;color:#c5e86c;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">+ Applicant</button><button onclick="closePipeline()" style="background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);padding:7px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Close</button></div></div>';
+  var h='<div class="ov-head"><div><div class="ov-title">Rehoming</div><div class="ov-sub">'+applicants.filter(function(a){return APP_ACTIVE.indexOf(a.stage)>-1;}).length+' active applicants</div></div><div style="display:flex;gap:8px"><button onclick="newApplicant()" style="background:#0f172a;color:#c5e86c;border:none;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">+ Applicant</button><button onclick="closePipeline()" class="ov-x">Close</button></div></div>';
   if(!supabaseClient)return h+'<div style="font-size:12.5px;color:#854d0e;background:#fef9c3;border-radius:8px;padding:10px 12px">Connect to the database to use the pipeline.</div>';
   // \u2500\u2500 live picture \u2500\u2500
   function cnt(s){return applicants.filter(function(a){return a.stage===s;}).length;}
@@ -2259,7 +2269,7 @@ function pipelineBoardHtml(){
     var grp=applicants.filter(function(a){return a.stage===st;});
     if(!grp.length&&APP_ACTIVE.indexOf(st)===-1)return;
     h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:12px 0 2px">'+st+' \u00b7 '+grp.length+'</div>';
-    h+=grp.length?('<div style="border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:0 12px">'+grp.map(applicantRowHtml).join("")+'</div>'):'<div style="font-size:11.5px;color:#cbd5e1;padding:2px 2px 0">none</div>';
+    h+=grp.length?('<div style="border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:0 12px">'+grp.map(applicantRowHtml).join("")+'</div>'):'<div style="font-size:11.5px;color:#cbd5e1;padding:2px 2px 0">No one at this stage</div>';
   });
   return h;
 }
@@ -2271,7 +2281,7 @@ function pipelineApplicantHtml(){
   var mm=_rec?matchApplicantToDog(A,_rec):null;
   var qi=appQueueInfo(A);
   // \u2500\u2500 header \u2500\u2500
-  var h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><button onclick="backToBoard()" style="background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">&larr; Board</button><div style="flex:1;font-size:15px;font-weight:700;color:#0f172a">'+esc(A.name||"New applicant")+'</div></div>';
+  var h='<div class="ov-head"><button onclick="backToBoard()" class="ov-x">&larr; Board</button><div style="flex:1;min-width:0" class="ov-title">'+esc(A.name||"New applicant")+'</div></div>';
   // \u2500\u2500 live picture \u2500\u2500
   var sTone=(A.stage==="Approved"||A.stage==="Adopted")?"ok":A.stage==="Home check"?"warn":(A.stage==="Declined"||A.stage==="Withdrawn")?"alert":"";
   var sLine=(A.animal_id&&A.species==="dog")
@@ -2376,9 +2386,9 @@ function pipelineApplicantHtml(){
   }
   // contact log
   var lg=(st.contactLog||[]);
-  var lSum=lg.length?(lg.length+" logged \u00b7 last "+fmtDMY(lg[lg.length-1].date)):"Nothing logged";
+  var lSum=lg.length?(lg.length+" logged \u00b7 last "+fmtDMY(lg[lg.length-1].date)):"No contact logged yet";
   h+=hybridRow("ap-log","","Contact log",lSum,
-    (lg.slice().reverse().map(function(c){return '<div style="font-size:12px;color:#334155;padding:4px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span style="color:#94a3b8">'+fmtDMY(c.date)+'</span> \u00b7 '+esc(c.text)+'</div>';}).join("")||'<div style="font-size:11.5px;color:#cbd5e1">nothing logged</div>')
+    (lg.slice().reverse().map(function(c){return '<div style="font-size:12px;color:#334155;padding:4px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span style="color:#94a3b8">'+fmtDMY(c.date)+'</span> \u00b7 '+esc(c.text)+'</div>';}).join("")||'<div style="font-size:11.5px;color:#cbd5e1">Nothing logged yet</div>')
     +'<div style="display:flex;gap:8px;margin:8px 0 2px"><input id="pipe-contact" type="text" placeholder="e.g. left voicemail" style="flex:1;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit"><button onclick="addContactLine()" style="background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);padding:8px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Add</button></div>',"");
   // notes
   var nSum=st.notes?esc(String(st.notes).replace(/\s+/g," ").slice(0,60)):"None";
@@ -2464,7 +2474,7 @@ function notifRowHtml(it){
 function renderNotifications(){
   var host=document.getElementById("notif-body");if(!host)return;
   var n=notifItems();
-  var h='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px"><div><div style="font-size:16px;font-weight:700;color:#0f172a">Recent</div><div style="font-size:12px;color:#94a3b8">Since you were last here</div></div><button onclick="closeNotifications()" style="background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);padding:7px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Close</button></div>';
+  var h='<div class="ov-head"><div><div class="ov-title">Recent</div><div class="ov-sub">Since you were last here</div></div><button onclick="closeNotifications()" class="ov-x">Close</button></div>';
   function sect(title,items){
     if(!items.length)return"";
     return '<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:12px 0 2px">'+title+'</div>'
@@ -3681,7 +3691,7 @@ function renderMedical(){
   var _paraLine=_lastPara?esc(_short(_lastPara.type||_lastPara.product||"Treated"))+" "+fmtDMY(_lastPara.date):"None recorded";
   var _medLine=_actMeds.length?_actMeds.map(function(x){return esc(x.name);}).join(" \u00b7 "):"None active";
   var _lastVet=vEntries.length?vEntries[0]:null;
-  var _vetLine=vEntries.length?(vEntries.length+" entr"+(vEntries.length===1?"y":"ies")+(_lastVet&&_lastVet.date?" \u00b7 last "+fmtDMY(_lastVet.date):"")):"None yet";
+  var _vetLine=vEntries.length?(vEntries.length+" entr"+(vEntries.length===1?"y":"ies")+(_lastVet&&_lastVet.date?" \u00b7 last "+fmtDMY(_lastVet.date):"")):"No vet notes yet";
   var _disLine=_actCond.length?_actCond.map(function(p){return esc(_short(p.type||""));}).join(" \u00b7 "):(disList.length?"All cleared":"None recorded");
   var _arrLine=[m.bcs?("BCS "+esc(_short(m.bcs))):"",_short(m.skinCondition||""),_short(m.injuries||"")].filter(Boolean).join(" \u00b7 ")||"Not recorded";
   var _neuLine=_ncS?esc(_ncS)+(m.neuterDate?" \u00b7 "+fmtDMY(m.neuterDate):""):"Not recorded";
