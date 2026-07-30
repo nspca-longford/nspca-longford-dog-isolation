@@ -309,6 +309,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
           <div onclick="dashMenuGo('records')" class="dmi">&#128203; Records</div>
           <div onclick="dashMenuGo('incidents')" class="dmi">&#9888;&#65039; Incident register</div>
           <div onclick="dashMenuGo('upcomingMedical')" class="dmi">&#128137; Upcoming Medical</div>
+          <div onclick="dashMenuGo('unitreport')" class="dmi">&#128196; Unit report</div>
           <div onclick="dashMenuGo('stats')" class="dmi">&#128202; Stats</div>
           <div onclick="closeDashMenu();exportCSV()" class="dmi">&#128229; Export CSV</div>
           <div class="dml">Reference</div>
@@ -396,11 +397,11 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.87",date:"2026-07-28",note:"A tidy-up of the edges. The dashboard header is slimmer and now stays with you as you scroll, with the buttons quietened to match the rest of the app and the clock stepping aside on a narrow phone so nothing wraps onto a second line. The pipeline, the applicant record and the new Recent panel all share one header now, so moving between them feels like the same app rather than three. The tab pills are a shade smaller, which lets the four in the Assessment group sit comfortably on a phone instead of squeezing, and the row scrolls cleanly if it ever needs to. Empty spaces now say what is actually missing rather than just \u0027nothing\u0027 \u2014 a stage with no one in it says so, a cleared dog nobody has asked about says so. Nothing moved and nothing changed what it does \u2014 it just sits better."},
+var CHANGELOG=[{version:"3.88",date:"2026-07-30",note:"Two additions. The app now works without a signal: the dogs are kept on the phone, so if you open it in a dead spot you still see the unit rather than an empty screen \u2014 clearly marked as how things looked when you last had a connection, with anything you change held and sent the moment you are back. And there is a Unit report in the menu: pick this month, last month, the quarter or the year, and it writes the summary for you \u2014 how many came in and left, what happened to them, how long they stayed on average, who is still here and how many are still to assess, contagious cases, and the rehoming activity. Copy it into an email or print it. The figures come straight from the records, so check anything that looks off before sending."},
+  {version:"3.87",date:"2026-07-28",note:"A tidy-up of the edges. The dashboard header is slimmer and now stays with you as you scroll, with the buttons quietened to match the rest of the app and the clock stepping aside on a narrow phone so nothing wraps onto a second line. The pipeline, the applicant record and the new Recent panel all share one header now, so moving between them feels like the same app rather than three. The tab pills are a shade smaller, which lets the four in the Assessment group sit comfortably on a phone instead of squeezing, and the row scrolls cleanly if it ever needs to. Empty spaces now say what is actually missing rather than just \u0027nothing\u0027 \u2014 a stage with no one in it says so, a cleared dog nobody has asked about says so. Nothing moved and nothing changed what it does \u2014 it just sits better."},
   {version:"3.86",date:"2026-07-28",note:"A bell on the dashboard. Tap it and you get what has happened since you were last in the app: anything that needs you now \u2014 a contagious dog, an isolation clearing today, a reclaim deadline, two people approved for the same dog \u2014 then what changed and who changed it, then any app updates you have not seen. Tap a line to go straight to that dog or to the pipeline. The count on the bell tells you how much is waiting, and Mark all as read clears it, though anything genuinely urgent stays until it is actually dealt with. The little messages that pop up when something saves or fails now match the new bar along the bottom, and sit above it rather than over it."},
   {version:"3.85",date:"2026-07-27",note:"The most important change in a while: your work can no longer go missing. Until now, if a save failed \u2014 a dead spot in the block, wifi dropping \u2014 the app kept a copy on the phone and said nothing, and that copy was never sent. Now a failed save is held and retried by itself, and the moment the signal returns it goes up. The bar along the bottom tells you the truth while that happens: a green dot when everything is saved, amber while changes are waiting, red when you are offline, with a count of what is still to go. That bar is also slimmer now \u2014 one line with a small Save button rather than a block across the screen. Other honesty fixes: the pipeline says so when a save or delete fails instead of pretending, and marking someone Adopted tells you if the dog\u0027s own record could not be updated. And the dashboard now holds far more dogs before older ones drop off the list."},
-  {version:"3.84",date:"2026-07-27",note:"The Assessment and Sessions tabs are quieter. The icons are gone from the rows, and every section now starts closed \u2014 seven of them used to open themselves the moment you arrived, which is why the tab always looked like a wall. Now you get eleven summary lines and you open the one you want. What you open stays open while you are working on that dog, and closes again when you move to another one."},
-  {version:"3.83",date:"2026-07-27",note:"The rehoming pipeline says what is actually happening. A person who has adopted a dog now reads as having adopted it \u2014 on the board, on their record and on the dog\u0027s own row, which names who took it and when instead of still asking for applicants. Everyone else reads by where they are: interested in, home check for, approved for, withdrew from. Applicants now take a proper address \u2014 street, town, county and eircode, with an email alongside the phone \u2014 and once there is one, a map link sits on the record and directions sit on the home check row, so nobody is copying an address into their phone before a visit. The town shows on the board so you can see at a glance where people are coming from. And the icons are gone from the pipeline rows."}
+  {version:"3.84",date:"2026-07-27",note:"The Assessment and Sessions tabs are quieter. The icons are gone from the rows, and every section now starts closed \u2014 seven of them used to open themselves the moment you arrived, which is why the tab always looked like a wall. Now you get eleven summary lines and you open the one you want. What you open stays open while you are working on that dog, and closes again when you move to another one."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1110,6 +1111,8 @@ function showDashSection(section){
   var el=document.getElementById("dashboard-content");if(!el)return;
   if(section==="records"){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1">All Records</h2><button onclick="exportCSV()" class="btn" style="font-size:12px;padding:6px 14px">Export CSV &#8595;</button></div>'+page_records();
+  }else if(section==="unitreport"){
+    el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1">Unit report</h2></div>'+renderUnitReport();
   }else if(section==="stats"){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button></div>'+renderStats();
   }else if(section==="upcomingMedical"){
@@ -2520,7 +2523,7 @@ function renderDashboard(){
   }
   var stickyEl=document.getElementById("overdue-sticky");
   if(stickyEl)stickyEl.innerHTML=contagiousAlertHtml()+overdueBannerHtml;
-  if(!active.length){el.innerHTML=statusStrip+fb+tasksRollupHtml(records)+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+recentOutcomesHtml()+brandFooterHtml();return;}
+  if(!active.length){el.innerHTML=offlineBannerHtml()+statusStrip+fb+tasksRollupHtml(records)+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+recentOutcomesHtml()+brandFooterHtml();return;}
   var cards=active.map(function(rec){
     var d=rec.state&&rec.state.dog?rec.state.dog:{};var f=rec.state&&rec.state.fin?rec.state.fin:{};
     var con=activeContagiousList(rec.state&&rec.state.medical?rec.state.medical:null);
@@ -2547,7 +2550,7 @@ function renderDashboard(){
   }).join("");
   var rollupHtml=tasksRollupHtml(active);
   var viewBody='<div class="dcardgrid">'+cards+'</div>';
-  el.innerHTML=statusStrip+fb+rollupHtml+viewBody+recentOutcomesHtml()+brandFooterHtml();
+  el.innerHTML=offlineBannerHtml()+statusStrip+fb+rollupHtml+viewBody+recentOutcomesHtml()+brandFooterHtml();
   if(window._dbSearchActive){var si=el.querySelector('input[placeholder="Search..."]');if(si){si.focus();var l=(window._dbCaret!=null?window._dbCaret:si.value.length);si.setSelectionRange(l,l);}window._dbSearchActive=false;window._dbCaret=null;}
 }
 
@@ -3163,6 +3166,109 @@ function exportCSV(){
   var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="nspca-isolation-"+new Date().toISOString().slice(0,10)+".csv";a.click();
 }
 
+// \u2500\u2500 Unit report: the month, written so it can be sent \u2500\u2500
+function unitPeriod(key){
+  var now=new Date();var end=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  var start;
+  if(key==="last"){start=new Date(now.getFullYear(),now.getMonth()-1,1);end=new Date(now.getFullYear(),now.getMonth(),0);}
+  else if(key==="q"){start=new Date(now.getFullYear(),now.getMonth()-2,1);}
+  else if(key==="ytd"){start=new Date(now.getFullYear(),0,1);}
+  else{start=new Date(now.getFullYear(),now.getMonth(),1);}
+  return{from:start.toISOString().slice(0,10),to:end.toISOString().slice(0,10),key:key||"this"};
+}
+function unitReportData(p){
+  var inRange=function(d){return d&&d>=p.from&&d<=p.to;};
+  var intakes=[],left=[],stays=[],outcomes={},reasons={},lights={},contagious=0;
+  var here=0,longest=null;
+  (records||[]).forEach(function(r){
+    var st=r.state||{};var f=st.fin||{};var d=st.dog||{};
+    if(inRange(r.intakeDate)){
+      intakes.push(r);
+      var why=d.intakeReason||"Not recorded";reasons[why]=(reasons[why]||0)+1;
+    }
+    var o=f.outcome||"";
+    var gone=o&&o.indexOf("Active")!==0&&o!=="Finished Isolation";
+    if(gone&&inRange(f.outcomeDate)){
+      left.push(r);
+      outcomes[o]=(outcomes[o]||0)+1;
+      if(r.intakeDate&&f.outcomeDate){
+        var days=Math.round((new Date(f.outcomeDate)-new Date(r.intakeDate))/864e5);
+        if(days>=0&&days<400)stays.push(days);
+      }
+    }
+    if(!gone){
+      here++;
+      var dd=daysInIsolation(r.intakeDate)||0;
+      if(!longest||dd>longest.days)longest={name:r.name,days:dd};
+      var l=r.trafficLight||"";if(l)lights[l]=(lights[l]||0)+1;
+      if((activeContagiousList(st.medical||null)||[]).length)contagious++;
+    }
+  });
+  var scored=0,unscored=0;
+  (records||[]).forEach(function(r){
+    var st=r.state||{};var f=st.fin||{};var o=f.outcome||"";
+    if(o&&o.indexOf("Active")!==0&&o!=="Finished Isolation")return;
+    if(Object.values(st.scores||{}).reduce(function(a,b){return a+(parseInt(b)||0);},0))scored++;else unscored++;
+  });
+  var enq=0,adopted=0,checks=0;
+  (applicants||[]).forEach(function(a){
+    if(inRange(a.enquiry_date))enq++;
+    if(a.stage==="Adopted"&&a.state&&inRange(a.state.adoptionDate))adopted++;
+    if(a.state&&inRange(a.state.hcDate))checks++;
+  });
+  var avg=stays.length?Math.round(stays.reduce(function(a,b){return a+b;},0)/stays.length):null;
+  return{intakes:intakes,left:left,outcomes:outcomes,reasons:reasons,avg:avg,here:here,longest:longest,
+         lights:lights,contagious:contagious,scored:scored,unscored:unscored,enq:enq,adopted:adopted,checks:checks};
+}
+function unitReportText(p,d){
+  var L=[];
+  var label=p.key==="last"?"last month":p.key==="q"?"the last three months":p.key==="ytd"?"this year so far":"this month";
+  L.push("Dog Isolation Unit \u2014 report for "+label+" ("+fmtDMY(p.from)+" to "+fmtDMY(p.to)+")");
+  L.push("");
+  L.push(d.intakes.length+" dog"+(d.intakes.length===1?"":"s")+" came into the unit and "+d.left.length+" left"+(d.avg!==null?", staying "+d.avg+" days on average":"")+".");
+  var oKeys=Object.keys(d.outcomes);
+  if(oKeys.length)L.push("Outcomes: "+oKeys.map(function(k){return d.outcomes[k]+" "+k.toLowerCase();}).join(", ")+".");
+  var rKeys=Object.keys(d.reasons);
+  if(rKeys.length)L.push("They came in as: "+rKeys.map(function(k){return d.reasons[k]+" "+k.toLowerCase();}).join(", ")+".");
+  L.push("");
+  L.push("There are "+d.here+" dog"+(d.here===1?"":"s")+" in the unit now"+(d.longest?", the longest staying being "+d.longest.name+" at "+d.longest.days+" days":"")+".");
+  if(d.scored||d.unscored)L.push(d.scored+" of those "+(d.scored+d.unscored)+" have been assessed"+(d.unscored?", leaving "+d.unscored+" still to do":"")+".");
+  var lk=Object.keys(d.lights);
+  if(lk.length)L.push("Handling levels: "+lk.map(function(k){return d.lights[k]+" "+k.toLowerCase();}).join(", ")+".");
+  if(d.contagious)L.push(d.contagious+" dog"+(d.contagious===1?" is":"s are")+" being treated for a contagious condition.");
+  if(d.enq||d.checks||d.adopted){
+    L.push("");
+    L.push("Rehoming: "+d.enq+" new "+(d.enq===1?"enquiry":"enquiries")+", "+d.checks+" home check"+(d.checks===1?"":"s")+", "+d.adopted+" adopted.");
+  }
+  return L.join("\n");
+}
+function renderUnitReport(){
+  var key=window._urPeriod||"this";
+  var p=unitPeriod(key);var d=unitReportData(p);
+  var txt=unitReportText(p,d);
+  function tab(k,l){return '<button onclick="setUnitPeriod(\''+k+'\')" style="font-size:11.5px;padding:5px 12px;border-radius:16px;cursor:pointer;font-family:inherit;border:'+(key===k?'1px solid rgba(15,23,42,0.25)':'0.5px solid rgba(15,23,42,0.1)')+';background:'+(key===k?'#0f172a':'#f1f5f9')+';color:'+(key===k?'#c5e86c':'#0f172a')+'">'+l+'</button>';}
+  var h='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">'+tab("this","This month")+tab("last","Last month")+tab("q","Last 3 months")+tab("ytd","Year to date")+'</div>';
+  h+=hybridTiles([
+    {label:"Came in",value:String(d.intakes.length)},
+    {label:"Left",value:String(d.left.length)},
+    {label:"Average stay",value:d.avg===null?"\u2014":d.avg+"d"}
+  ]);
+  h+='<div class="card" style="padding:14px 16px"><div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin-bottom:8px">The report</div>'
+    +'<div id="unit-report-text" style="font-size:13px;line-height:1.65;color:#0f172a;white-space:pre-wrap">'+esc(txt)+'</div></div>';
+  h+='<div style="display:flex;gap:8px;margin-top:10px"><button onclick="copyUnitReport()" class="btn btnp" style="flex:1;font-size:12px;padding:9px">Copy</button>'
+    +'<button onclick="printDoc(\'Unit report\')" class="btn" style="flex:1;font-size:12px;padding:9px">Print</button></div>';
+  h+='<div style="font-size:11px;color:#94a3b8;margin-top:10px">Figures come from the records as they stand \u2014 check anything that looks wrong before sending.</div>';
+  return h;
+}
+function setUnitPeriod(k){window._urPeriod=k;showDashSection("unitreport");}
+function copyUnitReport(){
+  var p=unitPeriod(window._urPeriod||"this");
+  var txt=unitReportText(p,unitReportData(p));
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt);miniToast("Report copied");return;}
+  }catch(e){}
+  miniToast("Select the text to copy it");
+}
 function renderStats(){
   var now=new Date(),thisMonth=now.toISOString().slice(0,7);
   var byMonth={},tlC={Green:0,Yellow:0,Red:0,Black:0},outC={},totalD=0,countD=0;
@@ -6032,16 +6138,57 @@ function loadRecord(id){
   S._id=rec.id;S.tab="report";render();
 }
 
+// ── Offline reading ─────────────────────────────────────────────
+// The list is kept on the phone so the app still works in the parts
+// of the block with no signal. Cached data is always labelled as such.
+var _recordsFromCache=false,_recordsCachedAt=0;
+function cacheRecordsList(){
+  try{
+    var payload=JSON.stringify({at:Date.now(),rows:records});
+    try{localStorage.setItem("nspca-records-cache",payload);}
+    catch(e){
+      // too big for the phone's storage — keep everything but the photos
+      var slim=records.map(function(r){
+        var st=r.state?JSON.parse(JSON.stringify(r.state)):r.state;
+        if(st&&st.dog)delete st.dog.photo;
+        return{id:r.id,savedAt:r.savedAt,savedBy:r.savedBy,name:r.name,breed:r.breed,refNo:r.refNo,
+               intakeDate:r.intakeDate,assessor:r.assessor,score:r.score,trafficLight:r.trafficLight,state:st};
+      });
+      try{localStorage.setItem("nspca-records-cache",JSON.stringify({at:Date.now(),rows:slim,slim:true}));}catch(e2){}
+    }
+  }catch(e){}
+}
+function loadCachedRecordsList(){
+  try{
+    var raw=localStorage.getItem("nspca-records-cache");if(!raw)return false;
+    var o=JSON.parse(raw);if(!o||!o.rows||!o.rows.length)return false;
+    records=o.rows;_recordsFromCache=true;_recordsCachedAt=o.at||0;
+    return true;
+  }catch(e){return false;}
+}
+function offlineBannerHtml(){
+  if(!_recordsFromCache)return"";
+  var when=_recordsCachedAt?fmtAgo(new Date(_recordsCachedAt).toISOString()):"a while ago";
+  return '<div style="display:flex;align-items:center;gap:8px;background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:9px 12px;margin-bottom:10px">'
+    +'<span style="width:8px;height:8px;border-radius:50%;background:#854d0e;flex-shrink:0"></span>'
+    +'<span style="font-size:12px;color:#854d0e;flex:1">No connection \u2014 showing the dogs as they were '+when+'. Anything you change is held and sent when you are back.</span>'
+    +'<button onclick="retryLoad()" style="background:none;border:0.5px solid rgba(133,77,14,0.4);color:#854d0e;padding:4px 10px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit;flex-shrink:0">Retry</button></div>';
+}
+async function retryLoad(){try{await loadRecordsList();renderDashboard();}catch(e){}}
 async function loadRecordsList(){
   if(!supabaseClient){records=[];return;}
   if(typeof pendingCount==="function"&&pendingCount())schedulePendingRetry();
-  var res=await supabaseClient.from("dogs").select("*").order("saved_at",{ascending:false}).limit(400);
-  if(res.error){console.error(res.error);records=[];return;}
+  var res;
+  try{res=await supabaseClient.from("dogs").select("*").order("saved_at",{ascending:false}).limit(400);}
+  catch(e){console.error(e);if(!loadCachedRecordsList())records=[];return;}
+  if(!res||res.error){console.error(res&&res.error);if(!loadCachedRecordsList())records=[];return;}
+  _recordsFromCache=false;
   records=(res.data||[]).map(function(row){
     var st=null;try{st=typeof row.data==="string"?JSON.parse(row.data):row.data;}catch(e){}
     var savedBy=st&&st._savedBy?st._savedBy:"";
     return{id:row.id,savedAt:row.saved_at,savedBy:savedBy,name:row.name||"Unknown",breed:row.breed,refNo:row.ref_no,intakeDate:row.intake_date,assessor:row.assessor,score:row.score,trafficLight:((handlingLight(row.score,st&&st.scores,st)||{}).l||row.traffic_light),state:st};
   });
+  cacheRecordsList();
 }
 
 function loadCurrent(){
