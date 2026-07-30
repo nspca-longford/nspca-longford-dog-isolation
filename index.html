@@ -284,6 +284,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
       <span id="dash-count" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8;display:none"></span>
     </div>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap">
+      <button id="notif-bell" onclick="openNotifications()" style="position:relative;background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:4px 11px;font-size:12px;color:#e2e8f0;cursor:pointer;font-family:inherit" title="Recent activity">&#128276;<span id="notif-count" style="display:none;position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#dc2626;color:#fff;font-size:10px;font-weight:700;line-height:16px;text-align:center"></span></button>
       <span id="dash-user" onclick="showDashSection('profile')" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8;display:none;align-items:center;gap:6px;cursor:pointer"></span>
       <button onclick="showIncidentModal()" style="background:#7f1d1d;color:#fecaca;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600" title="Quickly log an incident">&#9888; Incident</button>
       <button onclick="openPipeline()" style="background:#f1f5f9;color:#0f172a;border:0.5px solid rgba(15,23,42,0.12);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" title="Rehoming pipeline">Rehoming</button> <button onclick="openNewDog()" style="background:#c5e86c;color:#0f172a;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" title="Start a new dog">+ New</button>
@@ -385,11 +386,11 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.85",date:"2026-07-27",note:"The most important change in a while: your work can no longer go missing. Until now, if a save failed \u2014 a dead spot in the block, wifi dropping \u2014 the app kept a copy on the phone and said nothing, and that copy was never sent. Now a failed save is held and retried by itself, and the moment the signal returns it goes up. The bar along the bottom tells you the truth while that happens: a green dot when everything is saved, amber while changes are waiting, red when you are offline, with a count of what is still to go. That bar is also slimmer now \u2014 one line with a small Save button rather than a block across the screen. Other honesty fixes: the pipeline says so when a save or delete fails instead of pretending, and marking someone Adopted tells you if the dog\u0027s own record could not be updated. And the dashboard now holds far more dogs before older ones drop off the list."},
+var CHANGELOG=[{version:"3.86",date:"2026-07-28",note:"A bell on the dashboard. Tap it and you get what has happened since you were last in the app: anything that needs you now \u2014 a contagious dog, an isolation clearing today, a reclaim deadline, two people approved for the same dog \u2014 then what changed and who changed it, then any app updates you have not seen. Tap a line to go straight to that dog or to the pipeline. The count on the bell tells you how much is waiting, and Mark all as read clears it, though anything genuinely urgent stays until it is actually dealt with. The little messages that pop up when something saves or fails now match the new bar along the bottom, and sit above it rather than over it."},
+  {version:"3.85",date:"2026-07-27",note:"The most important change in a while: your work can no longer go missing. Until now, if a save failed \u2014 a dead spot in the block, wifi dropping \u2014 the app kept a copy on the phone and said nothing, and that copy was never sent. Now a failed save is held and retried by itself, and the moment the signal returns it goes up. The bar along the bottom tells you the truth while that happens: a green dot when everything is saved, amber while changes are waiting, red when you are offline, with a count of what is still to go. That bar is also slimmer now \u2014 one line with a small Save button rather than a block across the screen. Other honesty fixes: the pipeline says so when a save or delete fails instead of pretending, and marking someone Adopted tells you if the dog\u0027s own record could not be updated. And the dashboard now holds far more dogs before older ones drop off the list."},
   {version:"3.84",date:"2026-07-27",note:"The Assessment and Sessions tabs are quieter. The icons are gone from the rows, and every section now starts closed \u2014 seven of them used to open themselves the moment you arrived, which is why the tab always looked like a wall. Now you get eleven summary lines and you open the one you want. What you open stays open while you are working on that dog, and closes again when you move to another one."},
   {version:"3.83",date:"2026-07-27",note:"The rehoming pipeline says what is actually happening. A person who has adopted a dog now reads as having adopted it \u2014 on the board, on their record and on the dog\u0027s own row, which names who took it and when instead of still asking for applicants. Everyone else reads by where they are: interested in, home check for, approved for, withdrew from. Applicants now take a proper address \u2014 street, town, county and eircode, with an email alongside the phone \u2014 and once there is one, a map link sits on the record and directions sit on the home check row, so nobody is copying an address into their phone before a visit. The town shows on the board so you can see at a glance where people are coming from. And the icons are gone from the pipeline rows."},
-  {version:"3.82",date:"2026-07-26",note:"You can now say when an assessment actually happened. The Scoring tab has an Assessed on date beside the Snapshot button \u2014 set it to the day you did the work, whether that was this morning or last Tuesday, and everything follows it: the days-since figure on the Assessment tab, the out-of-date warning, and the stale-assessment blocker on Rehoming. Snapshots are stamped with that date too, so a re-assessment written up the next day still reads as having happened when it did. Leave it alone and it behaves as before, filling itself in the first time you score a dog. It will not accept a date in the future."},
-  {version:"3.81",date:"2026-07-26",note:"The Assessment and Sessions tabs now look the way they were meant to. Each group is one tidy card with its sections as rows inside it, separated by a hairline, instead of every section being its own card floating apart from the next. Every row carries an icon so you can find the one you want without reading — the traffic light for the handling level, hands for handling, a bone for guarding. Nothing else changed: the same rows, the same order, the same summaries, everything opens exactly as it did."}
+  {version:"3.82",date:"2026-07-26",note:"You can now say when an assessment actually happened. The Scoring tab has an Assessed on date beside the Snapshot button \u2014 set it to the day you did the work, whether that was this morning or last Tuesday, and everything follows it: the days-since figure on the Assessment tab, the out-of-date warning, and the stale-assessment blocker on Rehoming. Snapshots are stamped with that date too, so a re-assessment written up the next day still reads as having happened when it did. Leave it alone and it behaves as before, filling itself in the first time you score a dog. It will not accept a date in the future."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -480,7 +481,7 @@ function dismissWelcomeToast(){
   t.style.transform="translateX(-50%) translateY(-120%)";
   setTimeout(function(){if(t.parentNode)t.remove();},450);
 }
-function miniToast(msg){var e=document.getElementById("mini-toast");if(e)e.remove();var t=document.createElement("div");t.id="mini-toast";t.style.cssText="position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;z-index:9999;box-shadow:0 8px 30px rgba(0,0,0,0.3);opacity:0;transition:opacity .3s,transform .3s;font-family:inherit";t.textContent=msg;document.body.appendChild(t);requestAnimationFrame(function(){requestAnimationFrame(function(){t.style.opacity="1";t.style.transform="translateX(-50%) translateY(0)";});});setTimeout(function(){t.style.opacity="0";t.style.transform="translateX(-50%) translateY(20px)";setTimeout(function(){if(t.parentNode)t.remove();},300);},2200);}
+function miniToast(msg){var e=document.getElementById("mini-toast");if(e)e.remove();var t=document.createElement("div");t.id="mini-toast";t.style.cssText="position:fixed;bottom:64px;left:50%;transform:translateX(-50%) translateY(10px);background:rgba(15,23,42,0.92);backdrop-filter:saturate(1.6) blur(8px);-webkit-backdrop-filter:saturate(1.6) blur(8px);color:#fff;padding:9px 15px;border-radius:20px;font-size:12.5px;max-width:88vw;text-align:center;z-index:9999;box-shadow:0 6px 24px rgba(15,23,42,0.28);opacity:0;transition:opacity .25s,transform .25s;font-family:inherit";t.textContent=msg;document.body.appendChild(t);requestAnimationFrame(function(){requestAnimationFrame(function(){t.style.opacity="1";t.style.transform="translateX(-50%) translateY(0)";});});setTimeout(function(){t.style.opacity="0";t.style.transform="translateX(-50%) translateY(20px)";setTimeout(function(){if(t.parentNode)t.remove();},300);},2200);}
 
 // ── What's new ────────────────────────────────────────────────────
 function whatsNewSeen(){try{return localStorage.getItem("nspca-whatsnew-seen")||"";}catch(e){return"";}}
@@ -2390,7 +2391,94 @@ function pipelineApplicantHtml(){
   +'</div></div>';
   return h;
 }
+// \u2500\u2500 Notifications: what happened while you were away \u2500\u2500
+function notifSeenAt(){
+  try{var v=localStorage.getItem("nspca-notif-seen");if(v)return parseInt(v,10)||0;}catch(e){}
+  try{var l=localStorage.getItem("nspca-last-login");if(l)return parseInt(l,10)||0;}catch(e){}
+  return Date.now()-7*864e5;
+}
+function notifMarkSeen(){try{localStorage.setItem("nspca-notif-seen",String(Date.now()));}catch(e){}updateNotifBell();}
+function notifItems(){
+  var since=notifSeenAt();var me=(typeof currentName==="function"?currentName():"")||"";
+  var urgent=[],changes=[],updates=[];
+  var today=new Date().toISOString().slice(0,10);
+  (records||[]).forEach(function(r){
+    var st=r.state||{};var o=(st.fin&&st.fin.outcome)||"";
+    var active=!o||o.indexOf("Active")===0||o==="Finished Isolation";
+    if(active){
+      var con=(typeof activeContagiousList==="function")?activeContagiousList(st.medical||null):[];
+      if(con&&con.length)urgent.push({t:esc(r.name||"A dog")+" \u2014 contagious condition active",s:con.map(function(c){return c.type||"";}).filter(Boolean).join(", "),go:r.id,tone:"alert"});
+      var ii=(typeof isolationInfo==="function")?isolationInfo(r.intakeDate,o,isoExtraDays(st.dog),pupIsoVax(st.dog,st.medical)):null;
+      if(ii&&ii.state==="final"&&!ii.awaitVax)urgent.push({t:esc(r.name||"A dog")+" \u2014 isolation clears today",s:"day "+ii.day+" of "+ii.total,go:r.id,tone:"warn"});
+      var d=st.dog||{};
+      if(d.returnType&&d.returnDate&&d.returnType!=="Returned from adoption"){
+        var dd=daysSince(d.returnDate);
+        if(dd!==null&&new Date(d.returnDate)<=new Date(Date.now()+2*864e5))
+          urgent.push({t:esc(r.name||"A dog")+" \u2014 "+returnDateLabel(d.returnType).toLowerCase()+" "+fmtDMY(d.returnDate),s:"",go:r.id,tone:"alert"});
+      }
+    }
+    var at=r.savedAt?new Date(r.savedAt).getTime():0;
+    if(at>since){
+      var who=r.savedBy||"someone";
+      changes.push({t:esc(r.name||"A dog")+" updated",s:"by "+esc(who)+(o&&o.indexOf("Active")!==0?" \u00b7 "+esc(o):""),go:r.id,at:at,tone:""});
+    }
+  });
+  // two people approved for one dog
+  var appr={};
+  (applicants||[]).forEach(function(a){if(a.stage==="Approved"&&a.animal_id)appr[a.animal_id]=(appr[a.animal_id]||0)+1;});
+  Object.keys(appr).forEach(function(k){if(appr[k]>1)urgent.push({t:"Two people approved for "+esc(pipeDogName(+k)),s:"only one can have the dog",go:null,pipe:true,tone:"alert"});});
+  (applicants||[]).forEach(function(a){
+    var at=a.saved_at?new Date(a.saved_at).getTime():0;
+    if(at>since)changes.push({t:esc(a.name||"An applicant")+" \u2014 "+String(a.stage||"").toLowerCase(),s:a.animal_id?(appRelation(a)+" "+esc(pipeDogName(a.animal_id))):"",go:null,pipe:true,at:at,tone:""});
+  });
+  (CHANGELOG||[]).forEach(function(c){
+    var t=c.date?new Date(c.date+"T12:00:00").getTime():0;
+    if(t>since)updates.push({t:"App updated to "+c.version,s:String(c.note||"").slice(0,110)+"\u2026",go:null,tone:""});
+  });
+  changes.sort(function(a,b){return (b.at||0)-(a.at||0);});
+  return{urgent:urgent,changes:changes.slice(0,20),updates:updates,total:urgent.length+changes.length+updates.length};
+}
+function updateNotifBell(){
+  var b=document.getElementById("notif-count");if(!b)return;
+  var n=0;try{n=notifItems().total;}catch(e){n=0;}
+  if(n>0){b.textContent=n>99?"99+":String(n);b.style.display="block";}else{b.style.display="none";}
+}
+function openNotifications(){
+  var ov=document.getElementById("notif-ov");if(ov)ov.style.display="block";
+  renderNotifications();
+}
+function closeNotifications(){
+  var ov=document.getElementById("notif-ov");if(ov)ov.style.display="none";
+  notifMarkSeen();
+}
+function notifOpenDog(id){closeNotifications();openDog(id);}
+function notifOpenPipeline(){closeNotifications();openPipeline();}
+function notifRowHtml(it){
+  var col=it.tone==="alert"?"#991b1b":it.tone==="warn"?"#854d0e":"#0f172a";
+  var click=it.go?'onclick="notifOpenDog('+it.go+')"':(it.pipe?'onclick="notifOpenPipeline()"':"");
+  return '<div '+click+' style="display:flex;align-items:flex-start;gap:9px;padding:10px 2px;border-bottom:0.5px solid var(--color-border-tertiary);'+((it.go||it.pipe)?'cursor:pointer':'')+'">'
+    +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:'+col+'">'+it.t+'</div>'
+    +(it.s?'<div style="font-size:11.5px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+it.s+'</div>':'')+'</div>'
+    +((it.go||it.pipe)?'<span class="med-chev">&#8250;</span>':'')+'</div>';
+}
+function renderNotifications(){
+  var host=document.getElementById("notif-body");if(!host)return;
+  var n=notifItems();
+  var h='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px"><div><div style="font-size:16px;font-weight:700;color:#0f172a">Recent</div><div style="font-size:12px;color:#94a3b8">Since you were last here</div></div><button onclick="closeNotifications()" style="background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);padding:7px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Close</button></div>';
+  function sect(title,items){
+    if(!items.length)return"";
+    return '<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:12px 0 2px">'+title+'</div>'
+      +'<div style="border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:0 12px">'+items.map(notifRowHtml).join("")+'</div>';
+  }
+  h+=sect("Needs you now",n.urgent);
+  h+=sect("What changed",n.changes);
+  h+=sect("App updates",n.updates);
+  if(!n.total)h+='<div style="text-align:center;padding:40px 10px"><div style="font-size:34px">\u2705</div><div style="font-size:13px;color:#64748b;margin-top:8px">Nothing new since you were last here.</div></div>';
+  else h+='<div style="margin-top:14px"><button onclick="closeNotifications()" style="width:100%;background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);padding:9px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Mark all as read</button></div>';
+  host.innerHTML=h;
+}
 function renderDashboard(){
+  try{updateNotifBell();}catch(e){}
   var el=document.getElementById("dashboard-content");if(!el)return;
   updateClock();
   var _s=(window._dbS||"").toLowerCase(),_k=window._dbK||"",_t=window._dbT||"",_o=window._dbO||"day";
@@ -5964,6 +6052,7 @@ function loadCurrent(){
   }else{showScreen("login-screen");}
 })();
 </script>
+<div id="notif-ov" style="display:none;position:fixed;inset:0;background:var(--color-background-primary,#fff);z-index:85;overflow-y:auto"><div id="notif-body" style="max-width:560px;margin:0 auto;padding:18px 16px 40px"></div></div>
 <div id="pipeline-ov" style="display:none;position:fixed;inset:0;background:var(--color-background-primary,#fff);z-index:80;overflow-y:auto"><div id="pipeline-body" style="max-width:560px;margin:0 auto;padding:18px 16px 40px"></div></div>
 </body>
 </html>
