@@ -398,11 +398,11 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.89",date:"2026-08-03",note:"Kate Fitzsimons is set up on the app as Dog Trainer &amp; Behaviour Specialist, with her own login. The role is a new one rather than borrowing an existing title, so it reads properly on her profile and in the Team Directory, and it is there in the list when you add or edit anyone else. Being a specialist rather than management, she is visible to all staff in the directory, and sits with the Rehoming Co-Ordinator in the ordering rather than in the management run."},
+var CHANGELOG=[{version:"3.91",date:"2026-08-03",note:"Three gaps closed. The rehoming pipeline now has the same protection the dog records got: applicants are kept on the phone so the board still works with no signal, and an enquiry taken in a dead spot is held and sent when you are back rather than quietly lost \u2014 the board tells you either way. A closed record can be reopened: if a dog comes back, or an outcome was set on the wrong one, open the Outcome tab and there is a Reopen button that puts the dog back on the dashboard and writes what happened into the notes, so nothing is quietly rewritten. And the app now records who made a decision rather than only who saved last \u2014 setting an outcome or clearing a dog for rehoming stamps your name and the date, and it shows on the record."},
+  {version:"3.90",date:"2026-08-03",note:"Users can now be removed, not just switched off. Until now the only option was setting someone inactive, which left them on the list for good. Open a person in Manage Users and there is a Remove button: it asks once, warns that their login stops working straight away, and confirms that anything they recorded stays on the dogs\u0027 records. Two sensible guards \u2014 you cannot remove your own account, and the built-in accounts that come with the app can only be set inactive, which the screen now explains rather than leaving you wondering."},
+  {version:"3.89",date:"2026-08-03",note:"Kate Fitzsimons is set up on the app as Dog Trainer &amp; Behaviour Specialist, with her own login. The role is a new one rather than borrowing an existing title, so it reads properly on her profile and in the Team Directory, and it is there in the list when you add or edit anyone else. Being a specialist rather than management, she is visible to all staff in the directory, and sits with the Rehoming Co-Ordinator in the ordering rather than in the management run."},
   {version:"3.88",date:"2026-07-30",note:"Two additions. The app now works without a signal: the dogs are kept on the phone, so if you open it in a dead spot you still see the unit rather than an empty screen \u2014 clearly marked as how things looked when you last had a connection, with anything you change held and sent the moment you are back. And there is a Unit report in the menu: pick this month, last month, the quarter or the year, and it writes the summary for you \u2014 how many came in and left, what happened to them, how long they stayed on average, who is still here and how many are still to assess, contagious cases, and the rehoming activity. Copy it into an email or print it. The figures come straight from the records, so check anything that looks off before sending."},
-  {version:"3.87",date:"2026-07-28",note:"A tidy-up of the edges. The dashboard header is slimmer and now stays with you as you scroll, with the buttons quietened to match the rest of the app and the clock stepping aside on a narrow phone so nothing wraps onto a second line. The pipeline, the applicant record and the new Recent panel all share one header now, so moving between them feels like the same app rather than three. The tab pills are a shade smaller, which lets the four in the Assessment group sit comfortably on a phone instead of squeezing, and the row scrolls cleanly if it ever needs to. Empty spaces now say what is actually missing rather than just \u0027nothing\u0027 \u2014 a stage with no one in it says so, a cleared dog nobody has asked about says so. Nothing moved and nothing changed what it does \u2014 it just sits better."},
-  {version:"3.86",date:"2026-07-28",note:"A bell on the dashboard. Tap it and you get what has happened since you were last in the app: anything that needs you now \u2014 a contagious dog, an isolation clearing today, a reclaim deadline, two people approved for the same dog \u2014 then what changed and who changed it, then any app updates you have not seen. Tap a line to go straight to that dog or to the pipeline. The count on the bell tells you how much is waiting, and Mark all as read clears it, though anything genuinely urgent stays until it is actually dealt with. The little messages that pop up when something saves or fails now match the new bar along the bottom, and sit above it rather than over it."},
-  {version:"3.85",date:"2026-07-27",note:"The most important change in a while: your work can no longer go missing. Until now, if a save failed \u2014 a dead spot in the block, wifi dropping \u2014 the app kept a copy on the phone and said nothing, and that copy was never sent. Now a failed save is held and retried by itself, and the moment the signal returns it goes up. The bar along the bottom tells you the truth while that happens: a green dot when everything is saved, amber while changes are waiting, red when you are offline, with a count of what is still to go. That bar is also slimmer now \u2014 one line with a small Save button rather than a block across the screen. Other honesty fixes: the pipeline says so when a save or delete fails instead of pretending, and marking someone Adopted tells you if the dog\u0027s own record could not be updated. And the dashboard now holds far more dogs before older ones drop off the list."}
+  {version:"3.87",date:"2026-07-28",note:"A tidy-up of the edges. The dashboard header is slimmer and now stays with you as you scroll, with the buttons quietened to match the rest of the app and the clock stepping aside on a narrow phone so nothing wraps onto a second line. The pipeline, the applicant record and the new Recent panel all share one header now, so moving between them feels like the same app rather than three. The tab pills are a shade smaller, which lets the four in the Assessment group sit comfortably on a phone instead of squeezing, and the row scrolls cleanly if it ever needs to. Empty spaces now say what is actually missing rather than just \u0027nothing\u0027 \u2014 a stage with no one in it says so, a cleared dog nobody has asked about says so. Nothing moved and nothing changed what it does \u2014 it just sits better."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1060,11 +1060,38 @@ function showEditUserModal(code){
     +'<div class="f"><label class="lbl">Access code (read-only)</label><input type="text" value="'+esc(u.code)+'" disabled style="background:#f1f5f9;color:#64748b;font-family:monospace"></div>'
     +'<div class="f"><label class="lbl">Role</label><select id="edit-user-role">'+[["staff","Staff"],["supervisor","Supervisor"],["coordinator","Rehoming Co-Ordinator"],["trainer","Dog Trainer & Behaviour Specialist"],["manager","Manager"],["director","Director of Operations"],["admin","Admin"]].map(function(r){return'<option value="'+r[0]+'"'+(u.role===r[0]?" selected":"")+'>'+r[1]+'</option>';}).join("")+'</select></div>'
     +'<button onclick="saveEditedUser(\''+esc(code)+'\')" class="btn btnp" style="width:100%;padding:10px;font-size:13px;font-weight:600">Save changes</button>'
+    +(userRemovable(u)
+      ?'<button onclick="removeUser(\''+esc(code)+'\')" style="width:100%;margin-top:8px;padding:9px;font-size:12px;background:none;border:0.5px solid #fca5a5;color:#991b1b;border-radius:8px;cursor:pointer;font-family:inherit">Remove '+esc(u.name)+' from the app</button>'
+      :'<div style="margin-top:8px;font-size:11px;color:#94a3b8;text-align:center">'+(u.code===((CURRENT_USER||{}).code)?"You cannot remove your own account.":"Built-in accounts cannot be removed \u2014 set them inactive instead.")+'</div>')
     +'</div>';
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
   document.body.appendChild(ov);
 }
 
+// A user added through this screen can be removed outright. Built-in
+// accounts live in the app file and can only be made inactive.
+function userRemovable(u){
+  if(!u)return false;
+  if(u.source==="app")return false;
+  if(USERS.some(function(x){return x.code===u.code;}))return false;
+  if(CURRENT_USER&&u.code===CURRENT_USER.code)return false;
+  return true;
+}
+async function removeUser(code){
+  var u=getAllUsersSync().find(function(x){return x.code===code;});
+  if(!u||!userRemovable(u)){appAlert("That account cannot be removed.");return;}
+  if(!supabaseClient){appAlert("No connection \u2014 try again when you are back online.");return;}
+  appConfirm("Remove "+u.name+" from the app for good? Their login stops working immediately. Anything they recorded stays on the dogs\u0027 records.",async function(){
+    try{
+      var res=await supabaseClient.from("users").delete().eq("code",code);
+      if(res&&res.error)throw res.error;
+      var ov=document.querySelector(".edit-user-ov");if(ov)ov.remove();
+      await refreshAllUsers();
+      showDashSection("users");
+      miniToast(u.name+" removed");
+    }catch(e){console.error("removeUser:",e);appAlert("Could not remove that user. Check your connection and try again.");}
+  });
+}
 async function saveEditedUser(code){
   var name=(document.getElementById("edit-user-name")||{}).value;name=name?name.trim():"";
   var role=(document.getElementById("edit-user-role")||{}).value||"staff";
@@ -2007,11 +2034,55 @@ var APP_ACTIVE=["Enquiry","Home check","Approved"];
 function defaultApplicant(){return{id:null,name:"",stage:"Enquiry",species:"dog",animal_id:null,enquiry_date:new Date().toISOString().slice(0,10),state:{phone:"",email:"",addr1:"",addr2:"",town:"",county:"",eircode:"",homeType:"",children:"",otherDogs:"",cats:"",livestock:"",smallPets:"",experience:"",activity:"",interestNote:"",contactLog:[],notes:"",reason:"",anonymised:false}};}
 function maskPhone(p){p=String(p||"");if(p.length<4)return p?"\u00b7\u00b7\u00b7":"";return p.slice(0,3)+" \u00b7\u00b7\u00b7 \u00b7\u00b7"+p.slice(-2);}
 function appDaysWaiting(ap){if(!ap.enquiry_date)return null;var d=Math.floor((Date.now()-new Date(ap.enquiry_date).getTime())/864e5);return d<0?null:d;}
+var _appsFromCache=false,_appsCachedAt=0;
+function cacheApplicants(){
+  try{localStorage.setItem("nspca-applicants-cache",JSON.stringify({at:Date.now(),rows:applicants}));}catch(e){}
+}
+function loadCachedApplicants(){
+  try{
+    var raw=localStorage.getItem("nspca-applicants-cache");if(!raw)return false;
+    var o=JSON.parse(raw);if(!o||!o.rows)return false;
+    applicants=o.rows;_appsFromCache=true;_appsCachedAt=o.at||0;return true;
+  }catch(e){return false;}
+}
 async function loadApplicants(){
   if(!supabaseClient)return;
-  try{var res=await supabaseClient.from("applicants").select("*").order("saved_at",{ascending:false}).limit(300);
-    if(!res.error&&res.data)applicants=res.data.map(function(r){r.state=r.state||{};return r;});
-  }catch(e){}
+  var res;
+  try{res=await supabaseClient.from("applicants").select("*").order("saved_at",{ascending:false}).limit(300);}
+  catch(e){loadCachedApplicants();return;}
+  if(!res||res.error){loadCachedApplicants();return;}
+  applicants=(res.data||[]).map(function(r){r.state=r.state||{};return r;});
+  _appsFromCache=false;
+  cacheApplicants();
+  if(typeof appPendingCount==="function"&&appPendingCount())scheduleAppPendingRetry();
+}
+// Applicant saves get the same safety net the dog records have.
+var _appPendingRetry=null;
+function appPendingGet(){try{return JSON.parse(localStorage.getItem("nspca-applicants-pending")||"{}");}catch(e){return {};}}
+function appPendingSet(o){try{localStorage.setItem("nspca-applicants-pending",JSON.stringify(o));}catch(e){}}
+function appPendingCount(){return Object.keys(appPendingGet()).length;}
+function appPendingPark(id,row){
+  var p=appPendingGet();p[id||"new"]={row:row,at:new Date().toISOString()};appPendingSet(p);
+  scheduleAppPendingRetry();
+}
+function appPendingClear(id){var p=appPendingGet();delete p[id||"new"];appPendingSet(p);}
+function scheduleAppPendingRetry(){
+  if(_appPendingRetry||!appPendingCount())return;
+  _appPendingRetry=setTimeout(function(){_appPendingRetry=null;retryAppPending();},15000);
+}
+async function retryAppPending(){
+  if(!supabaseClient||!appPendingCount())return;
+  var p=appPendingGet();var ids=Object.keys(p);
+  for(var i=0;i<ids.length;i++){
+    var id=ids[i];
+    try{
+      if(id==="new"){var r1=await supabaseClient.from("applicants").insert(p[id].row);if(r1&&r1.error)throw r1.error;}
+      else{var r2=await supabaseClient.from("applicants").update(p[id].row).eq("id",id);if(r2&&r2.error)throw r2.error;}
+      appPendingClear(id);
+    }catch(e){}
+  }
+  if(appPendingCount())scheduleAppPendingRetry();
+  else{try{await loadApplicants();renderPipeline();}catch(e){}}
 }
 var _appSaveBusy=false,_appSaveAgain=false,_appSaveFailed=false;
 async function saveApplicant(){
@@ -2024,11 +2095,13 @@ async function saveApplicant(){
   try{
     if(A.id){await supabaseClient.from("applicants").update(row).eq("id",A.id);}
     else{var res=await supabaseClient.from("applicants").insert(row);if(res&&res.data&&res.data[0])A.id=res.data[0].id;}
+    appPendingClear(A.id);
     await loadApplicants();
     _appSaveFailed=false;
   }catch(e){
     console.error("saveApplicant:",e);
-    if(!_appSaveFailed){_appSaveFailed=true;miniToast("Not saved \u2014 check your connection");}
+    appPendingPark(A.id,row);        // held, and retried when the signal returns
+    if(!_appSaveFailed){_appSaveFailed=true;miniToast("Not saved yet \u2014 held until you\u0027re back online");}
   }
   finally{
     _appSaveBusy=false;
@@ -2250,6 +2323,15 @@ function pipeDogsHtml(){
 function pipelineBoardHtml(){
   var h='<div class="ov-head"><div><div class="ov-title">Rehoming</div><div class="ov-sub">'+applicants.filter(function(a){return APP_ACTIVE.indexOf(a.stage)>-1;}).length+' active applicants</div></div><div style="display:flex;gap:8px"><button onclick="newApplicant()" style="background:#0f172a;color:#c5e86c;border:none;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">+ Applicant</button><button onclick="closePipeline()" class="ov-x">Close</button></div></div>';
   if(!supabaseClient)return h+'<div style="font-size:12.5px;color:#854d0e;background:#fef9c3;border-radius:8px;padding:10px 12px">Connect to the database to use the pipeline.</div>';
+  if(_appsFromCache||appPendingCount()){
+    var _n=appPendingCount();
+    h+='<div style="display:flex;align-items:center;gap:8px;background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:9px 12px;margin-bottom:10px">'
+      +'<span style="width:8px;height:8px;border-radius:50%;background:#854d0e;flex-shrink:0"></span>'
+      +'<span style="font-size:12px;color:#854d0e;flex:1">'
+      +(_appsFromCache?"No connection \u2014 showing applicants as they were "+(_appsCachedAt?fmtAgo(new Date(_appsCachedAt).toISOString()):"earlier")+". ":"")
+      +(_n?_n+" change"+(_n>1?"s":"")+" waiting to be sent.":"Anything you change is held and sent when you\u0027re back.")
+      +'</span></div>';
+  }
   // \u2500\u2500 live picture \u2500\u2500
   function cnt(s){return applicants.filter(function(a){return a.stage===s;}).length;}
   h+=hybridTiles([
@@ -3333,8 +3415,8 @@ function defaultState(){return{_id:null,tab:"dog",
   days:[0,1,2,3,4].map(function(){return{date:"",demeanour:"",feeding:"",toileting:"",staffInt:"",incidents:"",notes:""}}),
   scores:{excitability:0,reactivity:0,fearAnxiety:0,sepAnx:0,training:0,misc:0},
   medical:defaultMedical(),behaviour:{notes:"",log:[],draft:""},
-  assessment:{scoredDate:"",lightOverride:"",lightOverrideReason:"",lightOverrideBy:"",lightOverrideDate:"",harnessOn:"",leadOn:"",jumpingUp:"",leadReactivity:"",touchHead:"",touchBody:"",touchPaws:"",touchEars:"",touchMouth:"",collarGrab:"",restraint:"",leadBehaviour:"",handlingNotes:"",grooming:"",nailHandling:"",liftHandling:"",confidence:"",energyLevel:"",demeanour:"",stressRecovery:"",biddability:"",temperamentNotes:"",houseTraining:"",aloneTime:"",crateBehaviour:"",recall:"",toiletTraining:"",barrierReaction:"",barrierIntensity:"",barrierTriggers:"",redirectedAggression:"",barrierNotes:"",strangerApproach:"",childrenSuitable:"",dogOnLead:"",dogOffLead:"",catResponse:"",equineResponse:"",smallMammalResponse:"",groupDogs:"",socialNotes:"",carTravel:"",noiseSensitivity:"",newEnvironments:"",kennelBehaviour:"",environmentNotes:"",toyInterest:"",retrieve:"",tug:"",foodMotivation:"",resourceGuarding:"",playStyle:"",playEngagement:"",dropCue:"",mouthing:"",settleAfterPlay:"",frustration:"",toyPreference:"",playNotes:"",attentionSpan:"",handlerFocus:"",basicCommands:"",previousTraining:"",trainNotes:"",homeType:"",suitableChildren:"",suitableOtherDogs:"",suitableCats:"",suitableEquine:"",suitableSmallMammals:"",exerciseNeeds:"",experienceLevel:"",suitabilityNotes:"",buddyWalks:[],playdates:[],muzzleRequired:"",muzzleType:"",muzzleStage:"",muzzleSessions:[]},
-  fin:{c1:"",c2:"",c3:"",steps:"",followUp:"",notes:"",overallProgress:"",handoverNote:"",assessorName:"",assessorDate:"",secondAssessor:"",secondAssessorDate:"",outcome:"",outcomeDate:"",outcomeNotes:""},
+  assessment:{scoredDate:"",rehomingBy:"",rehomingAt:"",lightOverride:"",lightOverrideReason:"",lightOverrideBy:"",lightOverrideDate:"",harnessOn:"",leadOn:"",jumpingUp:"",leadReactivity:"",touchHead:"",touchBody:"",touchPaws:"",touchEars:"",touchMouth:"",collarGrab:"",restraint:"",leadBehaviour:"",handlingNotes:"",grooming:"",nailHandling:"",liftHandling:"",confidence:"",energyLevel:"",demeanour:"",stressRecovery:"",biddability:"",temperamentNotes:"",houseTraining:"",aloneTime:"",crateBehaviour:"",recall:"",toiletTraining:"",barrierReaction:"",barrierIntensity:"",barrierTriggers:"",redirectedAggression:"",barrierNotes:"",strangerApproach:"",childrenSuitable:"",dogOnLead:"",dogOffLead:"",catResponse:"",equineResponse:"",smallMammalResponse:"",groupDogs:"",socialNotes:"",carTravel:"",noiseSensitivity:"",newEnvironments:"",kennelBehaviour:"",environmentNotes:"",toyInterest:"",retrieve:"",tug:"",foodMotivation:"",resourceGuarding:"",playStyle:"",playEngagement:"",dropCue:"",mouthing:"",settleAfterPlay:"",frustration:"",toyPreference:"",playNotes:"",attentionSpan:"",handlerFocus:"",basicCommands:"",previousTraining:"",trainNotes:"",homeType:"",suitableChildren:"",suitableOtherDogs:"",suitableCats:"",suitableEquine:"",suitableSmallMammals:"",exerciseNeeds:"",experienceLevel:"",suitabilityNotes:"",buddyWalks:[],playdates:[],muzzleRequired:"",muzzleType:"",muzzleStage:"",muzzleSessions:[]},
+  fin:{outcomeBy:"",outcomeAt:"",c1:"",c2:"",c3:"",steps:"",followUp:"",notes:"",overallProgress:"",handoverNote:"",assessorName:"",assessorDate:"",secondAssessor:"",secondAssessorDate:"",outcome:"",outcomeDate:"",outcomeNotes:""},
   weights:[],files:[],exercises:[],notes:[],incidents:[],feeding:[],warnings:[],careNotices:[],feedingPlan:{brand:"",grams:"",frequency:"",dietType:"",notes:""},
   ea:{needed:"",frequency:"",size:"",intensity:"",biteScore:"",punctures:false,probability:"",concerns:"",incidentSummary:"",assessorName:"",assessorDate:""}
 };}
@@ -3450,6 +3532,36 @@ function finSteps(fin){
   if(Array.isArray(fin.stepList)&&fin.stepList.length)return fin.stepList.filter(function(s){return s&&s.text;});
   if(fin.steps&&String(fin.steps).trim())return String(fin.steps).split(/\n\s*\n/).map(function(t){return t.trim();}).filter(Boolean).map(function(t){return{text:t,done:false};});
   return[];
+}
+// A record that has left the unit. "Finished Isolation" is still in the unit.
+function recordHasDeparted(st){
+  var o=((st||S).fin||{}).outcome||"";
+  return !!o && o.indexOf("Active")!==0 && o!=="Finished Isolation";
+}
+// Reopening restores the dog to the unit and keeps a note of what happened,
+// so a closed record is never quietly rewritten.
+function reopenRecord(){
+  if(!recordHasDeparted(S))return;
+  var was=(S.fin||{}).outcome||"";
+  appConfirm("Reopen this record? "+(S.dog&&S.dog.name?S.dog.name:"The dog")+" goes back on the dashboard as active. The previous outcome \u2014 "+was+" \u2014 is kept in the notes.",function(){
+    S.fin=S.fin||{};
+    var stamp=fmtDMY(new Date().toISOString().slice(0,10))+" \u2014 reopened by "+(currentName()||"someone")+" (was: "+was+(S.fin.outcomeDate?" on "+fmtDMY(S.fin.outcomeDate):"")+")";
+    S.fin.outcomeNotes=(S.fin.outcomeNotes?S.fin.outcomeNotes+"\n":"")+stamp;
+    S.fin.outcome="";S.fin.outcomeDate="";S.fin.euthReason="";
+    saveRecord();renderMain();
+    miniToast("Record reopened");
+  });
+}
+// Who made the call, not just who saved last.
+function stampDecision(field){
+  S.fin=S.fin||{};
+  S.fin[field+"By"]=currentName()||"";
+  S.fin[field+"At"]=new Date().toISOString().slice(0,10);
+}
+function decisionCredit(field){
+  var f=S.fin||{};
+  if(!f[field+"By"])return "";
+  return '<div style="font-size:11px;color:#94a3b8;margin:-4px 0 8px">Set by '+esc(f[field+"By"])+(f[field+"At"]?" on "+fmtDMY(f[field+"At"]):"")+'</div>';
 }
 function migrateFinLists(){
   if(!S.fin)return;
@@ -4338,7 +4450,7 @@ function renderRehoming(){
     +ta("Conditions",a.rehomingConditions||"","assessment.rehomingConditions","e.g. adult-only home, no cats, experienced owner");
   var suitNotes=ta("Suitability notes",a.suitabilityNotes||"","assessment.suitabilityNotes","");
   var filledN=["homeType","suitableChildren","suitableOtherDogs","suitableCats","suitableEquine","suitableSmallMammals","exerciseNeeds","experienceLevel"].filter(function(kk){var v=a[kk];return v!==undefined&&v!==null&&String(v).trim()!=="";}).length;
-  var clearSum=st?(esc(st)+(a.rehomingDate?" \u00b7 "+fmtDMY(a.rehomingDate):"")+(a.rehomingConditions?" \u00b7 conditions set":"")):"No decision recorded \u2014 tap to decide";
+  var clearSum=st?(esc(st)+(a.rehomingDate?" \u00b7 "+fmtDMY(a.rehomingDate):"")+(a.rehomingBy?" \u00b7 by "+esc(a.rehomingBy):"")+(a.rehomingConditions?" \u00b7 conditions set":"")):"No decision recorded \u2014 tap to decide";
   // status tiles under the banner
   var _apps=(typeof applicants!=="undefined"?applicants:[]).filter(function(x){return S._id&&x.animal_id===S._id&&APP_ACTIVE.indexOf(x.stage)>-1;});
   var _best="";
@@ -5734,8 +5846,14 @@ function page(){
     var reasonControl=(needsReason&&!isStaff)?'<div style="border-left:3px solid #dc2626;background:#fef2f5;border-radius:8px;padding:2px 12px 1px;margin-bottom:12px">'+slct("Reason \u2014 required",f.euthReason,"fin.euthReason",reasonOpts)+'</div>':"";
     var decCard='<div class="card"><div class="oc-ch"><span class="oc-ic">&#9989;</span><span class="oc-ti">The decision</span></div>'
       +'<div class="oc-grid">'+outControl+fld("Outcome date",f.outcomeDate,"fin.outcomeDate","date")+fld("Follow-up date",f.followUp,"fin.followUp","date")+'</div>'
+      +decisionCredit("outcome")
       +reasonControl
       +ta("Outcome notes",f.outcomeNotes,"fin.outcomeNotes","")
+      +(recordHasDeparted(S)
+        ?'<div style="border-top:0.5px solid var(--color-border-tertiary);margin-top:12px;padding-top:11px">'
+          +'<div style="font-size:11.5px;color:#64748b;margin-bottom:7px">This record is closed and no longer shows on the dashboard. If the dog is back, or this was set in error, reopen it.</div>'
+          +'<button onclick="reopenRecord()" style="background:none;border:0.5px solid rgba(15,23,42,0.2);padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Reopen this record</button></div>'
+        :'')
       +'</div>';
     // ── Handover & sign-off ──
     var signCard='<div class="card"><div class="oc-ch"><span class="oc-ic">&#9997;&#65039;</span><span class="oc-ti">Sign-off</span></div>'
@@ -6022,6 +6140,12 @@ document.getElementById("wrap").addEventListener("input",function(e){
     if(!S[p[0]])S[p[0]]={};
     S[p[0]][p[1]]=val;
     if(p[0]==="dog"&&p[1]==="name"){var bg=document.getElementById("badge");if(bg){bg.style.display=val?"block":"none";bg.textContent=val;}}
+    // record who made the call, not just who saved last
+    if(p[0]==="fin"&&p[1]==="outcome"&&val)stampDecision("outcome");
+    if(p[0]==="assessment"&&p[1]==="rehomingStatus"&&val){
+      S.assessment.rehomingBy=currentName()||"";
+      S.assessment.rehomingAt=new Date().toISOString().slice(0,10);
+    }
     debouncedSave();
   }
   if(el.dataset.sd){var p2=el.dataset.sd.split(".");S.days[parseInt(p2[0])][p2[1]]=el.value;debouncedSave();}
@@ -6035,6 +6159,12 @@ document.getElementById("wrap").addEventListener("change",function(e){
     S[p[0]][p[1]]=val;
     if(p[0]==="dog"&&p[1]==="weight")syncDogWeightToLog();
     if(p[0]==="dog"&&p[1]==="name"){var bg=document.getElementById("badge");if(bg){bg.style.display=val?"block":"none";bg.textContent=val;}}
+    // record who made the call, not just who saved last
+    if(p[0]==="fin"&&p[1]==="outcome"&&val)stampDecision("outcome");
+    if(p[0]==="assessment"&&p[1]==="rehomingStatus"&&val){
+      S.assessment.rehomingBy=currentName()||"";
+      S.assessment.rehomingAt=new Date().toISOString().slice(0,10);
+    }
     renderMain();debouncedSave();
   }
   if(el.dataset.sd){
@@ -6047,7 +6177,7 @@ document.getElementById("wrap").addEventListener("change",function(e){
 
 // ── Supabase ──────────────────────────────────────────────────────
 if(typeof window!=="undefined"&&window.addEventListener){
-  window.addEventListener("online",function(){syncStatus();retryPending();});
+  window.addEventListener("online",function(){syncStatus();retryPending();if(typeof retryAppPending==="function")retryAppPending();});
   window.addEventListener("offline",function(){syncStatus();});
 }
 function initSupabase(){
