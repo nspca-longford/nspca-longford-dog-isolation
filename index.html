@@ -310,11 +310,11 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
           <div onclick="dashMenuGo('incidents')" class="dmi">&#9888;&#65039; Incident register</div>
           <div onclick="dashMenuGo('upcomingMedical')" class="dmi">&#128137; Upcoming Medical</div>
           <div onclick="dashMenuGo('unitreport')" class="dmi">&#128196; Unit report</div>
+          <div onclick="dashMenuGo('breedguide')" class="dmi">&#128054; Breed guide</div>
           <div onclick="dashMenuGo('stats')" class="dmi">&#128202; Stats</div>
           <div onclick="closeDashMenu();exportCSV()" class="dmi">&#128229; Export CSV</div>
           <div class="dml">Reference</div>
-          <div onclick="dashMenuGo('factsheets')" class="dmi">&#129440; Disease info</div>
-          <div class="dml">Team &amp; data</div>
+                    <div class="dml">Team &amp; data</div>
           <div onclick="dashMenuGo('team')" class="dmi">&#128101; Team Directory</div>
           <div id="dash-menu-users" onclick="dashMenuGo('users')" class="dmi" style="display:none">&#9881; Manage Users</div>
           <div onclick="closeDashMenu();downloadBackup()" class="dmi">&#128190; Download backup</div>
@@ -398,11 +398,11 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.91",date:"2026-08-03",note:"Three gaps closed. The rehoming pipeline now has the same protection the dog records got: applicants are kept on the phone so the board still works with no signal, and an enquiry taken in a dead spot is held and sent when you are back rather than quietly lost \u2014 the board tells you either way. A closed record can be reopened: if a dog comes back, or an outcome was set on the wrong one, open the Outcome tab and there is a Reopen button that puts the dog back on the dashboard and writes what happened into the notes, so nothing is quietly rewritten. And the app now records who made a decision rather than only who saved last \u2014 setting an outcome or clearing a dog for rehoming stamps your name and the date, and it shows on the record."},
+var CHANGELOG=[{version:"3.93",date:"2026-08-06",note:"A breed guide, in the menu where Disease info used to be. It covers the breeds we actually see rather than every breed that exists, and it is written for this unit: how the breed copes in a kennel, what it needs on a lead, what to check at intake, what it actually needs day to day, and what sort of home suits. Open a dog with a breed set and there is an About link on the Identity card that takes you straight to the right entry \u2014 it copes with the way breeds really get written down, so Staffie x Lab, GSD cross and collie/terrier all find something. Restricted breeds point back at the legal wording on the dog\u0027s own record rather than repeating it. It says plainly at the top what it is: things to watch for, not things to expect. Assess the dog in front of you. Corrections welcome \u2014 this is a first draft and Kate and Ciara know more than it does."},
+  {version:"3.92",date:"2026-08-06",note:"Disease info has been taken out of the menu. It was general guidance that was rarely opened, and the disease tracking that actually matters \u2014 recording a condition on a dog, the contagious warnings, and a contagious case blocking rehoming \u2014 is untouched and works exactly as before. Anything that was written into those sheets is still held in the database, so nothing is lost if you want it back."},
+  {version:"3.91",date:"2026-08-03",note:"Three gaps closed. The rehoming pipeline now has the same protection the dog records got: applicants are kept on the phone so the board still works with no signal, and an enquiry taken in a dead spot is held and sent when you are back rather than quietly lost \u2014 the board tells you either way. A closed record can be reopened: if a dog comes back, or an outcome was set on the wrong one, open the Outcome tab and there is a Reopen button that puts the dog back on the dashboard and writes what happened into the notes, so nothing is quietly rewritten. And the app now records who made a decision rather than only who saved last \u2014 setting an outcome or clearing a dog for rehoming stamps your name and the date, and it shows on the record."},
   {version:"3.90",date:"2026-08-03",note:"Users can now be removed, not just switched off. Until now the only option was setting someone inactive, which left them on the list for good. Open a person in Manage Users and there is a Remove button: it asks once, warns that their login stops working straight away, and confirms that anything they recorded stays on the dogs\u0027 records. Two sensible guards \u2014 you cannot remove your own account, and the built-in accounts that come with the app can only be set inactive, which the screen now explains rather than leaving you wondering."},
-  {version:"3.89",date:"2026-08-03",note:"Kate Fitzsimons is set up on the app as Dog Trainer &amp; Behaviour Specialist, with her own login. The role is a new one rather than borrowing an existing title, so it reads properly on her profile and in the Team Directory, and it is there in the list when you add or edit anyone else. Being a specialist rather than management, she is visible to all staff in the directory, and sits with the Rehoming Co-Ordinator in the ordering rather than in the management run."},
-  {version:"3.88",date:"2026-07-30",note:"Two additions. The app now works without a signal: the dogs are kept on the phone, so if you open it in a dead spot you still see the unit rather than an empty screen \u2014 clearly marked as how things looked when you last had a connection, with anything you change held and sent the moment you are back. And there is a Unit report in the menu: pick this month, last month, the quarter or the year, and it writes the summary for you \u2014 how many came in and left, what happened to them, how long they stayed on average, who is still here and how many are still to assess, contagious cases, and the rehoming activity. Copy it into an email or print it. The figures come straight from the records, so check anything that looks off before sending."},
-  {version:"3.87",date:"2026-07-28",note:"A tidy-up of the edges. The dashboard header is slimmer and now stays with you as you scroll, with the buttons quietened to match the rest of the app and the clock stepping aside on a narrow phone so nothing wraps onto a second line. The pipeline, the applicant record and the new Recent panel all share one header now, so moving between them feels like the same app rather than three. The tab pills are a shade smaller, which lets the four in the Assessment group sit comfortably on a phone instead of squeezing, and the row scrolls cleanly if it ever needs to. Empty spaces now say what is actually missing rather than just \u0027nothing\u0027 \u2014 a stage with no one in it says so, a cleared dog nobody has asked about says so. Nothing moved and nothing changed what it does \u2014 it just sits better."}
+  {version:"3.89",date:"2026-08-03",note:"Kate Fitzsimons is set up on the app as Dog Trainer &amp; Behaviour Specialist, with her own login. The role is a new one rather than borrowing an existing title, so it reads properly on her profile and in the Team Directory, and it is there in the list when you add or edit anyone else. Being a specialist rather than management, she is visible to all staff in the directory, and sits with the Rehoming Co-Ordinator in the ordering rather than in the management run."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1141,6 +1141,8 @@ function showDashSection(section){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1">All Records</h2><button onclick="exportCSV()" class="btn" style="font-size:12px;padding:6px 14px">Export CSV &#8595;</button></div>'+page_records();
   }else if(section==="unitreport"){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1">Unit report</h2></div>'+renderUnitReport();
+  }else if(section==="breedguide"){
+    el.innerHTML=renderBreedGuide();
   }else if(section==="stats"){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button></div>'+renderStats();
   }else if(section==="upcomingMedical"){
@@ -1154,9 +1156,6 @@ function showDashSection(section){
     if(currentRole()!=="admin"){el.innerHTML='<div style="text-align:center;padding:40px"><h2>Admin only</h2><div style="color:#64748b;margin-top:8px">User management is restricted to admin accounts.</div><button onclick="showDashSection(\'profile\')" class="btn" style="margin-top:14px">&larr; Back to profile</button></div>';return;}
     refreshAllUsers().then(function(){el.innerHTML=renderUsersAdmin();});
     el.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">Loading users...</div>';
-  }else if(section==="factsheets"){
-    el.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">Loading…</div>';
-    loadFactsheets().then(function(){el.innerHTML=renderFactsheets();});
   }else if(section==="readytogo"){
     el.innerHTML=renderReadyToGo();
   }else if(section==="healthboard"){
@@ -1351,136 +1350,6 @@ function page_records(){
   var archToggle=archCount?'<div style="margin-bottom:12px"><button onclick="window._showArchived=!window._showArchived;document.getElementById(\'dashboard-content\').innerHTML=page_records()" style="background:'+(showArch?"#0f172a":"#fff")+';color:'+(showArch?"#c5e86c":"#64748b")+';border:1px solid '+(showArch?"#0f172a":"rgba(15,23,42,0.1)")+';border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">&#128451; '+(showArch?"Hide archived":"Show archived ("+archCount+")")+'</button></div>':"";
   return sth+sch+archToggle+(fil.length?body:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)">No records match.</div>');
 }
-
-// ── Disease factsheets (general guidance, editable, saved on device) ──
-var FACTSHEET_DEFAULTS={
-"_protocol":`Treat every dog in isolation as if it could be infectious until proven otherwise.
-
-Work clean to dirty - healthy dogs first, suspected or confirmed cases last.
-Wear gloves and an apron to handle a case, and change them between dogs.
-Wash hands thoroughly between every dog, even after wearing gloves.
-Keep equipment separate per dog or area - bowls, leads, bedding, brushes. Never share between a sick and a healthy dog.
-Clean first, then disinfect surfaces with an approved product and respect its contact time.
-Use foot dips or dedicated footwear where the unit provides them.
-
-Zoonotic diseases (lepto, ringworm, scabies, giardia) can pass to people - extra hand hygiene, cover any cuts, and tell your manager if you develop symptoms.
-
-Always follow the unit's vet-approved isolation and cleaning protocol over anything written here.`,
-"Parvovirus (CPV)":`What it is: a tough, highly contagious gut virus, most dangerous to unvaccinated puppies and young dogs.
-How it spreads: infected faeces and anything it touches - floors, bowls, hands, footwear. It survives in the environment for months.
-Signs to watch: severe vomiting, foul or bloody diarrhoea, flat and off food, rapid decline.
-In the unit: strict isolation and barrier nursing, dedicated equipment, and thorough disinfection with a parvo-effective product.`,
-"Canine Distemper":`What it is: a serious virus affecting the gut, lungs and nervous system.
-How it spreads: droplets and secretions between dogs sharing air and space.
-Signs to watch: eye and nose discharge, cough, fever, vomiting or diarrhoea, and later twitching or fits.
-In the unit: strict isolation, and report any neurological signs to the vet promptly.`,
-"Kennel Cough (CIRDC)":`What it is: a contagious cough caused by several bugs (often including Bordetella). Usually mild but spreads fast.
-How it spreads: coughing and airborne droplets, and shared bowls or toys in close quarters.
-Signs to watch: a honking cough, retching or gagging, often otherwise bright and eating.
-In the unit: keep away from other dogs, good ventilation, and vet-check - especially pups, seniors or anything off-colour.`,
-"Canine Influenza":`What it is: a contagious respiratory virus.
-How it spreads: droplets from coughing, direct contact, and contaminated items.
-Signs to watch: cough, runny nose, fever, tiredness and reduced appetite.
-In the unit: isolate from other dogs and keep equipment separate.`,
-"Infectious Hepatitis (CAV-1)":`What it is: a virus that affects the liver, eyes and kidneys, mostly in unvaccinated dogs.
-How it spreads: urine, faeces and saliva, and items they contaminate; it persists in the environment.
-Signs to watch: fever, off food, belly pain, and sometimes a cloudy 'blue' eye.
-In the unit: isolate and disinfect thoroughly.`,
-"Leptospirosis":`What it is: a bacterial infection that can be serious. Zoonotic - it can infect people.
-How it spreads: mainly urine from infected dogs, wildlife or rats, and contaminated water or soil.
-Signs to watch: fever, off food, vomiting, increased thirst, and yellowing (jaundice).
-In the unit: isolate and use strict hygiene - gloves for any urine or bedding, cover cuts, wash hands well. Flag to your manager and vet quickly.`,
-"Sarcoptic Mange (scabies)":`What it is: a very itchy, highly contagious skin disease caused by mites. Zoonotic - can cause a temporary itchy rash on people.
-How it spreads: direct contact and shared bedding or grooming kit.
-Signs to watch: intense scratching, hair loss and crusty skin, often on ears, elbows and belly.
-In the unit: isolate, handle with gloves, and treat or dispose of bedding. Wash hands well after contact.`,
-"Ringworm":`What it is: a fungal skin infection - not actually a worm. Zoonotic - can infect people.
-How it spreads: direct contact and contaminated bedding, brushes and surfaces; spores last a long time in the environment.
-Signs to watch: circular patches of hair loss, scaly or crusty skin.
-In the unit: isolate, gloves on, and disinfect tools and bedding. Cover any skin breaks and wash hands well.`,
-"Giardia":`What it is: a gut parasite causing diarrhoea. Zoonotic - some risk to people, so hygiene matters.
-How it spreads: infected faeces and contaminated water.
-Signs to watch: soft, greasy or pale diarrhoea, sometimes weight loss, often otherwise well.
-In the unit: clean up faeces promptly, keep equipment separate, and wash hands thoroughly.`,
-"Coccidiosis":`What it is: a gut infection from a single-celled parasite, common in young or stressed dogs.
-How it spreads: infected faeces and contaminated areas.
-Signs to watch: watery or mucousy diarrhoea, sometimes straining.
-In the unit: prompt clean-up and good hygiene; vet for diagnosis and treatment. Not a risk to people.`,
-"Demodectic Mange":`What it is: a skin condition from mites that live on most dogs normally; it flares when the immune system is low. Not contagious to other dogs or people.
-How it spreads: it does not spread by contact - it relates to the individual dog.
-Signs to watch: patchy hair loss, often around the face and legs, usually not very itchy unless infected.
-In the unit: no isolation needed for the mange itself; follow vet advice on treatment.`,
-"Lungworm":`What it is: a parasite that can cause serious illness. Not spread dog-to-dog.
-How it spreads: dogs pick it up by eating slugs and snails, or their slime trails - not from other dogs directly.
-Signs to watch: cough, breathing difficulty, unusual bleeding or bruising, tiredness.
-In the unit: no dog-to-dog isolation needed; vet diagnosis and treatment, and slug and snail control in the environment.`,
-"Tick-borne (Babesia / Ehrlichia)":`What it is: infections passed on by tick bites. Not spread dog-to-dog.
-How it spreads: the bite of an infected tick - not between dogs in normal contact.
-Signs to watch: fever, lethargy, pale gums, weight loss, sometimes bruising.
-In the unit: no dog-to-dog isolation needed; focus on tick removal and prevention, and vet treatment.`
-};
-var _fsCache=null,_fsShared=false;
-function getFactsheetOverridesLocal(){try{var r=localStorage.getItem("nspca-factsheets");return r?JSON.parse(r):{};}catch(e){return{};}}
-function getFactsheetOverrides(){return _fsCache||getFactsheetOverridesLocal();}
-async function loadFactsheets(){
-  _fsCache=getFactsheetOverridesLocal();_fsShared=false;
-  if(typeof supabaseClient!=="undefined"&&supabaseClient){
-    try{
-      var res=await supabaseClient.from("factsheets").select("*");
-      if(res.error)throw res.error;
-      var o={};(res.data||[]).forEach(function(r){o[r.key]=r.content;});
-      _fsCache=o;_fsShared=true;
-      try{localStorage.setItem("nspca-factsheets",JSON.stringify(o));}catch(e){}
-    }catch(e){_fsShared=false;}
-  }
-}
-function factsheetText(key){var o=getFactsheetOverrides();return(o[key]!==undefined&&o[key]!==null)?o[key]:(FACTSHEET_DEFAULTS[key]||"");}
-function _fsRerender(){var el=document.getElementById("dashboard-content");if(el)el.innerHTML=renderFactsheets();}
-function fsEdit(key){window._fsEditing=key;_fsRerender();setTimeout(function(){var t=document.getElementById("fs-edit-area");if(t)t.focus();},30);}
-function fsCancel(){window._fsEditing="";_fsRerender();}
-async function fsSave(){
-  var k=window._fsEditing;var ta=document.getElementById("fs-edit-area");if(!k||!ta)return;
-  var val=ta.value;if(!_fsCache)_fsCache={};_fsCache[k]=val;
-  try{localStorage.setItem("nspca-factsheets",JSON.stringify(_fsCache));}catch(e){}
-  if(typeof supabaseClient!=="undefined"&&supabaseClient&&_fsShared){try{await supabaseClient.from("factsheets").upsert({key:k,content:val,updated_at:new Date().toISOString(),updated_by:currentName()},{onConflict:"key"});}catch(e){}}
-  window._fsEditing="";await loadFactsheets();_fsRerender();
-  if(typeof miniToast==="function")miniToast(_fsShared?"Saved for the team":"Saved on this device");
-}
-async function fsReset(){
-  var k=window._fsEditing;if(!k)return;
-  if(_fsCache&&_fsCache[k]!==undefined)delete _fsCache[k];
-  try{localStorage.setItem("nspca-factsheets",JSON.stringify(_fsCache||{}));}catch(e){}
-  if(typeof supabaseClient!=="undefined"&&supabaseClient&&_fsShared){try{await supabaseClient.from("factsheets").delete().eq("key",k);}catch(e){}}
-  window._fsEditing="";await loadFactsheets();_fsRerender();
-  if(typeof miniToast==="function")miniToast("Reset to default");
-}
-function renderFactsheets(){
-  var editing=window._fsEditing||"";
-  var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><button onclick="window._fsEditing=&quot;&quot;;loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1;font-size:18px">Disease info</h2></div>';
-  var disclaimer='<div style="background:#fef9c3;border:0.5px solid #fde68a;color:#854d0e;border-radius:12px;padding:11px 14px;font-size:12px;line-height:1.5;margin-bottom:14px"><strong>General guidance, not veterinary advice.</strong> Use as a quick reference and always follow your vet and clinic protocols for isolation, treatment and cleaning. Tap Edit on any card to replace it with your own SOP. '+(_fsShared?'Edits sync across your team.':'Edits are saved on this device.')+'</div>';
-  function fsCard(key,title){
-    var txt=factsheetText(key);
-    var badges="";
-    if(key!=="_protocol"){
-      var c=CONTAGIOUS_DISEASES[key],z=ZOONOTIC_DISEASES[key];
-      badges='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px">'+(c?'<span style="background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px">Contagious</span>':'<span style="background:#e2e8f0;color:#475569;font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px">Not spread dog-to-dog</span>')+(z?'<span style="background:#7c2d12;color:#fff;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px">Zoonotic - human risk</span>':'')+'</div>';
-    }
-    var body;
-    if(editing===key){
-      body='<textarea id="fs-edit-area" style="width:100%;min-height:175px;padding:10px;border:1px solid var(--color-border-secondary);border-radius:8px;font-size:13px;font-family:inherit;line-height:1.5;resize:vertical;box-sizing:border-box">'+esc(txt)+'</textarea><div style="display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap"><button onclick="fsSave()" style="background:#c5e86c;color:#0f172a;border:none;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Save</button><button onclick="fsCancel()" style="background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-secondary);padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Cancel</button><button onclick="fsReset()" style="background:transparent;color:#991b1b;border:none;padding:6px 8px;font-size:12px;cursor:pointer;font-family:inherit;margin-left:auto">Reset to default</button></div>';
-    }else{
-      body='<div style="white-space:pre-wrap;font-size:13px;line-height:1.55;margin-top:8px">'+esc(txt)+'</div><div style="margin-top:9px"><button onclick="fsEdit(\''+key+'\')" style="background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-secondary);padding:5px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Edit</button></div>';
-    }
-    var accent=key==="_protocol"?'border-left:3px solid #c5e86c;':'';
-    return'<div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);'+accent+'border-radius:14px;padding:14px 15px;margin-bottom:10px"><div style="font-size:15px;font-weight:700">'+esc(title)+'</div>'+badges+body+'</div>';
-  }
-  var order=["Parvovirus (CPV)","Canine Distemper","Kennel Cough (CIRDC)","Canine Influenza","Infectious Hepatitis (CAV-1)","Leptospirosis","Sarcoptic Mange (scabies)","Ringworm","Giardia","Coccidiosis","Demodectic Mange","Lungworm","Tick-borne (Babesia / Ehrlichia)"];
-  var html=fsCard("_protocol","Isolation & hygiene barriers (general)");
-  html+=order.map(function(k){return fsCard(k,k);}).join("");
-  return '<div style="max-width:840px;margin:0 auto">'+back+disclaimer+html+'</div>';
-}
-
-
 
 function updateClock(){
   var el=document.getElementById("dash-clock");if(!el)return;
@@ -3352,6 +3221,86 @@ function copyUnitReport(){
   }catch(e){}
   miniToast("Select the text to copy it");
 }
+// \u2500\u2500 Breed guide \u2014 what a breed means for this unit, not an encyclopaedia \u2500\u2500
+var BREED_GUIDE={"Lurcher":{"what":"Sighthound crosses, the most common dog in Irish pounds.","kennel":"Quiet and undemanding in the kennel — often sleeps most of the day. Thin coat and almost no body fat, so they feel the cold badly; needs bedding off the floor and a coat in winter.","lead":"Deceptively strong on a lead for the first thirty seconds. Slips flat collars easily — martingale or harness every time.","intake":"Check for old racing or coursing injuries, dental wear, and skin thinning over pressure points. Very sensitive to some sedatives — flag to the vet.","needs":"Short bursts rather than distance. A safe run is worth more than an hour on a lead.","home":"Quiet homes. Almost always high prey drive — assume unsafe with cats and small pets until proven otherwise, and never off-lead in unfenced ground."},"Greyhound":{"what":"Ex-racing and ex-breeding dogs, usually arriving in numbers.","kennel":"Kennel-hardened and generally calm, but may have never seen stairs, glass doors or a television. Feels the cold badly.","lead":"Strong straight-line pull. Martingale collar — a flat collar will come off over the head.","intake":"Dental disease is near-universal. Check for pressure sores, bald thighs, and old track injuries.","needs":"Two short walks. They are sprinters, not endurance dogs.","home":"Genuinely low-energy indoors. Prey drive is usually high — muzzle in public is normal for them and not a red flag."},"Border Collie":{"what":"Working stock, often surrendered when the work stops.","kennel":"The breed that suffers most in a kennel. Without a job they spiral — spinning, wall-staring, light-chasing, barking. Deterioration can be fast and is often mistaken for temperament.","lead":"Usually easy on a lead. Watch for herding the handler's heels.","intake":"Check eyes and hips. Ask about noise phobia — very common and often the reason for surrender.","needs":"Mental work matters more than distance. Scatter feeds, puzzle toys, training sessions. Twenty minutes of thinking beats an hour of walking.","home":"Active homes that want to train. Herding instinct means care around small children and traffic."},"Collie":{"what":"Farm collies and collie crosses — the workhorse of Irish rescue.","kennel":"Similar to the Border Collie but usually steadier. Still needs stimulation to hold up in a kennel.","lead":"Generally manageable. Some are lead-shy if never walked on one.","intake":"Often arrive underweight with matted coats and embedded grass seed. Check between toes and in ears.","needs":"Daily work of some kind — walking, training, or a job to do.","home":"Rural or active homes. Many have never lived indoors and need house-training from scratch."},"Jack Russell Terrier":{"what":"Small, hardy and everywhere.","kennel":"Loud. A single JRT can set off an entire block, which matters when assessing everyone else's stress. Diggers and escapers — check the run.","lead":"Easy on a lead but reactive to other dogs at distance.","intake":"Check teeth, patellas and eyes. Often older than they look.","needs":"More than people expect. Terriers need outlets or they invent them.","home":"Homes without small pets — the prey drive is real and unteachable. Often better as the only dog."},"Staffordshire Bull Terrier":{"what":"Common, frequently misjudged, and legally restricted in Ireland.","kennel":"Generally settled and affectionate with people in the kennel. Strong chewers — check bedding and toys for swallowed pieces.","lead":"Very strong for their size. Two hands on the lead, and a harness for anyone light.","intake":"Skin allergies and demodex are common. Check ears and feet.","needs":"Moderate. They tire more from play and training than distance.","home":"Restricted breed — see the banner on the record for the legal handling requirements. Dog-to-dog tolerance varies widely and must be assessed individually, never assumed either way."},"German Shepherd":{"what":"Frequently surrendered, frequently under-socialised, legally restricted here.","kennel":"Kennel stress shows quickly — barrier reactivity, pacing, barking at passers-by. Distinguish kennel behaviour from real temperament before concluding anything.","lead":"Powerful. Two handlers for any dog showing arousal. Watch for lead-biting and redirection.","intake":"Check hips, elbows and the tail tip. Ear infections common in dropped-ear types.","needs":"High, and needs mental work as well as walking.","home":"Restricted breed — see the record banner. Needs experienced handling and a home that will keep training going."},"Husky (Siberian)":{"what":"Bought on impulse, surrendered within the year.","kennel":"Vocal rather than barky. Escape artists — climbs, digs and squeezes. Assume any run is escapable until proven otherwise. Overheats badly in warm weather even in Ireland.","lead":"Enormous pull. Double-clipped lead and a fitted harness. Never off-lead.","intake":"Check eyes, coat condition and weight. Often underexercised and overweight, or the opposite.","needs":"Very high. No amount of garden substitutes for it.","home":"Experienced, active, secure-fenced homes. Recall is unreliable in the breed — say so plainly to adopters. High prey drive."},"Labrador Retriever":{"what":"Common, generally easy, often overweight.","kennel":"Settles well. Steals and swallows things — check the run for missing bedding.","lead":"Pulls from enthusiasm rather than strength of will. Fine on a harness.","intake":"Check weight, ears, and hips in older dogs. Ask about seizures in young dogs.","needs":"Moderate to high, and food-motivated so training goes fast.","home":"Almost any active home. Watch food guarding around other dogs at feeding."},"Terrier Cross":{"what":"The default label for half the pound intake.","kennel":"Loud and busy. Small enough to slip gaps in gates and fencing.","lead":"Manageable but reactive at distance.","intake":"Teeth, patellas, and skin. Often unvaccinated and unchipped.","needs":"More than their size suggests.","home":"Assume high prey drive until tested. Usually best in homes without small pets."},"Spaniel Cross":{"what":"Working cockers and springers, often surrendered when the season ends.","kennel":"Busy, vocal and quick to develop repetitive behaviour in a kennel.","lead":"Pull moderately, and follow their nose.","intake":"Ears are the priority — infections are near-universal in working dogs. Check for grass seed.","needs":"High, with scent work being the best outlet.","home":"Active homes. Often unsuitable for quiet or apartment living."},"Beagle":{"what":"Occasionally from laboratory or hunting backgrounds.","kennel":"Vocal — a beagle in distress is heard across the site. Escapes under fencing rather than over.","lead":"Follows scent regardless of the handler. Harness essential.","intake":"Check ears and weight. Lab-background dogs may be entirely naive to normal life.","needs":"High, and led by the nose. Scent work and food-based puzzles do more for them than distance walking.","home":"Secure gardens. Recall is genuinely unreliable — never promise otherwise."},"Rottweiler":{"what":"Less common but significant, and legally restricted here.","kennel":"Usually calm in the kennel. Size alone intimidates volunteers, which affects how much handling they get — watch for that.","lead":"Very powerful. Two experienced handlers as standard until assessed.","intake":"Check hips and weight. Ask about heart history.","needs":"Moderate, with training.","home":"Restricted breed — see the record banner. Experienced homes only."},"Boxer":{"what":"Bouncy and long-lived in the kennel.","kennel":"Loud and mouthy in play. Overheats easily and struggles in the cold — a short coat with no undercoat.","lead":"Strong and bouncy rather than steadily pulling.","intake":"Brachycephalic — watch breathing on exertion and in heat. Heart conditions and skin masses are worth flagging.","needs":"High but in bursts.","home":"Active homes with room for a boisterous dog. Often poor with same-sex dogs."},"French Bulldog":{"what":"Increasingly common as breeding-stock surrenders.","kennel":"Struggles with heat and with any exertion. Never leave in a warm van or transport at midday.","lead":"Easy, but harness only — a collar restricts an already compromised airway.","intake":"Airway, spine, eyes and skin folds. Assume a vet check is needed rather than optional.","needs":"Low, and must be limited in warm weather.","home":"Any home that understands the health costs. Be candid with adopters about likely vet bills."},"Mastiff":{"what":"Bull mastiff types, restricted here.","kennel":"Take up a whole run. Slow to show stress, then show it suddenly.","lead":"Immense strength. Two handlers, always, and check equipment ratings.","intake":"Joints, weight, and skin folds. Drooling can mask dental problems.","needs":"Low to moderate — over-exercising a young one damages joints.","home":"Restricted breed — see the record banner. Experienced homes with space."},"Akita":{"what":"Uncommon but demanding, and restricted here.","kennel":"Clean and quiet in the kennel. Often intolerant of kennel neighbours, particularly same-sex.","lead":"Strong and independent. Never assume a friendly greeting.","intake":"Check eyes, thyroid and skin. Sensitive to some anaesthetics — flag it.","needs":"Moderate physical exercise, but they need calm, predictable routine more than they need mileage.","home":"Restricted breed — see the record banner. Experienced, usually only-dog homes."},"Chihuahua":{"what":"Small, frequently over-represented, often fear-aggressive on arrival.","kennel":"Cold, and hides in bedding — check carefully before moving anything. Fear presents as biting far more than in bigger dogs and is easily dismissed as bad temper.","lead":"Slips collars. Harness.","intake":"Teeth are usually the worst thing about them. Check patellas and windpipe.","needs":"Low physically, but they need gentle handling practice — confidence work matters far more than exercise.","home":"Adult homes generally. Fear-based behaviour usually improves markedly once out of a kennel."},"Shih Tzu":{"what":"Common surrender, usually badly matted.","kennel":"Overheats and struggles to breathe when stressed. Matting hides skin damage and wounds.","lead":"Easy. Harness rather than collar.","intake":"Eyes, airway, ears and skin under the coat. Clipping off is usually the first welfare act.","needs":"Low, and limited in warm weather. Grooming and coat care take more time than walking does.","home":"Quiet homes willing to commit to grooming every six to eight weeks — say the cost plainly."},"Yorkshire Terrier":{"what":"Small, common, often elderly on arrival.","kennel":"Cold and vocal. Easily lost in bedding.","lead":"Slips collars. Harness.","intake":"Teeth, patellas, windpipe. Heart murmurs in older dogs.","needs":"Low to moderate — still a terrier.","home":"Quieter adult homes. Grooming commitment."},"Mixed Breed":{"what":"Where most dogs end up labelled.","kennel":"Judge the dog in front of you. Where a type is obvious — sighthound, terrier, bull breed, collie, northern — the notes for that type are a starting point for what to watch for, not a prediction.","lead":"Assess equipment individually.","intake":"A full intake check matters more here than anywhere, because there is no breed history to lean on.","needs":"Assess individually.","home":"Assess individually."}};
+// Cross-breeds and unlabelled dogs fall back to the type they most resemble.
+var BREED_ALIASES={"Collie Cross":"Collie","Border Collie Cross":"Border Collie","Sheepdog":"Collie",
+  "Bearded Collie":"Collie","Rough Collie":"Collie","Smooth Collie":"Collie",
+  "Whippet":"Greyhound","Saluki":"Lurcher","Greyhound Cross":"Greyhound","Lurcher Cross":"Lurcher",
+  "Parson Russell Terrier":"Jack Russell Terrier","Russell Terrier":"Jack Russell Terrier",
+  "American Staffordshire Terrier":"Staffordshire Bull Terrier","Staffie Cross":"Staffordshire Bull Terrier",
+  "Alaskan Malamute":"Husky (Siberian)","Japanese Akita":"Akita",
+  "Cocker Spaniel":"Spaniel Cross","English Springer Spaniel":"Spaniel Cross","Springer Spaniel":"Spaniel Cross",
+  "American Cocker Spaniel":"Spaniel Cross","Golden Retriever":"Labrador Retriever",
+  "Bull Mastiff":"Mastiff","Neapolitan Mastiff":"Mastiff","English Bulldog":"French Bulldog",
+  "Pug":"French Bulldog","Maltese":"Shih Tzu","Lhasa Apso":"Shih Tzu",
+  "Unknown":"Mixed Breed","Crossbreed":"Mixed Breed"};
+// How breeds actually get written on a kennel card.
+var BREED_NICKS={"staffie":"Staffordshire Bull Terrier","staffy":"Staffordshire Bull Terrier","staff":"Staffordshire Bull Terrier",
+  "lab":"Labrador Retriever","labrador":"Labrador Retriever","gsd":"German Shepherd","alsatian":"German Shepherd",
+  "jrt":"Jack Russell Terrier","jack russell":"Jack Russell Terrier","russell":"Jack Russell Terrier",
+  "collie":"Collie","border":"Border Collie","sheepdog":"Collie",
+  "springer":"Spaniel Cross","cocker":"Spaniel Cross","spaniel":"Spaniel Cross",
+  "frenchie":"French Bulldog","bulldog":"French Bulldog","yorkie":"Yorkshire Terrier","chi":"Chihuahua",
+  "husky":"Husky (Siberian)","malamute":"Husky (Siberian)","rottie":"Rottweiler","rotty":"Rottweiler",
+  "greyhound":"Greyhound","whippet":"Greyhound","lurcher":"Lurcher","saluki":"Lurcher",
+  "terrier":"Terrier Cross","mastiff":"Mastiff","akita":"Akita","beagle":"Beagle","boxer":"Boxer",
+  "shih tzu":"Shih Tzu","shihtzu":"Shih Tzu"};
+function breedGuideKey(breed){
+  if(!breed)return "";
+  var b=String(breed).trim();
+  if(BREED_GUIDE[b])return b;
+  if(BREED_ALIASES[b]&&BREED_GUIDE[BREED_ALIASES[b]])return BREED_ALIASES[b];
+  // "Collie Cross", "Staffie x Lab" and the like \u2014 match on the leading words
+  var low=b.toLowerCase();
+  var best="";
+  Object.keys(BREED_GUIDE).forEach(function(k){
+    if(low.indexOf(k.toLowerCase())>-1&&k.length>best.length)best=k;
+  });
+  if(best)return best;
+  Object.keys(BREED_ALIASES).forEach(function(a){
+    if(low.indexOf(a.toLowerCase())>-1&&BREED_GUIDE[BREED_ALIASES[a]]&&a.length>best.length)best=BREED_ALIASES[a];
+  });
+  if(best)return best;
+  // "Staffie x Lab", "GSD cross", "collie/terrier" \u2014 match on the words themselves,
+  // taking the longest nickname found so "border" beats "collie".
+  var words=low.split(/[^a-z]+/).filter(Boolean);
+  var joined=words.join(" ");
+  Object.keys(BREED_NICKS).forEach(function(n){
+    var hit=(n.indexOf(" ")>-1)?(joined.indexOf(n)>-1):(words.indexOf(n)>-1);
+    if(hit&&BREED_GUIDE[BREED_NICKS[n]]&&n.length>best.length)best=BREED_NICKS[n];
+  });
+  return best;
+}
+function breedGuideEntryHtml(key){
+  var g=BREED_GUIDE[key];if(!g)return "";
+  var rows=[["In the kennel",g.kennel],["On the lead",g.lead],["Check at intake",g.intake],["What it needs",g.needs],["Suits",g.home]];
+  var h='<div style="font-size:15px;font-weight:700;color:#0f172a">'+esc(key)+'</div>'
+    +'<div style="font-size:12.5px;color:#64748b;margin:2px 0 12px;line-height:1.5">'+esc(g.what)+'</div>';
+  h+='<div class="card" style="padding:0 14px">'+rows.map(function(r){
+    return '<div style="padding:11px 0;border-bottom:0.5px solid var(--color-border-tertiary)">'
+      +'<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin-bottom:3px">'+r[0]+'</div>'
+      +'<div style="font-size:13px;line-height:1.6;color:#0f172a">'+esc(r[1])+'</div></div>';
+  }).join("").replace(/border-bottom:0.5px solid var\(--color-border-tertiary\)(?![\s\S]*border-bottom)/,'border-bottom:none')+'</div>';
+  var rb=(typeof restrictedBreedInfo==="function")?restrictedBreedInfo(key):null;
+  if(rb)h+='<div style="font-size:11.5px;color:#854d0e;background:#fef9c3;border-radius:8px;padding:9px 12px;margin-top:10px">This is a restricted breed in Ireland. The legal handling requirements are set out on the dog\u0027s own record.</div>';
+  return h;
+}
+function renderBreedGuide(){
+  var sel=window._bgSel||"";
+  var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><button onclick="'+(sel?'window._bgSel=&quot;&quot;;showDashSection(&quot;breedguide&quot;)':'loadRecordsList().then(function(){renderDashboard();})')+'" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; '+(sel?"All breeds":"Dashboard")+'</button><h2 style="margin:0;flex:1">Breed guide</h2></div>';
+  if(sel&&BREED_GUIDE[sel])return back+breedGuideEntryHtml(sel);
+  var h=back+'<div style="font-size:12.5px;color:#64748b;line-height:1.6;margin-bottom:14px">Practical notes on the breeds we actually see \u2014 how they cope in a kennel, what they need on a lead, what to check at intake. Always assess the dog in front of you; this is what to watch for, not what to expect.</div>';
+  h+='<div class="card" style="padding:0 14px">'+Object.keys(BREED_GUIDE).sort().map(function(k){
+    return '<div onclick="openBreedGuide(\''+k.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer">'
+      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#0f172a">'+esc(k)+'</div>'
+      +'<div style="font-size:11.5px;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(BREED_GUIDE[k].what)+'</div></div>'
+      +'<span class="med-chev">&#8250;</span></div>';
+  }).join("")+'</div>';
+  return h;
+}
+function openBreedGuide(k){window._bgSel=k;showDashSection("breedguide");}
+function openBreedGuideFor(breed){var k=breedGuideKey(breed);if(k)openBreedGuide(k);}
 function renderStats(){
   var now=new Date(),thisMonth=now.toISOString().slice(0,7);
   var byMonth={},tlC={Green:0,Yellow:0,Red:0,Black:0},outC={},totalD=0,countD=0;
@@ -5668,7 +5617,10 @@ function page(){
       +(chips.length?'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:11px;padding-top:10px;border-top:0.5px solid var(--color-border-tertiary)">'+chips.join("")+'</div>':'')
       +'<div style="margin-top:11px;display:flex;align-items:center;gap:8px"><label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:8px;cursor:pointer;font-size:11px;color:var(--color-text-secondary)">&#128247; '+(d.photo?"Change photo":"Add photo")+'<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>'+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px" onclick="showRepositionPhoto()">&#10021; Reposition</button>':'')+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px;background:#fee2e2;color:#991b1b;border:none" onclick="removePhoto()">Remove</button>':'')+'</div></div>';
 
-    var identity='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Identity</div>'+'<div class="dog-fg">'+fld("Dog name",d.name,"dog.name","text","e.g. Bailey",'onblur="checkDuplicateName()" id="dog-name-input"')+fld("Reference no.",d.refNo,"dog.refNo","text","e.g. 023-MH-2026")+breedSlct(d.breed)+slct("Sex",d.sex,"dog.sex",[["Male","Male"],["Female","Female"],["Male (N)","Male (Neutered)"],["Female (S)","Female (Spayed)"],["Unknown","Unknown"]])+'</div>'+'<div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">&#9888; There&rsquo;s already an active dog with this name.</div>'+'<div class="f"><label class="lbl">Crossbreed</label><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0"><input type="checkbox" data-save="dog.crossbreed" '+(d.crossbreed?"checked":"")+' onchange="S.dog.crossbreed=this.checked;debouncedSave();renderMain()" style="width:18px;height:18px;cursor:pointer"><span style="font-size:13px">This dog is a crossbreed</span></label></div>'+(d.crossbreed?breedSlct(d.breed2,"dog.breed2","Crossed with"):'')+'<div class="dog-fg">'+fld("Date of birth (if known)",d.dob||"","dog.dob","date")+slct("Age (approx.)",d.age,"dog.age",ageOptions(d.age))+slct("Size",d.size,"dog.size",[["","-- select --"],["Small (under 10kg)","Small (under 10kg)"],["Medium (10-25kg)","Medium (10-25kg)"],["Large (25-40kg)","Large (25-40kg)"],["XL (over 40kg)","XL (over 40kg)"]])+slct("Colour / markings",d.colour,"dog.colour",[["","-- select --"],["Black","Black"],["White","White"],["Cream","Cream"],["Golden","Golden"],["Fawn","Fawn"],["Tan","Tan"],["Red / Chestnut","Red / Chestnut"],["Brown / Chocolate","Brown / Chocolate"],["Blue / Grey","Blue / Grey"],["Sable","Sable"],["Black and White","Black and White"],["Black and Tan","Black and Tan"],["Brown and White","Brown and White"],["Tri-colour","Tri-colour"],["Brindle","Brindle"],["Merle","Merle"],["Other","Other"]])+wfld(d.weight)+fld("Microchip no.",d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')+'</div>'+'<div id="chip-info" style="margin:0 0 4px;font-size:11px">'+chipInfoHtml(d.microchip)+'</div></div>';
+    var _bgk=(typeof breedGuideKey==="function")?breedGuideKey(d.breed):"";
+    var identity='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Identity</span>'
+      +(_bgk?'<span onclick="openBreedGuideFor(\''+esc(d.breed).replace(/\u0027/g,"")+'\')" style="font-size:11px;color:#0f172a;background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.1);border-radius:14px;padding:3px 10px;cursor:pointer;white-space:nowrap">About '+esc(_bgk)+' \u2192</span>':'')
+      +'</div>'+'<div class="dog-fg">'+fld("Dog name",d.name,"dog.name","text","e.g. Bailey",'onblur="checkDuplicateName()" id="dog-name-input"')+fld("Reference no.",d.refNo,"dog.refNo","text","e.g. 023-MH-2026")+breedSlct(d.breed)+slct("Sex",d.sex,"dog.sex",[["Male","Male"],["Female","Female"],["Male (N)","Male (Neutered)"],["Female (S)","Female (Spayed)"],["Unknown","Unknown"]])+'</div>'+'<div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">&#9888; There&rsquo;s already an active dog with this name.</div>'+'<div class="f"><label class="lbl">Crossbreed</label><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0"><input type="checkbox" data-save="dog.crossbreed" '+(d.crossbreed?"checked":"")+' onchange="S.dog.crossbreed=this.checked;debouncedSave();renderMain()" style="width:18px;height:18px;cursor:pointer"><span style="font-size:13px">This dog is a crossbreed</span></label></div>'+(d.crossbreed?breedSlct(d.breed2,"dog.breed2","Crossed with"):'')+'<div class="dog-fg">'+fld("Date of birth (if known)",d.dob||"","dog.dob","date")+slct("Age (approx.)",d.age,"dog.age",ageOptions(d.age))+slct("Size",d.size,"dog.size",[["","-- select --"],["Small (under 10kg)","Small (under 10kg)"],["Medium (10-25kg)","Medium (10-25kg)"],["Large (25-40kg)","Large (25-40kg)"],["XL (over 40kg)","XL (over 40kg)"]])+slct("Colour / markings",d.colour,"dog.colour",[["","-- select --"],["Black","Black"],["White","White"],["Cream","Cream"],["Golden","Golden"],["Fawn","Fawn"],["Tan","Tan"],["Red / Chestnut","Red / Chestnut"],["Brown / Chocolate","Brown / Chocolate"],["Blue / Grey","Blue / Grey"],["Sable","Sable"],["Black and White","Black and White"],["Black and Tan","Black and Tan"],["Brown and White","Brown and White"],["Tri-colour","Tri-colour"],["Brindle","Brindle"],["Merle","Merle"],["Other","Other"]])+wfld(d.weight)+fld("Microchip no.",d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')+'</div>'+'<div id="chip-info" style="margin:0 0 4px;font-size:11px">'+chipInfoHtml(d.microchip)+'</div></div>';
 
     var intake='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Intake</div>'+'<div class="dog-fg">'+slct("Kennel / Pod",d.kennel,"dog.kennel",[["",'-- not assigned --'],["Kennel 1","Kennel 1"],["Kennel 2","Kennel 2"],["Kennel 3","Kennel 3"],["Kennel 4","Kennel 4"],["Kennel 5","Kennel 5"],["Kennel 6","Kennel 6"],["Pod 1","Pod 1"],["Pod 2","Pod 2"],["Pod 3","Pod 3"],["Pod 4","Pod 4"]])+fld("Assessor",d.assessor,"dog.assessor","text","e.g. Shane")+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()+slct("Reason for intake",d.intakeReason,"dog.intakeReason",[["Stray","Stray"],["Owner surrender","Owner surrender"],["Cruelty case","Cruelty case"],["Transfer","Transfer from another centre"],["Other","Other"]])+slct("Return / reclaim",d.returnType||"","dog.returnType",[["","-- not a return --"],["Returned from adoption","Returned from adoption"],["Back from foster / trial","Back from foster / trial"],["Owner-reclaim deadline","Owner-reclaim deadline (stray)"]])+(d.returnType?fld(returnDateLabel(d.returnType),d.returnDate||"","dog.returnDate","date"):"")+'</div></div>';
 
