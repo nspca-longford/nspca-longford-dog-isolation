@@ -309,12 +309,9 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
           <div onclick="dashMenuGo('records')" class="dmi">&#128203; Records</div>
           <div onclick="dashMenuGo('incidents')" class="dmi">&#9888;&#65039; Incident register</div>
           <div onclick="dashMenuGo('upcomingMedical')" class="dmi">&#128137; Upcoming Medical</div>
-          <div onclick="dashMenuGo('unitreport')" class="dmi">&#128196; Unit report</div>
-          <div onclick="openBreedGuidePage()" class="dmi">&#128054; Breed guide</div>
           <div onclick="dashMenuGo('stats')" class="dmi">&#128202; Stats</div>
           <div onclick="closeDashMenu();exportCSV()" class="dmi">&#128229; Export CSV</div>
-          <div class="dml">Reference</div>
-                    <div class="dml">Team &amp; data</div>
+          <div class="dml">Team &amp; data</div>
           <div onclick="dashMenuGo('team')" class="dmi">&#128101; Team Directory</div>
           <div id="dash-menu-users" onclick="dashMenuGo('users')" class="dmi" style="display:none">&#9881; Manage Users</div>
           <div onclick="closeDashMenu();downloadBackup()" class="dmi">&#128190; Download backup</div>
@@ -398,11 +395,11 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.94",date:"2026-08-06",note:"The breed guide has moved out of the app into its own page, so this file stays small and quick to publish. Nothing is lost \u2014 the menu opens it, and a dog with a breed set has a Breed guide link on its Identity card that takes you straight to the right entry. The guide itself is now a page you can search, print, or send to someone without giving them the app. It needs to sit in the same folder as the app when you publish, as breed-guide.html."},
+var CHANGELOG=[{version:"3.95",date:"2026-08-15",note:"Unit report and the breed guide have both been removed from the menu. The breed guide had already moved out to its own page in v3.94; the app no longer links to it at all, so delete breed-guide.html from wherever it's published if it's not wanted anymore. Unit report is gone completely, monthly write-up and all \u2014 nothing else in the app depended on it. Also tidied up an empty \u201cReference\u201d menu heading left over from the v3.92 clear-out."},
+  {version:"3.94",date:"2026-08-06",note:"The breed guide has moved out of the app into its own page, so this file stays small and quick to publish. Nothing is lost \u2014 the menu opens it, and a dog with a breed set has a Breed guide link on its Identity card that takes you straight to the right entry. The guide itself is now a page you can search, print, or send to someone without giving them the app. It needs to sit in the same folder as the app when you publish, as breed-guide.html."},
   {version:"3.93",date:"2026-08-06",note:"A breed guide, in the menu where Disease info used to be. It covers the breeds we actually see rather than every breed that exists, and it is written for this unit: how the breed copes in a kennel, what it needs on a lead, what to check at intake, what it actually needs day to day, and what sort of home suits. Open a dog with a breed set and there is an About link on the Identity card that takes you straight to the right entry \u2014 it copes with the way breeds really get written down, so Staffie x Lab, GSD cross and collie/terrier all find something. Restricted breeds point back at the legal wording on the dog\u0027s own record rather than repeating it. It says plainly at the top what it is: things to watch for, not things to expect. Assess the dog in front of you. Corrections welcome \u2014 this is a first draft and Kate and Ciara know more than it does."},
   {version:"3.92",date:"2026-08-06",note:"Disease info has been taken out of the menu. It was general guidance that was rarely opened, and the disease tracking that actually matters \u2014 recording a condition on a dog, the contagious warnings, and a contagious case blocking rehoming \u2014 is untouched and works exactly as before. Anything that was written into those sheets is still held in the database, so nothing is lost if you want it back."},
-  {version:"3.91",date:"2026-08-03",note:"Three gaps closed. The rehoming pipeline now has the same protection the dog records got: applicants are kept on the phone so the board still works with no signal, and an enquiry taken in a dead spot is held and sent when you are back rather than quietly lost \u2014 the board tells you either way. A closed record can be reopened: if a dog comes back, or an outcome was set on the wrong one, open the Outcome tab and there is a Reopen button that puts the dog back on the dashboard and writes what happened into the notes, so nothing is quietly rewritten. And the app now records who made a decision rather than only who saved last \u2014 setting an outcome or clearing a dog for rehoming stamps your name and the date, and it shows on the record."},
-  {version:"3.90",date:"2026-08-03",note:"Users can now be removed, not just switched off. Until now the only option was setting someone inactive, which left them on the list for good. Open a person in Manage Users and there is a Remove button: it asks once, warns that their login stops working straight away, and confirms that anything they recorded stays on the dogs\u0027 records. Two sensible guards \u2014 you cannot remove your own account, and the built-in accounts that come with the app can only be set inactive, which the screen now explains rather than leaving you wondering."}
+  {version:"3.91",date:"2026-08-03",note:"Three gaps closed. The rehoming pipeline now has the same protection the dog records got: applicants are kept on the phone so the board still works with no signal, and an enquiry taken in a dead spot is held and sent when you are back rather than quietly lost \u2014 the board tells you either way. A closed record can be reopened: if a dog comes back, or an outcome was set on the wrong one, open the Outcome tab and there is a Reopen button that puts the dog back on the dashboard and writes what happened into the notes, so nothing is quietly rewritten. And the app now records who made a decision rather than only who saved last \u2014 setting an outcome or clearing a dog for rehoming stamps your name and the date, and it shows on the record."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1139,8 +1136,6 @@ function showDashSection(section){
   var el=document.getElementById("dashboard-content");if(!el)return;
   if(section==="records"){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1">All Records</h2><button onclick="exportCSV()" class="btn" style="font-size:12px;padding:6px 14px">Export CSV &#8595;</button></div>'+page_records();
-  }else if(section==="unitreport"){
-    el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1">Unit report</h2></div>'+renderUnitReport();
   }else if(section==="stats"){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button></div>'+renderStats();
   }else if(section==="upcomingMedical"){
@@ -3116,112 +3111,6 @@ function exportCSV(){
   var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="nspca-isolation-"+new Date().toISOString().slice(0,10)+".csv";a.click();
 }
 
-// \u2500\u2500 Unit report: the month, written so it can be sent \u2500\u2500
-function unitPeriod(key){
-  var now=new Date();var end=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-  var start;
-  if(key==="last"){start=new Date(now.getFullYear(),now.getMonth()-1,1);end=new Date(now.getFullYear(),now.getMonth(),0);}
-  else if(key==="q"){start=new Date(now.getFullYear(),now.getMonth()-2,1);}
-  else if(key==="ytd"){start=new Date(now.getFullYear(),0,1);}
-  else{start=new Date(now.getFullYear(),now.getMonth(),1);}
-  return{from:start.toISOString().slice(0,10),to:end.toISOString().slice(0,10),key:key||"this"};
-}
-function unitReportData(p){
-  var inRange=function(d){return d&&d>=p.from&&d<=p.to;};
-  var intakes=[],left=[],stays=[],outcomes={},reasons={},lights={},contagious=0;
-  var here=0,longest=null;
-  (records||[]).forEach(function(r){
-    var st=r.state||{};var f=st.fin||{};var d=st.dog||{};
-    if(inRange(r.intakeDate)){
-      intakes.push(r);
-      var why=d.intakeReason||"Not recorded";reasons[why]=(reasons[why]||0)+1;
-    }
-    var o=f.outcome||"";
-    var gone=o&&o.indexOf("Active")!==0&&o!=="Finished Isolation";
-    if(gone&&inRange(f.outcomeDate)){
-      left.push(r);
-      outcomes[o]=(outcomes[o]||0)+1;
-      if(r.intakeDate&&f.outcomeDate){
-        var days=Math.round((new Date(f.outcomeDate)-new Date(r.intakeDate))/864e5);
-        if(days>=0&&days<400)stays.push(days);
-      }
-    }
-    if(!gone){
-      here++;
-      var dd=daysInIsolation(r.intakeDate)||0;
-      if(!longest||dd>longest.days)longest={name:r.name,days:dd};
-      var l=r.trafficLight||"";if(l)lights[l]=(lights[l]||0)+1;
-      if((activeContagiousList(st.medical||null)||[]).length)contagious++;
-    }
-  });
-  var scored=0,unscored=0;
-  (records||[]).forEach(function(r){
-    var st=r.state||{};var f=st.fin||{};var o=f.outcome||"";
-    if(o&&o.indexOf("Active")!==0&&o!=="Finished Isolation")return;
-    if(Object.values(st.scores||{}).reduce(function(a,b){return a+(parseInt(b)||0);},0))scored++;else unscored++;
-  });
-  var enq=0,adopted=0,checks=0;
-  (applicants||[]).forEach(function(a){
-    if(inRange(a.enquiry_date))enq++;
-    if(a.stage==="Adopted"&&a.state&&inRange(a.state.adoptionDate))adopted++;
-    if(a.state&&inRange(a.state.hcDate))checks++;
-  });
-  var avg=stays.length?Math.round(stays.reduce(function(a,b){return a+b;},0)/stays.length):null;
-  return{intakes:intakes,left:left,outcomes:outcomes,reasons:reasons,avg:avg,here:here,longest:longest,
-         lights:lights,contagious:contagious,scored:scored,unscored:unscored,enq:enq,adopted:adopted,checks:checks};
-}
-function unitReportText(p,d){
-  var L=[];
-  var label=p.key==="last"?"last month":p.key==="q"?"the last three months":p.key==="ytd"?"this year so far":"this month";
-  L.push("Dog Isolation Unit \u2014 report for "+label+" ("+fmtDMY(p.from)+" to "+fmtDMY(p.to)+")");
-  L.push("");
-  L.push(d.intakes.length+" dog"+(d.intakes.length===1?"":"s")+" came into the unit and "+d.left.length+" left"+(d.avg!==null?", staying "+d.avg+" days on average":"")+".");
-  var oKeys=Object.keys(d.outcomes);
-  if(oKeys.length)L.push("Outcomes: "+oKeys.map(function(k){return d.outcomes[k]+" "+k.toLowerCase();}).join(", ")+".");
-  var rKeys=Object.keys(d.reasons);
-  if(rKeys.length)L.push("They came in as: "+rKeys.map(function(k){return d.reasons[k]+" "+k.toLowerCase();}).join(", ")+".");
-  L.push("");
-  L.push("There are "+d.here+" dog"+(d.here===1?"":"s")+" in the unit now"+(d.longest?", the longest staying being "+d.longest.name+" at "+d.longest.days+" days":"")+".");
-  if(d.scored||d.unscored)L.push(d.scored+" of those "+(d.scored+d.unscored)+" have been assessed"+(d.unscored?", leaving "+d.unscored+" still to do":"")+".");
-  var lk=Object.keys(d.lights);
-  if(lk.length)L.push("Handling levels: "+lk.map(function(k){return d.lights[k]+" "+k.toLowerCase();}).join(", ")+".");
-  if(d.contagious)L.push(d.contagious+" dog"+(d.contagious===1?" is":"s are")+" being treated for a contagious condition.");
-  if(d.enq||d.checks||d.adopted){
-    L.push("");
-    L.push("Rehoming: "+d.enq+" new "+(d.enq===1?"enquiry":"enquiries")+", "+d.checks+" home check"+(d.checks===1?"":"s")+", "+d.adopted+" adopted.");
-  }
-  return L.join("\n");
-}
-function renderUnitReport(){
-  var key=window._urPeriod||"this";
-  var p=unitPeriod(key);var d=unitReportData(p);
-  var txt=unitReportText(p,d);
-  function tab(k,l){return '<button onclick="setUnitPeriod(\''+k+'\')" style="font-size:11.5px;padding:5px 12px;border-radius:16px;cursor:pointer;font-family:inherit;border:'+(key===k?'1px solid rgba(15,23,42,0.25)':'0.5px solid rgba(15,23,42,0.1)')+';background:'+(key===k?'#0f172a':'#f1f5f9')+';color:'+(key===k?'#c5e86c':'#0f172a')+'">'+l+'</button>';}
-  var h='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">'+tab("this","This month")+tab("last","Last month")+tab("q","Last 3 months")+tab("ytd","Year to date")+'</div>';
-  h+=hybridTiles([
-    {label:"Came in",value:String(d.intakes.length)},
-    {label:"Left",value:String(d.left.length)},
-    {label:"Average stay",value:d.avg===null?"\u2014":d.avg+"d"}
-  ]);
-  h+='<div class="card" style="padding:14px 16px"><div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin-bottom:8px">The report</div>'
-    +'<div id="unit-report-text" style="font-size:13px;line-height:1.65;color:#0f172a;white-space:pre-wrap">'+esc(txt)+'</div></div>';
-  h+='<div style="display:flex;gap:8px;margin-top:10px"><button onclick="copyUnitReport()" class="btn btnp" style="flex:1;font-size:12px;padding:9px">Copy</button>'
-    +'<button onclick="printDoc(\'Unit report\')" class="btn" style="flex:1;font-size:12px;padding:9px">Print</button></div>';
-  h+='<div style="font-size:11px;color:#94a3b8;margin-top:10px">Figures come from the records as they stand \u2014 check anything that looks wrong before sending.</div>';
-  return h;
-}
-function setUnitPeriod(k){window._urPeriod=k;showDashSection("unitreport");}
-function copyUnitReport(){
-  var p=unitPeriod(window._urPeriod||"this");
-  var txt=unitReportText(p,unitReportData(p));
-  try{
-    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt);miniToast("Report copied");return;}
-  }catch(e){}
-  miniToast("Select the text to copy it");
-}
-// ── Breed guide — lives in its own page so this file stays small ──
-function breedGuideUrl(breed){return "breed-guide.html"+(breed?("?breed="+encodeURIComponent(breed)):"");}
-function openBreedGuidePage(breed){try{window.open(breedGuideUrl(breed),"_blank");}catch(e){location.href=breedGuideUrl(breed);}}
 function renderStats(){
   var now=new Date(),thisMonth=now.toISOString().slice(0,7);
   var byMonth={},tlC={Green:0,Yellow:0,Red:0,Black:0},outC={},totalD=0,countD=0;
@@ -5538,9 +5427,7 @@ function page(){
       +(chips.length?'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:11px;padding-top:10px;border-top:0.5px solid var(--color-border-tertiary)">'+chips.join("")+'</div>':'')
       +'<div style="margin-top:11px;display:flex;align-items:center;gap:8px"><label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:8px;cursor:pointer;font-size:11px;color:var(--color-text-secondary)">&#128247; '+(d.photo?"Change photo":"Add photo")+'<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>'+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px" onclick="showRepositionPhoto()">&#10021; Reposition</button>':'')+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px;background:#fee2e2;color:#991b1b;border:none" onclick="removePhoto()">Remove</button>':'')+'</div></div>';
 
-    var _bgk=d.breed||"";
     var identity='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Identity</span>'
-      +(_bgk?'<span onclick="openBreedGuidePage(\''+esc(d.breed).replace(/\u0027/g,"")+'\')" style="font-size:11px;color:#0f172a;background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.1);border-radius:14px;padding:3px 10px;cursor:pointer;white-space:nowrap">Breed guide \u2192</span>':'')
       +'</div>'+'<div class="dog-fg">'+fld("Dog name",d.name,"dog.name","text","e.g. Bailey",'onblur="checkDuplicateName()" id="dog-name-input"')+fld("Reference no.",d.refNo,"dog.refNo","text","e.g. 023-MH-2026")+breedSlct(d.breed)+slct("Sex",d.sex,"dog.sex",[["Male","Male"],["Female","Female"],["Male (N)","Male (Neutered)"],["Female (S)","Female (Spayed)"],["Unknown","Unknown"]])+'</div>'+'<div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">&#9888; There&rsquo;s already an active dog with this name.</div>'+'<div class="f"><label class="lbl">Crossbreed</label><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0"><input type="checkbox" data-save="dog.crossbreed" '+(d.crossbreed?"checked":"")+' onchange="S.dog.crossbreed=this.checked;debouncedSave();renderMain()" style="width:18px;height:18px;cursor:pointer"><span style="font-size:13px">This dog is a crossbreed</span></label></div>'+(d.crossbreed?breedSlct(d.breed2,"dog.breed2","Crossed with"):'')+'<div class="dog-fg">'+fld("Date of birth (if known)",d.dob||"","dog.dob","date")+slct("Age (approx.)",d.age,"dog.age",ageOptions(d.age))+slct("Size",d.size,"dog.size",[["","-- select --"],["Small (under 10kg)","Small (under 10kg)"],["Medium (10-25kg)","Medium (10-25kg)"],["Large (25-40kg)","Large (25-40kg)"],["XL (over 40kg)","XL (over 40kg)"]])+slct("Colour / markings",d.colour,"dog.colour",[["","-- select --"],["Black","Black"],["White","White"],["Cream","Cream"],["Golden","Golden"],["Fawn","Fawn"],["Tan","Tan"],["Red / Chestnut","Red / Chestnut"],["Brown / Chocolate","Brown / Chocolate"],["Blue / Grey","Blue / Grey"],["Sable","Sable"],["Black and White","Black and White"],["Black and Tan","Black and Tan"],["Brown and White","Brown and White"],["Tri-colour","Tri-colour"],["Brindle","Brindle"],["Merle","Merle"],["Other","Other"]])+wfld(d.weight)+fld("Microchip no.",d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')+'</div>'+'<div id="chip-info" style="margin:0 0 4px;font-size:11px">'+chipInfoHtml(d.microchip)+'</div></div>';
 
     var intake='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Intake</div>'+'<div class="dog-fg">'+slct("Kennel / Pod",d.kennel,"dog.kennel",[["",'-- not assigned --'],["Kennel 1","Kennel 1"],["Kennel 2","Kennel 2"],["Kennel 3","Kennel 3"],["Kennel 4","Kennel 4"],["Kennel 5","Kennel 5"],["Kennel 6","Kennel 6"],["Pod 1","Pod 1"],["Pod 2","Pod 2"],["Pod 3","Pod 3"],["Pod 4","Pod 4"]])+fld("Assessor",d.assessor,"dog.assessor","text","e.g. Shane")+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()+slct("Reason for intake",d.intakeReason,"dog.intakeReason",[["Stray","Stray"],["Owner surrender","Owner surrender"],["Cruelty case","Cruelty case"],["Transfer","Transfer from another centre"],["Other","Other"]])+slct("Return / reclaim",d.returnType||"","dog.returnType",[["","-- not a return --"],["Returned from adoption","Returned from adoption"],["Back from foster / trial","Back from foster / trial"],["Owner-reclaim deadline","Owner-reclaim deadline (stray)"]])+(d.returnType?fld(returnDateLabel(d.returnType),d.returnDate||"","dog.returnDate","date"):"")+'</div></div>';
