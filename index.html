@@ -315,6 +315,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
           <div onclick="dashMenuGo('stats')" class="dmi">&#128202; Stats</div>
           <div onclick="closeDashMenu();exportCSV()" class="dmi">&#128229; Export CSV</div>
           <div class="dml">Areas</div>
+          <div onclick="dashMenuGo('unitmap')" class="dmi">🗺&#65039; Unit map</div>
           <div onclick="location.href='cats.html'" class="dmi">🐱 Cats</div>
           <div class="dml">Team &amp; data</div>
           <div onclick="dashMenuGo('team')" class="dmi">&#128101; Team Directory</div>
@@ -400,11 +401,11 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.104",date:"2026-08-23",note:"All Records got the full treatment. The stat tiles at the top are now the same tap-to-filter rail as the dashboard \u2014 tap This month, Red/Black or EA flagged to see just those, tap again to clear. There\u0027s a sort menu \u2014 newest first, name A to Z, or longest in \u2014 and the folders remember what you had open or closed, even after you leave and come back."},
+var CHANGELOG=[{version:"3.105",date:"2026-08-23",note:"The Unit map is in \u2014 under Areas in the menu. The whole building on one screen: every kennel a tile showing who\u0027s in it with their day clock and colour, free kennels shown dashed, contagious dogs in red. Tap a dog to open them, tap a free kennel to start a new dog already placed in it. The cat side sits underneath \u2014 every pod as a square, heather in iso, green in the cattery, red if contagious, hover for the name, tap to jump to the Cats page. Senior staff can set the real kennel names with Edit kennels \u2014 do that once and the map matches the building; any kennel name typed on a dog that isn\u0027t in the list still shows up rather than disappearing. Dogs with no kennel filled in are listed so they can be placed."},
+  {version:"3.104",date:"2026-08-23",note:"All Records got the full treatment. The stat tiles at the top are now the same tap-to-filter rail as the dashboard \u2014 tap This month, Red/Black or EA flagged to see just those, tap again to clear. There\u0027s a sort menu \u2014 newest first, name A to Z, or longest in \u2014 and the folders remember what you had open or closed, even after you leave and come back."},
   {version:"3.103",date:"2026-08-23",note:"Rehoming layouts are stacked now instead of sitting in two columns \u2014 on the board the dogs come first with the applications underneath, and on a person\u0027s record their details come first with their applications and timeline below. Same information, one column."},
   {version:"3.102",date:"2026-08-23",note:"The search in All Records works properly now \u2014 you can type a whole name without it throwing your cursor out after every letter. It also searches kennel numbers and microchips, not just name, breed and ref. And the Show archived button no longer swallows the Dashboard and Export buttons at the top of the page."},
-  {version:"3.101",date:"2026-08-23",note:"The unit has a second wing: Cats. It's in the menu under Areas \u2014 same login, same code, and if you're signed in here you're signed in there. The cat side is its own page, so this file stays the size it is."},
-  {version:"3.100",date:"2026-08-23",note:"Rehoming rebuild, part three \u2014 done. Ready to Go now uses the full width of a monitor, two cards across, and every dog on it says where its rehoming actually stands: reserved and for whom with the collection date, approved, how many applications, or no interest yet. A dog's own Rehoming tab shows its applications the same way \u2014 reserved flagged in its own colour, queue positions counted across everyone who has applied, whichever way their record was made. That completes the overhaul: applications underneath (3.98), the board (3.99), and the day-to-day screens (this one) all telling the same story."}
+  {version:"3.101",date:"2026-08-23",note:"The unit has a second wing: Cats. It's in the menu under Areas \u2014 same login, same code, and if you're signed in here you're signed in there. The cat side is its own page, so this file stays the size it is."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1164,7 +1165,108 @@ function showDashSection(section){
     el.innerHTML=renderBatchWeighIn();
   }else if(section==="incidents"){
     el.innerHTML=renderIncidentRegister();
+  }else if(section==="unitmap"){
+    el.innerHTML=renderUnitMap();
+    fetchUnitMapCats();
   }
+}
+
+// \u2500\u2500 Unit map \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+function kennelRoster(){
+  try{var raw=localStorage.getItem("nspca-kennel-roster");if(raw){var a=JSON.parse(raw);if(Array.isArray(a)&&a.length)return a.map(function(s){return String(s).trim();}).filter(Boolean);}}catch(e){}
+  var out=[];for(var i=1;i<=12;i++)out.push("K"+i);return out;
+}
+function editKennelRoster(){
+  var role=currentRole();
+  if(!(role==="admin"||role==="director"||role==="manager"||role==="supervisor")){appAlert("Only senior staff can change the kennel list.");return;}
+  var ov=document.createElement("div");ov.className="cf-ov";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(15,23,42,0.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999";
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:420px;width:100%;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,0.3)"><div style="font-size:14px;font-weight:700;margin-bottom:6px">Kennel list</div><div style="font-size:12px;color:#64748b;margin-bottom:10px">One name per line, in the order they sit in the building. This is what the Unit map draws.</div><textarea id="kr-list" style="width:100%;min-height:170px;padding:9px 11px;border:1px solid rgba(15,23,42,0.14);border-radius:9px;font-size:13px;font-family:inherit;resize:vertical">'+esc(kennelRoster().join("\n"))+'</textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn" onclick="this.closest(\'.cf-ov\').remove()">Cancel</button><button class="btn btnp" onclick="saveKennelRoster()">Save</button></div></div>';
+  document.body.appendChild(ov);
+}
+function saveKennelRoster(){
+  var ta=document.getElementById("kr-list");if(!ta)return;
+  var list=ta.value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
+  if(!list.length){appAlert("The list can\u0027t be empty.");return;}
+  try{localStorage.setItem("nspca-kennel-roster",JSON.stringify(list));}catch(e){}
+  var ov=document.querySelector(".cf-ov");if(ov)ov.remove();
+  miniToast("Kennel list saved");
+  showDashSection("unitmap");
+}
+function newDogInKennel(k){
+  appConfirm("Start a new dog in "+k+"? Current unsaved data will be cleared.",function(){
+    S=defaultState();S.dog.kennel=k;persistSave();showScreen("wrap");S.tab="dog";render();
+  });
+}
+function fetchUnitMapCats(){
+  if(!supabaseClient)return;
+  supabaseClient.from("cats").select("*").limit(200).then(function(res){
+    if(!res||res.error||!res.data){window._umCats=null;return;}
+    window._umCats=res.data.map(function(row){var st=null;try{st=typeof row.data==="string"?JSON.parse(row.data):row.data;}catch(e){}return{name:row.name||"",area:row.area||((st&&st.area)||"iso"),state:st||{}};});
+    if(window._dashSection==="unitmap"){var el=document.getElementById("dashboard-content");if(el){var strip=document.getElementById("um-catstrip");if(strip)strip.outerHTML=unitMapCatStrip();}}
+  });
+}
+function unitMapCatStrip(){
+  var rows=window._umCats;
+  if(rows===undefined)return '<div id="um-catstrip" style="font-size:11.5px;color:#94a3b8;padding:6px 0">Loading the cat side\u2026</div>';
+  if(rows===null)return '<div id="um-catstrip"></div>';
+  var act=rows.filter(function(c){var o=c.state&&c.state.fin?c.state.fin.outcome:"";return !o;});
+  function occ(pod){return act.find(function(c){return ((c.state.cat&&c.state.cat.pen)||"")===pod;});}
+  function conOf(c){var ds=(c.state.medical&&c.state.medical.diseases)||[];var CONT={"Panleukopenia (FPV)":1,"Cat flu (FHV / FCV)":1,"FeLV":1,"Ringworm":1,"Ear mites":1,"Giardia":1,"Coccidiosis":1,"Chlamydia":1};return ds.some(function(p){return CONT[p.type]&&p.status!=="Recovered / cleared";});}
+  function sq(pod){var c=occ(pod);if(!c)return '<span title="'+esc(pod)+' \u2014 free" style="display:inline-block;width:15px;height:15px;border-radius:4px;border:1px solid #cbd5e1;margin:0 3px 3px 0;vertical-align:middle"></span>';var col=conOf(c)?"#dc2626":(c.area==="cattery"?"#16a34a":"#7f77dd");return '<span title="'+esc(pod)+' \u2014 '+esc(c.name)+'" style="display:inline-block;width:15px;height:15px;border-radius:4px;background:'+col+';margin:0 3px 3px 0;vertical-align:middle"></span>';}
+  function podRange(pre,n){var h="";for(var i=1;i<=n;i++)h+=sq(pre+" "+i);return h;}
+  var isoN=act.filter(function(c){return c.area!=="cattery";}).length;
+  var catN=act.length-isoN;
+  return '<div id="um-catstrip" onclick="location.href=\'cats.html\'" style="cursor:pointer" title="Open the Cats page">'
+    +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:5px"><span style="font-size:11px;color:#94a3b8;width:52px">Iso</span><span>'+podRange("Iso",5)+'</span><span style="font-size:11px;color:#64748b">\u00b7</span><span style="font-size:11px;color:#94a3b8">Q</span><span>'+podRange("Q",9)+'</span><span style="font-size:11px;color:#64748b">'+isoN+' / 14</span></div>'
+    +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:11px;color:#94a3b8;width:52px">Cattery</span><span>'+podRange("Pod",16)+'</span><span style="font-size:11px;color:#64748b">'+catN+' / 16</span></div>'
+    +'</div>';
+}
+function renderUnitMap(){
+  var roster=kennelRoster();
+  var act=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active \u2014 in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
+  var byK={};var noK=[];
+  act.forEach(function(r){var k=((r.state&&r.state.dog?r.state.dog.kennel:"")||"").trim();if(!k){noK.push(r);return;}var key=k.toLowerCase();(byK[key]=byK[key]||[]).push(r);});
+  var rosterKeys=roster.map(function(k){return k.toLowerCase();});
+  var extras=Object.keys(byK).filter(function(k){return rosterKeys.indexOf(k)<0;});
+  var usedN=roster.filter(function(k){return byK[k.toLowerCase()];}).length+extras.length;
+  function tile(kName,recs,inRoster){
+    if(!recs||!recs.length){
+      return '<div onclick="newDogInKennel(\''+esc(kName)+'\')" title="Start a new dog in '+esc(kName)+'" style="border:1.5px dashed #cbd5e1;border-radius:12px;background:#f8fafc;min-height:82px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer"><div style="font-size:12px;color:#94a3b8;font-weight:600">'+esc(kName)+'</div><div style="font-size:10.5px;color:#cbd5e1;margin-top:2px">Free</div></div>';
+    }
+    var rec=recs[0];var d=rec.state&&rec.state.dog?rec.state.dog:{};var f=rec.state&&rec.state.fin?rec.state.fin:{};
+    var con=activeContagiousList(rec.state&&rec.state.medical?rec.state.medical:null);
+    var finished=(f.outcome||"")==="Finished Isolation";
+    var days=daysInIsolation(rec.intakeDate);var tot=5+isoExtraDays(d);
+    var col=con.length?"#dc2626":finished?"#0d9488":days!=null&&days>tot?"#16a34a":days!=null&&days>=tot-1?"#f59e0b":"#0d9488";
+    var txtCol=con.length?"#991b1b":finished?"#0d9488":days!=null&&days>=tot-1?"#854d0e":"#0d9488";
+    var sub=con.length?("Contagious \u2014 "+esc(diseaseShortName(con[0].type))):finished?"Complete":days==null?"":(days<=0?"Arrival day":"Day "+days+" of "+tot);
+    var more=recs.length>1?" +"+(recs.length-1):"";
+    var pct=days!=null&&!finished?Math.min(100,Math.round((days/tot)*100)):100;
+    return '<div onclick="openDog('+rec.id+')" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;min-height:82px;padding:10px 12px;cursor:pointer;position:relative;overflow:hidden">'
+      +'<div style="position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:'+col+'"></div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px;padding-left:6px"><span style="font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rec.name)+more+'</span><span style="font-size:9.5px;color:#94a3b8;flex-shrink:0">'+esc(kName)+(inRoster?"":" \u00b7 not in list")+'</span></div>'
+      +'<div style="font-size:10.5px;color:'+txtCol+';margin-top:3px;padding-left:6px">'+sub+'</div>'
+      +(days!=null&&!con.length?'<div style="margin:7px 0 0 6px;background:#eceef1;border-radius:20px;height:4px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%"></div></div>':'')
+      +'</div>';
+  }
+  var tiles=roster.map(function(k){return tile(k,byK[k.toLowerCase()],true);}).join("");
+  tiles+=extras.map(function(key){var recs=byK[key];var disp=((recs[0].state&&recs[0].state.dog?recs[0].state.dog.kennel:"")||key).trim();return tile(disp,recs,false);}).join("");
+  var canEdit=["admin","director","manager","supervisor"].indexOf(currentRole())>=0;
+  var noKH=noK.length?('<div style="margin-top:14px;font-size:11.5px;color:#854d0e;background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:8px 12px">No kennel set: '+noK.map(function(r){return '<span onclick="openDog('+r.id+')" style="text-decoration:underline;cursor:pointer;font-weight:600">'+esc(r.name)+'</span>';}).join(", ")+' \u2014 open the dog and fill in its kennel to place it on the map.</div>'):"";
+  return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1">Unit map</h2><span style="font-size:12px;color:#64748b">'+usedN+' of '+(roster.length+extras.length)+' in use</span>'+(canEdit?'<button class="btn" style="font-size:12px;padding:6px 14px" onclick="editKennelRoster()">Edit kennels</button>':'')+'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px">'+tiles+'</div>'
+    +noKH
+    +'<div style="margin:20px 0 6px;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8">Cat side</div>'
+    +unitMapCatStrip()
+    +'<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:16px;font-size:10.5px;color:#64748b">'
+    +'<span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#0d9488;vertical-align:middle;margin-right:5px"></span>on the clock</span>'
+    +'<span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#f59e0b;vertical-align:middle;margin-right:5px"></span>last day</span>'
+    +'<span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#16a34a;vertical-align:middle;margin-right:5px"></span>complete</span>'
+    +'<span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#dc2626;vertical-align:middle;margin-right:5px"></span>contagious</span>'
+    +'<span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#7f77dd;vertical-align:middle;margin-right:5px"></span>cat in iso/quarantine</span>'
+    +'</div>';
 }
 
 function eaCalc(e){
