@@ -39,6 +39,9 @@ textarea{resize:vertical;min-height:68px}
 .lbl{display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em}
 .f{margin-bottom:12px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.apgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;align-items:start}
+.apcol{min-width:0}
+@media(max-width:900px){.apgrid{grid-template-columns:1fr}}
 .card{background:#fff;border:1px solid rgba(15,23,42,0.08);border-radius:16px;padding:16px 18px;margin-bottom:12px;box-shadow:0 1px 2px rgba(15,23,42,0.04),0 4px 16px rgba(15,23,42,0.05)}
 .sec{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#64748b;padding:8px 0 10px;margin-top:4px;border-top:1px solid #e2e8f0}
 #navwrap{position:sticky;top:0;z-index:10;background:#fff}
@@ -131,7 +134,6 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
 .sub{font-size:12px;color:#64748b;margin-bottom:16px}
 .sb{padding:8px 10px;border:1px solid rgba(15,23,42,0.1);border-radius:9px;cursor:pointer;font-size:11px;text-align:left;background:#fff;color:#0f172a;font-family:inherit;line-height:1.4;transition:all 0.12s}
 .sb .n{font-weight:600;font-size:12px;display:block;margin-bottom:1px}
-.schip:hover{border-color:#94a3b8}
 .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
 .rrow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:13px}
 .rk{color:#64748b}.rv{font-weight:500;text-align:right;max-width:65%}
@@ -394,11 +396,11 @@ var TABS=[
 ];
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.96",date:"2026-08-15",note:"The notification bell has come out of the dashboard header \u2014 the icon, the unread badge, and the \u201cRecent\u201d panel it opened (dogs needing attention, what changed, app updates) are all gone. This is separate from the Notices feature on a dog's own record, which reuses the same bell icon but is untouched \u2014 those still show and still work exactly as before."},
+var CHANGELOG=[{version:"3.98",date:"2026-08-23",note:"The rehoming rebuild begins \u2014 part one of three. The link between a person and a dog is now an application: one person can apply for several dogs, a dog can hold several applications, and only one ever becomes the adoption \u2014 marking one Adopted offers to close everyone else's as \u201cadopted by someone else\u201d. There's a new Reserved stage for the gap where a dog is promised but not yet collected. The applicant record is rebuilt for a proper monitor: the person on the left \u2014 contact, situation, and a real enquiry form (why now, previous pets, hours alone, garden and fencing, landlord) \u2014 their applications on the right, and a timeline of every stage move, who moved it and when, alongside the contact log. Existing applicants carry over untouched: their current dog and stage simply become their first application. The board and Ready to Go get the same treatment in the next two versions."},
+  {version:"3.97",date:"2026-08-18",note:"Housekeeping after a full code audit. The audit checked for duplicate functions, dead code, broken references and leftovers from the recent removals \u2014 the app came back clean, with one exception: a single style rule for a feature long gone, now deleted. Nothing you can see or use changes."},
+  {version:"3.96",date:"2026-08-15",note:"The notification bell has come out of the dashboard header \u2014 the icon, the unread badge, and the \u201cRecent\u201d panel it opened (dogs needing attention, what changed, app updates) are all gone. This is separate from the Notices feature on a dog's own record, which reuses the same bell icon but is untouched \u2014 those still show and still work exactly as before."},
   {version:"3.95",date:"2026-08-15",note:"Unit report and the breed guide have both been removed from the menu. The breed guide had already moved out to its own page in v3.94; the app no longer links to it at all, so delete breed-guide.html from wherever it's published if it's not wanted anymore. Unit report is gone completely, monthly write-up and all \u2014 nothing else in the app depended on it. Also tidied up an empty \u201cReference\u201d menu heading left over from the v3.92 clear-out."},
-  {version:"3.94",date:"2026-08-06",note:"The breed guide has moved out of the app into its own page, so this file stays small and quick to publish. Nothing is lost \u2014 the menu opens it, and a dog with a breed set has a Breed guide link on its Identity card that takes you straight to the right entry. The guide itself is now a page you can search, print, or send to someone without giving them the app. It needs to sit in the same folder as the app when you publish, as breed-guide.html."},
-  {version:"3.93",date:"2026-08-06",note:"A breed guide, in the menu where Disease info used to be. It covers the breeds we actually see rather than every breed that exists, and it is written for this unit: how the breed copes in a kennel, what it needs on a lead, what to check at intake, what it actually needs day to day, and what sort of home suits. Open a dog with a breed set and there is an About link on the Identity card that takes you straight to the right entry \u2014 it copes with the way breeds really get written down, so Staffie x Lab, GSD cross and collie/terrier all find something. Restricted breeds point back at the legal wording on the dog\u0027s own record rather than repeating it. It says plainly at the top what it is: things to watch for, not things to expect. Assess the dog in front of you. Corrections welcome \u2014 this is a first draft and Kate and Ciara know more than it does."},
-  {version:"3.92",date:"2026-08-06",note:"Disease info has been taken out of the menu. It was general guidance that was rarely opened, and the disease tracking that actually matters \u2014 recording a condition on a dog, the contagious warnings, and a contagious case blocking rehoming \u2014 is untouched and works exactly as before. Anything that was written into those sheets is still held in the database, so nothing is lost if you want it back."}
+  {version:"3.94",date:"2026-08-06",note:"The breed guide has moved out of the app into its own page, so this file stays small and quick to publish. Nothing is lost \u2014 the menu opens it, and a dog with a breed set has a Breed guide link on its Identity card that takes you straight to the right entry. The guide itself is now a page you can search, print, or send to someone without giving them the app. It needs to sit in the same folder as the app when you publish, as breed-guide.html."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1890,11 +1892,109 @@ function openKennelCard(){
 function dashSearchRender(){clearTimeout(window._dbSrchT);window._dbSrchT=setTimeout(function(){renderDashboard();},160);}
 // \u2500\u2500 Rehoming pipeline (applicants) \u2014 stage 1: records, board, editor \u2500\u2500
 var applicants=[];var A=null;var _pipeTimer=null;
-var APP_STAGES=["Enquiry","Home check","Approved","Adopted","Withdrawn","Declined"];
-var APP_ACTIVE=["Enquiry","Home check","Approved"];
-function defaultApplicant(){return{id:null,name:"",stage:"Enquiry",species:"dog",animal_id:null,enquiry_date:new Date().toISOString().slice(0,10),state:{phone:"",email:"",addr1:"",addr2:"",town:"",county:"",eircode:"",homeType:"",children:"",otherDogs:"",cats:"",livestock:"",smallPets:"",experience:"",activity:"",interestNote:"",contactLog:[],notes:"",reason:"",anonymised:false}};}
+var APP_STAGES=["Enquiry","Home check","Approved","Reserved","Adopted","Withdrawn","Declined"];
+var APP_ACTIVE=["Enquiry","Home check","Approved","Reserved"];
+var APP_STAGE_RANK={"Adopted":6,"Reserved":5,"Approved":4,"Home check":3,"Enquiry":2,"Withdrawn":1,"Declined":0};
+function defaultApplicant(){return{id:null,name:"",stage:"Enquiry",species:"dog",animal_id:null,enquiry_date:new Date().toISOString().slice(0,10),state:{phone:"",email:"",addr1:"",addr2:"",town:"",county:"",eircode:"",homeType:"",children:"",otherDogs:"",cats:"",livestock:"",smallPets:"",experience:"",activity:"",interestNote:"",whyNow:"",previousPets:"",hoursAlone:"",gardenFencing:"",landlord:"",contactLog:[],notes:"",reason:"",anonymised:false}};}
 function maskPhone(p){p=String(p||"");if(p.length<4)return p?"\u00b7\u00b7\u00b7":"";return p.slice(0,3)+" \u00b7\u00b7\u00b7 \u00b7\u00b7"+p.slice(-2);}
 function appDaysWaiting(ap){if(!ap.enquiry_date)return null;var d=Math.floor((Date.now()-new Date(ap.enquiry_date).getTime())/864e5);return d<0?null:d;}
+// ── Applications: one person can hold several; only one ever becomes the adoption ──
+function migrateApplications(a){
+  if(!a)return;a.state=a.state||{};
+  if(Array.isArray(a.state.applications)&&a.state.applications.length)return;
+  var st=a.state;
+  st.applications=[{aid:1,animal_id:a.animal_id||null,note:st.interestNote||"",stage:a.stage||"Enquiry",
+    reason:st.reason||"",collectionDate:st.collectionDate||"",fee:st.fee||"",
+    contractSigned:st.contractSigned||"",chipTransferred:st.chipTransferred||"",adoptionDate:st.adoptionDate||"",
+    history:[{stage:a.stage||"Enquiry",by:"",at:(a.enquiry_date||new Date().toISOString().slice(0,10))}]}];
+}
+function appPrimary(a){
+  var apps=(a&&a.state&&a.state.applications)||[];
+  if(!apps.length)return null;
+  return apps.slice().sort(function(x,y){return (APP_STAGE_RANK[y.stage]||0)-(APP_STAGE_RANK[x.stage]||0)||((y.aid||0)-(x.aid||0));})[0];
+}
+function appSyncMirror(a){
+  var p=appPrimary(a);if(!p)return;
+  a.stage=p.stage||"Enquiry";a.animal_id=p.animal_id||null;
+}
+function appFind(aid){return ((A&&A.state&&A.state.applications)||[]).find(function(x){return x.aid===aid;});}
+function appAddApplication(){
+  if(!A)return;migrateApplications(A);
+  var next=A.state.applications.reduce(function(m,x){return Math.max(m,x.aid||0);},0)+1;
+  A.state.applications.push({aid:next,animal_id:null,note:"",stage:"Enquiry",reason:"",collectionDate:"",fee:"",contractSigned:"",chipTransferred:"",adoptionDate:"",history:[{stage:"Enquiry",by:currentName()||"",at:new Date().toISOString().slice(0,10)}]});
+  appSyncMirror(A);saveApplicantSoon();renderPipeline();
+}
+function appRemoveApplication(aid){
+  var ap=appFind(aid);if(!ap)return;
+  var nm=ap.animal_id?pipeDogName(ap.animal_id):"this application";
+  appConfirm("Remove the application for "+nm+"? Its history goes with it.",function(){
+    A.state.applications=A.state.applications.filter(function(x){return x.aid!==aid;});
+    if(!A.state.applications.length)migrateApplications(A)&&(A.state.applications[0].animal_id=null);
+    appSyncMirror(A);saveApplicantSoon();renderPipeline();
+  });
+}
+function setAppStage(aid,stage){
+  var ap=appFind(aid);if(!ap||ap.stage===stage)return;
+  ap.stage=stage;
+  (ap.history=ap.history||[]).push({stage:stage,by:currentName()||"",at:new Date().toISOString().slice(0,10)});
+  if(stage==="Adopted"&&!ap.adoptionDate)ap.adoptionDate=new Date().toISOString().slice(0,10);
+  appSyncMirror(A);saveApplicantSoon();renderPipeline();
+  if(stage==="Adopted")afterAdoption(ap);
+}
+function setAppAppF(aid,k,v){
+  var ap=appFind(aid);if(!ap)return;
+  if(k==="animal_id")ap.animal_id=v?(+v||null):null;else ap[k]=v;
+  appSyncMirror(A);saveApplicantSoon();
+  if(k==="animal_id")renderPipeline();
+}
+function otherActiveAppsOn(animal_id){
+  var out=[];
+  applicants.forEach(function(x){
+    if(A&&x.id===A.id)return;
+    var apps=(x.state&&x.state.applications)||null;
+    if(apps&&apps.length){apps.forEach(function(q){if(q.animal_id===animal_id&&APP_ACTIVE.indexOf(q.stage)>-1)out.push({row:x,app:q});});}
+    else if(x.animal_id===animal_id&&APP_ACTIVE.indexOf(x.stage)>-1)out.push({row:x,app:null});
+  });
+  return out;
+}
+function afterAdoption(ap){
+  if(!ap||!ap.animal_id)return;
+  var rec=records.find(function(r){return r.id===ap.animal_id;});
+  if(rec)maybeOfferAdoptionHandoff(ap.animal_id);
+  var others=otherActiveAppsOn(ap.animal_id);
+  if(others.length)appConfirm(others.length+" other active application"+(others.length>1?"s":"")+" on "+pipeDogName(ap.animal_id)+" \u2014 close them as \u201cadopted by someone else\u201d? Each person keeps their record and any other applications they hold.",function(){closeOtherApplications(ap.animal_id);});
+}
+async function closeOtherApplications(animal_id){
+  if(!supabaseClient)return;
+  var others=otherActiveAppsOn(animal_id);var done=0;var seen={};
+  for(var i=0;i<others.length;i++){
+    var o=others[i];if(seen[o.row.id])continue;seen[o.row.id]=1;
+    var row={name:o.row.name,stage:o.row.stage,species:o.row.species,animal_id:o.row.animal_id,enquiry_date:o.row.enquiry_date,saved_at:new Date().toISOString(),state:JSON.parse(JSON.stringify(o.row.state||{}))};
+    migrateApplications(row);
+    row.state.applications.forEach(function(q){
+      if(q.animal_id===animal_id&&APP_ACTIVE.indexOf(q.stage)>-1){
+        q.stage="Declined";q.reason=q.reason||"Dog was adopted by someone else";
+        (q.history=q.history||[]).push({stage:"Declined",by:currentName()||"",at:new Date().toISOString().slice(0,10)});
+      }
+    });
+    appSyncMirror(row);
+    try{var r=await supabaseClient.from("applicants").update(row).eq("id",o.row.id);if(r&&r.error)throw r.error;done++;}
+    catch(e){console.error("closeOtherApplications:",e);}
+  }
+  await loadApplicants();renderPipeline();
+  miniToast(done+" application"+(done!==1?"s":"")+" closed");
+}
+function appQueueInfoFor(animal_id){
+  if(!animal_id)return null;
+  var q=[];
+  applicants.forEach(function(x){
+    var apps=(x.state&&x.state.applications)||null;
+    if(apps&&apps.length){apps.forEach(function(p){if(p.animal_id===animal_id&&APP_ACTIVE.indexOf(p.stage)>-1)q.push({who:x.id,name:x.name,at:(p.history&&p.history[0]&&p.history[0].at)||x.enquiry_date||"",stage:p.stage});});}
+    else if(x.animal_id===animal_id&&APP_ACTIVE.indexOf(x.stage)>-1)q.push({who:x.id,name:x.name,at:x.enquiry_date||"",stage:x.stage});
+  });
+  q.sort(function(a,b){return String(a.at).localeCompare(String(b.at))||((a.who||0)-(b.who||0));});
+  return q;
+}
 var _appsFromCache=false,_appsCachedAt=0;
 function cacheApplicants(){
   try{localStorage.setItem("nspca-applicants-cache",JSON.stringify({at:Date.now(),rows:applicants}));}catch(e){}
@@ -1952,6 +2052,7 @@ async function saveApplicant(){
   // where a second save fires before the first insert has returned an id.
   if(_appSaveBusy){_appSaveAgain=true;return;}
   _appSaveBusy=true;
+  migrateApplications(A);appSyncMirror(A);
   var row={name:A.name||"",stage:A.stage||"Enquiry",species:A.species||"dog",animal_id:A.animal_id||null,enquiry_date:A.enquiry_date||null,saved_at:new Date().toISOString(),state:A.state||{}};
   try{
     if(A.id){await supabaseClient.from("applicants").update(row).eq("id",A.id);}
@@ -1976,11 +2077,11 @@ function appPillGroup(label,key,current,opts){
     return '<button onclick="setAppPill(\''+key+'\',\''+o.replace(/'/g,"\\'")+'\')" style="font-size:11.5px;padding:5px 13px;border-radius:16px;cursor:pointer;font-family:inherit;'+(on?'background:#0f172a;color:#fff;border:1px solid #0f172a;font-weight:600':'background:#fff;color:#475569;border:0.5px solid rgba(15,23,42,0.18)')+'">'+o+'</button>';}).join("");
   return '<div style="margin-bottom:10px"><div style="font-size:11.5px;color:#64748b;margin-bottom:4px">'+label+'</div><div style="display:flex;gap:5px;flex-wrap:wrap">'+pills+'</div></div>';
 }
-function setAppF(k,v){if(!A)return;if(k==="name"||k==="stage"||k==="species"||k==="enquiry_date")A[k]=v;else if(k==="animal_id")A.animal_id=v?(+v||null):null;else A.state[k]=v;saveApplicantSoon();if(k==="stage"||k==="animal_id"||k==="species")renderPipeline();if(k==="stage"&&v==="Adopted")maybeOfferAdoptionHandoff();}
+function setAppF(k,v){if(!A)return;if(k==="name"||k==="stage"||k==="species"||k==="enquiry_date")A[k]=v;else if(k==="animal_id")A.animal_id=v?(+v||null):null;else A.state[k]=v;saveApplicantSoon();if(k==="stage"||k==="animal_id"||k==="species")renderPipeline();}
 function openPipeline(){window._pipeView={mode:"board"};var ov=document.getElementById("pipeline-ov");if(ov)ov.style.display="block";renderPipeline();loadApplicants().then(function(){renderPipeline();});}
 function closePipeline(){var ov=document.getElementById("pipeline-ov");if(ov)ov.style.display="none";A=null;}
-function newApplicant(){A=defaultApplicant();window._pipeView={mode:"applicant"};renderPipeline();}
-function openApplicant(id){var r=applicants.find(function(x){return x.id===id;});if(!r)return;A={id:r.id,name:r.name,stage:r.stage,species:r.species,animal_id:r.animal_id,enquiry_date:r.enquiry_date,state:JSON.parse(JSON.stringify(r.state||{}))};A.state.contactLog=A.state.contactLog||[];window._pipeView={mode:"applicant"};renderPipeline();}
+function newApplicant(){A=defaultApplicant();migrateApplications(A);window._pipeView={mode:"applicant"};renderPipeline();}
+function openApplicant(id){var r=applicants.find(function(x){return x.id===id;});if(!r)return;A={id:r.id,name:r.name,stage:r.stage,species:r.species,animal_id:r.animal_id,enquiry_date:r.enquiry_date,state:JSON.parse(JSON.stringify(r.state||{}))};A.state.contactLog=A.state.contactLog||[];migrateApplications(A);appSyncMirror(A);window._pipeView={mode:"applicant"};renderPipeline();}
 function backToBoard(){saveApplicant();A=null;window._pipeView={mode:"board"};renderPipeline();}
 function addContactLine(){var el=document.getElementById("pipe-contact");if(!el||!el.value.trim())return;A.state.contactLog=A.state.contactLog||[];A.state.contactLog.push({date:new Date().toISOString().slice(0,10),text:el.value.trim()});el.value="";saveApplicantSoon();renderPipeline();}
 function anonymiseApplicant(){
@@ -2071,9 +2172,9 @@ function appQueueInfo(ap){
   var approvedOther=applicants.find(function(x){return x.animal_id===ap.animal_id&&x.id!==ap.id&&x.stage==="Approved";});
   return{pos:pos<0?null:pos+1,total:q.length,approvedOther:approvedOther?approvedOther.name:null};
 }
-function maybeOfferAdoptionHandoff(){
-  if(!A||!A.animal_id)return;
-  var rec=records.find(function(r){return r.id===A.animal_id;});if(!rec||!rec.state)return;
+function maybeOfferAdoptionHandoff(animal_id){
+  var _aid=animal_id||(A&&A.animal_id);if(!_aid)return;
+  var rec=records.find(function(r){return r.id===_aid;});if(!rec||!rec.state)return;
   var o=(rec.state.fin&&rec.state.fin.outcome)||"";
   if(o&&!/^Active/.test(o))return; // isolation record already closed its own way \u2014 leave it
   var nm=rec.name||"the dog";
@@ -2125,6 +2226,8 @@ function applicantRowHtml(ap){
     if(q2&&q2.approvedOther&&ap.stage==="Approved")extra.push("\u26a0 two approved");
   }
   if(ap.stage==="Home check"&&ap.state.hcDate)extra.push("visit "+fmtDMY(ap.state.hcDate));
+  var _apps=(ap.state&&ap.state.applications)||[];
+  if(_apps.length>1)extra.push(_apps.length+" applications");
   var sub=[ap.species==="dog"?(ap.animal_id?(appRelation(ap)+" "+esc(pipeDogName(ap.animal_id))):"no dog linked yet"):("cat"+(ap.state.interestNote?": "+esc(ap.state.interestNote):" enquiry")),ap.state.town||ap.state.county||null,ap.state.phone?maskPhone(ap.state.phone):null,(w!==null&&APP_ACTIVE.indexOf(ap.stage)>-1)?("waiting "+w+"d"):null].concat(extra).filter(Boolean).join(" \u00b7 ");
   return '<div onclick="openApplicant('+ap.id+')" style="display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer">'
     +'<div style="width:30px;height:30px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#64748b;flex-shrink:0">'+esc((ap.name||"?").split(/\s+/).map(function(x){return x[0]||"";}).join("").slice(0,2).toUpperCase())+'</div>'
@@ -2134,7 +2237,9 @@ function applicantRowHtml(ap){
 function renderPipeline(){
   var host=document.getElementById("pipeline-body");if(!host)return;
   var v=window._pipeView||{mode:"board"};
-  host.innerHTML=(v.mode==="applicant"&&A)?pipelineApplicantHtml():pipelineBoardHtml();
+  var isApp=(v.mode==="applicant"&&A);
+  host.style.maxWidth=isApp?"1100px":"560px";
+  host.innerHTML=isApp?pipelineApplicantHtml():pipelineBoardHtml();
 }
 function pipeOpenDog(id){closePipeline();openDog(id);}
 function pipeAvailableDogs(){
@@ -2221,55 +2326,33 @@ function pipelineBoardHtml(){
   return h;
 }
 function pipelineApplicantHtml(){
-  var st=A.state;var w=appDaysWaiting(A);
+  migrateApplications(A);
+  var st=A.state;var w=appDaysWaiting(A);var apps=st.applications||[];
   function pf(label,key,val,type,ph){return '<div style="margin-bottom:9px"><label class="lbl">'+label+'</label><input type="'+(type||"text")+'" value="'+esc(val||"")+'" placeholder="'+(ph||"")+'" oninput="setAppF(\''+key+'\',this.value)" style="width:100%;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit"></div>';}
+  function paf(aid,label,key,val,type,ph){return '<div style="margin-bottom:9px"><label class="lbl">'+label+'</label><input type="'+(type||"text")+'" value="'+esc(val||"")+'" placeholder="'+(ph||"")+'" oninput="setAppAppF('+aid+',\''+key+'\',this.value)" style="width:100%;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit"></div>';}
   function ps(label,key,val,opts){return '<div style="margin-bottom:9px"><label class="lbl">'+label+'</label><select onchange="setAppF(\''+key+'\',this.value)" style="width:100%"><option value="">\u2014</option>'+opts.map(function(o){return '<option value="'+o+'"'+(val===o?' selected':'')+'>'+o+'</option>';}).join("")+'</select></div>';}
-  var _rec=(A.species==="dog"&&A.animal_id)?records.find(function(r){return r.id===A.animal_id;}):null;
-  var mm=_rec?matchApplicantToDog(A,_rec):null;
-  var qi=appQueueInfo(A);
   // \u2500\u2500 header \u2500\u2500
   var h='<div class="ov-head"><button onclick="backToBoard()" class="ov-x">&larr; Board</button><div style="flex:1;min-width:0" class="ov-title">'+esc(A.name||"New applicant")+'</div></div>';
-  // \u2500\u2500 live picture \u2500\u2500
-  var sTone=(A.stage==="Approved"||A.stage==="Adopted")?"ok":A.stage==="Home check"?"warn":(A.stage==="Declined"||A.stage==="Withdrawn")?"alert":"";
-  var sLine=(A.animal_id&&A.species==="dog")
-    ? (A.stage==="Adopted"?("Adopted "+esc(pipeDogName(A.animal_id))):
-       A.stage==="Approved"?("Approved for "+esc(pipeDogName(A.animal_id))):
-       A.stage==="Home check"?("Home check for "+esc(pipeDogName(A.animal_id))):
-       A.stage==="Withdrawn"?("Withdrew from "+esc(pipeDogName(A.animal_id))):
-       A.stage==="Declined"?("Declined for "+esc(pipeDogName(A.animal_id))):
-       ("Enquiry \u2014 "+esc(pipeDogName(A.animal_id))))
-    : (A.stage+(A.species==="cat"?" \u2014 cat enquiry":" \u2014 no dog linked yet"));
-  sLine+=(A.stage==="Adopted"&&st.adoptionDate?" \u00b7 "+fmtDMY(st.adoptionDate):"")
-    +(A.stage==="Home check"&&st.hcDate?" \u00b7 visit "+fmtDMY(st.hcDate):"");
+  // \u2500\u2500 live picture (from the primary application) \u2500\u2500
+  var prim=appPrimary(A);
+  var sTone=prim?((prim.stage==="Approved"||prim.stage==="Reserved"||prim.stage==="Adopted")?"ok":prim.stage==="Home check"?"warn":(prim.stage==="Declined"||prim.stage==="Withdrawn")?"alert":""):"";
+  var actN=apps.filter(function(x){return APP_ACTIVE.indexOf(x.stage)>-1;}).length;
+  var sLine=prim
+    ? (prim.animal_id?(appStageVerb(prim.stage)+" "+esc(pipeDogName(prim.animal_id))):(prim.stage+(A.species==="cat"?" \u2014 cat enquiry":" \u2014 no dog linked yet")))
+    : "No applications yet";
+  if(prim&&prim.stage==="Adopted"&&prim.adoptionDate)sLine+=" \u00b7 "+fmtDMY(prim.adoptionDate);
+  if(actN>1)sLine+=" \u00b7 "+actN+" active applications";
   h+=hybridBanner(esc(sLine),sTone);
-  var mTile=mm?(mm.verdict==="blocked"?{v:"Conflict",t:"alert"}:mm.verdict==="caution"?{v:"Check",t:"warn"}:mm.verdict==="good"?{v:"Good",t:""}:{v:"\u2014",t:""}):{v:"\u2014",t:""};
+  var hcT=st.hcOutcome?{v:st.hcOutcome==="Failed"?"Failed":"\u2713 "+st.hcOutcome,t:st.hcOutcome==="Failed"?"alert":""}:{v:"\u2014",t:""};
   h+=hybridTiles([
-    {label:"Waiting",value:(w===null?"\u2014":w+"d"),tone:(w!==null&&w>21&&APP_ACTIVE.indexOf(A.stage)>-1)?"warn":""},
-    {label:"Match",value:mTile.v,tone:mTile.t},
-    {label:"In line",value:(qi&&qi.total>1)?("#"+qi.pos+" of "+qi.total):(qi&&qi.total===1?"only one":"\u2014"),tone:""}
+    {label:"Waiting",value:(w===null?"\u2014":w+"d"),tone:(w!==null&&w>21&&actN)?"warn":""},
+    {label:"Applications",value:String(apps.length)+(actN&&actN!==apps.length?" \u00b7 "+actN+" live":""),tone:""},
+    {label:"Home check",value:hcT.v,tone:hcT.t}
   ]);
-  h+='<div style="margin-bottom:10px"><label class="lbl">Stage</label><select onchange="setAppF(\'stage\',this.value)" style="width:100%">'+APP_STAGES.map(function(s){return '<option'+(A.stage===s?' selected':'')+'>'+s+'</option>';}).join("")+'</select></div>';
-  if(A.stage==="Withdrawn"||A.stage==="Declined")h+=pf("Reason","reason",st.reason,"text","brief \u2014 helps if they apply again");
-  // needs-checking list (the Medical "Due" equivalent)
-  var chk=[];
-  if(mm){
-    mm.hard.forEach(function(t){chk.push({icon:"\u2715",text:esc(t),tone:"alert"});});
-    mm.soft.forEach(function(t){chk.push({icon:"\u25b3",text:esc(t),tone:"warn"});});
-  }
-  if(_rec){
-    var bl=rehomeBlockersFor(_rec.state||{});
-    if(bl.length)chk.push({icon:"\ud83d\udd12",text:esc(pipeDogName(A.animal_id))+" isn\u0027t cleared yet",tag:bl.length+" blocker"+(bl.length>1?"s":""),tone:"warn"});
-  }
-  if(qi&&qi.approvedOther)chk.push({icon:"\u26a0",text:esc(qi.approvedOther)+" is already approved for this dog",tone:A.stage==="Approved"?"alert":"warn"});
-  if(A.stage==="Adopted"){
-    if(st.contractSigned!=="Signed")chk.push({icon:"\ud83d\udcc4",text:"Adoption contract not marked signed",tone:"warn"});
-    if(st.chipTransferred!=="Transferred")chk.push({icon:"\ud83d\udcdf",text:"Microchip not marked transferred",tone:"warn"});
-  }
-  if(A.stage==="Approved"&&!st.collectionDate)chk.push({icon:"\ud83d\udcc5",text:"Collection date not set",tone:"warn"});
-  if(chk.length)h+=hybridList("Needs checking",chk);
-  else if(mm&&mm.verdict==="good")h+=hybridList("Needs checking",[{icon:"\u2713",text:"Nothing conflicting on what\u0027s recorded",tone:""}]);
-  // \u2500\u2500 Record \u2500\u2500
-  h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:4px 0 2px;display:flex;align-items:center;gap:10px">Record<span style="flex:1;height:1px;background:var(--color-border-tertiary)"></span></div>';
+  h+='<div class="apgrid">';
+  // ================= LEFT: the person =================
+  h+='<div class="apcol">';
+  h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:4px 0 2px;display:flex;align-items:center;gap:10px">The person<span style="flex:1;height:1px;background:var(--color-border-tertiary)"></span></div>';
   // contact
   var _addr=appAddressOneLine(st);
   var _map=appMapUrl(st);
@@ -2285,14 +2368,6 @@ function pipelineApplicantHtml(){
     +(_map?'<a href="'+_map+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin:2px 0 8px;padding:7px 13px;border-radius:8px;background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);font-size:12px;color:#0f172a;text-decoration:none">View on the map \u2192</a><div style="font-size:11px;color:#94a3b8;margin-bottom:6px">'+esc(_addr)+'</div>'
       :'<div style="font-size:11px;color:#cbd5e1;margin-bottom:6px">Add an address to get a map link for the home check.</div>')
     +'<div style="font-size:11px;color:#94a3b8">Enquired '+(A.enquiry_date?fmtDMY(A.enquiry_date):"\u2014")+'</div>',"");
-  // interested in
-  var _adopted=A.stage==="Adopted";
-  var iSum=A.species==="cat"?("Cat"+(st.interestNote?" \u00b7 "+esc(st.interestNote):" \u2014 no record linked")) 
-    :(A.animal_id?(esc(pipeDogName(A.animal_id))+(_adopted?" \u00b7 adopted"+(st.adoptionDate?" "+fmtDMY(st.adoptionDate):""):(mm?(mm.verdict==="blocked"?" \u00b7 \u2715 conflict":mm.verdict==="caution"?" \u00b7 \u25b3 checks":mm.verdict==="good"?" \u00b7 \u2713 match":""):""))):"No dog linked yet");
-  h+=hybridRow(_adopted?"ap-adopted-dog":"ap-interest","",(_adopted?"Adopted":"Interested in"),iSum,
-    '<div class="g2"><div style="margin-bottom:9px"><label class="lbl">Species</label><select onchange="setAppF(\'species\',this.value)" style="width:100%"><option value="dog"'+(A.species==="dog"?" selected":"")+'>Dog</option><option value="cat"'+(A.species==="cat"?" selected":"")+'>Cat</option></select></div>'
-    +(A.species==="dog"?'<div style="margin-bottom:9px"><label class="lbl">Dog</label><select onchange="setAppF(\'animal_id\',this.value)" style="width:100%"><option value="">\u2014 none yet \u2014</option>'+records.filter(function(r){return !isArchived(r);}).map(function(r){return '<option value="'+r.id+'"'+(A.animal_id===r.id?' selected':'')+'>'+esc(r.name||"Unnamed")+'</option>';}).join("")+'</select></div>':pf("Which cat / what kind","interestNote",st.interestNote))+'</div>',
-    mm&&mm.verdict==="blocked"?"alert":mm&&mm.verdict==="caution"?"warn":"");
   // their situation
   var sitKeys=["homeType","children","otherDogs","cats","livestock","smallPets","experience","activity"];
   var sitN=sitKeys.filter(function(k){return st[k];}).length;
@@ -2307,47 +2382,107 @@ function pipelineApplicantHtml(){
     +appPillGroup("Experience","experience",st.experience,["First-time","Some","Experienced","Specialist"])
     +appPillGroup("Activity","activity",st.activity,["Low","Daily walks","Very active"]),
     sitN<8?"warn":"");
-  // home check
-  if(A.stage==="Home check"||A.stage==="Approved"||A.stage==="Adopted"){
-    var hSum=[st.hcOutcome||null,st.hcDate?fmtDMY(st.hcDate):null].filter(Boolean).join(" \u00b7 ")||"Not booked yet";
-    h+=hybridRow("ap-hc","","Home check",esc(hSum),
-      '<div class="g2">'+pf("Visit date","hcDate",st.hcDate,"date")+ps("Outcome","hcOutcome",st.hcOutcome,["Booked","Passed","Passed with advice","Failed"])+'</div>'
-      +pf("Home check notes","hcNotes",st.hcNotes,"text","brief \u2014 garden secure, other pets met, etc.")
-      +(appMapUrl(st)?'<a href="'+appMapUrl(st)+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:7px 13px;border-radius:8px;background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);font-size:12px;color:#0f172a;text-decoration:none">Directions to '+esc(st.town||st.county||"the address")+' \u2192</a>'
-        :'<div style="font-size:11px;color:#854d0e">No address recorded \u2014 add one on the Contact row for directions.</div>'),
-      st.hcOutcome==="Failed"?"alert":(!st.hcOutcome?"warn":""));
-  }
-  // adoption completion
-  if(A.stage==="Approved"||A.stage==="Adopted"){
-    var aBits=[st.collectionDate?("collect "+fmtDMY(st.collectionDate)):null,
-      st.contractSigned==="Signed"?"contract \u2713":null,
-      st.chipTransferred==="Transferred"?"chip \u2713":null,
-      st.fee?esc(st.fee):null].filter(Boolean);
-    var aSum=aBits.length?aBits.join(" \u00b7 "):"Nothing recorded yet";
-    var aOutstanding=A.stage==="Adopted"&&(st.contractSigned!=="Signed"||st.chipTransferred!=="Transferred");
-    h+=hybridRow("ap-adopt","","Adoption",esc(aSum),
-      '<div class="g2">'+pf("Collection date","collectionDate",st.collectionDate,"date")+pf("Adoption fee","fee",st.fee,"text","e.g. \u20ac150 \u2014 leave blank if none")+'</div>'
-      +appPillGroup("Contract","contractSigned",st.contractSigned,["Signed","Not yet"])
-      +appPillGroup("Microchip","chipTransferred",st.chipTransferred,["Transferred","Not yet"]),
-      aOutstanding?"warn":"");
-  }
-  // contact log
-  var lg=(st.contactLog||[]);
-  var lSum=lg.length?(lg.length+" logged \u00b7 last "+fmtDMY(lg[lg.length-1].date)):"No contact logged yet";
-  h+=hybridRow("ap-log","","Contact log",lSum,
-    (lg.slice().reverse().map(function(c){return '<div style="font-size:12px;color:#334155;padding:4px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span style="color:#94a3b8">'+fmtDMY(c.date)+'</span> \u00b7 '+esc(c.text)+'</div>';}).join("")||'<div style="font-size:11.5px;color:#cbd5e1">Nothing logged yet</div>')
-    +'<div style="display:flex;gap:8px;margin:8px 0 2px"><input id="pipe-contact" type="text" placeholder="e.g. left voicemail" style="flex:1;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit"><button onclick="addContactLine()" style="background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);padding:8px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Add</button></div>',"");
+  // their story — the enquiry form
+  var styN=["whyNow","previousPets","hoursAlone","gardenFencing","landlord"].filter(function(k){return st[k];}).length;
+  var stySum=styN?(styN+" of 5 answered"):"Not asked yet";
+  h+=hybridRow("ap-story","","Their story",stySum,
+    pf("Why a dog, why now","whyNow",st.whyNow,"text","in their own words")
+    +pf("Previous pets","previousPets",st.previousPets,"text","what they had, what happened to them")
+    +appPillGroup("Hours the dog would be alone","hoursAlone",st.hoursAlone,["Rarely","2\u20134 hours","4\u20138 hours","8+ hours"])
+    +pf("Garden & fencing","gardenFencing",st.gardenFencing,"text","size, fence height, secure?")
+    +appPillGroup("Landlord / ownership","landlord",st.landlord,["Own home","Landlord permits pets","Permission not confirmed"]),
+    styN<5?"warn":"");
+  // home check (person-level: it is the home that gets checked)
+  var hSum=[st.hcOutcome||null,st.hcDate?fmtDMY(st.hcDate):null].filter(Boolean).join(" \u00b7 ")||"Not booked yet";
+  h+=hybridRow("ap-hc","","Home check",esc(hSum),
+    '<div class="g2">'+pf("Visit date","hcDate",st.hcDate,"date")+ps("Outcome","hcOutcome",st.hcOutcome,["Booked","Passed","Passed with advice","Failed"])+'</div>'
+    +pf("Home check notes","hcNotes",st.hcNotes,"text","brief \u2014 garden secure, other pets met, etc.")
+    +(_map?'<a href="'+_map+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:7px 13px;border-radius:8px;background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);font-size:12px;color:#0f172a;text-decoration:none">Directions to '+esc(st.town||st.county||"the address")+' \u2192</a>'
+      :'<div style="font-size:11px;color:#854d0e">No address recorded \u2014 add one on the Contact row for directions.</div>'),
+    st.hcOutcome==="Failed"?"alert":(!st.hcOutcome?"warn":""));
   // notes
   var nSum=st.notes?esc(String(st.notes).replace(/\s+/g," ").slice(0,60)):"None";
   h+=hybridRow("ap-notes","","Notes",nSum,
     '<textarea oninput="setAppF(\'notes\',this.value)" style="width:100%;min-height:60px;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit">'+esc(st.notes||"")+'</textarea>',"");
   // footer actions
   h+='<div style="display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid var(--color-border-tertiary);padding-top:10px;margin-top:12px"><span style="font-size:11px;color:#94a3b8">'+(st.anonymised?"Personal details cleared":"After adoption, withdrawal or decline:")+'</span>'+'<div style="display:flex;gap:6px">'
-  +(st.anonymised?'':'<button onclick="anonymiseApplicant()" style="background:none;border:0.5px solid rgba(15,23,42,0.2);padding:5px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit">Clear personal details</button>')
-  +'<button onclick="deleteApplicant()" style="background:none;border:0.5px solid #fca5a5;color:#991b1b;padding:5px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit">Delete</button>'
-  +'</div></div>';
+    +(st.anonymised?'':'<button onclick="anonymiseApplicant()" style="background:none;border:0.5px solid rgba(15,23,42,0.2);padding:5px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit">Clear personal details</button>')
+    +'<button onclick="deleteApplicant()" style="background:none;border:0.5px solid #fca5a5;color:#991b1b;padding:5px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit">Delete</button>'
+    +'</div></div>';
+  h+='</div>';
+  // ================= RIGHT: the applications =================
+  h+='<div class="apcol">';
+  h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:4px 0 2px;display:flex;align-items:center;gap:10px">Applications \u00b7 '+apps.length+'<span style="flex:1;height:1px;background:var(--color-border-tertiary)"></span><button onclick="appAddApplication()" style="background:#0f172a;color:#c5e86c;border:none;padding:5px 12px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">+ Application</button></div>';
+  if(!apps.length)h+='<div style="font-size:11.5px;color:#cbd5e1;padding:6px 2px 12px">No applications yet \u2014 add one to link this person to a dog.</div>';
+  apps.forEach(function(ap){h+=appCardHtml(ap);});
+  // timeline: every stage move and every contact, newest first
+  var tl=[];
+  apps.forEach(function(ap){
+    (ap.history||[]).forEach(function(hh){
+      tl.push({at:hh.at||"",text:(hh.stage||"?")+(ap.animal_id?" \u2014 "+pipeDogName(ap.animal_id):(ap.note?" \u2014 "+ap.note:""))+(hh.by?" \u00b7 by "+hh.by:"")});
+    });
+  });
+  (st.contactLog||[]).forEach(function(c){tl.push({at:c.date||"",text:"Contact \u00b7 "+String(c.text||"")});});
+  tl.sort(function(a,b){return String(b.at).localeCompare(String(a.at));});
+  var tlSum=tl.length?(tl.length+" entries \u00b7 last "+fmtDMY(tl[0].at)):"Nothing yet";
+  h+=hybridRow("ap-timeline","","Timeline",tlSum,
+    (tl.map(function(t){return '<div style="font-size:12px;color:#334155;padding:4px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span style="color:#94a3b8">'+fmtDMY(t.at)+'</span> \u00b7 '+esc(t.text)+'</div>';}).join("")||'<div style="font-size:11.5px;color:#cbd5e1">Every stage move and contact lands here, with who and when.</div>')
+    +'<div style="display:flex;gap:8px;margin:8px 0 2px"><input id="pipe-contact" type="text" placeholder="log a contact \u2014 e.g. left voicemail" style="flex:1;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit"><button onclick="addContactLine()" style="background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);padding:8px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Add</button></div>',"");
+  h+='</div>';
+  h+='</div>';
   return h;
 }
+function appStageVerb(s){
+  return s==="Adopted"?"Adopted":s==="Reserved"?"Reserved":s==="Approved"?"Approved for":s==="Home check"?"Home check for":
+    s==="Withdrawn"?"Withdrew from":s==="Declined"?"Declined for":"Enquiry \u2014";
+}
+function appCardHtml(ap){
+  var st=A.state;
+  function paf(label,key,val,type,ph){return '<div style="margin-bottom:9px"><label class="lbl">'+label+'</label><input type="'+(type||"text")+'" value="'+esc(val||"")+'" placeholder="'+(ph||"")+'" oninput="setAppAppF('+ap.aid+',\''+key+'\',this.value)" style="width:100%;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit"></div>';}
+  var _rec=(A.species==="dog"&&ap.animal_id)?records.find(function(r){return r.id===ap.animal_id;}):null;
+  var mm=_rec?matchApplicantToDog(A,_rec):null;
+  var q=ap.animal_id?appQueueInfoFor(ap.animal_id):null;
+  var qPos=null;if(q&&A.id){var _i=q.findIndex(function(x){return x.who===A.id;});if(_i>-1)qPos=_i+1;}
+  var closed=(ap.stage==="Withdrawn"||ap.stage==="Declined");
+  var tone=closed?"#94a3b8":(ap.stage==="Adopted"?"#166534":mm&&mm.verdict==="blocked"?"#991b1b":mm&&mm.verdict==="caution"?"#854d0e":"#0f172a");
+  var head=[ap.animal_id?pipeDogName(ap.animal_id):(A.species==="cat"?(ap.note||"Cat enquiry"):"No dog linked"),ap.stage].join(" \u00b7 ");
+  var badges=[];
+  if(mm)badges.push(mm.verdict==="blocked"?"\u2715 conflict":mm.verdict==="caution"?"\u25b3 checks":mm.verdict==="good"?"\u2713 match":"");
+  if(q&&q.length>1&&qPos)badges.push("#"+qPos+" of "+q.length+" in line");
+  if(q&&ap.stage!=="Adopted"&&q.some(function(x){return x.who!==A.id&&(x.stage==="Approved"||x.stage==="Reserved");}))badges.push("\u26a0 someone else approved");
+  var h='<div style="border:0.5px solid '+(closed?'var(--color-border-tertiary)':'rgba(15,23,42,0.14)')+';border-radius:10px;padding:12px 14px;margin-bottom:10px'+(closed?';opacity:0.72':'')+'">';
+  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="flex:1;min-width:0;font-size:13px;font-weight:700;color:'+tone+'">'+esc(head)+'</div>'
+    +badges.filter(Boolean).map(function(b){return '<span style="font-size:10.5px;color:#64748b;background:#f1f5f9;padding:2px 8px;border-radius:10px;white-space:nowrap">'+esc(b)+'</span>';}).join("")
+    +'<button onclick="appRemoveApplication('+ap.aid+')" title="Remove this application" style="background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:13px;padding:2px 4px">&#10005;</button></div>';
+  h+='<div class="g2">';
+  h+=(A.species==="dog"
+    ?'<div style="margin-bottom:9px"><label class="lbl">Dog</label><select onchange="setAppAppF('+ap.aid+',\'animal_id\',this.value)" style="width:100%"><option value="">\u2014 none yet \u2014</option>'+records.filter(function(r){return !isArchived(r);}).map(function(r){return '<option value="'+r.id+'"'+(ap.animal_id===r.id?' selected':'')+'>'+esc(r.name||"Unnamed")+'</option>';}).join("")+'</select></div>'
+    :paf("Which cat / what kind","note",ap.note));
+  h+='<div style="margin-bottom:9px"><label class="lbl">Stage</label><select onchange="setAppStage('+ap.aid+',this.value)" style="width:100%">'+APP_STAGES.map(function(s){return '<option'+(ap.stage===s?' selected':'')+'>'+s+'</option>';}).join("")+'</select></div>';
+  h+='</div>';
+  if(closed)h+=paf("Reason","reason",ap.reason,"text","brief \u2014 helps if they apply again");
+  if(mm&&(mm.hard.length||mm.soft.length)&&!closed){
+    h+='<div style="margin:2px 0 8px">'+mm.hard.map(function(t){return '<div style="font-size:11.5px;color:#991b1b;padding:2px 0">\u2715 '+esc(t)+'</div>';}).join("")
+      +mm.soft.map(function(t){return '<div style="font-size:11.5px;color:#854d0e;padding:2px 0">\u25b3 '+esc(t)+'</div>';}).join("")+'</div>';
+  }
+  if(_rec&&!closed){
+    var bl=rehomeBlockersFor(_rec.state||{});
+    if(bl.length)h+='<div style="font-size:11.5px;color:#854d0e;margin:2px 0 8px">\ud83d\udd12 '+esc(pipeDogName(ap.animal_id))+' isn\u0027t cleared yet \u00b7 '+bl.length+' blocker'+(bl.length>1?"s":"")+'</div>';
+  }
+  if(ap.stage==="Reserved")h+='<div style="font-size:11.5px;color:#0f6e56;background:#ccfbf1;border-radius:8px;padding:7px 10px;margin:2px 0 8px">Reserved \u2014 promised to this person, not yet collected.'+(ap.collectionDate?' Collecting '+fmtDMY(ap.collectionDate)+'.':' Set a collection date below.')+'</div>';
+  if(ap.stage==="Approved"||ap.stage==="Reserved"||ap.stage==="Adopted"){
+    h+='<div class="g2">'+paf("Collection date","collectionDate",ap.collectionDate,"date")+paf("Adoption fee","fee",ap.fee,"text","e.g. \u20ac150 \u2014 leave blank if none")+'</div>';
+    h+='<div class="g2">'
+      +'<div style="margin-bottom:9px"><label class="lbl">Contract</label><select onchange="setAppAppF('+ap.aid+',\'contractSigned\',this.value)" style="width:100%"><option value="">\u2014</option><option'+(ap.contractSigned==="Signed"?" selected":"")+'>Signed</option><option'+(ap.contractSigned==="Not yet"?" selected":"")+'>Not yet</option></select></div>'
+      +'<div style="margin-bottom:9px"><label class="lbl">Microchip</label><select onchange="setAppAppF('+ap.aid+',\'chipTransferred\',this.value)" style="width:100%"><option value="">\u2014</option><option'+(ap.chipTransferred==="Transferred"?" selected":"")+'>Transferred</option><option'+(ap.chipTransferred==="Not yet"?" selected":"")+'>Not yet</option></select></div>'
+      +'</div>';
+    if(ap.stage==="Adopted"&&(ap.contractSigned!=="Signed"||ap.chipTransferred!=="Transferred"))h+='<div style="font-size:11.5px;color:#854d0e;margin-bottom:6px">'+((ap.contractSigned!=="Signed")?"\ud83d\udcc4 Contract not marked signed. ":"")+((ap.chipTransferred!=="Transferred")?"\ud83d\udcdf Chip not marked transferred.":"")+'</div>';
+  }
+  var last=(ap.history||[]).slice(-1)[0];
+  if(last)h+='<div style="font-size:10.5px;color:#94a3b8">Last move: '+esc(last.stage)+' \u00b7 '+fmtDMY(last.at)+(last.by?' \u00b7 by '+esc(last.by):'')+'</div>';
+  return h+'</div>';
+}
+
 function renderDashboard(){
   var el=document.getElementById("dashboard-content");if(!el)return;
   updateClock();
