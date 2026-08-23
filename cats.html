@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NSPCA Longford &middot; Cats</title>
+<style>
+:root{--color-background-primary:#fff;--color-text-primary:#0f172a;--color-text-secondary:#64748b;--color-border-secondary:#e2e8f0;--color-border-tertiary:#eef1f5;--lime:#c5e86c;--ink:#0f172a}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--color-text-primary);background:#f8fafc;font-size:14px;line-height:1.45}
+h2{font-size:18px;margin:0 0 4px}
+.card{background:#fff;border:0.5px solid var(--color-border-secondary);border-radius:14px;padding:16px;margin-bottom:14px}
+.lbl{display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.04em}
+input,select,textarea{font-family:inherit;font-size:13px;color:#0f172a}
+select{padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;background:#fff}
+.btn{background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);padding:9px 16px;border-radius:9px;font-size:13px;cursor:pointer;font-family:inherit;color:#0f172a}
+.btnp{background:var(--ink);color:var(--lime);border:none;font-weight:600}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 12px}
+.ctgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;align-items:start}
+.ctcol{min-width:0}
+.cards-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start}
+@media(max-width:1180px){.cards-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:900px){.ctgrid,.cards-grid{grid-template-columns:1fr}.g3{grid-template-columns:1fr}}
+.med-chev{color:#cbd5e1;font-size:15px;transition:transform .15s}
+.apill{font-size:12px;padding:6px 15px;border-radius:18px;cursor:pointer;font-family:inherit;border:0.5px solid rgba(15,23,42,0.16);background:#fff;color:#475569}
+.apill.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600}
+.tabbar{display:flex;gap:4px;border-bottom:0.5px solid var(--color-border-secondary);margin-bottom:16px;flex-wrap:wrap}
+.tabbtn{background:none;border:none;padding:9px 15px;font-size:13px;color:#64748b;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent}
+.tabbtn.on{color:#0f172a;font-weight:600;border-bottom-color:var(--lime)}
+</style>
+</head>
+<body>
+
+<div id="login-screen" style="display:none;min-height:100vh;background:#0f172a;padding-top:12vh">
+  <div style="max-width:380px;margin:0 auto;padding:0 20px">
+    <div style="font-size:22px;font-weight:800;color:#c5e86c;letter-spacing:-0.02em;margin-bottom:2px">NSPCA Longford</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:26px">Cats &middot; Cattery and Isolation</div>
+    <label style="display:block;font-size:11px;font-weight:600;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">Access code</label>
+    <input id="login-code" type="password" autocomplete="off" style="width:100%;padding:12px 14px;border:1px solid #334155;border-radius:11px;background:#1e293b;color:#fff;font-size:15px;margin-bottom:12px" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btnp" style="width:100%;padding:13px;font-size:14px;border-radius:11px;font-weight:700" onclick="doLogin()">Enter &rarr;</button>
+    <div id="login-err" style="color:#fca5a5;font-size:12px;margin-top:10px;display:none">That code isn't recognised.</div>
+    <div style="margin-top:26px;font-size:11px;color:#475569">Same codes as the dog app &middot; <a href="index.html" style="color:#94a3b8">Dogs &rarr;</a></div>
+  </div>
+</div>
+
+<div id="dashboard-screen" style="display:none">
+  <div style="background:#0f172a;padding:10px 18px;position:sticky;top:0;z-index:40">
+    <div style="max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div style="font-size:15px;font-weight:800;color:#c5e86c;letter-spacing:-0.02em">NSPCA Longford</div>
+      <span style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#e2e8f0;font-weight:600">Cats</span>
+      <span id="dash-count" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8;display:none"></span>
+      <span style="flex:1"></span>
+      <span id="dash-user" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8;display:none;align-items:center;gap:6px"></span>
+      <button onclick="location.href='index.html'" style="background:#1e293b;color:#e2e8f0;border:0.5px solid #334155;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit" title="Switch to the dog app">&#128054; Dogs</button>
+      <button onclick="openNewCat()" style="background:#c5e86c;color:#0f172a;border:none;padding:4px 13px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">+ New cat</button>
+      <button onclick="logout()" style="background:none;color:#64748b;border:none;font-size:11px;cursor:pointer;font-family:inherit">Log out</button>
+    </div>
+  </div>
+  <div id="dashboard-content" style="max-width:1180px;margin:0 auto;padding:18px"></div>
+</div>
+
+<div id="wrap" style="display:none">
+  <div style="background:#0f172a;padding:10px 18px;position:sticky;top:0;z-index:40">
+    <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:10px">
+      <button onclick="backToDash()" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; All cats</button>
+      <div id="rec-title" style="font-size:15px;font-weight:700;color:#fff;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+      <span id="save-state" style="font-size:11px;color:#94a3b8"></span>
+    </div>
+  </div>
+  <div id="main" style="max-width:1100px;margin:0 auto;padding:18px"></div>
+</div>
+
+<script>
+// ── NSPCA Longford — Cats · v0.1 (stage 1: the shell) ─────────────
+// Sibling page to the dog app. Same Supabase project, same login codes,
+// same session (shared localStorage keys) — a second wing, not a second app.
+var CHANGELOG=[
+  {version:"0.1",date:"2026-08-23",note:"The Cats page exists. Log in with the same code as the dog app \u2014 if you\u0027re already signed in there, you\u0027re signed in here. Every cat gets a record: identity and intake, medical written for cats (FeLV and FIV testing, RCP and FeLV vaccinations, cat diseases with the contagious ones flagged), weights, notices, notes and the outcome. The dashboard shows the whole cat side at once, filtered by area \u2014 Isolation/Quarantine or the main Cattery \u2014 and moving a cat between them is one button that keeps a log of who moved it and when. The rules for those moves (how long isolation runs, what clears a cat across) come in the next part."}
+];
+var APP_VERSION=CHANGELOG[0].version;
+
+var SUPABASE_URL="https://sbajswwuykvjhtoehfps.supabase.co";
+var SUPABASE_KEY="sb_publishable_uP40lclXeaMzJ__zFQESHQ__XSLqJgK";
+var supabaseClient=null;
+function initSupabase(){
+  supabaseClient={from:function(table){
+    var base=SUPABASE_URL+"/rest/v1/"+table;
+    var headers={"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json"};
+    return{
+      select:function(cols){
+        var q=base+"?select="+(cols||"*");
+        var chain={
+          eq:function(col,val){q+="&"+col+"=eq."+encodeURIComponent(val);return chain;},
+          limit:function(n){q+="&limit="+n;return chain;},
+          order:function(col,opts){q+="&order="+col+(opts&&opts.ascending===false?".desc":".asc");return chain;},
+          then:function(res,rej){return fetch(q,{headers:headers}).then(function(r){return r.json().then(function(d){var result=r.ok?{data:d,error:null}:{data:null,error:d};if(res)res(result);return result;});}).catch(function(e){var result={data:null,error:{message:e.message}};if(rej)rej(result);return result;});}
+        };return chain;
+      },
+      insert:function(rows){return fetch(base,{method:"POST",headers:Object.assign({},headers,{"Prefer":"return=representation"}),body:JSON.stringify(Array.isArray(rows)?rows[0]:rows)}).then(function(r){return r.json().then(function(d){return r.ok?{data:Array.isArray(d)?d:[d],error:null}:{data:null,error:d};});});},
+      update:function(data){var q2=base;return{eq:function(col,val){q2+="?"+col+"=eq."+encodeURIComponent(val);return fetch(q2,{method:"PATCH",headers:Object.assign({},headers,{"Prefer":"return=representation"}),body:JSON.stringify(data)}).then(function(r){return r.json().then(function(d){return r.ok?{data:d,error:null}:{data:null,error:d};});});}};},
+      delete:function(){return{eq:function(col,val){return fetch(base+"?"+col+"=eq."+encodeURIComponent(val),{method:"DELETE",headers:headers}).then(function(r){return r.ok?{data:null,error:null}:{data:null,error:{message:"Delete failed"}};});}};}
+    };
+  }};return true;
+}
+
+// ── users & session — SAME keys as the dog app, so one login covers both ──
+var USERS=[
+  {code:"SHC01",name:"Shane",role:"admin"},
+  {code:"SUZ01",name:"Suzanne",role:"director"},
+  {code:"SAR01",name:"Sarah",role:"manager"},
+  {code:"CIA01",name:"Ciara",role:"supervisor"},
+  {code:"LAU01",name:"Laura",role:"coordinator"},
+  {code:"KAT01",name:"Kate",role:"trainer"},
+  {code:"NSPCA2024",name:"Staff",role:"staff"}
+];
+var CURRENT_USER=null,LOGGED_IN=false;
+function currentName(){return CURRENT_USER?CURRENT_USER.name:(localStorage.getItem("nspca-user-name")||"Staff");}
+function currentRole(){return CURRENT_USER?CURRENT_USER.role:(localStorage.getItem("nspca-user-role")||"staff");}
+async function findUserByCode(code){
+  var u=USERS.find(function(x){return x.code===code;});
+  if(u)return u;
+  if(!supabaseClient)return null;
+  try{
+    var res=await supabaseClient.from("users").select("*").eq("code",code).limit(1);
+    if(res&&res.data&&res.data[0]&&res.data[0].active!==false)return res.data[0];
+  }catch(e){}
+  return null;
+}
+async function doLogin(){
+  var el=document.getElementById("login-code");var code=(el&&el.value||"").trim();
+  var u=await findUserByCode(code);
+  if(!u){var er=document.getElementById("login-err");if(er)er.style.display="block";return;}
+  LOGGED_IN=true;CURRENT_USER=u;
+  localStorage.setItem("nspca-intake-auth",u.code);
+  localStorage.setItem("nspca-user-name",u.name);localStorage.setItem("nspca-user-role",u.role);
+  loadCats().then(function(){showScreen("dashboard-screen");renderDashboard();});
+}
+function logout(){localStorage.removeItem("nspca-intake-auth");location.reload();}
+function showScreen(id){["login-screen","dashboard-screen","wrap"].forEach(function(s){var el=document.getElementById(s);if(el)el.style.display=(s===id?"block":"none");});if(id==="login-screen"){var lc=document.getElementById("login-code");if(lc)setTimeout(function(){try{lc.focus();}catch(e){}},60);}}
+
+// ── shared utilities (copied from the dog app, unchanged) ─────────
+function esc(s){return(s===null||s===undefined?"":""+s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
+function fmtDMY(ds){if(ds===null||ds===undefined||ds==="")return"";if(ds instanceof Date){if(isNaN(ds))return"";return ("0"+ds.getDate()).slice(-2)+"-"+("0"+(ds.getMonth()+1)).slice(-2)+"-"+(""+ds.getFullYear()).slice(2);}var p=(""+ds).slice(0,10).split("-");if(p.length===3&&p[0].length===4)return p[2]+"-"+p[1]+"-"+p[0].slice(2);return ""+ds;}
+function fmtAgo(ts){if(!ts)return"never";var diff=Math.round((Date.now()-(typeof ts==="number"?ts:new Date(ts).getTime()))/60000);if(diff<1)return"just now";if(diff<60)return diff+"m ago";if(diff<1440)return Math.round(diff/60)+"h ago";return Math.round(diff/1440)+"d ago";}
+function daysSince(ds){if(!ds)return null;var p=String(ds).slice(0,10).split("-");if(p.length!==3)return null;var then=new Date(+p[0],(+p[1])-1,+p[2]);if(isNaN(then.getTime()))return null;var n=new Date();var today=new Date(n.getFullYear(),n.getMonth(),n.getDate());return Math.max(0,Math.round((today-then)/864e5));}
+function initials(n){var p=(n||"").trim().split(/\s+/);return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():(n||"?").slice(0,2).toUpperCase();}
+function miniToast(msg){var e=document.getElementById("mini-toast");if(e)e.remove();var t=document.createElement("div");t.id="mini-toast";t.style.cssText="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:rgba(15,23,42,0.92);color:#fff;padding:9px 15px;border-radius:20px;font-size:12.5px;max-width:88vw;text-align:center;z-index:9999;box-shadow:0 6px 24px rgba(15,23,42,0.28);opacity:0;transition:opacity .25s,transform .25s;font-family:inherit";t.textContent=msg;document.body.appendChild(t);requestAnimationFrame(function(){requestAnimationFrame(function(){t.style.opacity="1";t.style.transform="translateX(-50%) translateY(0)";});});setTimeout(function(){t.style.opacity="0";setTimeout(function(){if(t.parentNode)t.remove();},300);},2200);}
+function appConfirm(message,onConfirm){
+  var ov=document.createElement("div");ov.className="cf-ov";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(15,23,42,0.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999";
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:380px;width:100%;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,0.3)"><div style="font-size:13.5px;line-height:1.5;color:#0f172a;margin-bottom:16px">'+esc(message)+'</div><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="this.closest(\'.cf-ov\').remove()">Cancel</button><button class="btn btnp" id="cf-yes">Yes</button></div></div>';
+  document.body.appendChild(ov);
+  ov.querySelector("#cf-yes").onclick=function(){ov.remove();onConfirm&&onConfirm();};
+}
+function appAlert(message){
+  var ov=document.createElement("div");ov.className="cf-ov";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(15,23,42,0.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999";
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:380px;width:100%;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,0.3)"><div style="font-size:13.5px;line-height:1.5;color:#0f172a;margin-bottom:16px">'+esc(message)+'</div><div style="display:flex;justify-content:flex-end"><button class="btn btnp" onclick="this.closest(\'.cf-ov\').remove()">OK</button></div></div>';
+  document.body.appendChild(ov);
+}
+window._medOpen=window._medOpen||{};
+function medTog(id){window._medOpen[id]=!window._medOpen[id];var b=document.getElementById("medbody-"+id);var c=document.getElementById("medchev-"+id);if(b)b.style.display=window._medOpen[id]?"":"none";if(c)c.style.transform="rotate("+(window._medOpen[id]?90:0)+"deg)";}
+function hybridRow(id,icon,title,summary,body,tone){
+  var open=!!(window._medOpen&&window._medOpen[id]);
+  var sc=tone==="warn"?"#854d0e":tone==="alert"?"#991b1b":"#64748b";
+  return '<div style="border-bottom:0.5px solid var(--color-border-tertiary)">'
+    +'<div onclick="medTog(\''+id+'\')" role="button" tabindex="0" aria-expanded="'+open+'" onkeydown="if(event.key===\'Enter\')medTog(\''+id+'\')" style="display:flex;align-items:flex-start;gap:10px;padding:11px 2px;cursor:pointer">'
+    +(icon?'<span style="font-size:15px;line-height:1.3;flex-shrink:0">'+icon+'</span>':'')
+    +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#0f172a">'+title+'</div>'
+    +(summary?'<div style="font-size:11.5px;color:'+sc+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+summary+'</div>':'')
+    +'</div>'
+    +'<span class="med-chev" id="medchev-'+id+'" style="transform:rotate('+(open?'90':'0')+'deg);align-self:center">&#8250;</span>'
+    +'</div>'
+    +'<div class="med-body" id="medbody-'+id+'" style="padding:2px 2px 14px;'+(open?'':'display:none')+'">'+body+'</div>'
+  +'</div>';
+}
+function hybridBanner(label,tone){
+  var c=tone==="alert"?["#fee2e2","#fca5a5","#991b1b"]:tone==="warn"?["#fef9c3","#f59e0b","#854d0e"]:tone==="ok"?["#dcfce7","#86efac","#166534"]:["#f1f5f9","#e2e8f0","#64748b"];
+  return '<div style="display:flex;align-items:center;gap:8px;background:'+c[0]+';border:1px solid '+c[1]+';border-radius:10px;padding:10px 13px;margin-bottom:12px">'
+    +'<span style="width:9px;height:9px;border-radius:50%;flex-shrink:0;background:'+c[2]+'"></span>'
+    +'<span style="font-size:12.5px;font-weight:700;color:'+c[2]+'">'+label+'</span></div>';
+}
+function hybridTiles(tiles){
+  if(!tiles||!tiles.length)return"";
+  return '<div style="display:grid;grid-template-columns:repeat('+tiles.length+',minmax(0,1fr));gap:8px;margin-bottom:12px">'
+    +tiles.map(function(t){return '<div style="background:#f8fafc;border-radius:8px;padding:9px 10px"><div style="font-size:11px;color:#94a3b8;margin-bottom:2px">'+t.label+'</div><div style="font-size:14px;font-weight:600;color:'+(t.tone==="warn"?"#854d0e":t.tone==="alert"?"#991b1b":"#0f172a")+'">'+t.value+'</div></div>';}).join("")
+    +'</div>';
+}
+function hybridList(title,items){
+  if(!items||!items.length)return"";
+  return '<div style="margin-bottom:12px"><div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:0 0 4px">'+title+'</div>'
+    +'<div style="border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:2px 12px">'
+    +items.map(function(it){var col=it.tone==="alert"?"#991b1b":it.tone==="warn"?"#854d0e":"#334155";
+      return '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px"><span style="flex-shrink:0">'+(it.icon||"")+'</span><span style="flex:1;color:'+col+'">'+it.text+'</span>'+(it.tag?'<span style="font-size:10.5px;color:#94a3b8;white-space:nowrap">'+it.tag+'</span>':'')+'</div>';}).join("")
+    +'</div></div>';
+}
+
+// ── the cat itself ────────────────────────────────────────────────
+var AREAS={iso:"Cat Iso",cattery:"Cattery"};
+var CAT_DISEASES=["Panleukopenia (FPV)","Cat flu (FHV / FCV)","FeLV","FIV","Ringworm","Ear mites","Giardia","Coccidiosis","Chlamydia","Other"];
+var CONTAGIOUS_CATS={"Panleukopenia (FPV)":1,"Cat flu (FHV / FCV)":1,"FeLV":1,"FIV":0,"Ringworm":1,"Ear mites":1,"Giardia":1,"Coccidiosis":1,"Chlamydia":1,"Other":0};
+var CAT_VAX=["RCP 1st","RCP 2nd","RCP Booster","FeLV 1st","FeLV 2nd"];
+var CAT_OUTCOMES=["","Rehomed","Reclaimed by owner","Transferred","Died in care","Escaped / Lost","Euthanised"];
+function defaultCat(){
+  return{cat:{name:"",sex:"",colour:"",dob:"",ageEstimate:"",microchip:"",pen:"",intakeDate:new Date().toISOString().slice(0,10),arrivalType:"",arrivalNotes:"",photo:""},
+    area:"iso",moves:[],
+    medical:{currentStatus:"",diseases:[],vaccinations:[],testing:{felv:"",fiv:"",testedDate:""},parasiteTreatments:[],vetNotes:""},
+    weights:[],notices:[],notes:"",fin:{outcome:"",outcomeDate:"",outcomeNotes:""},_savedBy:""};
+}
+var cats=[],C=null,_recTab="cat";
+function activeContagiousCats(medical){var ds=(medical&&medical.diseases)||[];return ds.filter(function(p){return CONTAGIOUS_CATS[p.type]&&p.status!=="Recovered / cleared";});}
+function catHasDeparted(st){var o=((st||C).fin||{}).outcome||"";return !!o;}
+
+// ── load / cache / save — the same safety net as the dog app ──────
+var _catsFromCache=false,_catsCachedAt=0,_tableMissing=false;
+function cacheCats(){try{localStorage.setItem("nspca-cats-cache",JSON.stringify({at:Date.now(),rows:cats}));}catch(e){}}
+function loadCachedCats(){try{var raw=localStorage.getItem("nspca-cats-cache");if(!raw)return false;var o=JSON.parse(raw);if(!o||!o.rows)return false;cats=o.rows;_catsFromCache=true;_catsCachedAt=o.at||0;return true;}catch(e){return false;}}
+async function loadCats(){
+  if(!supabaseClient)return;
+  var res;
+  try{res=await supabaseClient.from("cats").select("*").order("saved_at",{ascending:false}).limit(400);}
+  catch(e){loadCachedCats();return;}
+  if(!res||res.error){
+    if(res&&res.error&&/relation|does not exist|not found|42P01/i.test(JSON.stringify(res.error)))_tableMissing=true;
+    loadCachedCats();return;
+  }
+  _tableMissing=false;
+  cats=(res.data||[]).map(function(row){var st=null;try{st=typeof row.data==="string"?JSON.parse(row.data):row.data;}catch(e){}
+    return{id:row.id,name:row.name||"Unknown",area:row.area||((st&&st.area)||"iso"),intakeDate:row.intake_date,savedAt:row.saved_at,state:st||defaultCat()};});
+  _catsFromCache=false;cacheCats();
+  if(catPendingCount())scheduleCatRetry();
+}
+function catPendingGet(){try{return JSON.parse(localStorage.getItem("nspca-cats-pending")||"{}");}catch(e){return {};}}
+function catPendingSet(o){try{localStorage.setItem("nspca-cats-pending",JSON.stringify(o));}catch(e){}}
+function catPendingCount(){return Object.keys(catPendingGet()).length;}
+function catPendingPark(id,row){var p=catPendingGet();p[id||"new"]={row:row,at:new Date().toISOString()};catPendingSet(p);scheduleCatRetry();}
+function catPendingClear(id){var p=catPendingGet();delete p[id||"new"];catPendingSet(p);}
+var _catRetry=null;
+function scheduleCatRetry(){if(_catRetry||!catPendingCount())return;_catRetry=setTimeout(function(){_catRetry=null;retryCatPending();},15000);}
+async function retryCatPending(){
+  if(!supabaseClient||!catPendingCount())return;
+  var p=catPendingGet();var ids=Object.keys(p);
+  for(var i=0;i<ids.length;i++){
+    var id=ids[i];
+    try{
+      if(id==="new"){var r1=await supabaseClient.from("cats").insert(p[id].row);if(r1&&r1.error)throw r1.error;}
+      else{var r2=await supabaseClient.from("cats").update(p[id].row).eq("id",id);if(r2&&r2.error)throw r2.error;}
+      catPendingClear(id);
+    }catch(e){}
+  }
+  if(catPendingCount())scheduleCatRetry();
+  else{try{await loadCats();if(!C)renderDashboard();}catch(e){}}
+}
+var _saveBusy=false,_saveAgain=false,_saveFailed=false,_saveTimer=null,_openId=null;
+function setSaveState(t){var el=document.getElementById("save-state");if(el)el.textContent=t;}
+async function saveCat(){
+  if(!C||!supabaseClient)return;
+  if(_saveBusy){_saveAgain=true;return;}
+  _saveBusy=true;setSaveState("Saving\u2026");
+  C._savedBy=currentName();
+  var row={name:(C.cat&&C.cat.name)||"",area:C.area||"iso",intake_date:(C.cat&&C.cat.intakeDate)||null,saved_at:new Date().toISOString(),data:C};
+  try{
+    if(_openId){var up=await supabaseClient.from("cats").update(row).eq("id",_openId);if(up&&up.error)throw up.error;}
+    else{var res=await supabaseClient.from("cats").insert(row);if(res&&res.error)throw res.error;if(res&&res.data&&res.data[0])_openId=res.data[0].id;}
+    catPendingClear(_openId);
+    _saveFailed=false;setSaveState("Saved "+fmtAgo(Date.now()));
+  }catch(e){
+    console.error("saveCat:",e);
+    catPendingPark(_openId,row);
+    setSaveState("Held \u2014 will retry");
+    if(!_saveFailed){_saveFailed=true;miniToast("Not saved yet \u2014 held until you\u0027re back online");}
+  }finally{
+    _saveBusy=false;
+    if(_saveAgain){_saveAgain=false;saveCat();}
+  }
+}
+function debouncedSave(){clearTimeout(_saveTimer);setSaveState("\u2026");_saveTimer=setTimeout(saveCat,700);}
+
+// ── field plumbing ────────────────────────────────────────────────
+function setF(path,val){
+  if(!C)return;
+  var p=path.split(".");var o=C;
+  for(var i=0;i<p.length-1;i++){if(!o[p[i]])o[p[i]]={};o=o[p[i]];}
+  o[p[p.length-1]]=val;
+  debouncedSave();
+}
+function setFR(path,val){setF(path,val);renderMain();}
+function fld(label,val,path,type,ph){return '<div style="margin-bottom:9px"><label class="lbl">'+label+'</label><input type="'+(type||"text")+'" value="'+esc(val||"")+'" placeholder="'+(ph||"")+'" oninput="setF(\''+path+'\',this.value)" style="width:100%;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px"></div>';}
+function slct(label,val,path,opts){return '<div style="margin-bottom:9px"><label class="lbl">'+label+'</label><select onchange="setFR(\''+path+'\',this.value)" style="width:100%">'+opts.map(function(o){var v=Array.isArray(o)?o[0]:o,l=Array.isArray(o)?o[1]:o;return '<option value="'+esc(v)+'"'+(val===v?' selected':'')+'>'+esc(l)+'</option>';}).join("")+'</select></div>';}
+function ta(label,val,path,ph){return '<div style="margin-bottom:9px"><label class="lbl">'+label+'</label><textarea oninput="setF(\''+path+'\',this.value)" placeholder="'+(ph||"")+'" style="width:100%;min-height:70px;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;resize:vertical">'+esc(val||"")+'</textarea></div>';}
+
+// ── dashboard ─────────────────────────────────────────────────────
+var _areaFilter="all",_search="";
+function setArea(a){_areaFilter=a;renderDashboard();}
+function dashSearch(v){_search=(v||"").toLowerCase();clearTimeout(window._srchT);window._srchT=setTimeout(renderDashboard,160);}
+function activeCats(){return cats.filter(function(r){return !catHasDeparted(r.state);});}
+function renderDashboard(){
+  var el=document.getElementById("dashboard-content");if(!el)return;
+  var ue=document.getElementById("dash-user");
+  if(ue){ue.innerHTML='<span>'+esc(currentName())+'</span>';ue.style.display="inline-flex";}
+  var act=activeCats();
+  var ce=document.getElementById("dash-count");
+  if(ce){ce.textContent=act.length+" in care";ce.style.display=act.length?"inline":"none";}
+  var h="";
+  if(_tableMissing){
+    h+='<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:12px;padding:14px 16px;margin-bottom:14px;font-size:12.5px;color:#854d0e"><strong>One-time setup:</strong> the <code>cats</code> table doesn\u0027t exist in Supabase yet. In the SQL editor run:<pre style="background:#fff;border-radius:8px;padding:10px;font-size:11px;overflow-x:auto;margin:8px 0 0">create table cats (\n  id bigserial primary key,\n  name text, area text, intake_date date,\n  saved_at timestamptz, data jsonb\n);</pre>Give it the same access rules as the dogs table, then reload this page.</div>';
+  }
+  if(_catsFromCache||catPendingCount()){
+    var _n=catPendingCount();
+    h+='<div style="display:flex;align-items:center;gap:8px;background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:9px 12px;margin-bottom:12px">'
+      +'<span style="width:8px;height:8px;border-radius:50%;background:#854d0e;flex-shrink:0"></span>'
+      +'<span style="font-size:12px;color:#854d0e;flex:1">'
+      +(_catsFromCache?"No connection \u2014 showing cats as they were "+(_catsCachedAt?fmtAgo(_catsCachedAt):"earlier")+". ":"")
+      +(_n?_n+" change"+(_n>1?"s":"")+" waiting to be sent.":"Anything you change is held and sent when you\u0027re back.")
+      +'</span></div>';
+  }
+  var isoN=act.filter(function(r){return (r.state.area||r.area)==="iso";}).length;
+  var catN=act.length-isoN;
+  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">'
+    +'<button class="apill'+(_areaFilter==="all"?" on":"")+'" onclick="setArea(\'all\')">All \u00b7 '+act.length+'</button>'
+    +'<button class="apill'+(_areaFilter==="iso"?" on":"")+'" onclick="setArea(\'iso\')">'+AREAS.iso+' \u00b7 '+isoN+'</button>'
+    +'<button class="apill'+(_areaFilter==="cattery"?" on":"")+'" onclick="setArea(\'cattery\')">'+AREAS.cattery+' \u00b7 '+catN+'</button>'
+    +'<span style="flex:1"></span>'
+    +'<input type="search" placeholder="Search cats\u2026" value="'+esc(_search)+'" oninput="dashSearch(this.value)" style="padding:8px 13px;border:0.5px solid rgba(15,23,42,0.16);border-radius:18px;font-size:12.5px;width:220px">'
+    +'</div>';
+  var list=act.filter(function(r){
+    if(_areaFilter!=="all"&&(r.state.area||r.area)!==_areaFilter)return false;
+    if(_search&&String(r.name||"").toLowerCase().indexOf(_search)<0)return false;
+    return true;
+  });
+  list.sort(function(a,b){return (daysSince(a.intakeDate)||0)-(daysSince(b.intakeDate)||0)?((daysSince(b.intakeDate)||0)-(daysSince(a.intakeDate)||0)):String(a.name||"").localeCompare(String(b.name||""));});
+  if(!cats.length&&!_tableMissing){
+    h+='<div style="text-align:center;padding:48px 20px;color:#64748b"><div style="font-size:36px;margin-bottom:10px">\ud83d\udc31</div>No cats yet.<div style="font-size:11.5px;margin-top:6px;opacity:0.85">Tap + New cat to start the first record.</div></div>';
+  }else if(!list.length){
+    h+='<div style="text-align:center;padding:38px 20px;color:#94a3b8;font-size:13px">Nothing matches that filter.</div>';
+  }else{
+    h+='<div class="cards-grid">'+list.map(catCardHtml).join("")+'</div>';
+  }
+  var dep=cats.filter(function(r){return catHasDeparted(r.state);});
+  if(dep.length&&_areaFilter==="all"&&!_search){
+    h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:22px 0 6px">Departed \u00b7 '+dep.length+'</div>';
+    h+='<div style="border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:0 14px;background:#fff">'+dep.slice(0,12).map(function(r){
+      return '<div onclick="openCat('+r.id+')" style="display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer;font-size:12.5px"><span style="flex:1;font-weight:600">'+esc(r.name)+'</span><span style="color:#94a3b8">'+esc((r.state.fin&&r.state.fin.outcome)||"")+(r.state.fin&&r.state.fin.outcomeDate?" \u00b7 "+fmtDMY(r.state.fin.outcomeDate):"")+'</span></div>';
+    }).join("")+'</div>';
+  }
+  el.innerHTML=h;
+}
+function catCardHtml(r){
+  var st=r.state||{};var c=st.cat||{};var m=st.medical||{};
+  var area=(st.area||r.area)==="cattery"?"cattery":"iso";
+  var d=daysSince(r.intakeDate);
+  var con=activeContagiousCats(m);
+  var t=st.medical&&st.medical.testing||{};
+  var testBits=[];
+  if(t.felv)testBits.push("FeLV "+(t.felv==="Negative"?"\u2713":t.felv==="Positive"?"\u2717":"?"));
+  if(t.fiv)testBits.push("FIV "+(t.fiv==="Negative"?"\u2713":t.fiv==="Positive"?"\u2717":"?"));
+  var areaChip=area==="iso"
+    ? '<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:#fef3c7;color:#92400e">'+AREAS.iso+'</span>'
+    : '<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:#dcfce7;color:#166534">'+AREAS.cattery+'</span>';
+  var conLine=con.length?'<div style="font-size:11px;font-weight:600;color:#991b1b;margin-top:6px">\u2623\ufe0f '+esc(con.map(function(x){return x.type;}).join(", "))+'</div>':"";
+  var idline=[c.pen?("pen "+c.pen):null,c.sex||null,c.colour||null,(d!==null?("day "+(d+1)):null)].filter(Boolean).join(" \u00b7 ");
+  var ph=c.photo?'<img src="'+c.photo+'" alt="" style="width:52px;height:52px;border-radius:12px;object-fit:cover;flex-shrink:0">':'<div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#fbfdf4,#eef7d8);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">\ud83d\udc31</div>';
+  return '<div onclick="openCat('+r.id+')" class="card" style="margin-bottom:0;cursor:pointer;border-left:3px solid '+(con.length?"#dc2626":area==="iso"?"#f59e0b":"#16a34a")+'">'
+    +'<div style="display:flex;gap:12px;align-items:flex-start">'+ph
+    +'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px"><div style="font-size:15px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.name||"Unnamed")+'</div>'+areaChip+'</div>'
+    +(idline?'<div style="font-size:11px;color:#64748b;margin-top:3px">'+esc(idline)+'</div>':'')
+    +(testBits.length?'<div style="font-size:11px;color:#334155;margin-top:3px">'+testBits.join(" \u00b7 ")+'</div>':'')
+    +'</div></div>'+conLine+'</div>';
+}
+
+// ── the cat record ────────────────────────────────────────────────
+function openNewCat(){C=defaultCat();_openId=null;_recTab="cat";window._medOpen={};showScreen("wrap");renderMain();}
+function openCat(id){
+  var r=cats.find(function(x){return x.id===id;});if(!r)return;
+  C=JSON.parse(JSON.stringify(r.state||defaultCat()));
+  _openId=id;_recTab="cat";window._medOpen={};
+  showScreen("wrap");renderMain();
+}
+function backToDash(){saveCat();C=null;_openId=null;loadCats().then(function(){showScreen("dashboard-screen");renderDashboard();});showScreen("dashboard-screen");renderDashboard();}
+function setTab(t){_recTab=t;renderMain();}
+function moveArea(){
+  var to=C.area==="iso"?"cattery":"iso";
+  var toName=AREAS[to];
+  appConfirm("Move "+(C.cat.name||"this cat")+" to "+toName+"? The move is logged with your name and the date.",function(){
+    C.moves=C.moves||[];
+    C.moves.push({from:C.area,to:to,by:currentName(),at:new Date().toISOString().slice(0,10)});
+    C.area=to;saveCat();renderMain();
+    miniToast("Moved to "+toName);
+  });
+}
+function renderMain(){
+  var el=document.getElementById("main");if(!el||!C)return;
+  var tt=document.getElementById("rec-title");
+  if(tt)tt.textContent=(C.cat.name||"New cat")+" \u00b7 "+AREAS[C.area==="cattery"?"cattery":"iso"];
+  var tabs=[["cat","Cat"],["medical","Medical"],["weights","Weights"],["notes","Notes & notices"],["outcome","Outcome"]];
+  var h='<div class="tabbar">'+tabs.map(function(t){return '<button class="tabbtn'+(_recTab===t[0]?" on":"")+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join("")+'</div>';
+  h+=_recTab==="cat"?renderCatTab():_recTab==="medical"?renderMedicalTab():_recTab==="weights"?renderWeightsTab():_recTab==="notes"?renderNotesTab():renderOutcomeTab();
+  el.innerHTML=h;
+}
+function renderCatTab(){
+  var c=C.cat||{};
+  var con=activeContagiousCats(C.medical);
+  var banner=catHasDeparted(C)?hybridBanner(esc(C.fin.outcome)+(C.fin.outcomeDate?" \u00b7 "+fmtDMY(C.fin.outcomeDate):""),"alert")
+    :con.length?hybridBanner("Contagious condition active \u2014 "+esc(con.map(function(x){return x.type;}).join(", ")),"alert")
+    :hybridBanner("In "+AREAS[C.area==="cattery"?"cattery":"iso"]+(c.intakeDate?" \u00b7 day "+((daysSince(c.intakeDate)||0)+1):""),C.area==="iso"?"warn":"ok");
+  var d=daysSince(c.intakeDate);
+  var tiles=hybridTiles([
+    {label:"Area",value:AREAS[C.area==="cattery"?"cattery":"iso"],tone:C.area==="iso"?"warn":""},
+    {label:"Days in care",value:d===null?"\u2014":String(d+1)},
+    {label:"Moves",value:String((C.moves||[]).length)}
+  ]);
+  var moveBtn=catHasDeparted(C)?"":'<button class="btn btnp" style="width:100%;margin-bottom:14px" onclick="moveArea()">Move to '+AREAS[C.area==="iso"?"cattery":"iso"]+' \u2192</button>';
+  var movesH=(C.moves||[]).slice().reverse().map(function(m){return '<div style="font-size:12px;color:#334155;padding:4px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span style="color:#94a3b8">'+fmtDMY(m.at)+'</span> \u00b7 '+esc(AREAS[m.from]||m.from)+' \u2192 '+esc(AREAS[m.to]||m.to)+(m.by?' \u00b7 by '+esc(m.by):'')+'</div>';}).join("")||'<div style="font-size:11.5px;color:#cbd5e1">No moves yet \u2014 arrived into '+AREAS[C.area==="cattery"?"cattery":"iso"]+'.</div>';
+  return '<div class="ctgrid"><div class="ctcol"><div class="card">'+banner+tiles+moveBtn
+    +'<div class="g2">'+fld("Name",c.name,"cat.name")+fld("Pen",c.pen,"cat.pen")+'</div>'
+    +'<div class="g3">'+slct("Sex",c.sex||"","cat.sex",[["","\u2014"],["Male","Male"],["Male (neutered)","Male (neutered)"],["Female","Female"],["Female (spayed)","Female (spayed)"]])+fld("Colour / coat",c.colour,"cat.colour")+fld("Microchip",c.microchip,"cat.microchip")+'</div>'
+    +'<div class="g2">'+fld("Date of birth (if known)",c.dob,"cat.dob","date")+fld("Age estimate",c.ageEstimate,"cat.ageEstimate","text","e.g. ~2 years, 8 weeks")+'</div>'
+    +'</div></div>'
+    +'<div class="ctcol"><div class="card">'
+    +'<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:0 0 10px">Intake</div>'
+    +'<div class="g2">'+fld("Intake date",c.intakeDate,"cat.intakeDate","date")+slct("How it arrived",c.arrivalType||"","cat.arrivalType",[["","\u2014"],["Stray","Stray"],["Owner surrender","Owner surrender"],["Litter / kittens","Litter / kittens"],["Seizure / welfare case","Seizure / welfare case"],["Transfer in","Transfer in"],["Returned from adoption","Returned from adoption"]])+'</div>'
+    +ta("Arrival notes",c.arrivalNotes,"cat.arrivalNotes","condition on arrival, where found, who brought it in")
+    +'<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:12px 0 6px">Area history</div>'
+    +movesH
+    +'</div></div></div>';
+}
+function renderMedicalTab(){
+  var m=C.medical||{};var t=m.testing||{};
+  var con=activeContagiousCats(m);
+  var banner=con.length?hybridBanner("Contagious \u2014 "+esc(con.map(function(x){return x.type;}).join(", ")),"alert")
+    :m.currentStatus==="Not fit for rehoming"?hybridBanner("Not fit for rehoming","alert")
+    :hybridBanner(m.currentStatus||"No health status set",m.currentStatus==="Healthy"?"ok":m.currentStatus?"warn":"");
+  var testSum=[t.felv?("FeLV "+t.felv):null,t.fiv?("FIV "+t.fiv):null,t.testedDate?fmtDMY(t.testedDate):null].filter(Boolean).join(" \u00b7 ")||"Not tested yet";
+  var testTone=(t.felv==="Positive"||t.fiv==="Positive")?"alert":(!t.felv&&!t.fiv)?"warn":"";
+  var dsRows=(m.diseases||[]).map(function(p,i){
+    var act=p.status!=="Recovered / cleared";
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px">'
+      +'<span style="flex:1;color:'+(act&&CONTAGIOUS_CATS[p.type]?"#991b1b;font-weight:600":"#334155")+'">'+esc(p.type)+(CONTAGIOUS_CATS[p.type]&&act?" \u2623\ufe0f":"")+'</span>'
+      +'<span style="color:#94a3b8">'+esc(p.status||"")+(p.date?" \u00b7 "+fmtDMY(p.date):"")+'</span>'
+      +'<button onclick="cycleDisease('+i+')" style="background:#e2e8f0;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">'+(act?"Mark cleared":"Reactivate")+'</button>'
+      +'<button onclick="removeDisease('+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">&#10005;</button></div>';
+  }).join("")||'<div style="font-size:11.5px;color:#cbd5e1;padding:2px 0 6px">Nothing recorded.</div>';
+  var vaxRows=(m.vaccinations||[]).map(function(v,i){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px"><span style="flex:1">'+esc(v.type)+'</span><span style="color:#94a3b8">'+fmtDMY(v.date)+(v.nextDue?" \u00b7 next "+fmtDMY(v.nextDue):"")+'</span><button onclick="removeVax('+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">&#10005;</button></div>';
+  }).join("")||'<div style="font-size:11.5px;color:#cbd5e1;padding:2px 0 6px">None recorded yet.</div>';
+  return '<div class="ctgrid"><div class="ctcol"><div class="card">'+banner
+    +slct("Health status",m.currentStatus||"","medical.currentStatus",[["","\u2014 not set \u2014"],["Healthy","Healthy"],["Monitoring","Monitoring"],["Under treatment","Under treatment"],["Recovering","Recovering"],["Not fit for rehoming","Not fit for rehoming"]])
+    +hybridRow("ct-test","\ud83e\uddea","FeLV / FIV testing",esc(testSum),
+      '<div class="g3">'+slct("FeLV",t.felv||"","medical.testing.felv",[["","Not tested"],["Negative","Negative"],["Positive","Positive"],["Retest needed","Retest needed"]])
+      +slct("FIV",t.fiv||"","medical.testing.fiv",[["","Not tested"],["Negative","Negative"],["Positive","Positive"],["Retest needed","Retest needed"]])
+      +fld("Tested",t.testedDate,"medical.testing.testedDate","date")+'</div>',testTone)
+    +hybridRow("ct-dis","\ud83e\udda0","Conditions & diseases",((m.diseases||[]).length?(m.diseases.length+" recorded"+(con.length?" \u00b7 "+con.length+" contagious":"")):"Nothing recorded"),
+      dsRows+'<div style="display:flex;gap:8px;margin-top:8px"><select id="new-disease" style="flex:1">'+CAT_DISEASES.map(function(dd){return '<option>'+dd+'</option>';}).join("")+'</select><button class="btn" onclick="addDisease()">Add</button></div>',con.length?"alert":"")
+    +'</div></div>'
+    +'<div class="ctcol"><div class="card">'
+    +hybridRow("ct-vax","\ud83d\udc89","Vaccinations",((m.vaccinations||[]).length?m.vaccinations.length+" recorded":"None recorded yet"),
+      vaxRows+'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><select id="new-vax" style="flex:1;min-width:130px">'+CAT_VAX.map(function(v){return '<option>'+v+'</option>';}).join("")+'</select><input id="new-vax-date" type="date" style="padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px"><button class="btn" onclick="addVax()">Add</button></div>',(m.vaccinations||[]).length?"":"warn")
+    +ta("Vet notes",m.vetNotes,"medical.vetNotes","anything the vet said or needs watching")
+    +'</div></div></div>';
+}
+function addDisease(){var el=document.getElementById("new-disease");if(!el)return;C.medical.diseases=C.medical.diseases||[];C.medical.diseases.push({type:el.value,status:"Active",date:new Date().toISOString().slice(0,10)});debouncedSave();renderMain();}
+function cycleDisease(i){var p=(C.medical.diseases||[])[i];if(!p)return;p.status=p.status==="Recovered / cleared"?"Active":"Recovered / cleared";debouncedSave();renderMain();}
+function removeDisease(i){appConfirm("Remove this condition from the record?",function(){C.medical.diseases.splice(i,1);debouncedSave();renderMain();});}
+function addVax(){var el=document.getElementById("new-vax");var de=document.getElementById("new-vax-date");if(!el)return;C.medical.vaccinations=C.medical.vaccinations||[];C.medical.vaccinations.push({type:el.value,date:(de&&de.value)||new Date().toISOString().slice(0,10)});debouncedSave();renderMain();}
+function removeVax(i){appConfirm("Remove this vaccination entry?",function(){C.medical.vaccinations.splice(i,1);debouncedSave();renderMain();});}
+function renderWeightsTab(){
+  var ws=(C.weights||[]).slice().sort(function(a,b){return String(a.date).localeCompare(String(b.date));});
+  var rows=ws.slice().reverse().map(function(w,ri){var i=ws.length-1-ri;
+    var prev=i>0?ws[i-1]:null;var diff=prev?(w.kg-prev.kg):null;
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12.5px"><span style="color:#94a3b8;width:70px">'+fmtDMY(w.date)+'</span><span style="font-weight:600">'+w.kg+' kg</span>'+(diff!==null?'<span style="font-size:11px;color:'+(diff<0?"#991b1b":"#166534")+'">'+(diff>0?"+":"")+diff.toFixed(2)+'</span>':'')+'<span style="flex:1"></span><button onclick="removeWeight('+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">&#10005;</button></div>';
+  }).join("")||'<div style="font-size:11.5px;color:#cbd5e1;padding:2px 0 8px">No weights yet \u2014 the first one becomes the baseline.</div>';
+  return '<div class="card" style="max-width:560px">'
+    +'<div style="display:flex;gap:8px;margin-bottom:12px"><input id="new-w" type="number" step="0.01" placeholder="kg" style="width:110px;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px"><input id="new-w-date" type="date" value="'+new Date().toISOString().slice(0,10)+'" style="padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px"><button class="btn btnp" onclick="addWeight()">Add</button></div>'
+    +rows+'</div>';
+}
+function addWeight(){var el=document.getElementById("new-w");var de=document.getElementById("new-w-date");var kg=parseFloat(el&&el.value);if(!kg)return;C.weights=C.weights||[];C.weights.push({date:(de&&de.value)||new Date().toISOString().slice(0,10),kg:kg});debouncedSave();renderMain();}
+function removeWeight(i){var ws=(C.weights||[]).slice().sort(function(a,b){return String(a.date).localeCompare(String(b.date));});var w=ws[i];C.weights=C.weights.filter(function(x){return x!==w;});debouncedSave();renderMain();}
+function renderNotesTab(){
+  var ns=C.notices||[];
+  var rows=ns.map(function(n,i){return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px"><span style="flex:1">\ud83d\udd14 '+esc(n.text)+'</span><span style="color:#94a3b8;font-size:11px">'+(n.by?esc(n.by)+" \u00b7 ":"")+fmtDMY(n.at)+'</span><button onclick="removeNotice('+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">&#10005;</button></div>';}).join("")||'<div style="font-size:11.5px;color:#cbd5e1;padding:2px 0 8px">No notices \u2014 anything the whole team must know about this cat goes here.</div>';
+  return '<div class="ctgrid"><div class="ctcol"><div class="card">'
+    +'<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:0 0 8px">Notices</div>'
+    +rows+'<div style="display:flex;gap:8px;margin-top:8px"><input id="new-notice" type="text" placeholder="e.g. door-darter \u2014 double-check the pen latch" style="flex:1;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px"><button class="btn" onclick="addNotice()">Add</button></div>'
+    +'</div></div>'
+    +'<div class="ctcol"><div class="card">'+ta("General notes",C.notes,"notes","temperament, habits, anything worth knowing")+'</div></div></div>';
+}
+function addNotice(){var el=document.getElementById("new-notice");if(!el||!el.value.trim())return;C.notices=C.notices||[];C.notices.push({text:el.value.trim(),by:currentName(),at:new Date().toISOString().slice(0,10)});el.value="";debouncedSave();renderMain();}
+function removeNotice(i){C.notices.splice(i,1);debouncedSave();renderMain();}
+function renderOutcomeTab(){
+  var f=C.fin||{};
+  var banner=f.outcome?hybridBanner(esc(f.outcome)+(f.outcomeDate?" \u00b7 "+fmtDMY(f.outcomeDate):""),"alert"):hybridBanner("Active \u2014 in the unit","ok");
+  return '<div class="card" style="max-width:560px">'+banner
+    +slct("Outcome",f.outcome||"","fin.outcome",CAT_OUTCOMES.map(function(o){return [o,o||"Active \u2014 in the unit"];}))
+    +fld("Date",f.outcomeDate,"fin.outcomeDate","date")
+    +ta("Outcome notes",f.outcomeNotes,"fin.outcomeNotes","where it went, who took it, anything worth keeping")
+    +(f.outcome?'<div style="font-size:11.5px;color:#854d0e;background:#fef9c3;border-radius:8px;padding:8px 11px">A cat with an outcome leaves the live dashboard and shows under Departed.</div>':'')
+    +'</div>';
+}
+
+// ── init ──────────────────────────────────────────────────────────
+(function(){
+  initSupabase();
+  var savedCode=localStorage.getItem("nspca-intake-auth");
+  if(savedCode){
+    findUserByCode(savedCode).then(function(u){
+      if(u){LOGGED_IN=true;CURRENT_USER=u;localStorage.setItem("nspca-user-name",u.name);localStorage.setItem("nspca-user-role",u.role);
+        loadCats().then(function(){showScreen("dashboard-screen");renderDashboard();});}
+      else showScreen("login-screen");
+    });
+  }else showScreen("login-screen");
+})();
+</script>
+</body>
+</html>
