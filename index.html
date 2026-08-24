@@ -396,7 +396,7 @@ var TABS=[
   {id:"dog",l:"Dog",g:"Profile"},{id:"arrival",l:"Arrival",g:"Profile"},{id:"picture",l:"Picture",g:"Profile"},
   {id:"assessment",l:"Assessment",g:"Assessment"},{id:"scoring",l:"Scoring",g:"Assessment"},{id:"sessions",l:"Sessions",g:"Assessment"},{id:"ea",l:"EA",g:"Assessment"},{id:"rehoming",l:"Clearance",g:"Assessment"},
   {id:"days",l:"5-Day Report",g:"Isolation"},
-  {id:"feeding",l:"Feeding",g:"Isolation"},{id:"notes",l:"Notes",g:"Isolation"},
+  {id:"exercise",l:"Exercise",g:"Isolation"},{id:"feeding",l:"Feeding",g:"Isolation"},{id:"notes",l:"Notes",g:"Isolation"},
   {id:"medical",l:"Medical",g:"Health"},{id:"weights",l:"Weights",g:"Health"},
   {id:"outcome",l:"Outcome",g:"Departure"},
   {id:"files",l:"Files",g:"Records"},{id:"breakdown",l:"Breakdown",g:"Records"},{id:"report",l:"Report",g:"Records"}
@@ -412,11 +412,11 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.111",date:"2026-08-24",note:"The record\u0027s tabs make sense again. Rehoming and Outcome are no longer squashed into one confusing group: the old Rehoming tab is now called Clearance and lives under Assessment (it\u0027s the cleared-for-rehoming decision and suitability \u2014 assessment work), and Outcome stands alone under Departure. The word Rehoming now means one thing only: the board. Every Back and Next button at the bottom of every tab now follows the actual tab order \u2014 two of them pointed at an Exercise tab that hasn\u0027t existed for months (a blank page if you hit them), and several others jumped half the app. And the two worlds finally connect: set a dog\u0027s outcome to Rehomed and the tab shows who adopted them, pulled straight from the board \u2014 or warns you if the adoption was never recorded there."},
+var CHANGELOG=[{version:"3.112",date:"2026-08-24",note:"The Exercise tab is back \u2014 parked since v3.54 waiting for a laptop in the unit, restored now that it\u0027s there. It sits in Isolation between the 5-Day Report and Feeding: log each session \u2014 lead walk, yard time, enrichment and the rest \u2014 with minutes, who did it and a note (notes tap-to-edit like the buddy walks). Every walk logged before the tab was parked is still on the dogs\u0027 records and shows straight away. Walks due is back on the dashboard\u0027s needs-attention row too: any dog with nothing logged today gets flagged, which is exactly why it left \u2014 now there\u0027s a way to answer it."},
+  {version:"3.111",date:"2026-08-24",note:"The record\u0027s tabs make sense again. Rehoming and Outcome are no longer squashed into one confusing group: the old Rehoming tab is now called Clearance and lives under Assessment (it\u0027s the cleared-for-rehoming decision and suitability \u2014 assessment work), and Outcome stands alone under Departure. The word Rehoming now means one thing only: the board. Every Back and Next button at the bottom of every tab now follows the actual tab order \u2014 two of them pointed at an Exercise tab that hasn\u0027t existed for months (a blank page if you hit them), and several others jumped half the app. And the two worlds finally connect: set a dog\u0027s outcome to Rehomed and the tab shows who adopted them, pulled straight from the board \u2014 or warns you if the adoption was never recorded there."},
   {version:"3.110",date:"2026-08-24",note:"Two removals you asked for: the Print button is gone from the dashboard, and the Vacc record print button is gone from Medical. The vaccination list itself is untouched \u2014 just the printable card is retired."},
   {version:"3.109",date:"2026-08-24",note:"The Unit map is gone \u2014 tried, not wanted, removed cleanly. Nothing else changes."},
-  {version:"3.108",date:"2026-08-24",note:"The dogs side has its mark. The black dog on brand lime \u2014 from the same family as the cat \u2014 is now the browser-tab icon, and both home-screen icons (the round one and the square one) carry it too. Deploy all three files again: index.html, icon-round.png and icon-square.png."},
-  {version:"3.107",date:"2026-08-23",note:"New in the menu: Overview sheet. One tap builds a spreadsheet of every animal in care \u2014 a Dogs tab and a Cats tab, each with colour-banded sections (Basics, Health, Assessment, Adoption, and blank Enter-here columns for notes, foster and vet bookings) plus a Summary tab with the counts. It downloads as an Excel file that Google Sheets opens with all the colours intact \u2014 in Sheets, File then Import. The adoption columns fill themselves from the rehoming board. Housekeeping underneath: the app\u0027s two home-screen icons now live as their own files instead of being baked into this one, which keeps the app under the size where publishing starts failing \u2014 so this update is THREE files: index.html plus icon-round.png and icon-square.png, all in the same folder."}
+  {version:"3.108",date:"2026-08-24",note:"The dogs side has its mark. The black dog on brand lime \u2014 from the same family as the cat \u2014 is now the browser-tab icon, and both home-screen icons (the round one and the square one) carry it too. Deploy all three files again: index.html, icon-round.png and icon-square.png."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -664,6 +664,66 @@ var EX_TYPES=[
   {key:"Enrichment",icon:"&#129504;",short:"E"}
 ];
 
+var EXERCISE_TYPES=["Lead walk","Off-lead run","Yard time","Enrichment","Play session","Training session","Grooming / handling","Other"];
+function addExercise(){
+  var d=document.getElementById("ex-date");var t=document.getElementById("ex-type");var mn=document.getElementById("ex-mins");var by=document.getElementById("ex-by");var nt=document.getElementById("ex-notes");
+  var date=(d&&d.value)||new Date().toISOString().slice(0,10);
+  var type=(t&&t.value)||"";
+  if(!type){appAlert("Pick what kind of session it was.");return;}
+  if(!S.exercises)S.exercises=[];
+  S.exercises.push({date:date,type:type,minutes:(mn&&mn.value)?parseInt(mn.value)||"":"",by:(by&&by.value.trim())||currentName(),notes:(nt&&nt.value.trim())||""});
+  saveRecord();renderMain();
+}
+function deleteExercise(i){appConfirm("Delete this session from the log?",function(){S.exercises.splice(i,1);saveRecord();renderMain();},{danger:true});}
+function editExerciseNotes(i){
+  var e=(S.exercises||[])[i];if(!e)return;
+  var ov=document.createElement("div");ov.className="cf-ov";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(15,23,42,0.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999";
+  ov.onclick=function(ev){if(ev.target===ov)ov.remove();};
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:420px;width:100%;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,0.3)"><div style="font-size:14px;font-weight:700;margin-bottom:8px">Notes \u2014 '+esc(e.type)+' \u00b7 '+fmtDMY(e.date)+'</div><textarea id="exn-notes" style="width:100%;min-height:100px;padding:9px 11px;border:1px solid rgba(15,23,42,0.14);border-radius:9px;font-size:13px;font-family:inherit;resize:vertical">'+esc(e.notes||"")+'</textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn" onclick="this.closest(\'.cf-ov\').remove()">Cancel</button><button class="btn btnp" onclick="saveExerciseNotes('+i+')">Save</button></div></div>';
+  document.body.appendChild(ov);
+}
+function saveExerciseNotes(i){
+  var ta=document.getElementById("exn-notes");if(!ta)return;
+  S.exercises[i].notes=ta.value.trim();
+  var ov=document.querySelector(".cf-ov");if(ov)ov.remove();
+  saveRecord();renderMain();
+}
+function renderExercise(){
+  var exs=(S.exercises||[]).slice();
+  var today=new Date().toISOString().slice(0,10);
+  var todayN=exs.filter(function(e){return e.date===today;}).length;
+  var weekAgo=new Date(Date.now()-6*864e5).toISOString().slice(0,10);
+  var weekN=exs.filter(function(e){return String(e.date||"")>=weekAgo;}).length;
+  var banner=todayN?hybridBanner(todayN+" session"+(todayN>1?"s":"")+" logged today","ok"):hybridBanner("Nothing logged today yet","warn");
+  var tiles=hybridTiles([
+    {label:"Today",value:String(todayN),tone:todayN?"":"warn"},
+    {label:"Last 7 days",value:String(weekN)},
+    {label:"All time",value:String(exs.length)}
+  ]);
+  var form='<div style="display:grid;grid-template-columns:130px 1fr 90px 130px;gap:8px;margin-bottom:8px">'
+    +'<div class="f"><label class="lbl">Date</label><input type="date" id="ex-date" value="'+today+'"></div>'
+    +'<div class="f"><label class="lbl">Session</label><select id="ex-type">'+EXERCISE_TYPES.map(function(t){return '<option>'+t+'</option>';}).join("")+'</select></div>'
+    +'<div class="f"><label class="lbl">Minutes</label><input type="number" id="ex-mins" min="1" placeholder="\u2014"></div>'
+    +'<div class="f"><label class="lbl">By</label><input type="text" id="ex-by" value="'+esc(currentName())+'"></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:14px"><input type="text" id="ex-notes" placeholder="anything worth noting \u2014 pulled hard, settled well, loved the snuffle mat" style="flex:1;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px"><button class="btn btnp" onclick="addExercise()">Log it</button></div>';
+  var sorted=exs.map(function(e,i){return{e:e,i:i};}).sort(function(a,b){return String(b.e.date||"").localeCompare(String(a.e.date||""));});
+  var rows=sorted.map(function(w){var e=w.e;
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12.5px">'
+      +'<span style="color:#94a3b8;width:66px;flex-shrink:0">'+fmtDMY(e.date)+'</span>'
+      +'<span style="font-weight:600;min-width:110px">'+esc(e.type||"")+'</span>'
+      +(e.minutes?'<span style="color:#64748b">'+e.minutes+' min</span>':'')
+      +(e.by?'<span style="color:#94a3b8;font-size:11px">'+esc(e.by)+'</span>':'')
+      +'<span onclick="editExerciseNotes('+w.i+')" title="Tap to edit the notes" style="flex:1;color:#64748b;font-size:11.5px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(e.notes?esc(e.notes)+' <span style="opacity:.45">\u270e</span>':'<span style="opacity:.5">+ notes</span>')+'</span>'
+      +'<button onclick="deleteExercise('+w.i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0">&#10005;</button>'
+      +'</div>';
+  }).join("")||'<div style="font-size:11.5px;color:#cbd5e1;padding:6px 0">Nothing logged yet \u2014 the first session starts the record.</div>';
+  return '<h2>Exercise &amp; enrichment</h2><div class="sub">Walks, yard time and enrichment \u2014 logged per session.</div>'
+    +'<div class="card">'+banner+tiles+form
+    +'<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:4px 0 4px">The log</div>'
+    +rows+'</div>'+browNav("exercise");
+}
 function getTodaysExercises(rec){
   var today=new Date().toISOString().slice(0,10);
   var ex=(rec&&rec.state&&rec.state.exercises)||[];
@@ -1589,7 +1649,7 @@ function tasksRollupHtml(activeRecords){
   var today=new Date().toISOString().slice(0,10);
   var thisWeek=weekStartStr(today);
   var act=activeRecords.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
-  var cats={returns:[],finishing:[],vaccs:[],paras:[],weighs:[],meds:[],reports:[]};
+  var cats={returns:[],finishing:[],vaccs:[],paras:[],weighs:[],meds:[],reports:[],walks:[]};
   function vaccDue(med){
     var vl=(med&&med.vaccinations)||[];
     function dateOf(t){var e=vl.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(x){return x.type===t&&x.date;});return e?e.date:null;}
@@ -1602,6 +1662,7 @@ function tasksRollupHtml(activeRecords){
   act.forEach(function(r){
     if(!r.state)return;var med=r.state.medical||{};
     var _fo=r.state.fin?r.state.fin.outcome:"";if(_fo!=="Finished Isolation"&&daysInIsolation(r.intakeDate)===5+isoExtraDays(r.state.dog))cats.finishing.push(r);
+    if(!getTodaysExercises(r).length)cats.walks.push(r);
     if((med.medications||[]).some(function(mm){return !mm.endDate||mm.endDate>=today;}))cats.meds.push(r);
     (function(){var _o2=r.state.fin?r.state.fin.outcome:"";if(_o2&&_o2!=="Active — in isolation"&&_o2!=="Active - in isolation")return;var _dn=daysInIsolation(r.intakeDate);if(!_dn||_dn>5+isoExtraDays(r.state.dog))return;var _de=(r.state.days||[])[Math.min(_dn,5)-1];var _has=_de&&(_de.demeanour||_de.feeding||_de.toileting||_de.staffInt||_de.incidents||_de.notes);if(!_has)cats.reports.push(r);})();
     (function(){
@@ -1620,7 +1681,7 @@ function tasksRollupHtml(activeRecords){
     if(paraDue)cats.paras.push(r);
     var wts=r.state.weights||[];if((r.state.dog&&r.state.dog.intakeDate)&&!wts.find(function(w){return w.date>=thisWeek&&w.date<=today;}))cats.weighs.push(r);
   });
-  var defs=[["returns","Reclaim / due back","#991b1b","#fee2e2"],["finishing","Finishing today","#0d9488","#ccfbf1"],["reports","Daily report due","#7c3aed","#f3e8ff"],["meds","On medication","#9d174d","#fce7f3"],["vaccs","Vaccines due","#a16207","#fef9c3"],["paras","Parasite tx due","#a16207","#fef9c3"],["weighs","Weigh-ins due","#0d9488","#ccfbf1"]];
+  var defs=[["returns","Reclaim / due back","#991b1b","#fee2e2"],["finishing","Finishing today","#0d9488","#ccfbf1"],["reports","Daily report due","#7c3aed","#f3e8ff"],["meds","On medication","#9d174d","#fce7f3"],["vaccs","Vaccines due","#a16207","#fef9c3"],["paras","Parasite tx due","#a16207","#fef9c3"],["weighs","Weigh-ins due","#0d9488","#ccfbf1"],["walks","Walks due","#0d9488","#ccfbf1"]];
   var items=defs.filter(function(d){return cats[d[0]].length;});
   if(!items.length)return"";
   var total=items.reduce(function(a,d){return a+cats[d[0]].length;},0);
@@ -5972,6 +6033,7 @@ function page(){
 
   if(t==="assessment")return pupAssessBanner()+renderAssessment();
   if(t==="sessions")return renderSessions();
+  if(t==="exercise")return renderExercise();
   if(t==="medical")return renderMedical();
   if(t==="weights")return renderWeights();
   if(t==="feeding")return renderFeeding();
