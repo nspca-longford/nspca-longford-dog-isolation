@@ -317,6 +317,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
           <div onclick="dashMenuGo('stats')" class="dmi">&#128202; Stats</div>
           <div onclick="closeDashMenu();exportCSV()" class="dmi">&#128229; Export CSV</div>
           <div onclick="closeDashMenu();exportOverviewSheet()" class="dmi">&#128200; Overview sheet</div>
+          <div onclick="closeDashMenu();exportRTG()" class="dmi">&#128203; RTG sheet</div>
           <div class="dml">Areas</div>
           <div onclick="location.href='cats.html'" class="dmi">🐱 Cats</div>
           <div class="dml">Team &amp; data</div>
@@ -412,7 +413,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.120",date:"2026-08-25",note:"Daily rounds, one tap. Every dashboard card now has Walk and Fed buttons \u2014 tap to log a lead walk or a meal (using the dog\u0027s feeding plan grams) straight from the board, no record-opening. Logged ones turn green with a tick; tap again for a second session. Full details still editable in the Care tabs. The Incoming strip now saves to the shared database, so expected arrivals show on every device \u2014 until the database table is created it says \u2018this device only\u2019 and keeps working locally. And the batch weigh-in and vaccine due lists now walk the building in the same order as the dashboard: kennels, pods, crate."},{version:"3.119",date:"2026-08-25",note:"The Crate is now a proper place: pick it in the Kennel / Pod dropdown on the Dog tab, and on the dashboard it gets its own section after the pods \u2014 Kennels, Pods, Crate, then everything else. Also fixed the layout hole where the Pods heading started: the divider was using the wrong layout rule so it squeezed into a card-sized cell and left a gap in the row \u2014 it now spans the full width like it always should have."},{version:"3.118",date:"2026-08-25",note:"Fixed the Incoming strip \u2014 its buttons were redrawing the record screen behind the scenes instead of the dashboard in front of you, so taps looked like they did nothing. Add, close, remove and the mini-form all respond properly now."},{version:"3.117",date:"2026-08-25",note:"Full audit pass. Found and fixed the Kennel card button on the Dog tab \u2014 it\u0027s been silently broken (it tried to open a companion page that doesn\u0027t exist), so tapping it did nothing. It now builds the printable card itself in a new tab: name and kennel up top, isolation and handling-light chips, contagious and restricted-breed flags, warnings in red, the facts, feeding, meds and walking rule, with a Print button. Everything else checked out \u2014 all 19 tabs, every navigation link, all the dashboard views and both apps\u0027 databases wiring."},{version:"3.116",date:"2026-08-25",note:"Every record now has a Story tab \u2014 first thing in Records. It reads the whole file \u2014 arrival, day reports, weights, vet work, meds, exercise, buddy walks, notes, incidents, scoring, clearance, outcome \u2014 and lays it out as one dated timeline, oldest to newest, so you can hand anyone the dog\u0027s whole journey at a glance. Filter it down to just Medical, Behaviour or Notes, tap any entry to jump to where it was logged, and Copy for vet turns the lot into plain text for an email. Nothing new to fill in \u2014 it builds itself from what\u0027s already there."}
+var CHANGELOG=[{version:"3.124",date:"2026-08-25",note:"The RTG sheet builds itself now. \u2630 menu \u2192 RTG sheet downloads an Excel file in the exact SharePoint layout \u2014 Play Assessment, Age Group, Web Bio, Kennel No., Name & Gender, A&D, Breed & Age, Notes \u2014 one row per active dog in building order. Play assessments come from the logged playdates and buddy walks, notes gather warnings, feeding plan and the latest record notes, and dogs marked \u2018web bio: not yet\u2019 get the red N cell. That flag is the one new field: \u2018Web bio written?\u2019 on the Dog tab. Fill it and the sheet stops needing retyping \u2014 just paste over the Dogs tab."},{version:"3.123",date:"2026-08-25",note:"Meal-by-meal feeding log removed \u2014 it sat unused long enough that nobody noticed it couldn\u0027t even take entries, which answers whether it\u0027s needed. The Feeding tab is now just the standing plan: food, grams, frequency, diet type and special notes \u2014 the part the kennel card and dashboard actually read. Day-to-day appetite stays where it always really lived, in the daily reports."},{version:"3.122",date:"2026-08-25",note:"Rounds buttons removed from the dashboard \u2014 the board goes back to clean cards. Instead the Care tabs do the fast logging themselves, and this fixes a real hole: the Feeding tab had no way to log a meal at all (totals and history were there, adding wasn\u0027t). It now has a Log-a-meal card \u2014 one big \u2018Log meal now\u2019 tap that uses the plan\u0027s grams and stamps the time and Breakfast/Lunch/Dinner automatically, plus a grams-and-notes row for part-eaten meals and exceptions. Incoming sharing and the building-order sort from earlier stay as they were."},{version:"3.121",date:"2026-08-25",note:"Slimmed the rounds buttons \u2014 Walk and Fed are now two small icon chips tucked into the right end of the flag row instead of their own row, so cards stay the same height as before. Faint until logged, teal once done; hold or hover for the count."},{version:"3.120",date:"2026-08-25",note:"Daily rounds, one tap. Every dashboard card now has Walk and Fed buttons \u2014 tap to log a lead walk or a meal (using the dog\u0027s feeding plan grams) straight from the board, no record-opening. Logged ones turn green with a tick; tap again for a second session. Full details still editable in the Care tabs. The Incoming strip now saves to the shared database, so expected arrivals show on every device \u2014 until the database table is created it says \u2018this device only\u2019 and keeps working locally. And the batch weigh-in and vaccine due lists now walk the building in the same order as the dashboard: kennels, pods, crate."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1309,6 +1310,66 @@ function buildOverviewAOA(){
     ["Green",tl.Green,""],["Yellow",tl.Yellow,""],["Red",tl.Red,""],["Black",tl.Black,""],["Contagious (dogs)",conD,""],["","",""],
     ["Adoptions this month",adoptedMonth,""]];
   return{dogs:{bands:dogsBands,head:dogsHead,rows:dogsRows},cats:{bands:catsBands,head:catsHead,rows:catsRows},summary:summary};
+}
+function rtgPlayAssessment(st){
+  var as=(st&&st.assessment)||{};
+  var pool=[];
+  (as.playdates||[]).forEach(function(x){pool.push({d:x.date||"",txt:"PA "+fmtDMY(x.date)+" with "+(x.dog||"?")+(x.result?" \u2014 "+x.result:"")});});
+  (as.buddyWalks||[]).forEach(function(x){pool.push({d:x.date||"",txt:"Buddy walk "+fmtDMY(x.date)+" with "+(x.dog||"?")+(x.result?" \u2014 "+x.result:"")});});
+  if(!pool.length)return "Needs PA";
+  pool.sort(function(a,b){return b.d.localeCompare(a.d);});
+  return pool.slice(0,2).map(function(p){return p.txt;}).join("\n");
+}
+function rtgAgeGroup(age){
+  var a=String(age||"").toLowerCase();if(!a)return "";
+  if(/week|month/.test(a)&&!/1[2-9]\s*month|[2-9][0-9]\s*month/.test(a))return "Puppy";
+  if(/^(0?\.[0-9]|0)\s*(y|$)/.test(a))return "Puppy";
+  return "Adult";
+}
+function rtgKennelShort(k){
+  var m=String(k||"").match(/^k(?:ennel)?\s*\.?\s*(\d+)/i);if(m)return "K"+m[1];
+  m=String(k||"").match(/^pod\s*\.?\s*(\d+)/i);if(m)return "Pod "+m[1];
+  return k||"";
+}
+function rtgNotes(r){
+  var st=r.state||{};var bits=[];
+  var rb=restrictedBreedInfo((st.dog&&st.dog.breed)||r.breed);
+  if(rb)bits.push(rb.xl?"\u26a0 "+rb.name+" \u2014 banned breed, cannot be rehomed":"\u26a0 "+rb.name+" \u2014 muzzle + lead in public");
+  (st.warnings||[]).forEach(function(w){bits.push("\u26a0 "+w.text);});
+  var fp=st.feedingPlan||{};
+  var feed=[fp.brand,fp.grams?fp.grams+"g":"",fp.frequency].filter(Boolean).join(" \u00b7 ");
+  if(feed)bits.push("Feeding: "+feed);
+  if(fp.notes)bits.push(fp.notes);
+  var ns=(st.notes||[]).slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");}).slice(0,2);
+  ns.forEach(function(n){bits.push(fmtDMY(n.date)+": "+n.text);});
+  return bits.join("\n");
+}
+async function exportRTG(){
+  miniToast("Building the RTG sheet\u2026");
+  try{
+    try{await loadScriptOnce("https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js");}
+    catch(e){await loadScriptOnce("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js");}
+  }catch(e){appAlert("Couldn\u0027t load the spreadsheet builder \u2014 check the connection and try again.");return;}
+  var X=window.XLSX;var wb=X.utils.book_new();
+  var head=["Play Assessment","Age Group","Web Bio","Kennel No.","Name & Gender","A&D","Breed & Age","Notes"];
+  var act=roundsActiveDogs();
+  var rows=act.map(function(r){
+    var d=(r.state&&r.state.dog)||{};
+    var sx=/^f/i.test(d.sex||"")?" (F)":(/^m/i.test(d.sex||"")?" (M)":"");
+    return[rtgPlayAssessment(r.state),rtgAgeGroup(d.age),d.webBio||"",rtgKennelShort(d.kennel),(r.name||"")+sx,r.refNo||d.refNo||"",[d.breed||r.breed||"",d.age||""].filter(Boolean).join("  "),rtgNotes(r)];
+  });
+  var ws=X.utils.aoa_to_sheet([head].concat(rows));
+  for(var c=0;c<head.length;c++){var a=X.utils.encode_cell({r:0,c:c});if(ws[a])ws[a].s={fill:{fgColor:{rgb:"FDE68A"}},font:{bold:true,color:{rgb:"1A2233"}},alignment:{horizontal:"center"}};}
+  for(var rI=0;rI<rows.length;rI++){
+    if(rows[rI][2]==="N"){var cw=X.utils.encode_cell({r:rI+1,c:2});if(ws[cw])ws[cw].s={fill:{fgColor:{rgb:"F87171"}},font:{bold:true,color:{rgb:"FFFFFF"}},alignment:{horizontal:"center"}};}
+    var cn=X.utils.encode_cell({r:rI+1,c:7});if(ws[cn])ws[cn].s={alignment:{wrapText:true,vertical:"top"}};
+    var cp=X.utils.encode_cell({r:rI+1,c:0});if(ws[cp])ws[cp].s={alignment:{wrapText:true,vertical:"top"}};
+  }
+  ws["!cols"]=[{wch:30},{wch:10},{wch:8},{wch:10},{wch:18},{wch:12},{wch:20},{wch:60}];
+  ws["!rows"]=[{hpt:20}].concat(rows.map(function(){return{hpt:44};}));
+  X.utils.book_append_sheet(wb,ws,"Dogs");
+  X.writeFile(wb,"nspca-rtg-"+new Date().toISOString().slice(0,10)+".xlsx");
+  miniToast("RTG sheet downloaded \u2014 "+rows.length+" dog"+(rows.length===1?"":"s"));
 }
 async function exportOverviewSheet(){
   miniToast("Building the overview sheet\u2026");
@@ -2766,7 +2827,6 @@ function renderDashboard(){
       +'<div class="dbottom"><div class="drow"><div class="dstatus"><span class="dd"></span>'+tlLabelTxt+'</div>'+(dayLabelTxt?'<div class="dayno">'+dayLabelTxt+'</div>':'')+'</div>'
       +(dayLabelTxt?'<div style="background:#eceef1;border-radius:20px;height:4px;overflow:hidden;margin-top:7px"><div style="background:'+col+';width:'+barPct+'%;height:100%;border-radius:20px"></div></div>':'')
       +(flagsHtml?'<div class="dflagrow">'+flagsHtml+'</div>':'')
-      +(function(){var _o3=rec.state&&rec.state.fin?rec.state.fin.outcome:"";if(_o3&&_o3!=="Active \u2014 in isolation"&&_o3!=="Active - in isolation")return"";var _tdy=new Date().toISOString().slice(0,10);var _wN=getTodaysExercises(rec).length;var _fN=((rec.state&&rec.state.feeding)||[]).filter(function(f){return f.date===_tdy;}).length;var _pill=function(done,n,ic,lbl,fn){return '<button onclick="event.stopPropagation();'+fn+'('+rec.id+')" title="'+(done?'Logged '+n+' today \u2014 tap to add another':'Tap to log')+'" style="background:'+(done?'#ccfbf1':'none')+';color:'+(done?'#0f6e56':'#94a3b8')+';border:0.5px solid '+(done?'#ccfbf1':'var(--color-border-secondary)')+';padding:2px 9px;border-radius:12px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">'+ic+' '+(done?'\u2713'+(n>1?' '+n:''):lbl)+'</button>';};return '<div style="display:flex;gap:5px;margin-top:8px">'+_pill(_wN>0,_wN,'\ud83d\udeb6','Walk','quickWalk')+_pill(_fN>0,_fN,'\ud83c\udf7d\ufe0f','Fed','quickFed')+'</div>';})()
       +'</div></div></div>';
   }).map(function(_h,_ci){
     if(_o!=="kennel")return _h;
@@ -2866,8 +2926,6 @@ function copyStory(){
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){appAlert("Story copied \u2014 paste it into an email or document.");},function(){appAlert("Couldn\u0027t copy automatically \u2014 use the Report tab\u0027s copy instead.");});}
   else{appAlert("Couldn\u0027t copy automatically \u2014 use the Report tab\u0027s copy instead.");}
 }
-function quickWalk(id){var rec=records.find(function(r){return r.id===id;});if(!rec||!rec.state)return;var today=new Date().toISOString().slice(0,10);if(!rec.state.exercises)rec.state.exercises=[];var e={date:today,type:"Lead walk",minutes:"",by:currentName()||"",notes:""};rec.state.exercises.push(e);if(S&&S._id===id){if(!S.exercises)S.exercises=[];S.exercises.push(JSON.parse(JSON.stringify(e)));persistSave();}saveRecordChange(rec);renderDashboard();if(typeof miniToast==="function")miniToast((rec.name||"Dog")+" \u2014 walk logged");}
-function quickFed(id){var rec=records.find(function(r){return r.id===id;});if(!rec||!rec.state)return;var today=new Date().toISOString().slice(0,10);var hm=new Date();var tm=("0"+hm.getHours()).slice(-2)+":"+("0"+hm.getMinutes()).slice(-2);if(!rec.state.feeding)rec.state.feeding=[];var g=(rec.state.feedingPlan&&rec.state.feedingPlan.grams)||"";var e={date:today,time:tm,meal:"Meal",status:"",grams:g,notes:""};rec.state.feeding.push(e);if(S&&S._id===id){if(!S.feeding)S.feeding=[];S.feeding.push(JSON.parse(JSON.stringify(e)));persistSave();}saveRecordChange(rec);renderDashboard();if(typeof miniToast==="function")miniToast((rec.name||"Dog")+" \u2014 meal logged"+(g?" ("+g+"g)":""));}
 function openNewDog(){appConfirm("Start a new dog? Current unsaved data will be cleared.",function(){S=defaultState();persistSave();showScreen("wrap");S.tab="dog";render();});}
 
 // ── Family trail (mums, pups, litters) ────────────────────────────
@@ -4324,70 +4382,9 @@ function renderFeeding(){
   h+=ta("Special notes (allergies, restrictions, vet-prescribed amounts...)",fp.notes||"","feedingPlan.notes","");
   h+='</div>';
 
-  // Today's total
-  var todaysList=S.feeding.filter(function(f){return f.date===today;});
-  var todayTotal=todaysList.reduce(function(a,f){return a+(parseFloat(f.grams)||0);},0);
-  var target=parseFloat(fp.grams)||0;
-  var freq=fp.frequency==="Twice daily"?2:fp.frequency==="Three times daily"?3:fp.frequency==="Once daily"?1:0;
-  var targetTotal=target*freq;
-  if(todaysList.length||targetTotal){
-    h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Today\'s total</div>';
-    h+='<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px"><div style="font-size:28px;font-weight:800;color:#0f172a">'+todayTotal+'<span style="font-size:14px;color:#64748b;font-weight:500">g</span></div>';
-    if(targetTotal)h+='<div style="font-size:13px;color:#64748b">of '+targetTotal+'g target</div>';
-    h+='</div>';
-    if(targetTotal){
-      var pct=Math.min(100,Math.round((todayTotal/targetTotal)*100));
-      var col=pct>=90?"#16a34a":pct>=50?"#f59e0b":"#dc2626";
-      h+='<div style="background:#e2e8f0;border-radius:20px;height:8px;overflow:hidden"><div style="background:'+col+';width:'+pct+'%;height:100%;transition:width 0.3s"></div></div>';
-    }
-    if(todaysList.length){
-      h+='<div style="margin-top:14px;padding-top:10px;border-top:1px solid #e2e8f0">';
-      todaysList.slice().sort(function(a,b){return(b.time||"").localeCompare(a.time||"");}).forEach(function(f){
-        var oi=S.feeding.indexOf(f);
-        h+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px"><span style="font-size:11px;color:#64748b;min-width:40px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(f.time||"")+'</span><span style="font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:20px;background:'+(f.status==="partial"?"#fef9c3":"#dcfce7")+';color:'+(f.status==="partial"?"#854d0e":"#166534")+';white-space:nowrap">'+esc(f.meal||"Meal")+'</span><span style="flex:1;color:#64748b;font-size:11px">'+f.grams+'g'+(f.notes?" &middot; "+esc(f.notes):"")+'</span><button onclick="deleteFeeding('+oi+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer">&#10005;</button></div>';
-      });
-      h+='</div>';
-    }
-    h+='</div>';
-  }
-
-  // 14-day chart
-  if(S.feeding.length){
-    var days=[];var d=new Date(today);
-    for(var i=0;i<14;i++){var ds=d.toISOString().slice(0,10);var de=S.feeding.filter(function(f){return f.date===ds;});days.unshift({date:ds,total:de.reduce(function(a,f){return a+(parseFloat(f.grams)||0);},0),count:de.length});d.setDate(d.getDate()-1);}
-    var maxDay=Math.max.apply(null,days.map(function(x){return x.total;}).concat([targetTotal||100]));
-    h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px">Last 14 days</div>';
-    h+='<div style="display:flex;align-items:flex-end;gap:3px;height:80px;padding:0 4px">';
-    days.forEach(function(day){
-      var pct=maxDay?Math.round((day.total/maxDay)*100):0;
-      var col=targetTotal?(day.total>=targetTotal*0.9?"#16a34a":day.total>=targetTotal*0.5?"#f59e0b":day.total>0?"#dc2626":"#e2e8f0"):day.total>0?"#0d9488":"#e2e8f0";
-      h+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="width:100%;height:'+pct+'%;background:'+col+';border-radius:3px 3px 0 0;min-height:'+(day.total>0?"3px":"0")+'" title="'+fmtDMY(day.date)+': '+day.total+'g"></div></div>';
-    });
-    h+='</div><div style="display:flex;gap:3px;margin-top:6px;padding:0 4px">';
-    days.forEach(function(day){var d2=new Date(day.date);h+='<div style="flex:1;text-align:center;font-size:9px;color:#94a3b8">'+d2.getDate()+'</div>';});
-    h+='</div></div>';
-
-    // Full history
-    h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px">All entries &middot; '+S.feeding.length+'</div>';
-    var sorted=S.feeding.slice().sort(function(a,b){var c=(b.date||"").localeCompare(a.date||"");return c!==0?c:(b.time||"").localeCompare(a.time||"");});
-    var byDate={};sorted.forEach(function(f){if(!byDate[f.date])byDate[f.date]=[];byDate[f.date].push(f);});
-    Object.keys(byDate).sort().reverse().forEach(function(date){
-      var dayLbl=fmtDMYwk(date);
-      var dayTotal=byDate[date].reduce(function(a,f){return a+(parseFloat(f.grams)||0);},0);
-      h+='<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e2e8f0;margin-bottom:5px"><span style="font-size:12px;font-weight:700;color:#0f172a">'+dayLbl+(date===today?" &middot; Today":"")+'</span><span style="font-size:11px;color:#0d9488;font-weight:700">'+dayTotal+'g</span></div>';
-      byDate[date].forEach(function(f){
-        var oi=S.feeding.indexOf(f);
-        h+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:11px"><span style="color:#64748b;min-width:40px">'+esc(f.time||"")+'</span><span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;background:'+(f.status==="partial"?"#fef9c3":"#dcfce7")+';color:'+(f.status==="partial"?"#854d0e":"#166534")+';white-space:nowrap">'+esc(f.meal||"")+'</span><span style="flex:1;color:#64748b">'+f.grams+'g'+(f.notes?" &middot; "+esc(f.notes):"")+'</span><button onclick="deleteFeeding('+oi+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:1px 6px;font-size:9px;cursor:pointer">&#10005;</button></div>';
-      });
-      h+='</div>';
-    });
-    h+='</div>';
-  }
-
-  h+=browNav("feeding");
+  h+='<div style="font-size:11.5px;color:#94a3b8;margin:4px 2px 0">Day-to-day appetite lives in the daily reports \u2014 this tab holds the standing plan the kennel card and board read from.</div>';
   return h;
 }
-function deleteFeeding(idx){appConfirm("Delete this feeding entry?",function(){S.feeding.splice(idx,1);saveRecord();renderMain();},{danger:true});}
 
 // ── Timeline ──────────────────────────────────────────────────────
 
@@ -5825,7 +5822,7 @@ function page(){
     var identity='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Identity</span>'
       +'</div>'+'<div class="dog-fg">'+fld("Dog name",d.name,"dog.name","text","e.g. Bailey",'onblur="checkDuplicateName()" id="dog-name-input"')+fld("Reference no.",d.refNo,"dog.refNo","text","e.g. 023-MH-2026")+breedSlct(d.breed)+slct("Sex",d.sex,"dog.sex",[["Male","Male"],["Female","Female"],["Male (N)","Male (Neutered)"],["Female (S)","Female (Spayed)"],["Unknown","Unknown"]])+'</div>'+'<div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">&#9888; There&rsquo;s already an active dog with this name.</div>'+'<div class="f"><label class="lbl">Crossbreed</label><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0"><input type="checkbox" data-save="dog.crossbreed" '+(d.crossbreed?"checked":"")+' onchange="S.dog.crossbreed=this.checked;debouncedSave();renderMain()" style="width:18px;height:18px;cursor:pointer"><span style="font-size:13px">This dog is a crossbreed</span></label></div>'+(d.crossbreed?breedSlct(d.breed2,"dog.breed2","Crossed with"):'')+'<div class="dog-fg">'+fld("Date of birth (if known)",d.dob||"","dog.dob","date")+slct("Age (approx.)",d.age,"dog.age",ageOptions(d.age))+slct("Size",d.size,"dog.size",[["","-- select --"],["Small (under 10kg)","Small (under 10kg)"],["Medium (10-25kg)","Medium (10-25kg)"],["Large (25-40kg)","Large (25-40kg)"],["XL (over 40kg)","XL (over 40kg)"]])+slct("Colour / markings",d.colour,"dog.colour",[["","-- select --"],["Black","Black"],["White","White"],["Cream","Cream"],["Golden","Golden"],["Fawn","Fawn"],["Tan","Tan"],["Red / Chestnut","Red / Chestnut"],["Brown / Chocolate","Brown / Chocolate"],["Blue / Grey","Blue / Grey"],["Sable","Sable"],["Black and White","Black and White"],["Black and Tan","Black and Tan"],["Brown and White","Brown and White"],["Tri-colour","Tri-colour"],["Brindle","Brindle"],["Merle","Merle"],["Other","Other"]])+wfld(d.weight)+fld("Microchip no.",d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')+'</div>'+'<div id="chip-info" style="margin:0 0 4px;font-size:11px">'+chipInfoHtml(d.microchip)+'</div></div>';
 
-    var intake='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Intake</div>'+'<div class="dog-fg">'+slct("Kennel / Pod",d.kennel,"dog.kennel",[["",'-- not assigned --'],["Kennel 1","Kennel 1"],["Kennel 2","Kennel 2"],["Kennel 3","Kennel 3"],["Kennel 4","Kennel 4"],["Kennel 5","Kennel 5"],["Kennel 6","Kennel 6"],["Pod 1","Pod 1"],["Pod 2","Pod 2"],["Pod 3","Pod 3"],["Pod 4","Pod 4"],["Crate","Crate"]])+fld("Assessor",d.assessor,"dog.assessor","text","e.g. Shane")+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()+slct("Reason for intake",d.intakeReason,"dog.intakeReason",[["Stray","Stray"],["Owner surrender","Owner surrender"],["Cruelty case","Cruelty case"],["Transfer","Transfer from another centre"],["Other","Other"]])+slct("Return / reclaim",d.returnType||"","dog.returnType",[["","-- not a return --"],["Returned from adoption","Returned from adoption"],["Back from foster / trial","Back from foster / trial"],["Owner-reclaim deadline","Owner-reclaim deadline (stray)"]])+(d.returnType?fld(returnDateLabel(d.returnType),d.returnDate||"","dog.returnDate","date"):"")+'</div></div>';
+    var intake='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Intake</div>'+'<div class="dog-fg">'+slct("Kennel / Pod",d.kennel,"dog.kennel",[["",'-- not assigned --'],["Kennel 1","Kennel 1"],["Kennel 2","Kennel 2"],["Kennel 3","Kennel 3"],["Kennel 4","Kennel 4"],["Kennel 5","Kennel 5"],["Kennel 6","Kennel 6"],["Pod 1","Pod 1"],["Pod 2","Pod 2"],["Pod 3","Pod 3"],["Pod 4","Pod 4"],["Crate","Crate"]])+fld("Assessor",d.assessor,"dog.assessor","text","e.g. Shane")+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()+slct("Reason for intake",d.intakeReason,"dog.intakeReason",[["Stray","Stray"],["Owner surrender","Owner surrender"],["Cruelty case","Cruelty case"],["Transfer","Transfer from another centre"],["Other","Other"]])+slct("Return / reclaim",d.returnType||"","dog.returnType",[["","-- not a return --"],["Returned from adoption","Returned from adoption"],["Back from foster / trial","Back from foster / trial"],["Owner-reclaim deadline","Owner-reclaim deadline (stray)"]])+(d.returnType?fld(returnDateLabel(d.returnType),d.returnDate||"","dog.returnDate","date"):"")+slct("Web bio written?",d.webBio||"","dog.webBio",[["","\u2014"],["Y","Yes \u2014 on the website"],["N","Not yet"]])+'</div></div>';
 
     var admDivider='<div style="font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin:18px 0 10px;display:flex;align-items:center;gap:10px">Status &amp; admin<span style="flex:1;height:1px;background:#e2e8f0"></span></div>';
     var isoStatus=ii?(ii.state==="done"?"Complete":(ii.awaitVax?"Until 1st vax \u00b7 day "+ii.day:(ii.day<=0?"Arrived today":"Day "+ii.day+" of "+ii.total))):"No intake date";
