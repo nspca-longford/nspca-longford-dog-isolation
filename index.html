@@ -317,7 +317,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
           <div onclick="dashMenuGo('stats')" class="dmi">&#128202; Stats</div>
           <div onclick="closeDashMenu();exportCSV()" class="dmi">&#128229; Export CSV</div>
           <div onclick="closeDashMenu();exportOverviewSheet()" class="dmi">&#128200; Overview sheet</div>
-          <div onclick="closeDashMenu();exportRTG()" class="dmi">&#128203; RTG sheet</div>
+          <div onclick="closeDashMenu();exportDogSheet()" class="dmi">&#128062; Dog sheet</div>
           <div class="dml">Areas</div>
           <div onclick="location.href='cats.html'" class="dmi">🐱 Cats</div>
           <div class="dml">Team &amp; data</div>
@@ -413,7 +413,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.124",date:"2026-08-25",note:"The RTG sheet builds itself now. \u2630 menu \u2192 RTG sheet downloads an Excel file in the exact SharePoint layout \u2014 Play Assessment, Age Group, Web Bio, Kennel No., Name & Gender, A&D, Breed & Age, Notes \u2014 one row per active dog in building order. Play assessments come from the logged playdates and buddy walks, notes gather warnings, feeding plan and the latest record notes, and dogs marked \u2018web bio: not yet\u2019 get the red N cell. That flag is the one new field: \u2018Web bio written?\u2019 on the Dog tab. Fill it and the sheet stops needing retyping \u2014 just paste over the Dogs tab."},{version:"3.123",date:"2026-08-25",note:"Meal-by-meal feeding log removed \u2014 it sat unused long enough that nobody noticed it couldn\u0027t even take entries, which answers whether it\u0027s needed. The Feeding tab is now just the standing plan: food, grams, frequency, diet type and special notes \u2014 the part the kennel card and dashboard actually read. Day-to-day appetite stays where it always really lived, in the daily reports."},{version:"3.122",date:"2026-08-25",note:"Rounds buttons removed from the dashboard \u2014 the board goes back to clean cards. Instead the Care tabs do the fast logging themselves, and this fixes a real hole: the Feeding tab had no way to log a meal at all (totals and history were there, adding wasn\u0027t). It now has a Log-a-meal card \u2014 one big \u2018Log meal now\u2019 tap that uses the plan\u0027s grams and stamps the time and Breakfast/Lunch/Dinner automatically, plus a grams-and-notes row for part-eaten meals and exceptions. Incoming sharing and the building-order sort from earlier stay as they were."},{version:"3.121",date:"2026-08-25",note:"Slimmed the rounds buttons \u2014 Walk and Fed are now two small icon chips tucked into the right end of the flag row instead of their own row, so cards stay the same height as before. Faint until logged, teal once done; hold or hover for the count."},{version:"3.120",date:"2026-08-25",note:"Daily rounds, one tap. Every dashboard card now has Walk and Fed buttons \u2014 tap to log a lead walk or a meal (using the dog\u0027s feeding plan grams) straight from the board, no record-opening. Logged ones turn green with a tick; tap again for a second session. Full details still editable in the Care tabs. The Incoming strip now saves to the shared database, so expected arrivals show on every device \u2014 until the database table is created it says \u2018this device only\u2019 and keeps working locally. And the batch weigh-in and vaccine due lists now walk the building in the same order as the dashboard: kennels, pods, crate."}
+var CHANGELOG=[{version:"3.126",date:"2026-08-25",note:"Dog sheet locked to the approved sketch \u2014 the Pods / Crate / no-kennel divider rows now carry through into the spreadsheet itself, slim grey lines between the sections exactly like the dashboard, so the printed sheet walks the building the same way the board does."},{version:"3.125",date:"2026-08-25",note:"RTG export replaced with our own, fuller sheet. \u2630 menu \u2192 Dog sheet downloads one row per active dog in building order, grouped into colour-banded sections: DOG (name, breed, kennel, A&D, chip) \u00b7 STAY (intake, day, reason) \u00b7 HEALTH (status, contagious in red, neutered, every vaccination with dates, active meds, latest vet note) \u00b7 ASSESSMENT (score, light, play sessions, EA category) \u00b7 REHOMING (clearance, web bio with the red N, applicant and stage) \u00b7 NOTES (warnings, feeding plan, latest notes). Everything pulled from the records \u2014 nothing typed twice."},{version:"3.124",date:"2026-08-25",note:"The RTG sheet builds itself now. \u2630 menu \u2192 RTG sheet downloads an Excel file in the exact SharePoint layout \u2014 Play Assessment, Age Group, Web Bio, Kennel No., Name & Gender, A&D, Breed & Age, Notes \u2014 one row per active dog in building order. Play assessments come from the logged playdates and buddy walks, notes gather warnings, feeding plan and the latest record notes, and dogs marked \u2018web bio: not yet\u2019 get the red N cell. That flag is the one new field: \u2018Web bio written?\u2019 on the Dog tab. Fill it and the sheet stops needing retyping \u2014 just paste over the Dogs tab."},{version:"3.123",date:"2026-08-25",note:"Meal-by-meal feeding log removed \u2014 it sat unused long enough that nobody noticed it couldn\u0027t even take entries, which answers whether it\u0027s needed. The Feeding tab is now just the standing plan: food, grams, frequency, diet type and special notes \u2014 the part the kennel card and dashboard actually read. Day-to-day appetite stays where it always really lived, in the daily reports."},{version:"3.122",date:"2026-08-25",note:"Rounds buttons removed from the dashboard \u2014 the board goes back to clean cards. Instead the Care tabs do the fast logging themselves, and this fixes a real hole: the Feeding tab had no way to log a meal at all (totals and history were there, adding wasn\u0027t). It now has a Log-a-meal card \u2014 one big \u2018Log meal now\u2019 tap that uses the plan\u0027s grams and stamps the time and Breakfast/Lunch/Dinner automatically, plus a grams-and-notes row for part-eaten meals and exceptions. Incoming sharing and the building-order sort from earlier stay as they were."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1344,32 +1344,85 @@ function rtgNotes(r){
   ns.forEach(function(n){bits.push(fmtDMY(n.date)+": "+n.text);});
   return bits.join("\n");
 }
-async function exportRTG(){
-  miniToast("Building the RTG sheet\u2026");
+async function exportDogSheet(){
+  miniToast("Building the dog sheet\u2026");
+  try{if(typeof loadApplicants==="function")await loadApplicants();}catch(e){}
   try{
     try{await loadScriptOnce("https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js");}
     catch(e){await loadScriptOnce("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js");}
   }catch(e){appAlert("Couldn\u0027t load the spreadsheet builder \u2014 check the connection and try again.");return;}
   var X=window.XLSX;var wb=X.utils.book_new();
-  var head=["Play Assessment","Age Group","Web Bio","Kennel No.","Name & Gender","A&D","Breed & Age","Notes"];
+  var bands=[["DOG",5],["STAY",3],["HEALTH",6],["ASSESSMENT",4],["REHOMING",4],["NOTES",3]];
+  var head=["Name & Gender","Breed & Age","Kennel","A&D","Chip",
+            "Intake","Day","Reason",
+            "Status","Contagious","Neutered","Vaccinations","Active meds","Latest vet note",
+            "Score","Light","Play / sessions","EA",
+            "Cleared","Web bio","Applicant","Stage",
+            "Warnings","Feeding plan","Latest notes"];
+  var tdy=new Date().toISOString().slice(0,10);
   var act=roundsActiveDogs();
-  var rows=act.map(function(r){
-    var d=(r.state&&r.state.dog)||{};
-    var sx=/^f/i.test(d.sex||"")?" (F)":(/^m/i.test(d.sex||"")?" (M)":"");
-    return[rtgPlayAssessment(r.state),rtgAgeGroup(d.age),d.webBio||"",rtgKennelShort(d.kennel),(r.name||"")+sx,r.refNo||d.refNo||"",[d.breed||r.breed||"",d.age||""].filter(Boolean).join("  "),rtgNotes(r)];
+  var lines=[];var lastSec=-1;
+  act.forEach(function(r){
+    var sec=kennelRank((r.state&&r.state.dog&&r.state.dog.kennel)||"").sec;
+    if(sec!==lastSec&&sec>0){var lbl=sec===1?"Pods":sec===2?"Crate":sec===3?"Other areas":"No kennel set";lines.push({type:"div",label:lbl});}
+    lastSec=sec;
+    lines.push({type:"dog",rec:r});
   });
-  var ws=X.utils.aoa_to_sheet([head].concat(rows));
-  for(var c=0;c<head.length;c++){var a=X.utils.encode_cell({r:0,c:c});if(ws[a])ws[a].s={fill:{fgColor:{rgb:"FDE68A"}},font:{bold:true,color:{rgb:"1A2233"}},alignment:{horizontal:"center"}};}
-  for(var rI=0;rI<rows.length;rI++){
-    if(rows[rI][2]==="N"){var cw=X.utils.encode_cell({r:rI+1,c:2});if(ws[cw])ws[cw].s={fill:{fgColor:{rgb:"F87171"}},font:{bold:true,color:{rgb:"FFFFFF"}},alignment:{horizontal:"center"}};}
-    var cn=X.utils.encode_cell({r:rI+1,c:7});if(ws[cn])ws[cn].s={alignment:{wrapText:true,vertical:"top"}};
-    var cp=X.utils.encode_cell({r:rI+1,c:0});if(ws[cp])ws[cp].s={alignment:{wrapText:true,vertical:"top"}};
+  var rows=lines.map(function(L){
+    if(L.type==="div"){var dv=[L.label];for(var i=1;i<25;i++)dv.push("");return dv;}
+    var r=L.rec;
+    var st=r.state||{};var d=st.dog||{};var mm=st.medical||{};var as=st.assessment||{};
+    var sx=/^f/i.test(d.sex||"")?" (F)":(/^m/i.test(d.sex||"")?" (M)":"");
+    var con=activeContagiousList(mm).map(function(x){return diseaseShortName(x.type);}).join(", ");
+    var vax=(mm.vaccinations||[]).map(function(v){return (v.type||"")+" "+fmtDMY(v.date);}).join("\n");
+    var meds=(mm.medications||[]).filter(function(x){return x.active!==false&&(!x.endDate||x.endDate>=tdy);}).map(function(x){return [x.name,x.dose,x.frequency].filter(Boolean).join(" ");}).join("\n");
+    var vlog=(mm.vetLog||[]).slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");})[0];
+    var nc=mm.neuteredConfirmed||"";var neut=nc.indexOf("Yes")===0?"Yes":nc.indexOf("No")===0?"No":nc==="Booked"?"Booked":"";
+    var ap=ovPrimaryApp(r.id)||{};
+    var cleared=as.rehomingStatus?(as.rehomingStatus+(as.rehomingAt?" "+fmtDMY(as.rehomingAt):"")):"";
+    var fp=st.feedingPlan||{};
+    var feed=[fp.brand,fp.grams?fp.grams+"g":"",fp.frequency].filter(Boolean).join(" \u00b7 ")+(fp.notes?"\n"+fp.notes:"");
+    var warns=(st.warnings||[]).map(function(w){return w.text;}).join("\n");
+    var ns=(st.notes||[]).slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");}).slice(0,2).map(function(n){return fmtDMY(n.date)+": "+n.text;}).join("\n");
+    var days=daysInIsolation(r.intakeDate);
+    return[(r.name||"")+sx,[d.breed||r.breed||"",d.age||""].filter(Boolean).join("  "),rtgKennelShort(d.kennel),r.refNo||d.refNo||"",d.microchip||"",
+      fmtDMY(r.intakeDate),days==null?"":days,d.intakeReason||"",
+      mm.currentStatus||"",con,neut,vax,meds,vlog?(fmtDMY(vlog.date)+": "+vlog.text):"",
+      (r.score!=null?r.score:"")+"",r.trafficLight||"",rtgPlayAssessment(st),(function(){try{var e=eaCalc(st.ea||{});return (e&&e.complete)?String(e.cat||"").replace("Category ","Cat "):"";}catch(x){return "";}})(),
+      cleared,d.webBio||"",ap.who||"",ap.stage||"",
+      warns,feed,ns];
+  });
+  var bandRow=[];bands.forEach(function(b){for(var i=0;i<b[1];i++)bandRow.push(i===0?b[0]:"");});
+  var ws=X.utils.aoa_to_sheet([bandRow,head].concat(rows));
+  var FILLS={DOG:"C5E86C",STAY:"E2E8F0",HEALTH:"99F6E4",ASSESSMENT:"FDE68A",REHOMING:"DDD6FE",NOTES:"FBCFE8"};
+  ws["!merges"]=[];var c0=0;
+  bands.forEach(function(b){
+    ws["!merges"].push({s:{r:0,c:c0},e:{r:0,c:c0+b[1]-1}});
+    for(var i=0;i<b[1];i++){
+      var a0=X.utils.encode_cell({r:0,c:c0+i});
+      if(ws[a0])ws[a0].s={fill:{fgColor:{rgb:FILLS[b[0]]}},font:{bold:true,color:{rgb:"1A2233"}},alignment:{horizontal:"center"}};
+      else ws[a0]={t:"s",v:"",s:{fill:{fgColor:{rgb:FILLS[b[0]]}}}};
+      var a1=X.utils.encode_cell({r:1,c:c0+i});
+      if(ws[a1])ws[a1].s={font:{bold:true,sz:10},fill:{fgColor:{rgb:"F1F5F9"}}};
+    }
+    c0+=b[1];
+  });
+  for(var rI=0;rI<lines.length;rI++){
+    if(lines[rI].type==="div"){
+      ws["!merges"].push({s:{r:rI+2,c:0},e:{r:rI+2,c:24}});
+      var da=X.utils.encode_cell({r:rI+2,c:0});
+      if(ws[da])ws[da].s={fill:{fgColor:{rgb:"F8FAFC"}},font:{bold:true,sz:9,color:{rgb:"94A3B8"}}};
+      continue;
+    }
+    if(rows[rI][19]==="N"){var cw=X.utils.encode_cell({r:rI+2,c:19});if(ws[cw])ws[cw].s={fill:{fgColor:{rgb:"F87171"}},font:{bold:true,color:{rgb:"FFFFFF"}},alignment:{horizontal:"center"}};}
+    if(rows[rI][9]){var cc=X.utils.encode_cell({r:rI+2,c:9});if(ws[cc])ws[cc].s={fill:{fgColor:{rgb:"FECACA"}},font:{bold:true,color:{rgb:"7F1D1D"}}};}
+    [11,12,13,16,22,23,24].forEach(function(ci){var cx=X.utils.encode_cell({r:rI+2,c:ci});if(ws[cx])ws[cx].s=Object.assign(ws[cx].s||{},{alignment:{wrapText:true,vertical:"top"}});});
   }
-  ws["!cols"]=[{wch:30},{wch:10},{wch:8},{wch:10},{wch:18},{wch:12},{wch:20},{wch:60}];
-  ws["!rows"]=[{hpt:20}].concat(rows.map(function(){return{hpt:44};}));
+  ws["!cols"]=head.map(function(hh,i){var w=[18,20,9,11,13,10,5,13,12,13,9,20,18,26,6,8,26,5,14,8,16,10,24,22,30][i]||14;return{wch:w};});
+  ws["!rows"]=[{hpt:18},{hpt:18}].concat(lines.map(function(L){return{hpt:L.type==="div"?16:52};}));
   X.utils.book_append_sheet(wb,ws,"Dogs");
-  X.writeFile(wb,"nspca-rtg-"+new Date().toISOString().slice(0,10)+".xlsx");
-  miniToast("RTG sheet downloaded \u2014 "+rows.length+" dog"+(rows.length===1?"":"s"));
+  X.writeFile(wb,"nspca-dog-sheet-"+new Date().toISOString().slice(0,10)+".xlsx");
+  var _nD=lines.filter(function(L){return L.type==="dog";}).length;miniToast("Dog sheet downloaded \u2014 "+_nD+" dog"+(_nD===1?"":"s"));
 }
 async function exportOverviewSheet(){
   miniToast("Building the overview sheet\u2026");
