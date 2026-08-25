@@ -1,0 +1,245 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NSPCA Longford — Unit sheet</title>
+<link rel="icon" href="icon-round.png">
+<style>
+:root{--border:#e2e8f0;--txt2:#64748b}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;margin:0;background:#f4f5f7;color:#0f172a}
+.hd{background:#0f172a;color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center}
+.hd h1{font-size:16px;margin:0}.hd .s{font-size:11px;opacity:0.75}
+.wrap{max-width:680px;margin:0 auto;padding:22px 16px}
+.card{background:#fff;border:0.5px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,0.05)}
+.big{width:100%;background:#c5e86c;color:#0f172a;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+.big:disabled{opacity:0.5;cursor:default}
+.muted{font-size:11.5px;color:var(--txt2)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+td,th{padding:6px 8px;border-bottom:0.5px solid var(--border);text-align:left}
+th{font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--txt2)}
+.divrow td{font-size:9px;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;color:#94a3b8;background:#f8fafc;padding:3px 8px}
+.chip{display:inline-block;font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:10px}
+a{color:#4f46e5}
+</style></head><body>
+<div class="hd"><div><h1>&#128203; Unit sheet</h1><div class="s">NSPCA Longford &middot; Dog Isolation Unit</div></div><div class="s" id="who"></div></div>
+<div class="wrap">
+  <div class="card" id="gate" style="display:none">
+    <div style="font-weight:700;margin-bottom:6px">Log in first</div>
+    <div class="muted">This page uses your app login. Open the <a href="index.html">Dog Isolation app</a>, log in, then come back here.</div>
+  </div>
+  <div id="main" style="display:none">
+    <div class="card">
+      <button class="big" id="dl" onclick="downloadSheet()" disabled>Loading dogs&hellip;</button>
+      <div class="muted" style="margin-top:10px">One row per active dog, in building order &mdash; kennels, pods, crate. Colour-banded sections: DOG &middot; STAY &middot; HEALTH &middot; ASSESSMENT &middot; REHOMING &middot; NOTES. Red N = web bio not written; red cell = live contagious case. Everything is pulled from the app records the moment you tap.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--txt2);margin-bottom:10px">In the unit right now</div>
+      <table id="preview"><tr><th>Dog</th><th>Kennel</th><th>Light</th><th>Web bio</th></tr></table>
+    </div>
+    <div class="muted" style="text-align:center;margin-top:4px" id="stamp"></div>
+  </div>
+</div>
+<script>
+var SUPABASE_URL="https://sbajswwuykvjhtoehfps.supabase.co";
+var SUPABASE_KEY="sb_publishable_uP40lclXeaMzJ__zFQESHQ__XSLqJgK";
+var APP_STAGE_RANK={"Adopted":6,"Reserved":5,"Approved":4,"Home check":3,"Enquiry":2,"Withdrawn":1,"Declined":0};
+var CONTAGIOUS_DISEASES={"Parvovirus (CPV)":1,"Canine Distemper":1,"Kennel Cough (CIRDC)":1,"Canine Influenza":1,"Infectious Hepatitis (CAV-1)":1,"Leptospirosis":1,"Sarcoptic Mange (scabies)":1,"Demodectic Mange":0,"Ringworm":1,"Giardia":1,"Coccidiosis":1,"Lungworm":0,"Tick-borne (Babesia / Ehrlichia)":0,"Other":0};
+function fmtDMY(ds){if(ds===null||ds===undefined||ds==="")return"";if(ds instanceof Date){if(isNaN(ds))return"";return ("0"+ds.getDate()).slice(-2)+"-"+("0"+(ds.getMonth()+1)).slice(-2)+"-"+(""+ds.getFullYear()).slice(2);}var p=(""+ds).slice(0,10).split("-");if(p.length===3&&p[0].length===4)return p[2]+"-"+p[1]+"-"+p[0].slice(2);return ""+ds;}
+function daysInIsolation(d){if(!d)return null;return Math.max(0,Math.floor((new Date()-new Date(d))/(1000*60*60*24)));}
+function isoExtraDays(dog){return ((dog&&dog.isoExt)||[]).reduce(function(a,e){return a+(parseInt(e.days)||0);},0);}
+function eaCalc(e){
+  e=e||{};
+  var f=parseInt(e.frequency)||0,s=parseInt(e.size)||0,i=parseInt(e.intensity)||0,b=parseInt(e.biteScore)||0,p=parseInt(e.probability)||0;
+  var complete=!!(f&&s&&i&&b&&p);
+  var severity=f+s+i+b;
+  var score=complete?(severity*p)/72:0;
+  var cat="",mgmt="",col=["#f1f5f9","#64748b"];
+  if(complete){
+    if(score<=0.29){cat="Category 1";mgmt="Maintenance plan";col=["#dcfce7","#166534"];}
+    else if(score<=0.50){cat="Category 2";mgmt="Advanced Care Plan (ACP)";col=["#fef9c3","#854d0e"];}
+    else if(score<=0.60){if(e.punctures){cat="Category 4a";mgmt="Senior team review (punctures present)";col=["#fee2e2","#991b1b"];}else{cat="Category 3";mgmt="Behaviourist recommendation";col=["#ffedd5","#9a3412"];}}
+    else if(score<=0.70){cat="Category 4b";mgmt="Senior team review";col=["#fee2e2","#991b1b"];}
+    else{cat="Category 5";mgmt="Senior management + Head of Canine Behaviour sign-off + SMP";col=["#1e293b","#f1f5f9"];}
+  }
+  return {complete:complete,severity:severity,score:score,cat:cat,mgmt:mgmt,col:col,f:f,s:s,i:i,b:b,p:p};
+}
+function restrictedBreedInfo(breed){
+  if(!breed)return null;
+  for(var i=0;i<RESTRICTED_BREEDS.length;i++){if(RESTRICTED_BREEDS[i].re.test(breed))return RESTRICTED_BREEDS[i];}
+  return null;
+}
+function activeContagiousList(medical){var ds=(medical&&medical.diseases)||[];return ds.filter(function(p){return CONTAGIOUS_DISEASES[p.type]&&p.status!=="Recovered / cleared";});}
+function diseaseShortName(t){return(t||"").replace(/ \(.*$/,"");}
+function kennelRank(k){
+  k=String(k||"").trim();
+  if(!k)return{sec:4,num:0,txt:""};
+  var m=k.match(/^k(?:ennel)?\s*\.?\s*(\d+)/i);
+  if(m)return{sec:0,num:parseInt(m[1],10),txt:k.toLowerCase()};
+  m=k.match(/^pod\s*\.?\s*(\d+)/i);
+  if(m)return{sec:1,num:parseInt(m[1],10),txt:k.toLowerCase()};
+  m=k.match(/^(?:the\s+)?crate\s*\.?\s*(\d*)/i);
+  if(m)return{sec:2,num:m[1]?parseInt(m[1],10):0,txt:k.toLowerCase()};
+  return{sec:3,num:0,txt:k.toLowerCase()};
+}
+function kennelCompare(a,b){
+  var ra=kennelRank(a),rb=kennelRank(b);
+  if(ra.sec!==rb.sec)return ra.sec-rb.sec;
+  if(ra.num!==rb.num)return ra.num-rb.num;
+  return ra.txt.localeCompare(rb.txt);
+}
+function rtgPlayAssessment(st){
+  var as=(st&&st.assessment)||{};
+  var pool=[];
+  (as.playdates||[]).forEach(function(x){pool.push({d:x.date||"",txt:"PA "+fmtDMY(x.date)+" with "+(x.dog||"?")+(x.result?" \u2014 "+x.result:"")});});
+  (as.buddyWalks||[]).forEach(function(x){pool.push({d:x.date||"",txt:"Buddy walk "+fmtDMY(x.date)+" with "+(x.dog||"?")+(x.result?" \u2014 "+x.result:"")});});
+  if(!pool.length)return "Needs PA";
+  pool.sort(function(a,b){return b.d.localeCompare(a.d);});
+  return pool.slice(0,2).map(function(p){return p.txt;}).join("\n");
+}
+function rtgAgeGroup(age){
+  var a=String(age||"").toLowerCase();if(!a)return "";
+  if(/week|month/.test(a)&&!/1[2-9]\s*month|[2-9][0-9]\s*month/.test(a))return "Puppy";
+  if(/^(0?\.[0-9]|0)\s*(y|$)/.test(a))return "Puppy";
+  return "Adult";
+}
+function rtgKennelShort(k){
+  var m=String(k||"").match(/^k(?:ennel)?\s*\.?\s*(\d+)/i);if(m)return "K"+m[1];
+  m=String(k||"").match(/^pod\s*\.?\s*(\d+)/i);if(m)return "Pod "+m[1];
+  return k||"";
+}
+function rtgNotes(r){
+  var st=r.state||{};var bits=[];
+  var rb=restrictedBreedInfo((st.dog&&st.dog.breed)||r.breed);
+  if(rb)bits.push(rb.xl?"\u26a0 "+rb.name+" \u2014 banned breed, cannot be rehomed":"\u26a0 "+rb.name+" \u2014 muzzle + lead in public");
+  (st.warnings||[]).forEach(function(w){bits.push("\u26a0 "+w.text);});
+  var fp=st.feedingPlan||{};
+  var feed=[fp.brand,fp.grams?fp.grams+"g":"",fp.frequency].filter(Boolean).join(" \u00b7 ");
+  if(feed)bits.push("Feeding: "+feed);
+  if(fp.notes)bits.push(fp.notes);
+  var ns=(st.notes||[]).slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");}).slice(0,2);
+  ns.forEach(function(n){bits.push(fmtDMY(n.date)+": "+n.text);});
+  return bits.join("\n");
+}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+var records=[],applicants=[];
+function sb(path){return fetch(SUPABASE_URL+"/rest/v1/"+path,{headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY}}).then(function(r){return r.ok?r.json():Promise.reject(r.status);});}
+function ovPrimaryApp(dogId){
+  try{
+    var pool=[];
+    applicants.forEach(function(x){
+      var apps=(x.state&&x.state.applications)||[{aid:0,animal_id:x.animal_id,stage:x.stage}];
+      apps.forEach(function(q){if(q.animal_id===dogId)pool.push({row:x,app:q});});
+    });
+    if(!pool.length)return null;
+    pool.sort(function(a,b){return (APP_STAGE_RANK[b.app.stage]||0)-(APP_STAGE_RANK[a.app.stage]||0);});
+    return{stage:pool[0].app.stage||"",who:pool[0].row.name||""};
+  }catch(e){return null;}
+}
+function roundsActiveDogs(){
+  var act=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o.indexOf("Active")>=0||o==="Finished Isolation";});
+  act.sort(function(a,b){var c=kennelCompare((a.state&&a.state.dog&&a.state.dog.kennel)||"",(b.state&&b.state.dog&&b.state.dog.kennel)||"");if(c!==0)return c;return(a.name||"").localeCompare(b.name||"");});
+  return act;
+}
+function boot(){
+  var auth=localStorage.getItem("nspca-intake-auth");
+  if(!auth){document.getElementById("gate").style.display="";return;}
+  document.getElementById("main").style.display="";
+  document.getElementById("who").textContent=localStorage.getItem("nspca-user-name")||"";
+  Promise.all([
+    sb("dogs?select=*&limit=400"),
+    sb("applicants?select=*&limit=400").catch(function(){return[];})
+  ]).then(function(res){
+    records=(res[0]||[]).map(function(row){var st=null;try{st=typeof row.data==="string"?JSON.parse(row.data):row.data;}catch(e){}st=st||{};return{id:row.id,name:row.name||"",breed:row.breed||"",refNo:row.ref_no||"",intakeDate:row.intake_date||"",score:row.score,trafficLight:row.traffic_light||"",state:st};});
+    applicants=res[1]||[];
+    var act=roundsActiveDogs();
+    var tb=document.getElementById("preview");var lastSec=-1;
+    act.forEach(function(r){
+      var d=(r.state&&r.state.dog)||{};
+      var sec=kennelRank(d.kennel||"").sec;
+      if(sec!==lastSec&&sec>0){var lbl=sec===1?"Pods":sec===2?"Crate":sec===3?"Other areas":"No kennel set";var dv=document.createElement("tr");dv.className="divrow";dv.innerHTML='<td colspan="4">'+lbl+'</td>';tb.appendChild(dv);}
+      lastSec=sec;
+      var con=activeContagiousList(r.state.medical||{}).length;
+      var tr=document.createElement("tr");
+      tr.innerHTML='<td><b>'+esc(r.name)+'</b>'+(con?' <span class="chip" style="background:#fecaca;color:#7f1d1d">contagious</span>':'')+'</td><td>'+esc(rtgKennelShort(d.kennel))+'</td><td>'+esc(r.trafficLight||"")+'</td><td>'+(d.webBio==="Y"?'<span class="chip" style="background:#dcfce7;color:#166534">Y</span>':d.webBio==="N"?'<span class="chip" style="background:#f87171;color:#fff">N</span>':'<span class="muted">&mdash;</span>')+'</td>';
+      tb.appendChild(tr);
+    });
+    var btn=document.getElementById("dl");btn.disabled=false;btn.textContent="\u2b07\ufe0f Download unit sheet \u00b7 "+act.length+" dog"+(act.length===1?"":"s");
+    document.getElementById("stamp").textContent="Live from the app database \u00b7 "+new Date().toLocaleString("en-IE");
+  }).catch(function(e){
+    var btn=document.getElementById("dl");btn.textContent="Couldn\u0027t reach the database \u2014 check the connection and refresh";
+  });
+}
+var _scriptCache={};
+function loadScriptOnce(url){
+  if(_scriptCache[url])return _scriptCache[url];
+  _scriptCache[url]=new Promise(function(res,rej){var s=document.createElement("script");s.src=url;s.onload=function(){res(true);};s.onerror=function(){delete _scriptCache[url];rej(new Error("load failed"));};document.head.appendChild(s);});
+  return _scriptCache[url];
+}
+async function downloadSheet(){
+  var btn=document.getElementById("dl");btn.disabled=true;btn.textContent="Building\u2026";
+  try{
+    try{await loadScriptOnce("https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js");}
+    catch(e){await loadScriptOnce("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js");}
+  }catch(e){btn.disabled=false;btn.textContent="Couldn\u0027t load the spreadsheet builder \u2014 try again";return;}
+  var X=window.XLSX;var wb=X.utils.book_new();
+  var bands=[["DOG",5],["STAY",3],["HEALTH",6],["ASSESSMENT",4],["REHOMING",4],["NOTES",3]];
+  var head=["Name & Gender","Breed & Age","Kennel","A&D","Chip","Intake","Day","Reason","Status","Contagious","Neutered","Vaccinations","Active meds","Latest vet note","Score","Light","Play / sessions","EA","Cleared","Web bio","Applicant","Stage","Warnings","Feeding plan","Latest notes"];
+  var tdy=new Date().toISOString().slice(0,10);
+  var act=roundsActiveDogs();
+  var lines=[];var lastSec=-1;
+  act.forEach(function(r){
+    var sec=kennelRank((r.state&&r.state.dog&&r.state.dog.kennel)||"").sec;
+    if(sec!==lastSec&&sec>0){var lbl=sec===1?"Pods":sec===2?"Crate":sec===3?"Other areas":"No kennel set";lines.push({type:"div",label:lbl});}
+    lastSec=sec;lines.push({type:"dog",rec:r});
+  });
+  var rows=lines.map(function(L){
+    if(L.type==="div"){var dv=[L.label];for(var i=1;i<25;i++)dv.push("");return dv;}
+    var r=L.rec;var st=r.state||{};var d=st.dog||{};var mm=st.medical||{};var as=st.assessment||{};
+    var sx=/^f/i.test(d.sex||"")?" (F)":(/^m/i.test(d.sex||"")?" (M)":"");
+    var con=activeContagiousList(mm).map(function(x){return diseaseShortName(x.type);}).join(", ");
+    var vax=(mm.vaccinations||[]).map(function(v){return (v.type||"")+" "+fmtDMY(v.date);}).join("\n");
+    var meds=(mm.medications||[]).filter(function(x){return x.active!==false&&(!x.endDate||x.endDate>=tdy);}).map(function(x){return [x.name,x.dose,x.frequency].filter(Boolean).join(" ");}).join("\n");
+    var vlog=(mm.vetLog||[]).slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");})[0];
+    var nc=mm.neuteredConfirmed||"";var neut=nc.indexOf("Yes")===0?"Yes":nc.indexOf("No")===0?"No":nc==="Booked"?"Booked":"";
+    var ap=ovPrimaryApp(r.id)||{};
+    var cleared=as.rehomingStatus?(as.rehomingStatus+(as.rehomingAt?" "+fmtDMY(as.rehomingAt):"")):"";
+    var fp=st.feedingPlan||{};
+    var feed=[fp.brand,fp.grams?fp.grams+"g":"",fp.frequency].filter(Boolean).join(" \u00b7 ")+(fp.notes?"\n"+fp.notes:"");
+    var warns=(st.warnings||[]).map(function(w){return w.text;}).join("\n");
+    var ns=(st.notes||[]).slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");}).slice(0,2).map(function(n){return fmtDMY(n.date)+": "+n.text;}).join("\n");
+    var days=daysInIsolation(r.intakeDate);
+    var eaCat="";try{var e=eaCalc(st.ea||{});eaCat=(e&&e.complete)?String(e.cat||"").replace("Category ","Cat "):"";}catch(x){}
+    return[(r.name||"")+sx,[d.breed||r.breed||"",d.age||""].filter(Boolean).join("  "),rtgKennelShort(d.kennel),r.refNo||d.refNo||"",d.microchip||"",fmtDMY(r.intakeDate),days==null?"":days,d.intakeReason||"",mm.currentStatus||"",con,neut,vax,meds,vlog?(fmtDMY(vlog.date)+": "+vlog.text):"",(r.score!=null?r.score:"")+"",r.trafficLight||"",rtgPlayAssessment(st),eaCat,cleared,d.webBio||"",ap.who||"",ap.stage||"",warns,feed,ns];
+  });
+  var bandRow=[];bands.forEach(function(b){for(var i=0;i<b[1];i++)bandRow.push(i===0?b[0]:"");});
+  var ws=X.utils.aoa_to_sheet([bandRow,head].concat(rows));
+  var FILLS={DOG:"C5E86C",STAY:"E2E8F0",HEALTH:"99F6E4",ASSESSMENT:"FDE68A",REHOMING:"DDD6FE",NOTES:"FBCFE8"};
+  ws["!merges"]=[];var c0=0;
+  bands.forEach(function(b){
+    ws["!merges"].push({s:{r:0,c:c0},e:{r:0,c:c0+b[1]-1}});
+    for(var i=0;i<b[1];i++){
+      var a0=X.utils.encode_cell({r:0,c:c0+i});
+      if(ws[a0])ws[a0].s={fill:{fgColor:{rgb:FILLS[b[0]]}},font:{bold:true,color:{rgb:"1A2233"}},alignment:{horizontal:"center"}};
+      else ws[a0]={t:"s",v:"",s:{fill:{fgColor:{rgb:FILLS[b[0]]}}}};
+      var a1=X.utils.encode_cell({r:1,c:c0+i});
+      if(ws[a1])ws[a1].s={font:{bold:true,sz:10},fill:{fgColor:{rgb:"F1F5F9"}}};
+    }
+    c0+=b[1];
+  });
+  for(var rI=0;rI<lines.length;rI++){
+    if(lines[rI].type==="div"){
+      ws["!merges"].push({s:{r:rI+2,c:0},e:{r:rI+2,c:24}});
+      var da=X.utils.encode_cell({r:rI+2,c:0});
+      if(ws[da])ws[da].s={fill:{fgColor:{rgb:"F8FAFC"}},font:{bold:true,sz:9,color:{rgb:"94A3B8"}}};
+      continue;
+    }
+    if(rows[rI][19]==="N"){var cw=X.utils.encode_cell({r:rI+2,c:19});if(ws[cw])ws[cw].s={fill:{fgColor:{rgb:"F87171"}},font:{bold:true,color:{rgb:"FFFFFF"}},alignment:{horizontal:"center"}};}
+    if(rows[rI][9]){var cc=X.utils.encode_cell({r:rI+2,c:9});if(ws[cc])ws[cc].s={fill:{fgColor:{rgb:"FECACA"}},font:{bold:true,color:{rgb:"7F1D1D"}}};}
+    [11,12,13,16,22,23,24].forEach(function(ci){var cx=X.utils.encode_cell({r:rI+2,c:ci});if(ws[cx])ws[cx].s=Object.assign(ws[cx].s||{},{alignment:{wrapText:true,vertical:"top"}});});
+  }
+  ws["!cols"]=head.map(function(hh,i){var w=[18,20,9,11,13,10,5,13,12,13,9,20,18,26,6,8,26,5,14,8,16,10,24,22,30][i]||14;return{wch:w};});
+  ws["!rows"]=[{hpt:18},{hpt:18}].concat(lines.map(function(L){return{hpt:L.type==="div"?16:52};}));
+  X.utils.book_append_sheet(wb,ws,"Dogs");
+  X.writeFile(wb,"nspca-unit-sheet-"+tdy+".xlsx");
+  var act2=lines.filter(function(L){return L.type==="dog";}).length;
+  btn.disabled=false;btn.textContent="\u2b07\ufe0f Download unit sheet \u00b7 "+act2+" dog"+(act2===1?"":"s");
+}
+boot();
+</script></body></html>
