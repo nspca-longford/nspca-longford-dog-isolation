@@ -302,7 +302,7 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap">
       <span id="dash-user" onclick="showDashSection('profile')" style="background:#1e293b;border:0.5px solid #334155;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8;display:none;align-items:center;gap:6px;cursor:pointer"></span>
       <button onclick="showIncidentModal()" style="background:rgba(127,29,29,0.85);color:#fecaca;border:0.5px solid rgba(254,202,202,0.25);padding:4px 11px;border-radius:20px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600" title="Quickly log an incident">&#9888;</button>
-      <button onclick="openPipeline()" style="background:#1e293b;color:#e2e8f0;border:0.5px solid #334155;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit" title="Rehoming pipeline">Rehoming</button> <button onclick="openNewDog()" style="background:#c5e86c;color:#0f172a;border:none;padding:4px 13px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit" title="Start a new dog">+ New</button>
+      <button onclick="openNewDog()" style="background:#c5e86c;color:#0f172a;border:none;padding:4px 13px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit" title="Start a new dog">+ New</button>
       <div style="position:relative">
         <button id="dash-menu-btn" onclick="toggleDashMenu(event)" style="background:#1e293b;color:#c5e86c;border:0.5px solid #334155;padding:5px 11px;border-radius:6px;font-size:14px;cursor:pointer;font-family:inherit;line-height:1" title="Menu" aria-label="Menu">&#9776;</button>
         <div id="dash-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,0.18);min-width:210px;z-index:50;overflow-y:auto;max-height:calc(100vh - 90px)">
@@ -310,18 +310,18 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
           <div onclick="dashMenuGo('weighin')" class="dmi">&#9878;&#65039; Batch weigh-in</div>
           <div onclick="dashMenuGo('readytogo')" class="dmi">&#9989; Ready to Go</div>
           <div onclick="dashMenuGo('healthboard')" class="dmi">&#10084;&#65039; Unit Health Board</div>
+          <div onclick="dashMenuGo('wrapped')" class="dmi">&#127881; Unit Wrapped</div>
           <div class="dml">Records &amp; reports</div>
           <div onclick="dashMenuGo('records')" class="dmi">&#128203; Records</div>
           <div onclick="dashMenuGo('incidents')" class="dmi">&#9888;&#65039; Incident register</div>
           <div onclick="dashMenuGo('upcomingMedical')" class="dmi">&#128137; Upcoming Medical</div>
           <div onclick="dashMenuGo('stats')" class="dmi">&#128202; Stats</div>
-          <div onclick="closeDashMenu();exportCSV()" class="dmi">&#128229; Export CSV</div>
+          <div onclick="closeDashMenu();openDaySheet()" class="dmi">&#9728;&#65039; Day sheet</div>
           <div class="dml">Areas</div>
           <div onclick="location.href='cats.html'" class="dmi">🐱 Cats</div>
           <div class="dml">Team &amp; data</div>
-          <div onclick="dashMenuGo('team')" class="dmi">&#128101; Team Directory</div>
           <div id="dash-menu-users" onclick="dashMenuGo('users')" class="dmi" style="display:none">&#9881; Manage Users</div>
-          <div onclick="closeDashMenu();downloadBackup()" class="dmi">&#128190; Download backup</div>
+          <div id="dmi-backup" onclick="closeDashMenu();downloadBackup()" class="dmi">&#128190; Download backup</div>
           <div onclick="closeDashMenu();restoreBackupOpen()" class="dmi" id="dash-menu-restore">&#9851;&#65039; Restore backup</div>
           <div onclick="showWhatsNew()" class="dmi">&#10024; What&#8217;s new</div>
           <div style="border-top:1px solid #e2e8f0;margin:4px 0"></div>
@@ -378,7 +378,8 @@ var USERS=[
   {code:"CIA01",name:"Ciara",role:"supervisor"},
   {code:"LAU01",name:"Laura",role:"coordinator"},
   {code:"KAT01",name:"Kate",role:"trainer"},
-  {code:"NSPCA2024",name:"Staff",role:"staff"}
+  {code:"NSPCA2024",name:"Staff",role:"staff"},
+  {code:"ISO01",name:"Isolation",role:"staff"}
 ];
 var CURRENT_USER=null;
 
@@ -398,7 +399,7 @@ var TABS=[
   {id:"exercise",l:"Exercise",g:"Care"},{id:"feeding",l:"Feeding",g:"Care"},
   {id:"medical",l:"Medical",g:"Health"},{id:"weights",l:"Weights",g:"Health"},
   {id:"outcome",l:"Outcome",g:"Departure"},
-  {id:"story",l:"Story",g:"Records"},{id:"files",l:"Files",g:"Records"},{id:"breakdown",l:"Breakdown",g:"Records"},{id:"report",l:"Report",g:"Records"}
+  {id:"story",l:"Story",g:"Records"},{id:"files",l:"Files",g:"Records"},{id:"report",l:"Report",g:"Records"}
 ];
 function browNav(id){
   var i=-1;TABS.forEach(function(tb,k){if(tb.id===id)i=k;});
@@ -411,7 +412,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.128",date:"2026-08-25",note:"The Unit sheet moved out of the app into its own page \u2014 unit-sheet.html, deployed beside the app. Same login, same live records, one button: open it, see who\u0027s in the unit, download the sheet. Hand the link to whoever fills the office spreadsheet \u2014 they never need to touch the app. The export and its menu item are gone from the app itself; the \u2018Web bio written?\u2019 field on the Dog tab stays, since the sheet reads it."},{version:"3.127",date:"2026-08-25",note:"The export has a name: Unit sheet \u2014 one row for every dog in the unit, walking the building. Same content as before, new name in the menu and on the downloaded file. The old Overview sheet export is gone \u2014 the Unit sheet covers the dogs better than it did, and one export means one habit."},{version:"3.126",date:"2026-08-25",note:"Dog sheet locked to the approved sketch \u2014 the Pods / Crate / no-kennel divider rows now carry through into the spreadsheet itself, slim grey lines between the sections exactly like the dashboard, so the printed sheet walks the building the same way the board does."},{version:"3.125",date:"2026-08-25",note:"RTG export replaced with our own, fuller sheet. \u2630 menu \u2192 Dog sheet downloads one row per active dog in building order, grouped into colour-banded sections: DOG (name, breed, kennel, A&D, chip) \u00b7 STAY (intake, day, reason) \u00b7 HEALTH (status, contagious in red, neutered, every vaccination with dates, active meds, latest vet note) \u00b7 ASSESSMENT (score, light, play sessions, EA category) \u00b7 REHOMING (clearance, web bio with the red N, applicant and stage) \u00b7 NOTES (warnings, feeding plan, latest notes). Everything pulled from the records \u2014 nothing typed twice."},{version:"3.124",date:"2026-08-25",note:"The RTG sheet builds itself now. \u2630 menu \u2192 RTG sheet downloads an Excel file in the exact SharePoint layout \u2014 Play Assessment, Age Group, Web Bio, Kennel No., Name & Gender, A&D, Breed & Age, Notes \u2014 one row per active dog in building order. Play assessments come from the logged playdates and buddy walks, notes gather warnings, feeding plan and the latest record notes, and dogs marked \u2018web bio: not yet\u2019 get the red N cell. That flag is the one new field: \u2018Web bio written?\u2019 on the Dog tab. Fill it and the sheet stops needing retyping \u2014 just paste over the Dogs tab."}
+var CHANGELOG=[{version:"3.139",date:"2026-08-26",note:"New built-in login for the unit: code ISO01, signs in as \u2018Isolation\u2019, staff role. For the unit laptop or whoever\u0027s on \u2014 saves stamp as Isolation rather than a person."},{version:"3.138",date:"2026-08-26",note:"Download backup is now admin-only \u2014 hidden from the menu for everyone else. It stays because it\u0027s the only road back if the database ever loses data."},{version:"3.137",date:"2026-08-26",note:"Breakdown tab removed \u2014 Story took its job and tells it better. Records is now Story \u00b7 Files \u00b7 Report, and the record is back to 18 tabs. Any old link to Breakdown lands on Story."},{version:"3.136",date:"2026-08-26",note:"Three removals from the audit. The rehoming pipeline is gone \u2014 board, Rehoming button, applicant records, and the applicant readouts on the Clearance, Outcome and Ready-to-Go screens; adopter details now live in the Outcome notes. The records CSV export is gone \u2014 the Unit sheet is the readable export, the backup is the safety one. Net: the app is ~60KB lighter and every remaining surface is one someone actually uses."},{version:"3.135",date:"2026-08-26",note:"Team Directory removed \u2014 the staff app owns people now, and two directories only drift apart. Users admin (adding logins) stays, under \u2630 as before."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -964,6 +965,7 @@ async function doLogin(){
     localStorage.setItem("nspca-intake-auth",code);
     localStorage.setItem("nspca-user-name",user.name);
     localStorage.setItem("nspca-user-role",user.role||"staff");
+    window._prevLogin=userLastLogin(user.code);window._catchupDismissed=false;
     recordLastLogin(user.code);
     setupAutoLogout();
     await refreshAllUsers();
@@ -1042,39 +1044,6 @@ function renderProfile(){
   return h;
 }
 
-function renderTeamDirectory(){
-  var all=getAllUsersSync();
-  var meName=currentName();
-  // Sort by role priority then name
-  var roleOrder={admin:0,director:1,manager:2,supervisor:3,coordinator:4,trainer:5,staff:6};
-  all=all.slice().sort(function(a,b){var ra=roleOrder[a.role||"staff"]||9;var rb=roleOrder[b.role||"staff"]||9;return ra===rb?(a.name||"").localeCompare(b.name||""):ra-rb;});
-  var canManage=currentRole()==="admin";
-  // Elevated accounts are visible to admin only (you always see yourself).
-  if(!canManage){
-    all=all.filter(function(u){return ["admin","director","manager"].indexOf(u.role||"staff")===-1||u.name===meName;});
-  }
-
-  var h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+backToDashBtn()+'<h2 style="margin:0;flex:1">Team Directory</h2>'+(canManage?'<button onclick="showDashSection(\'users\')" class="btn" style="font-size:12px;padding:6px 12px">Manage</button>':'')+'</div>';
-  h+='<div class="sub" style="margin-bottom:16px">'+all.length+' user'+(all.length!==1?"s":"")+' with access. Tap a card to see their recent activity.</div>';
-
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">';
-  all.forEach(function(u){
-    var role=u.role||"staff";
-    var roleLabel=role==="admin"?"Admin":role==="director"?"Director of Operations":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Dog Trainer \u0026 Behaviour Specialist":"Staff";
-    var roleColor=role==="admin"?"#0f172a":role==="director"?"#1d4ed8":role==="manager"?"#0d9488":role==="supervisor"?"#7c3aed":role==="coordinator"?"#db2777":"#64748b";
-    var lastActive=userLastActive(u.name);
-    var lastLogin=userLastLogin(u.code);
-    var lastAct=lastActive?fmtAgo(lastActive):(lastLogin?"Logged in "+fmtAgo(lastLogin):"No activity yet");
-    var isMe=u.name===meName;
-    var saves=records.filter(function(r){return r.savedBy===u.name;}).length;
-    h+='<div style="background:#fff;border:1px solid '+(isMe?"#c5e86c":"#e2e8f0")+';border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:10px">'+userAvatarHtml(u,42)+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(u.name)+(isMe?' <span style="font-size:9px;background:#c5e86c;color:#3a4a16;padding:1px 6px;border-radius:20px;font-weight:700;margin-left:2px">YOU</span>':"")+'</div><div style="font-size:10px;font-weight:700;color:'+roleColor+';text-transform:uppercase;letter-spacing:0.04em;margin-top:2px">'+roleLabel+'</div></div></div>';
-    h+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid #e2e8f0;font-size:11px"><span style="color:#64748b">Activity</span><span style="font-weight:600;color:#0f172a">'+lastAct+'</span></div>';
-    h+='<div style="display:flex;justify-content:space-between;padding:0 0 0;font-size:11px"><span style="color:#64748b">Saves</span><span style="font-weight:600;color:#0f172a">'+saves+'</span></div>';
-    h+='</div>';
-  });
-  h+='</div>';
-  return h;
-}
 
 function renderUsersAdmin(){
   var all=getAllUsersSync();
@@ -1226,7 +1195,7 @@ function showDashSection(section){
   var st=document.getElementById("overdue-sticky");if(st)st.innerHTML="";
   var el=document.getElementById("dashboard-content");if(!el)return;
   if(section==="records"){
-    el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1">All Records</h2><button onclick="exportCSV()" class="btn" style="font-size:12px;padding:6px 14px">Export CSV &#8595;</button></div>'+page_records();
+    el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1">All Records</h2></div>'+page_records();
     if(window._rSearchActive){var _rsi=document.getElementById("rec-search");if(_rsi){_rsi.focus();var _rl=(window._rCaret!=null?window._rCaret:_rsi.value.length);try{_rsi.setSelectionRange(_rl,_rl);}catch(e){}}window._rSearchActive=false;window._rCaret=null;}
   }else if(section==="stats"){
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button></div>'+renderStats();
@@ -1234,9 +1203,6 @@ function showDashSection(section){
     el.innerHTML=renderUpcomingMedical();
   }else if(section==="profile"){
     el.innerHTML=renderProfile();
-  }else if(section==="team"){
-    refreshAllUsers().then(function(){el.innerHTML=renderTeamDirectory();});
-    el.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">Loading team...</div>';
   }else if(section==="users"){
     if(currentRole()!=="admin"){el.innerHTML='<div style="text-align:center;padding:40px"><h2>Admin only</h2><div style="color:#64748b;margin-top:8px">User management is restricted to admin accounts.</div><button onclick="showDashSection(\'profile\')" class="btn" style="margin-top:14px">&larr; Back to profile</button></div>';return;}
     refreshAllUsers().then(function(){el.innerHTML=renderUsersAdmin();});
@@ -1245,6 +1211,8 @@ function showDashSection(section){
     el.innerHTML=renderReadyToGo();
   }else if(section==="healthboard"){
     el.innerHTML=renderHealthBoard();
+  }else if(section==="wrapped"){
+    el.innerHTML=renderWrapped();
   }else if(section==="weighin"){
     el.innerHTML=renderBatchWeighIn();
   }else if(section==="incidents"){
@@ -1313,7 +1281,6 @@ function page_ea(){
   return h;
 }
 function renderReadyToGo(){
-  if(!window._appsLoadedOnce&&supabaseClient){window._appsLoadedOnce=1;loadApplicants().then(function(){if(window._dashSection==="readytogo")showDashSection("readytogo");});}
   var DEP=["Moved to Kennels","Moved to Foster","Rehomed","Returned to Owner","Transferred","Died in care","Escaped / Lost","Euthanised"];
   var list=records.filter(function(r){
     var st=r.state||{};var f=st.fin||{};var o=f.outcome||"";
@@ -1352,24 +1319,66 @@ function renderReadyToGo(){
     var suitLine=(suitBits.length||extra)?'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:8px;border-top:1px dashed var(--color-border-tertiary);padding-top:7px"><strong style="color:var(--color-text-primary);font-weight:600">Rehoming:</strong> '+suitBits.join("&nbsp;&nbsp;\u00b7&nbsp;&nbsp;")+(extra?(suitBits.length?"&nbsp;&nbsp;\u00b7&nbsp;&nbsp;":"")+esc(extra):"")+'</div>':"";
     var warns=st.warnings||[];
     var warnLine=warns.length?'<div style="font-size:11px;font-weight:600;color:'+(warns.some(function(w){return w.level==="Critical";})?"#991b1b":"#92400e")+';margin-top:6px">&#9888; '+warns.length+' handling warning'+(warns.length!==1?"s":"")+'</div>':"";
-    var mine=appsOnDog(r.id);
-    var reservedE=mine.find(function(e){return e.app.stage==="Reserved";});
-    var approvedE=mine.find(function(e){return e.app.stage==="Approved";});
-    var interest=reservedE
-      ? '<div style="font-size:11px;font-weight:600;color:#0f6e56;margin-top:6px">\ud83c\udfe1 Reserved \u2014 '+esc(reservedE.row.name||"someone")+(reservedE.app.collectionDate?(" \u00b7 collecting "+fmtDMY(reservedE.app.collectionDate)):" \u00b7 no collection date yet")+'</div>'
-      : approvedE
-      ? '<div style="font-size:11px;font-weight:600;color:#166534;margin-top:6px">\ud83c\udfe1 Approved \u2014 '+esc(approvedE.row.name||"someone")+(mine.length>1?(" \u00b7 "+mine.length+" applications"):"")+'</div>'
-      : mine.length
-      ? '<div style="font-size:11px;color:#334155;margin-top:6px">\ud83c\udfe1 '+mine.length+' application'+(mine.length>1?"s":"")+'</div>'
-      : '<div style="font-size:11px;color:#94a3b8;margin-top:6px">\ud83c\udfe1 No interest yet</div>';
-    var rb=readyDays>=14?["#fee2e2","#991b1b"]:readyDays>=7?["#fef3c7","#92400e"]:["#f1f5f9","#64748b"];
+        var rb=readyDays>=14?["#fee2e2","#991b1b"]:readyDays>=7?["#fef3c7","#92400e"]:["#f1f5f9","#64748b"];
     var readyBadge='<div style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:'+rb[0]+';color:'+rb[1]+';white-space:nowrap;flex-shrink:0">Ready '+readyDays+'d</div>';
     var rbBorder=(notFit||infActive)?"#dc2626":"#16a34a";
-    return'<div onclick="openDog('+r.id+')" class="dog-card" style="background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-left:3px solid '+rbBorder+';border-radius:14px;padding:13px;cursor:pointer"><div style="display:flex;gap:12px;align-items:flex-start">'+ph+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px"><div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">'+esc(r.name)+'</div>'+tlPill+provDot(r.state)+trajTag(r)+readyBadge+'</div>'+(idline?'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px">'+esc(idline)+'</div>':'')+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+chips+'</div>'+suitLine+interest+warnLine+'</div>';
+    return'<div onclick="openDog('+r.id+')" class="dog-card" style="background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-left:3px solid '+rbBorder+';border-radius:14px;padding:13px;cursor:pointer"><div style="display:flex;gap:12px;align-items:flex-start">'+ph+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px"><div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">'+esc(r.name)+'</div>'+tlPill+provDot(r.state)+trajTag(r)+readyBadge+'</div>'+(idline?'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px">'+esc(idline)+'</div>':'')+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+chips+'</div>'+suitLine+warnLine+'</div>';
   }).join("");
   var count='<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">'+list.length+' dog'+(list.length!==1?'s':'')+' ready \u00b7 longest-waiting first</div>';
   var legend='<div style="font-size:10px;color:#94a3b8;margin-bottom:12px">Rehoming marks: \u2713 suitable \u00b7 ~ with caution \u00b7 \u2717 not suitable. Amber chips are info, not blockers.</div>';
   return '<div style="max-width:1100px;margin:0 auto">'+back+sub+count+legend+'<div class="rtg-grid">'+rows+'</div></div>';
+}
+function wrappedStats(){
+  var y=new Date().getFullYear();var jan1=y+"-01-01";var today=new Date().toISOString().slice(0,10);
+  var home=0,careDays=0,kg=0,walks=0,vax=0,pas=0,cleared=0;
+  var longest=null,comeback=null;
+  records.forEach(function(r){
+    var st=r.state||{};var d=st.dog||{};var f=st.fin||{};var mm=st.medical||{};var as=st.assessment||{};
+    if(f.outcome&&["Rehomed","Reclaimed by owner","Transferred"].some(function(o){return (f.outcome||"").indexOf(o.split(" ")[0])===0;})&&f.outcomeDate>=jan1)home++;
+    var start=d.intakeDate||r.intakeDate;
+    if(start){
+      var end=f.outcomeDate&&f.outcomeDate<=today?f.outcomeDate:today;
+      var s2=start<jan1?jan1:start;
+      if(end>=s2){var dd=Math.round((new Date(end)-new Date(s2))/864e5);if(dd>0)careDays+=dd;}
+      var tot=Math.round((new Date(end)-new Date(start))/864e5);
+      if(tot>0&&(!longest||tot>longest.days))longest={name:r.name,days:tot,returned:(d.returnType==="Returned from adoption")};
+    }
+    var ws=(st.weights||[]).slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");});
+    if(ws.length>=2){var g=parseFloat(ws[ws.length-1].weight)-parseFloat(ws[0].weight);if(!isNaN(g)&&g>0){kg+=g;if(!comeback||g>comeback.kg)comeback={name:r.name,kg:g};}}
+    walks+=(st.exercises||[]).filter(function(e){return (e.date||"")>=jan1;}).length;
+    vax+=(mm.vaccinations||[]).filter(function(v){return (v.date||"")>=jan1;}).length;
+    pas+=((as.playdates||[]).length+(as.buddyWalks||[]).length);
+    cleared+=(mm.diseases||[]).filter(function(x){return x.status==="Recovered / cleared";}).length;
+  });
+  return{year:y,home:home,careDays:careDays,kg:kg,walks:walks,vax:vax,pas:pas,cleared:cleared,longest:longest,comeback:comeback};
+}
+function renderWrapped(){
+  var w=wrappedStats();
+  var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" class="btn" style="padding:5px 14px">\u2190 Back</button><h2 style="margin:0">\ud83c\udf89 Unit Wrapped</h2><span style="margin-left:auto"><button class="btn btnp" onclick="saveWrappedImage()" style="font-size:11.5px">\ud83d\udcf7 Save as image</button></span></div>';
+  var stat=function(n,l){return '<div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:16px;text-align:center"><div style="font-size:26px;font-weight:900;color:#c5e86c">'+n+'</div><div style="font-size:10.5px;color:#94a3b8;margin-top:3px">'+l+'</div></div>';};
+  var champ=function(e,t,d2){return '<div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:14px 16px;margin-top:10px;display:flex;align-items:center;gap:12px"><span style="font-size:28px">'+e+'</span><div><b style="font-size:13.5px">'+esc(t)+'</b><div style="font-size:11px;color:#94a3b8">'+esc(d2)+'</div></div></div>';};
+  var h='<div style="max-width:560px;margin:0 auto">'+back;
+  h+='<div id="wrapped-card" style="background:#0f172a;border-radius:20px;padding:16px;color:#fff">';
+  h+='<div style="background:linear-gradient(160deg,#1e293b,#0f172a);border:1px solid #334155;border-radius:20px;padding:26px;text-align:center;margin-bottom:12px"><div style="font-size:22px;font-weight:800">\ud83c\udf89 NSPCA Longford</div><div style="font-size:12px;color:#94a3b8">Dog Isolation Unit \u00b7 '+w.year+' so far</div><div style="font-size:52px;font-weight:900;color:#c5e86c;letter-spacing:-0.03em;margin:14px 0 2px">'+w.home+'</div><div style="font-size:12px;color:#94a3b8">dog'+(w.home===1?"":"s")+' went home</div></div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    +stat(w.careDays.toLocaleString(),"days of care given")
+    +stat(w.kg.toFixed(1)+" kg","weight gained back, all dogs")
+    +stat(w.walks,"walks logged")
+    +stat(w.vax,"vaccinations given")
+    +stat(w.pas,"play assessments run")
+    +stat(w.cleared,"contagious cases cleared")+'</div>';
+  if(w.longest)h+=champ("\ud83c\udfc6","Longest journey: "+(w.longest.name||"?"),w.longest.days+" days"+(w.longest.returned?", came back once":"")+" \u2014 still wagging");
+  if(w.comeback)h+=champ("\ud83d\udcaa","Biggest comeback: "+(w.comeback.name||"?"),"+"+w.comeback.kg.toFixed(1)+" kg from arrival");
+  h+='</div></div>';
+  return h;
+}
+async function saveWrappedImage(){
+  try{await loadScriptOnce("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");}
+  catch(e){appAlert("Couldn\u0027t load the image builder \u2014 check the connection.");return;}
+  var el=document.getElementById("wrapped-card");if(!el)return;
+  window.html2canvas(el,{backgroundColor:"#0f172a",scale:2}).then(function(cv){
+    var a=document.createElement("a");a.download="nspca-unit-wrapped-"+new Date().toISOString().slice(0,10)+".png";a.href=cv.toDataURL("image/png");a.click();
+  });
 }
 function renderHealthBoard(){
   var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#1e293b;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1;font-size:18px">Unit Health Board</h2></div>';
@@ -1489,7 +1498,7 @@ setInterval(updateClock,30000);
 function showDashboard(){restoreDashFilters();showScreen("dashboard-screen");renderDashboard();showWelcomeToast();maybeShowWhatsNew();startDashRefresh();}
 
 // ── Header dropdown menu ──────────────────────────────────────────
-function toggleDashMenu(e){
+function toggleDashMenu(e){var _bk=document.getElementById("dmi-backup");if(_bk)_bk.style.display=(currentRole()==="admin"||currentRole()==="director")?"":"none";
   if(e){e.stopPropagation();}
   var m=document.getElementById("dash-menu");if(!m)return;
   var open=m.style.display==="block";
@@ -1568,7 +1577,7 @@ function recentOutcomesHtml(){
   }).join("");
   return '<div class="card" style="margin-top:14px;margin-bottom:12px"><div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px"><span style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#64748b">Recently moved on</span><span style="font-size:11px;color:#94a3b8">'+list.length+' total</span></div>'+rows+'</div>';
 }
-function tasksRollupHtml(activeRecords){
+function computeDueToday(activeRecords){
   var today=new Date().toISOString().slice(0,10);
   var thisWeek=weekStartStr(today);
   var act=activeRecords.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
@@ -1604,6 +1613,10 @@ function tasksRollupHtml(activeRecords){
     if(paraDue)cats.paras.push(r);
     var wts=r.state.weights||[];if((r.state.dog&&r.state.dog.intakeDate)&&!wts.find(function(w){return w.date>=thisWeek&&w.date<=today;}))cats.weighs.push(r);
   });
+  return cats;
+}
+function tasksRollupHtml(activeRecords){
+  var cats=computeDueToday(activeRecords);
   var defs=[["returns","Reclaim / due back","#991b1b","#fee2e2"],["finishing","Finishing today","#0d9488","#ccfbf1"],["reports","Daily report due","#7c3aed","#f3e8ff"],["meds","On medication","#9d174d","#fce7f3"],["vaccs","Vaccines due","#a16207","#fef9c3"],["paras","Parasite tx due","#a16207","#fef9c3"],["weighs","Weigh-ins due","#0d9488","#ccfbf1"],["walks","Walks due","#0d9488","#ccfbf1"]];
   var items=defs.filter(function(d){return cats[d[0]].length;});
   if(!items.length)return"";
@@ -1902,7 +1915,7 @@ function printIncidentRegister(){
   w.document.close();w.focus();setTimeout(function(){w.print();},300);
 }
 
-function downloadBackup(){
+function downloadBackup(){if(currentRole()!=="admin"&&currentRole()!=="director"){appAlert("Backups are admin-only.");return;}
   try{
     var payload={app:"NSPCA Dog Isolation",exported:new Date().toISOString(),by:currentName(),recordCount:records.length,records:records};
     var blob=new Blob([JSON.stringify(payload,null,1)],{type:"application/json"});
@@ -1964,7 +1977,6 @@ function openKennelCard(){
     warnings:ws,notices:ns,feeding:feeding,photo:d.photo||"",
     foot:"Printed "+new Date().toLocaleString("en-IE")+" \u00b7 "+currentName()
   };
-  try{localStorage.setItem("nspca-kennelcard",JSON.stringify(payload));}catch(e){}
   var w=window.open("","_blank");
   if(!w){appAlert("Couldn\u0027t open the card \u2014 allow pop-ups for this site.");return;}
   w.document.write(kennelCardDoc(payload));w.document.close();
@@ -1999,627 +2011,6 @@ function kennelCardDoc(p){
 }
 
 function dashSearchRender(){clearTimeout(window._dbSrchT);window._dbSrchT=setTimeout(function(){renderDashboard();},160);}
-// \u2500\u2500 Rehoming pipeline (applicants) \u2014 stage 1: records, board, editor \u2500\u2500
-var applicants=[];var A=null;var _pipeTimer=null;
-var APP_STAGES=["Enquiry","Home check","Approved","Reserved","Adopted","Withdrawn","Declined"];
-var APP_ACTIVE=["Enquiry","Home check","Approved","Reserved"];
-var APP_STAGE_RANK={"Adopted":6,"Reserved":5,"Approved":4,"Home check":3,"Enquiry":2,"Withdrawn":1,"Declined":0};
-function defaultApplicant(){return{id:null,name:"",stage:"Enquiry",species:"dog",animal_id:null,enquiry_date:new Date().toISOString().slice(0,10),state:{phone:"",email:"",addr1:"",addr2:"",town:"",county:"",eircode:"",homeType:"",children:"",otherDogs:"",cats:"",livestock:"",smallPets:"",experience:"",activity:"",interestNote:"",whyNow:"",previousPets:"",hoursAlone:"",gardenFencing:"",landlord:"",contactLog:[],notes:"",reason:"",anonymised:false}};}
-function maskPhone(p){p=String(p||"");if(p.length<4)return p?"\u00b7\u00b7\u00b7":"";return p.slice(0,3)+" \u00b7\u00b7\u00b7 \u00b7\u00b7"+p.slice(-2);}
-function appDaysWaiting(ap){if(!ap.enquiry_date)return null;var d=Math.floor((Date.now()-new Date(ap.enquiry_date).getTime())/864e5);return d<0?null:d;}
-// ── Applications: one person can hold several; only one ever becomes the adoption ──
-function migrateApplications(a){
-  if(!a)return;a.state=a.state||{};
-  if(Array.isArray(a.state.applications)&&a.state.applications.length)return;
-  var st=a.state;
-  st.applications=[{aid:1,animal_id:a.animal_id||null,note:st.interestNote||"",stage:a.stage||"Enquiry",
-    reason:st.reason||"",collectionDate:st.collectionDate||"",fee:st.fee||"",
-    contractSigned:st.contractSigned||"",chipTransferred:st.chipTransferred||"",adoptionDate:st.adoptionDate||"",
-    history:[{stage:a.stage||"Enquiry",by:"",at:(a.enquiry_date||new Date().toISOString().slice(0,10))}]}];
-}
-function appPrimary(a){
-  var apps=(a&&a.state&&a.state.applications)||[];
-  if(!apps.length)return null;
-  return apps.slice().sort(function(x,y){return (APP_STAGE_RANK[y.stage]||0)-(APP_STAGE_RANK[x.stage]||0)||((y.aid||0)-(x.aid||0));})[0];
-}
-function appSyncMirror(a){
-  var p=appPrimary(a);if(!p)return;
-  a.stage=p.stage||"Enquiry";a.animal_id=p.animal_id||null;
-}
-function appFind(aid){return ((A&&A.state&&A.state.applications)||[]).find(function(x){return x.aid===aid;});}
-function appAddApplication(){
-  if(!A)return;migrateApplications(A);
-  var next=A.state.applications.reduce(function(m,x){return Math.max(m,x.aid||0);},0)+1;
-  A.state.applications.push({aid:next,animal_id:null,note:"",stage:"Enquiry",reason:"",collectionDate:"",fee:"",contractSigned:"",chipTransferred:"",adoptionDate:"",history:[{stage:"Enquiry",by:currentName()||"",at:new Date().toISOString().slice(0,10)}]});
-  appSyncMirror(A);saveApplicantSoon();renderPipeline();
-}
-function appRemoveApplication(aid){
-  var ap=appFind(aid);if(!ap)return;
-  var nm=ap.animal_id?pipeDogName(ap.animal_id):"this application";
-  appConfirm("Remove the application for "+nm+"? Its history goes with it.",function(){
-    A.state.applications=A.state.applications.filter(function(x){return x.aid!==aid;});
-    if(!A.state.applications.length)migrateApplications(A)&&(A.state.applications[0].animal_id=null);
-    appSyncMirror(A);saveApplicantSoon();renderPipeline();
-  });
-}
-function setAppStage(aid,stage){
-  var ap=appFind(aid);if(!ap||ap.stage===stage)return;
-  ap.stage=stage;
-  (ap.history=ap.history||[]).push({stage:stage,by:currentName()||"",at:new Date().toISOString().slice(0,10)});
-  if(stage==="Adopted"&&!ap.adoptionDate)ap.adoptionDate=new Date().toISOString().slice(0,10);
-  appSyncMirror(A);saveApplicantSoon();renderPipeline();
-  if(stage==="Adopted")afterAdoption(ap);
-}
-function setAppAppF(aid,k,v){
-  var ap=appFind(aid);if(!ap)return;
-  if(k==="animal_id")ap.animal_id=v?(+v||null):null;else ap[k]=v;
-  appSyncMirror(A);saveApplicantSoon();
-  if(k==="animal_id")renderPipeline();
-}
-function otherActiveAppsOn(animal_id){
-  var out=[];
-  applicants.forEach(function(x){
-    if(A&&x.id===A.id)return;
-    var apps=(x.state&&x.state.applications)||null;
-    if(apps&&apps.length){apps.forEach(function(q){if(q.animal_id===animal_id&&APP_ACTIVE.indexOf(q.stage)>-1)out.push({row:x,app:q});});}
-    else if(x.animal_id===animal_id&&APP_ACTIVE.indexOf(x.stage)>-1)out.push({row:x,app:null});
-  });
-  return out;
-}
-function afterAdoption(ap){
-  if(!ap||!ap.animal_id)return;
-  var rec=records.find(function(r){return r.id===ap.animal_id;});
-  if(rec)maybeOfferAdoptionHandoff(ap.animal_id);
-  var others=otherActiveAppsOn(ap.animal_id);
-  if(others.length)appConfirm(others.length+" other active application"+(others.length>1?"s":"")+" on "+pipeDogName(ap.animal_id)+" \u2014 close them as \u201cadopted by someone else\u201d? Each person keeps their record and any other applications they hold.",function(){closeOtherApplications(ap.animal_id);});
-}
-async function closeOtherApplications(animal_id){
-  if(!supabaseClient)return;
-  var others=otherActiveAppsOn(animal_id);var done=0;var seen={};
-  for(var i=0;i<others.length;i++){
-    var o=others[i];if(seen[o.row.id])continue;seen[o.row.id]=1;
-    var row={name:o.row.name,stage:o.row.stage,species:o.row.species,animal_id:o.row.animal_id,enquiry_date:o.row.enquiry_date,saved_at:new Date().toISOString(),state:JSON.parse(JSON.stringify(o.row.state||{}))};
-    migrateApplications(row);
-    row.state.applications.forEach(function(q){
-      if(q.animal_id===animal_id&&APP_ACTIVE.indexOf(q.stage)>-1){
-        q.stage="Declined";q.reason=q.reason||"Dog was adopted by someone else";
-        (q.history=q.history||[]).push({stage:"Declined",by:currentName()||"",at:new Date().toISOString().slice(0,10)});
-      }
-    });
-    appSyncMirror(row);
-    try{var r=await supabaseClient.from("applicants").update(row).eq("id",o.row.id);if(r&&r.error)throw r.error;done++;}
-    catch(e){console.error("closeOtherApplications:",e);}
-  }
-  await loadApplicants();renderPipeline();
-  miniToast(done+" application"+(done!==1?"s":"")+" closed");
-}
-function appQueueInfoFor(animal_id){
-  if(!animal_id)return null;
-  var q=[];
-  applicants.forEach(function(x){
-    var apps=(x.state&&x.state.applications)||null;
-    if(apps&&apps.length){apps.forEach(function(p){if(p.animal_id===animal_id&&APP_ACTIVE.indexOf(p.stage)>-1)q.push({who:x.id,name:x.name,at:(p.history&&p.history[0]&&p.history[0].at)||x.enquiry_date||"",stage:p.stage});});}
-    else if(x.animal_id===animal_id&&APP_ACTIVE.indexOf(x.stage)>-1)q.push({who:x.id,name:x.name,at:x.enquiry_date||"",stage:x.stage});
-  });
-  q.sort(function(a,b){return String(a.at).localeCompare(String(b.at))||((a.who||0)-(b.who||0));});
-  return q;
-}
-var _appsFromCache=false,_appsCachedAt=0;
-function cacheApplicants(){
-  try{localStorage.setItem("nspca-applicants-cache",JSON.stringify({at:Date.now(),rows:applicants}));}catch(e){}
-}
-function loadCachedApplicants(){
-  try{
-    var raw=localStorage.getItem("nspca-applicants-cache");if(!raw)return false;
-    var o=JSON.parse(raw);if(!o||!o.rows)return false;
-    applicants=o.rows;_appsFromCache=true;_appsCachedAt=o.at||0;return true;
-  }catch(e){return false;}
-}
-async function loadApplicants(){
-  if(!supabaseClient)return;
-  var res;
-  try{res=await supabaseClient.from("applicants").select("*").order("saved_at",{ascending:false}).limit(300);}
-  catch(e){loadCachedApplicants();return;}
-  if(!res||res.error){loadCachedApplicants();return;}
-  applicants=(res.data||[]).map(function(r){r.state=r.state||{};return r;});
-  _appsFromCache=false;
-  cacheApplicants();
-  if(typeof appPendingCount==="function"&&appPendingCount())scheduleAppPendingRetry();
-}
-// Applicant saves get the same safety net the dog records have.
-var _appPendingRetry=null;
-function appPendingGet(){try{return JSON.parse(localStorage.getItem("nspca-applicants-pending")||"{}");}catch(e){return {};}}
-function appPendingSet(o){try{localStorage.setItem("nspca-applicants-pending",JSON.stringify(o));}catch(e){}}
-function appPendingCount(){return Object.keys(appPendingGet()).length;}
-function appPendingPark(id,row){
-  var p=appPendingGet();p[id||"new"]={row:row,at:new Date().toISOString()};appPendingSet(p);
-  scheduleAppPendingRetry();
-}
-function appPendingClear(id){var p=appPendingGet();delete p[id||"new"];appPendingSet(p);}
-function scheduleAppPendingRetry(){
-  if(_appPendingRetry||!appPendingCount())return;
-  _appPendingRetry=setTimeout(function(){_appPendingRetry=null;retryAppPending();},15000);
-}
-async function retryAppPending(){
-  if(!supabaseClient||!appPendingCount())return;
-  var p=appPendingGet();var ids=Object.keys(p);
-  for(var i=0;i<ids.length;i++){
-    var id=ids[i];
-    try{
-      if(id==="new"){var r1=await supabaseClient.from("applicants").insert(p[id].row);if(r1&&r1.error)throw r1.error;}
-      else{var r2=await supabaseClient.from("applicants").update(p[id].row).eq("id",id);if(r2&&r2.error)throw r2.error;}
-      appPendingClear(id);
-    }catch(e){}
-  }
-  if(appPendingCount())scheduleAppPendingRetry();
-  else{try{await loadApplicants();renderPipeline();}catch(e){}}
-}
-var _appSaveBusy=false,_appSaveAgain=false,_appSaveFailed=false;
-async function saveApplicant(){
-  if(!A||!supabaseClient)return;
-  // Serialise saves: only one in flight. Prevents the duplicate-insert race
-  // where a second save fires before the first insert has returned an id.
-  if(_appSaveBusy){_appSaveAgain=true;return;}
-  _appSaveBusy=true;
-  migrateApplications(A);appSyncMirror(A);
-  var row={name:A.name||"",stage:A.stage||"Enquiry",species:A.species||"dog",animal_id:A.animal_id||null,enquiry_date:A.enquiry_date||null,saved_at:new Date().toISOString(),state:A.state||{}};
-  try{
-    if(A.id){await supabaseClient.from("applicants").update(row).eq("id",A.id);}
-    else{var res=await supabaseClient.from("applicants").insert(row);if(res&&res.data&&res.data[0])A.id=res.data[0].id;}
-    appPendingClear(A.id);
-    await loadApplicants();
-    _appSaveFailed=false;
-  }catch(e){
-    console.error("saveApplicant:",e);
-    appPendingPark(A.id,row);        // held, and retried when the signal returns
-    if(!_appSaveFailed){_appSaveFailed=true;miniToast("Not saved yet \u2014 held until you\u0027re back online");}
-  }
-  finally{
-    _appSaveBusy=false;
-    if(_appSaveAgain){_appSaveAgain=false;saveApplicant();}
-  }
-}
-function saveApplicantSoon(){clearTimeout(_pipeTimer);_pipeTimer=setTimeout(function(){saveApplicant();},700);}
-function setAppPill(k,v){if(!A)return;if(A.state[k]===v)v="";setAppF(k,v);renderPipeline();}
-function appPillGroup(label,key,current,opts){
-  var pills=opts.map(function(o){var on=current===o;
-    return '<button onclick="setAppPill(\''+key+'\',\''+o.replace(/'/g,"\\'")+'\')" style="font-size:11.5px;padding:5px 13px;border-radius:16px;cursor:pointer;font-family:inherit;'+(on?'background:#0f172a;color:#fff;border:1px solid #0f172a;font-weight:600':'background:#fff;color:#475569;border:0.5px solid rgba(15,23,42,0.18)')+'">'+o+'</button>';}).join("");
-  return '<div style="margin-bottom:10px"><div style="font-size:11.5px;color:#64748b;margin-bottom:4px">'+label+'</div><div style="display:flex;gap:5px;flex-wrap:wrap">'+pills+'</div></div>';
-}
-function setAppF(k,v){if(!A)return;if(k==="name"||k==="stage"||k==="species"||k==="enquiry_date")A[k]=v;else if(k==="animal_id")A.animal_id=v?(+v||null):null;else A.state[k]=v;saveApplicantSoon();if(k==="stage"||k==="animal_id"||k==="species")renderPipeline();}
-function openPipeline(){window._pipeView={mode:"board"};var ov=document.getElementById("pipeline-ov");if(ov)ov.style.display="block";renderPipeline();loadApplicants().then(function(){renderPipeline();});}
-function closePipeline(){var ov=document.getElementById("pipeline-ov");if(ov)ov.style.display="none";A=null;}
-function newApplicant(){A=defaultApplicant();migrateApplications(A);window._pipeView={mode:"applicant"};renderPipeline();}
-function openApplicant(id){var r=applicants.find(function(x){return x.id===id;});if(!r)return;A={id:r.id,name:r.name,stage:r.stage,species:r.species,animal_id:r.animal_id,enquiry_date:r.enquiry_date,state:JSON.parse(JSON.stringify(r.state||{}))};A.state.contactLog=A.state.contactLog||[];migrateApplications(A);appSyncMirror(A);window._pipeView={mode:"applicant"};renderPipeline();}
-function backToBoard(){saveApplicant();A=null;window._pipeView={mode:"board"};renderPipeline();}
-function addContactLine(){var el=document.getElementById("pipe-contact");if(!el||!el.value.trim())return;A.state.contactLog=A.state.contactLog||[];A.state.contactLog.push({date:new Date().toISOString().slice(0,10),text:el.value.trim()});el.value="";saveApplicantSoon();renderPipeline();}
-function anonymiseApplicant(){
-  if(!A)return;
-  appConfirm("Clear this applicant\u0027s personal details? Name and phone are removed for good; the pipeline history stays.",function(){
-    A.name="(details cleared)";A.state.phone="";A.state.anonymised=true;saveApplicant();renderPipeline();
-  });
-}
-function deleteApplicant(){
-  if(!A)return;
-  var nm=A.name&&A.name!=="(details cleared)"?A.name:"this applicant";
-  var wasId=A.id;
-  appConfirm("Delete "+nm+" for good? The record is removed completely \u2014 this cannot be undone.",function(){
-    clearTimeout(_pipeTimer);           // stop any pending debounced save
-    A=null;                             // any in-flight/queued save now no-ops on !A
-    window._pipeView={mode:"board"};
-    renderPipeline();
-    if(wasId&&supabaseClient){
-      supabaseClient.from("applicants").delete().eq("id",wasId).then(function(){
-        return loadApplicants();
-      }).then(function(){renderPipeline();}).catch(function(e){
-        console.error("deleteApplicant:",e);
-        miniToast("Couldn\u0027t delete \u2014 check your connection and try again");
-        loadApplicants().then(function(){renderPipeline();});
-      });
-    }
-  });
-}
-// \u2500\u2500 Stage 2: conflict-aware matching, queue, adoption handoff \u2500\u2500
-function matchApplicantToDog(ap,rec){
-  var a=(rec&&rec.state&&rec.state.assessment)||{};var p=(ap&&ap.state)||{};
-  var hard=[],soft=[],hasData=false;
-  function H(t){hard.push(t);}function Sf(t){soft.push(t);}
-  var kids=p.children,dogs=p.otherDogs,cats=p.cats,exp=p.experience,act=p.activity,home=p.homeType;
-  // children
-  if(a.suitableChildren){hasData=true;
-    if(a.suitableChildren==="No"||a.suitableChildren==="Adults only"){if(kids&&kids!=="None")H("Needs a home without children \u2014 they have "+(kids==="Under 12"?"young children":"children"));}
-    else if(a.suitableChildren==="Over 12"){if(kids==="Under 12")H("Older children only \u2014 they have under-12s");}
-  }else if(kids&&kids!=="None"){Sf("Children untested \u2014 they have "+(kids==="Under 12"?"young children":"children"));}
-  // other dogs
-  if(a.suitableOtherDogs){hasData=true;
-    if(a.suitableOtherDogs==="No"){if(dogs&&dogs!=="None")H("Needs to be the only dog \u2014 they have "+(dogs==="One"?"a dog":"dogs"));}
-    else if(a.suitableOtherDogs==="Selective"){if(dogs&&dogs!=="None")Sf("Selective with dogs \u2014 careful introduction needed");}
-    else if(a.suitableOtherDogs==="Female only"||a.suitableOtherDogs==="Male only"){if(dogs&&dogs!=="None")Sf(a.suitableOtherDogs+" \u2014 check the sex of their dog"+(dogs==="One"?"":"s"));}
-  }else if(dogs&&dogs!=="None"){Sf("Other dogs untested \u2014 they have "+(dogs==="One"?"a dog":"dogs"));}
-  // cats
-  if(a.suitableCats){hasData=true;
-    if(a.suitableCats==="No"){if(cats==="One or more")H("Cannot live with cats \u2014 they have "+(cats==="One or more"?"a cat":"cats"));}
-    else if(a.suitableCats==="Caution"){if(cats==="One or more")Sf("Caution with cats \u2014 slow introduction needed");}
-  }else if(cats==="One or more"){Sf("Cats untested \u2014 they have a cat");}
-  // horses / livestock — dog side uses Yes / Caution / No
-  if(a.suitableEquine){hasData=true;
-    if(a.suitableEquine==="No"){if(p.livestock==="Yes")H("Not safe with horses or livestock \u2014 they keep them");}
-    else if(a.suitableEquine==="Caution"){if(p.livestock==="Yes")Sf("Caution around livestock \u2014 supervised introduction needed");}
-  }else if(p.livestock==="Yes"){Sf("Livestock untested \u2014 they keep horses or stock");}
-  // small pets
-  if(a.suitableSmallMammals){hasData=true;
-    if(a.suitableSmallMammals==="No"){if(p.smallPets==="Yes")H("Not safe with small pets \u2014 they have them");}
-    else if(a.suitableSmallMammals==="Caution"){if(p.smallPets==="Yes")Sf("Caution around small pets \u2014 keep separated");}
-  }else if(p.smallPets==="Yes"){Sf("Small pets untested \u2014 they keep them");}
-  // experience (from experienceLevel and the Experienced-owner homeType value)
-  var needExp=a.experienceLevel||(a.homeType==="Experienced owner only"?"Experienced only":"");
-  if(needExp){hasData=true;
-    if(needExp==="Specialist"){if(exp==="First-time"||exp==="Some")H("Specialist owner needed \u2014 they are "+(exp==="First-time"?"first-time":"some experience"));else if(exp==="Experienced")Sf("Specialist owner preferred \u2014 discuss their background");}
-    else if(needExp==="Experienced only"){if(exp==="First-time")H("Experienced owner only \u2014 they are first-time");else if(exp==="Some")Sf("Experienced owner preferred");}
-    else if(needExp==="Some experience"){if(exp==="First-time")Sf("Some experience preferred \u2014 they are first-time");}
-  }
-  // home
-  if(a.homeType&&a.homeType!=="Any home"&&a.homeType!=="Experienced owner only"){hasData=true;
-    if(a.homeType==="Single dog household"){if(dogs&&dogs!=="None")H("Single-dog household needed \u2014 they have "+(dogs==="One"?"a dog":"dogs"));}
-    else if(a.homeType==="House with garden"){if(home==="Apartment"||home==="House without garden")Sf("Garden preferred \u2014 they have "+(home==="Apartment"?"an apartment":"no garden"));}
-    else if(a.homeType==="Rural \u2014 large space"){if(home&&home!=="Rural / farm")Sf("Rural / large space preferred");}
-    else if(a.homeType==="Quiet home"){if(kids==="Under 12")Sf("Quiet home preferred \u2014 they have young children");}
-  }
-  // energy
-  if(a.exerciseNeeds){hasData=true;
-    if((a.exerciseNeeds.indexOf("High")===0||a.exerciseNeeds==="Very high")&&act==="Low")Sf("High energy dog \u2014 they marked low activity");
-    else if(a.exerciseNeeds.indexOf("Moderate")===0&&act==="Low")Sf("Daily exercise needed \u2014 they marked low activity");
-  }
-  var verdict=hard.length?"blocked":(soft.length?"caution":(hasData?"good":"unassessed"));
-  return{hard:hard,soft:soft,verdict:verdict,hasData:hasData};
-}
-function maybeOfferAdoptionHandoff(animal_id){
-  var _aid=animal_id||(A&&A.animal_id);if(!_aid)return;
-  var rec=records.find(function(r){return r.id===_aid;});if(!rec||!rec.state)return;
-  var o=(rec.state.fin&&rec.state.fin.outcome)||"";
-  if(o&&!/^Active/.test(o))return; // isolation record already closed its own way \u2014 leave it
-  var nm=rec.name||"the dog";
-  appConfirm("Mark "+nm+"\u0027s record as Rehomed with today\u0027s date?",function(){adoptLinkedDog(rec);});
-}
-async function adoptLinkedDog(rec){
-  if(!supabaseClient||!rec)return;
-  var st=JSON.parse(JSON.stringify(rec.state||{}));
-  st.fin=st.fin||{};st.fin.outcome="Rehomed";st.fin.outcomeDate=new Date().toISOString().slice(0,10);
-  try{
-    var up=await supabaseClient.from("dogs").update({saved_at:new Date().toISOString(),data:st}).eq("id",rec.id);
-    if(up&&up.error)throw up.error;
-    await loadRecordsList();
-    if(A){A.state.adoptionDate=st.fin.outcomeDate;saveApplicantSoon();}
-    renderPipeline();
-  }catch(e){
-    console.error("adoptLinkedDog:",e);
-    miniToast("Couldn\u0027t update "+(rec.name||"the dog")+"\u0027s record \u2014 mark the outcome by hand");
-  }
-}
-function pipeDogName(id){var r=records.find(function(x){return x.id===id;});return r?(r.name||"Unnamed"):"record #"+id;}
-// How this person relates to that dog, in the words of where they are now.
-function appRelation(ap){
-  var s=(ap&&ap.stage)||"";
-  return s==="Adopted"?"adopted":s==="Approved"?"approved for":s==="Home check"?"home check for":
-    s==="Withdrawn"?"withdrew from":s==="Declined"?"declined for":"interested in";
-}
-function appAddressLines(st){
-  st=st||{};
-  return [st.addr1,st.addr2,st.town,st.county,st.eircode].filter(function(x){return x&&String(x).trim();});
-}
-function appAddressOneLine(st){return appAddressLines(st).join(", ");}
-function appMapUrl(st){
-  var a=appAddressOneLine(st);
-  if(!a)return "";
-  return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(a+", Ireland");
-}
-function renderPipeline(){
-  var host=document.getElementById("pipeline-body");if(!host)return;
-  var v=window._pipeView||{mode:"board"};
-  var isApp=(v.mode==="applicant"&&A);
-  host.style.maxWidth="900px";
-  host.innerHTML=isApp?pipelineApplicantHtml():pipelineBoardHtml();
-}
-function pipeOpenDog(id){closePipeline();openDog(id);}
-function pipeAvailableDogs(){
-  return records.filter(function(r){
-    var o=r.state&&r.state.fin?r.state.fin.outcome:"";
-    if(o&&o!=="Active \u2014 in isolation"&&o!=="Active - in isolation"&&o!=="Finished Isolation")return false;
-    var s=(r.state&&r.state.assessment?r.state.assessment.rehomingStatus:"")||"";
-    return /^cleared/i.test(s);
-  });
-}
-function allApplications(){
-  var out=[];
-  applicants.forEach(function(x){
-    var apps=(x.state&&x.state.applications)||null;
-    if(apps&&apps.length)apps.forEach(function(q){out.push({row:x,app:q});});
-    else out.push({row:x,app:{aid:0,animal_id:x.animal_id,stage:x.stage,note:(x.state&&x.state.interestNote)||"",history:[]}});
-  });
-  return out;
-}
-function appsOnDog(id){return allApplications().filter(function(e){return e.app.animal_id===id&&APP_ACTIVE.indexOf(e.app.stage)>-1;});}
-function pipeDogsHtml(){
-  var av=pipeAvailableDogs();
-  var withApps=av.filter(function(r){return appsOnDog(r.id).length;}).length;
-  var h='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:4px 0 2px;display:flex;align-items:center;gap:10px">Dogs available \u00b7 '+av.length+(withApps?' \u00b7 '+withApps+' with interest':'')+'<span style="flex:1;height:1px;background:var(--color-border-tertiary)"></span></div>';
-  if(!av.length)return h+'<div style="font-size:11.5px;color:#cbd5e1;padding:2px 2px 12px">No dogs cleared for rehoming yet</div>';
-  h+='<div style="border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:0 12px;margin-bottom:12px">';
-  h+=av.map(function(r){
-    var d=(r.state&&r.state.dog)||{};
-    var s=(r.state&&r.state.assessment?r.state.assessment.rehomingStatus:"")||"";
-    var mine=appsOnDog(r.id);
-    var adoptedE=allApplications().find(function(e){return e.app.animal_id===r.id&&e.app.stage==="Adopted";});
-    var reservedE=mine.find(function(e){return e.app.stage==="Reserved";});
-    var approvedE=mine.find(function(e){return e.app.stage==="Approved";});
-    var best="";
-    mine.forEach(function(e){var v=matchApplicantToDog(e.row,r).verdict;
-      if(v==="good")best="\u2713 match";
-      else if(v==="caution"&&best!=="\u2713 match")best="\u25b3 checks";
-      else if(v==="blocked"&&!best)best="\u2715 conflict";});
-    var bl=rehomeBlockersFor(r.state||{});
-    var sub=adoptedE
-      ? ("adopted by "+esc(adoptedE.row.name||"someone")+(adoptedE.app.adoptionDate?" \u00b7 "+fmtDMY(adoptedE.app.adoptionDate):""))
-      : reservedE
-      ? ("reserved for "+esc(reservedE.row.name||"someone")+(reservedE.app.collectionDate?" \u00b7 collecting "+fmtDMY(reservedE.app.collectionDate):" \u00b7 no collection date yet"))
-      : ([/conditions/i.test(s)?"with conditions":null,bl.length?(bl.length+" blocker"+(bl.length>1?"s":"")):null,d.kennel||null].filter(Boolean).join(" \u00b7 ")||"cleared for rehoming");
-    var chip=adoptedE
-      ? '<span style="font-size:11px;font-weight:600;color:#166534;background:#dcfce7;padding:2px 9px;border-radius:9px;white-space:nowrap">adopted</span>'
-      : reservedE
-      ? '<span style="font-size:11px;font-weight:600;color:#0f6e56;background:#ccfbf1;padding:2px 9px;border-radius:9px;white-space:nowrap">reserved</span>'
-      : approvedE
-      ? '<span style="font-size:11px;font-weight:600;color:#166534;background:#dcfce7;padding:2px 9px;border-radius:9px;white-space:nowrap">approved'+(mine.length>1?" \u00b7 "+mine.length:"")+'</span>'
-      : mine.length
-      ? '<span style="font-size:11px;font-weight:600;color:#166534;background:#dcfce7;padding:2px 9px;border-radius:9px;white-space:nowrap">'+mine.length+(best?" \u00b7 "+best:"")+'</span>'
-      : '<span style="font-size:11px;color:#94a3b8;white-space:nowrap">no interest yet</span>';
-    var av2=d.photo
-      ? '<img src="'+d.photo+'" alt="" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0">'
-      : '<div style="width:30px;height:30px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">\ud83d\udc36</div>';
-    return '<div onclick="pipeOpenDog('+r.id+')" style="display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer">'
-      +av2
-      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#0f172a">'+esc(r.name||"Unnamed")+'</div>'
-      +'<div style="font-size:11.5px;color:'+(bl.length?"#854d0e":"#64748b")+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(sub)+'</div></div>'
-      +chip+'<span class="med-chev">&#8250;</span></div>';
-  }).join("");
-  return h+'</div>';
-}
-function applicationRowHtml(e){
-  var row=e.row,ap=e.app;
-  var w=appDaysWaiting(row);
-  var extra=[];
-  if(row.species==="dog"&&ap.animal_id&&APP_ACTIVE.indexOf(ap.stage)>-1){
-    var _r2=records.find(function(r){return r.id===ap.animal_id;});
-    if(_r2){var m2=matchApplicantToDog(row,_r2);
-      if(m2.verdict==="blocked")extra.push("\u2715 conflict");
-      else if(m2.verdict==="caution")extra.push("\u25b3 checks");
-      else if(m2.verdict==="good")extra.push("\u2713 match");}
-    var q2=appQueueInfoFor(ap.animal_id)||[];
-    var _pos=q2.findIndex(function(x){return x.who===row.id;});
-    if(q2.length>1&&_pos>0)extra.push("#"+(_pos+1)+" in line");
-    if(ap.stage!=="Adopted"&&q2.some(function(x){return x.who!==row.id&&(x.stage==="Approved"||x.stage==="Reserved");}))extra.push("\u26a0 another approved");
-  }
-  if(ap.stage==="Home check"&&row.state&&row.state.hcDate)extra.push("visit "+fmtDMY(row.state.hcDate));
-  if(ap.stage==="Reserved")extra.push(ap.collectionDate?("collect "+fmtDMY(ap.collectionDate)):"no collection date");
-  var what=row.species==="dog"
-    ? (ap.animal_id?esc(pipeDogName(ap.animal_id)):"no dog linked yet")
-    : ("cat"+(ap.note?": "+esc(ap.note):" enquiry"));
-  var sub=[what,row.state&&(row.state.town||row.state.county)||null,row.state&&row.state.phone?maskPhone(row.state.phone):null,(w!==null&&APP_ACTIVE.indexOf(ap.stage)>-1)?("waiting "+w+"d"):null].concat(extra).filter(Boolean).join(" \u00b7 ");
-  return '<div onclick="openApplicant('+row.id+')" style="display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer">'
-    +'<div style="width:30px;height:30px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#64748b;flex-shrink:0">'+esc((row.name||"?").split(/\s+/).map(function(x){return x[0]||"";}).join("").slice(0,2).toUpperCase())+'</div>'
-    +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#0f172a">'+esc(row.name||"Unnamed")+'</div><div style="font-size:11.5px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+sub+'</div></div>'
-    +'<span class="med-chev">&#8250;</span></div>';
-}
-function pipelineBoardHtml(){
-  var all=allApplications();
-  var actApps=all.filter(function(e){return APP_ACTIVE.indexOf(e.app.stage)>-1;});
-  var actPeople={};actApps.forEach(function(e){actPeople[e.row.id||("n"+Math.random())]=1;});
-  var h='<div class="ov-head"><div><div class="ov-title">Rehoming</div><div class="ov-sub">'+actApps.length+' active application'+(actApps.length!==1?"s":"")+' \u00b7 '+Object.keys(actPeople).length+' people</div></div><div style="display:flex;gap:8px"><button onclick="newApplicant()" style="background:#0f172a;color:#c5e86c;border:none;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">+ Applicant</button><button onclick="closePipeline()" class="ov-x">Close</button></div></div>';
-  if(!supabaseClient)return h+'<div style="font-size:12.5px;color:#854d0e;background:#fef9c3;border-radius:8px;padding:10px 12px">Connect to the database to use the pipeline.</div>';
-  if(_appsFromCache||appPendingCount()){
-    var _n=appPendingCount();
-    h+='<div style="display:flex;align-items:center;gap:8px;background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:9px 12px;margin-bottom:10px">'
-      +'<span style="width:8px;height:8px;border-radius:50%;background:#854d0e;flex-shrink:0"></span>'
-      +'<span style="font-size:12px;color:#854d0e;flex:1">'
-      +(_appsFromCache?"No connection \u2014 showing applicants as they were "+(_appsCachedAt?fmtAgo(new Date(_appsCachedAt).toISOString()):"earlier")+". ":"")
-      +(_n?_n+" change"+(_n>1?"s":"")+" waiting to be sent.":"Anything you change is held and sent when you\u0027re back.")
-      +'</span></div>';
-  }
-  // \u2500\u2500 two panes: the dogs, and the applications \u2500\u2500
-  h+='<div class="apgrid">';
-  // LEFT \u2014 the dogs
-  h+='<div class="apcol">'+pipeDogsHtml()+'</div>';
-  // RIGHT \u2014 the applications
-  h+='<div class="apcol">';
-  function cnt(s){return all.filter(function(e){return e.app.stage===s;}).length;}
-  h+=hybridTiles([
-    {label:"Enquiry",value:String(cnt("Enquiry"))},
-    {label:"Home check",value:String(cnt("Home check")),tone:cnt("Home check")?"warn":""},
-    {label:"Approved",value:String(cnt("Approved"))},
-    {label:"Reserved",value:String(cnt("Reserved")),tone:cnt("Reserved")?"ok":""}
-  ]);
-  var att=[];var seenW={};
-  actApps.forEach(function(e){
-    var a=e.row;
-    if(!seenW[a.id]){
-      var wd=appDaysWaiting(a);
-      if(wd!==null&&wd>21){att.push({icon:"\u23f3",text:esc(a.name||"Unnamed")+" waiting since "+fmtDMY(a.enquiry_date),tag:wd+"d",tone:"warn"});seenW[a.id]=1;}
-    }
-    if(e.app.stage==="Home check"&&!(a.state&&a.state.hcDate)&&!seenW["hc"+a.id]){att.push({icon:"\ud83d\udd0d",text:esc(a.name||"Unnamed")+" \u2014 home check not booked",tone:"warn"});seenW["hc"+a.id]=1;}
-    if(e.app.stage==="Reserved"&&!e.app.collectionDate)att.push({icon:"\ud83d\udcc5",text:esc(a.name||"Unnamed")+" \u2014 reserved "+esc(e.app.animal_id?pipeDogName(e.app.animal_id):"a dog")+", no collection date",tone:"warn"});
-  });
-  var dbl={};
-  actApps.forEach(function(e){if((e.app.stage==="Approved"||e.app.stage==="Reserved")&&e.app.animal_id)dbl[e.app.animal_id]=(dbl[e.app.animal_id]||0)+1;});
-  Object.keys(dbl).forEach(function(k){if(dbl[k]>1)att.push({icon:"\u26a0",text:"Two approved for "+esc(pipeDogName(+k)),tone:"alert"});});
-  if(att.length)h+=hybridList("Needs attention",att.slice(0,6));
-  h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:4px 0 2px;display:flex;align-items:center;gap:10px">Applications<span style="flex:1;height:1px;background:var(--color-border-tertiary)"></span></div>';
-  APP_STAGES.forEach(function(st){
-    var grp=all.filter(function(e){return e.app.stage===st;});
-    if(!grp.length&&APP_ACTIVE.indexOf(st)===-1)return;
-    h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:12px 0 2px">'+st+' \u00b7 '+grp.length+'</div>';
-    h+=grp.length?('<div style="border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:0 12px">'+grp.map(applicationRowHtml).join("")+'</div>'):'<div style="font-size:11.5px;color:#cbd5e1;padding:2px 2px 0">No one at this stage</div>';
-  });
-  h+='</div>';
-  h+='</div>';
-  return h;
-}
-function pipelineApplicantHtml(){
-  migrateApplications(A);
-  var st=A.state;var w=appDaysWaiting(A);var apps=st.applications||[];
-  function pf(label,key,val,type,ph){return '<div style="margin-bottom:9px"><label class="lbl">'+label+'</label><input type="'+(type||"text")+'" value="'+esc(val||"")+'" placeholder="'+(ph||"")+'" oninput="setAppF(\''+key+'\',this.value)" style="width:100%;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit"></div>';}
-  function paf(aid,label,key,val,type,ph){return '<div style="margin-bottom:9px"><label class="lbl">'+label+'</label><input type="'+(type||"text")+'" value="'+esc(val||"")+'" placeholder="'+(ph||"")+'" oninput="setAppAppF('+aid+',\''+key+'\',this.value)" style="width:100%;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit"></div>';}
-  function ps(label,key,val,opts){return '<div style="margin-bottom:9px"><label class="lbl">'+label+'</label><select onchange="setAppF(\''+key+'\',this.value)" style="width:100%"><option value="">\u2014</option>'+opts.map(function(o){return '<option value="'+o+'"'+(val===o?' selected':'')+'>'+o+'</option>';}).join("")+'</select></div>';}
-  // \u2500\u2500 header \u2500\u2500
-  var h='<div class="ov-head"><button onclick="backToBoard()" class="ov-x">&larr; Board</button><div style="flex:1;min-width:0" class="ov-title">'+esc(A.name||"New applicant")+'</div></div>';
-  // \u2500\u2500 live picture (from the primary application) \u2500\u2500
-  var prim=appPrimary(A);
-  var sTone=prim?((prim.stage==="Approved"||prim.stage==="Reserved"||prim.stage==="Adopted")?"ok":prim.stage==="Home check"?"warn":(prim.stage==="Declined"||prim.stage==="Withdrawn")?"alert":""):"";
-  var actN=apps.filter(function(x){return APP_ACTIVE.indexOf(x.stage)>-1;}).length;
-  var sLine=prim
-    ? (prim.animal_id?(appStageVerb(prim.stage)+" "+esc(pipeDogName(prim.animal_id))):(prim.stage+(A.species==="cat"?" \u2014 cat enquiry":" \u2014 no dog linked yet")))
-    : "No applications yet";
-  if(prim&&prim.stage==="Adopted"&&prim.adoptionDate)sLine+=" \u00b7 "+fmtDMY(prim.adoptionDate);
-  if(actN>1)sLine+=" \u00b7 "+actN+" active applications";
-  h+=hybridBanner(esc(sLine),sTone);
-  var hcT=st.hcOutcome?{v:st.hcOutcome==="Failed"?"Failed":"\u2713 "+st.hcOutcome,t:st.hcOutcome==="Failed"?"alert":""}:{v:"\u2014",t:""};
-  h+=hybridTiles([
-    {label:"Waiting",value:(w===null?"\u2014":w+"d"),tone:(w!==null&&w>21&&actN)?"warn":""},
-    {label:"Applications",value:String(apps.length)+(actN&&actN!==apps.length?" \u00b7 "+actN+" live":""),tone:""},
-    {label:"Home check",value:hcT.v,tone:hcT.t}
-  ]);
-  h+='<div class="apgrid">';
-  // ================= LEFT: the person =================
-  h+='<div class="apcol">';
-  h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:4px 0 2px;display:flex;align-items:center;gap:10px">The person<span style="flex:1;height:1px;background:var(--color-border-tertiary)"></span></div>';
-  // contact
-  var _addr=appAddressOneLine(st);
-  var _map=appMapUrl(st);
-  var cSum=[st.phone?maskPhone(st.phone):null,st.town||st.county||null].filter(Boolean).join(" \u00b7 ")||"No contact details yet";
-  h+=hybridRow("ap-contact","","Contact",esc(cSum),
-    pf("Name","name",A.name)
-    +'<div class="g2">'+pf("Phone","phone",st.phone,"tel")+pf("Email","email",st.email,"email")+'</div>'
-    +'<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:8px 0 6px">Address</div>'
-    +pf("Address line 1","addr1",st.addr1,"text","house name or number and street")
-    +pf("Address line 2","addr2",st.addr2,"text","optional")
-    +'<div class="g2">'+pf("Town","town",st.town)+pf("County","county",st.county)+'</div>'
-    +pf("Eircode","eircode",st.eircode,"text","e.g. N39 XY12")
-    +(_map?'<a href="'+_map+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin:2px 0 8px;padding:7px 13px;border-radius:8px;background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);font-size:12px;color:#0f172a;text-decoration:none">View on the map \u2192</a><div style="font-size:11px;color:#94a3b8;margin-bottom:6px">'+esc(_addr)+'</div>'
-      :'<div style="font-size:11px;color:#cbd5e1;margin-bottom:6px">Add an address to get a map link for the home check.</div>')
-    +'<div style="font-size:11px;color:#94a3b8">Enquired '+(A.enquiry_date?fmtDMY(A.enquiry_date):"\u2014")+'</div>',"");
-  // their situation
-  var sitKeys=["homeType","children","otherDogs","cats","livestock","smallPets","experience","activity"];
-  var sitN=sitKeys.filter(function(k){return st[k];}).length;
-  var sitSum=sitN?(sitN+" of 8 recorded"+(st.homeType?" \u00b7 "+esc(st.homeType):"")):"Nothing recorded yet";
-  h+=hybridRow("ap-situation","","Their situation",sitSum,
-    appPillGroup("Home","homeType",st.homeType,["House with garden","House without garden","Apartment","Rural / farm"])
-    +appPillGroup("Children","children",st.children,["None","Over 12","Under 12"])
-    +appPillGroup("Other dogs","otherDogs",st.otherDogs,["None","One","Two or more"])
-    +appPillGroup("Cats","cats",st.cats,["None","One or more"])
-    +appPillGroup("Horses / livestock","livestock",st.livestock,["None","Yes"])
-    +appPillGroup("Small pets","smallPets",st.smallPets,["None","Yes"])
-    +appPillGroup("Experience","experience",st.experience,["First-time","Some","Experienced","Specialist"])
-    +appPillGroup("Activity","activity",st.activity,["Low","Daily walks","Very active"]),
-    sitN<8?"warn":"");
-  // their story — the enquiry form
-  var styN=["whyNow","previousPets","hoursAlone","gardenFencing","landlord"].filter(function(k){return st[k];}).length;
-  var stySum=styN?(styN+" of 5 answered"):"Not asked yet";
-  h+=hybridRow("ap-story","","Their story",stySum,
-    pf("Why a dog, why now","whyNow",st.whyNow,"text","in their own words")
-    +pf("Previous pets","previousPets",st.previousPets,"text","what they had, what happened to them")
-    +appPillGroup("Hours the dog would be alone","hoursAlone",st.hoursAlone,["Rarely","2\u20134 hours","4\u20138 hours","8+ hours"])
-    +pf("Garden & fencing","gardenFencing",st.gardenFencing,"text","size, fence height, secure?")
-    +appPillGroup("Landlord / ownership","landlord",st.landlord,["Own home","Landlord permits pets","Permission not confirmed"]),
-    styN<5?"warn":"");
-  // home check (person-level: it is the home that gets checked)
-  var hSum=[st.hcOutcome||null,st.hcDate?fmtDMY(st.hcDate):null].filter(Boolean).join(" \u00b7 ")||"Not booked yet";
-  h+=hybridRow("ap-hc","","Home check",esc(hSum),
-    '<div class="g2">'+pf("Visit date","hcDate",st.hcDate,"date")+ps("Outcome","hcOutcome",st.hcOutcome,["Booked","Passed","Passed with advice","Failed"])+'</div>'
-    +pf("Home check notes","hcNotes",st.hcNotes,"text","brief \u2014 garden secure, other pets met, etc.")
-    +(_map?'<a href="'+_map+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:7px 13px;border-radius:8px;background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);font-size:12px;color:#0f172a;text-decoration:none">Directions to '+esc(st.town||st.county||"the address")+' \u2192</a>'
-      :'<div style="font-size:11px;color:#854d0e">No address recorded \u2014 add one on the Contact row for directions.</div>'),
-    st.hcOutcome==="Failed"?"alert":(!st.hcOutcome?"warn":""));
-  // notes
-  var nSum=st.notes?esc(String(st.notes).replace(/\s+/g," ").slice(0,60)):"None";
-  h+=hybridRow("ap-notes","","Notes",nSum,
-    '<textarea oninput="setAppF(\'notes\',this.value)" style="width:100%;min-height:60px;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit">'+esc(st.notes||"")+'</textarea>',"");
-  // footer actions
-  h+='<div style="display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid var(--color-border-tertiary);padding-top:10px;margin-top:12px"><span style="font-size:11px;color:#94a3b8">'+(st.anonymised?"Personal details cleared":"After adoption, withdrawal or decline:")+'</span>'+'<div style="display:flex;gap:6px">'
-    +(st.anonymised?'':'<button onclick="anonymiseApplicant()" style="background:none;border:0.5px solid rgba(15,23,42,0.2);padding:5px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit">Clear personal details</button>')
-    +'<button onclick="deleteApplicant()" style="background:none;border:0.5px solid #fca5a5;color:#991b1b;padding:5px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit">Delete</button>'
-    +'</div></div>';
-  h+='</div>';
-  // ================= RIGHT: the applications =================
-  h+='<div class="apcol">';
-  h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:4px 0 2px;display:flex;align-items:center;gap:10px">Applications \u00b7 '+apps.length+'<span style="flex:1;height:1px;background:var(--color-border-tertiary)"></span><button onclick="appAddApplication()" style="background:#0f172a;color:#c5e86c;border:none;padding:5px 12px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">+ Application</button></div>';
-  if(!apps.length)h+='<div style="font-size:11.5px;color:#cbd5e1;padding:6px 2px 12px">No applications yet \u2014 add one to link this person to a dog.</div>';
-  apps.forEach(function(ap){h+=appCardHtml(ap);});
-  // timeline: every stage move and every contact, newest first
-  var tl=[];
-  apps.forEach(function(ap){
-    (ap.history||[]).forEach(function(hh){
-      tl.push({at:hh.at||"",text:(hh.stage||"?")+(ap.animal_id?" \u2014 "+pipeDogName(ap.animal_id):(ap.note?" \u2014 "+ap.note:""))+(hh.by?" \u00b7 by "+hh.by:"")});
-    });
-  });
-  (st.contactLog||[]).forEach(function(c){tl.push({at:c.date||"",text:"Contact \u00b7 "+String(c.text||"")});});
-  tl.sort(function(a,b){return String(b.at).localeCompare(String(a.at));});
-  var tlSum=tl.length?(tl.length+" entries \u00b7 last "+fmtDMY(tl[0].at)):"Nothing yet";
-  h+=hybridRow("ap-timeline","","Timeline",tlSum,
-    (tl.map(function(t){return '<div style="font-size:12px;color:#334155;padding:4px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span style="color:#94a3b8">'+fmtDMY(t.at)+'</span> \u00b7 '+esc(t.text)+'</div>';}).join("")||'<div style="font-size:11.5px;color:#cbd5e1">Every stage move and contact lands here, with who and when.</div>')
-    +'<div style="display:flex;gap:8px;margin:8px 0 2px"><input id="pipe-contact" type="text" placeholder="log a contact \u2014 e.g. left voicemail" style="flex:1;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit"><button onclick="addContactLine()" style="background:#f1f5f9;border:0.5px solid rgba(15,23,42,0.12);padding:8px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">Add</button></div>',"");
-  h+='</div>';
-  h+='</div>';
-  return h;
-}
-function appStageVerb(s){
-  return s==="Adopted"?"Adopted":s==="Reserved"?"Reserved":s==="Approved"?"Approved for":s==="Home check"?"Home check for":
-    s==="Withdrawn"?"Withdrew from":s==="Declined"?"Declined for":"Enquiry \u2014";
-}
-function appCardHtml(ap){
-  var st=A.state;
-  function paf(label,key,val,type,ph){return '<div style="margin-bottom:9px"><label class="lbl">'+label+'</label><input type="'+(type||"text")+'" value="'+esc(val||"")+'" placeholder="'+(ph||"")+'" oninput="setAppAppF('+ap.aid+',\''+key+'\',this.value)" style="width:100%;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px;font-family:inherit"></div>';}
-  var _rec=(A.species==="dog"&&ap.animal_id)?records.find(function(r){return r.id===ap.animal_id;}):null;
-  var mm=_rec?matchApplicantToDog(A,_rec):null;
-  var q=ap.animal_id?appQueueInfoFor(ap.animal_id):null;
-  var qPos=null;if(q&&A.id){var _i=q.findIndex(function(x){return x.who===A.id;});if(_i>-1)qPos=_i+1;}
-  var closed=(ap.stage==="Withdrawn"||ap.stage==="Declined");
-  var tone=closed?"#94a3b8":(ap.stage==="Adopted"?"#166534":mm&&mm.verdict==="blocked"?"#991b1b":mm&&mm.verdict==="caution"?"#854d0e":"#0f172a");
-  var head=[ap.animal_id?pipeDogName(ap.animal_id):(A.species==="cat"?(ap.note||"Cat enquiry"):"No dog linked"),ap.stage].join(" \u00b7 ");
-  var badges=[];
-  if(mm)badges.push(mm.verdict==="blocked"?"\u2715 conflict":mm.verdict==="caution"?"\u25b3 checks":mm.verdict==="good"?"\u2713 match":"");
-  if(q&&q.length>1&&qPos)badges.push("#"+qPos+" of "+q.length+" in line");
-  if(q&&ap.stage!=="Adopted"&&q.some(function(x){return x.who!==A.id&&(x.stage==="Approved"||x.stage==="Reserved");}))badges.push("\u26a0 someone else approved");
-  var h='<div style="border:0.5px solid '+(closed?'var(--color-border-tertiary)':'rgba(15,23,42,0.14)')+';border-radius:10px;padding:12px 14px;margin-bottom:10px'+(closed?';opacity:0.72':'')+'">';
-  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="flex:1;min-width:0;font-size:13px;font-weight:700;color:'+tone+'">'+esc(head)+'</div>'
-    +badges.filter(Boolean).map(function(b){return '<span style="font-size:10.5px;color:#64748b;background:#f1f5f9;padding:2px 8px;border-radius:10px;white-space:nowrap">'+esc(b)+'</span>';}).join("")
-    +'<button onclick="appRemoveApplication('+ap.aid+')" title="Remove this application" style="background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:13px;padding:2px 4px">&#10005;</button></div>';
-  h+='<div class="g2">';
-  h+=(A.species==="dog"
-    ?'<div style="margin-bottom:9px"><label class="lbl">Dog</label><select onchange="setAppAppF('+ap.aid+',\'animal_id\',this.value)" style="width:100%"><option value="">\u2014 none yet \u2014</option>'+records.filter(function(r){return !isArchived(r);}).map(function(r){return '<option value="'+r.id+'"'+(ap.animal_id===r.id?' selected':'')+'>'+esc(r.name||"Unnamed")+'</option>';}).join("")+'</select></div>'
-    :paf("Which cat / what kind","note",ap.note));
-  h+='<div style="margin-bottom:9px"><label class="lbl">Stage</label><select onchange="setAppStage('+ap.aid+',this.value)" style="width:100%">'+APP_STAGES.map(function(s){return '<option'+(ap.stage===s?' selected':'')+'>'+s+'</option>';}).join("")+'</select></div>';
-  h+='</div>';
-  if(closed)h+=paf("Reason","reason",ap.reason,"text","brief \u2014 helps if they apply again");
-  if(mm&&(mm.hard.length||mm.soft.length)&&!closed){
-    h+='<div style="margin:2px 0 8px">'+mm.hard.map(function(t){return '<div style="font-size:11.5px;color:#991b1b;padding:2px 0">\u2715 '+esc(t)+'</div>';}).join("")
-      +mm.soft.map(function(t){return '<div style="font-size:11.5px;color:#854d0e;padding:2px 0">\u25b3 '+esc(t)+'</div>';}).join("")+'</div>';
-  }
-  if(_rec&&!closed){
-    var bl=rehomeBlockersFor(_rec.state||{});
-    if(bl.length)h+='<div style="font-size:11.5px;color:#854d0e;margin:2px 0 8px">\ud83d\udd12 '+esc(pipeDogName(ap.animal_id))+' isn\u0027t cleared yet \u00b7 '+bl.length+' blocker'+(bl.length>1?"s":"")+'</div>';
-  }
-  if(ap.stage==="Reserved")h+='<div style="font-size:11.5px;color:#0f6e56;background:#ccfbf1;border-radius:8px;padding:7px 10px;margin:2px 0 8px">Reserved \u2014 promised to this person, not yet collected.'+(ap.collectionDate?' Collecting '+fmtDMY(ap.collectionDate)+'.':' Set a collection date below.')+'</div>';
-  if(ap.stage==="Approved"||ap.stage==="Reserved"||ap.stage==="Adopted"){
-    h+='<div class="g2">'+paf("Collection date","collectionDate",ap.collectionDate,"date")+paf("Adoption fee","fee",ap.fee,"text","e.g. \u20ac150 \u2014 leave blank if none")+'</div>';
-    h+='<div class="g2">'
-      +'<div style="margin-bottom:9px"><label class="lbl">Contract</label><select onchange="setAppAppF('+ap.aid+',\'contractSigned\',this.value)" style="width:100%"><option value="">\u2014</option><option'+(ap.contractSigned==="Signed"?" selected":"")+'>Signed</option><option'+(ap.contractSigned==="Not yet"?" selected":"")+'>Not yet</option></select></div>'
-      +'<div style="margin-bottom:9px"><label class="lbl">Microchip</label><select onchange="setAppAppF('+ap.aid+',\'chipTransferred\',this.value)" style="width:100%"><option value="">\u2014</option><option'+(ap.chipTransferred==="Transferred"?" selected":"")+'>Transferred</option><option'+(ap.chipTransferred==="Not yet"?" selected":"")+'>Not yet</option></select></div>'
-      +'</div>';
-    if(ap.stage==="Adopted"&&(ap.contractSigned!=="Signed"||ap.chipTransferred!=="Transferred"))h+='<div style="font-size:11.5px;color:#854d0e;margin-bottom:6px">'+((ap.contractSigned!=="Signed")?"\ud83d\udcc4 Contract not marked signed. ":"")+((ap.chipTransferred!=="Transferred")?"\ud83d\udcdf Chip not marked transferred.":"")+'</div>';
-  }
-  var last=(ap.history||[]).slice(-1)[0];
-  if(last)h+='<div style="font-size:10.5px;color:#94a3b8">Last move: '+esc(last.stage)+' \u00b7 '+fmtDMY(last.at)+(last.by?' \u00b7 by '+esc(last.by):'')+'</div>';
-  return h+'</div>';
-}
-
 function renderDashboard(){
   var el=document.getElementById("dashboard-content");if(!el)return;
   updateClock();incSync();
@@ -2629,7 +2020,7 @@ function renderDashboard(){
   var ue=document.getElementById("dash-user");
   if(ue){var col=avatarColor(currentName());var ini=initials(currentName());var role=currentRole();var roleLabel=role==="admin"?"Admin":role==="director"?"Director of Operations":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Dog Trainer \u0026 Behaviour Specialist":"Staff";ue.innerHTML='<span style="width:18px;height:18px;border-radius:50%;background:'+col+';color:#fff;font-size:8px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">'+ini+'</span><span>'+esc(currentName())+' &middot; '+roleLabel+'</span>';ue.style.display="inline-flex";ue.style.alignItems="center";ue.style.gap="6px";}
   var ks=[];records.forEach(function(r){var k=r.state&&r.state.dog?r.state.dog.kennel:"";if(k&&ks.indexOf(k)<0)ks.push(k);});ks.sort();
-  var fb='<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap"><div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 10px;min-width:150px"><span>&#128269;</span><input placeholder="Search..." value="'+esc(_s)+'" oninput="setDashFilter(\'S\',this.value);window._dbCaret=this.selectionStart;window._dbSearchActive=true;dashSearchRender()" style="border:none;background:transparent;outline:none;font-size:12px;width:100%;font-family:inherit">'+(_s?'<span onclick="setDashFilter(\'S\',\'\');renderDashboard()" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){this.click()}" title="Clear" style="cursor:pointer;color:#94a3b8;font-size:14px;line-height:1;padding:0 2px;flex-shrink:0">&#10005;</span>':'')+'</div><select onchange="setDashFilter(\'K\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:100px"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select><select onchange="setDashFilter(\'O\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:90px">'+[["day","Day"],["name","Name"],["kennel","Kennel"],["tl","Score"]].map(function(o){return'<option value="'+o[0]+'"'+(_o===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select>'+'</div>';
+  var fb='<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap"><button onclick="toggleFocus()" title="Show only dogs needing something today" style="background:'+(window._dbFocus?'#0f172a':'none')+';color:'+(window._dbFocus?'#fff':'#64748b')+';border:0.5px solid '+(window._dbFocus?'#0f172a':'var(--color-border-secondary)')+';padding:6px 13px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">\ud83c\udfaf Focus</button><div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 10px;min-width:150px"><span>&#128269;</span><input placeholder="Search..." value="'+esc(_s)+'" oninput="setDashFilter(\'S\',this.value);window._dbCaret=this.selectionStart;window._dbSearchActive=true;dashSearchRender()" style="border:none;background:transparent;outline:none;font-size:12px;width:100%;font-family:inherit">'+(_s?'<span onclick="setDashFilter(\'S\',\'\');renderDashboard()" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){this.click()}" title="Clear" style="cursor:pointer;color:#94a3b8;font-size:14px;line-height:1;padding:0 2px;flex-shrink:0">&#10005;</span>':'')+'</div><select onchange="setDashFilter(\'K\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:100px"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select><select onchange="setDashFilter(\'O\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:90px">'+[["day","Day"],["name","Name"],["kennel","Kennel"],["tl","Score"]].map(function(o){return'<option value="'+o[0]+'"'+(_o===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select>'+'</div>';
   var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
   if(_s)active=active.filter(function(r){return(r.name||"").toLowerCase().includes(_s)||(r.breed||"").toLowerCase().includes(_s)||(r.refNo||"").toLowerCase().includes(_s);});
   if(_k)active=active.filter(function(r){return(r.state&&r.state.dog?r.state.dog.kennel:"")=== _k;});
@@ -2652,7 +2043,9 @@ function renderDashboard(){
   }
   var stickyEl=document.getElementById("overdue-sticky");
   if(stickyEl)stickyEl.innerHTML=contagiousAlertHtml()+overdueBannerHtml;
-  if(!active.length){el.innerHTML=offlineBannerHtml()+statusStrip+fb+renderIncomingStrip()+tasksRollupHtml(records)+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+recentOutcomesHtml()+brandFooterHtml();return;}
+  if(!active.length){el.innerHTML=offlineBannerHtml()+catchupHtml()+statusStrip+fb+renderIncomingStrip()+tasksRollupHtml(records)+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+recentOutcomesHtml()+brandFooterHtml();return;}
+  var _ff=focusFilter(active);active=_ff.list;var _focusRest=_ff.rest;
+
   var cards=active.map(function(rec){
     var d=rec.state&&rec.state.dog?rec.state.dog:{};var f=rec.state&&rec.state.fin?rec.state.fin:{};
     var con=activeContagiousList(rec.state&&rec.state.medical?rec.state.medical:null);
@@ -2670,7 +2063,7 @@ function renderDashboard(){
     var barPct=(finished||overdue)?100:pct;
     var savedBy=rec.savedBy||"";
     var flagsHtml=(d.kennel?'':'')+(con.length?'<span title="'+esc(con.map(function(x){return diseaseShortName(x.type);}).join(", "))+'" class="dflag crit">&#129440; Contagious</span>':'')+(function(){var rb=restrictedBreedInfo(rec.state&&rec.state.dog?rec.state.dog.breed:rec.breed);return rb?('<span title="'+esc(rb.name)+(rb.xl?' — banned: cannot be rehomed':' — restricted breed: muzzle + lead in public')+'" class="dflag '+(rb.xl?'crit':'warn')+'">'+(rb.xl?'&#128683; XL':'&#9888; RB')+'</span>'):'';})()+(warns.length?'<span title="'+esc(warns.map(function(w){return w.text;}).join(", "))+'" class="dflag '+(warnCrit?"crit":"warn")+'">&#9888; '+warns.length+'</span>':'')+trajTag(rec)+(subMeta(rec.state).partial?'<span title="Provisional — assessment incomplete" class="dflag prov">PROV</span>':'');
-    return'<div onclick="openDog('+rec.id+')" tabindex="0" role="button" aria-label="Open '+esc(rec.name)+'" onkeydown="if(event.key===\'Enter\'){openDog('+rec.id+')}" class="dcard '+tlClass+'"><div class="stripe"></div><div class="dcard-in">'
+    return'<div onclick="openDog('+rec.id+')" tabindex="0" role="button" aria-label="Open '+esc(rec.name)+'" onkeydown="if(event.key===\'Enter\'){openDog('+rec.id+')}" class="dcard '+tlClass+'" style="position:relative"><div class="stripe"></div><button onclick="event.stopPropagation();openPeek('+rec.id+')" title="Quick peek" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;border:0.5px solid #d8dde5;background:#fff;color:#94a3b8;font-size:11px;cursor:pointer;z-index:2;line-height:1">\u24d8</button><div class="dcard-in">'
       +'<div class="dtop"><div class="dthumb">'+ph+'</div><div class="dinfo"><div class="dname">'+esc(rec.name)+'</div>'+(d.breed||rec.breed?'<div class="dmeta">'+esc(d.breed||rec.breed)+'</div>':'')+'</div>'+(d.kennel?'<span class="dkennel">'+esc(d.kennel)+'</span>':'')+'</div>'
       +'<div class="dbottom"><div class="drow"><div class="dstatus"><span class="dd"></span>'+tlLabelTxt+'</div>'+(dayLabelTxt?'<div class="dayno">'+dayLabelTxt+'</div>':'')+'</div>'
       +(dayLabelTxt?'<div style="background:#eceef1;border-radius:20px;height:4px;overflow:hidden;margin-top:7px"><div style="background:'+col+';width:'+barPct+'%;height:100%;border-radius:20px"></div></div>':'')
@@ -2686,7 +2079,8 @@ function renderDashboard(){
   }).join("");
   var rollupHtml=tasksRollupHtml(active);
   var viewBody='<div class="dcardgrid">'+cards+'</div>';
-  el.innerHTML=offlineBannerHtml()+statusStrip+fb+renderIncomingStrip()+rollupHtml+viewBody+recentOutcomesHtml()+brandFooterHtml();
+  var _restHtml=(window._dbFocus&&_focusRest&&_focusRest.length)?'<div onclick="toggleFocus()" style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;padding:10px 14px;font-size:12px;color:#64748b;text-align:center;cursor:pointer;margin-top:8px">'+_focusRest.length+' dog'+(_focusRest.length===1?'':'s')+' need'+(_focusRest.length===1?'s':'')+' nothing right now \u2014 '+esc(_focusRest.map(function(r){return r.name;}).filter(Boolean).slice(0,8).join(', '))+(_focusRest.length>8?'\u2026':'')+' \u00b7 tap to show</div>':'';
+  el.innerHTML=offlineBannerHtml()+catchupHtml()+statusStrip+fb+renderIncomingStrip()+rollupHtml+viewBody+_restHtml+recentOutcomesHtml()+brandFooterHtml();
   if(window._dbSearchActive){var si=el.querySelector('input[placeholder="Search..."]');if(si){si.focus();var l=(window._dbCaret!=null?window._dbCaret:si.value.length);si.setSelectionRange(l,l);}window._dbSearchActive=false;window._dbCaret=null;}
 }
 
@@ -2745,6 +2139,7 @@ function storyEvents(){
   if(as.scoredDate)push(as.scoredDate,"key","\ud83c\udfaf","Behaviour scored","","scoring");
   if(as.lightOverrideDate)push(as.lightOverrideDate,"key","\ud83d\udd00","Handling light overridden"+(as.lightOverride?" to "+as.lightOverride:""),as.lightOverrideReason,"rehoming");
   if(as.rehomingAt)push(as.rehomingAt,"key","\u2705","Cleared for rehoming"+(as.rehomingBy?" \u2014 "+as.rehomingBy:""),"","rehoming");
+  ((d.photos)||[]).forEach(function(p){push(p.date,"note","\ud83d\udcf7","Photo added",p.note,"dog");});
   if(f.outcomeDate&&f.outcome)push(f.outcomeDate,"key",'\ud83c\udfe1',f.outcome,f.outcomeNotes,"outcome");
   ev.sort(function(x,y){return x.date<y.date?-1:x.date>y.date?1:(x.time||"").localeCompare(y.time||"");});
   return ev;
@@ -2774,6 +2169,169 @@ function copyStory(){
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){appAlert("Story copied \u2014 paste it into an email or document.");},function(){appAlert("Couldn\u0027t copy automatically \u2014 use the Report tab\u0027s copy instead.");});}
   else{appAlert("Couldn\u0027t copy automatically \u2014 use the Report tab\u0027s copy instead.");}
 }
+function daySheetDoc(){
+  var today=new Date().toISOString().slice(0,10);
+  var yday=addDaysStr(today,-1);
+  var act=roundsActiveDogs();
+  var due=computeDueToday(records);
+  var inList=function(list,r){return (due[list]||[]).indexOf(r)>-1;};
+  var incToday=incLoad().filter(function(e){return e.when==="today";});
+  var chip=function(txt,bg,col){return '<span style="font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:10px;white-space:nowrap;background:'+bg+';color:'+col+'">'+esc(txt)+'</span>';};
+  var secFor=function(sec){return sec===0?"Kennels":sec===1?"Pods":sec===2?"Crate":sec===3?"Other areas":"No kennel set";};
+  var h="";var lastSec=-1;
+  act.forEach(function(r){
+    var st=r.state||{};var d=st.dog||{};var mm=st.medical||{};
+    var sec=kennelRank(d.kennel||"").sec;
+    if(sec!==lastSec){h+='<div style="font-size:9.5px;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;color:#94a3b8;margin:14px 0 6px">'+secFor(sec)+'</div>';lastSec=sec;}
+    var chips="";
+    var con=activeContagiousList(mm);
+    con.forEach(function(x){chips+=chip("\u26a0 "+diseaseShortName(x.type),"#fecaca","#7f1d1d");});
+    if(inList("meds",r)){var mnames=(mm.medications||[]).filter(function(x){return x.active!==false&&(!x.endDate||x.endDate>=today);}).map(function(x){return x.name;}).filter(Boolean).join(", ");chips+=chip("\ud83d\udc8a "+(mnames||"Meds"),"#fce7f3","#9d174d");}
+    if(inList("vaccs",r))chips+=chip("\ud83d\udc89 Vaccination due","#fef9c3","#a16207");
+    if(inList("paras",r))chips+=chip("\ud83d\udc1b Parasite tx due","#fef9c3","#a16207");
+    if(inList("reports",r))chips+=chip("\ud83d\udccb Day report due","#f3e8ff","#7c3aed");
+    if(inList("weighs",r))chips+=chip("\u2696 Weigh-in due","#ccfbf1","#0d9488");
+    if(inList("finishing",r))chips+=chip("\ud83c\udf89 Finishing today","#dcfce7","#166534");
+    if(inList("returns",r))chips+=chip("\u23f3 Reclaim window","#fee2e2","#991b1b");
+    if(inList("walks",r))chips+=chip("\ud83d\udeb6 Not walked yet","#e2e8f0","#475569");
+    // yesterday, via story assembly on this record
+    var ydayLine="";
+    var keepS=S;
+    try{
+      S=st;
+      var ev=storyEvents().filter(function(e){return e.date===yday;});
+      if(ev.length)ydayLine=ev.slice(0,2).map(function(e){return e.title+(e.detail?" \u2014 "+e.detail.slice(0,80):"");}).join(" \u00b7 ");
+    }catch(e){}
+    S=keepS;
+    var days=daysInIsolation(r.intakeDate);
+    var kShort=(function(k){var m=String(k||"").match(/^k(?:ennel)?\s*\.?\s*(\d+)/i);if(m)return "K"+m[1];m=String(k||"").match(/^pod\s*\.?\s*(\d+)/i);if(m)return "P"+m[1];return /^(?:the\s+)?crate/i.test(k||"")?"CR":(k?k.slice(0,4):"\u2014");})(d.kennel);
+    var kbg=sec===1?"#7c6df0":sec===2?"#b45309":"#0f172a";
+    h+='<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:0.5px solid #e2e8f0;page-break-inside:avoid">'
+      +'<span style="font-size:11px;font-weight:800;background:'+kbg+';color:#fff;border-radius:8px;padding:3px 8px;min-width:34px;text-align:center;flex-shrink:0">'+esc(kShort)+'</span>'
+      +'<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13.5px">'+esc(r.name||"")+'</div>'
+      +'<div style="font-size:11px;color:#64748b;margin-top:1px">'+(days!=null?"Day "+days:"")+(r.trafficLight?" \u00b7 "+esc(r.trafficLight):"")+'</div>'
+      +(ydayLine?'<div style="font-size:11px;color:#475569;background:#f8fafc;border-radius:8px;padding:6px 10px;margin-top:5px">Yesterday: '+esc(ydayLine)+'</div>':'')
+      +'</div>'
+      +'<div style="margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:290px">'+chips+'</div>'
+      +'<span style="width:34px;height:22px;border:1.5px dashed #cbd5e1;border-radius:6px;flex-shrink:0;margin-left:8px"></span></div>';
+  });
+  var incHtml=incToday.length?('<div style="font-size:9.5px;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;color:#94a3b8;margin:0 0 6px">\ud83d\ude90 Expected today</div>'
+    +incToday.map(function(e){return '<div style="background:#f6fbe8;border-left:3px solid #c5e86c;border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:4px"><b>'+esc(e.time||"Today")+'</b> \u2014 '+esc(e.what||"Unknown dog")+(e.source?" \u00b7 "+esc(e.source):"")+(e.from?" \u00b7 "+esc(e.from):"")+(e.notes?" \u00b7 "+esc(e.notes):"")+'</div>';}).join("")):"";
+  var reclaims=(due.returns||[]).map(function(r){var d2=r.state&&r.state.dog?r.state.dog:{};return r.name+" \u2014 "+returnDateLabel(d2.returnType)+" "+fmtDMY(d2.returnDate);}).join(" \u00b7 ");
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Day sheet \u2014 '+esc(fmtDMYwk(today))+'</title><style>body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0;padding:22px 24px;color:#0f172a}@media print{.noprint{display:none}body{padding:0}}</style></head><body>'
+    +'<div class="noprint" style="text-align:right;margin-bottom:10px"><button onclick="window.print()" style="background:#c5e86c;border:none;padding:8px 20px;border-radius:20px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">\ud83d\udda8 Print</button></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #0f172a;padding-bottom:10px;margin-bottom:14px"><h1 style="font-size:17px;margin:0">\u2600\ufe0f Day sheet</h1><div style="font-size:12px;color:#64748b">'+esc(fmtDMYwk(today))+' \u00b7 '+act.length+' dog'+(act.length===1?"":"s")+' \u00b7 built '+new Date().toTimeString().slice(0,5)+(currentName()?' by '+esc(currentName()):'')+'</div></div>'
+    +incHtml+h
+    +'<div style="margin-top:16px;display:flex;justify-content:space-between;font-size:10.5px;color:#94a3b8;border-top:0.5px solid #e2e8f0;padding-top:10px"><span>'+(reclaims?'\u26a0 Reclaim: '+esc(reclaims):'')+'</span><span>Initials: ______</span></div>'
+    +'</body></html>';
+}
+function openDaySheet(){
+  var w=window.open("","_blank");
+  if(!w){appAlert("Couldn\u0027t open the day sheet \u2014 allow pop-ups for this site.");return;}
+  w.document.write(daySheetDoc());w.document.close();
+}
+function peekHtml(rec){
+  var st=rec.state||{};var d=st.dog||{};var mm=st.medical||{};var as=st.assessment||{};var today=new Date().toISOString().slice(0,10);
+  var days=daysInIsolation(rec.intakeDate);
+  var meta=[d.breed,(d.sex||"").split(" ")[0],d.age].filter(Boolean).join(" \u00b7 ")+(days!=null?" \u00b7 Day "+days:"")+(rec.trafficLight?" \u00b7 "+rec.trafficLight:"");
+  var ph=d.photo?'<img src="'+d.photo+'" style="width:52px;height:52px;border-radius:12px;object-fit:cover">':'<div style="width:52px;height:52px;border-radius:12px;background:#334155;display:flex;align-items:center;justify-content:center;font-size:24px">\ud83d\udc15</div>';
+  var kShort=(function(k){var m=String(k||"").match(/^k(?:ennel)?\s*\.?\s*(\d+)/i);if(m)return "K"+m[1];m=String(k||"").match(/^pod\s*\.?\s*(\d+)/i);if(m)return "P"+m[1];return /^(?:the\s+)?crate/i.test(k||"")?"CR":(k||"\u2014");})(d.kennel);
+  var crit=(st.warnings||[]).filter(function(w){return w.level==="critical"||w.critical;})[0]||(st.warnings||[])[0];
+  var due=computeDueToday([rec]);
+  var chips="";
+  var chip=function(t,bg,c){return '<span style="font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:10px;background:'+bg+';color:'+c+'">'+esc(t)+'</span>';};
+  if((due.reports||[]).length)chips+=chip("\ud83d\udccb Day report due","#fde68a","#92400e");
+  if((due.meds||[]).length){var mn=(mm.medications||[]).filter(function(x){return x.active!==false&&(!x.endDate||x.endDate>=today);}).map(function(x){return x.name;}).filter(Boolean).join(", ");chips+=chip("\ud83d\udc8a "+(mn||"Meds"),"#fce7f3","#9d174d");}
+  if((due.vaccs||[]).length)chips+=chip("\ud83d\udc89 Vaccination due","#fef9c3","#a16207");
+  var ws=(st.weights||[]);
+  if(ws.length){var lastW=ws[ws.length-1];var prevW=ws.length>1?parseFloat(ws[ws.length-2].weight):null;var curW=parseFloat(lastW.weight);var dl=(prevW!=null&&!isNaN(curW))?(curW-prevW):null;chips+=chip("\u2696 "+(lastW.weight||"")+(dl?" \u00b7 "+(dl>0?"+":"")+dl.toFixed(1):""),"#ccfbf1","#0d9488");}
+  var fp=st.feedingPlan||{};
+  var feed=[fp.brand,fp.grams?fp.grams+"g":"",fp.frequency].filter(Boolean).join(" \u00b7 ");
+  var vlog=(mm.vetLog||[]).slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");})[0];
+  var note=(st.notes||[]).slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");})[0];
+  var people=[];
+  if(as.rehomingAt)people.push("cleared "+fmtDMY(as.rehomingAt));
+  if(as.playdates&&as.playdates.length)people.push("PA\u0027d with "+(as.playdates[as.playdates.length-1].dog||"?"));
+  if(d.webBio)people.push("web bio "+(d.webBio==="Y"?"\u2713":'<b style="color:#dc2626">N</b>'));
+  var row=function(ic,l,txt){return txt?'<div style="display:flex;gap:8px;padding:7px 0;border-bottom:0.5px solid #eef1f5;font-size:12.5px"><span style="width:20px;text-align:center;flex-shrink:0">'+ic+'</span><span style="color:#64748b;width:60px;flex-shrink:0;font-size:11px;margin-top:1px">'+l+'</span><span style="flex:1;min-width:0">'+txt+'</span></div>':"";}
+  return '<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;box-shadow:0 18px 50px rgba(15,23,42,0.35);overflow:hidden" onclick="event.stopPropagation()">'
+    +'<div style="background:#0f172a;color:#fff;padding:14px 16px;display:flex;gap:12px;align-items:center;position:relative">'+ph
+    +'<div style="min-width:0"><div style="font-size:17px;font-weight:800">'+esc(rec.name||"")+'</div><div style="font-size:11px;opacity:0.75">'+esc(meta)+'</div></div>'
+    +'<span style="margin-left:auto;background:#c5e86c;color:#0f172a;font-weight:800;font-size:13px;padding:5px 12px;border-radius:10px">'+esc(kShort)+'</span>'
+    +'<button onclick="closePeek()" style="position:absolute;top:8px;right:10px;color:#94a3b8;background:none;border:none;font-size:14px;cursor:pointer">\u2715</button></div>'
+    +(crit?'<div style="background:#dc2626;color:#fff;font-size:11.5px;font-weight:700;padding:7px 16px">\u26a0 '+esc(crit.text)+'</div>':'')
+    +'<div style="padding:12px 16px">'
+    +(chips?'<div style="display:flex;gap:5px;flex-wrap:wrap;padding:2px 0 6px">'+chips+'</div>':'')
+    +row("\ud83c\udf7d\ufe0f","Feeding",feed?esc(feed)+(fp.notes?' \u2014 <b>'+esc(fp.notes)+'</b>':''):"")
+    +row("\ud83e\ude7a","Vet",vlog?esc(fmtDMY(vlog.date)+": "+vlog.text.slice(0,110)):"")
+    +row("\ud83d\udcdd","Latest",note?esc(fmtDMY(note.date)+": "+note.text.slice(0,110))+(note.staff?' <span style="color:#94a3b8">\u2014 '+esc(note.staff)+'</span>':''):"")
+    +row("\ud83d\udc36","People",people.join(" \u00b7 "))
+    +'</div>'
+    +'<div style="display:flex;gap:8px;padding:12px 16px;border-top:0.5px solid #eceff3;background:#fafbfc">'
+    +'<button onclick="closePeek();openDog('+rec.id+')" style="flex:1;border:none;border-radius:12px;padding:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;background:#c5e86c;color:#0f172a">Open record</button>'
+    +'<button onclick="peekStory('+rec.id+')" style="flex:1;border:none;border-radius:12px;padding:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;background:#0f172a;color:#fff">\ud83d\udcd6 Story</button>'
+    +'</div></div>';
+}
+function openPeek(id){
+  var rec=records.find(function(r){return r.id===id;});if(!rec)return;
+  closePeek();
+  var ov=document.createElement("div");ov.id="peek-overlay";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(15,23,42,0.45);display:flex;align-items:center;justify-content:center;padding:18px;z-index:900";
+  ov.onclick=closePeek;
+  ov.innerHTML=peekHtml(rec);
+  document.body.appendChild(ov);
+}
+function closePeek(){var ov=document.getElementById("peek-overlay");if(ov)ov.remove();}
+function peekStory(id){closePeek();openDog(id);S.tab="story";render();}
+function catchupEvents(){
+  var prev=window._prevLogin||0;
+  if(!prev)return[];
+  var prevDate=new Date(prev).toISOString().slice(0,10);
+  var evs=[];var keepS=S;
+  try{
+    records.forEach(function(r){
+      var st=r.state||{};
+      try{
+        S=st;
+        storyEvents().forEach(function(e){
+          if(e.date<prevDate)return;
+          if(e.date===prevDate&&new Date(prev).getHours()<12){} // same-day morning login: keep the day
+          else if(e.date===prevDate)return;
+          var rank=e.cat==="key"?0:(e.title.indexOf("Warning")===0||e.title.indexOf("Incident")===0)?1:(e.title.indexOf("Vaccinated")===0||e.title.indexOf("Vet")===0)?2:3;
+          evs.push({rec:r,e:e,rank:rank});
+        });
+      }catch(x){}
+    });
+  }finally{S=keepS;}
+  evs.sort(function(a,b){return a.rank-b.rank||b.e.date.localeCompare(a.e.date);});
+  return evs.slice(0,6);
+}
+function catchupHtml(){
+  if(window._catchupDismissed)return"";
+  var evs=catchupEvents();
+  if(!evs.length)return"";
+  var prev=new Date(window._prevLogin);
+  var ago=fmtDMYwk(prev.toISOString().slice(0,10));
+  var newest=evs.filter(function(x){return x.e.title.indexOf("Arrived")===0;})[0]||evs[0];
+  var h='<div class="card" style="margin-bottom:14px;padding:0;overflow:hidden;border:0.5px solid #334155">';
+  h+='<div style="background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;padding:13px 16px"><div style="font-size:14px;font-weight:800">\ud83d\udc4b Welcome back'+(currentName()?", "+esc(currentName().split(" ")[0]):"")+'</div><div style="font-size:11px;color:#94a3b8;margin-top:2px">Last in '+esc(ago)+' \u2014 what you missed</div></div>';
+  h+='<div style="padding:4px 16px 10px">'+evs.map(function(x){
+    return '<div onclick="openDog('+x.rec.id+')" style="display:flex;gap:9px;padding:8px 0;border-bottom:0.5px solid #eef1f5;font-size:12.5px;cursor:pointer;align-items:flex-start"><span style="width:6px;height:6px;border-radius:50%;background:#c5e86c;margin-top:6px;flex-shrink:0"></span><span style="flex-shrink:0;width:20px;text-align:center">'+x.e.icon+'</span><span style="flex:1;min-width:0"><b>'+esc(x.rec.name||"")+'</b> \u2014 '+esc(x.e.title)+(x.e.detail?' <span style="color:#64748b">\u00b7 '+esc(x.e.detail.slice(0,70))+'</span>':'')+' <span style="color:#94a3b8;font-size:10.5px">'+fmtDMY(x.e.date)+'</span></span></div>';
+  }).join("")+'</div>';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#fafbfc;border-top:0.5px solid #eceff3"><button onclick="window._catchupDismissed=true;renderDashboard()" style="background:none;border:none;font-size:11.5px;font-weight:700;color:#64748b;cursor:pointer;font-family:inherit">Dismiss</button><button onclick="openDog('+newest.rec.id+')" style="background:#c5e86c;color:#0f172a;border:none;border-radius:14px;padding:7px 16px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit">Start with '+esc(newest.rec.name||"this one")+' \u2192</button></div>';
+  h+='</div>';
+  return h;
+}
+function focusFilter(list){
+  if(!window._dbFocus)return{list:list,rest:[]};
+  var due=computeDueToday(records);
+  var needy={};["returns","finishing","vaccs","paras","weighs","meds","reports","walks"].forEach(function(k){(due[k]||[]).forEach(function(r){needy[r.id]=1;});});
+  var keep=[],rest=[];
+  list.forEach(function(r){(needy[r.id]?keep:rest).push(r);});
+  return{list:keep,rest:rest};
+}
+function toggleFocus(){window._dbFocus=!window._dbFocus;renderDashboard();}
+function toggleDogFold(id){window._dogFoldOpen=window._dogFoldOpen||{};window._dogFoldOpen[id]=!window._dogFoldOpen[id];renderMain();}
 function openNewDog(){appConfirm("Start a new dog? Current unsaved data will be cleared.",function(){S=defaultState();persistSave();showScreen("wrap");S.tab="dog";render();});}
 
 // ── Family trail (mums, pups, litters) ────────────────────────────
@@ -3378,12 +2936,6 @@ function updateNoticeChip(){
   chip.style.background=NOTICE_ACCENT;chip.style.color="#fff";chip.style.borderColor=NOTICE_ACCENT;
 }
 
-function exportCSV(){
-  var hdrs=["Name","Breed","Ref No","Intake Date","Kennel","Age","Sex","Colour","Weight","Traffic Light","Score","Outcome","Days","Saved","Saved By"];
-  var rows=records.map(function(r){var d=r.state&&r.state.dog?r.state.dog:{};var f=r.state&&r.state.fin?r.state.fin:{};return[r.name,r.breed,r.refNo,r.intakeDate,d.kennel||"",d.age||"",d.sex||"",d.colour||"",d.weight||"",r.trafficLight||"",r.score||"",f.outcome||"",daysInIsolation(r.intakeDate)||"",r.savedAt||"",r.savedBy||""].map(function(v){return'"'+(v||"").toString().replace(/"/g,"''")+'"';}).join(",");});
-  var csv=[hdrs.join(",")].concat(rows).join("\n");
-  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="nspca-isolation-"+new Date().toISOString().slice(0,10)+".csv";a.click();
-}
 
 function renderStats(){
   var now=new Date(),thisMonth=now.toISOString().slice(0,7);
@@ -4079,8 +3631,42 @@ function renderFiles(){
   return'<h2 style="margin-bottom:4px">Files & Documents</h2><div class="sub" style="margin-bottom:16px">Upload photos, scans or documents for this dog</div><div class="card" style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Upload File</div><div class="f"><label class="lbl">Note (optional)</label><input id="f-note" placeholder="e.g. Vet report 12 May"></div><label style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:13px;color:var(--color-text-secondary)">&#128206; Choose file<input type="file" accept="image/*,application/pdf,.pdf,.doc,.docx" style="display:none" onchange="handleFileUpload(this)"></label><div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px">Up to 5 MB per file. Images, PDFs and documents.</div></div>'+(files.length?fileCards:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)"><div style="font-size:32px;margin-bottom:8px">&#128206;</div>No files uploaded yet</div>')+browNav("files");
 }
 function compressPhoto(file,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var MAX=400,w=img.width,h=img.height;if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}var cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);cb(cv.toDataURL("image/jpeg",0.75));};img.src=e.target.result;};r.readAsDataURL(file);}
-function handlePhotoUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){appAlert("Photo too large. Max 5MB.");return;}compressPhoto(file,function(data){S.dog.photo=data;renderMain();});}
-function removePhoto(){S.dog.photo="";renderMain();}
+function ensurePhotos(){
+  if(!S||!S.dog)return;
+  if(!Array.isArray(S.dog.photos))S.dog.photos=[];
+  if(S.dog.photo&&!S.dog.photos.length)S.dog.photos.push({date:S.dog.intakeDate||new Date().toISOString().slice(0,10),data:S.dog.photo,note:"Arrival photo",star:true});
+}
+function syncStarPhoto(){
+  ensurePhotos();
+  var st=S.dog.photos.filter(function(p){return p.star;})[0]||S.dog.photos[S.dog.photos.length-1];
+  S.dog.photo=st?st.data:"";
+}
+function handlePhotoUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){appAlert("Photo too large. Max 5MB.");return;}compressPhoto(file,function(data){ensurePhotos();S.dog.photos.push({date:new Date().toISOString().slice(0,10),data:data,note:"",star:!S.dog.photos.length});syncStarPhoto();saveRecord();renderMain();});}
+function starPhoto(i){ensurePhotos();S.dog.photos.forEach(function(p,j){p.star=(j===i);});syncStarPhoto();saveRecord();renderMain();}
+function deletePhoto(i){appConfirm("Remove this photo from the log?",function(){ensurePhotos();S.dog.photos.splice(i,1);if(S.dog.photos.length&&!S.dog.photos.some(function(p){return p.star;}))S.dog.photos[S.dog.photos.length-1].star=true;syncStarPhoto();saveRecord();renderMain();});}
+function photoNote(i){ensurePhotos();var p=S.dog.photos[i];if(!p)return;var cur=p.note||"";var v=prompt("Condition note for this photo (what it shows):",cur);if(v===null)return;p.note=v.trim();saveRecord();renderMain();}
+function photoLogHtml(){
+  ensurePhotos();
+  var ps=S.dog.photos||[];
+  if(!ps.length)return"";
+  var byDate=ps.slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");});
+  var h='';
+  if(byDate.length>=2&&byDate[0].date!==byDate[byDate.length-1].date){
+    var f=byDate[0],l=byDate[byDate.length-1];
+    h+='<div style="display:flex;gap:10px;margin-top:12px">'
+      +'<div style="flex:1;text-align:center"><img src="'+f.data+'" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px"><div style="font-size:10px;color:#64748b;margin-top:4px"><b>'+fmtDMY(f.date)+'</b> \u00b7 arrival'+(f.note&&f.note!=="Arrival photo"?' \u00b7 '+esc(f.note):'')+'</div></div>'
+      +'<div style="flex:1;text-align:center"><img src="'+l.data+'" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px"><div style="font-size:10px;color:#64748b;margin-top:4px"><b>'+fmtDMY(l.date)+'</b> \u00b7 latest'+(l.note?' \u00b7 '+esc(l.note):'')+'</div></div></div>';
+  }
+  h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px">'+ps.map(function(p,i){
+    return '<div style="position:relative;aspect-ratio:1"><img src="'+p.data+'" onclick="photoNote('+i+')" title="'+esc(p.note||"tap to add a condition note")+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px;cursor:pointer;'+(p.star?'outline:2px solid #c5e86c':'')+'">'
+      +'<div style="position:absolute;bottom:2px;left:2px;right:2px;font-size:8.5px;font-weight:700;color:#334155;background:rgba(255,255,255,0.85);border-radius:6px;text-align:center;padding:1px 0">'+fmtDMY(p.date)+(p.star?' \u2605':'')+'</div>'
+      +'<button onclick="starPhoto('+i+')" title="Use as profile photo" style="position:absolute;top:3px;left:3px;background:rgba(255,255,255,0.9);border:none;border-radius:8px;font-size:10px;cursor:pointer;padding:1px 5px">\u2605</button>'
+      +'<button onclick="deletePhoto('+i+')" style="position:absolute;top:3px;right:3px;background:rgba(255,255,255,0.9);border:none;border-radius:8px;font-size:10px;cursor:pointer;padding:1px 5px">\u2715</button></div>';
+  }).join("")+'</div>';
+  return h;
+}
+
+function removePhoto(){ensurePhotos();var i=S.dog.photos.findIndex(function(p){return p.star;});if(i<0)i=S.dog.photos.length-1;if(i>=0)deletePhoto(i);else{S.dog.photo="";renderMain();}}
 function showRepositionPhoto(){
   if(!S.dog||!S.dog.photo)return;
   var pos=(S.dog.photoPos||"50% 50%").split(" ");
@@ -4448,62 +4034,19 @@ function renderRehoming(){
   var filledN=["homeType","suitableChildren","suitableOtherDogs","suitableCats","suitableEquine","suitableSmallMammals","exerciseNeeds","experienceLevel"].filter(function(kk){var v=a[kk];return v!==undefined&&v!==null&&String(v).trim()!=="";}).length;
   var clearSum=st?(esc(st)+(a.rehomingDate?" \u00b7 "+fmtDMY(a.rehomingDate):"")+(a.rehomingBy?" \u00b7 by "+esc(a.rehomingBy):"")+(a.rehomingConditions?" \u00b7 conditions set":"")):"No decision recorded \u2014 tap to decide";
   // status tiles under the banner
-  var _apps=(S._id&&typeof applicants!=="undefined")?appsOnDog(S._id):[];
-  var _best="";
-  _apps.forEach(function(e){var v=matchApplicantToDog(e.row,{state:S}).verdict;
-    if(v==="good")_best="\u2713 match";
-    else if(v==="caution"&&_best!=="\u2713 match")_best="\u25b3 checks";
-    else if(v==="blocked"&&!_best)_best="\u2715 conflict";});
   var tiles=hybridTiles([
     {label:"Clearance",value:st?esc(String(st).split(" \u2014 ")[0]):"Undecided",tone:tone==="alert"?"alert":(st?"":"warn")},
-    {label:"Suitability",value:filledN+" of 8",tone:filledN<8?"warn":""},
-    {label:"Applications",value:_apps.length?(_apps.length+(_best?" \u00b7 "+_best:"")):"\u2014"}
+    {label:"Suitability",value:filledN+" of 8",tone:filledN<8?"warn":""}
   ]);
-  var appsHtml=dogApplicantsHtml();
   var suitSum=filledN?(filledN+" of 8 recorded"+(a.suitableChildren?" \u00b7 children: "+esc(String(a.suitableChildren).split(" \u2014 ")[0]):"")):"Nothing recorded yet";
   var rows='<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:4px 0 2px;display:flex;align-items:center;gap:10px">Record<span style="flex:1;height:1px;background:var(--color-border-tertiary)"></span></div>'
     +hybridRow("rh-clear","\u2696\ufe0f","Clearance decision",clearSum,clearBody,tone==="alert"?"alert":tone==="warn"?"warn":"")
     +hybridRow("rh-suit","\ud83c\udfe1","Suitability",suitSum,suitPillsHtml(a)+suitNotes,filledN<8?"warn":"");
   return '<h2 style="margin-bottom:4px">Rehoming</h2><div class="sub" style="margin-bottom:14px">Clearance first \u2014 the record below</div>'
-    +'<div class="card">'+banner+tiles+blockHtml+appsHtml+rows+'</div>'
+    +'<div class="card">'+banner+tiles+blockHtml+rows+'</div>'
     +browNav("rehoming");
 }
 function ageWeeksOf(dob){if(!dob)return null;var t=new Date(dob).getTime();if(isNaN(t))return null;var ms=Date.now()-t;if(ms<0)return null;return Math.floor(ms/6048e5);}
-function dogApplicantsHtml(){
-  if(!S._id)return"";
-  if(!window._appsLoadedOnce&&supabaseClient){window._appsLoadedOnce=1;loadApplicants().then(function(){if(S.tab==="rehoming")renderMain();});}
-  var mine=allApplications().filter(function(e){return e.app.animal_id===S._id&&e.row.species==="dog";});
-  if(!mine.length)return"";
-  var order={"Reserved":1,"Approved":2,"Home check":3,"Enquiry":4,"Adopted":5,"Withdrawn":6,"Declined":7};
-  mine.sort(function(x,y){return (order[x.app.stage]||9)-(order[y.app.stage]||9)||String(x.row.enquiry_date||"").localeCompare(String(y.row.enquiry_date||""));});
-  var shown=mine.filter(function(e){return e.app.stage!=="Withdrawn"&&e.app.stage!=="Declined";});
-  if(!shown.length)return"";
-  var me={state:S};
-  var rowsH=shown.map(function(e){
-    var a=e.row,ap=e.app;
-    var m=matchApplicantToDog(a,me);
-    var chip=m.verdict==="blocked"?'<span style="font-size:10.5px;font-weight:700;background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:8px">\u2715 conflict</span>'
-      :m.verdict==="caution"?'<span style="font-size:10.5px;font-weight:700;background:#fef9c3;color:#854d0e;padding:2px 8px;border-radius:8px">\u25b3 checks</span>'
-      :m.verdict==="good"?'<span style="font-size:10.5px;font-weight:700;background:#dcfce7;color:#166534;padding:2px 8px;border-radius:8px">\u2713 match</span>':"";
-    if(ap.stage==="Reserved")chip='<span style="font-size:10.5px;font-weight:700;background:#ccfbf1;color:#0f6e56;padding:2px 8px;border-radius:8px">reserved</span>'+chip;
-    var q=appQueueInfoFor(ap.animal_id)||[];var _i=q.findIndex(function(x){return x.who===a.id;});
-    var sub=[ap.stage,(q.length>1&&_i>-1)?(_i===0?"first in line":"#"+(_i+1)+" of "+q.length):null,
-      ap.stage==="Reserved"?(ap.collectionDate?("collect "+fmtDMY(ap.collectionDate)):"no collection date"):null,
-      a.state&&a.state.hcDate&&ap.stage==="Home check"?("visit "+fmtDMY(a.state.hcDate)):null].filter(Boolean).join(" \u00b7 ");
-    return '<div onclick="openApplicantFromDog('+a.id+')" style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer">'
-      +'<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600;color:#0f172a">'+esc(a.name||"Unnamed")+'</div><div style="font-size:11px;color:#64748b">'+sub+'</div></div>'+chip+'<span class="med-chev">&#8250;</span></div>';
-  }).join("");
-  var adoptedBy=null;
-  if(S.fin&&S.fin.outcome==="Rehomed"){var ad=mine.find(function(e){return e.app.stage==="Adopted";});if(ad){var _adt=ad.app.adoptionDate||(ad.row.state&&ad.row.state.adoptionDate)||"";adoptedBy='<div style="font-size:11.5px;color:#166534;padding:6px 0 0">Adopted by '+esc(ad.row.name||"")+(_adt?" \u00b7 "+fmtDMY(_adt):"")+'</div>';}}
-  return '<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:0 0 4px">Applications \u00b7 '+shown.length+'</div>'
-    +'<div style="border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:0 12px;margin-bottom:14px">'+rowsH+(adoptedBy||"")+'</div>';
-}
-function openApplicantFromDog(id){
-  var ov=document.getElementById("pipeline-ov");if(ov)ov.style.display="block";
-  window._pipeView={mode:"board"};
-  loadApplicants().then(function(){openApplicant(id);});
-  renderPipeline();
-}
 function rehomeBlockersFor(st){
   var out=[];st=st||{};var f=st.fin||{};var d=st.dog||{};
   var ii=isolationInfo(d.intakeDate,f.outcome,isoExtraDays(d),pupIsoVax(d,st.medical));
@@ -4526,161 +4069,6 @@ function rehomeBlockersFor(st){
   return out;
 }
 function rehomeBlockers(){return rehomeBlockersFor(S);}
-function bdCell(label,val,flag){
-  // flag: undefined/"" normal, "warn" amber, "risk" red
-  var has=val!==undefined&&val!==null&&String(val).trim()!=="";
-  var v=has?esc(String(val)):"&mdash;";
-  var col=!has?"#b6bdc6":flag==="risk"?"#b91c1c":flag==="warn"?"#b45309":"#0f172a";
-  var bg=flag==="risk"&&has?"#fef2f2":flag==="warn"&&has?"#fffbeb":"transparent";
-  return '<div style="padding:7px 10px;border-radius:8px;background:'+bg+';min-width:0">'
-    +'<div style="font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+label+'</div>'
-    +'<div style="font-size:12.5px;font-weight:'+(has?'600':'400')+';color:'+col+';margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(has?esc(String(val)):'')+'">'+v+'</div>'
-    +'</div>';
-}
-function bdSection(title,go,cells,cols){
-  return '<div class="card" style="padding:12px 14px;margin-bottom:10px">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
-      +'<div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#475569">'+title+'</div>'
-      +(go?'<button class="btn" data-go="'+go+'" style="font-size:10px;padding:3px 9px">Open</button>':'')
-    +'</div>'
-    +'<div style="display:grid;grid-template-columns:repeat('+(cols||4)+',1fr);gap:2px 10px">'+cells.join("")+'</div>'
-    +'</div>';
-}
-
-function renderBreakdown(){
-  var rec=records.find(function(r){return r.id===S._id;})||{};
-  var d=S.dog||{},arr=S.arrival||{},a=S.assessment||{},m=S.medical||{},f=S.fin||{},ea=S.ea||{};
-  var meta=subMeta(S);
-  var total=Object.values(S.scores||{}).reduce(function(x,y){return x+(parseInt(y)||0);},0);
-  var tl=meta.catsAny?handlingLight(total,S.scores||{}):null;
-  var todayStr=new Date().toISOString().slice(0,10);
-
-  var h='<h2>Breakdown</h2><div class="sub">The whole record on one screen. Grey dash = not recorded, amber = worth attention, red = flagged.</div>';
-
-  // ── Identity & intake
-  h+=bdSection("Identity &amp; intake","dog",[
-    bdCell("Name",rec.name||d.name),
-    bdCell("Ref",d.refNo),
-    bdCell("Breed",d.breed+(d.crossbreed&&d.breed2?" x "+d.breed2:"")),
-    bdCell("Sex",d.sex),
-    bdCell("Age",d.age),
-    bdCell("Size",d.size),
-    bdCell("Colour",d.colour),
-    bdCell("Microchip",d.microchip,!d.microchip?"warn":""),
-    bdCell("Kennel",d.kennel),
-    bdCell("Intake",rec.intakeDate||d.intakeDate),
-    bdCell("Days in",rec.intakeDate?daysInIsolation(rec.intakeDate):""),
-    bdCell("Assessor",d.assessor),
-  ]);
-
-  // ── Arrival & history
-  var biteFlag=arr.biteHistory&&!/^none/i.test(arr.biteHistory)?"risk":"";
-  h+=bdSection("Arrival &amp; history","arrival",[
-    bdCell("Came in as",arr.source),
-    bdCell("Brought by",arr.sourceBy),
-    bdCell("Surrender form",arr.sourceForm),
-    bdCell("Arrival demeanour",arr.demeanour),
-    bdCell("Bite history",arr.biteHistory,biteFlag),
-    bdCell("Cats",arr.catTolerance,/reactive/i.test(arr.catTolerance||"")?"risk":!arr.catTolerance||/not tested|unknown/i.test(arr.catTolerance)?"warn":""),
-    bdCell("Children",arr.childHistory,/caution|incident/i.test(arr.childHistory||"")?"risk":""),
-    bdCell("Other dogs",arr.dogDog),
-    bdCell("Time owned",arr.histDuration),
-    bdCell("Why surrendered",arr.histReason),
-    bdCell("Previous setup",arr.histLiving),
-    bdCell("Lived with pets",arr.histAnimals),
-  ]);
-
-  // ── Assessment (per-card fill + key flags)
-  var guardVals=["guardFood","guardChew","guardToys","guardBed","guardStolen","guardPerson"].map(function(k){return a[k]||"";});
-  var worstGuard=guardVals.find(function(v){return /severe/i.test(v);})?"Severe":guardVals.find(function(v){return /moderate/i.test(v);})?"Moderate":guardVals.find(function(v){return /mild/i.test(v);})?"Mild":guardVals.some(function(v){return v&&!/not tested/i.test(v);})?"None seen":"";
-  h+=bdSection("Assessment","assessment",[
-    bdCell("Handler brief",a.briefTriggers||a.briefWarning?"Written":"","" ),
-    bdCell("Handler level",a.briefHandler,/two people|named/i.test(a.briefHandler||"")?"warn":""),
-    bdCell("Muzzle for walks",a.briefMuzzle,/yes/i.test(a.briefMuzzle||"")?"warn":""),
-    bdCell("Guarding (worst)",worstGuard,worstGuard==="Severe"?"risk":worstGuard==="Moderate"?"warn":""),
-    bdCell("Guard warning given",a.guardWarning,/no warning/i.test(a.guardWarning||"")?"risk":""),
-    bdCell("Temperament",a.confidence||a.demeanour),
-    bdCell("On lead",a.leadBehaviour,/dangerous/i.test(a.leadBehaviour||"")?"risk":""),
-    bdCell("Horses — on arrival",arr.equineHistory,/reactive/i.test(arr.equineHistory||"")?"warn":""),
-    bdCell("Small mammals — on arrival",arr.smallMammalHistory,/reactive/i.test(arr.smallMammalHistory||"")?"warn":""),
-    bdCell("Lead reactivity",a.leadReactivity,/severe/i.test(a.leadReactivity||"")?"risk":/moderate/i.test(a.leadReactivity||"")?"warn":""),
-    bdCell("Jumping up",a.jumpingUp,/knocks/i.test(a.jumpingUp||"")?"warn":""),
-    bdCell("House training",a.houseTraining),
-    bdCell("Time alone",a.aloneTime,!a.aloneTime?"warn":""),
-    bdCell("Recall",a.recall),
-    bdCell("Buddy walks",(a.buddyWalks||[]).length?(a.buddyWalks||[]).length+" logged":""),
-    bdCell("Muzzle training",a.muzzleStage),
-  ]);
-
-  // ── Scoring & EA
-  var cs=CATS.map(function(c){return {l:c.l,s:catState(c.k,S)};});
-  var scoreCells=cs.map(function(x){
-    var b=x.s.has?x.s.band:null;
-    return bdCell(x.l,b?("Band "+b+(x.s.floored?" · floored":"")):"",b===4?"risk":b===3?"warn":"");
-  });
-  scoreCells.unshift(bdCell("Traffic light",tl?tl.l+" · "+total+"/24":"",tl&&(tl.l==="Red"||tl.l==="Black")?"risk":tl&&tl.l==="Yellow"?"warn":""));
-  scoreCells.push(bdCell("Categories done",meta.catsComplete+" / "+CATS.length,meta.catsComplete<CATS.length?"warn":""));
-  var eaDone=!!(ea.frequency&&ea.probability);
-  scoreCells.push(bdCell("Battersea EA",ea.needed==="No"?"Not required":eaDone?"Done":(ea.needed?"Started":""),(ea.needed&&ea.needed!=="No"&&!eaDone)?"warn":""));
-  h+=bdSection("Scoring &amp; EA","scoring",scoreCells);
-
-  // ── Isolation & daily care
-  var daysDone=(S.days||[]).filter(function(x){return x.date||x.demeanour||x.feeding;}).length;
-  var lastNote=(S.notes||[]).map(function(n){return n.date;}).filter(Boolean).sort().pop();
-  var incid=(S.incidents||[]).length;
-  h+=bdSection("Isolation &amp; daily care","days",[
-    bdCell("5-day entries",daysDone+" / 5",daysDone===0?"warn":""),
-    bdCell("Notes",(S.notes||[]).length?(S.notes||[]).length+" · last "+fmtDMY(lastNote):"", !(S.notes||[]).length?"warn":""),
-    bdCell("Incidents",incid?String(incid):"None",incid?"risk":""),
-    bdCell("Feeding plan",(S.feedingPlan&&(S.feedingPlan.food||S.feedingPlan.grams))?((S.feedingPlan.food||"")+(S.feedingPlan.grams?" · "+S.feedingPlan.grams+" g":"")).trim():""),
-    bdCell("Files",(S.files||[]).length?(S.files||[]).length+" attached":""),
-  ]);
-
-  // ── Medical
-  var vacList=m.vaccinations||[];
-  var vaxDone=vacList.filter(function(v){return v.date&&v.date<=todayStr;}).length;
-  var vaxOver=vacList.some(function(v){return v.nextDue&&v.nextDue<todayStr;});
-  var meds=(m.medications||[]).filter(function(x){return x.active!==false;}).length;
-  var dis=(m.diseases||[]).length;
-  var lastW=latestWeight();
-  h+=bdSection("Medical","medical",[
-    bdCell("Status",m.currentStatus,/unwell|concern/i.test(m.currentStatus||"")?"risk":""),
-    bdCell("BCS",m.bcs,!m.bcs?"warn":/^[1-3]\b|^[7-9]\b/.test(m.bcs)?"warn":""),
-    bdCell("Weight",lastW?lastW.weight+" kg ("+fmtDMY(lastW.date)+")":"",!lastW?"warn":""),
-    bdCell("Weigh-ins",(S.weights||[]).length),
-    bdCell("Vaccinations",vaxDone?vaxDone+" given":"",vaxOver?"risk":vaxDone===0?"warn":""),
-    bdCell("Parasite",(m.parasiteTreatments||[]).length?(m.parasiteTreatments||[]).length+" treatments":"",!(m.parasiteTreatments||[]).length?"warn":""),
-    bdCell("Neutered",m.neuteredConfirmed),
-    bdCell("Dental",m.dental),
-    bdCell("Disease flags",dis?dis+" recorded":"None",dis?"risk":""),
-    bdCell("Active meds",meds?String(meds):"None",meds?"warn":""),
-    bdCell("Injuries",m.injuries),
-    bdCell("Vet log",(m.vetLog||m.vetVisits||[]).length?(m.vetLog||m.vetVisits||[]).length+" entries":""),
-  ]);
-
-  // ── Outcome
-  h+=bdSection("Outcome","outcome",[
-    bdCell("Rehoming status",a.rehomingStatus,/not cleared|not fit/i.test(a.rehomingStatus||"")?"risk":/conditions/i.test(a.rehomingStatus||"")?"warn":""),
-    bdCell("Outcome",f.outcome,/euthan|unsafe|not fit/i.test(f.outcome||"")?"risk":""),
-    bdCell("Date",f.outcomeDate),
-    bdCell("Progress",f.overallProgress),
-    bdCell("Assessor",f.assessorName),
-    bdCell("Second assessor",f.secondAssessor),
-    bdCell("Follow-up",f.followUp),
-  ],3);
-
-  h+=browNav("breakdown");
-  return h;
-}
-
-window._dogFoldOpen=window._dogFoldOpen||{};
-function toggleDogFold(id){
-  window._dogFoldOpen=window._dogFoldOpen||{};
-  var open=window._dogFoldOpen[id]=!window._dogFoldOpen[id];
-  var b=document.getElementById("dfold-"+id),ch=document.getElementById("dfoldch-"+id);
-  if(b)b.style.display=open?"":"none";
-  if(ch)ch.style.transform="rotate("+(open?90:0)+"deg)";
-}
 function dogFold(id,icon,title,sub,status,tone,inner){
   window._dogFoldOpen=window._dogFoldOpen||{};var open=!!window._dogFoldOpen[id];
   var bg=tone==="done"?"#dcfce7":tone==="warn"?"#fef9c3":"#f1f5f9";
@@ -5643,6 +5031,7 @@ function page(){
   if(t==="behaviour"){S.tab=t="notes";}
   else if(t==="timeline"){S.tab=t="report";}
   else if(t==="briefing"){S.tab=t="report";window._reportView="narrative";}
+  else if(t==="breakdown"){S.tab=t="story";}
   var total=Object.values(S.scores).reduce(function(a,b){return a+b},0);
   var tl=handlingLight(total,S.scores);var ea=eaTriggered();
 
@@ -5665,7 +5054,8 @@ function page(){
     var hero='<div class="card" style="margin-bottom:14px"><div style="display:flex;gap:13px;align-items:center">'+photoEl
       +'<div style="flex:1;min-width:0"><div style="font-size:19px;font-weight:800;line-height:1.1">'+esc(d.name||"Unnamed dog")+'</div>'+(meta?'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">'+esc(meta)+'</div>':'')+'</div>'+tlPill+'</div>'
       +(chips.length?'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:11px;padding-top:10px;border-top:0.5px solid var(--color-border-tertiary)">'+chips.join("")+'</div>':'')
-      +'<div style="margin-top:11px;display:flex;align-items:center;gap:8px"><label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:8px;cursor:pointer;font-size:11px;color:var(--color-text-secondary)">&#128247; '+(d.photo?"Change photo":"Add photo")+'<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>'+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px" onclick="showRepositionPhoto()">&#10021; Reposition</button>':'')+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px;background:#fee2e2;color:#991b1b;border:none" onclick="removePhoto()">Remove</button>':'')+'</div></div>';
+      +photoLogHtml()
+      +'<div style="margin-top:11px;display:flex;align-items:center;gap:8px"><label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:8px;cursor:pointer;font-size:11px;color:var(--color-text-secondary)">&#128247; Add photo'+'<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>'+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px" onclick="showRepositionPhoto()">&#10021; Reposition</button>':'')+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px;background:#fee2e2;color:#991b1b;border:none" onclick="removePhoto()">Remove</button>':'')+'</div></div>';
 
     var identity='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Identity</span>'
       +'</div>'+'<div class="dog-fg">'+fld("Dog name",d.name,"dog.name","text","e.g. Bailey",'onblur="checkDuplicateName()" id="dog-name-input"')+fld("Reference no.",d.refNo,"dog.refNo","text","e.g. 023-MH-2026")+breedSlct(d.breed)+slct("Sex",d.sex,"dog.sex",[["Male","Male"],["Female","Female"],["Male (N)","Male (Neutered)"],["Female (S)","Female (Spayed)"],["Unknown","Unknown"]])+'</div>'+'<div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">&#9888; There&rsquo;s already an active dog with this name.</div>'+'<div class="f"><label class="lbl">Crossbreed</label><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0"><input type="checkbox" data-save="dog.crossbreed" '+(d.crossbreed?"checked":"")+' onchange="S.dog.crossbreed=this.checked;debouncedSave();renderMain()" style="width:18px;height:18px;cursor:pointer"><span style="font-size:13px">This dog is a crossbreed</span></label></div>'+(d.crossbreed?breedSlct(d.breed2,"dog.breed2","Crossed with"):'')+'<div class="dog-fg">'+fld("Date of birth (if known)",d.dob||"","dog.dob","date")+slct("Age (approx.)",d.age,"dog.age",ageOptions(d.age))+slct("Size",d.size,"dog.size",[["","-- select --"],["Small (under 10kg)","Small (under 10kg)"],["Medium (10-25kg)","Medium (10-25kg)"],["Large (25-40kg)","Large (25-40kg)"],["XL (over 40kg)","XL (over 40kg)"]])+slct("Colour / markings",d.colour,"dog.colour",[["","-- select --"],["Black","Black"],["White","White"],["Cream","Cream"],["Golden","Golden"],["Fawn","Fawn"],["Tan","Tan"],["Red / Chestnut","Red / Chestnut"],["Brown / Chocolate","Brown / Chocolate"],["Blue / Grey","Blue / Grey"],["Sable","Sable"],["Black and White","Black and White"],["Black and Tan","Black and Tan"],["Brown and White","Brown and White"],["Tri-colour","Tri-colour"],["Brindle","Brindle"],["Merle","Merle"],["Other","Other"]])+wfld(d.weight)+fld("Microchip no.",d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')+'</div>'+'<div id="chip-info" style="margin:0 0 4px;font-size:11px">'+chipInfoHtml(d.microchip)+'</div></div>';
@@ -5706,7 +5096,6 @@ function page(){
   if(t==="picture") return renderPicture();
   if(t==="rehoming") return renderRehoming();
   if(t==="story") return renderStory();
-  if(t==="breakdown") return renderBreakdown();
 
   if(t==="arrival") return'<h2>On-arrival observation</h2><div class="sub">Record the dog\'s behaviour on arrival.</div><div class="card">'+slct("Initial demeanour on arrival",a.demeanour,"arrival.demeanour",[["Engaging","Engaging — friendly, curious"],["Nervous","Nervous — withdrawn, avoidant"],["Reactive","Reactive — alert, tense, vocal"],["Shut down","Shut down — frozen, non-responsive"],["Neutral","Neutral — calm, no strong response"]])+slct("Muzzle required?",a.muzzle,"arrival.muzzle",[["No","No — handled safely without muzzle"],["Yes — accepted","Yes — accepted without issue"],["Yes — resistant","Yes — resistant to muzzling"],["Yes — required intervention","Yes — required significant intervention"]])+slct("Lead / handling acceptance",a.lead,"arrival.lead",[["Good","Good — relaxed, no tension"],["Moderate","Moderate — some pulling or resistance"],["Poor","Poor — strong pulling"],["Dangerous","Dangerous — unsafe on lead"]])+slct("First vet visit behaviour",a.vet,"arrival.vet",[["Cooperative","Cooperative"],["Nervous but manageable","Nervous but manageable"],["Resistant","Resistant — required restraint"],["Aggressive","Aggressive — unsafe to handle"],["Not yet seen","Not yet seen by vet"]])+ta("Arrival notes",a.notes,"arrival.notes","Describe arrival behaviour...")+'<div class="sec">Source &amp; handover</div>'+slct("How the dog came in",a.source,"arrival.source",[["","-- not set --"],["Owner surrender","Owner surrender"],["Stray","Stray / found"],["Seizure","Seizure"],["Transfer","Transfer from another centre"],["Return","Return \u2014 previously rehomed by us"],["Born here","Born in care"]])+ta("Surrendered / brought in by",a.sourceBy,"arrival.sourceBy","Name, and contact number or address if given...")+slct("Surrender form signed?",a.sourceForm,"arrival.sourceForm",[["","-- not set --"],["Yes","Yes \u2014 on file"],["No","No"],["N/A","N/A \u2014 stray or seizure"]])+'<div class="sec">Reported history</div>'+slct("How long with previous owner",a.histDuration,"arrival.histDuration",[["","-- not known --"],["Since a puppy","Since a puppy"],["Under 1 year","Under 1 year"],["1 to 3 years","1 to 3 years"],["Over 3 years","Over 3 years"],["Unknown","Unknown"]])+ta("Reason given for surrender",a.histReason,"arrival.histReason","In the owner's own words where possible...")+slct("Previous living setup",a.histLiving,"arrival.histLiving",[["","-- not known --"],["Indoors \u2014 family home","Indoors \u2014 family home"],["Indoors and garden","Indoors with garden access"],["Outdoor kennel","Outdoor kennel / yard"],["Farm","Farm / working"],["Multiple homes","Multiple homes"],["Unknown","Unknown"]])+slct("Lived with other animals?",a.histAnimals,"arrival.histAnimals",[["","-- not known --"],["Lived with dogs","Lived with other dogs"],["Lived with cats","Lived with cats"],["Lived with both","Lived with dogs and cats"],["Lived alone","Lived as the only pet"],["Unknown","Unknown"]])+slct("House trained (as reported)",a.histHouseTrained,"arrival.histHouseTrained",[["","-- not known --"],["Yes","Yes"],["Mostly","Mostly \u2014 occasional accidents"],["No","No"],["Unknown","Unknown"]])+ta("Known medical or dietary history",a.histMedical,"arrival.histMedical","Conditions, medication, allergies, food the dog is used to...")+'<div class="sec">Behaviour History</div>'+slct("Dog-to-Dog Reactivity",a.dogDog,"arrival.dogDog",[["Not tested","Not tested"],["None observed — settled","None observed — settled"],["Mild","Mild — some interest or pulling"],["Moderate","Moderate — barking or lunging"],["Severe","Severe — could not pass safely"]])+slct("Cat Tolerance",a.catTolerance,"arrival.catTolerance",[["Not tested","Not tested"],["Unknown","Unknown"],["Cat friendly","Known to be cat friendly"],["Reactive","Chased or reactive to cats"]])+slct("Horses / equine",a.equineHistory,"arrival.equineHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Good","Known to be good with horses"],["Reactive","Reactive / chased horses"]])+slct("Small mammals",a.smallMammalHistory,"arrival.smallMammalHistory",[["Not tested","Not tested"],["Unknown","Unknown"],["Safe","Known to be safe with small mammals"],["Reactive","Chased / high prey drive"]])+slct("Child History",a.childHistory,"arrival.childHistory",[["Not known","Not known"],["Good","Known to be good with children"],["No exposure","No known exposure"],["Caution","Owner advised caution"],["Incident","Known incident involving a child"]])+slct("Previous Bite History",a.biteHistory,"arrival.biteHistory",[["None","None declared"],["One","One bite declared by owner"],["Multiple","Multiple bites declared"],["Unknown details","Bite history — details unknown"]])+'</div><div class="brow"><button class="btn" data-go="dog">&larr; Back</button><button class="btn btnp" data-go="days">Next: 5-day report &rarr;</button></div>';
 
@@ -5810,7 +5199,6 @@ function page(){
   }
 
   if(t==="outcome"){migrateFinLists();
-    if(!window._appsLoadedOnce&&supabaseClient){window._appsLoadedOnce=1;loadApplicants().then(function(){if(S.tab==="outcome"||S.tab==="rehoming")renderMain();});}
     var isStaff=currentRole()==="staff";
     var DEP_OUT=["Moved to Kennels","Moved to Foster","Rehomed","Returned to Owner","Transferred","Died in care","Escaped / Lost","Euthanised"];
     var _departed=DEP_OUT.indexOf(f.outcome)>=0;
@@ -5850,14 +5238,7 @@ function page(){
       +'<div class="oc-grid">'+outControl+fld("Outcome date",f.outcomeDate,"fin.outcomeDate","date")+fld("Follow-up date",f.followUp,"fin.followUp","date")+'</div>'
       +decisionCredit("outcome")
       +reasonControl
-      +(function(){
-        if(f.outcome!=="Rehomed")return "";
-        var _ad=null;
-        try{allApplications().forEach(function(e){if(e.app.animal_id===S._id&&e.app.stage==="Adopted"){if(!_ad||String(e.app.adoptionDate||"")>String(_ad.date||""))_ad={who:e.row.name||"",date:e.app.adoptionDate||"",contract:!!e.app.contractSigned,chip:!!e.app.chipTransferred};}});}catch(err){}
-        if(_ad)return '<div style="display:flex;align-items:center;gap:8px;background:#ccfbf1;border:1px solid #5eead4;border-radius:10px;padding:10px 13px;margin-bottom:12px;font-size:12.5px;color:#0f6e56"><span>&#127968;</span><span>Adopted by <strong>'+esc(_ad.who)+'</strong>'+(_ad.date?" \u00b7 "+fmtDMY(_ad.date):"")+' \u00b7 contract '+(_ad.contract?"\u2713":"\u2014")+' \u00b7 chip transfer '+(_ad.chip?"\u2713":"\u2014")+' <span style="color:#14b8a6">(from the rehoming board)</span></span></div>';
-        return '<div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:#854d0e">Outcome is <strong>Rehomed</strong> but no adoption is recorded on the rehoming board \u2014 record it there so the adopter, contract and chip transfer are on file.</div>';
-      })()
-      +ta("Outcome notes",f.outcomeNotes,"fin.outcomeNotes","")
+            +ta("Outcome notes",f.outcomeNotes,"fin.outcomeNotes","")
       +(recordHasDeparted(S)
         ?'<div style="border-top:0.5px solid var(--color-border-tertiary);margin-top:12px;padding-top:11px">'
           +'<div style="font-size:11.5px;color:#64748b;margin-bottom:7px">This record is closed and no longer shows on the dashboard. If the dog is back, or this was set in error, reopen it.</div>'
@@ -6198,7 +5579,7 @@ document.getElementById("wrap").addEventListener("change",function(e){
 
 // ── Supabase ──────────────────────────────────────────────────────
 if(typeof window!=="undefined"&&window.addEventListener){
-  window.addEventListener("online",function(){syncStatus();retryPending();if(typeof retryAppPending==="function")retryAppPending();});
+  window.addEventListener("online",function(){syncStatus();retryPending();});
   window.addEventListener("offline",function(){syncStatus();});
 }
 function initSupabase(){
@@ -6361,6 +5742,5 @@ function loadCurrent(){
   }else{showScreen("login-screen");}
 })();
 </script>
-<div id="pipeline-ov" style="display:none;position:fixed;inset:0;background:var(--color-background-primary,#fff);z-index:80;overflow-y:auto"><div id="pipeline-body" style="max-width:560px;margin:0 auto;padding:18px 16px 40px"></div></div>
 </body>
 </html>
