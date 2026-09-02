@@ -86,17 +86,6 @@ nav::-webkit-scrollbar{display:none}
 .pnav-subs .ppill .pcdot.empty{background:transparent;box-shadow:inset 0 0 0 1.5px #5b5f6e}
 .pnav-subs.single{display:none}
 /* V5 dashboard — calm/dense cards */
-.statrail{display:flex;align-items:stretch;gap:0;margin-bottom:14px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden}
-.srstat{flex:1;padding:11px 14px;border-right:1px solid #e2e8f0;cursor:pointer;transition:background .12s;position:relative;background:none;font-family:inherit;text-align:left}
-.srstat:last-child{border-right:none}
-.srstat:hover{background:#fafafa}
-.srstat.srstat.sel::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:#282932}
-.srstat.sel.g::after{background:#16a34a}.srstat.sel.y::after{background:#f59e0b}
-.srstat.sel.r::after{background:#dc2626}.srstat.sel.b::after{background:#282932}
-.srstat .srn{font-size:19px;font-weight:800;letter-spacing:-.02em;line-height:1;display:flex;align-items:baseline;gap:6px;color:#282932}
-.srstat .srn .srd{width:7px;height:7px;border-radius:999px;margin-bottom:1px}
-.srstat.g .srd{background:#16a34a}.srstat.y .srd{background:#f59e0b}.srstat.r .srd{background:#dc2626}.srstat.b .srd{background:#282932}
-.srstat .srl{font-size:10.5px;color:#94a3b8;font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.04em}
 .dcardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .dcard{background:#fff;border:1px solid #e2e8f0;border-radius:13px;cursor:pointer;position:relative;box-shadow:0 1px 2px rgba(40,41,50,.03);transition:border-color .14s,box-shadow .14s,transform .14s}
 .dcard:hover{border-color:#cbd5e1;box-shadow:0 4px 16px -8px rgba(40,41,50,.18);transform:translateY(-1px)}
@@ -134,9 +123,8 @@ nav::-webkit-scrollbar{display:none}
 .today .th{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .today .th b{font-size:12px;font-weight:800;color:#c6e76c;letter-spacing:.06em;text-transform:uppercase}
 .today .th span{font-size:11px;color:#9aa0b0;font-weight:600}
-.ti{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid rgba(255,255,255,0.08);font-size:13px;cursor:pointer}
-.ti .tk{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;background:#333542}
-.ti .tk.r{background:#7f1d1d}.ti .tk.a{background:#78350f}.ti .tk.t{background:#134e4a}.ti .tk.q{background:#333542}
+.ti{display:flex;align-items:center;gap:10px;padding:9px 0 9px 11px;border-top:1px solid rgba(255,255,255,0.08);font-size:13px;cursor:pointer;border-left:3px solid #454857}
+.ti.r{border-left-color:#ef4444}.ti.a{border-left-color:#f59e0b}.ti.t{border-left-color:#2dd4bf}.ti.q{border-left-color:#454857}
 .ti .tw{flex:1;min-width:0;line-height:1.3}.ti .tw b{font-weight:800}.ti .tw small{display:block;color:#9aa0b0;font-size:11px;font-weight:600}
 .ti .tkn{background:#c6e76c;color:#282932;font-weight:800;font-size:9.5px;padding:1px 6px;border-radius:5px;vertical-align:middle}
 .ti .tgo{color:#c6e76c;font-weight:800;font-size:11px;white-space:nowrap}
@@ -291,7 +279,7 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
   <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(180deg,#1f2029 0%,#282932 45%)">
 
     <div style="text-align:center;margin-bottom:28px">
-      <img src="data:image/png;base64,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" alt="NSPCA \u2014 One National Voice for Animals" style="width:230px;max-width:78vw;height:auto;display:block;margin:0 auto">
+      <img src="data:image/png;base64,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" alt="NSPCA" style="width:210px;max-width:72vw;height:auto;display:block;margin:0 auto"><div style="font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:11.5px;letter-spacing:0.01em;color:#c6e76c;margin-top:9px;line-height:1.3;max-width:300px;margin-left:auto;margin-right:auto">National Society for Prevention of Cruelty to Animals</div>
       <div style="font-size:13px;font-weight:600;color:#fff;letter-spacing:0.16em;margin-top:8px">LONGFORD</div>
       <div style="display:inline-flex;align-items:center;gap:6px;margin-top:13px;background:#333542;padding:4px 13px;border-radius:20px">
         <span style="color:#c6e76c;font-size:9px">&#9679;</span>
@@ -335,24 +323,24 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
         <button id="dash-menu-btn" onclick="toggleDashMenu(event)" style="background:#333542;color:#c6e76c;border:0.5px solid #454857;padding:5px 11px;border-radius:6px;font-size:14px;cursor:pointer;font-family:inherit;line-height:1" title="Menu" aria-label="Menu">&#9776;</button>
         <div id="dash-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,0.18);min-width:210px;z-index:50;overflow-y:auto;max-height:calc(100vh - 90px)">
           <div class="dml">Daily work</div>
-          <div onclick="dashMenuGo('weighin')" class="dmi">&#9878;&#65039; Batch weigh-in</div>
-          <div onclick="dashMenuGo('readytogo')" class="dmi">&#9989; Ready to Go</div>
-          <div onclick="dashMenuGo('healthboard')" class="dmi">&#10084;&#65039; Unit Health Board</div>
-          <div onclick="dashMenuGo('wrapped')" class="dmi">&#127881; Unit Wrapped</div>
+          <div onclick="dashMenuGo('weighin')" class="dmi">Batch weigh-in</div>
+          <div onclick="dashMenuGo('readytogo')" class="dmi">Ready to Go</div>
+          <div onclick="dashMenuGo('healthboard')" class="dmi">Unit Health Board</div>
+          <div onclick="dashMenuGo('wrapped')" class="dmi">Unit Wrapped</div>
           <div class="dml">Records &amp; reports</div>
-          <div onclick="dashMenuGo('records')" class="dmi">&#128203; Records</div>
-          <div onclick="dashMenuGo('incidents')" class="dmi">&#9888;&#65039; Incident register</div>
-          <div onclick="dashMenuGo('upcomingMedical')" class="dmi">&#128137; Upcoming Medical</div>
-          <div onclick="dashMenuGo('stats')" class="dmi">&#128202; Stats</div>
+          <div onclick="dashMenuGo('records')" class="dmi">Records</div>
+          <div onclick="dashMenuGo('incidents')" class="dmi">Incident register</div>
+          <div onclick="dashMenuGo('upcomingMedical')" class="dmi">Upcoming Medical</div>
+          <div onclick="dashMenuGo('stats')" class="dmi">Stats</div>
           <div class="dml">Areas</div>
-          <div onclick="location.href='cats.html'" class="dmi">🐱 Cats</div>
+          <div onclick="location.href='cats.html'" class="dmi">Cats</div>
           <div class="dml">Team &amp; data</div>
-          <div id="dash-menu-users" onclick="dashMenuGo('users')" class="dmi" style="display:none">&#9881; Manage Users</div>
-          <div id="dmi-backup" onclick="closeDashMenu();downloadBackup()" class="dmi">&#128190; Download backup</div>
-          <div onclick="closeDashMenu();restoreBackupOpen()" class="dmi" id="dash-menu-restore">&#9851;&#65039; Restore backup</div>
-          <div onclick="showWhatsNew()" class="dmi">&#10024; What&#8217;s new</div>
+          <div id="dash-menu-users" onclick="dashMenuGo('users')" class="dmi" style="display:none">Manage Users</div>
+          <div id="dmi-backup" onclick="closeDashMenu();downloadBackup()" class="dmi">Download backup</div>
+          <div onclick="closeDashMenu();restoreBackupOpen()" class="dmi" id="dash-menu-restore">Restore backup</div>
+          <div onclick="showWhatsNew()" class="dmi">What&#8217;s new</div>
           <div style="border-top:1px solid #e2e8f0;margin:4px 0"></div>
-          <div onclick="closeDashMenu();appConfirm('Log out of NSPCA Longford?',doLogout)" class="dmi" style="color:#991b1b">&#128682; Log out</div>
+          <div onclick="closeDashMenu();appConfirm('Log out of NSPCA Longford?',doLogout)" class="dmi" style="color:#991b1b">Log out</div>
         </div>
       </div>
     </div>
@@ -420,7 +408,7 @@ var CATS=[
 ];
 
 var TABS=[
-  {id:"dog",l:"Dog",g:"Profile"},{id:"picture",l:"Picture",g:"Profile"},{id:"notes",l:"Notes",g:"Profile"},
+  {id:"dog",l:"Dog",g:"Profile"},{id:"photos",l:"Photos",g:"Profile"},{id:"picture",l:"Picture",g:"Profile"},{id:"notes",l:"Notes",g:"Profile"},
   {id:"assessment",l:"Assessment",g:"Assessment"},{id:"scoring",l:"Scoring",g:"Assessment"},{id:"sessions",l:"Sessions",g:"Assessment"},{id:"ea",l:"EA",g:"Assessment"},{id:"rehoming",l:"Clearance",g:"Assessment"},
   {id:"arrival",l:"Arrival",g:"Isolation"},{id:"days",l:"5-Day Report",g:"Isolation"},
   {id:"feeding",l:"Feeding",g:"Care"},
@@ -439,7 +427,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.152",date:"2026-09-02",note:"New dashboard, part 3 of 3 \u2014 filters. The traffic-light stat rail is replaced by filter pills with live counts: All, Needs report, Amber & Red, Contagious, Ready, Puppies. Tap one to see just those dogs, tap again to clear; pills with nothing in them hide themselves. Phase 2 complete: Today at the top, filters, then the map of the building with one next-thing line per dog."},{version:"3.151",date:"2026-09-02",note:"New dashboard, part 2 of 3 \u2014 Today. The \u2018Needs attention\u2019 chips are gone; in their place a charcoal Today card at the top of the board lists the shift\u0027s actual jobs, dog by dog, in priority order \u2014 meds today, vaccine due, parasite due, reclaim date, finishing isolation, ready-but-no-web-bio, day report not written \u2014 plus weigh day when weights are due. Every line opens the dog straight on the right tab (Medical, Dog, Report, Clearance). Six shown, tap for more."},{version:"3.150",date:"2026-09-02",note:"New dashboard, part 1 of 3 \u2014 the map and the next thing. The board is now a map of the building: Kennels 1\u20136, Pods 1\u20134 and the Crate are always shown, and an empty kennel shows as an empty slot with a \u2018+ assign\u2019 that starts a new dog already placed there. Every dog card carries one \u2018next thing\u2019 line chosen by priority \u2014 contagious, meds today, vaccine due, parasite due, reclaim date, finishing today, ready-but-no-web-bio, ready to go, report not written, weigh-in due. Section headers wear the Lichen rule. Search, filters and name order still work as before."},{version:"3.149",date:"2026-09-02",note:"Reskin slice 4 of 4 \u2014 cards & fields. Warm paper background, crisper cards (thin border, softer corner, no floating shadow), micro-cap field labels, inputs on a faint paper tint that turn white with a Lichen glow when you\u0027re in them, bolder primary buttons, and every tab title gets a Lichen fade-rule. Phase 1 (visual overhaul) complete \u2014 same app, brand skin. Next: the dashboard."},{version:"3.148",date:"2026-09-02",note:"Reskin slice 3 of 4 \u2014 tabs. The tab rail now lives on the charcoal band under the header: the active group and tab sit in a solid Lichen pill with ink text, inactive tabs go quiet grey, the \u2018has content\u2019 dot turns Lichen, and the Medical tab carries a red dot whenever a live contagious case is on the record. Same tabs, same groups, same order."}
+var CHANGELOG=[{version:"3.157",date:"2026-09-02",note:"Emoji removed from the dashboard menu and from Unit Wrapped \u2014 words only. The coloured edges on Today lines stay; they\u0027re the urgency signal now."},{version:"3.156",date:"2026-09-02",note:"Photos get their own tab, next to Dog in the Profile group: add photos there, see the arrival-vs-latest comparison and the full log. The folded photo log has left the Dog tab. And the new dashboard drops its symbols \u2014 the Today card and the next-thing lines are words only; urgency shows as a coloured edge (red, amber, teal, grey) rather than an emoji."},{version:"3.155",date:"2026-09-02",note:"Today now means today. It was borrowing the old \u2018needs attention\u2019 windows \u2014 vaccines 14 days ahead, parasite treatments 7 days ahead, reclaim dates 2 days ahead, weigh-ins from Monday \u2014 so it listed things that weren\u0027t due. The Today card, the next-thing lines and the filter counts now use strict windows: due today or overdue only; weigh-ins only when a dog hasn\u0027t been weighed for 7 days. Upcoming Medical keeps its look-ahead \u2014 that\u0027s what it\u0027s for."},{version:"3.154",date:"2026-09-02",note:"Login screen: the tagline \u2018National Society for Prevention of Cruelty to Animals\u2019 is now set as real text under the NSPCA mark instead of being baked into the image, so it reads crisply on every screen \u2014 at 230px wide the pixel version had blurred into nothing."},{version:"3.153",date:"2026-09-02",note:"Improvements sweep: dead stat-rail styling removed after the dashboard rebuild (smaller file, nothing visible changes). The Assessment & Behaviour handbook was corrected to the app\u0027s real scoring \u2014 1 best to 4 worst, low total is good, 1\u201310 Green / 11\u201314 Yellow / 15\u201320 Red / 21+ Black, any 4 floors to Red, any 3 to Yellow \u2014 and now names the six categories exactly as the Scoring tab does."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1315,12 +1303,12 @@ function wrappedStats(){
 }
 function renderWrapped(){
   var w=wrappedStats();
-  var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" class="btn" style="padding:5px 14px">\u2190 Back</button><h2 style="margin:0">\ud83c\udf89 Unit Wrapped</h2><span style="margin-left:auto"><button class="btn btnp" onclick="saveWrappedImage()" style="font-size:11.5px">\ud83d\udcf7 Save as image</button></span></div>';
+  var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" class="btn" style="padding:5px 14px">\u2190 Back</button><h2 style="margin:0">Unit Wrapped</h2><span style="margin-left:auto"><button class="btn btnp" onclick="saveWrappedImage()" style="font-size:11.5px">Save as image</button></span></div>';
   var stat=function(n,l){return '<div style="background:#333542;border:1px solid #454857;border-radius:16px;padding:16px;text-align:center"><div style="font-size:26px;font-weight:900;color:#c6e76c">'+n+'</div><div style="font-size:10.5px;color:#94a3b8;margin-top:3px">'+l+'</div></div>';};
   var champ=function(e,t,d2){return '<div style="background:#333542;border:1px solid #454857;border-radius:16px;padding:14px 16px;margin-top:10px;display:flex;align-items:center;gap:12px"><span style="font-size:28px">'+e+'</span><div><b style="font-size:13.5px">'+esc(t)+'</b><div style="font-size:11px;color:#94a3b8">'+esc(d2)+'</div></div></div>';};
   var h='<div style="max-width:560px;margin:0 auto">'+back;
   h+='<div id="wrapped-card" style="background:#282932;border-radius:20px;padding:16px;color:#fff">';
-  h+='<div style="background:linear-gradient(160deg,#333542,#282932);border:1px solid #454857;border-radius:20px;padding:26px;text-align:center;margin-bottom:12px"><div style="font-size:22px;font-weight:800">\ud83c\udf89 NSPCA Longford</div><div style="font-size:12px;color:#94a3b8">Dog Isolation Unit \u00b7 '+w.year+' so far</div><div style="font-size:52px;font-weight:900;color:#c6e76c;letter-spacing:-0.03em;margin:14px 0 2px">'+w.home+'</div><div style="font-size:12px;color:#94a3b8">dog'+(w.home===1?"":"s")+' went home</div></div>';
+  h+='<div style="background:linear-gradient(160deg,#333542,#282932);border:1px solid #454857;border-radius:20px;padding:26px;text-align:center;margin-bottom:12px"><div style="font-size:22px;font-weight:800">NSPCA Longford</div><div style="font-size:12px;color:#94a3b8">Dog Isolation Unit \u00b7 '+w.year+' so far</div><div style="font-size:52px;font-weight:900;color:#c6e76c;letter-spacing:-0.03em;margin:14px 0 2px">'+w.home+'</div><div style="font-size:12px;color:#94a3b8">dog'+(w.home===1?"":"s")+' went home</div></div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
     +stat(w.careDays.toLocaleString(),"days of care given")
     +stat(w.kg.toFixed(1)+" kg","weight gained back, all dogs")
@@ -1328,8 +1316,8 @@ function renderWrapped(){
     +stat(w.vax,"vaccinations given")
     +stat(w.pas,"play assessments run")
     +stat(w.cleared,"contagious cases cleared")+'</div>';
-  if(w.longest)h+=champ("\ud83c\udfc6","Longest journey: "+(w.longest.name||"?"),w.longest.days+" days"+(w.longest.returned?", came back once":"")+" \u2014 still wagging");
-  if(w.comeback)h+=champ("\ud83d\udcaa","Biggest comeback: "+(w.comeback.name||"?"),"+"+w.comeback.kg.toFixed(1)+" kg from arrival");
+  if(w.longest)h+=champ("","Longest journey: "+(w.longest.name||"?"),w.longest.days+" days"+(w.longest.returned?", came back once":"")+" \u2014 still wagging");
+  if(w.comeback)h+=champ("","Biggest comeback: "+(w.comeback.name||"?"),"+"+w.comeback.kg.toFixed(1)+" kg from arrival");
   h+='</div></div>';
   return h;
 }
@@ -1538,8 +1526,9 @@ function recentOutcomesHtml(){
   }).join("");
   return '<div class="card" style="margin-top:14px;margin-bottom:12px"><div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px"><span style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#64748b">Recently moved on</span><span style="font-size:11px;color:#94a3b8">'+list.length+' total</span></div>'+rows+'</div>';
 }
-function computeDueToday(activeRecords){
+function computeDueToday(activeRecords,strict){
   var today=new Date().toISOString().slice(0,10);
+  var LA_V=strict?0:14,LA_P=strict?0:7,LA_R=strict?0:2;
   var thisWeek=weekStartStr(today);
   var act=activeRecords.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
   var cats={returns:[],finishing:[],vaccs:[],paras:[],weighs:[],meds:[],reports:[],walks:[]};
@@ -1547,9 +1536,9 @@ function computeDueToday(activeRecords){
     var vl=(med&&med.vaccinations)||[];
     function dateOf(t){var e=vl.slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");}).find(function(x){return x.type===t&&x.date;});return e?e.date:null;}
     var due=false;
-    ["1st Vaccination","Kennel Cough","2nd Vaccination","Booster"].forEach(function(vt){if(vl.some(function(v){return v.type===vt;}))return;var ex=vl.find(function(v){return v.type===vt&&v.nextDue;});if(ex&&ex.nextDue&&ex.nextDue<=addDaysStr(today,14))due=true;});
-    var first=dateOf("1st Vaccination");if(first&&!vl.some(function(v){return v.type==="2nd Vaccination";})&&addDaysStr(first,28)<=addDaysStr(today,14))due=true;
-    var second=dateOf("2nd Vaccination");if(second&&!vl.some(function(v){return v.type==="Booster";})){var dy=new Date(second);dy.setFullYear(dy.getFullYear()+1);if(dy.toISOString().slice(0,10)<=addDaysStr(today,14))due=true;}
+    ["1st Vaccination","Kennel Cough","2nd Vaccination","Booster"].forEach(function(vt){if(vl.some(function(v){return v.type===vt;}))return;var ex=vl.find(function(v){return v.type===vt&&v.nextDue;});if(ex&&ex.nextDue&&ex.nextDue<=addDaysStr(today,LA_V))due=true;});
+    var first=dateOf("1st Vaccination");if(first&&!vl.some(function(v){return v.type==="2nd Vaccination";})&&addDaysStr(first,28)<=addDaysStr(today,LA_V))due=true;
+    var second=dateOf("2nd Vaccination");if(second&&!vl.some(function(v){return v.type==="Booster";})){var dy=new Date(second);dy.setFullYear(dy.getFullYear()+1);if(dy.toISOString().slice(0,10)<=addDaysStr(today,LA_V))due=true;}
     return due;
   }
   act.forEach(function(r){
@@ -1564,14 +1553,14 @@ function computeDueToday(activeRecords){
       if(rt==="Returned from adoption")return; // a date already passed, not a deadline
       var dd=daysSince(rd);
       if(dd===null)return;
-      var due=daysSince(rd)>=0&&new Date(rd)<=new Date(new Date().getTime()+2*864e5);
+      var due=daysSince(rd)>=0&&new Date(rd)<=new Date(new Date().getTime()+LA_R*864e5);
       if(due)cats.returns.push(r);
     })();
     if(vaccDue(med))cats.vaccs.push(r);
     var pl=med.parasiteTreatments||[];var paraDue=false;
-    ["Bravecto","Milpro"].forEach(function(drug){var last=pl.filter(function(p){return(p.type||"").indexOf(drug)===0||(p.product||"").indexOf(drug)===0;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];if(!last||!last.date)return;var nextDue=last.nextDue||addDaysStr(last.date,90);if(nextDue<=addDaysStr(today,7))paraDue=true;});
+    ["Bravecto","Milpro"].forEach(function(drug){var last=pl.filter(function(p){return(p.type||"").indexOf(drug)===0||(p.product||"").indexOf(drug)===0;}).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];if(!last||!last.date)return;var nextDue=last.nextDue||addDaysStr(last.date,90);if(nextDue<=addDaysStr(today,LA_P))paraDue=true;});
     if(paraDue)cats.paras.push(r);
-    var wts=r.state.weights||[];if((r.state.dog&&r.state.dog.intakeDate)&&!wts.find(function(w){return w.date>=thisWeek&&w.date<=today;}))cats.weighs.push(r);
+    var wts=r.state.weights||[];var _wFrom=strict?addDaysStr(today,-7):thisWeek;if((r.state.dog&&r.state.dog.intakeDate)&&!wts.find(function(w){return w.date>_wFrom&&w.date<=today;}))cats.weighs.push(r);
   });
   return cats;
 }
@@ -1581,27 +1570,27 @@ function dogIsReady(r){var st=r.state||{};var f=st.fin||{};var o=f.outcome||"";v
 function dogNextThing(r,cats){
   var st=r.state||{};var d=st.dog||{};var inc=function(k){return cats&&cats[k]&&cats[k].indexOf(r)>=0;};
   var con=activeContagiousList(st.medical||null);
-  if(con.length)return{c:"r",t:"\u2623 "+diseaseShortName(con[0].type)+" \u00b7 served last"};
-  if(inc("meds"))return{c:"a",t:"\ud83d\udc8a On medication \u00b7 dose today"};
-  if(inc("vaccs"))return{c:"a",t:"\ud83d\udc89 Vaccine due"};
-  if(inc("paras"))return{c:"a",t:"\ud83d\udc1b Parasite treatment due"};
-  if(inc("returns"))return{c:"a",t:"\u23f3 Due back / reclaim date"};
+  if(con.length)return{c:"r",t:diseaseShortName(con[0].type)+" \u00b7 served last"};
+  if(inc("meds"))return{c:"a",t:"On medication \u00b7 dose today"};
+  if(inc("vaccs"))return{c:"a",t:"Vaccine due"};
+  if(inc("paras"))return{c:"a",t:"Parasite treatment due"};
+  if(inc("returns"))return{c:"a",t:"Due back / reclaim date"};
   if(inc("finishing"))return{c:"t",t:"Finishing isolation today"};
   var ready=dogIsReady(r);
-  if(ready&&d.webBio!=="Y")return{c:"a",t:"\u270e Ready \u00b7 web bio not written"};
-  if(ready)return{c:"t",t:"\u2713 Ready to go"};
+  if(ready&&d.webBio!=="Y")return{c:"a",t:"Ready \u00b7 web bio not written"};
+  if(ready)return{c:"t",t:"Ready to go"};
   if(inc("reports"))return{c:"q",t:"Day report not written yet"};
-  if(inc("weighs"))return{c:"q",t:"Weigh-in due this week"};
+  if(inc("weighs"))return{c:"q",t:"Not weighed in 7 days"};
   return null;
 }
 function openNewDogIn(k){appConfirm("Start a new dog in "+k+"?",function(){S=defaultState();S.dog.kennel=k;persistSave();showScreen("wrap");S.tab="dog";render();});}
 function openDogAt(id,tab){openDog(id);if(tab){S.tab=tab;render();}}
 function todayItems(activeRecords){
-  var cats=computeDueToday(activeRecords);var items=[];
-  var push=function(r,pri,cls,icon,job,sub,tab){var d=r.state&&r.state.dog?r.state.dog:{};items.push({pri:pri,cls:cls,icon:icon,id:r.id,name:r.name||d.name||"\u2014",k:kennelShort(d.kennel),job:job,sub:sub,tab:tab});};
-  cats.meds.forEach(function(r){push(r,1,"r","\ud83d\udc8a","on medication","dose today \u00b7 log it on Medical","medical");});
-  cats.vaccs.forEach(function(r){push(r,2,"a","\ud83d\udc89","vaccine due","book or log the dose","medical");});
-  cats.paras.forEach(function(r){push(r,2,"a","\ud83d\udc1b","parasite treatment due","Bravecto / Milpro","medical");});
+  var cats=computeDueToday(activeRecords,true);var items=[];
+  var push=function(r,pri,cls,icon,job,sub,tab){icon="";var d=r.state&&r.state.dog?r.state.dog:{};items.push({pri:pri,cls:cls,icon:icon,id:r.id,name:r.name||d.name||"\u2014",k:kennelShort(d.kennel),job:job,sub:sub,tab:tab});};
+  cats.meds.forEach(function(r){push(r,1,"r","\ud83d\udc8a","on medication","give today\u0027s dose \u00b7 log it on Medical","medical");});
+  cats.vaccs.forEach(function(r){push(r,2,"a","\ud83d\udc89","vaccine due or overdue","book or log the dose","medical");});
+  cats.paras.forEach(function(r){push(r,2,"a","\ud83d\udc1b","parasite treatment due or overdue","Bravecto / Milpro","medical");});
   cats.returns.forEach(function(r){push(r,3,"a","\u23f3","reclaim / due-back date","check the owner status","dog");});
   cats.finishing.forEach(function(r){push(r,4,"t","\u2713","finishing isolation today","clear the record if all\u0027s well","days");});
   activeRecords.forEach(function(r){var d=r.state&&r.state.dog?r.state.dog:{};if(dogIsReady(r)&&d.webBio!=="Y")push(r,5,"a","\u270e","ready \u00b7 no web bio","losing days on the website","rehoming");});
@@ -1614,8 +1603,8 @@ function tasksRollupHtml(activeRecords){
   if(!items.length&&!t.weighs)return "";
   var showAll=!!window._todayAll;var LIM=6;var shown=showAll?items:items.slice(0,LIM);
   var h='<div class="today"><div class="th"><b>Today</b><span>'+(items.length+(t.weighs?1:0))+' thing'+((items.length+(t.weighs?1:0))!==1?"s":"")+' \u00b7 tap to open</span></div>';
-  h+=shown.map(function(it){return '<div class="ti" onclick="openDogAt('+it.id+',\''+it.tab+'\')"><div class="tk '+it.cls+'">'+it.icon+'</div><div class="tw"><b>'+esc(it.name)+'</b>'+(it.k?' <span class="tkn">'+esc(it.k)+'</span>':'')+' \u00b7 '+it.job+'<small>'+it.sub+'</small></div><div class="tgo">'+({medical:"Medical",dog:"Dog",days:"Report",rehoming:"Clearance"}[it.tab]||"Open")+' &rsaquo;</div></div>';}).join("");
-  if(t.weighs)h+='<div class="ti" onclick="dashMenuGo(\'weighin\')"><div class="tk">&#9878;&#65039;</div><div class="tw"><b>Weigh day</b> \u00b7 '+t.weighs+' dog'+(t.weighs!==1?"s":"")+' due this week<small>Batch weigh-in \u00b7 a few minutes</small></div><div class="tgo">Weigh &rsaquo;</div></div>';
+  h+=shown.map(function(it){return '<div class="ti '+it.cls+'" onclick="openDogAt('+it.id+',\''+it.tab+'\')"><div class="tw"><b>'+esc(it.name)+'</b>'+(it.k?' <span class="tkn">'+esc(it.k)+'</span>':'')+' \u00b7 '+it.job+'<small>'+it.sub+'</small></div><div class="tgo">'+({medical:"Medical",dog:"Dog",days:"Report",rehoming:"Clearance"}[it.tab]||"Open")+' &rsaquo;</div></div>';}).join("");
+  if(t.weighs)h+='<div class="ti q" onclick="dashMenuGo(\'weighin\')"><div class="tw"><b>Weigh-ins</b> \u00b7 '+t.weighs+' dog'+(t.weighs!==1?"s":"")+' not weighed in 7 days<small>Batch weigh-in \u00b7 a few minutes</small></div><div class="tgo">Weigh &rsaquo;</div></div>';
   if(items.length>LIM)h+='<div class="tmore" onclick="window._todayAll=!window._todayAll;renderDashboard()">'+(showAll?"Show fewer":"+ "+(items.length-LIM)+" more")+'</div>';
   h+='</div>';
   return h;
@@ -2010,7 +1999,7 @@ function renderDashboard(){
   if(_k)active=active.filter(function(r){return(r.state&&r.state.dog?r.state.dog.kennel:"")=== _k;});
   var tlCounts={Green:0,Yellow:0,Red:0,Black:0,None:0};
   active.forEach(function(r){if(r.trafficLight&&tlCounts[r.trafficLight]!==undefined)tlCounts[r.trafficLight]++;else tlCounts.None++;});
-  var _f=window._dbF||"";var _fc=computeDueToday(active);
+  var _f=window._dbF||"";var _fc=computeDueToday(active,true);
   var FILTERS=[["","All",function(r){return true;}],
     ["report","Needs report",function(r){return _fc.reports.indexOf(r)>=0;}],
     ["risk","Amber & Red",function(r){return r.trafficLight==="Yellow"||r.trafficLight==="Red"||r.trafficLight==="Black";}],
@@ -2033,7 +2022,7 @@ function renderDashboard(){
   if(stickyEl)stickyEl.innerHTML=contagiousAlertHtml()+overdueBannerHtml;
   if(!active.length){el.innerHTML=offlineBannerHtml()+catchupHtml()+statusStrip+fb+renderIncomingStrip()+tasksRollupHtml(records)+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+recentOutcomesHtml()+brandFooterHtml();return;}
 
-  var _cats=computeDueToday(active);
+  var _cats=computeDueToday(active,true);
   var cards=active.map(function(rec){
     var d=rec.state&&rec.state.dog?rec.state.dog:{};var f=rec.state&&rec.state.fin?rec.state.fin:{};
     var _nx=dogNextThing(rec,_cats);var nextHtml=_nx?'<div class="dnext '+_nx.c+'">'+_nx.t+'</div>':'';
@@ -3526,6 +3515,13 @@ function handlePhotoUpload(inp){var file=inp.files[0];if(!file)return;if(file.si
 function starPhoto(i){ensurePhotos();S.dog.photos.forEach(function(p,j){p.star=(j===i);});syncStarPhoto();saveRecord();renderMain();}
 function deletePhoto(i){appConfirm("Remove this photo from the log?",function(){ensurePhotos();S.dog.photos.splice(i,1);if(S.dog.photos.length&&!S.dog.photos.some(function(p){return p.star;}))S.dog.photos[S.dog.photos.length-1].star=true;syncStarPhoto();saveRecord();renderMain();});}
 function photoNote(i){ensurePhotos();var p=S.dog.photos[i];if(!p)return;var cur=p.note||"";var v=prompt("Condition note for this photo (what it shows):",cur);if(v===null)return;p.note=v.trim();saveRecord();renderMain();}
+function renderPhotos(){
+  ensurePhotos();var ps=S.dog.photos||[];var n=ps.length;
+  var add='<label class="btn btnp" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">Add photo<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>';
+  var h='<h2 style="margin-bottom:4px">Photos</h2><div class="sub">'+(n?n+' photo'+(n===1?'':'s')+' on this record'+(n>=2?' \u00b7 arrival vs latest below':''):'No photos yet \u2014 the intake photo is the first entry in every dog\u0027s record.')+'</div>';
+  h+='<div class="card">'+add+(n?'<div style="margin-top:4px">'+photoLogHtml()+'</div>':'')+'</div>';
+  return h;
+}
 function photoFoldHtml(){
   ensurePhotos();
   var n=(S.dog.photos||[]).length;
@@ -4945,7 +4941,7 @@ function page(){
       +'<div style="flex:1;min-width:0"><div style="font-size:21px;font-weight:800;line-height:1.1;letter-spacing:-0.02em">'+esc(d.name||"Unnamed dog")+'</div>'+(meta?'<div style="font-size:11.5px;color:#a7adbd;font-weight:600;margin-top:3px">'+esc(meta)+'</div>':'')+(tlPill?'<div style="margin-top:6px">'+tlPill+'</div>':'')+'</div>'+knChip+'</div>'
       +(chips.length?'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:11px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.12)">'+chips.join("")+'</div>':'')
       
-      +'<div style="margin-top:11px;display:flex;align-items:center;gap:8px"><label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(255,255,255,0.06);border:1px dashed rgba(255,255,255,0.3);border-radius:8px;cursor:pointer;font-size:11px;color:#cdd3df">&#128247; Add photo'+'<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>'+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px" onclick="showRepositionPhoto()">&#10021; Reposition</button>':'')+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px;background:#fee2e2;color:#991b1b;border:none" onclick="removePhoto()">Remove</button>':'')+'</div></div>';
+      +'<div style="margin-top:11px;display:flex;align-items:center;gap:8px"><label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(255,255,255,0.06);border:1px dashed rgba(255,255,255,0.3);border-radius:8px;cursor:pointer;font-size:11px;color:#cdd3df">Add photo'+'<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>'+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px" onclick="showRepositionPhoto()">&#10021; Reposition</button>':'')+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px;background:#fee2e2;color:#991b1b;border:none" onclick="removePhoto()">Remove</button>':'')+'</div></div>';
 
     var identity='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Identity</span>'
       +'</div>'+'<div class="dog-fg">'+fld("Dog name",d.name,"dog.name","text","e.g. Bailey",'onblur="checkDuplicateName()" id="dog-name-input"')+fld("Reference no.",d.refNo,"dog.refNo","text","e.g. 023-MH-2026")+breedSlct(d.breed)+slct("Sex",d.sex,"dog.sex",[["Male","Male"],["Female","Female"],["Male (N)","Male (Neutered)"],["Female (S)","Female (Spayed)"],["Unknown","Unknown"]])+'</div>'+'<div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">&#9888; There&rsquo;s already an active dog with this name.</div>'+'<div class="f"><label class="lbl">Crossbreed</label><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0"><input type="checkbox" data-save="dog.crossbreed" '+(d.crossbreed?"checked":"")+' onchange="S.dog.crossbreed=this.checked;debouncedSave();renderMain()" style="width:18px;height:18px;cursor:pointer"><span style="font-size:13px">This dog is a crossbreed</span></label></div>'+(d.crossbreed?breedSlct(d.breed2,"dog.breed2","Crossed with"):'')+'<div class="dog-fg">'+fld("Date of birth (if known)",d.dob||"","dog.dob","date")+slct("Age (approx.)",d.age,"dog.age",ageOptions(d.age))+slct("Size",d.size,"dog.size",[["","-- select --"],["Small (under 10kg)","Small (under 10kg)"],["Medium (10-25kg)","Medium (10-25kg)"],["Large (25-40kg)","Large (25-40kg)"],["XL (over 40kg)","XL (over 40kg)"]])+slct("Colour / markings",d.colour,"dog.colour",[["","-- select --"],["Black","Black"],["White","White"],["Cream","Cream"],["Golden","Golden"],["Fawn","Fawn"],["Tan","Tan"],["Red / Chestnut","Red / Chestnut"],["Brown / Chocolate","Brown / Chocolate"],["Blue / Grey","Blue / Grey"],["Sable","Sable"],["Black and White","Black and White"],["Black and Tan","Black and Tan"],["Brown and White","Brown and White"],["Tri-colour","Tri-colour"],["Brindle","Brindle"],["Merle","Merle"],["Other","Other"]])+wfld(d.weight)+fld("Microchip no.",d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')+'</div>'+'<div id="chip-info" style="margin:0 0 4px;font-size:11px">'+chipInfoHtml(d.microchip)+'</div></div>';
@@ -4980,10 +4976,11 @@ function page(){
     }else{
       famFold=dogFold("family","\ud83d\udc3e","Family","Mums, pups and litters","Not linked \u2014 tap to link","plain",familyCardInner(_fi));
     }
-    return hero+photoFoldHtml()+identity+intake+famCard+pupCardHtml()+restrictedBreedCardHtml()+admDivider+intakeChecklistHtml()+isoFold+wnFolds+famFold+'<div class="brow"><button class="btn" onclick="openKennelCard()" style="white-space:nowrap">&#128203; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
+    return hero+identity+intake+famCard+pupCardHtml()+restrictedBreedCardHtml()+admDivider+intakeChecklistHtml()+isoFold+wnFolds+famFold+'<div class="brow"><button class="btn" onclick="openKennelCard()" style="white-space:nowrap">&#128203; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
   }
 
   if(t==="picture") return renderPicture();
+  if(t==="photos") return renderPhotos();
   if(t==="rehoming") return renderRehoming();
   if(t==="story") return renderStory();
 
@@ -5306,6 +5303,7 @@ function tabDone(id){
   function anyVal(o){return o?Object.keys(o).some(function(k){var v=o[k];return v!==""&&v!==null&&v!==undefined&&v!==false&&v!==0&&!(Array.isArray(v)&&v.length===0);}):false;}
   switch(id){
     case "dog": return !!(S.dog&&S.dog.name);
+    case "photos": ensurePhotos();return (S.dog.photos||[]).length?true:null;
     case "arrival": return anyVal(S.arrival);
     case "days": return (S.days||[]).some(function(d){return d&&(d.demeanour||d.feeding||d.toileting||d.staffInt||d.incidents||d.notes);});
     case "assessment": return anyVal(S.assessment);
