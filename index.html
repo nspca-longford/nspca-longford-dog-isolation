@@ -301,7 +301,7 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
       </div>
       <button class="btn btnp" style="width:100%;padding:13px;font-size:14px;border-radius:11px;font-weight:700" id="login-btn" onclick="doLogin()">Enter &rarr;</button>
       <div id="login-err" style="display:none;color:#dc2626;font-size:12px;margin-top:12px;padding:9px;background:#fef2f2;border-radius:8px">Incorrect code. Try again.</div>
-      <div style="border-top:1px solid #f1f5f9;margin-top:20px;padding-top:16px;font-size:11px;color:#94a3b8">Contact Shane to request a code</div>
+      <div style="border-top:1px solid #f1f5f9;margin-top:20px;padding-top:16px;font-size:11px;color:#94a3b8">Contact Admin to request a code</div>
     </div>
 
     <div style="margin-top:22px;font-size:10px;color:#475569">NSPCA Longford &middot; Shared records enabled</div>
@@ -326,7 +326,6 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
           <div onclick="dashMenuGo('weighin')" class="dmi">Batch weigh-in</div>
           <div onclick="dashMenuGo('readytogo')" class="dmi">Ready to Go</div>
           <div onclick="dashMenuGo('healthboard')" class="dmi">Unit Health Board</div>
-          <div onclick="dashMenuGo('wrapped')" class="dmi">Unit Wrapped</div>
           <div class="dml">Records &amp; reports</div>
           <div onclick="dashMenuGo('records')" class="dmi">Records</div>
           <div onclick="dashMenuGo('incidents')" class="dmi">Incident register</div>
@@ -427,7 +426,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.157",date:"2026-09-02",note:"Emoji removed from the dashboard menu and from Unit Wrapped \u2014 words only. The coloured edges on Today lines stay; they\u0027re the urgency signal now."},{version:"3.156",date:"2026-09-02",note:"Photos get their own tab, next to Dog in the Profile group: add photos there, see the arrival-vs-latest comparison and the full log. The folded photo log has left the Dog tab. And the new dashboard drops its symbols \u2014 the Today card and the next-thing lines are words only; urgency shows as a coloured edge (red, amber, teal, grey) rather than an emoji."},{version:"3.155",date:"2026-09-02",note:"Today now means today. It was borrowing the old \u2018needs attention\u2019 windows \u2014 vaccines 14 days ahead, parasite treatments 7 days ahead, reclaim dates 2 days ahead, weigh-ins from Monday \u2014 so it listed things that weren\u0027t due. The Today card, the next-thing lines and the filter counts now use strict windows: due today or overdue only; weigh-ins only when a dog hasn\u0027t been weighed for 7 days. Upcoming Medical keeps its look-ahead \u2014 that\u0027s what it\u0027s for."},{version:"3.154",date:"2026-09-02",note:"Login screen: the tagline \u2018National Society for Prevention of Cruelty to Animals\u2019 is now set as real text under the NSPCA mark instead of being baked into the image, so it reads crisply on every screen \u2014 at 230px wide the pixel version had blurred into nothing."},{version:"3.153",date:"2026-09-02",note:"Improvements sweep: dead stat-rail styling removed after the dashboard rebuild (smaller file, nothing visible changes). The Assessment & Behaviour handbook was corrected to the app\u0027s real scoring \u2014 1 best to 4 worst, low total is good, 1\u201310 Green / 11\u201314 Yellow / 15\u201320 Red / 21+ Black, any 4 floors to Red, any 3 to Yellow \u2014 and now names the six categories exactly as the Scoring tab does."}
+var CHANGELOG=[{version:"3.160",date:"2026-09-02",note:"\u2018Web bio written?\u2019 removed from the Dog tab, along with the ready-but-no-bio line on cards and in Today. A ready dog now simply reads \u2018Ready to go\u2019."},{version:"3.159",date:"2026-09-02",note:"Today card gets a Dismiss \u2014 hides it for the rest of the day on that device; a one-line \u2018show\u2019 brings it back, and it returns by itself tomorrow. Login screen now says \u2018Contact Admin to request a code\u2019."},{version:"3.158",date:"2026-09-02",note:"Unit Wrapped removed \u2014 the year-in-review screen, its menu entry and the save-as-image code are gone. Nothing else changes; the dogs\u0027 data it read from is untouched."},{version:"3.157",date:"2026-09-02",note:"Emoji removed from the dashboard menu and from Unit Wrapped \u2014 words only. The coloured edges on Today lines stay; they\u0027re the urgency signal now."},{version:"3.156",date:"2026-09-02",note:"Photos get their own tab, next to Dog in the Profile group: add photos there, see the arrival-vs-latest comparison and the full log. The folded photo log has left the Dog tab. And the new dashboard drops its symbols \u2014 the Today card and the next-thing lines are words only; urgency shows as a coloured edge (red, amber, teal, grey) rather than an emoji."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1160,8 +1159,6 @@ function showDashSection(section){
     el.innerHTML=renderReadyToGo();
   }else if(section==="healthboard"){
     el.innerHTML=renderHealthBoard();
-  }else if(section==="wrapped"){
-    el.innerHTML=renderWrapped();
   }else if(section==="weighin"){
     el.innerHTML=renderBatchWeighIn();
   }else if(section==="incidents"){
@@ -1276,58 +1273,6 @@ function renderReadyToGo(){
   var count='<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">'+list.length+' dog'+(list.length!==1?'s':'')+' ready \u00b7 longest-waiting first</div>';
   var legend='<div style="font-size:10px;color:#94a3b8;margin-bottom:12px">Rehoming marks: \u2713 suitable \u00b7 ~ with caution \u00b7 \u2717 not suitable. Amber chips are info, not blockers.</div>';
   return '<div style="max-width:1100px;margin:0 auto">'+back+sub+count+legend+'<div class="rtg-grid">'+rows+'</div></div>';
-}
-function wrappedStats(){
-  var y=new Date().getFullYear();var jan1=y+"-01-01";var today=new Date().toISOString().slice(0,10);
-  var home=0,careDays=0,kg=0,walks=0,vax=0,pas=0,cleared=0;
-  var longest=null,comeback=null;
-  records.forEach(function(r){
-    var st=r.state||{};var d=st.dog||{};var f=st.fin||{};var mm=st.medical||{};var as=st.assessment||{};
-    if(f.outcome&&["Rehomed","Reclaimed by owner","Transferred"].some(function(o){return (f.outcome||"").indexOf(o.split(" ")[0])===0;})&&f.outcomeDate>=jan1)home++;
-    var start=d.intakeDate||r.intakeDate;
-    if(start){
-      var end=f.outcomeDate&&f.outcomeDate<=today?f.outcomeDate:today;
-      var s2=start<jan1?jan1:start;
-      if(end>=s2){var dd=Math.round((new Date(end)-new Date(s2))/864e5);if(dd>0)careDays+=dd;}
-      var tot=Math.round((new Date(end)-new Date(start))/864e5);
-      if(tot>0&&(!longest||tot>longest.days))longest={name:r.name,days:tot,returned:(d.returnType==="Returned from adoption")};
-    }
-    var ws=(st.weights||[]).slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");});
-    if(ws.length>=2){var g=parseFloat(ws[ws.length-1].weight)-parseFloat(ws[0].weight);if(!isNaN(g)&&g>0){kg+=g;if(!comeback||g>comeback.kg)comeback={name:r.name,kg:g};}}
-    walks+=(st.exercises||[]).filter(function(e){return (e.date||"")>=jan1;}).length;
-    vax+=(mm.vaccinations||[]).filter(function(v){return (v.date||"")>=jan1;}).length;
-    pas+=((as.playdates||[]).length+(as.buddyWalks||[]).length);
-    cleared+=(mm.diseases||[]).filter(function(x){return x.status==="Recovered / cleared";}).length;
-  });
-  return{year:y,home:home,careDays:careDays,kg:kg,walks:walks,vax:vax,pas:pas,cleared:cleared,longest:longest,comeback:comeback};
-}
-function renderWrapped(){
-  var w=wrappedStats();
-  var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" class="btn" style="padding:5px 14px">\u2190 Back</button><h2 style="margin:0">Unit Wrapped</h2><span style="margin-left:auto"><button class="btn btnp" onclick="saveWrappedImage()" style="font-size:11.5px">Save as image</button></span></div>';
-  var stat=function(n,l){return '<div style="background:#333542;border:1px solid #454857;border-radius:16px;padding:16px;text-align:center"><div style="font-size:26px;font-weight:900;color:#c6e76c">'+n+'</div><div style="font-size:10.5px;color:#94a3b8;margin-top:3px">'+l+'</div></div>';};
-  var champ=function(e,t,d2){return '<div style="background:#333542;border:1px solid #454857;border-radius:16px;padding:14px 16px;margin-top:10px;display:flex;align-items:center;gap:12px"><span style="font-size:28px">'+e+'</span><div><b style="font-size:13.5px">'+esc(t)+'</b><div style="font-size:11px;color:#94a3b8">'+esc(d2)+'</div></div></div>';};
-  var h='<div style="max-width:560px;margin:0 auto">'+back;
-  h+='<div id="wrapped-card" style="background:#282932;border-radius:20px;padding:16px;color:#fff">';
-  h+='<div style="background:linear-gradient(160deg,#333542,#282932);border:1px solid #454857;border-radius:20px;padding:26px;text-align:center;margin-bottom:12px"><div style="font-size:22px;font-weight:800">NSPCA Longford</div><div style="font-size:12px;color:#94a3b8">Dog Isolation Unit \u00b7 '+w.year+' so far</div><div style="font-size:52px;font-weight:900;color:#c6e76c;letter-spacing:-0.03em;margin:14px 0 2px">'+w.home+'</div><div style="font-size:12px;color:#94a3b8">dog'+(w.home===1?"":"s")+' went home</div></div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-    +stat(w.careDays.toLocaleString(),"days of care given")
-    +stat(w.kg.toFixed(1)+" kg","weight gained back, all dogs")
-    +stat(w.walks,"walks logged")
-    +stat(w.vax,"vaccinations given")
-    +stat(w.pas,"play assessments run")
-    +stat(w.cleared,"contagious cases cleared")+'</div>';
-  if(w.longest)h+=champ("","Longest journey: "+(w.longest.name||"?"),w.longest.days+" days"+(w.longest.returned?", came back once":"")+" \u2014 still wagging");
-  if(w.comeback)h+=champ("","Biggest comeback: "+(w.comeback.name||"?"),"+"+w.comeback.kg.toFixed(1)+" kg from arrival");
-  h+='</div></div>';
-  return h;
-}
-async function saveWrappedImage(){
-  try{await loadScriptOnce("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");}
-  catch(e){appAlert("Couldn\u0027t load the image builder \u2014 check the connection.");return;}
-  var el=document.getElementById("wrapped-card");if(!el)return;
-  window.html2canvas(el,{backgroundColor:"#282932",scale:2}).then(function(cv){
-    var a=document.createElement("a");a.download="nspca-unit-wrapped-"+new Date().toISOString().slice(0,10)+".png";a.href=cv.toDataURL("image/png");a.click();
-  });
 }
 function renderHealthBoard(){
   var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#333542;color:#94a3b8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1;font-size:18px">Unit Health Board</h2></div>';
@@ -1577,7 +1522,6 @@ function dogNextThing(r,cats){
   if(inc("returns"))return{c:"a",t:"Due back / reclaim date"};
   if(inc("finishing"))return{c:"t",t:"Finishing isolation today"};
   var ready=dogIsReady(r);
-  if(ready&&d.webBio!=="Y")return{c:"a",t:"Ready \u00b7 web bio not written"};
   if(ready)return{c:"t",t:"Ready to go"};
   if(inc("reports"))return{c:"q",t:"Day report not written yet"};
   if(inc("weighs"))return{c:"q",t:"Not weighed in 7 days"};
@@ -1593,16 +1537,19 @@ function todayItems(activeRecords){
   cats.paras.forEach(function(r){push(r,2,"a","\ud83d\udc1b","parasite treatment due or overdue","Bravecto / Milpro","medical");});
   cats.returns.forEach(function(r){push(r,3,"a","\u23f3","reclaim / due-back date","check the owner status","dog");});
   cats.finishing.forEach(function(r){push(r,4,"t","\u2713","finishing isolation today","clear the record if all\u0027s well","days");});
-  activeRecords.forEach(function(r){var d=r.state&&r.state.dog?r.state.dog:{};if(dogIsReady(r)&&d.webBio!=="Y")push(r,5,"a","\u270e","ready \u00b7 no web bio","losing days on the website","rehoming");});
   cats.reports.forEach(function(r){push(r,6,"q","\ud83d\udcdd","day report not written","today\u0027s report","days");});
   items.sort(function(a,b){return a.pri-b.pri||a.name.localeCompare(b.name);});
   return{items:items,weighs:cats.weighs.length};
 }
+function todayDismissed(){try{return localStorage.getItem("nspca-today-dismissed")===new Date().toISOString().slice(0,10);}catch(e){return false;}}
+function dismissToday(){try{localStorage.setItem("nspca-today-dismissed",new Date().toISOString().slice(0,10));}catch(e){}renderDashboard();}
+function restoreToday(){try{localStorage.removeItem("nspca-today-dismissed");}catch(e){}renderDashboard();}
 function tasksRollupHtml(activeRecords){
   var t=todayItems(activeRecords);var items=t.items;
   if(!items.length&&!t.weighs)return "";
+  if(todayDismissed())return '<div onclick="restoreToday()" style="font-size:11px;color:#6b7280;font-weight:700;text-align:right;margin:-4px 2px 8px;cursor:pointer">Today hidden until tomorrow &middot; show</div>';
   var showAll=!!window._todayAll;var LIM=6;var shown=showAll?items:items.slice(0,LIM);
-  var h='<div class="today"><div class="th"><b>Today</b><span>'+(items.length+(t.weighs?1:0))+' thing'+((items.length+(t.weighs?1:0))!==1?"s":"")+' \u00b7 tap to open</span></div>';
+  var h='<div class="today"><div class="th"><b>Today</b><span>'+(items.length+(t.weighs?1:0))+' thing'+((items.length+(t.weighs?1:0))!==1?"s":"")+' \u00b7 tap to open <span onclick="event.stopPropagation();dismissToday()" style="margin-left:10px;color:#c6e76c;font-weight:800;cursor:pointer">Dismiss</span></span></div>';
   h+=shown.map(function(it){return '<div class="ti '+it.cls+'" onclick="openDogAt('+it.id+',\''+it.tab+'\')"><div class="tw"><b>'+esc(it.name)+'</b>'+(it.k?' <span class="tkn">'+esc(it.k)+'</span>':'')+' \u00b7 '+it.job+'<small>'+it.sub+'</small></div><div class="tgo">'+({medical:"Medical",dog:"Dog",days:"Report",rehoming:"Clearance"}[it.tab]||"Open")+' &rsaquo;</div></div>';}).join("");
   if(t.weighs)h+='<div class="ti q" onclick="dashMenuGo(\'weighin\')"><div class="tw"><b>Weigh-ins</b> \u00b7 '+t.weighs+' dog'+(t.weighs!==1?"s":"")+' not weighed in 7 days<small>Batch weigh-in \u00b7 a few minutes</small></div><div class="tgo">Weigh &rsaquo;</div></div>';
   if(items.length>LIM)h+='<div class="tmore" onclick="window._todayAll=!window._todayAll;renderDashboard()">'+(showAll?"Show fewer":"+ "+(items.length-LIM)+" more")+'</div>';
@@ -4946,7 +4893,7 @@ function page(){
     var identity='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Identity</span>'
       +'</div>'+'<div class="dog-fg">'+fld("Dog name",d.name,"dog.name","text","e.g. Bailey",'onblur="checkDuplicateName()" id="dog-name-input"')+fld("Reference no.",d.refNo,"dog.refNo","text","e.g. 023-MH-2026")+breedSlct(d.breed)+slct("Sex",d.sex,"dog.sex",[["Male","Male"],["Female","Female"],["Male (N)","Male (Neutered)"],["Female (S)","Female (Spayed)"],["Unknown","Unknown"]])+'</div>'+'<div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">&#9888; There&rsquo;s already an active dog with this name.</div>'+'<div class="f"><label class="lbl">Crossbreed</label><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0"><input type="checkbox" data-save="dog.crossbreed" '+(d.crossbreed?"checked":"")+' onchange="S.dog.crossbreed=this.checked;debouncedSave();renderMain()" style="width:18px;height:18px;cursor:pointer"><span style="font-size:13px">This dog is a crossbreed</span></label></div>'+(d.crossbreed?breedSlct(d.breed2,"dog.breed2","Crossed with"):'')+'<div class="dog-fg">'+fld("Date of birth (if known)",d.dob||"","dog.dob","date")+slct("Age (approx.)",d.age,"dog.age",ageOptions(d.age))+slct("Size",d.size,"dog.size",[["","-- select --"],["Small (under 10kg)","Small (under 10kg)"],["Medium (10-25kg)","Medium (10-25kg)"],["Large (25-40kg)","Large (25-40kg)"],["XL (over 40kg)","XL (over 40kg)"]])+slct("Colour / markings",d.colour,"dog.colour",[["","-- select --"],["Black","Black"],["White","White"],["Cream","Cream"],["Golden","Golden"],["Fawn","Fawn"],["Tan","Tan"],["Red / Chestnut","Red / Chestnut"],["Brown / Chocolate","Brown / Chocolate"],["Blue / Grey","Blue / Grey"],["Sable","Sable"],["Black and White","Black and White"],["Black and Tan","Black and Tan"],["Brown and White","Brown and White"],["Tri-colour","Tri-colour"],["Brindle","Brindle"],["Merle","Merle"],["Other","Other"]])+wfld(d.weight)+fld("Microchip no.",d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')+'</div>'+'<div id="chip-info" style="margin:0 0 4px;font-size:11px">'+chipInfoHtml(d.microchip)+'</div></div>';
 
-    var intake='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Intake</div>'+'<div class="dog-fg">'+slct("Kennel / Pod",d.kennel,"dog.kennel",[["",'-- not assigned --'],["Kennel 1","Kennel 1"],["Kennel 2","Kennel 2"],["Kennel 3","Kennel 3"],["Kennel 4","Kennel 4"],["Kennel 5","Kennel 5"],["Kennel 6","Kennel 6"],["Pod 1","Pod 1"],["Pod 2","Pod 2"],["Pod 3","Pod 3"],["Pod 4","Pod 4"],["Crate","Crate"]])+fld("Assessor",d.assessor,"dog.assessor","text","e.g. Shane")+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()+slct("Reason for intake",d.intakeReason,"dog.intakeReason",[["Stray","Stray"],["Owner surrender","Owner surrender"],["Cruelty case","Cruelty case"],["Transfer","Transfer from another centre"],["Other","Other"]])+slct("Return / reclaim",d.returnType||"","dog.returnType",[["","-- not a return --"],["Returned from adoption","Returned from adoption"],["Back from foster / trial","Back from foster / trial"],["Owner-reclaim deadline","Owner-reclaim deadline (stray)"]])+(d.returnType?fld(returnDateLabel(d.returnType),d.returnDate||"","dog.returnDate","date"):"")+slct("Web bio written?",d.webBio||"","dog.webBio",[["","\u2014"],["Y","Yes \u2014 on the website"],["N","Not yet"]])+'</div></div>';
+    var intake='<div class="card" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary);margin-bottom:12px">Intake</div>'+'<div class="dog-fg">'+slct("Kennel / Pod",d.kennel,"dog.kennel",[["",'-- not assigned --'],["Kennel 1","Kennel 1"],["Kennel 2","Kennel 2"],["Kennel 3","Kennel 3"],["Kennel 4","Kennel 4"],["Kennel 5","Kennel 5"],["Kennel 6","Kennel 6"],["Pod 1","Pod 1"],["Pod 2","Pod 2"],["Pod 3","Pod 3"],["Pod 4","Pod 4"],["Crate","Crate"]])+fld("Assessor",d.assessor,"dog.assessor","text","e.g. Shane")+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()+slct("Reason for intake",d.intakeReason,"dog.intakeReason",[["Stray","Stray"],["Owner surrender","Owner surrender"],["Cruelty case","Cruelty case"],["Transfer","Transfer from another centre"],["Other","Other"]])+slct("Return / reclaim",d.returnType||"","dog.returnType",[["","-- not a return --"],["Returned from adoption","Returned from adoption"],["Back from foster / trial","Back from foster / trial"],["Owner-reclaim deadline","Owner-reclaim deadline (stray)"]])+(d.returnType?fld(returnDateLabel(d.returnType),d.returnDate||"","dog.returnDate","date"):"")+'</div></div>';
 
     var admDivider='<div style="font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin:18px 0 10px;display:flex;align-items:center;gap:10px">Status &amp; admin<span style="flex:1;height:1px;background:#e2e8f0"></span></div>';
     var isoStatus=ii?(ii.state==="done"?"Complete":(ii.awaitVax?"Until 1st vax \u00b7 day "+ii.day:(ii.day<=0?"Arrived today":"Day "+ii.day+" of "+ii.total))):"No intake date";
