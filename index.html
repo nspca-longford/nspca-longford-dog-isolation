@@ -114,6 +114,21 @@ nav::-webkit-scrollbar{display:none}
 .dflagrow{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
 .dnext{font-size:11.5px;font-weight:700;margin:6px 12px 0;display:flex;align-items:center;gap:5px;line-height:1.3}
 .today{background:#282932;border-radius:16px;padding:12px 14px 6px;color:#fff;margin-bottom:12px}
+.dash2{display:block}
+@media(min-width:960px){.dash2{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start}.dash2-left{position:sticky;top:54px}.dash2-left .today{margin-bottom:0}.dcard:hover{box-shadow:0 8px 20px rgba(40,41,50,.12);transform:translateY(-1px)}}
+.dt{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e4e7e0;border-radius:12px;overflow:hidden;font-size:12.5px}
+.dt th{text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#868b7e;padding:9px 12px;border-bottom:2px solid #e4e7e0;cursor:pointer;white-space:nowrap;user-select:none}
+.dt th.on{color:#282932}
+.dt td{padding:8px 12px;border-bottom:1px solid #eef0ea;vertical-align:middle}
+.dt tr:last-child td{border-bottom:none}
+.dt tbody tr{cursor:pointer}.dt tbody tr:hover td{background:#f7f9f2}
+.dt .pl{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.dt .kc{background:#282932;color:#c6e76c;font-weight:800;font-size:10px;padding:2px 7px;border-radius:6px}
+.only-wide{display:none}
+@media(min-width:960px){.only-wide{display:block}.hide-wide{display:none}}
+.kbhint{display:none;font-size:11px;color:#6b7280;font-weight:600;margin:14px 2px 0}
+.kbhint kbd{background:#eef1ea;border-radius:4px;padding:0 5px;font-family:inherit;font-weight:800;color:#3f4a2e}
+@media(min-width:960px){.kbhint{display:block}}
 .fpills{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none;padding-bottom:2px}
 .fpills::-webkit-scrollbar{display:none}
 .fp{white-space:nowrap;font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:20px;border:1.5px solid #e4e7e0;background:#fff;color:#6b7280;cursor:pointer;font-family:inherit}
@@ -164,6 +179,15 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
 .rec-card{background:#fff;border:1px solid rgba(40,41,50,0.08);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;box-shadow:0 1px 2px rgba(40,41,50,0.04),0 4px 16px rgba(40,41,50,0.05)}
 .save-dot{width:7px;height:7px;border-radius:50%;background:#16a34a;display:inline-block;margin-right:5px}
 #content{max-width:740px;margin:0 auto;padding:20px 16px 96px}
+.sidepanel{display:none}
+@media(min-width:1100px){#content{max-width:1180px;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}.recmain{min-width:0}.sidepanel{display:flex;flex-direction:column;gap:10px;position:sticky;top:96px}.dog-fg,.g2{grid-template-columns:1fr 1fr 1fr}}
+.sp-hero{background:#282932;color:#fff;border-radius:14px;padding:13px;cursor:pointer}
+.sp-warn{background:#fee2e2;border:1px solid #fecaca;border-left:4px solid #dc2626;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:700;color:#991b1b;cursor:pointer}
+.sp-card{background:#fff;border:1px solid #e4e7e0;border-radius:12px;padding:10px 13px;cursor:pointer;transition:box-shadow .12s}
+.sp-card:hover{box-shadow:0 6px 16px rgba(40,41,50,.1)}
+.sp-t{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:#868b7e;margin-bottom:5px}
+.sp-v{font-size:12.5px;line-height:1.45;color:#282932}.sp-v b{font-weight:800}
+.sp-r b{color:#991b1b}.sp-a b{color:#92400e}.sp-t b{color:#0f766e}.sp-q b{color:#4b5563}
 .header{background:linear-gradient(180deg,#16202f,#333542);padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
 .subheader{background:#282932;padding:4px 20px 0}
 #overdue-sticky{position:sticky;top:0;z-index:9;pointer-events:none}
@@ -345,7 +369,7 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
     </div>
   </div>
   <div id="overdue-sticky"></div>
-  <div style="max-width:900px;margin:0 auto;padding:18px"><div id="dashboard-content"></div></div>
+  <div style="max-width:1240px;margin:0 auto;padding:18px"><div id="dashboard-content"></div></div>
 </div>
 
 <div id="wrap" style="display:none">
@@ -426,7 +450,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.160",date:"2026-09-02",note:"\u2018Web bio written?\u2019 removed from the Dog tab, along with the ready-but-no-bio line on cards and in Today. A ready dog now simply reads \u2018Ready to go\u2019."},{version:"3.159",date:"2026-09-02",note:"Today card gets a Dismiss \u2014 hides it for the rest of the day on that device; a one-line \u2018show\u2019 brings it back, and it returns by itself tomorrow. Login screen now says \u2018Contact Admin to request a code\u2019."},{version:"3.158",date:"2026-09-02",note:"Unit Wrapped removed \u2014 the year-in-review screen, its menu entry and the save-as-image code are gone. Nothing else changes; the dogs\u0027 data it read from is untouched."},{version:"3.157",date:"2026-09-02",note:"Emoji removed from the dashboard menu and from Unit Wrapped \u2014 words only. The coloured edges on Today lines stay; they\u0027re the urgency signal now."},{version:"3.156",date:"2026-09-02",note:"Photos get their own tab, next to Dog in the Profile group: add photos there, see the arrival-vs-latest comparison and the full log. The folded photo log has left the Dog tab. And the new dashboard drops its symbols \u2014 the Today card and the next-thing lines are words only; urgency shows as a coloured edge (red, amber, teal, grey) rather than an emoji."}
+var CHANGELOG=[{version:"3.163",date:"2026-09-02",note:"Desktop pass, slice 3 of 3 \u2014 tables. On a wide screen Records and Upcoming Medical are proper tables: click any column header to sort (click again to flip), rows highlight under the mouse, one row per dog. Records shows name, kennel, breed, status, light, score, day, intake date and last change; a Card view button brings the folders back if you prefer them. On phones both screens are unchanged. The desktop pass is complete."},{version:"3.162",date:"2026-09-02",note:"Desktop pass, slice 2 of 3 \u2014 the pinned panel. On a wide screen every record shows a right-hand panel that stays put while you move through the tabs: the dog (photo, day, light, kennel), warnings, the next thing, the latest vet note, the feeding plan and the last day report. Each card is a link to its tab. Forms go three fields across. Under 1100px the panel hides and the record is exactly as before."},{version:"3.161",date:"2026-09-02",note:"Desktop pass, slice 1 of 3. On a laptop the dashboard now runs two columns \u2014 Today pinned on the left, the building map beside it, three cards across, cards lift under the mouse. Keyboard shortcuts: / jumps to search, N starts a new dog, Esc closes any overlay or the menu, and \u2190 \u2192 step between tabs inside a record. Below ~960px everything folds back to the single column, so phones are unchanged."},{version:"3.160",date:"2026-09-02",note:"\u2018Web bio written?\u2019 removed from the Dog tab, along with the ready-but-no-bio line on cards and in Today. A ready dog now simply reads \u2018Ready to go\u2019."},{version:"3.159",date:"2026-09-02",note:"Today card gets a Dismiss \u2014 hides it for the rest of the day on that device; a one-line \u2018show\u2019 brings it back, and it returns by itself tomorrow. Login screen now says \u2018Contact Admin to request a code\u2019."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -769,7 +793,9 @@ function renderUpcomingMedical(){
       +'<span style="display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+c[0]+';color:'+c[1]+';white-space:nowrap;flex-shrink:0">'+umDueText(it.due)+'</span>'
     +'</div>';
   }).join("");
-  return head+rows;
+  var trows=shown.map(function(x){var r=x.r,it=x.it,d=(r.state&&r.state.dog)||{};var c=SC[it.state]||SC.upcoming;return{onclick:'openDogMedical('+r.id+')',s:{name:r.name||"",kennel:kennelRank(d.kennel).sec*100+kennelRank(d.kennel).num,what:it.label||"",due:it.due||"",state:({overdue:0,soon:1,booked:2,upcoming:3})[it.state]||3},c:{name:'<b>'+esc(r.name)+'</b>',kennel:d.kennel?'<span class="kc">'+esc(kennelShort(d.kennel))+'</span>':'',what:esc(it.label||""),due:esc(it.due?fmtDMY(it.due):""),state:'<span class="pl" style="background:'+c[0]+';color:'+c[1]+'">'+umDueText(it.due)+'</span>'}};});
+  var table=dtable("um","upcomingMedical",[{k:"name",l:"Dog"},{k:"kennel",l:"Kennel",w:"80px"},{k:"what",l:"What"},{k:"due",l:"Due",w:"120px"},{k:"state",l:"Status",w:"130px"}],trows,"due");
+  return head+'<div class="only-wide">'+table+'</div><div class="hide-wide">'+rows+'</div>';
 }
 
 // ── Weight trend sparkline + loss flag ────────────────────────────
@@ -1378,7 +1404,14 @@ function page_records(){
     return'<div style="margin-bottom:16px">'+head+rows+'</div>';
   }).join("");
   var archToggle=archCount?'<div style="margin-bottom:12px"><button onclick="window._showArchived=!window._showArchived;showDashSection(&quot;records&quot;)" style="background:'+(showArch?"#282932":"#fff")+';color:'+(showArch?"#c6e76c":"#64748b")+';border:1px solid '+(showArch?"#282932":"rgba(40,41,50,0.1)")+';border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">&#128451; '+(showArch?"Hide archived":"Show archived ("+archCount+")")+'</button></div>':"";
-  return sth+sch+archToggle+(fil.length?body:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)">No records match.</div>');
+  var rrows=fil.map(function(r){var d=r.state&&r.state.dog?r.state.dog:{};var f=r.state&&r.state.fin?r.state.fin:{};var o=f.outcome||"";var days=daysInIsolation(r.intakeDate);var parts=(tlC[r.trafficLight]||"#f1f5f9|#64748b").split("|");var kr=kennelRank(d.kennel);
+    return{onclick:'openDog('+r.id+')',s:{name:r.name||"",kennel:kr.sec*100+kr.num,breed:r.breed||d.breed||"",status:o||"Active",light:({Green:0,Yellow:1,Red:2,Black:3})[r.trafficLight]==null?9:({Green:0,Yellow:1,Red:2,Black:3})[r.trafficLight],score:r.score||0,day:days||0,intake:r.intakeDate||"",changed:r.savedAt||""},
+    c:{name:'<b>'+esc(r.name||"\u2014")+'</b>'+(r.refNo?' <span style="color:#868b7e;font-size:11px">'+esc(r.refNo)+'</span>':''),kennel:d.kennel?'<span class="kc">'+esc(kennelShort(d.kennel))+'</span>':'',breed:esc(r.breed||d.breed||""),status:esc(o||"Active"),light:r.trafficLight?'<span class="pl" style="background:'+parts[0]+';color:'+parts[1]+'">'+esc(r.trafficLight)+'</span>':'',score:r.score?r.score+'/24':'',day:days?String(days):'',intake:r.intakeDate?esc(fmtDMY(r.intakeDate)):'',changed:r.savedAt?esc(fmtAgo(r.savedAt))+(r.savedBy?' \u00b7 '+esc(r.savedBy):''):''}};});
+  var rtable=dtable("rec","records",[{k:"name",l:"Dog"},{k:"kennel",l:"Kennel",w:"76px"},{k:"breed",l:"Breed"},{k:"status",l:"Status"},{k:"light",l:"Light",w:"84px"},{k:"score",l:"Score",w:"70px"},{k:"day",l:"Day",w:"56px"},{k:"intake",l:"Intake",w:"104px"},{k:"changed",l:"Last changed"}],rrows,"changed");
+  var asCards=!!window._rCards;
+  var vtoggle='<div class="only-wide" style="margin-bottom:10px"><button onclick="window._rCards=!window._rCards;showDashSection(&quot;records&quot;)" class="btn" style="padding:5px 12px;font-size:11px">'+(asCards?"Table view":"Card view")+'</button></div>';
+  var wide=asCards?body:rtable;
+  return sth+sch+archToggle+(fil.length?(vtoggle+'<div class="only-wide">'+wide+'</div><div class="hide-wide">'+body+'</div>'):'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)">No records match.</div>');
 }
 
 function updateClock(){
@@ -2019,7 +2052,8 @@ function renderDashboard(){
   }).join("");
   var rollupHtml=tasksRollupHtml(active);
   var viewBody='<div class="dcardgrid">'+cards+'</div>';
-  el.innerHTML=offlineBannerHtml()+catchupHtml()+rollupHtml+statusStrip+fb+renderIncomingStrip()+viewBody+recentOutcomesHtml()+brandFooterHtml();
+  var mainCol=statusStrip+fb+renderIncomingStrip()+viewBody+recentOutcomesHtml();
+  el.innerHTML=offlineBannerHtml()+catchupHtml()+(rollupHtml?'<div class="dash2"><div class="dash2-left">'+rollupHtml+'</div><div class="dash2-main">'+mainCol+'</div></div>':mainCol)+brandFooterHtml()+kbHintHtml();
   if(window._dbSearchActive){var si=el.querySelector('input[placeholder="Search..."]');if(si){si.focus();var l=(window._dbCaret!=null?window._dbCaret:si.value.length);si.setSelectionRange(l,l);}window._dbSearchActive=false;window._dbCaret=null;}
 }
 
@@ -5320,7 +5354,29 @@ window.addEventListener("resize",function(){
   var gOn=document.querySelector("#pnav-groups .ppill.on");pnavGlide(document.getElementById("pnav-gglide"),gOn,"g");
   var sOn=document.querySelector("#pnav-subs .ppill.on");pnavGlide(document.getElementById("pnav-sglide"),sOn,"s");
 });
-function renderMain(){document.getElementById("content").innerHTML=page();}
+function sidePanelHtml(){
+  var d=S.dog||{},f=S.fin||{};
+  var total=Object.values(S.scores||{}).reduce(function(a,b){return a+(parseInt(b)||0);},0);
+  var tl=total?handlingLight(total,S.scores):null;
+  var meta=[d.breed,d.age].filter(Boolean).join(" \u00b7 ");
+  var ii=d.intakeDate?isolationInfo(d.intakeDate,(f.outcome||""),isoExtraDays(d),pupIsoVax(d,S.medical)):null;
+  var dayTxt=ii?(ii.state==="done"?"Isolation complete":(ii.day<=0?"Arrived today":"Day "+ii.day+" of "+(ii.total||5))):"";
+  var ph=d.photo?'<img src="'+d.photo+'" style="width:52px;height:52px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';border-radius:12px;box-shadow:0 0 0 2px #c6e76c;flex-shrink:0">':'<div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#3a3c46,#4d5140);box-shadow:0 0 0 2px #c6e76c;flex-shrink:0"></div>';
+  var kn=kennelShort(d.kennel);
+  var h='<div class="sp-hero" data-go="dog"><div style="display:flex;gap:11px;align-items:center">'+ph+'<div style="min-width:0;flex:1"><div style="font-size:19px;font-weight:800;letter-spacing:-0.02em;line-height:1.1">'+esc(d.name||"Unnamed dog")+'</div><div style="font-size:11.5px;color:#a7adbd;font-weight:600;margin-top:2px">'+esc([dayTxt,meta].filter(Boolean).join(" \u00b7 "))+'</div>'+(tl?'<span style="display:inline-block;margin-top:6px;font-size:10px;font-weight:800;letter-spacing:.05em;padding:2px 9px;border-radius:20px;background:'+tl.bg+';color:'+tl.tc+'">'+tl.l.toUpperCase()+' \u00b7 '+total+'/24</span>':'')+'</div>'+(kn?'<span style="background:#c6e76c;color:#282932;font-weight:800;font-size:13px;padding:6px 11px;border-radius:10px;flex-shrink:0">'+esc(kn)+'</span>':'')+'</div></div>';
+  var ws=(S.warnings||[]).map(function(w){return w.text||w.note||w.title||"";}).filter(Boolean);
+  if(ws.length)h+='<div class="sp-warn" data-go="dog">'+esc(ws.slice(0,3).join(" \u00b7 "))+'</div>';
+  var rec=S._id?records.find(function(r){return r.id===S._id;}):null;
+  if(rec){var nx=dogNextThing(rec,computeDueToday([rec],true));if(nx)h+='<div class="sp-card" data-go="'+(nx.c==="r"||nx.t.indexOf("Vaccine")===0||nx.t.indexOf("On medication")===0||nx.t.indexOf("Parasite")===0?"medical":"dog")+'"><div class="sp-t">Next thing</div><div class="sp-v sp-'+nx.c+'"><b>'+nx.t+'</b></div></div>';}
+  var vv=((S.medical&&S.medical.vetVisits)||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
+  if(vv)h+='<div class="sp-card" data-go="medical"><div class="sp-t">Latest vet note</div><div class="sp-v">'+esc(fmtDMY(vv.date))+(vv.vet?' \u00b7 '+esc(vv.vet):'')+' \u2014 '+esc((vv.findings||vv.reason||"").slice(0,140))+(vv.followUp?' <b>Follow-up: '+esc(vv.followUp)+'</b>':'')+'</div></div>';
+  var fp=S.feedingPlan||{};
+  if(fp.brand||fp.grams)h+='<div class="sp-card" data-go="feeding"><div class="sp-t">Feeding</div><div class="sp-v"><b>'+esc(fp.brand||"")+'</b>'+(fp.grams?' \u00b7 '+esc(fp.grams)+' g':'')+(fp.frequency?' \u00b7 '+esc(fp.frequency.toLowerCase()):'')+(fp.notes?' \u00b7 <b style="color:#991b1b">'+esc(fp.notes)+'</b>':'')+'</div></div>';
+  var days=S.days||[];var last=null;for(var i=days.length-1;i>=0;i--){var de=days[i];if(de&&(de.demeanour||de.notes||de.feeding)){last={i:i,d:de};break;}}
+  if(last)h+='<div class="sp-card" data-go="days"><div class="sp-t">Last report \u00b7 day '+(last.i+1)+'</div><div class="sp-v">'+esc((last.d.demeanour||last.d.notes||last.d.feeding||"").slice(0,160))+'</div></div>';
+  return '<aside class="sidepanel">'+h+'</aside>';
+}
+function renderMain(){var c=document.getElementById("content");c.innerHTML='<div class="recmain">'+page()+'</div>'+sidePanelHtml();}
 function render(){renderNav();renderMain();updateIsoChip();updateWarnChip();updateNoticeChip();updateSaveBar();updateHeaderDog();checkDuplicateName();checkMicrochip();}
 var CHIP_CC={"372":"Ireland","826":"United Kingdom","250":"France","276":"Germany","380":"Italy","724":"Spain","528":"Netherlands","056":"Belgium","620":"Portugal","616":"Poland","642":"Romania","208":"Denmark","752":"Sweden","040":"Austria","348":"Hungary","203":"Czechia","372":"Ireland"};
 function microchipLookup(num){try{if(navigator.clipboard&&num)navigator.clipboard.writeText(num);}catch(e){}window.open("https://www.europetnet.com/","_blank","noopener");}
@@ -5336,6 +5392,28 @@ function updateHeaderDog(){var bg=document.getElementById("badge");if(bg){var nm
 function checkDuplicateName(){var el=document.getElementById("dup-name-hint");if(!el)return;var nm=((S.dog&&S.dog.name)||"").trim().toLowerCase();if(!nm){el.style.display="none";return;}var dup=records.some(function(r){if(r.id===S._id)return false;var o=r.state&&r.state.fin?r.state.fin.outcome:"";var act=!o||o.indexOf("Active")>=0||o==="Finished Isolation";return act&&r.name&&r.name.trim().toLowerCase()===nm;});el.style.display=dup?"block":"none";}
 function updateSaveBar(){var ro=["report","briefing","timeline"].indexOf(S.tab)>=0;var sb=document.getElementById("save-bar");if(sb)sb.style.display=ro?"none":"";var c=document.getElementById("content");if(c)c.style.paddingBottom=ro?"24px":"";var lc=document.getElementById("last-changed");if(lc){if(syncStatus())return;var rec=S._id?records.find(function(r){return r.id===S._id;}):null;if(rec&&rec.savedBy){lc.textContent="Last changed by "+rec.savedBy+(rec.savedAt?" \u00b7 "+fmtAgo(rec.savedAt):"");}else{lc.textContent="Not saved yet";}}}
 
+window._dts=window._dts||{};
+function dtSort(id,k,section){var st=window._dts[id]||{};window._dts[id]={k:k,dir:(st.k===k?-(st.dir||1):1)};showDashSection(section);}
+function dtable(id,section,cols,rows,defKey){
+  var st=window._dts[id]||{k:defKey||cols[0].k,dir:1};
+  rows=rows.slice().sort(function(a,b){var x=a.s[st.k],y=b.s[st.k];if(x==null)x="";if(y==null)y="";if(typeof x==="number"&&typeof y==="number")return(x-y)*st.dir;return String(x).localeCompare(String(y))*st.dir;});
+  var h='<table class="dt"><thead><tr>'+cols.map(function(c){var on=st.k===c.k;return '<th onclick="dtSort(\''+id+'\',\''+c.k+'\',\''+section+'\')" class="'+(on?"on":"")+'"'+(c.w?' style="width:'+c.w+'"':'')+'>'+c.l+(on?(st.dir===1?' \u25b4':' \u25be'):'')+'</th>';}).join("")+'</tr></thead><tbody>';
+  h+=rows.map(function(r){return '<tr onclick="'+r.onclick+'">'+cols.map(function(c){return '<td>'+(r.c[c.k]||"")+'</td>';}).join("")+'</tr>';}).join("");
+  return h+'</tbody></table>';
+}
+function kbHintHtml(){return '<div class="kbhint">Keyboard: <kbd>/</kbd> search &middot; <kbd>N</kbd> new dog &middot; <kbd>Esc</kbd> close &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> tabs inside a record</div>';}
+function closeAnyOverlay(){var ids=["warn-overlay","con-overlay","iso-overlay","notice-overlay","walk-overlay","glance-overlay"];var hit=false;ids.forEach(function(id){var o=document.getElementById(id);if(o&&o.classList.contains("show")){o.classList.remove("show");hit=true;}});var dm=document.getElementById("dash-menu");if(dm&&dm.style.display!=="none"&&dm.style.display!==""){closeDashMenu();hit=true;}return hit;}
+document.addEventListener("keydown",function(e){
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  var t=e.target,tag=(t&&t.tagName||"").toLowerCase();var typing=tag==="input"||tag==="textarea"||tag==="select"||(t&&t.isContentEditable);
+  if(e.key==="Escape"){if(typing){t.blur();return;}if(closeAnyOverlay())e.preventDefault();return;}
+  if(typing)return;
+  var dash=document.getElementById("dashboard-screen"),onDash=dash&&dash.style.display!=="none";
+  var wrap=document.getElementById("wrap"),onRec=wrap&&wrap.style.display!=="none";
+  if(e.key==="/"&&onDash){var si=document.querySelector('#dashboard-content input[placeholder="Search..."]');if(si){e.preventDefault();si.focus();si.select();}return;}
+  if((e.key==="n"||e.key==="N")&&onDash){e.preventDefault();openNewDog();return;}
+  if((e.key==="ArrowLeft"||e.key==="ArrowRight")&&onRec){var i=-1;TABS.forEach(function(tb,k){if(tb.id===S.tab)i=k;});if(i<0)return;var j=e.key==="ArrowRight"?i+1:i-1;if(j<0||j>=TABS.length)return;e.preventDefault();S.tab=TABS[j].id;render();window.scrollTo(0,0);}
+});
 function handleAppClick(e){
   var go=e.target.closest("[data-go]");if(go){S.tab=go.dataset.go;render();window.scrollTo(0,0);return;}
   var gogrp=e.target.closest("[data-gogroup]");if(gogrp){
