@@ -316,7 +316,6 @@ h2{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:3px}
           <div onclick="dashMenuGo('incidents')" class="dmi">&#9888;&#65039; Incident register</div>
           <div onclick="dashMenuGo('upcomingMedical')" class="dmi">&#128137; Upcoming Medical</div>
           <div onclick="dashMenuGo('stats')" class="dmi">&#128202; Stats</div>
-          <div onclick="closeDashMenu();openDaySheet()" class="dmi">&#9728;&#65039; Day sheet</div>
           <div class="dml">Areas</div>
           <div onclick="location.href='cats.html'" class="dmi">🐱 Cats</div>
           <div class="dml">Team &amp; data</div>
@@ -396,7 +395,7 @@ var TABS=[
   {id:"dog",l:"Dog",g:"Profile"},{id:"picture",l:"Picture",g:"Profile"},{id:"notes",l:"Notes",g:"Profile"},
   {id:"assessment",l:"Assessment",g:"Assessment"},{id:"scoring",l:"Scoring",g:"Assessment"},{id:"sessions",l:"Sessions",g:"Assessment"},{id:"ea",l:"EA",g:"Assessment"},{id:"rehoming",l:"Clearance",g:"Assessment"},
   {id:"arrival",l:"Arrival",g:"Isolation"},{id:"days",l:"5-Day Report",g:"Isolation"},
-  {id:"exercise",l:"Exercise",g:"Care"},{id:"feeding",l:"Feeding",g:"Care"},
+  {id:"feeding",l:"Feeding",g:"Care"},
   {id:"medical",l:"Medical",g:"Health"},{id:"weights",l:"Weights",g:"Health"},
   {id:"outcome",l:"Outcome",g:"Departure"},
   {id:"story",l:"Story",g:"Records"},{id:"files",l:"Files",g:"Records"},{id:"report",l:"Report",g:"Records"}
@@ -412,7 +411,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.139",date:"2026-08-26",note:"New built-in login for the unit: code ISO01, signs in as \u2018Isolation\u2019, staff role. For the unit laptop or whoever\u0027s on \u2014 saves stamp as Isolation rather than a person."},{version:"3.138",date:"2026-08-26",note:"Download backup is now admin-only \u2014 hidden from the menu for everyone else. It stays because it\u0027s the only road back if the database ever loses data."},{version:"3.137",date:"2026-08-26",note:"Breakdown tab removed \u2014 Story took its job and tells it better. Records is now Story \u00b7 Files \u00b7 Report, and the record is back to 18 tabs. Any old link to Breakdown lands on Story."},{version:"3.136",date:"2026-08-26",note:"Three removals from the audit. The rehoming pipeline is gone \u2014 board, Rehoming button, applicant records, and the applicant readouts on the Clearance, Outcome and Ready-to-Go screens; adopter details now live in the Outcome notes. The records CSV export is gone \u2014 the Unit sheet is the readable export, the backup is the safety one. Net: the app is ~60KB lighter and every remaining surface is one someone actually uses."},{version:"3.135",date:"2026-08-26",note:"Team Directory removed \u2014 the staff app owns people now, and two directories only drift apart. Users admin (adding logins) stays, under \u2630 as before."}
+var CHANGELOG=[{version:"3.142",date:"2026-08-26",note:"Exercise tab parked again \u2014 the tab, its log form and the Walks-due flag are out; Care is just Feeding for now. Every walk already logged stays in the records and still shows in each dog\u0027s Story and the Wrapped walk count; old links land on Feeding. Parked, not forgotten \u2014 it can come back."},{version:"3.141",date:"2026-08-26",note:"Photo log tucked away \u2014 it now lives in a collapsed \ud83d\udcf7 fold under the hero on the Dog tab, one line showing the count until you tap it open. Same gallery, compare pair, stars and notes inside; the tab itself is back to its old height."},{version:"3.140",date:"2026-08-26",note:"Three removals on request: the Day sheet, Quick peek (the \u24d8 on cards) and Focus mode. The dashboard is back to the plain board; the \u2018Since you were last here\u2019 card stays."},{version:"3.139",date:"2026-08-26",note:"New built-in login for the unit: code ISO01, signs in as \u2018Isolation\u2019, staff role. For the unit laptop or whoever\u0027s on \u2014 saves stamp as Isolation rather than a person."},{version:"3.138",date:"2026-08-26",note:"Download backup is now admin-only \u2014 hidden from the menu for everyone else. It stays because it\u0027s the only road back if the database ever loses data."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -660,72 +659,6 @@ var EX_TYPES=[
   {key:"Enrichment",icon:"&#129504;",short:"E"}
 ];
 
-var EXERCISE_TYPES=["Lead walk","Off-lead run","Yard time","Enrichment","Play session","Training session","Grooming / handling","Other"];
-function addExercise(){
-  var d=document.getElementById("ex-date");var t=document.getElementById("ex-type");var mn=document.getElementById("ex-mins");var by=document.getElementById("ex-by");var nt=document.getElementById("ex-notes");
-  var date=(d&&d.value)||new Date().toISOString().slice(0,10);
-  var type=(t&&t.value)||"";
-  if(!type){appAlert("Pick what kind of session it was.");return;}
-  if(!S.exercises)S.exercises=[];
-  S.exercises.push({date:date,type:type,minutes:(mn&&mn.value)?parseInt(mn.value)||"":"",by:(by&&by.value.trim())||currentName(),notes:(nt&&nt.value.trim())||""});
-  saveRecord();renderMain();
-}
-function deleteExercise(i){appConfirm("Delete this session from the log?",function(){S.exercises.splice(i,1);saveRecord();renderMain();},{danger:true});}
-function editExerciseNotes(i){
-  var e=(S.exercises||[])[i];if(!e)return;
-  var ov=document.createElement("div");ov.className="cf-ov";
-  ov.style.cssText="position:fixed;inset:0;background:rgba(15,23,42,0.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999";
-  ov.onclick=function(ev){if(ev.target===ov)ov.remove();};
-  ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:420px;width:100%;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,0.3)"><div style="font-size:14px;font-weight:700;margin-bottom:8px">Notes \u2014 '+esc(e.type)+' \u00b7 '+fmtDMY(e.date)+'</div><textarea id="exn-notes" style="width:100%;min-height:100px;padding:9px 11px;border:1px solid rgba(15,23,42,0.14);border-radius:9px;font-size:13px;font-family:inherit;resize:vertical">'+esc(e.notes||"")+'</textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn" onclick="this.closest(\'.cf-ov\').remove()">Cancel</button><button class="btn btnp" onclick="saveExerciseNotes('+i+')">Save</button></div></div>';
-  document.body.appendChild(ov);
-}
-function saveExerciseNotes(i){
-  var ta=document.getElementById("exn-notes");if(!ta)return;
-  S.exercises[i].notes=ta.value.trim();
-  var ov=document.querySelector(".cf-ov");if(ov)ov.remove();
-  saveRecord();renderMain();
-}
-function renderExercise(){
-  var exs=(S.exercises||[]).slice();
-  var today=new Date().toISOString().slice(0,10);
-  var todayN=exs.filter(function(e){return e.date===today;}).length;
-  var weekAgo=new Date(Date.now()-6*864e5).toISOString().slice(0,10);
-  var weekN=exs.filter(function(e){return String(e.date||"")>=weekAgo;}).length;
-  var banner=todayN?hybridBanner(todayN+" session"+(todayN>1?"s":"")+" logged today","ok"):hybridBanner("Nothing logged today yet","warn");
-  var tiles=hybridTiles([
-    {label:"Today",value:String(todayN),tone:todayN?"":"warn"},
-    {label:"Last 7 days",value:String(weekN)},
-    {label:"All time",value:String(exs.length)}
-  ]);
-  var form='<div style="display:grid;grid-template-columns:130px 1fr 90px 130px;gap:8px;margin-bottom:8px">'
-    +'<div class="f"><label class="lbl">Date</label><input type="date" id="ex-date" value="'+today+'"></div>'
-    +'<div class="f"><label class="lbl">Session</label><select id="ex-type">'+EXERCISE_TYPES.map(function(t){return '<option>'+t+'</option>';}).join("")+'</select></div>'
-    +'<div class="f"><label class="lbl">Minutes</label><input type="number" id="ex-mins" min="1" placeholder="\u2014"></div>'
-    +'<div class="f"><label class="lbl">By</label><input type="text" id="ex-by" value="'+esc(currentName())+'"></div>'
-    +'</div>'
-    +'<div style="display:flex;gap:8px;margin-bottom:14px"><input type="text" id="ex-notes" placeholder="anything worth noting \u2014 pulled hard, settled well, loved the snuffle mat" style="flex:1;padding:8px 10px;border:1px solid rgba(15,23,42,0.12);border-radius:8px;font-size:13px"><button class="btn btnp" onclick="addExercise()">Log it</button></div>';
-  var sorted=exs.map(function(e,i){return{e:e,i:i};}).sort(function(a,b){return String(b.e.date||"").localeCompare(String(a.e.date||""));});
-  var rows=sorted.map(function(w){var e=w.e;
-    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12.5px">'
-      +'<span style="color:#94a3b8;width:66px;flex-shrink:0">'+fmtDMY(e.date)+'</span>'
-      +'<span style="font-weight:600;min-width:110px">'+esc(e.type||"")+'</span>'
-      +(e.time?'<span style="color:#94a3b8;font-size:11px">'+esc(e.time)+'</span>':'')
-      +(e.minutes?'<span style="color:#64748b">'+e.minutes+' min</span>':'')
-      +((e.by||e.staff)?'<span style="color:#94a3b8;font-size:11px">'+esc(e.by||e.staff)+'</span>':'')
-      +'<span onclick="editExerciseNotes('+w.i+')" title="Tap to edit the notes" style="flex:1;color:#64748b;font-size:11.5px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(e.notes?esc(e.notes)+' <span style="opacity:.45">\u270e</span>':'<span style="opacity:.5">+ notes</span>')+'</span>'
-      +'<button onclick="deleteExercise('+w.i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;flex-shrink:0">&#10005;</button>'
-      +'</div>';
-  }).join("")||'<div style="font-size:11.5px;color:#cbd5e1;padding:6px 0">Nothing logged yet \u2014 the first session starts the record.</div>';
-  return '<h2>Exercise &amp; enrichment</h2><div class="sub">Walks, yard time and enrichment \u2014 logged per session.</div>'
-    +'<div class="card">'+banner+tiles+form
-    +'<div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin:4px 0 4px">The log</div>'
-    +rows+'</div>'+browNav("exercise");
-}
-function getTodaysExercises(rec){
-  var today=new Date().toISOString().slice(0,10);
-  var ex=(rec&&rec.state&&rec.state.exercises)||[];
-  return ex.filter(function(e){return e.date===today;});
-}
 
 
 
@@ -1594,7 +1527,6 @@ function computeDueToday(activeRecords){
   act.forEach(function(r){
     if(!r.state)return;var med=r.state.medical||{};
     var _fo=r.state.fin?r.state.fin.outcome:"";if(_fo!=="Finished Isolation"&&daysInIsolation(r.intakeDate)===5+isoExtraDays(r.state.dog))cats.finishing.push(r);
-    if(!getTodaysExercises(r).length)cats.walks.push(r);
     if((med.medications||[]).some(function(mm){return !mm.endDate||mm.endDate>=today;}))cats.meds.push(r);
     (function(){var _o2=r.state.fin?r.state.fin.outcome:"";if(_o2&&_o2!=="Active — in isolation"&&_o2!=="Active - in isolation")return;var _dn=daysInIsolation(r.intakeDate);if(!_dn||_dn>5+isoExtraDays(r.state.dog))return;var _de=(r.state.days||[])[Math.min(_dn,5)-1];var _has=_de&&(_de.demeanour||_de.feeding||_de.toileting||_de.staffInt||_de.incidents||_de.notes);if(!_has)cats.reports.push(r);})();
     (function(){
@@ -1617,7 +1549,7 @@ function computeDueToday(activeRecords){
 }
 function tasksRollupHtml(activeRecords){
   var cats=computeDueToday(activeRecords);
-  var defs=[["returns","Reclaim / due back","#991b1b","#fee2e2"],["finishing","Finishing today","#0d9488","#ccfbf1"],["reports","Daily report due","#7c3aed","#f3e8ff"],["meds","On medication","#9d174d","#fce7f3"],["vaccs","Vaccines due","#a16207","#fef9c3"],["paras","Parasite tx due","#a16207","#fef9c3"],["weighs","Weigh-ins due","#0d9488","#ccfbf1"],["walks","Walks due","#0d9488","#ccfbf1"]];
+  var defs=[["returns","Reclaim / due back","#991b1b","#fee2e2"],["finishing","Finishing today","#0d9488","#ccfbf1"],["reports","Daily report due","#7c3aed","#f3e8ff"],["meds","On medication","#9d174d","#fce7f3"],["vaccs","Vaccines due","#a16207","#fef9c3"],["paras","Parasite tx due","#a16207","#fef9c3"],["weighs","Weigh-ins due","#0d9488","#ccfbf1"]];
   var items=defs.filter(function(d){return cats[d[0]].length;});
   if(!items.length)return"";
   var total=items.reduce(function(a,d){return a+cats[d[0]].length;},0);
@@ -2020,7 +1952,7 @@ function renderDashboard(){
   var ue=document.getElementById("dash-user");
   if(ue){var col=avatarColor(currentName());var ini=initials(currentName());var role=currentRole();var roleLabel=role==="admin"?"Admin":role==="director"?"Director of Operations":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Dog Trainer \u0026 Behaviour Specialist":"Staff";ue.innerHTML='<span style="width:18px;height:18px;border-radius:50%;background:'+col+';color:#fff;font-size:8px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">'+ini+'</span><span>'+esc(currentName())+' &middot; '+roleLabel+'</span>';ue.style.display="inline-flex";ue.style.alignItems="center";ue.style.gap="6px";}
   var ks=[];records.forEach(function(r){var k=r.state&&r.state.dog?r.state.dog.kennel:"";if(k&&ks.indexOf(k)<0)ks.push(k);});ks.sort();
-  var fb='<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap"><button onclick="toggleFocus()" title="Show only dogs needing something today" style="background:'+(window._dbFocus?'#0f172a':'none')+';color:'+(window._dbFocus?'#fff':'#64748b')+';border:0.5px solid '+(window._dbFocus?'#0f172a':'var(--color-border-secondary)')+';padding:6px 13px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">\ud83c\udfaf Focus</button><div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 10px;min-width:150px"><span>&#128269;</span><input placeholder="Search..." value="'+esc(_s)+'" oninput="setDashFilter(\'S\',this.value);window._dbCaret=this.selectionStart;window._dbSearchActive=true;dashSearchRender()" style="border:none;background:transparent;outline:none;font-size:12px;width:100%;font-family:inherit">'+(_s?'<span onclick="setDashFilter(\'S\',\'\');renderDashboard()" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){this.click()}" title="Clear" style="cursor:pointer;color:#94a3b8;font-size:14px;line-height:1;padding:0 2px;flex-shrink:0">&#10005;</span>':'')+'</div><select onchange="setDashFilter(\'K\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:100px"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select><select onchange="setDashFilter(\'O\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:90px">'+[["day","Day"],["name","Name"],["kennel","Kennel"],["tl","Score"]].map(function(o){return'<option value="'+o[0]+'"'+(_o===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select>'+'</div>';
+  var fb='<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap"><div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 10px;min-width:150px"><span>&#128269;</span><input placeholder="Search..." value="'+esc(_s)+'" oninput="setDashFilter(\'S\',this.value);window._dbCaret=this.selectionStart;window._dbSearchActive=true;dashSearchRender()" style="border:none;background:transparent;outline:none;font-size:12px;width:100%;font-family:inherit">'+(_s?'<span onclick="setDashFilter(\'S\',\'\');renderDashboard()" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){this.click()}" title="Clear" style="cursor:pointer;color:#94a3b8;font-size:14px;line-height:1;padding:0 2px;flex-shrink:0">&#10005;</span>':'')+'</div><select onchange="setDashFilter(\'K\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:100px"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select><select onchange="setDashFilter(\'O\',this.value);renderDashboard()" style="font-size:11px;padding:5px 6px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-family:inherit;max-width:90px">'+[["day","Day"],["name","Name"],["kennel","Kennel"],["tl","Score"]].map(function(o){return'<option value="'+o[0]+'"'+(_o===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select>'+'</div>';
   var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
   if(_s)active=active.filter(function(r){return(r.name||"").toLowerCase().includes(_s)||(r.breed||"").toLowerCase().includes(_s)||(r.refNo||"").toLowerCase().includes(_s);});
   if(_k)active=active.filter(function(r){return(r.state&&r.state.dog?r.state.dog.kennel:"")=== _k;});
@@ -2044,7 +1976,6 @@ function renderDashboard(){
   var stickyEl=document.getElementById("overdue-sticky");
   if(stickyEl)stickyEl.innerHTML=contagiousAlertHtml()+overdueBannerHtml;
   if(!active.length){el.innerHTML=offlineBannerHtml()+catchupHtml()+statusStrip+fb+renderIncomingStrip()+tasksRollupHtml(records)+'<div style="text-align:center;padding:40px"><div style="font-size:40px">&#128062;</div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+recentOutcomesHtml()+brandFooterHtml();return;}
-  var _ff=focusFilter(active);active=_ff.list;var _focusRest=_ff.rest;
 
   var cards=active.map(function(rec){
     var d=rec.state&&rec.state.dog?rec.state.dog:{};var f=rec.state&&rec.state.fin?rec.state.fin:{};
@@ -2063,7 +1994,7 @@ function renderDashboard(){
     var barPct=(finished||overdue)?100:pct;
     var savedBy=rec.savedBy||"";
     var flagsHtml=(d.kennel?'':'')+(con.length?'<span title="'+esc(con.map(function(x){return diseaseShortName(x.type);}).join(", "))+'" class="dflag crit">&#129440; Contagious</span>':'')+(function(){var rb=restrictedBreedInfo(rec.state&&rec.state.dog?rec.state.dog.breed:rec.breed);return rb?('<span title="'+esc(rb.name)+(rb.xl?' — banned: cannot be rehomed':' — restricted breed: muzzle + lead in public')+'" class="dflag '+(rb.xl?'crit':'warn')+'">'+(rb.xl?'&#128683; XL':'&#9888; RB')+'</span>'):'';})()+(warns.length?'<span title="'+esc(warns.map(function(w){return w.text;}).join(", "))+'" class="dflag '+(warnCrit?"crit":"warn")+'">&#9888; '+warns.length+'</span>':'')+trajTag(rec)+(subMeta(rec.state).partial?'<span title="Provisional — assessment incomplete" class="dflag prov">PROV</span>':'');
-    return'<div onclick="openDog('+rec.id+')" tabindex="0" role="button" aria-label="Open '+esc(rec.name)+'" onkeydown="if(event.key===\'Enter\'){openDog('+rec.id+')}" class="dcard '+tlClass+'" style="position:relative"><div class="stripe"></div><button onclick="event.stopPropagation();openPeek('+rec.id+')" title="Quick peek" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;border:0.5px solid #d8dde5;background:#fff;color:#94a3b8;font-size:11px;cursor:pointer;z-index:2;line-height:1">\u24d8</button><div class="dcard-in">'
+    return'<div onclick="openDog('+rec.id+')" tabindex="0" role="button" aria-label="Open '+esc(rec.name)+'" onkeydown="if(event.key===\'Enter\'){openDog('+rec.id+')}" class="dcard '+tlClass+'" style="position:relative"><div class="stripe"></div><div class="dcard-in">'
       +'<div class="dtop"><div class="dthumb">'+ph+'</div><div class="dinfo"><div class="dname">'+esc(rec.name)+'</div>'+(d.breed||rec.breed?'<div class="dmeta">'+esc(d.breed||rec.breed)+'</div>':'')+'</div>'+(d.kennel?'<span class="dkennel">'+esc(d.kennel)+'</span>':'')+'</div>'
       +'<div class="dbottom"><div class="drow"><div class="dstatus"><span class="dd"></span>'+tlLabelTxt+'</div>'+(dayLabelTxt?'<div class="dayno">'+dayLabelTxt+'</div>':'')+'</div>'
       +(dayLabelTxt?'<div style="background:#eceef1;border-radius:20px;height:4px;overflow:hidden;margin-top:7px"><div style="background:'+col+';width:'+barPct+'%;height:100%;border-radius:20px"></div></div>':'')
@@ -2079,8 +2010,7 @@ function renderDashboard(){
   }).join("");
   var rollupHtml=tasksRollupHtml(active);
   var viewBody='<div class="dcardgrid">'+cards+'</div>';
-  var _restHtml=(window._dbFocus&&_focusRest&&_focusRest.length)?'<div onclick="toggleFocus()" style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;padding:10px 14px;font-size:12px;color:#64748b;text-align:center;cursor:pointer;margin-top:8px">'+_focusRest.length+' dog'+(_focusRest.length===1?'':'s')+' need'+(_focusRest.length===1?'s':'')+' nothing right now \u2014 '+esc(_focusRest.map(function(r){return r.name;}).filter(Boolean).slice(0,8).join(', '))+(_focusRest.length>8?'\u2026':'')+' \u00b7 tap to show</div>':'';
-  el.innerHTML=offlineBannerHtml()+catchupHtml()+statusStrip+fb+renderIncomingStrip()+rollupHtml+viewBody+_restHtml+recentOutcomesHtml()+brandFooterHtml();
+  el.innerHTML=offlineBannerHtml()+catchupHtml()+statusStrip+fb+renderIncomingStrip()+rollupHtml+viewBody+recentOutcomesHtml()+brandFooterHtml();
   if(window._dbSearchActive){var si=el.querySelector('input[placeholder="Search..."]');if(si){si.focus();var l=(window._dbCaret!=null?window._dbCaret:si.value.length);si.setSelectionRange(l,l);}window._dbSearchActive=false;window._dbCaret=null;}
 }
 
@@ -2169,120 +2099,6 @@ function copyStory(){
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){appAlert("Story copied \u2014 paste it into an email or document.");},function(){appAlert("Couldn\u0027t copy automatically \u2014 use the Report tab\u0027s copy instead.");});}
   else{appAlert("Couldn\u0027t copy automatically \u2014 use the Report tab\u0027s copy instead.");}
 }
-function daySheetDoc(){
-  var today=new Date().toISOString().slice(0,10);
-  var yday=addDaysStr(today,-1);
-  var act=roundsActiveDogs();
-  var due=computeDueToday(records);
-  var inList=function(list,r){return (due[list]||[]).indexOf(r)>-1;};
-  var incToday=incLoad().filter(function(e){return e.when==="today";});
-  var chip=function(txt,bg,col){return '<span style="font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:10px;white-space:nowrap;background:'+bg+';color:'+col+'">'+esc(txt)+'</span>';};
-  var secFor=function(sec){return sec===0?"Kennels":sec===1?"Pods":sec===2?"Crate":sec===3?"Other areas":"No kennel set";};
-  var h="";var lastSec=-1;
-  act.forEach(function(r){
-    var st=r.state||{};var d=st.dog||{};var mm=st.medical||{};
-    var sec=kennelRank(d.kennel||"").sec;
-    if(sec!==lastSec){h+='<div style="font-size:9.5px;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;color:#94a3b8;margin:14px 0 6px">'+secFor(sec)+'</div>';lastSec=sec;}
-    var chips="";
-    var con=activeContagiousList(mm);
-    con.forEach(function(x){chips+=chip("\u26a0 "+diseaseShortName(x.type),"#fecaca","#7f1d1d");});
-    if(inList("meds",r)){var mnames=(mm.medications||[]).filter(function(x){return x.active!==false&&(!x.endDate||x.endDate>=today);}).map(function(x){return x.name;}).filter(Boolean).join(", ");chips+=chip("\ud83d\udc8a "+(mnames||"Meds"),"#fce7f3","#9d174d");}
-    if(inList("vaccs",r))chips+=chip("\ud83d\udc89 Vaccination due","#fef9c3","#a16207");
-    if(inList("paras",r))chips+=chip("\ud83d\udc1b Parasite tx due","#fef9c3","#a16207");
-    if(inList("reports",r))chips+=chip("\ud83d\udccb Day report due","#f3e8ff","#7c3aed");
-    if(inList("weighs",r))chips+=chip("\u2696 Weigh-in due","#ccfbf1","#0d9488");
-    if(inList("finishing",r))chips+=chip("\ud83c\udf89 Finishing today","#dcfce7","#166534");
-    if(inList("returns",r))chips+=chip("\u23f3 Reclaim window","#fee2e2","#991b1b");
-    if(inList("walks",r))chips+=chip("\ud83d\udeb6 Not walked yet","#e2e8f0","#475569");
-    // yesterday, via story assembly on this record
-    var ydayLine="";
-    var keepS=S;
-    try{
-      S=st;
-      var ev=storyEvents().filter(function(e){return e.date===yday;});
-      if(ev.length)ydayLine=ev.slice(0,2).map(function(e){return e.title+(e.detail?" \u2014 "+e.detail.slice(0,80):"");}).join(" \u00b7 ");
-    }catch(e){}
-    S=keepS;
-    var days=daysInIsolation(r.intakeDate);
-    var kShort=(function(k){var m=String(k||"").match(/^k(?:ennel)?\s*\.?\s*(\d+)/i);if(m)return "K"+m[1];m=String(k||"").match(/^pod\s*\.?\s*(\d+)/i);if(m)return "P"+m[1];return /^(?:the\s+)?crate/i.test(k||"")?"CR":(k?k.slice(0,4):"\u2014");})(d.kennel);
-    var kbg=sec===1?"#7c6df0":sec===2?"#b45309":"#0f172a";
-    h+='<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:0.5px solid #e2e8f0;page-break-inside:avoid">'
-      +'<span style="font-size:11px;font-weight:800;background:'+kbg+';color:#fff;border-radius:8px;padding:3px 8px;min-width:34px;text-align:center;flex-shrink:0">'+esc(kShort)+'</span>'
-      +'<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13.5px">'+esc(r.name||"")+'</div>'
-      +'<div style="font-size:11px;color:#64748b;margin-top:1px">'+(days!=null?"Day "+days:"")+(r.trafficLight?" \u00b7 "+esc(r.trafficLight):"")+'</div>'
-      +(ydayLine?'<div style="font-size:11px;color:#475569;background:#f8fafc;border-radius:8px;padding:6px 10px;margin-top:5px">Yesterday: '+esc(ydayLine)+'</div>':'')
-      +'</div>'
-      +'<div style="margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:290px">'+chips+'</div>'
-      +'<span style="width:34px;height:22px;border:1.5px dashed #cbd5e1;border-radius:6px;flex-shrink:0;margin-left:8px"></span></div>';
-  });
-  var incHtml=incToday.length?('<div style="font-size:9.5px;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;color:#94a3b8;margin:0 0 6px">\ud83d\ude90 Expected today</div>'
-    +incToday.map(function(e){return '<div style="background:#f6fbe8;border-left:3px solid #c5e86c;border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:4px"><b>'+esc(e.time||"Today")+'</b> \u2014 '+esc(e.what||"Unknown dog")+(e.source?" \u00b7 "+esc(e.source):"")+(e.from?" \u00b7 "+esc(e.from):"")+(e.notes?" \u00b7 "+esc(e.notes):"")+'</div>';}).join("")):"";
-  var reclaims=(due.returns||[]).map(function(r){var d2=r.state&&r.state.dog?r.state.dog:{};return r.name+" \u2014 "+returnDateLabel(d2.returnType)+" "+fmtDMY(d2.returnDate);}).join(" \u00b7 ");
-  return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Day sheet \u2014 '+esc(fmtDMYwk(today))+'</title><style>body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0;padding:22px 24px;color:#0f172a}@media print{.noprint{display:none}body{padding:0}}</style></head><body>'
-    +'<div class="noprint" style="text-align:right;margin-bottom:10px"><button onclick="window.print()" style="background:#c5e86c;border:none;padding:8px 20px;border-radius:20px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">\ud83d\udda8 Print</button></div>'
-    +'<div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #0f172a;padding-bottom:10px;margin-bottom:14px"><h1 style="font-size:17px;margin:0">\u2600\ufe0f Day sheet</h1><div style="font-size:12px;color:#64748b">'+esc(fmtDMYwk(today))+' \u00b7 '+act.length+' dog'+(act.length===1?"":"s")+' \u00b7 built '+new Date().toTimeString().slice(0,5)+(currentName()?' by '+esc(currentName()):'')+'</div></div>'
-    +incHtml+h
-    +'<div style="margin-top:16px;display:flex;justify-content:space-between;font-size:10.5px;color:#94a3b8;border-top:0.5px solid #e2e8f0;padding-top:10px"><span>'+(reclaims?'\u26a0 Reclaim: '+esc(reclaims):'')+'</span><span>Initials: ______</span></div>'
-    +'</body></html>';
-}
-function openDaySheet(){
-  var w=window.open("","_blank");
-  if(!w){appAlert("Couldn\u0027t open the day sheet \u2014 allow pop-ups for this site.");return;}
-  w.document.write(daySheetDoc());w.document.close();
-}
-function peekHtml(rec){
-  var st=rec.state||{};var d=st.dog||{};var mm=st.medical||{};var as=st.assessment||{};var today=new Date().toISOString().slice(0,10);
-  var days=daysInIsolation(rec.intakeDate);
-  var meta=[d.breed,(d.sex||"").split(" ")[0],d.age].filter(Boolean).join(" \u00b7 ")+(days!=null?" \u00b7 Day "+days:"")+(rec.trafficLight?" \u00b7 "+rec.trafficLight:"");
-  var ph=d.photo?'<img src="'+d.photo+'" style="width:52px;height:52px;border-radius:12px;object-fit:cover">':'<div style="width:52px;height:52px;border-radius:12px;background:#334155;display:flex;align-items:center;justify-content:center;font-size:24px">\ud83d\udc15</div>';
-  var kShort=(function(k){var m=String(k||"").match(/^k(?:ennel)?\s*\.?\s*(\d+)/i);if(m)return "K"+m[1];m=String(k||"").match(/^pod\s*\.?\s*(\d+)/i);if(m)return "P"+m[1];return /^(?:the\s+)?crate/i.test(k||"")?"CR":(k||"\u2014");})(d.kennel);
-  var crit=(st.warnings||[]).filter(function(w){return w.level==="critical"||w.critical;})[0]||(st.warnings||[])[0];
-  var due=computeDueToday([rec]);
-  var chips="";
-  var chip=function(t,bg,c){return '<span style="font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:10px;background:'+bg+';color:'+c+'">'+esc(t)+'</span>';};
-  if((due.reports||[]).length)chips+=chip("\ud83d\udccb Day report due","#fde68a","#92400e");
-  if((due.meds||[]).length){var mn=(mm.medications||[]).filter(function(x){return x.active!==false&&(!x.endDate||x.endDate>=today);}).map(function(x){return x.name;}).filter(Boolean).join(", ");chips+=chip("\ud83d\udc8a "+(mn||"Meds"),"#fce7f3","#9d174d");}
-  if((due.vaccs||[]).length)chips+=chip("\ud83d\udc89 Vaccination due","#fef9c3","#a16207");
-  var ws=(st.weights||[]);
-  if(ws.length){var lastW=ws[ws.length-1];var prevW=ws.length>1?parseFloat(ws[ws.length-2].weight):null;var curW=parseFloat(lastW.weight);var dl=(prevW!=null&&!isNaN(curW))?(curW-prevW):null;chips+=chip("\u2696 "+(lastW.weight||"")+(dl?" \u00b7 "+(dl>0?"+":"")+dl.toFixed(1):""),"#ccfbf1","#0d9488");}
-  var fp=st.feedingPlan||{};
-  var feed=[fp.brand,fp.grams?fp.grams+"g":"",fp.frequency].filter(Boolean).join(" \u00b7 ");
-  var vlog=(mm.vetLog||[]).slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");})[0];
-  var note=(st.notes||[]).slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");})[0];
-  var people=[];
-  if(as.rehomingAt)people.push("cleared "+fmtDMY(as.rehomingAt));
-  if(as.playdates&&as.playdates.length)people.push("PA\u0027d with "+(as.playdates[as.playdates.length-1].dog||"?"));
-  if(d.webBio)people.push("web bio "+(d.webBio==="Y"?"\u2713":'<b style="color:#dc2626">N</b>'));
-  var row=function(ic,l,txt){return txt?'<div style="display:flex;gap:8px;padding:7px 0;border-bottom:0.5px solid #eef1f5;font-size:12.5px"><span style="width:20px;text-align:center;flex-shrink:0">'+ic+'</span><span style="color:#64748b;width:60px;flex-shrink:0;font-size:11px;margin-top:1px">'+l+'</span><span style="flex:1;min-width:0">'+txt+'</span></div>':"";}
-  return '<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;box-shadow:0 18px 50px rgba(15,23,42,0.35);overflow:hidden" onclick="event.stopPropagation()">'
-    +'<div style="background:#0f172a;color:#fff;padding:14px 16px;display:flex;gap:12px;align-items:center;position:relative">'+ph
-    +'<div style="min-width:0"><div style="font-size:17px;font-weight:800">'+esc(rec.name||"")+'</div><div style="font-size:11px;opacity:0.75">'+esc(meta)+'</div></div>'
-    +'<span style="margin-left:auto;background:#c5e86c;color:#0f172a;font-weight:800;font-size:13px;padding:5px 12px;border-radius:10px">'+esc(kShort)+'</span>'
-    +'<button onclick="closePeek()" style="position:absolute;top:8px;right:10px;color:#94a3b8;background:none;border:none;font-size:14px;cursor:pointer">\u2715</button></div>'
-    +(crit?'<div style="background:#dc2626;color:#fff;font-size:11.5px;font-weight:700;padding:7px 16px">\u26a0 '+esc(crit.text)+'</div>':'')
-    +'<div style="padding:12px 16px">'
-    +(chips?'<div style="display:flex;gap:5px;flex-wrap:wrap;padding:2px 0 6px">'+chips+'</div>':'')
-    +row("\ud83c\udf7d\ufe0f","Feeding",feed?esc(feed)+(fp.notes?' \u2014 <b>'+esc(fp.notes)+'</b>':''):"")
-    +row("\ud83e\ude7a","Vet",vlog?esc(fmtDMY(vlog.date)+": "+vlog.text.slice(0,110)):"")
-    +row("\ud83d\udcdd","Latest",note?esc(fmtDMY(note.date)+": "+note.text.slice(0,110))+(note.staff?' <span style="color:#94a3b8">\u2014 '+esc(note.staff)+'</span>':''):"")
-    +row("\ud83d\udc36","People",people.join(" \u00b7 "))
-    +'</div>'
-    +'<div style="display:flex;gap:8px;padding:12px 16px;border-top:0.5px solid #eceff3;background:#fafbfc">'
-    +'<button onclick="closePeek();openDog('+rec.id+')" style="flex:1;border:none;border-radius:12px;padding:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;background:#c5e86c;color:#0f172a">Open record</button>'
-    +'<button onclick="peekStory('+rec.id+')" style="flex:1;border:none;border-radius:12px;padding:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;background:#0f172a;color:#fff">\ud83d\udcd6 Story</button>'
-    +'</div></div>';
-}
-function openPeek(id){
-  var rec=records.find(function(r){return r.id===id;});if(!rec)return;
-  closePeek();
-  var ov=document.createElement("div");ov.id="peek-overlay";
-  ov.style.cssText="position:fixed;inset:0;background:rgba(15,23,42,0.45);display:flex;align-items:center;justify-content:center;padding:18px;z-index:900";
-  ov.onclick=closePeek;
-  ov.innerHTML=peekHtml(rec);
-  document.body.appendChild(ov);
-}
-function closePeek(){var ov=document.getElementById("peek-overlay");if(ov)ov.remove();}
-function peekStory(id){closePeek();openDog(id);S.tab="story";render();}
 function catchupEvents(){
   var prev=window._prevLogin||0;
   if(!prev)return[];
@@ -2322,15 +2138,6 @@ function catchupHtml(){
   h+='</div>';
   return h;
 }
-function focusFilter(list){
-  if(!window._dbFocus)return{list:list,rest:[]};
-  var due=computeDueToday(records);
-  var needy={};["returns","finishing","vaccs","paras","weighs","meds","reports","walks"].forEach(function(k){(due[k]||[]).forEach(function(r){needy[r.id]=1;});});
-  var keep=[],rest=[];
-  list.forEach(function(r){(needy[r.id]?keep:rest).push(r);});
-  return{list:keep,rest:rest};
-}
-function toggleFocus(){window._dbFocus=!window._dbFocus;renderDashboard();}
 function toggleDogFold(id){window._dogFoldOpen=window._dogFoldOpen||{};window._dogFoldOpen[id]=!window._dogFoldOpen[id];renderMain();}
 function openNewDog(){appConfirm("Start a new dog? Current unsaved data will be cleared.",function(){S=defaultState();persistSave();showScreen("wrap");S.tab="dog";render();});}
 
@@ -3645,6 +3452,13 @@ function handlePhotoUpload(inp){var file=inp.files[0];if(!file)return;if(file.si
 function starPhoto(i){ensurePhotos();S.dog.photos.forEach(function(p,j){p.star=(j===i);});syncStarPhoto();saveRecord();renderMain();}
 function deletePhoto(i){appConfirm("Remove this photo from the log?",function(){ensurePhotos();S.dog.photos.splice(i,1);if(S.dog.photos.length&&!S.dog.photos.some(function(p){return p.star;}))S.dog.photos[S.dog.photos.length-1].star=true;syncStarPhoto();saveRecord();renderMain();});}
 function photoNote(i){ensurePhotos();var p=S.dog.photos[i];if(!p)return;var cur=p.note||"";var v=prompt("Condition note for this photo (what it shows):",cur);if(v===null)return;p.note=v.trim();saveRecord();renderMain();}
+function photoFoldHtml(){
+  ensurePhotos();
+  var n=(S.dog.photos||[]).length;
+  if(!n)return "";
+  var sub=n+" photo"+(n===1?"":"s")+(n>=2?" \u00b7 arrival vs latest inside":"");
+  return dogFold("photolog","\ud83d\udcf7","Photo log",sub,n+"",n>=2?"done":"",photoLogHtml());
+}
 function photoLogHtml(){
   ensurePhotos();
   var ps=S.dog.photos||[];
@@ -5032,6 +4846,7 @@ function page(){
   else if(t==="timeline"){S.tab=t="report";}
   else if(t==="briefing"){S.tab=t="report";window._reportView="narrative";}
   else if(t==="breakdown"){S.tab=t="story";}
+  else if(t==="exercise"){S.tab=t="feeding";}
   var total=Object.values(S.scores).reduce(function(a,b){return a+b},0);
   var tl=handlingLight(total,S.scores);var ea=eaTriggered();
 
@@ -5054,7 +4869,7 @@ function page(){
     var hero='<div class="card" style="margin-bottom:14px"><div style="display:flex;gap:13px;align-items:center">'+photoEl
       +'<div style="flex:1;min-width:0"><div style="font-size:19px;font-weight:800;line-height:1.1">'+esc(d.name||"Unnamed dog")+'</div>'+(meta?'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">'+esc(meta)+'</div>':'')+'</div>'+tlPill+'</div>'
       +(chips.length?'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:11px;padding-top:10px;border-top:0.5px solid var(--color-border-tertiary)">'+chips.join("")+'</div>':'')
-      +photoLogHtml()
+      
       +'<div style="margin-top:11px;display:flex;align-items:center;gap:8px"><label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:8px;cursor:pointer;font-size:11px;color:var(--color-text-secondary)">&#128247; Add photo'+'<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>'+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px" onclick="showRepositionPhoto()">&#10021; Reposition</button>':'')+(d.photo?'<button class="btn" style="font-size:11px;padding:6px 10px;background:#fee2e2;color:#991b1b;border:none" onclick="removePhoto()">Remove</button>':'')+'</div></div>';
 
     var identity='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-secondary)">Identity</span>'
@@ -5090,7 +4905,7 @@ function page(){
     }else{
       famFold=dogFold("family","\ud83d\udc3e","Family","Mums, pups and litters","Not linked \u2014 tap to link","plain",familyCardInner(_fi));
     }
-    return hero+identity+intake+famCard+pupCardHtml()+restrictedBreedCardHtml()+admDivider+intakeChecklistHtml()+isoFold+wnFolds+famFold+'<div class="brow"><button class="btn" onclick="openKennelCard()" style="white-space:nowrap">&#128203; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
+    return hero+photoFoldHtml()+identity+intake+famCard+pupCardHtml()+restrictedBreedCardHtml()+admDivider+intakeChecklistHtml()+isoFold+wnFolds+famFold+'<div class="brow"><button class="btn" onclick="openKennelCard()" style="white-space:nowrap">&#128203; Kennel card</button><button class="btn btnp" data-go="arrival">Next: on-arrival &rarr;</button></div>';
   }
 
   if(t==="picture") return renderPicture();
@@ -5403,7 +5218,6 @@ function page(){
 
   if(t==="assessment")return pupAssessBanner()+renderAssessment();
   if(t==="sessions")return renderSessions();
-  if(t==="exercise")return renderExercise();
   if(t==="medical")return renderMedical();
   if(t==="weights")return renderWeights();
   if(t==="feeding")return renderFeeding();
