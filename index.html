@@ -114,9 +114,7 @@ nav::-webkit-scrollbar{display:none}
 .dflagrow{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
 .dnext{font-size:11.5px;font-weight:700;margin:6px 12px 0;display:flex;align-items:center;gap:5px;line-height:1.3}
 .today{background:#282932;border-radius:16px;padding:12px 14px 6px;color:#fff;margin-bottom:12px}
-.dash2{display:block}
-@media(min-width:1000px){#save-bar>div{max-width:1032px!important}}
-@media(min-width:960px){.dash2{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start}.dash2-left{position:sticky;top:54px}.dash2-left .today{margin-bottom:0}.dcard:hover{box-shadow:0 8px 20px rgba(40,41,50,.12);transform:translateY(-1px)}}
+@media(min-width:960px){.dcard:hover{box-shadow:0 8px 20px rgba(40,41,50,.12);transform:translateY(-1px)}}
 .dt{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e4e7e0;border-radius:12px;overflow:hidden;font-size:12.5px}
 .dt th{text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#868b7e;padding:9px 12px;border-bottom:2px solid #e4e7e0;cursor:pointer;white-space:nowrap;user-select:none}
 .dt th.on{color:#282932}
@@ -180,15 +178,7 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
 .rec-card{background:#fff;border:1px solid rgba(40,41,50,0.08);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;box-shadow:0 1px 2px rgba(40,41,50,0.04),0 4px 16px rgba(40,41,50,0.05)}
 .save-dot{width:7px;height:7px;border-radius:50%;background:#16a34a;display:inline-block;margin-right:5px}
 #content{max-width:740px;margin:0 auto;padding:20px 16px 96px}
-.sidepanel{display:flex;flex-direction:column;gap:10px}
-@media(min-width:1000px){#content{max-width:1080px;padding:20px 24px 96px}.dog-fg,.g2{grid-template-columns:1fr 1fr 1fr}}
-.sp-hero{background:#282932;color:#fff;border-radius:14px;padding:13px;cursor:pointer}
-.sp-warn{background:#fee2e2;border:1px solid #fecaca;border-left:4px solid #dc2626;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:700;color:#991b1b;cursor:pointer}
-.sp-card{background:#fff;border:1px solid #e4e7e0;border-radius:12px;padding:10px 13px;cursor:pointer;transition:box-shadow .12s}
-.sp-card:hover{box-shadow:0 6px 16px rgba(40,41,50,.1)}
-.sp-t{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:#868b7e;margin-bottom:5px}
-.sp-v{font-size:12.5px;line-height:1.45;color:#282932}.sp-v b{font-weight:800}
-.sp-r b{color:#991b1b}.sp-a b{color:#92400e}.sp-t b{color:#0f766e}.sp-q b{color:#4b5563}
+
 .header{background:linear-gradient(180deg,#16202f,#333542);padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
 .subheader{background:#282932;padding:4px 20px 0}
 #overdue-sticky{position:sticky;top:0;z-index:9;pointer-events:none}
@@ -342,7 +332,6 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
     </div>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap">
       <span id="dash-user" onclick="showDashSection('profile')" style="background:#333542;border:0.5px solid #454857;border-radius:20px;padding:3px 10px;font-size:11px;color:#94a3b8;display:none;align-items:center;gap:6px;cursor:pointer"></span>
-      <button id="dash-today-btn" onclick="showTodayOverlay()" style="display:none;align-items:center;background:#333542;color:#c6e76c;border:1.5px solid #c6e76c;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">Today</button>
       <button onclick="showIncidentModal()" style="background:rgba(127,29,29,0.85);color:#fecaca;border:0.5px solid rgba(254,202,202,0.25);padding:4px 11px;border-radius:20px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600" title="Quickly log an incident">&#9888;</button>
       <button onclick="openNewDog()" style="background:#c6e76c;color:#282932;border:none;padding:4px 13px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit" title="Start a new dog">+ New</button>
       <div style="position:relative">
@@ -371,7 +360,7 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
     </div>
   </div>
   <div id="overdue-sticky"></div>
-  <div style="max-width:1280px;margin:0 auto;padding:18px 24px"><div id="dashboard-content"></div></div>
+  <div style="max-width:900px;margin:0 auto;padding:18px"><div id="dashboard-content"></div></div>
 </div>
 
 <div id="wrap" style="display:none">
@@ -380,7 +369,6 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
     <div style="display:flex;align-items:center;gap:8px">
       <div id="save-ind" style="display:none;align-items:center;font-size:11px;color:#94a3b8"><span class="save-dot"></span>Saved</div>
       <button onclick="goToDashboard()" style="background:rgba(255,255,255,0.07);color:#cbd5e1;border:1px solid rgba(255,255,255,0.1);padding:5px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit">&#8592; All Dogs</button>
-      <button onclick="showSummaryOverlay()" style="background:#333542;color:#c6e76c;border:1.5px solid #c6e76c;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">Summary</button>
       <img id="badge-photo" onclick="showPhotoLightbox(S.dog&&S.dog.photo)" style="display:none;width:28px;height:28px;border-radius:8px;object-fit:cover;box-shadow:0 0 0 1.5px #c6e76c;cursor:zoom-in" alt="">
       <div id="badge" style="display:none;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:4px 12px;color:#c6e76c;font-size:12px;font-weight:700"></div>
       <div id="iso-chip" onclick="showIsolationOverlay()" title="5-day isolation status" style="display:none;align-items:center;gap:4px;border:1px solid #0d9488;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap"></div>
@@ -453,7 +441,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.169",date:"2026-09-02",note:"Less spread out. Today is now a pop-up: it opens once when you land on the dashboard, and a Today button in the top bar (with the count) brings it back any time; \u2018Hide for today\u2019 keeps it quiet until tomorrow. The record\u0027s pinned side column is gone too \u2014 a Summary button in the record header pops the same panel (dog, warnings, next thing, latest vet note, feeding, last report) over the page, each line still a link to its tab. Both screens are back to one centred column: dashboard up to 1280px, records up to 1080px, forms three across."},{version:"3.168",date:"2026-09-02",note:"Desktop width used properly: the record view and the dashboard now run up to 1400px wide, centred, with the side panel at 320px \u2014 far less empty margin on a big monitor."},{version:"3.167",date:"2026-09-02",note:"Dashboard centring fixed for real: when Today was dismissed the board still kept an empty column for it on the left and shoved everything right. Now a dismissed Today collapses to its one-line \u2018show\u2019 above the board and the map takes the full centred width."},{version:"3.166",date:"2026-09-02",note:"Bars back in the corners: the logo, New dog and menu buttons anchor to the screen edges again (the inset I tried in 3.164 was the wrong call). Content stays in a centred column."},{version:"3.165",date:"2026-09-02",note:"Inside a record the header and tab rail now follow the content column at every screen width (they only did above 1100px before, so mid-size laptops still saw them hugging the left). The pinned side panel now appears from 1000px wide."}
+var CHANGELOG=[{version:"3.170",date:"2026-09-02",note:"Back to the original layout \u2014 it fits better. Dashboard at its original width with Today inline at the top (Dismiss keeps it quiet until tomorrow, \u2018show\u2019 brings it back); records at their original width with the tab hero; the Summary button and side panel are gone. Kept from the desktop pass: the sortable tables on Records and Upcoming Medical, keyboard shortcuts, and the hover-lift on cards."},{version:"3.169",date:"2026-09-02",note:"Less spread out. Today is now a pop-up: it opens once when you land on the dashboard, and a Today button in the top bar (with the count) brings it back any time; \u2018Hide for today\u2019 keeps it quiet until tomorrow. The record\u0027s pinned side column is gone too \u2014 a Summary button in the record header pops the same panel (dog, warnings, next thing, latest vet note, feeding, last report) over the page, each line still a link to its tab. Both screens are back to one centred column: dashboard up to 1280px, records up to 1080px, forms three across."},{version:"3.168",date:"2026-09-02",note:"Desktop width used properly: the record view and the dashboard now run up to 1400px wide, centred, with the side panel at 320px \u2014 far less empty margin on a big monitor."},{version:"3.167",date:"2026-09-02",note:"Dashboard centring fixed for real: when Today was dismissed the board still kept an empty column for it on the left and shoved everything right. Now a dismissed Today collapses to its one-line \u2018show\u2019 above the board and the map takes the full centred width."},{version:"3.166",date:"2026-09-02",note:"Bars back in the corners: the logo, New dog and menu buttons anchor to the screen edges again (the inset I tried in 3.164 was the wrong call). Content stays in a centred column."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1564,7 +1552,7 @@ function dogNextThing(r,cats){
   return null;
 }
 function openNewDogIn(k){appConfirm("Start a new dog in "+k+"?",function(){S=defaultState();S.dog.kennel=k;persistSave();showScreen("wrap");S.tab="dog";render();});}
-function openDogAt(id,tab){hideTodayOverlay();openDog(id);if(tab){S.tab=tab;render();}}
+function openDogAt(id,tab){openDog(id);if(tab){S.tab=tab;render();}}
 function todayItems(activeRecords){
   var cats=computeDueToday(activeRecords,true);var items=[];
   var push=function(r,pri,cls,icon,job,sub,tab){icon="";var d=r.state&&r.state.dog?r.state.dog:{};items.push({pri:pri,cls:cls,icon:icon,id:r.id,name:r.name||d.name||"\u2014",k:kennelShort(d.kennel),job:job,sub:sub,tab:tab});};
@@ -1578,20 +1566,14 @@ function todayItems(activeRecords){
   return{items:items,weighs:cats.weighs.length};
 }
 function todayDismissed(){try{return localStorage.getItem("nspca-today-dismissed")===new Date().toISOString().slice(0,10);}catch(e){return false;}}
-function dismissToday(){try{localStorage.setItem("nspca-today-dismissed",new Date().toISOString().slice(0,10));}catch(e){}hideTodayOverlay();}
-function todayActiveRecords(){return records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active \u2014 in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});}
-function updateTodayBtn(active){var b=document.getElementById("dash-today-btn");if(!b)return;var t=todayItems(active||todayActiveRecords());var n=t.items.length+(t.weighs?1:0);b.style.display=n?"inline-flex":"none";b.textContent="Today \u00b7 "+n;}
-function showTodayOverlay(){var ov=document.getElementById("today-overlay");if(!ov){ov=document.createElement("div");ov.id="today-overlay";ov.className="med-overlay";ov.onclick=function(e){if(e.target===ov)hideTodayOverlay();};document.body.appendChild(ov);}
-  var card=tasksRollupHtml(todayActiveRecords());if(!card){card='<div class="today"><div class="th"><b>Today</b><span>nothing due</span></div><div style="font-size:13px;color:#9aa0b0;padding:10px 0 8px">Nothing is due today. Enjoy it.</div></div>';}
-  ov.innerHTML='<div class="med-modal" style="width:520px;padding:0;background:transparent;box-shadow:none">'+card.replace('<div class="today">','<div class="today" style="margin:0;box-shadow:0 20px 60px rgba(0,0,0,0.35)">')+'<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px"><button onclick="dismissToday()" class="btn" style="background:#333542;color:#cdd3df;border-color:#454857">Hide for today</button><button onclick="hideTodayOverlay()" class="btn btnp">Close</button></div></div>';
-  requestAnimationFrame(function(){ov.classList.add("show");});}
-function hideTodayOverlay(){var ov=document.getElementById("today-overlay");if(ov)ov.classList.remove("show");}
+function dismissToday(){try{localStorage.setItem("nspca-today-dismissed",new Date().toISOString().slice(0,10));}catch(e){}renderDashboard();}
+function restoreToday(){try{localStorage.removeItem("nspca-today-dismissed");}catch(e){}renderDashboard();}
 function tasksRollupHtml(activeRecords){
   var t=todayItems(activeRecords);var items=t.items;
   if(!items.length&&!t.weighs)return "";
-
+  if(todayDismissed())return '<div onclick="restoreToday()" style="font-size:11px;color:#6b7280;font-weight:700;text-align:right;margin:-4px 2px 8px;cursor:pointer">Today hidden until tomorrow &middot; show</div>';
   var showAll=!!window._todayAll;var LIM=6;var shown=showAll?items:items.slice(0,LIM);
-  var h='<div class="today"><div class="th"><b>Today</b><span>'+(items.length+(t.weighs?1:0))+' thing'+((items.length+(t.weighs?1:0))!==1?"s":"")+' \u00b7 tap to open</span></div>';
+  var h='<div class="today"><div class="th"><b>Today</b><span>'+(items.length+(t.weighs?1:0))+' thing'+((items.length+(t.weighs?1:0))!==1?"s":"")+' \u00b7 tap to open <span onclick="event.stopPropagation();dismissToday()" style="margin-left:10px;color:#c6e76c;font-weight:800;cursor:pointer">Dismiss</span></span></div>';
   h+=shown.map(function(it){return '<div class="ti '+it.cls+'" onclick="openDogAt('+it.id+',\''+it.tab+'\')"><div class="tw"><b>'+esc(it.name)+'</b>'+(it.k?' <span class="tkn">'+esc(it.k)+'</span>':'')+' \u00b7 '+it.job+'<small>'+it.sub+'</small></div><div class="tgo">'+({medical:"Medical",dog:"Dog",days:"Report",rehoming:"Clearance"}[it.tab]||"Open")+' &rsaquo;</div></div>';}).join("");
   if(t.weighs)h+='<div class="ti q" onclick="dashMenuGo(\'weighin\')"><div class="tw"><b>Weigh-ins</b> \u00b7 '+t.weighs+' dog'+(t.weighs!==1?"s":"")+' not weighed in 7 days<small>Batch weigh-in \u00b7 a few minutes</small></div><div class="tgo">Weigh &rsaquo;</div></div>';
   if(items.length>LIM)h+='<div class="tmore" onclick="window._todayAll=!window._todayAll;renderDashboard()">'+(showAll?"Show fewer":"+ "+(items.length-LIM)+" more")+'</div>';
@@ -2062,9 +2044,7 @@ function renderDashboard(){
   var rollupHtml=tasksRollupHtml(active);
   var viewBody='<div class="dcardgrid">'+cards+'</div>';
   var mainCol=statusStrip+fb+renderIncomingStrip()+viewBody+recentOutcomesHtml();
-  el.innerHTML=offlineBannerHtml()+catchupHtml()+mainCol+brandFooterHtml()+kbHintHtml();
-  updateTodayBtn(active);
-  if(rollupHtml&&!todayDismissed()&&!window._todayShownOnce){window._todayShownOnce=true;setTimeout(showTodayOverlay,250);}
+  el.innerHTML=offlineBannerHtml()+catchupHtml()+rollupHtml+mainCol+brandFooterHtml()+kbHintHtml();
   if(window._dbSearchActive){var si=el.querySelector('input[placeholder="Search..."]');if(si){si.focus();var l=(window._dbCaret!=null?window._dbCaret:si.value.length);si.setSelectionRange(l,l);}window._dbSearchActive=false;window._dbCaret=null;}
 }
 
@@ -5365,33 +5345,7 @@ window.addEventListener("resize",function(){
   var gOn=document.querySelector("#pnav-groups .ppill.on");pnavGlide(document.getElementById("pnav-gglide"),gOn,"g");
   var sOn=document.querySelector("#pnav-subs .ppill.on");pnavGlide(document.getElementById("pnav-sglide"),sOn,"s");
 });
-function sidePanelHtml(){
-  var d=S.dog||{},f=S.fin||{};
-  var total=Object.values(S.scores||{}).reduce(function(a,b){return a+(parseInt(b)||0);},0);
-  var tl=total?handlingLight(total,S.scores):null;
-  var meta=[d.breed,d.age].filter(Boolean).join(" \u00b7 ");
-  var ii=d.intakeDate?isolationInfo(d.intakeDate,(f.outcome||""),isoExtraDays(d),pupIsoVax(d,S.medical)):null;
-  var dayTxt=ii?(ii.state==="done"?"Isolation complete":(ii.day<=0?"Arrived today":"Day "+ii.day+" of "+(ii.total||5))):"";
-  var ph=d.photo?'<img src="'+d.photo+'" style="width:52px;height:52px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';border-radius:12px;box-shadow:0 0 0 2px #c6e76c;flex-shrink:0">':'<div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#3a3c46,#4d5140);box-shadow:0 0 0 2px #c6e76c;flex-shrink:0"></div>';
-  var kn=kennelShort(d.kennel);
-  var h='<div class="sp-hero" data-go="dog"><div style="display:flex;gap:11px;align-items:center">'+ph+'<div style="min-width:0;flex:1"><div style="font-size:19px;font-weight:800;letter-spacing:-0.02em;line-height:1.1">'+esc(d.name||"Unnamed dog")+'</div><div style="font-size:11.5px;color:#a7adbd;font-weight:600;margin-top:2px">'+esc([dayTxt,meta].filter(Boolean).join(" \u00b7 "))+'</div>'+(tl?'<span style="display:inline-block;margin-top:6px;font-size:10px;font-weight:800;letter-spacing:.05em;padding:2px 9px;border-radius:20px;background:'+tl.bg+';color:'+tl.tc+'">'+tl.l.toUpperCase()+' \u00b7 '+total+'/24</span>':'')+'</div>'+(kn?'<span style="background:#c6e76c;color:#282932;font-weight:800;font-size:13px;padding:6px 11px;border-radius:10px;flex-shrink:0">'+esc(kn)+'</span>':'')+'</div></div>';
-  var ws=(S.warnings||[]).map(function(w){return w.text||w.note||w.title||"";}).filter(Boolean);
-  if(ws.length)h+='<div class="sp-warn" data-go="dog">'+esc(ws.slice(0,3).join(" \u00b7 "))+'</div>';
-  var rec=S._id?records.find(function(r){return r.id===S._id;}):null;
-  if(rec){var nx=dogNextThing(rec,computeDueToday([rec],true));if(nx)h+='<div class="sp-card" data-go="'+(nx.c==="r"||nx.t.indexOf("Vaccine")===0||nx.t.indexOf("On medication")===0||nx.t.indexOf("Parasite")===0?"medical":"dog")+'"><div class="sp-t">Next thing</div><div class="sp-v sp-'+nx.c+'"><b>'+nx.t+'</b></div></div>';}
-  var vv=((S.medical&&S.medical.vetVisits)||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
-  if(vv)h+='<div class="sp-card" data-go="medical"><div class="sp-t">Latest vet note</div><div class="sp-v">'+esc(fmtDMY(vv.date))+(vv.vet?' \u00b7 '+esc(vv.vet):'')+' \u2014 '+esc((vv.findings||vv.reason||"").slice(0,140))+(vv.followUp?' <b>Follow-up: '+esc(vv.followUp)+'</b>':'')+'</div></div>';
-  var fp=S.feedingPlan||{};
-  if(fp.brand||fp.grams)h+='<div class="sp-card" data-go="feeding"><div class="sp-t">Feeding</div><div class="sp-v"><b>'+esc(fp.brand||"")+'</b>'+(fp.grams?' \u00b7 '+esc(fp.grams)+' g':'')+(fp.frequency?' \u00b7 '+esc(fp.frequency.toLowerCase()):'')+(fp.notes?' \u00b7 <b style="color:#991b1b">'+esc(fp.notes)+'</b>':'')+'</div></div>';
-  var days=S.days||[];var last=null;for(var i=days.length-1;i>=0;i--){var de=days[i];if(de&&(de.demeanour||de.notes||de.feeding)){last={i:i,d:de};break;}}
-  if(last)h+='<div class="sp-card" data-go="days"><div class="sp-t">Last report \u00b7 day '+(last.i+1)+'</div><div class="sp-v">'+esc((last.d.demeanour||last.d.notes||last.d.feeding||"").slice(0,160))+'</div></div>';
-  return '<aside class="sidepanel">'+h+'</aside>';
-}
 function renderMain(){document.getElementById("content").innerHTML=page();}
-function showSummaryOverlay(){var ov=document.getElementById("summary-overlay");if(!ov){ov=document.createElement("div");ov.id="summary-overlay";ov.className="med-overlay";ov.onclick=function(e){if(e.target===ov)hideSummaryOverlay();var g=e.target.closest&&e.target.closest("[data-go]");if(g){hideSummaryOverlay();}};document.body.appendChild(ov);}
-  ov.innerHTML='<div class="med-modal" style="width:420px;padding:0;background:transparent;box-shadow:none">'+sidePanelHtml().replace('<aside class="sidepanel">','<aside class="sidepanel" style="display:flex">')+'<div style="display:flex;justify-content:flex-end;margin-top:10px"><button onclick="hideSummaryOverlay()" class="btn btnp">Close</button></div></div>';
-  requestAnimationFrame(function(){ov.classList.add("show");});}
-function hideSummaryOverlay(){var ov=document.getElementById("summary-overlay");if(ov)ov.classList.remove("show");}
 function render(){renderNav();renderMain();updateIsoChip();updateWarnChip();updateNoticeChip();updateSaveBar();updateHeaderDog();checkDuplicateName();checkMicrochip();}
 var CHIP_CC={"372":"Ireland","826":"United Kingdom","250":"France","276":"Germany","380":"Italy","724":"Spain","528":"Netherlands","056":"Belgium","620":"Portugal","616":"Poland","642":"Romania","208":"Denmark","752":"Sweden","040":"Austria","348":"Hungary","203":"Czechia","372":"Ireland"};
 function microchipLookup(num){try{if(navigator.clipboard&&num)navigator.clipboard.writeText(num);}catch(e){}window.open("https://www.europetnet.com/","_blank","noopener");}
@@ -5417,7 +5371,7 @@ function dtable(id,section,cols,rows,defKey){
   return h+'</tbody></table>';
 }
 function kbHintHtml(){return '<div class="kbhint">Keyboard: <kbd>/</kbd> search &middot; <kbd>N</kbd> new dog &middot; <kbd>Esc</kbd> close &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> tabs inside a record</div>';}
-function closeAnyOverlay(){var ids=["warn-overlay","con-overlay","iso-overlay","notice-overlay","walk-overlay","glance-overlay","today-overlay","summary-overlay"];var hit=false;ids.forEach(function(id){var o=document.getElementById(id);if(o&&o.classList.contains("show")){o.classList.remove("show");hit=true;}});var dm=document.getElementById("dash-menu");if(dm&&dm.style.display!=="none"&&dm.style.display!==""){closeDashMenu();hit=true;}return hit;}
+function closeAnyOverlay(){var ids=["warn-overlay","con-overlay","iso-overlay","notice-overlay","walk-overlay","glance-overlay"];var hit=false;ids.forEach(function(id){var o=document.getElementById(id);if(o&&o.classList.contains("show")){o.classList.remove("show");hit=true;}});var dm=document.getElementById("dash-menu");if(dm&&dm.style.display!=="none"&&dm.style.display!==""){closeDashMenu();hit=true;}return hit;}
 document.addEventListener("keydown",function(e){
   if(e.metaKey||e.ctrlKey||e.altKey)return;
   var t=e.target,tag=(t&&t.tagName||"").toLowerCase();var typing=tag==="input"||tag==="textarea"||tag==="select"||(t&&t.isContentEditable);
