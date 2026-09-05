@@ -443,7 +443,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.200",date:"2026-09-05",note:"Lighter on the database. Photos now live in their own photo store (a dog_photos table) and only load when you open a dog\u2019s Photos tab; the dog\u2019s record keeps just a small profile thumb. The board refreshes by checking what changed rather than re-downloading every dog, and saves no longer echo the whole record back. One-off: admin menu \u203a Move photos to photo store (needs the dog_photos table created first \u2014 SQL supplied). Backups now include photos."},{version:"3.199",date:"2026-09-03",note:"Login screen: the NSPCA lock-up is centred and the Longford \u00b7 Dog Isolation Unit chip sits underneath it."},{version:"3.198",date:"2026-09-03",note:"Overview: \u2018Is anyone looking at this dog?\u2019 now counts day reports as well as notes (\u2018Last note or day report\u2019, amber after 2 days) and flags \u2018Weighed\u2019 after 7 days to match the weight nudge elsewhere."},{version:"3.197",date:"2026-09-03",note:"Medical: the heart on Current health and the scissors on Neuter / Spay (and in the due list) are gone \u2014 they were written as text escapes the earlier sweep didn\u0027t catch. Ticks, crosses and the edit pencil stay; they\u0027re controls, not decoration."},{version:"3.196",date:"2026-09-03",note:"Login screen: a crisper NSPCA mark (twice the resolution of the header one), with a Lichen rule down its right side and the tagline set beside it on three lines, the way the lock-up reads on the letterhead."}
+var CHANGELOG=[{version:"3.201",date:"2026-09-05",note:"Backups are records only again \u2014 no photos, no thumbnails \u2014 so the file stays small. Restoring a backup still reattaches any photos already in the photo store to their dogs."},{version:"3.200",date:"2026-09-05",note:"Lighter on the database. Photos now live in their own photo store (a dog_photos table) and only load when you open a dog\u2019s Photos tab; the dog\u2019s record keeps just a small profile thumb. The board refreshes by checking what changed rather than re-downloading every dog, and saves no longer echo the whole record back. One-off: admin menu \u203a Move photos to photo store (needs the dog_photos table created first \u2014 SQL supplied). Backups now include photos."},{version:"3.199",date:"2026-09-03",note:"Login screen: the NSPCA lock-up is centred and the Longford \u00b7 Dog Isolation Unit chip sits underneath it."},{version:"3.198",date:"2026-09-03",note:"Overview: \u2018Is anyone looking at this dog?\u2019 now counts day reports as well as notes (\u2018Last note or day report\u2019, amber after 2 days) and flags \u2018Weighed\u2019 after 7 days to match the weight nudge elsewhere."},{version:"3.197",date:"2026-09-03",note:"Medical: the heart on Current health and the scissors on Neuter / Spay (and in the due list) are gone \u2014 they were written as text escapes the earlier sweep didn\u0027t catch. Ticks, crosses and the edit pencil stay; they\u0027re controls, not decoration."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1910,12 +1910,11 @@ async function migrateAllPhotos(){
   });
 }
 function downloadBackup(){if(currentRole()!=="admin"&&currentRole()!=="director"){appAlert("Backups are admin-only.");return;}
-  if(supabaseClient){miniToast("Fetching photos for the backup\u2026");supabaseClient.from("dog_photos").select(PHOTO_COLS).then(function(res){downloadBackupRun((res&&res.data)||[]);});}
-  else downloadBackupRun([]);
+  downloadBackupRun([]);
 }
 function downloadBackupRun(photos){
   try{
-    var payload={app:"NSPCA Dog Isolation",exported:new Date().toISOString(),by:currentName(),recordCount:records.length,records:records,photos:photos||[]};
+    var payload={app:"Holdfast",exported:new Date().toISOString(),by:currentName(),recordCount:records.length,records:records.map(function(r){var c=JSON.parse(JSON.stringify(r));if(c.state&&c.state.dog){delete c.state.dog.photo;delete c.state.dog.photos;}return c;})};
     var blob=new Blob([JSON.stringify(payload,null,1)],{type:"application/json"});
     var a=document.createElement("a");
     a.href=URL.createObjectURL(blob);
