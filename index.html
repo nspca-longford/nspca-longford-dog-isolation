@@ -443,7 +443,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.204",date:"2026-09-05",note:"Kennel card: write on it before printing. The card no longer prints itself the moment it opens \u2014 it opens with a bar at the top, every piece of text can be tapped and changed on screen, there\u0027s a lined Notes for the door box to type into, and Print / Save PDF is on the bar. Nothing typed on the card is saved back to the record."},{version:"3.203",date:"2026-09-05",note:"Move photos to photo store now also finds dogs whose only photo is the single full-size profile picture (the way photos were stored before the photo log), so the menu item appears and those move across too, leaving the thumbnail."},{version:"3.202",date:"2026-09-05",note:"Kennel card overhauled. One A4 page built to be read from the corridor: charcoal band with the kennel number large in Lichen, the dog\u0027s name at 40pt with the photo beside it, a full-width walk-light strip (colour, score, who can walk this dog, and any held/provisional note), details on the left, alerts on the right (contagious, restricted breed, handling warnings, care notices, EA management), daily care lines, and a this-week tick grid for fed/cleaned/walked/meds. No emoji. The standalone kennel-card.html generator uses the identical card."},{version:"3.201",date:"2026-09-05",note:"Backups are records only again \u2014 no photos, no thumbnails \u2014 so the file stays small. Restoring a backup still reattaches any photos already in the photo store to their dogs."},{version:"3.200",date:"2026-09-05",note:"Lighter on the database. Photos now live in their own photo store (a dog_photos table) and only load when you open a dog\u2019s Photos tab; the dog\u2019s record keeps just a small profile thumb. The board refreshes by checking what changed rather than re-downloading every dog, and saves no longer echo the whole record back. One-off: admin menu \u203a Move photos to photo store (needs the dog_photos table created first \u2014 SQL supplied). Backups now include photos."}
+var CHANGELOG=[{version:"3.205",date:"2026-09-05",note:"Sharper photos. The kennel card now prints the dog\u0027s full photo from the photo store rather than the small board thumbnail. New photos are stored at up to 1200px (was 400) now that they live outside the record, so cards and the lightbox are crisp; the board still uses the light thumbnail."},{version:"3.204",date:"2026-09-05",note:"Kennel card: write on it before printing. The card no longer prints itself the moment it opens \u2014 it opens with a bar at the top, every piece of text can be tapped and changed on screen, there\u0027s a lined Notes for the door box to type into, and Print / Save PDF is on the bar. Nothing typed on the card is saved back to the record."},{version:"3.203",date:"2026-09-05",note:"Move photos to photo store now also finds dogs whose only photo is the single full-size profile picture (the way photos were stored before the photo log), so the menu item appears and those move across too, leaving the thumbnail."},{version:"3.202",date:"2026-09-05",note:"Kennel card overhauled. One A4 page built to be read from the corridor: charcoal band with the kennel number large in Lichen, the dog\u0027s name at 40pt with the photo beside it, a full-width walk-light strip (colour, score, who can walk this dog, and any held/provisional note), details on the left, alerts on the right (contagious, restricted breed, handling warnings, care notices, EA management), daily care lines, and a this-week tick grid for fed/cleaned/walked/meds. No emoji. The standalone kennel-card.html generator uses the identical card."},{version:"3.201",date:"2026-09-05",note:"Backups are records only again \u2014 no photos, no thumbnails \u2014 so the file stays small. Restoring a backup still reattaches any photos already in the photo store to their dogs."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1927,6 +1927,14 @@ function downloadBackupRun(photos){
 function openKennelCard(){
   var d=S.dog||{};
   if(!d.name){appAlert("Add the dog's name first.");return;}
+  var w=window.open("","_blank");
+  if(!w){appAlert("Couldn\u0027t open the card \u2014 allow pop-ups for this site.");return;}
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Kennel card</title></head><body style="font-family:Inter,sans-serif;background:#f4f5f2;color:#6b7280;padding:40px;text-align:center">Preparing the card\u2026</body></html>');
+  var go=function(){buildKennelCard(w);};
+  if(S._id&&supabaseClient&&!photosFor()&&!legacyPhotos()){loadDogPhotos(S._id).then(go,go);}else go();
+}
+function buildKennelCard(w){
+  var d=S.dog||{};
   var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
   var tl=total?handlingLight(total,S.scores):null;
   var info=d.intakeDate?isolationInfo(d.intakeDate,(S.fin&&S.fin.outcome)||"",isoExtraDays(d),pupIsoVax(d,S.medical)):{state:"none"};
@@ -1971,13 +1979,11 @@ function openKennelCard(){
     floored:tl?!!tl.floored:false,floorCat:(tl&&tl.floorCat)||"",
     eaCat:(ea&&ea.complete)?ea.cat.replace("Category ","Cat "):"",eaMgmt:(ea&&ea.complete)?(ea.mgmt||""):"",
     contagious:conNames,zoonotic:zoo,restrictedLabel:restrictedLabel,restrictedXl:rb?!!rb.xl:false,
-    warnings:ws,notices:ns,feeding:feeding,photo:d.photo||"",
+    warnings:ws,notices:ns,feeding:feeding,photo:(function(){var f=starPhotoFull();return f||d.photo||"";})(),
     foot:"Printed "+new Date().toLocaleString("en-IE")+" \u00b7 "+currentName()
   };
   try{localStorage.setItem("nspca-kennelcard",JSON.stringify(payload));}catch(e){}
-  var w=window.open("","_blank");
-  if(!w){appAlert("Couldn\u0027t open the card \u2014 allow pop-ups for this site.");return;}
-  w.document.write(kennelCardDoc(payload));w.document.close();
+  w.document.open();w.document.write(kennelCardDoc(payload));w.document.close();
 }
 function kennelCardDoc(p){
   var P={};for(var k in p)P[k]=p[k];P.chip=p.microchip||p.chip||"";P.isoEnds=p.isoEnds||"";
@@ -3519,7 +3525,7 @@ function renderFiles(){
   var fileCards=files.map(function(f,i){return'<div class="card" style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">'+(f.type==="image"?'<img src="'+fileURL(f)+'" onclick="showFileImage('+i+')" style="width:60px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;cursor:zoom-in">':'<div onclick="openFile('+i+')" style="width:60px;height:60px;border-radius:6px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;cursor:pointer"></div>')+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(f.name)+'</div><div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">'+fmtDMY(f.date)+(f.note?" &middot; "+esc(f.note):"")+'</div>'+(f.type==="image"?'<a href="'+fileURL(f)+'" download="'+esc(f.name)+'" style="font-size:11px;color:var(--color-teal)">Download</a>':'<a href="#" onclick="openFile('+i+');return false" style="font-size:11px;color:var(--color-teal)">Open</a>')+'</div><button class="btn btnr" style="font-size:11px;padding:4px 8px;flex-shrink:0" onclick="deleteFile('+i+')">&#10005;</button></div>';}).join("");
   return'<h2 style="margin-bottom:4px">Files & Documents</h2><div class="sub" style="margin-bottom:16px">Upload photos, scans or documents for this dog</div><div class="card" style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Upload File</div><div class="f"><label class="lbl">Note (optional)</label><input id="f-note" placeholder="e.g. Vet report 12 May"></div><label style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:13px;color:var(--color-text-secondary)">Choose file<input type="file" accept="image/*,application/pdf,.pdf,.doc,.docx" style="display:none" onchange="handleFileUpload(this)"></label><div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px">Up to 5 MB per file. Images, PDFs and documents.</div></div>'+(files.length?fileCards:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)"><div style="font-size:32px;margin-bottom:8px"></div>No files uploaded yet</div>')+browNav("files");
 }
-function compressPhoto(file,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var MAX=400,w=img.width,h=img.height;if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}var cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);cb(cv.toDataURL("image/jpeg",0.75));};img.src=e.target.result;};r.readAsDataURL(file);}
+function compressPhoto(file,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var MAX=1200,w=img.width,h=img.height;if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}var cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);cb(cv.toDataURL("image/jpeg",0.84));};img.src=e.target.result;};r.readAsDataURL(file);}
 // ── Photos ────────────────────────────────────────────────────────
 // Photos live in their own table (dog_photos), one row per photo. The dog
 // row carries only a small profile thumb (S.dog.photo). Full photos are
