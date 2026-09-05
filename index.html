@@ -351,6 +351,7 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
           <div onclick="dashMenuGo('profile')" class="dmi">My profile</div>
           <div id="dash-menu-users" onclick="dashMenuGo('users')" class="dmi" style="display:none">Manage Users</div>
           <div id="dmi-backup" onclick="closeDashMenu();downloadBackup()" class="dmi">Download backup</div>
+          <div id="dmi-movephotos" onclick="closeDashMenu();migrateAllPhotos()" class="dmi" style="display:none">Move photos to photo store</div>
           <div onclick="closeDashMenu();restoreBackupOpen()" class="dmi" id="dash-menu-restore">Restore backup</div>
           <div onclick="showWhatsNew()" class="dmi">What&#8217;s new</div>
           <div style="border-top:1px solid #e4e7e0;margin:4px 0"></div>
@@ -370,7 +371,7 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
       <div id="save-ind" style="display:none;align-items:center;font-size:11px;color:#9a9fa8"><span class="save-dot"></span>Saved</div>
       <button onclick="goToDashboard()" style="background:rgba(255,255,255,0.07);color:#cfd4cf;border:1px solid rgba(255,255,255,0.1);padding:5px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit">&#8592; All Dogs</button>
       <button onclick="showSummaryOverlay()" style="background:#333542;color:#c6e76c;border:1.5px solid #c6e76c;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">Summary</button>
-      <img id="badge-photo" onclick="showPhotoLightbox(S.dog&&S.dog.photo)" style="display:none;width:28px;height:28px;border-radius:8px;object-fit:cover;box-shadow:0 0 0 1.5px #c6e76c;cursor:zoom-in" alt="">
+      <img id="badge-photo" onclick="openStarPhoto()" style="display:none;width:28px;height:28px;border-radius:8px;object-fit:cover;box-shadow:0 0 0 1.5px #c6e76c;cursor:zoom-in" alt="">
       <div id="badge" style="display:none;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:4px 12px;color:#c6e76c;font-size:12px;font-weight:700"></div>
       <div id="iso-chip" onclick="showIsolationOverlay()" title="Isolation status" style="display:none;align-items:center;gap:4px;border:1px solid #0d9488;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap"></div>
       <div id="warn-chip" onclick="showWarningOverlay()" title="Handling warnings" style="display:none;align-items:center;gap:4px;border:1px solid #f59e0b;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap"></div>
@@ -442,7 +443,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.199",date:"2026-09-03",note:"Login screen: the NSPCA lock-up is centred and the Longford \u00b7 Dog Isolation Unit chip sits underneath it."},{version:"3.198",date:"2026-09-03",note:"Overview: \u2018Is anyone looking at this dog?\u2019 now counts day reports as well as notes (\u2018Last note or day report\u2019, amber after 2 days) and flags \u2018Weighed\u2019 after 7 days to match the weight nudge elsewhere."},{version:"3.197",date:"2026-09-03",note:"Medical: the heart on Current health and the scissors on Neuter / Spay (and in the due list) are gone \u2014 they were written as text escapes the earlier sweep didn\u0027t catch. Ticks, crosses and the edit pencil stay; they\u0027re controls, not decoration."},{version:"3.196",date:"2026-09-03",note:"Login screen: a crisper NSPCA mark (twice the resolution of the header one), with a Lichen rule down its right side and the tagline set beside it on three lines, the way the lock-up reads on the letterhead."},{version:"3.195",date:"2026-09-03",note:"Little things. The Save button shows its tick again after saving (\u2018Saved \u2713\u2019); the isolation chip in the record header no longer starts with a stray space where its icon was, and its overdue label says \u2018Past the isolation window\u2019 rather than \u2018Past Day 5\u2019."}
+var CHANGELOG=[{version:"3.200",date:"2026-09-05",note:"Lighter on the database. Photos now live in their own photo store (a dog_photos table) and only load when you open a dog\u2019s Photos tab; the dog\u2019s record keeps just a small profile thumb. The board refreshes by checking what changed rather than re-downloading every dog, and saves no longer echo the whole record back. One-off: admin menu \u203a Move photos to photo store (needs the dog_photos table created first \u2014 SQL supplied). Backups now include photos."},{version:"3.199",date:"2026-09-03",note:"Login screen: the NSPCA lock-up is centred and the Longford \u00b7 Dog Isolation Unit chip sits underneath it."},{version:"3.198",date:"2026-09-03",note:"Overview: \u2018Is anyone looking at this dog?\u2019 now counts day reports as well as notes (\u2018Last note or day report\u2019, amber after 2 days) and flags \u2018Weighed\u2019 after 7 days to match the weight nudge elsewhere."},{version:"3.197",date:"2026-09-03",note:"Medical: the heart on Current health and the scissors on Neuter / Spay (and in the due list) are gone \u2014 they were written as text escapes the earlier sweep didn\u0027t catch. Ticks, crosses and the edit pencil stay; they\u0027re controls, not decoration."},{version:"3.196",date:"2026-09-03",note:"Login screen: a crisper NSPCA mark (twice the resolution of the header one), with a Lichen rule down its right side and the tagline set beside it on three lines, the way the lock-up reads on the letterhead."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -626,7 +627,7 @@ async function retryPending(){
     var id=ids[i];var entry=p[id];
     try{
       if(id==="new"){
-        var res=await supabaseClient.from("dogs").insert([entry.row]);
+        var res=await supabaseClient.from("dogs").insert([entry.row],"id");
         if(res&&res.error)throw res.error;
       }else{
         var r2=await supabaseClient.from("dogs").update(entry.row).eq("id",id);
@@ -1434,7 +1435,7 @@ setInterval(updateClock,30000);
 function showDashboard(){restoreDashFilters();showScreen("dashboard-screen");renderDashboard();showWelcomeToast();maybeShowWhatsNew();startDashRefresh();}
 
 // ── Header dropdown menu ──────────────────────────────────────────
-function toggleDashMenu(e){var _bk=document.getElementById("dmi-backup");if(_bk)_bk.style.display=(currentRole()==="admin"||currentRole()==="director")?"":"none";
+function toggleDashMenu(e){var _bk=document.getElementById("dmi-backup");if(_bk)_bk.style.display=(currentRole()==="admin"||currentRole()==="director")?"":"none";var _mp=document.getElementById("dmi-movephotos");if(_mp)_mp.style.display=(currentRole()==="admin"&&records.some(function(r){return r.state&&r.state.dog&&Array.isArray(r.state.dog.photos)&&r.state.dog.photos.length;}))?"":"none";
   if(e){e.stopPropagation();}
   var m=document.getElementById("dash-menu");if(!m)return;
   var open=m.style.display==="block";
@@ -1757,27 +1758,31 @@ function restoreBackupOpen(){
         if(!Array.isArray(recs)||!recs.length)throw new Error("No records found in this file.");
         var existing=0,fresh=0;
         recs.forEach(function(b){if(records.some(function(r){return r.id===b.id;}))existing++;else fresh++;});
-        appConfirm("Restore backup from "+(data.exported?fmtDMY(data.exported.slice(0,10)):"unknown date")+"?\n\n"+recs.length+" dogs in file: "+existing+" will OVERWRITE existing records, "+fresh+" will be added as new. This cannot be undone.",function(){restoreBackupRun(recs);},{danger:true});
+        appConfirm("Restore backup from "+(data.exported?fmtDMY(data.exported.slice(0,10)):"unknown date")+"?\n\n"+recs.length+" dogs in file: "+existing+" will OVERWRITE existing records, "+fresh+" will be added as new. This cannot be undone.",function(){restoreBackupRun(recs,data.photos||[]);},{danger:true});
       }catch(e){appAlert("Couldn't read that backup: "+e.message);}
     };
     rd.readAsText(f);
   };
   inp.click();
 }
-async function restoreBackupRun(recs){
+async function restoreBackupRun(recs,photos){
   if(!supabaseClient){appAlert("No database connection.");return;}
-  var ok=0,fail=0;
+  var ok=0,fail=0,idMap={};
   for(var i=0;i<recs.length;i++){
     var b=recs[i];
     try{
       var st=JSON.parse(JSON.stringify(b.state||{}));delete st._id;st._savedBy=currentName()+" (restore)";
       var row={name:b.name||"",breed:b.breed||"",ref_no:b.refNo||"",intake_date:b.intakeDate||null,assessor:b.assessor||"",score:b.score||0,traffic_light:b.trafficLight||"",saved_at:new Date().toISOString(),data:st};
       var exists=records.some(function(r){return r.id===b.id;});
-      var res=exists?await supabaseClient.from("dogs").update(row).eq("id",b.id):await supabaseClient.from("dogs").insert([row]);
+      var res=exists?await supabaseClient.from("dogs").update(row).eq("id",b.id):await supabaseClient.from("dogs").insert([row],"id");
       if(res&&res.error)throw res.error;
+      idMap[b.id]=exists?b.id:(res.data&&res.data[0]?res.data[0].id:null);
       ok++;
     }catch(e){fail++;}
   }
+  // Photos from the backup follow their dogs (old id -> restored id).
+  var byDog={};(photos||[]).forEach(function(p){var nid=idMap[p.dog_id];if(!nid)return;(byDog[nid]=byDog[nid]||[]).push({dog_id:nid,date:p.date||"",note:p.note||"",star:!!p.star,data:p.data||""});});
+  for(var did in byDog){try{await supabaseClient.from("dog_photos").delete().eq("dog_id",did);await supabaseClient.from("dog_photos").insert(byDog[did],"id");delete _photoStore[did];}catch(e){console.error("restore photos:",did,e);}}
   await loadRecordsList();renderDashboard();
   miniToast("Restore complete: "+ok+" saved"+(fail?", "+fail+" failed":""));
 }
@@ -1875,9 +1880,42 @@ function printIncidentRegister(){
   w.document.close();w.focus();setTimeout(function(){w.print();},300);
 }
 
+// Walks every dog still carrying photos inside its row and moves them to
+// dog_photos. Works from the list already in memory — no extra download.
+async function migrateAllPhotos(){
+  if(currentRole()!=="admin"){appAlert("Admin only.");return;}
+  if(!supabaseClient){appAlert("No database connection.");return;}
+  var todo=records.filter(function(r){return r.state&&r.state.dog&&Array.isArray(r.state.dog.photos)&&r.state.dog.photos.length;});
+  if(!todo.length){miniToast("Nothing to move \u2014 every photo is already in the photo store.");return;}
+  appConfirm("Move "+todo.length+" dog"+(todo.length===1?"":"s")+"\u2019 photos out of their records and into the photo store? The board loads far lighter afterwards. Takes a minute.",async function(){
+    var ok=0,fail=0;
+    for(var i=0;i<todo.length;i++){
+      var rec=todo[i];
+      try{
+        var leg=rec.state.dog.photos;
+        var rows=leg.map(function(p){return{dog_id:rec.id,date:p.date||"",note:p.note||"",star:!!p.star,data:p.data||""};}).filter(function(r){return r.data;});
+        if(rows.length&&!rows.some(function(r){return r.star;}))rows[rows.length-1].star=true;
+        if(rows.length){var res=await supabaseClient.from("dog_photos").insert(rows,PHOTO_COLS);if(!res||res.error)throw(res&&res.error)||new Error("insert failed");}
+        delete rec.state.dog.photos;
+        var st=starRow(rows);rec.state.dog.photo=st?await thumbOf(st.data):"";
+        await saveRecordChange(rec);
+        delete _photoStore[rec.id];
+        ok++;miniToast("Moving photos\u2026 "+ok+" of "+todo.length);
+      }catch(e){console.error("migrateAllPhotos:",rec.id,e);fail++;}
+    }
+    cacheRecordsList();
+    if(S&&S._id){var cur=records.find(function(r){return r.id===S._id;});if(cur&&cur.state&&cur.state.dog){delete S.dog.photos;S.dog.photo=cur.state.dog.photo||"";persistSave();}}
+    appAlert("Photos moved for "+ok+" dog"+(ok===1?"":"s")+(fail?". "+fail+" failed \u2014 check the photo store table exists (see What\u2019s new) and try again.":"."));
+    renderDashboard();
+  });
+}
 function downloadBackup(){if(currentRole()!=="admin"&&currentRole()!=="director"){appAlert("Backups are admin-only.");return;}
+  if(supabaseClient){miniToast("Fetching photos for the backup\u2026");supabaseClient.from("dog_photos").select(PHOTO_COLS).then(function(res){downloadBackupRun((res&&res.data)||[]);});}
+  else downloadBackupRun([]);
+}
+function downloadBackupRun(photos){
   try{
-    var payload={app:"NSPCA Dog Isolation",exported:new Date().toISOString(),by:currentName(),recordCount:records.length,records:records};
+    var payload={app:"NSPCA Dog Isolation",exported:new Date().toISOString(),by:currentName(),recordCount:records.length,records:records,photos:photos||[]};
     var blob=new Blob([JSON.stringify(payload,null,1)],{type:"application/json"});
     var a=document.createElement("a");
     a.href=URL.createObjectURL(blob);
@@ -2128,7 +2166,7 @@ function storyEvents(){
   if(as.scoredDate)push(as.scoredDate,"key","","Behaviour scored","","scoring");
   if(as.lightOverrideDate)push(as.lightOverrideDate,"key","","Handling light overridden"+(as.lightOverride?" to "+as.lightOverride:""),as.lightOverrideReason,"rehoming");
   if(as.rehomingAt)push(as.rehomingAt,"key","","Cleared for rehoming"+(as.rehomingBy?" \u2014 "+as.rehomingBy:""),"","rehoming");
-  ((d.photos)||[]).forEach(function(p){push(p.date,"note","","Photo added",p.note,"dog");});
+  ((S._id&&Array.isArray(_photoStore[S._id]))?_photoStore[S._id]:(d.photos||[])).forEach(function(p){push(p.date,"note","","Photo added",p.note,"dog");});
   if(f.outcomeDate&&f.outcome)push(f.outcomeDate,"key",'',f.outcome,f.outcomeNotes,"outcome");
   ev.sort(function(x,y){return x.date<y.date?-1:x.date>y.date?1:(x.time||"").localeCompare(y.time||"");});
   return ev;
@@ -3463,30 +3501,104 @@ function renderFiles(){
   return'<h2 style="margin-bottom:4px">Files & Documents</h2><div class="sub" style="margin-bottom:16px">Upload photos, scans or documents for this dog</div><div class="card" style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:10px">Upload File</div><div class="f"><label class="lbl">Note (optional)</label><input id="f-note" placeholder="e.g. Vet report 12 May"></div><label style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:var(--color-background-secondary);border:1px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:13px;color:var(--color-text-secondary)">Choose file<input type="file" accept="image/*,application/pdf,.pdf,.doc,.docx" style="display:none" onchange="handleFileUpload(this)"></label><div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px">Up to 5 MB per file. Images, PDFs and documents.</div></div>'+(files.length?fileCards:'<div style="text-align:center;padding:30px;color:var(--color-text-secondary)"><div style="font-size:32px;margin-bottom:8px"></div>No files uploaded yet</div>')+browNav("files");
 }
 function compressPhoto(file,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var MAX=400,w=img.width,h=img.height;if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}var cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);cb(cv.toDataURL("image/jpeg",0.75));};img.src=e.target.result;};r.readAsDataURL(file);}
-function ensurePhotos(){
-  if(!S||!S.dog)return;
-  if(!Array.isArray(S.dog.photos))S.dog.photos=[];
-  if(S.dog.photo&&!S.dog.photos.length)S.dog.photos.push({date:S.dog.intakeDate||new Date().toISOString().slice(0,10),data:S.dog.photo,note:"Arrival photo",star:true});
+// ── Photos ────────────────────────────────────────────────────────
+// Photos live in their own table (dog_photos), one row per photo. The dog
+// row carries only a small profile thumb (S.dog.photo). Full photos are
+// fetched when a record's Photos tab is opened — never with the board.
+var _photoStore={},_photoStoreErr="";        // dog id -> rows, or "loading"
+var PHOTO_COLS="id,dog_id,date,note,star,data,created_at";
+function photosFor(){if(!S||!S._id)return[];var v=_photoStore[S._id];return Array.isArray(v)?v:null;}
+function legacyPhotos(){return(S&&S.dog&&Array.isArray(S.dog.photos)&&S.dog.photos.length)?S.dog.photos:null;}
+function makeThumb(dataUrl,cb){
+  if(!dataUrl){cb("");return;}
+  var img=new Image();
+  img.onload=function(){try{var MAX=200,w=img.width,h=img.height;if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}var cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);cb(cv.toDataURL("image/jpeg",0.72));}catch(e){cb(dataUrl);}};
+  img.onerror=function(){cb(dataUrl);};
+  img.src=dataUrl;
 }
-function syncStarPhoto(){
-  ensurePhotos();
-  var st=S.dog.photos.filter(function(p){return p.star;})[0]||S.dog.photos[S.dog.photos.length-1];
-  S.dog.photo=st?st.data:"";
+function thumbOf(dataUrl){return new Promise(function(res){makeThumb(dataUrl,res);});}
+function starRow(rows){rows=rows||[];return rows.filter(function(p){return p.star;})[0]||rows[rows.length-1]||null;}
+// The header badge and Overview show the thumb; tapping opens the full star
+// photo, fetched on demand if the Photos tab hasn't been opened yet.
+function starPhotoFull(){var ps=photosFor();var st=starRow(ps||[]);return st?st.data:(S&&S.dog?S.dog.photo:"");}
+function openStarPhoto(){
+  if(!S||!S.dog||!S.dog.photo)return;
+  showPhotoLightbox(starPhotoFull());
+  if(!photosFor()&&S._id){var id=S._id;loadDogPhotos(id).then(function(){if(!S||S._id!==id)return;var ov=document.getElementById("photo-lightbox");var img=ov&&ov.querySelector("img");var st=starRow(_photoStore[id]);if(img&&st&&ov.style.display!=="none")img.src=st.data;});}
 }
-function handlePhotoUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){appAlert("Photo too large. Max 5MB.");return;}compressPhoto(file,function(data){ensurePhotos();S.dog.photos.push({date:new Date().toISOString().slice(0,10),data:data,note:"",star:!S.dog.photos.length});syncStarPhoto();saveRecord();renderMain();});}
-function starPhoto(i){ensurePhotos();S.dog.photos.forEach(function(p,j){p.star=(j===i);});syncStarPhoto();saveRecord();renderMain();}
-function deletePhoto(i){appConfirm("Remove this photo from the log?",function(){ensurePhotos();S.dog.photos.splice(i,1);if(S.dog.photos.length&&!S.dog.photos.some(function(p){return p.star;}))S.dog.photos[S.dog.photos.length-1].star=true;syncStarPhoto();saveRecord();renderMain();});}
-function photoNote(i){ensurePhotos();var p=S.dog.photos[i];if(!p)return;var cur=p.note||"";var v=prompt("Condition note for this photo (what it shows):",cur);if(v===null)return;p.note=v.trim();saveRecord();renderMain();}
+async function setStarThumb(rows){
+  var st=starRow(rows);
+  S.dog.photo=st?await thumbOf(st.data):"";
+}
+// Moves this dog's old in-record photos into dog_photos, once. Records saved
+// before v3.200 carried every photo inside the dog row.
+async function migrateLegacyPhotos(){
+  var leg=legacyPhotos();if(!leg||!S._id||!supabaseClient)return false;
+  var rows=leg.map(function(p){return{dog_id:S._id,date:p.date||"",note:p.note||"",star:!!p.star,data:p.data||""};}).filter(function(r){return r.data;});
+  if(!rows.some(function(r){return r.star;})&&rows.length)rows[rows.length-1].star=true;
+  var res=await supabaseClient.from("dog_photos").insert(rows,PHOTO_COLS);
+  if(!res||res.error)throw(res&&res.error)||new Error("photo move failed");
+  delete S.dog.photos;
+  await setStarThumb(res.data||[]);
+  _photoStore[S._id]=res.data||[];
+  saveRecord();
+  return true;
+}
+async function loadDogPhotos(id){
+  if(!id||!supabaseClient)return null;
+  if(_photoStore[id]==="loading")return null;
+  _photoStore[id]="loading";_photoStoreErr="";
+  try{
+    if(S&&S._id===id&&legacyPhotos()){await migrateLegacyPhotos();return _photoStore[id];}
+    var res=await supabaseClient.from("dog_photos").select(PHOTO_COLS).eq("dog_id",id).order("created_at");
+    if(!res||res.error)throw(res&&res.error)||new Error("load failed");
+    _photoStore[id]=res.data||[];
+  }catch(e){console.error("loadDogPhotos:",e);delete _photoStore[id];_photoStoreErr=(e&&e.message)||"Couldn\u0027t load photos";return null;}
+  return _photoStore[id];
+}
+function handlePhotoUpload(inp){var file=inp.files[0];if(!file)return;if(file.size>5*1024*1024){appAlert("Photo too large. Max 5MB.");return;}
+  compressPhoto(file,async function(data){
+    if(!supabaseClient){appAlert("No connection \u2014 photos are saved straight to the database, so try again when you\u0027re back online.");return;}
+    if(!S._id){await saveRecord();if(!S._id){appAlert("Save the dog\u0027s name first, then add the photo.");return;}}
+    var ps=photosFor();if(!ps){ps=await loadDogPhotos(S._id);if(!ps){appAlert("Couldn\u0027t reach the photo store: "+_photoStoreErr);return;}}
+    var row={dog_id:S._id,date:new Date().toISOString().slice(0,10),note:"",star:!ps.length,data:data};
+    var res=await supabaseClient.from("dog_photos").insert(row,PHOTO_COLS);
+    if(!res||res.error){appAlert("Photo didn\u0027t save: "+((res&&res.error&&res.error.message)||"unknown error"));return;}
+    ps.push(res.data[0]);
+    if(row.star){await setStarThumb(ps);saveRecord();}
+    renderMain();
+  });
+}
+async function starPhoto(rowId){var ps=photosFor();if(!ps||!S._id)return;
+  await supabaseClient.from("dog_photos").update({star:false}).eq("dog_id",S._id);
+  await supabaseClient.from("dog_photos").update({star:true}).eq("id",rowId);
+  ps.forEach(function(p){p.star=(p.id===rowId);});
+  await setStarThumb(ps);saveRecord();renderMain();
+}
+function deletePhoto(rowId){appConfirm("Remove this photo from the log?",async function(){
+  var ps=photosFor();if(!ps)return;var i=ps.findIndex(function(p){return p.id===rowId;});if(i<0)return;
+  var res=await supabaseClient.from("dog_photos").delete().eq("id",rowId);
+  if(res&&res.error){appAlert("Couldn\u0027t remove the photo: "+(res.error.message||""));return;}
+  var wasStar=!!ps[i].star;ps.splice(i,1);
+  if(wasStar&&ps.length){var nx=ps[ps.length-1];nx.star=true;await supabaseClient.from("dog_photos").update({star:true}).eq("id",nx.id);}
+  await setStarThumb(ps);saveRecord();renderMain();
+});}
+async function photoNote(rowId){var ps=photosFor();if(!ps)return;var p=ps.find(function(x){return x.id===rowId;});if(!p)return;var cur=p.note||"";var v=prompt("Condition note for this photo (what it shows):",cur);if(v===null)return;p.note=v.trim();await supabaseClient.from("dog_photos").update({note:p.note}).eq("id",rowId);renderMain();}
 function renderPhotos(){
-  ensurePhotos();var ps=S.dog.photos||[];var n=ps.length;
+  var ps=photosFor();
   var add='<label class="btn btnp" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">Add photo<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>';
+  if(!ps){
+    if(S._id&&_photoStore[S._id]!=="loading"&&!_photoStoreErr)loadDogPhotos(S._id).then(function(){if(S.tab==="photos")renderMain();});
+    var msg=_photoStoreErr?'Couldn\u0027t load photos \u2014 '+esc(_photoStoreErr)+'. <a href="#" onclick="_photoStoreErr=\'\';renderMain();return false;">Try again</a>':(S._id?'Loading photos\u2026':'No photos yet \u2014 the intake photo is the first entry in every dog\u0027s record.');
+    return '<h2 style="margin-bottom:4px">Photos</h2><div class="sub">'+msg+'</div><div class="card">'+add+'</div>';
+  }
+  var n=ps.length;
   var h='<h2 style="margin-bottom:4px">Photos</h2><div class="sub">'+(n?n+' photo'+(n===1?'':'s')+' on this record'+(n>=2?' \u00b7 arrival vs latest below':''):'No photos yet \u2014 the intake photo is the first entry in every dog\u0027s record.')+'</div>';
   h+='<div class="card">'+add+(n?'<div style="margin-top:4px">'+photoLogHtml()+'</div>':'')+'</div>';
   return h;
 }
 function photoLogHtml(){
-  ensurePhotos();
-  var ps=S.dog.photos||[];
+  var ps=photosFor()||[];
   if(!ps.length)return"";
   var byDate=ps.slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");});
   var h='';
@@ -3497,15 +3609,15 @@ function photoLogHtml(){
       +'<div style="flex:1;text-align:center"><img src="'+l.data+'" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px"><div style="font-size:10px;color:#6b7280;margin-top:4px"><b>'+fmtDMY(l.date)+'</b> \u00b7 latest'+(l.note?' \u00b7 '+esc(l.note):'')+'</div></div></div>';
   }
   h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px">'+ps.map(function(p,i){
-    return '<div style="position:relative;aspect-ratio:1"><img src="'+p.data+'" onclick="photoNote('+i+')" title="'+esc(p.note||"tap to add a condition note")+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px;cursor:pointer;'+(p.star?'outline:2px solid #c6e76c':'')+'">'
+    return '<div style="position:relative;aspect-ratio:1"><img src="'+p.data+'" onclick="photoNote('+p.id+')" title="'+esc(p.note||"tap to add a condition note")+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px;cursor:pointer;'+(p.star?'outline:2px solid #c6e76c':'')+'">'
       +'<div style="position:absolute;bottom:2px;left:2px;right:2px;font-size:8.5px;font-weight:700;color:#454857;background:rgba(255,255,255,0.85);border-radius:6px;text-align:center;padding:1px 0">'+fmtDMY(p.date)+(p.star?' ':'')+'</div>'
-      +'<button onclick="starPhoto('+i+')" title="Use as profile photo" style="position:absolute;top:3px;left:3px;background:rgba(255,255,255,0.9);border:none;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;padding:1px 6px">Use</button>'
-      +'<button onclick="deletePhoto('+i+')" style="position:absolute;top:3px;right:3px;background:rgba(255,255,255,0.9);border:none;border-radius:8px;font-size:10px;cursor:pointer;padding:1px 5px">\u2715</button></div>';
+      +'<button onclick="starPhoto('+p.id+')" title="Use as profile photo" style="position:absolute;top:3px;left:3px;background:rgba(255,255,255,0.9);border:none;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;padding:1px 6px">Use</button>'
+      +'<button onclick="deletePhoto('+p.id+')" style="position:absolute;top:3px;right:3px;background:rgba(255,255,255,0.9);border:none;border-radius:8px;font-size:10px;cursor:pointer;padding:1px 5px">\u2715</button></div>';
   }).join("")+'</div>';
   return h;
 }
 
-function removePhoto(){ensurePhotos();var i=S.dog.photos.findIndex(function(p){return p.star;});if(i<0)i=S.dog.photos.length-1;if(i>=0)deletePhoto(i);else{S.dog.photo="";renderMain();}}
+function removePhoto(){var ps=photosFor();if(!ps){if(S._id){loadDogPhotos(S._id).then(function(r){if(r)removePhoto();else{S.dog.photo="";saveRecord();renderMain();}});return;}S.dog.photo="";renderMain();return;}var st=starRow(ps);if(st)deletePhoto(st.id);else{S.dog.photo="";saveRecord();renderMain();}}
 function showRepositionPhoto(){
   if(!S.dog||!S.dog.photo)return;
   var pos=(S.dog.photoPos||"50% 50%").split(" ");
@@ -4877,7 +4989,7 @@ function page(){
     var ii=d.intakeDate?isolationInfo(d.intakeDate,(f.outcome||""),isoExtraDays(d),pupIsoVax(d,S.medical)):null;
     var meta=[d.breed,d.sex,d.age,d.kennel].filter(Boolean).join(" \u00b7 ");
     var photoEl=d.photo
-      ? '<img src="'+d.photo+'" alt="'+esc(d.name||'dog')+'" onclick="showPhotoLightbox(S.dog.photo)" style="width:72px;height:72px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';border-radius:16px;box-shadow:0 0 0 2px #c6e76c;cursor:zoom-in;flex-shrink:0">'
+      ? '<img src="'+d.photo+'" alt="'+esc(d.name||'dog')+'" onclick="openStarPhoto()" style="width:72px;height:72px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+';border-radius:16px;box-shadow:0 0 0 2px #c6e76c;cursor:zoom-in;flex-shrink:0">'
       : '<div style="width:72px;height:72px;border-radius:16px;background:linear-gradient(135deg,#3a3c46,#4d5140);box-shadow:0 0 0 2px #c6e76c;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" style="width:30px;height:30px;opacity:.45" fill="#8fae3f"><ellipse cx="8.5" cy="8" rx="1.8" ry="2.4"/><ellipse cx="15.5" cy="8" rx="1.8" ry="2.4"/><ellipse cx="5" cy="11.5" rx="1.6" ry="2.1"/><ellipse cx="19" cy="11.5" rx="1.6" ry="2.1"/><path d="M12 11c-2.8 0-5 2.4-5 4.7 0 1.6 1.2 2.8 2.8 2.8.8 0 1.5-.3 2.2-.3s1.4.3 2.2.3c1.6 0 2.8-1.2 2.8-2.8C17 13.4 14.8 11 12 11z"/></svg></div>';
     var tlPill=tl?'<span onclick="showWalkLegend(\''+tl.l+'\')" title="Who can walk this dog?" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;background:'+tl.bg+';color:'+tl.tc+';flex-shrink:0;cursor:pointer">'+tl.l+'<span style="display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;border:1.3px solid currentColor;font-size:8px;font-weight:700;font-style:italic;line-height:1;opacity:0.85">i</span></span>':'';
     var chips=[];
@@ -5270,7 +5382,7 @@ function tabDone(id){
   function anyVal(o){return o?Object.keys(o).some(function(k){var v=o[k];return v!==""&&v!==null&&v!==undefined&&v!==false&&v!==0&&!(Array.isArray(v)&&v.length===0);}):false;}
   switch(id){
     case "dog": return !!(S.dog&&S.dog.name);
-    case "photos": ensurePhotos();return (S.dog.photos||[]).length?true:null;
+    case "photos": var _pp=photosFor();return _pp?(_pp.length?true:null):((S.dog.photo||legacyPhotos())?true:null);
     case "arrival": return anyVal(S.arrival);
     case "days": return (S.days||[]).some(function(d){return d&&(d.demeanour||d.feeding||d.toileting||d.staffInt||d.incidents||d.notes);});
     case "assessment": return anyVal(S.assessment);
@@ -5558,6 +5670,7 @@ function initSupabase(){
         var q=base+"?select="+(cols||"*");
         var chain={
           eq:function(col,val){q+="&"+col+"=eq."+encodeURIComponent(val);return chain;},
+          in:function(col,vals){q+="&"+col+"=in.("+(vals||[]).map(function(v){return encodeURIComponent(v);}).join(",")+")";return chain;},
           limit:function(n){q+="&limit="+n;return chain;},
           order:function(col,opts){q+="&order="+col+(opts&&opts.ascending===false?".desc":".asc");return chain;},
           single:function(){return fetch(q,{headers:Object.assign({},headers,{"Accept":"application/vnd.pgrst.object+json"})}).then(function(r){return r.json().then(function(d){return r.ok?{data:d,error:null}:{data:null,error:d};});});},
@@ -5568,8 +5681,12 @@ function initSupabase(){
         var oc=(opts&&opts.onConflict)?("?on_conflict="+encodeURIComponent(opts.onConflict)):"";
         return fetch(base+oc,{method:"POST",headers:Object.assign({},headers,{"Prefer":"resolution=merge-duplicates,return=representation"}),body:JSON.stringify(Array.isArray(row)?row:[row])}).then(function(r){return r.json().then(function(d){return r.ok?{data:Array.isArray(d)?d:[d],error:null}:{data:null,error:d};}).catch(function(){return r.ok?{data:[],error:null}:{data:null,error:{message:"upsert failed"}};});});
       },
-      insert:function(rows){return fetch(base,{method:"POST",headers:Object.assign({},headers,{"Prefer":"return=representation"}),body:JSON.stringify(Array.isArray(rows)?rows[0]:rows)}).then(function(r){return r.json().then(function(d){return r.ok?{data:Array.isArray(d)?d:[d],error:null}:{data:null,error:d};});});},
-      update:function(data){var q2=base;return{eq:function(col,val){q2+="?"+col+"=eq."+encodeURIComponent(val);return fetch(q2,{method:"PATCH",headers:Object.assign({},headers,{"Prefer":"return=representation"}),body:JSON.stringify(data)}).then(function(r){return r.json().then(function(d){return r.ok?{data:d,error:null}:{data:null,error:d};});});}};},
+      // insert(rows, cols): cols limits what comes back (e.g. "id") so a saved
+      // row isn't echoed to us in full — echoes count against the egress cap.
+      insert:function(rows,cols){return fetch(base+(cols?"?select="+cols:""),{method:"POST",headers:Object.assign({},headers,{"Prefer":"return=representation"}),body:JSON.stringify(Array.isArray(rows)?rows:[rows])}).then(function(r){return r.json().then(function(d){return r.ok?{data:Array.isArray(d)?d:[d],error:null}:{data:null,error:d};});});},
+      // Updates ask for nothing back (return=minimal): the old echo returned the
+      // whole row — photos and all — on every keystroke-debounced save.
+      update:function(data){var q2=base;return{eq:function(col,val){q2+="?"+col+"=eq."+encodeURIComponent(val);return fetch(q2,{method:"PATCH",headers:Object.assign({},headers,{"Prefer":"return=minimal"}),body:JSON.stringify(data)}).then(function(r){if(r.ok)return{data:null,error:null};return r.json().then(function(d){return{data:null,error:d};}).catch(function(){return{data:null,error:{message:"Update failed ("+r.status+")"}};});});}};},
       delete:function(){return{eq:function(col,val){return fetch(base+"?"+col+"=eq."+encodeURIComponent(val),{method:"DELETE",headers:headers}).then(function(r){return r.ok?{data:null,error:null}:{data:null,error:{message:"Delete failed"}};});}};},
     };
   }};return true;
@@ -5592,11 +5709,11 @@ async function saveRecord(){
       var up=await supabaseClient.from("dogs").update(row).eq("id",S._id);
       if(up&&up.error)throw up.error;
     }
-    else{var res=await supabaseClient.from("dogs").insert([row]);
+    else{var res=await supabaseClient.from("dogs").insert([row],"id");
       if(res&&res.error)throw res.error;
       if(res.data&&res.data[0]){S._id=res.data[0].id;}}
     pendingClear(S._id);
-    persistSave();showSaved();await loadRecordsList();updateSaveBar();
+    persistSave();showSaved();syncLocalRecord(S._id,row);updateSaveBar();
   }catch(e){
     console.error("saveRecord:",e);
     persistSave();
@@ -5609,6 +5726,8 @@ async function saveRecord(){
 async function deleteRecord(id){
   if(!supabaseClient)return;
   await supabaseClient.from("dogs").delete().eq("id",id);
+  try{await supabaseClient.from("dog_photos").delete().eq("dog_id",id);}catch(e){}
+  delete _photoStore[id];
   await loadRecordsList();
   var ds=document.getElementById("dashboard-screen");
   if(ds&&ds.style.display!=="none")showDashSection("records");
@@ -5662,7 +5781,7 @@ function loadCachedRecordsList(){
   try{
     var raw=localStorage.getItem("nspca-records-cache");if(!raw)return false;
     var o=JSON.parse(raw);if(!o||!o.rows||!o.rows.length)return false;
-    records=o.rows;_recordsFromCache=true;_recordsCachedAt=o.at||0;
+    records=o.rows;_recordsFromCache=true;_recordsCachedAt=o.at||0;_recordsCacheSlim=!!o.slim;
     return true;
   }catch(e){return false;}
 }
@@ -5675,19 +5794,51 @@ function offlineBannerHtml(){
     +'<button onclick="retryLoad()" style="background:none;border:0.5px solid rgba(133,77,14,0.4);color:#854d0e;padding:4px 10px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit;flex-shrink:0">Retry</button></div>';
 }
 async function retryLoad(){try{await loadRecordsList();renderDashboard();}catch(e){}}
+// Columns the board needs. Named on purpose — never "*" — so nothing heavy
+// that lands in the table later gets pulled on every refresh.
+var REC_COLS="id,name,breed,ref_no,intake_date,assessor,score,traffic_light,saved_at,data";
+function rowToRec(row){
+  var st=null;try{st=typeof row.data==="string"?JSON.parse(row.data):row.data;}catch(e){}
+  var savedBy=st&&st._savedBy?st._savedBy:"";
+  return{id:row.id,savedAt:row.saved_at,savedBy:savedBy,name:row.name||"Unknown",breed:row.breed,refNo:row.ref_no,intakeDate:row.intake_date,assessor:row.assessor,score:row.score,trafficLight:((handlingLight(row.score,st&&st.scores,st)||{}).l||row.traffic_light),state:st};
+}
+// After a save, patch the local list from what we just sent instead of
+// re-downloading every dog. saved_at matches the server, so the next sync
+// sees no change and fetches nothing.
+function syncLocalRecord(id,row){
+  if(!id||!row)return;
+  var rec=rowToRec(Object.assign({id:id},row));
+  var i=records.findIndex(function(r){return r.id===id;});
+  if(i>=0)records[i]=rec;else records.unshift(rec);
+  cacheRecordsList();
+}
+// Incremental sync. One tiny query for id + saved_at, then full rows only
+// for dogs that are new or changed since we last looked. A quiet minute on
+// the dashboard now costs a few KB, not the whole table.
+var _recordsCacheSlim=false;
 async function loadRecordsList(){
   if(!supabaseClient){records=[];return;}
   if(typeof pendingCount==="function"&&pendingCount())schedulePendingRetry();
-  var res;
-  try{res=await supabaseClient.from("dogs").select("*").order("saved_at",{ascending:false}).limit(400);}
-  catch(e){console.error(e);if(!loadCachedRecordsList())records=[];return;}
-  if(!res||res.error){console.error(res&&res.error);if(!loadCachedRecordsList())records=[];return;}
-  _recordsFromCache=false;
-  records=(res.data||[]).map(function(row){
-    var st=null;try{st=typeof row.data==="string"?JSON.parse(row.data):row.data;}catch(e){}
-    var savedBy=st&&st._savedBy?st._savedBy:"";
-    return{id:row.id,savedAt:row.saved_at,savedBy:savedBy,name:row.name||"Unknown",breed:row.breed,refNo:row.ref_no,intakeDate:row.intake_date,assessor:row.assessor,score:row.score,trafficLight:((handlingLight(row.score,st&&st.scores,st)||{}).l||row.traffic_light),state:st};
+  if(!records.length)loadCachedRecordsList();      // start from the phone's copy if we have one
+  var idx;
+  try{idx=await supabaseClient.from("dogs").select("id,saved_at").order("saved_at",{ascending:false}).limit(400);}
+  catch(e){console.error(e);if(!records.length&&!loadCachedRecordsList())records=[];return;}
+  if(!idx||idx.error){console.error(idx&&idx.error);if(!records.length&&!loadCachedRecordsList())records=[];return;}
+  var have={};records.forEach(function(r){have[r.id]=r;});
+  var need=[],recs={};
+  (idx.data||[]).forEach(function(x){
+    var r=have[x.id];
+    if(r&&r.state&&!_recordsCacheSlim&&(r.savedAt||"")===(x.saved_at||""))recs[x.id]=r;
+    else need.push(x.id);
   });
+  for(var i=0;i<need.length;i+=100){
+    var chunk=need.slice(i,i+100),res;
+    try{res=await supabaseClient.from("dogs").select(REC_COLS).in("id",chunk);}catch(e){res={error:{message:e.message}};}
+    if(!res||res.error){console.error(res&&res.error);if(!records.length&&!loadCachedRecordsList())records=[];return;}
+    (res.data||[]).forEach(function(row){recs[row.id]=rowToRec(row);});
+  }
+  records=(idx.data||[]).map(function(x){return recs[x.id];}).filter(Boolean);
+  _recordsFromCache=false;_recordsCacheSlim=false;
   cacheRecordsList();
 }
 
