@@ -5,7 +5,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Holdfast — NSPCA Longford</title>
-<link rel="icon" id="favicon-link" type="image/svg+xml">
+<link rel="icon" id="favicon-link" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 
 <!-- PWA: Install as home-screen app -->
@@ -25,7 +25,7 @@
  var m={name:"Holdfast",short_name:"Holdfast",start_url:base,scope:base,display:"standalone",background_color:"#282932",theme_color:"#282932",description:"Holdfast - NSPCA's shelter management system (Longford Dog Isolation Unit)",orientation:"any",icons:[{src:ROUND,sizes:"192x192",type:"image/png",purpose:"any"},{src:ROUND,sizes:"512x512",type:"image/png",purpose:"any"},{src:SQUARE,sizes:"512x512",type:"image/png",purpose:"maskable"}]};
  var url=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:"application/manifest+json"}));
  var link=document.getElementById("manifest-link");if(link)link.href=url;
- var DOGFAV="data:image/svg+xml;utf8,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' rx='22' fill='%23282932'/%3E%3Cg fill='none' stroke='%23c6e76c' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='50' cy='17' r='10.5' stroke-width='9.600000000000001'/%3E%3Cpath d='M50 28 V74'/%3E%3Cpath d='M31 40 H69'/%3E%3Cpath d='M50 74 C50 79 41 86 30 86 C23 86 19 82 18 74'/%3E%3Cpath d='M50 74 C50 79 59 86 70 86 C77 86 81 82 82 74'/%3E%3Cpath d='M12 92 H88'/%3E%3C/g%3E%3C/svg%3E";var fl=document.getElementById("favicon-link");if(fl)fl.href=DOGFAV;
+ var DOGFAV="favicon.png";utf8,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' rx='22' fill='%23282932'/%3E%3Cg fill='none' stroke='%23c6e76c' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='50' cy='17' r='10.5' stroke-width='9.600000000000001'/%3E%3Cpath d='M50 28 V74'/%3E%3Cpath d='M31 40 H69'/%3E%3Cpath d='M50 74 C50 79 41 86 30 86 C23 86 19 82 18 74'/%3E%3Cpath d='M50 74 C50 79 59 86 70 86 C77 86 81 82 82 74'/%3E%3Cpath d='M12 92 H88'/%3E%3C/g%3E%3C/svg%3E";var fl=document.getElementById("favicon-link");if(fl)fl.href=DOGFAV;
  var ai=document.getElementById("apple-touch-icon");if(ai)ai.href=SQUARE;
 }catch(e){}})();
 </script>
@@ -55,17 +55,17 @@ nav::-webkit-scrollbar{display:none}
 .cdot.empty{background:transparent;box-shadow:inset 0 0 0 1.5px #cfd4cf}
 /* V5 two-tier pill nav */
 #navwrap{background:#282932;padding-bottom:10px;box-shadow:0 6px 18px -8px rgba(40,41,50,0.35)}
-.pnav{padding:8px 14px 0}
+.pnav{padding:8px 14px 0;max-width:100%;overflow:hidden}
 .hide-narrow{display:inline-block}
 @media (max-width:430px){.hide-narrow{display:none}}
 /* one header for every full-screen overlay */
 /* the sub-tab row can scroll rather than cramp when a group has four tabs */
 #pnav-subs{-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none}
 #pnav-subs::-webkit-scrollbar{display:none}
-.pnav-row{position:relative;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.pnav-row{position:relative;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;max-width:100%;-webkit-overflow-scrolling:touch}
 .pnav-row::-webkit-scrollbar{display:none}
 .pnav-row .pglide{position:absolute;top:0;left:0;height:100%;border-radius:999px;z-index:0;pointer-events:none;transition:transform .3s cubic-bezier(.34,1.2,.4,1),width .3s cubic-bezier(.34,1.2,.4,1)}
-.pnav-groups{padding:3px;background:#333542;border-radius:999px;display:inline-flex;min-width:min-content}
+.pnav-groups{padding:3px;background:#333542;border-radius:999px;display:inline-flex;min-width:min-content;flex:none}
 .pnav-groups .pglide{background:#c6e76c}
 .ppill{position:relative;z-index:1;border:none;background:transparent;cursor:pointer;font-family:inherit;white-space:nowrap;transition:color .18s ease;padding:8px 16px;font-size:12.5px;font-weight:700;color:#9aa0b0;border-radius:999px}
 .pnav-groups .ppill.on{color:#282932}
@@ -135,6 +135,11 @@ nav::-webkit-scrollbar{display:none}
 /* ── Phone pass (v3.207) ─────────────────────────────── */
 @media(max-width:640px){
   html{-webkit-text-size-adjust:100%}
+  html,body{overflow-x:hidden;max-width:100vw}
+  #wrap,#dashboard-screen,#content,#navwrap{max-width:100vw;overflow-x:hidden}
+  .header{flex-wrap:wrap;gap:6px;padding:8px 10px}
+  .header>div{flex-wrap:wrap;gap:6px}
+  #badge{max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   input,select,textarea{font-size:16px!important;min-height:44px}
   input[type="checkbox"],input[type="radio"]{min-height:0}
   .btn,.btnp,button.btn{min-height:44px;padding:10px 16px;font-size:14px}
@@ -481,7 +486,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.207",date:"2026-09-05",note:"Phone pass. Under 640px: inputs go to 16px so iPhones stop zooming on every field, every field and button is at least 44px tall, forms fall to a single column, the bar drops the clock, count and your name (photo stays) to make room, menu rows and filter pills are finger-sized, pop-ups slide up from the bottom of the screen as sheets, bottom buttons stack full-width, and the card grid is one column. Nothing changes on a laptop."},{version:"3.206",date:"2026-09-05",note:"Kennel card on a phone: the A4 card scales to fit the screen width so you see the whole thing and can still tap text to edit it, the top bar stacks, and it un-scales itself for printing or saving as PDF."},{version:"3.205",date:"2026-09-05",note:"Sharper photos. The kennel card now prints the dog\u0027s full photo from the photo store rather than the small board thumbnail. New photos are stored at up to 1200px (was 400) now that they live outside the record, so cards and the lightbox are crisp; the board still uses the light thumbnail."},{version:"3.204",date:"2026-09-05",note:"Kennel card: write on it before printing. The card no longer prints itself the moment it opens \u2014 it opens with a bar at the top, every piece of text can be tapped and changed on screen, there\u0027s a lined Notes for the door box to type into, and Print / Save PDF is on the bar. Nothing typed on the card is saved back to the record."},{version:"3.203",date:"2026-09-05",note:"Move photos to photo store now also finds dogs whose only photo is the single full-size profile picture (the way photos were stored before the photo log), so the menu item appears and those move across too, leaving the thumbnail."}
+var CHANGELOG=[{version:"3.209",date:"2026-09-06",note:"Icons: the browser favicon and both home-screen icons are now the NSPCA letters in Lichen on charcoal. The favicon is a file in the repo (favicon.png) rather than baked in, so it can be swapped for another without touching the app."},{version:"3.208",date:"2026-09-05",note:"Phone fix: the tab rail\u0027s group row was wider than the screen and stretched the whole page sideways, so records opened shoved off to the left. The rail now scrolls inside its own track, the page can\u0027t scroll sideways, and the record header wraps its buttons instead of overflowing."},{version:"3.207",date:"2026-09-05",note:"Phone pass. Under 640px: inputs go to 16px so iPhones stop zooming on every field, every field and button is at least 44px tall, forms fall to a single column, the bar drops the clock, count and your name (photo stays) to make room, menu rows and filter pills are finger-sized, pop-ups slide up from the bottom of the screen as sheets, bottom buttons stack full-width, and the card grid is one column. Nothing changes on a laptop."},{version:"3.206",date:"2026-09-05",note:"Kennel card on a phone: the A4 card scales to fit the screen width so you see the whole thing and can still tap text to edit it, the top bar stacks, and it un-scales itself for printing or saving as PDF."},{version:"3.205",date:"2026-09-05",note:"Sharper photos. The kennel card now prints the dog\u0027s full photo from the photo store rather than the small board thumbnail. New photos are stored at up to 1200px (was 400) now that they live outside the record, so cards and the lightbox are crisp; the board still uses the light thumbnail."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
