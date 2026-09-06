@@ -133,6 +133,19 @@ nav::-webkit-scrollbar{display:none}
 .sp-t{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:#868b7e;margin-bottom:5px}
 .sp-v{font-size:12.5px;line-height:1.45;color:#282932}.sp-v b{font-weight:800}
 .sp-r b{color:#991b1b}.sp-a b{color:#92400e}.sp-t b{color:#0f766e}.sp-q b{color:#4b5563}
+.sc-cat2{padding:12px 14px;border:1px solid #e4e7e0;border-radius:14px;background:#fff;margin-bottom:10px}
+.sc-cat2 .sc-cat-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;gap:8px}
+.sc-cat2 .sc-cat-name{font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px}
+.sc-num{font-style:normal;width:20px;height:20px;border-radius:6px;background:#eef1ea;color:#3f4a2e;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+.sc-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.sc-tile{border:1.5px solid #e4e7e0;border-radius:11px;padding:9px 9px 10px;cursor:pointer;background:#fbfcf9;min-height:88px}
+.sc-tile b{display:block;font-size:20px;font-weight:900;line-height:1;margin-bottom:5px;color:#9a9fa8}
+.sc-tile span{font-size:10.5px;line-height:1.35;color:#4b5160;font-weight:600}
+.sc-tile.hi b{color:#b45309}
+.sc-tile.on{border-color:#282932;background:#282932;color:#fff;box-shadow:0 0 0 3px rgba(198,231,108,.45)}.sc-tile.on b{color:#c6e76c}.sc-tile.on span{color:#e2e6ee}
+.sc-det-h{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;font-weight:700;color:#6b7280;padding:9px 2px 2px;cursor:pointer;margin-top:6px}
+.sc-det{margin-top:6px;border-top:1px solid #eef0ea;padding-top:8px}
+@media(max-width:560px){.sc-tiles{grid-template-columns:1fr 1fr}.sc-tile{min-height:0}}
 .sc-stick{position:sticky;top:8px;z-index:6;background:#282932;color:#fff;border-radius:14px;padding:10px 14px;display:flex;gap:12px;align-items:center;margin-bottom:12px;box-shadow:0 10px 30px rgba(40,41,50,.28);flex-wrap:wrap}
 .sc-stick .big{font-size:26px;font-weight:900;letter-spacing:-.02em;line-height:1}.sc-stick .big small{font-size:12px;color:#9a9fa8;font-weight:700;margin-left:3px}
 .sc-stick .cap{font-size:9.5px;color:#9a9fa8;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
@@ -495,7 +508,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.214",date:"2026-09-06",note:"Somewhere for your written assessment: an Assessor\u0027s report box at the top of the Clearance tab (the tab now says Clearance). It stamps your name and the date as you write, prints as its own section of the full Report, and appears in the Story. No more pasting it into Outcome notes."},{version:"3.213",date:"2026-09-06",note:"\u2018Ready to go\u2019 now means it. A dog only shows Ready (on its card, in Today, in the Ready filter) when isolation is done, there\u0027s no live contagious case, it has a score, and the Clearance tab says Cleared (or Cleared with conditions). Otherwise the card says what\u0027s true: Not cleared \u2014 needs work, Not fit for rehoming, Isolation done \u00b7 Red \u2014 not cleared, or Isolation done \u00b7 awaiting clearance decision \u2014 and Today nudges you to decide."},{version:"3.212",date:"2026-09-06",note:"Phone fix: the tab rows (groups and tabs) now swipe all the way to the last tab \u2014 the tracks could shrink and hide their end, and there was no run-off room after the last pill."},{version:"3.211",date:"2026-09-06",note:"Scoring, built on the engine that was already there (weighted sub-criteria, evidence, floor flags \u2014 all kept). New: a charcoal verdict strip that sticks to the top as you scroll \u2014 total, light, how many scored, the floor rule in words (\u2018Held at Yellow by Reactivity 3\u2019), and the last six snapshots as a trend; a required reason whenever a category lands at 3 or 4 (\u2018Needs a reason\u2019 until written); every 0\u20133 button shows its wording on hover, and Show wording lays all four levels out under each sub-item."},{version:"3.210",date:"2026-09-06",note:"Back to NSPCA Longford. The Holdfast name and anchor are gone from the login screen, the tab title, the installed-app name, the record subheader, the dashboard footer, the kennel card and backup files. The favicon (NSPCA letters) is baked into the app again, so no favicon file is needed in the repo."}
+var CHANGELOG=[{version:"3.215",date:"2026-09-06",note:"Scoring now looks like the sketch. Each category is a card with four tiles carrying the app\u0027s own wording for levels 1\u20134; tap one to score the whole category (it sets every sub-criterion to that level), then open Detail underneath to refine the weighted sub-criteria and mark evidence as before. The verdict strip stays pinned at the top; the meter, snapshots and flags fold away under it. A 3 or 4 still asks for a reason."},{version:"3.214",date:"2026-09-06",note:"Somewhere for your written assessment: an Assessor\u0027s report box at the top of the Clearance tab (the tab now says Clearance). It stamps your name and the date as you write, prints as its own section of the full Report, and appears in the Story. No more pasting it into Outcome notes."},{version:"3.213",date:"2026-09-06",note:"\u2018Ready to go\u2019 now means it. A dog only shows Ready (on its card, in Today, in the Ready filter) when isolation is done, there\u0027s no live contagious case, it has a score, and the Clearance tab says Cleared (or Cleared with conditions). Otherwise the card says what\u0027s true: Not cleared \u2014 needs work, Not fit for rehoming, Isolation done \u00b7 Red \u2014 not cleared, or Isolation done \u00b7 awaiting clearance decision \u2014 and Today nudges you to decide."},{version:"3.212",date:"2026-09-06",note:"Phone fix: the tab rows (groups and tabs) now swipe all the way to the last tab \u2014 the tracks could shrink and hide their end, and there was no run-off room after the last pill."},{version:"3.211",date:"2026-09-06",note:"Scoring, built on the engine that was already there (weighted sub-criteria, evidence, floor flags \u2014 all kept). New: a charcoal verdict strip that sticks to the top as you scroll \u2014 total, light, how many scored, the floor rule in words (\u2018Held at Yellow by Reactivity 3\u2019), and the last six snapshots as a trend; a required reason whenever a category lands at 3 or 4 (\u2018Needs a reason\u2019 until written); every 0\u20133 button shows its wording on hover, and Show wording lays all four levels out under each sub-item."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -5224,7 +5237,11 @@ function page(){
       var noteV=(S.scoreNotes&&S.scoreNotes[c.k])||"";
       var needsWhy=cs.has&&cs.band>=3&&!String(noteV||"").trim();
       var noteIn='<div class="sc-note'+(needsWhy?' why':'')+'">'+(cs.has&&cs.band>=3?'<div class="sc-whylbl">Why '+cs.band+' \u2014 what did you see?'+(needsWhy?' <span>required</span>':'')+'</div>':'')+'<input value="'+esc(noteV)+'" oninput="S.scoreNotes=S.scoreNotes||{};S.scoreNotes[\''+c.k+'\']=this.value;debouncedSave();var w=this.closest(\'.sc-note\');if(w)w.classList.toggle(\'why\',!this.value.trim()&&'+(cs.band>=3?'true':'false')+')" placeholder="'+(cs.has&&cs.band>=3?'e.g. lunged at Alvin through the bars twice this week':'Notes for this category (optional)')+'"></div>';
-      return '<div class="sc-cat"><div class="sc-spine" style="background:'+(cs.has?accentFor(cs.band):"#e7ebe6")+'"></div><div class="sc-cat-h"><div><div class="sc-cat-name">'+c.l+'</div><div class="sc-cat-meta">'+ring+'<span class="sc-mini">'+metaTxt+'</span></div></div>'+bandPill+'</div>'+legacy+rows+noteIn+'</div>';
+      var tiles='<div class="sc-tiles">'+[1,2,3,4].map(function(n){var on=cs.has&&cs.band===n;return '<div class="sc-tile'+(on?' on':'')+(n>=3?' hi':'')+'" onclick="quickBand(\''+c.k+'\','+n+')" title="Tap to score the whole category '+n+' \u2014 refine in Detail"><b>'+n+'</b><span>'+esc(c.s[n])+'</span></div>';}).join("")+'</div>';
+      var detOpen=!!(window._scDetail&&window._scDetail[c.k]);
+      var detail='<div class="sc-det-h" onclick="toggleScDetail(\''+c.k+'\')"><span>Detail \u00b7 '+metaTxt+(cs.legacy?'':' \u00b7 weighted sub-criteria')+'</span><span class="med-chev" style="transform:rotate('+(detOpen?'90':'0')+'deg)">&#8250;</span></div>'+(detOpen?'<div class="sc-det">'+legacy+rows+'</div>':'');
+      var idx=CATS.indexOf(c)+1;
+      return '<div class="sc-cat sc-cat2"><div class="sc-cat-h"><div class="sc-cat-name"><i class="sc-num">'+idx+'</i>'+c.l+'</div>'+bandPill+'</div>'+tiles+noteIn+detail+'</div>';
     }).join("");
     cats='<div class="sc-label">Categories</div>'+cats;
 
@@ -5256,7 +5273,9 @@ function page(){
       +(tl?'<div class="lt" style="background:'+tl.bg+';color:'+tl.tc+(_provis?';border:1.5px dashed '+tl.dot:'')+'">'+tl.l.toUpperCase()+(_provis?' \u00b7 PROV.':'')+'</div>':'<div class="lt" style="background:#333542;color:#9a9fa8">NOT SCORED</div>')
       +'<div class="rule">'+(_floored?'Held at <b>'+esc(tl.l)+'</b> by <b>'+esc(tl.floorCat)+' '+esc(String(tl.floorFrom))+'</b> \u2014 the floor rule.':(_provis?'Provisional until all six are scored.':(tl?'All six scored.':'Rate the sub-criteria below.')))+'</div>'+trend
       +'<button class="sc-words-btn" onclick="window._scWords=!window._scWords;renderMain()">'+(window._scWords?'Hide wording':'Show wording')+'</button></div>';
-    return '<h2>Behaviour scoring</h2><div class="sub">Rate the weighted sub-criteria in each category 0&ndash;3 (none &rarr; severe). Each category rolls up to its 1&ndash;4 band and the /24 total; a flagged sub-item holds the category at Red when scored 3, and any category at 4 forces at least Red. A 3 or 4 needs a reason.</div>'+stick+staleBanner+resultPanel+scoreHistoryCardHtml()+flagHtml+eaBlock+cats+'<div class="sc-label">Cross-check</div>'+secondAssessorCardHtml()+browNav("scoring");
+    var moreOpen=!!window._scMore;
+    var more='<div class="sc-det-h" style="margin:0 0 10px" onclick="window._scMore=!window._scMore;renderMain()"><span>Meter, snapshots and flags</span><span class="med-chev" style="transform:rotate('+(moreOpen?'90':'0')+'deg)">&#8250;</span></div>'+(moreOpen?resultPanel+scoreHistoryCardHtml()+flagHtml+eaBlock:'');
+    return '<h2>Scoring</h2><div class="sub">Tap the level that fits each category \u2014 1 is best, 4 is worst \u2014 then open Detail to refine the sub-criteria. Any 3 or 4 asks you to say what you saw.</div>'+stick+staleBanner+more+cats+'<div class="sc-label">Cross-check</div>'+secondAssessorCardHtml()+browNav("scoring");
   }
 
   if(t==="rehome")return renderRehome();
@@ -5477,6 +5496,8 @@ function page(){
 }
 
 function tabWarn(id){if(id==="medical"){var c=activeContagiousList(S.medical);return !!(c&&c.length);}return false;}
+function quickBand(ck,band){if(!S.subScores)S.subScores={};S.subScores[ck]={};(SUBCRIT[ck]||[]).forEach(function(sub){S.subScores[ck][sub.k]=Math.max(0,Math.min(3,band-1));});recalcCat(ck);window._scDetail=window._scDetail||{};debouncedSave();renderMain();}
+function toggleScDetail(ck){window._scDetail=window._scDetail||{};window._scDetail[ck]=!window._scDetail[ck];renderMain();}
 function tabDone(id){
   function anyVal(o){return o?Object.keys(o).some(function(k){var v=o[k];return v!==""&&v!==null&&v!==undefined&&v!==false&&v!==0&&!(Array.isArray(v)&&v.length===0);}):false;}
   switch(id){
