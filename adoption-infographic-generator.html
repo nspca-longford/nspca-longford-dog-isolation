@@ -18,64 +18,48 @@ body{margin:0;font-family:Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,
 .drop.on{border-color:#c6e76c;background:#f7fbe9}
 .previewPane{overflow:auto}
 #scaler{transform-origin:top left}
-.kc-sheet{width:210mm;min-height:297mm;background:#fff;color:#282932;font-family:Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;box-sizing:border-box;padding:0;position:relative;display:flex;flex-direction:column}
+.kc-sheet{width:210mm;height:297mm;background:#fff;color:#282932;font-family:Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;display:grid;grid-template-rows:auto auto 1fr auto auto;overflow:hidden;position:relative}
 .kc-sheet *{box-sizing:border-box}
-.kc-band{background:#282932;color:#fff;padding:9mm 12mm 7mm;display:flex;align-items:center;justify-content:space-between;gap:10mm}
-.kc-band .l{display:flex;align-items:center;gap:6mm}
-.kc-band img{height:9mm;display:block}
-.kc-band .ttl{font-size:9pt;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#9a9fa8;border-left:1px solid #454857;padding-left:6mm}
-.kc-kennel{background:#c6e76c;color:#282932;font-weight:900;font-size:26pt;line-height:1;padding:4mm 8mm;border-radius:5mm;letter-spacing:-.01em;white-space:nowrap}
-.kc-hero{display:flex;gap:8mm;padding:8mm 12mm 0;align-items:flex-start}
-.kc-photo{width:58mm;height:58mm;border-radius:6mm;object-fit:cover;flex-shrink:0;box-shadow:0 0 0 1.2mm #c6e76c;background:#eef1ea}
-.kc-nophoto{width:58mm;height:58mm;border-radius:6mm;flex-shrink:0;border:1mm dashed #cfd4c8;display:flex;align-items:center;justify-content:center;color:#9a9fa8;font-size:9pt;font-weight:700;text-align:center;padding:4mm}
-.kc-id{flex:1;min-width:0}
-.kc-name{font-size:40pt;font-weight:900;letter-spacing:-.02em;line-height:1;word-break:break-word}
-.kc-meta{font-size:12.5pt;font-weight:600;color:#4b5160;margin-top:2.5mm}
-.kc-pills{display:flex;flex-wrap:wrap;gap:2mm;margin-top:4mm}
-.kc-pill{display:inline-block;font-size:9pt;font-weight:800;letter-spacing:.04em;padding:1.6mm 3.5mm;border-radius:10mm;white-space:nowrap}
-.kc-light{margin:6mm 12mm 0;border-radius:4mm;padding:4.5mm 6mm;display:flex;gap:6mm;align-items:center}
-.kc-light .lbl{font-size:8.5pt;font-weight:800;letter-spacing:.16em;text-transform:uppercase;opacity:.75}
-.kc-light .big{font-size:22pt;font-weight:900;letter-spacing:-.01em;line-height:1}
-.kc-light .rule{font-size:11.5pt;font-weight:700;line-height:1.35;flex:1}
-.kc-light .note{font-size:9.5pt;font-weight:800;margin-top:1.5mm}
-.kc-cols{display:flex;gap:7mm;padding:6mm 12mm 0;align-items:flex-start;flex:1}
-.kc-col{flex:1;min-width:0}
-.kc-sec{font-size:8.5pt;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6b7280;margin:0 0 2.5mm;display:flex;align-items:center;gap:3mm}
-.kc-sec::after{content:"";flex:1;height:.6mm;background:linear-gradient(90deg,#c6e76c,rgba(198,231,108,0))}
-.kc-facts{display:grid;grid-template-columns:1fr 1fr;gap:2mm 5mm;margin-bottom:6mm}
-.kc-fact .k{font-size:7.5pt;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#868b7e}
-.kc-fact .v{font-size:11pt;font-weight:700;line-height:1.25;word-break:break-word}
-.kc-box{border-radius:3.5mm;padding:3.5mm 4.5mm;margin-bottom:3.5mm;border:.5mm solid #e4e7e0;background:#fff}
-.kc-box .h{font-size:9pt;font-weight:900;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.5mm}
-.kc-box .t{font-size:10.5pt;line-height:1.4;font-weight:600}
-.kc-box ul{margin:0;padding-left:5mm;font-size:10.5pt;line-height:1.45;font-weight:600}
-.kc-box.red{background:#dc2626;color:#fff;border-color:#dc2626}
-.kc-box.warn{border-color:#dc2626}.kc-box.warn .h{color:#991b1b}
-.kc-box.amber{background:#fffbeb;border-color:#d97706}.kc-box.amber .h{color:#92400e}
-.kc-box.blue{border-color:#0284c7}.kc-box.blue .h{color:#075985}
-.kc-care{border:.5mm solid #e4e7e0;border-radius:3.5mm;overflow:hidden;margin-bottom:3.5mm}
-.kc-care .r{display:flex;gap:4mm;padding:2.5mm 4.5mm;border-top:.4mm solid #eef0ea;font-size:10.5pt;line-height:1.4}
-.kc-care .r:first-child{border-top:none}
-.kc-care .k{width:22mm;flex-shrink:0;font-size:8pt;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#868b7e;padding-top:.8mm}
-.kc-care .v{font-weight:700}
-.kc-write{padding:5mm 12mm 0}
-.kc-grid{width:100%;border-collapse:collapse;table-layout:fixed}
-.kc-grid th,.kc-grid td{border:.4mm solid #cfd4c8;height:8mm;font-size:8pt;font-weight:800;text-align:center;color:#6b7280;text-transform:uppercase;letter-spacing:.06em}
-.kc-grid th{background:#f1f3ee}
-.kc-grid td:first-child{text-align:left;padding-left:2.5mm;width:26mm;color:#282932}
-.kc-foot{margin-top:auto;padding:4mm 12mm 7mm;display:flex;justify-content:space-between;align-items:center;font-size:8.5pt;color:#9a9fa8;font-weight:600}
-.kc-foot b{color:#282932;letter-spacing:.08em}
-
-.kc-bandr{display:flex;align-items:center;gap:5mm}
-.kc-since{text-align:right;color:#cdd3df;font-size:8.5pt;font-weight:700;line-height:1.3}.kc-since b{color:#fff}.kc-since .lm{color:#c6e76c}
-.kc-words{margin-top:3mm}.kc-words span{display:inline-block;background:#eef1ea;color:#3f4a2e;font-size:11.5pt;font-weight:800;padding:1mm 3mm;border-radius:2mm;margin:0 1.5mm 1.5mm 0}
-.kc-qr{width:26mm;flex-shrink:0;text-align:center}.kc-qr img{width:26mm;height:26mm;display:block;border:.5mm solid #cfd4c8;border-radius:2mm;padding:1mm;background:#fff}.kc-qr div{font-size:7pt;font-weight:800;color:#6b7280;margin-top:1.5mm;line-height:1.25}
-.kc-rules{display:flex;flex-wrap:wrap;gap:2mm;margin:4mm 12mm 0}.kc-rules span{font-size:9.5pt;font-weight:900;padding:2mm 3.5mm;border-radius:2.5mm;letter-spacing:.02em}.kc-rules .no{background:#fee2e2;color:#991b1b}.kc-rules .ok{background:#dcfce7;color:#166534}
-.kc-secnote{font-weight:700;letter-spacing:0;text-transform:none;color:#9a9fa8;font-size:8pt;margin-left:2mm}
-.kc-sched{width:100%;border-collapse:collapse;margin-bottom:3.5mm}.kc-sched td,.kc-sched th{border:.4mm solid #e4e7e0;font-size:9.5pt;padding:1.8mm 2.5mm;text-align:left}.kc-sched th{background:#f1f3ee;font-size:8pt;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;text-align:center}.kc-sched th:first-child,.kc-sched th:nth-child(2){text-align:left}.kc-sched td.t{width:15mm;font-weight:900}.kc-sched td.tick{width:8mm;text-align:center}.kc-sched td.tick i{display:inline-block;width:4.5mm;height:4.5mm;border:.5mm solid #cfd4c8;border-radius:1mm}
-.kc-fact .v small{color:#166534;font-size:8.5pt;font-weight:800}
-.kc-box.ok{border-color:#16a34a}.kc-box.ok .h{color:#166534}
-
+.kc-top{display:grid;grid-template-columns:1fr 66mm;background:#282932;color:#fff}
+.kc-id{padding:9mm 11mm 7mm;min-width:0}
+.kc-k{font-size:8.5pt;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#9a9fa8}
+.kc-con{background:#dc2626;color:#fff;padding:.5mm 2mm;border-radius:1.5mm;letter-spacing:.1em}
+.kc-ready{background:#c6e76c;color:#282932;padding:.5mm 2mm;border-radius:1.5mm;letter-spacing:.06em;text-transform:none;font-weight:900}
+.kc-name{font-size:56pt;font-weight:900;letter-spacing:-.03em;line-height:.95;margin-top:2mm;word-break:break-word}
+.kc-who{font-size:12.5pt;font-weight:700;color:#cdd3df;margin-top:3.5mm}
+.kc-words{margin-top:3.5mm;display:flex;gap:2mm;flex-wrap:wrap}.kc-words span{background:#c6e76c;color:#282932;font-weight:900;font-size:10.5pt;padding:1.4mm 3.2mm;border-radius:2mm}
+.kc-kn{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;padding:7mm 9mm 7mm 0}
+.kc-kn img{height:7.5mm;opacity:.95}
+.kc-num{font-size:54pt;font-weight:900;color:#c6e76c;line-height:.9;letter-spacing:-.03em}
+.kc-since{text-align:right;font-size:9pt;font-weight:700;color:#9a9fa8;line-height:1.35}.kc-since b{color:#fff}
+.kc-rule{display:grid;grid-template-columns:34mm 1fr;align-items:stretch}
+.kc-lt{display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18pt;font-weight:900;letter-spacing:-.01em;text-align:center;line-height:1;padding:3mm}
+.kc-lt small{font-size:9pt;font-weight:800;margin-top:1.5mm;opacity:.85}
+.kc-tx{padding:4.5mm 8mm;font-size:15pt;font-weight:800;line-height:1.25;display:flex;flex-direction:column;justify-content:center}
+.kc-tx small{display:block;font-size:9.5pt;font-weight:700;opacity:.75;margin-top:1.5mm}
+.kc-body{display:grid;grid-template-columns:58mm 1fr 1fr;min-height:0}
+.kc-col{padding:6mm 7mm;border-right:.5mm solid #e4e7e0;min-width:0;overflow:hidden}.kc-col:last-child{border-right:none}
+.kc-h{font-size:8.5pt;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:#6b7280;margin-bottom:3.5mm;padding-bottom:1.5mm;border-bottom:.8mm solid #c6e76c}
+.kc-photo{width:100%;aspect-ratio:1;object-fit:cover;border-radius:4mm;display:block;margin-bottom:4mm;background:#eef1ea}
+.kc-nophoto{display:flex;align-items:center;justify-content:center;color:#9a9fa8;font-weight:800;font-size:9pt;border:.8mm dashed #cfd4c8}
+.kc-fact{display:flex;justify-content:space-between;gap:3mm;font-size:9pt;padding:1.8mm 0;border-bottom:.4mm solid #eef0ea}.kc-fact span{color:#6b7280;font-weight:700;flex-shrink:0}.kc-fact b{font-weight:800;text-align:right;word-break:break-all}
+.kc-rules{margin:0;padding:0}.kc-rules li{list-style:none;font-size:12.5pt;font-weight:900;padding:2.6mm 3.2mm;border-radius:2.5mm;margin-bottom:2.2mm;background:#fee2e2;color:#991b1b;line-height:1.2}
+.kc-rules li.crit{background:#dc2626;color:#fff}
+.kc-rules li.ok{background:#dcfce7;color:#166534}
+.kc-rules li.note{background:#f1f3ee;color:#282932;font-weight:700;font-size:10.5pt;line-height:1.35}
+.kc-tt{width:100%;border-collapse:collapse}
+.kc-tt td{border-bottom:.4mm solid #eef0ea;padding:2.2mm 0;font-size:10pt;font-weight:700;vertical-align:middle;line-height:1.25}
+.kc-tt td.t{width:13mm;color:#6b7280;font-weight:900}
+.kc-tt td.b{width:8mm;text-align:right}.kc-tt td.b i{display:inline-block;width:5.5mm;height:5.5mm;border:.6mm solid #282932;border-radius:1.2mm}
+.kc-empty{font-size:10.5pt;font-weight:700;color:#4b5160;line-height:1.4}
+.kc-settle{margin-top:4mm;font-size:10.5pt;line-height:1.5;font-weight:700;color:#282932;border-top:.4mm solid #eef0ea;padding-top:3mm}
+.kc-pen{margin:0 7mm 4mm;border:.5mm dashed #cfd4c8;border-radius:3mm;min-height:30mm;padding:3mm 4mm;font-size:11pt;font-weight:600;line-height:1.5;white-space:pre-wrap}
+.kc-pen:empty::before{content:attr(data-ph);font-size:8.5pt;font-weight:800;color:#9a9fa8;letter-spacing:.14em;text-transform:uppercase}
+.kc-pen:focus{outline:.6mm solid #c6e76c}
+.kc-foot{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6mm;padding:4mm 7mm 6mm;border-top:.5mm solid #e4e7e0}
+.kc-help{font-size:10.5pt;font-weight:800;line-height:1.4}.kc-help span{color:#991b1b}
+.kc-help small{display:block;font-size:7.5pt;color:#9a9fa8;font-weight:700;margin-top:1.5mm;letter-spacing:.02em}
+.kc-qr{width:22mm;text-align:center}.kc-qr img{width:22mm;height:22mm;display:block;border:.5mm solid #cfd4c8;border-radius:2mm;padding:1mm;background:#fff}.kc-qr span{display:block;font-size:6.5pt;font-weight:800;color:#6b7280;margin-top:1mm}
 @page{size:A4;margin:0}
 @media print{body{background:#fff;margin:0}.kc-sheet{width:210mm;height:297mm;box-shadow:none;page-break-after:always}}
 
@@ -95,53 +79,39 @@ var FIELDS=["f_name", "f_ref", "f_kennel", "f_breed", "f_breed2", "f_sex", "f_ag
 function val(id){var e=document.getElementById(id);return e?e.value.trim():'';}
 function setVal(id,v){var e=document.getElementById(id);if(e)e.value=(v==null?'':v);}
 
-var KC_TL={Green:["#dcfce7","#166534"],Yellow:["#fef9c3","#854d0e"],Red:["#fee2e2","#991b1b"],Black:["#282932","#f1f5f9"]};
+var KC_TL={Green:["#dcfce7","#166534","#22c55e","#052e16"],Yellow:["#fef9c3","#713f12","#facc15","#422006"],Red:["#fee2e2","#7f1d1d","#ef4444","#fff"],Black:["#282932","#f1f3ee","#0f1015","#c6e76c"]};
 function kcEsc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
 function kcShortKennel(k){return String(k||"").replace(/^Kennel\s*/i,"K").replace(/^Pod\s*/i,"P")||"—";}
 function kcCardHtml(P,MARK){
-  var e=kcEsc;var tl=P.tl?(KC_TL[P.tl]||["#f1f3ee","#282932"]):null;
-  var pills=[];
-  if(P.isoLabel)pills.push('<span class="kc-pill" style="background:'+(P.isoState==="done"?"#dcfce7":"#fef3c7")+';color:'+(P.isoState==="done"?"#166534":"#92400e")+'">'+e(P.isoLabel)+'</span>');
-  if(P.eaCat)pills.push('<span class="kc-pill" style="background:#fef3c7;color:#92400e">EA '+e(P.eaCat)+'</span>');
-  if(P.contagious&&P.contagious.length)pills.push('<span class="kc-pill" style="background:#dc2626;color:#fff">Contagious'+(P.zoonotic?' · zoonotic':'')+'</span>');
-  if(P.restrictedLabel)pills.push('<span class="kc-pill" style="background:'+(P.restrictedXl?'#7f1d1d':'#b45309')+';color:#fff">'+e(P.restrictedLabel)+'</span>');
-  if(P.readyLabel)pills.push('<span class="kc-pill" style="background:#dcfce7;color:#166534">'+e(P.readyLabel)+'</span>');
-  if(P.neutered)pills.push('<span class="kc-pill" style="background:#eef1ea;color:#3f4a2e">'+e(P.neutered)+'</span>');
-  var meta=[P.breed+(P.breed2?' × '+P.breed2:''),P.sex,P.age,P.colour].filter(Boolean).join(' · ');
+  var e=kcEsc;var tl=P.tl?(KC_TL[P.tl]||["#f1f3ee","#282932","#cfd4c8","#282932"]):null;
   var words=P.threeWords?'<div class="kc-words">'+String(P.threeWords).split(/[·,;]+/).map(function(w){return w.trim();}).filter(Boolean).slice(0,4).map(function(w){return '<span>'+e(w)+'</span>';}).join('')+'</div>':'';
-  var bandR='<div class="kc-bandr">'+(P.intake?'<div class="kc-since">In since <b>'+e(P.intake)+'</b>'+(P.inDay?' · day '+e(String(P.inDay)):'')+(P.assessor?'<br>Ask for <b class="lm">'+e(P.assessor)+'</b>':'')+'</div>':'')+'<div class="kc-kennel">'+e(kcShortKennel(P.kennel))+'</div></div>';
-  var qr=P.webUrl?'<div class="kc-qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data='+encodeURIComponent(P.webUrl)+'" alt=""><div>Scan to see '+e(P.name||'this dog')+' online</div></div>':'';
-  var rules=(P.rules&&P.rules.length)?'<div class="kc-rules">'+P.rules.map(function(r){return '<span class="'+(r[0]==='ok'?'ok':'no')+'">'+e(r[1])+'</span>';}).join('')+'</div>':'';
-  var light='';
-  if(tl){var lbl=P.tl+(P.score!=null&&P.score!==''?' · '+P.score+'/24':'');var note='';
-    if(P.floored)note='<div class="note">Held at '+e(P.tl)+(P.floorCat?' by a severe finding in '+e(P.floorCat):'')+' — do not downgrade.</div>';
-    else if(P.scoreProvisional)note='<div class="note">Provisional — '+(P.scoredN!=null?P.scoredN:'?')+' of '+(P.scoredOf!=null?P.scoredOf:6)+' categories scored. Confirm before relying on it.</div>';
-    light='<div class="kc-light" style="background:'+tl[0]+';color:'+tl[1]+(P.scoreProvisional&&!P.floored?';border:.7mm dashed '+tl[1]:'')+'"><div><div class="lbl">Walk light</div><div class="big">'+e(lbl)+'</div></div><div class="rule">'+(P.walkRule?e(P.walkRule):'Who can walk this dog: see the assessor.')+note+'</div></div>';
-  }else light='<div class="kc-light" style="background:#f1f3ee;color:#4b5160;border:.7mm dashed #cfd4c8"><div><div class="lbl">Walk light</div><div class="big">Not scored</div></div><div class="rule">No traffic light yet — designated staff only until assessed.</div></div>';
-  var facts=[["Reference",P.ref],["Microchip",P.chip],["Intake",P.intake],["Isolation ends",P.isoEnds],["Size",P.size],["Weight",P.weight?(P.weight+(P.weightTrend?' <small>'+e(P.weightTrend)+'</small>':'')):''],["Vaccinations",P.vax],["Parasite treatment",P.parasite],["Next vet",P.nextVet]].filter(function(f){return f[1];});
-  var factsHtml=facts.map(function(f){return '<div class="kc-fact"><div class="k">'+e(f[0])+'</div><div class="v">'+(f[0]==='Weight'?f[1]:e(f[1]))+'</div></div>';}).join('');
-  var tt=P.timetable||[];var careHtml='';
-  if(tt.length){careHtml='<div class="kc-sec">Daily care <span class="kc-secnote">tick as you go</span></div><table class="kc-sched"><tr><th>When</th><th>What</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>'+tt.map(function(r){return '<tr><td class="t">'+e(r.t)+'</td><td>'+e(r.w)+'</td>'+'<td class="tick"><i></i></td>'.repeat(5)+'</tr>';}).join('')+'</table>';}
-  else{var care=[["Feed",P.feeding],["Meds",P.meds]].filter(function(r){return r[1];});if(care.length)careHtml='<div class="kc-sec">Daily care</div><div class="kc-care">'+care.map(function(r){return '<div class="r"><div class="k">'+e(r[0])+'</div><div class="v">'+e(r[1])+'</div></div>';}).join('')+'</div>';}
-  if(P.handling)careHtml+='<div class="kc-care"><div class="r"><div class="k">Kit</div><div class="v">'+e(P.handling)+'</div></div></div>';
-  var alerts='';
-  if(P.contagious&&P.contagious.length)alerts+='<div class="kc-box red"><div class="h">Contagious — strict isolation and PPE</div><div class="t">'+e(P.contagious.join(', '))+(P.zoonotic?' · zoonotic risk':'')+'</div></div>';
-  if(P.restrictedLabel)alerts+='<div class="kc-box amber"><div class="h">'+e(P.restrictedLabel)+'</div><div class="t">Muzzle and lead in public — legal requirement.</div></div>';
-  if(P.warnings&&P.warnings.length)alerts+='<div class="kc-box warn"><div class="h">Handling warnings</div><ul>'+P.warnings.map(function(w){var t=typeof w==="string"?w:w.text;var c=typeof w==="object"&&w.critical;return '<li style="color:'+(c?'#991b1b':'#282932')+'">'+e(t)+(c?' — critical':'')+'</li>';}).join('')+'</ul></div>';
-  if(P.notices&&P.notices.length)alerts+='<div class="kc-box blue"><div class="h">Care notices</div><ul>'+P.notices.map(function(n){return '<li>'+e(typeof n==="string"?n:n.text)+'</li>';}).join('')+'</ul></div>';
-  if(P.eaMgmt)alerts+='<div class="kc-box"><div class="h" style="color:#6b7280">EA management</div><div class="t">'+e(P.eaMgmt)+'</div></div>';
-  if(P.reserved)alerts+='<div class="kc-box ok"><div class="h">Reserved'+(P.reserved.who?' · '+e(P.reserved.who):'')+'</div><div class="t">'+(P.reserved.hc?'Home check '+e(P.reserved.hc)+'. ':'')+e(P.reserved.note||'')+'</div></div>';
-  alerts+='<div class="kc-box"><div class="h" style="color:#6b7280">If something\'s wrong</div><div class="t">'+e(P.escalation||'Unit supervisor first · then the manager')+(P.vetLine?' · vet line '+e(P.vetLine):'')+'</div></div>';
-
-  var notesBox='<div class="kc-write" style="padding-top:4mm"><div class="kc-sec">Notes for the door</div><div class="kc-notes" data-ph="Tap here to type before printing \u2014 or write it in pen.">'+kcEsc(P.notes||'')+'</div></div>';
-  return '<div class="kc-sheet">'
-    +'<div class="kc-band"><div class="l"><img src="'+MARK+'" alt="NSPCA"><div class="ttl">Kennel card</div></div>'+bandR+'</div>'
-    +'<div class="kc-hero">'+(P.photo?'<img class="kc-photo" src="'+P.photo+'" alt="">':'<div class="kc-nophoto">No photo on record</div>')+'<div class="kc-id"><div class="kc-name">'+e(P.name||'Unnamed dog')+'</div><div class="kc-meta">'+e(meta||'—')+'</div><div class="kc-pills">'+pills.join('')+'</div>'+words+'</div>'+qr+'</div>'
-    +light+rules
-    +'<div class="kc-cols"><div class="kc-col"><div class="kc-sec">Details</div><div class="kc-facts">'+(factsHtml||'<div class="kc-fact"><div class="v" style="color:#9a9fa8">—</div></div>')+'</div>'+careHtml+'</div><div class="kc-col">'+(alerts||'<div class="kc-box"><div class="h" style="color:#166534">No warnings on record</div><div class="t">Standard handling applies. Check the record before any change.</div></div>')+'</div></div>'
-    +notesBox
-    +'<div class="kc-foot"><span>'+e(P.foot||'')+'</span><b>NSPCA LONGFORD · DOG ISOLATION UNIT</b></div>'
-    +'</div>';
+  var who=[P.breed+(P.breed2?' × '+P.breed2:''),P.sex,P.age,P.weight].filter(Boolean).join(' · ');
+  var top='<div class="kc-top"><div class="kc-id"><div class="kc-k">Dog Isolation Unit · Longford'+(P.contagious&&P.contagious.length?' · <span class="kc-con">CONTAGIOUS</span>':'')+(P.readyLabel?' · <span class="kc-ready">'+e(P.readyLabel)+'</span>':'')+'</div><div class="kc-name">'+e((P.name||'Unnamed dog').toUpperCase())+'</div><div class="kc-who">'+e(who||'—')+'</div>'+words+'</div>'
+    +'<div class="kc-kn"><img src="'+MARK+'" alt="NSPCA"><div class="kc-num">'+e(kcShortKennel(P.kennel))+'</div><div class="kc-since">'+(P.intake?'In since <b>'+e(P.intake)+'</b>'+(P.inDay?' · day '+e(String(P.inDay)):''):'')+(P.assessor?'<br>Ask for <b>'+e(P.assessor)+'</b>':'')+'</div></div></div>';
+  var rule;
+  if(tl){var lbl=P.tl.toUpperCase()+(P.score!=null&&P.score!==''?'<small>'+e(String(P.score))+'/24</small>':'');var why=P.floored?'Held at '+e(P.tl)+(P.floorCat?' by a finding in '+e(P.floorCat):'')+' — do not downgrade.':(P.scoreProvisional?'Provisional — '+(P.scoredN!=null?P.scoredN:'?')+' of 6 categories scored.':'');
+    rule='<div class="kc-rule" style="background:'+tl[0]+';color:'+tl[1]+'"><div class="kc-lt" style="background:'+tl[2]+';color:'+tl[3]+'">'+lbl+'</div><div class="kc-tx">'+e(P.walkRule||'Who can walk this dog: ask the assessor.')+(why?'<small>'+why+'</small>':'')+'</div></div>';}
+  else rule='<div class="kc-rule" style="background:#f1f3ee;color:#4b5160"><div class="kc-lt" style="background:#cfd4c8;color:#282932">NOT<br>SCORED</div><div class="kc-tx">Designated staff only until assessed.</div></div>';
+  var facts=[["Chip",P.chip],["Ref",P.ref],["In",[P.intake,P.reason].filter(Boolean).join(' · ')],["Iso ends",P.isoEnds],["Vax",P.vax],["Next vet",P.nextVet],["Weight",P.weight?(P.weight+(P.weightTrend?' '+P.weightTrend.slice(0,1):'')):''],["Parasite",P.parasite],["Neutered",P.neutered]].filter(function(f){return f[1];}).slice(0,8);
+  var left='<div class="kc-col kc-left">'+(P.photo?'<img class="kc-photo" src="'+P.photo+'" alt="">':'<div class="kc-photo kc-nophoto">No photo</div>')+facts.map(function(f){return '<div class="kc-fact"><span>'+e(f[0])+'</span><b>'+e(f[1])+'</b></div>';}).join('')+'</div>';
+  var rules=[];
+  if(P.contagious&&P.contagious.length)rules.push('<li class="crit">CONTAGIOUS — '+e(P.contagious.join(', '))+(P.zoonotic?' · zoonotic':'')+' · full PPE · serve last</li>');
+  if(P.restrictedLabel)rules.push('<li>'+e(P.restrictedLabel)+' — muzzle in public</li>');
+  (P.warnings||[]).forEach(function(w){var t=typeof w==="string"?w:w.text;var c=typeof w==="object"&&w.critical;rules.push('<li'+(c?' class="crit"':'')+'>'+e(t)+'</li>');});
+  (P.rules||[]).forEach(function(r){rules.push('<li class="'+(r[0]==='ok'?'ok':'')+'">'+e(r[1])+'</li>');});
+  var human=(P.notices||[]).map(function(n){return typeof n==="string"?n:n.text;}).filter(Boolean);
+  if(P.eaMgmt)human.push('EA: '+P.eaMgmt);
+  var mid='<div class="kc-col"><div class="kc-h">Before you open the door</div><ul class="kc-rules">'+(rules.length?rules.join(''):'<li class="ok">No warnings on record — standard handling</li>')+(human.length?'<li class="note">'+e(human.join(' · '))+'</li>':'')+'</ul></div>';
+  var tt=(P.timetable||[]).slice();
+  if(P.walkLine)tt.push({t:'12:00',w:P.walkLine});
+  tt.sort(function(a,b){return String(a.t).localeCompare(String(b.t));});
+  var today=tt.length?'<table class="kc-tt">'+tt.map(function(r){return '<tr><td class="t">'+e(r.t)+'</td><td>'+e(r.w)+'</td><td class="b"><i></i></td></tr>';}).join('')+'</table>':'<div class="kc-empty">'+e([P.feeding,P.meds].filter(Boolean).join(' · ')||'No feeding plan or medication on record.')+'</div>';
+  var settle=P.settleLine?'<div class="kc-settle">'+e(P.settleLine)+'</div>':'';
+  var right='<div class="kc-col"><div class="kc-h">Today</div>'+today+settle+'</div>';
+  var pen='<div class="kc-pen" data-ph="Written on the door — pen, or tap here to type">'+e(P.notes||'')+'</div>';
+  var qr=P.webUrl?'<div class="kc-qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data='+encodeURIComponent(P.webUrl)+'" alt=""><span>see '+e(P.name||'this dog')+' online</span></div>':'';
+  var foot='<div class="kc-foot"><div class="kc-help">Something wrong? <span>'+e(P.escalation||'Unit supervisor first · then the manager')+'</span>'+(P.vetLine?' · Vet line <span>'+e(P.vetLine)+'</span>':'')+'<small>'+e(P.foot||'')+' · reprint when anything above changes · NSPCA Longford · Dog Isolation Unit</small></div>'+qr+'</div>';
+  return '<div class="kc-sheet">'+top+rule+'<div class="kc-body">'+left+mid+right+'</div>'+pen+foot+'</div>';
 }
 
 function payloadFromForm(){var P={};for(var k in DATA)P[k]=DATA[k];
@@ -152,7 +122,7 @@ function loadPayload(){try{var raw=localStorage.getItem('nspca-kennelcard');if(r
   var p=new URLSearchParams(location.search),obj=null;['name','ref','kennel','breed','breed2','sex','age','size','colour','weight','chip','vax','parasite','neutered','intake','isoends','meds','feeding','handling'].forEach(function(k){if(p.has(k)){obj=obj||{};obj[k]=p.get(k);}});return obj;}
 function applyPayload(pl){if(!pl)return;
   setVal('f_name',pl.name);setVal('f_ref',pl.ref!=null?pl.ref:pl.refNo);setVal('f_kennel',pl.kennel);setVal('f_breed',pl.breed);setVal('f_breed2',pl.breed2);setVal('f_sex',pl.sex);setVal('f_age',pl.age);setVal('f_size',pl.size);setVal('f_colour',pl.colour);setVal('f_weight',pl.weight);setVal('f_chip',pl.chip!=null?pl.chip:pl.microchip);setVal('f_intake',pl.intake!=null?pl.intake:pl.intakeDate);setVal('f_vax',pl.vax);setVal('f_parasite',pl.parasite);setVal('f_neutered',pl.neutered);setVal('f_isoends',pl.isoEnds!=null?pl.isoEnds:pl.isoends);setVal('f_meds',pl.meds);setVal('f_feeding',pl.feeding);setVal('f_handling',pl.handling);setVal('f_words',pl.threeWords);setVal('f_assessor',pl.assessor);setVal('f_web',pl.webUrl);
-  DATA={isoLabel:pl.isoLabel||'',isoState:pl.isoState||'',tl:pl.tl||'',score:pl.score,walkRule:pl.walkRule||'',scoreProvisional:!!pl.scoreProvisional,scoredN:pl.scoredN,scoredOf:pl.scoredOf,floored:!!pl.floored,floorCat:pl.floorCat||'',eaCat:pl.eaCat||'',eaMgmt:pl.eaMgmt||'',contagious:pl.contagious||[],zoonotic:!!pl.zoonotic,restrictedLabel:pl.restrictedLabel||'',restrictedXl:!!pl.restrictedXl,warnings:pl.warnings||[],notices:pl.notices||[],photo:pl.photo||'',foot:pl.foot||'',inDay:pl.inDay,weightTrend:pl.weightTrend||'',nextVet:pl.nextVet||'',rules:pl.rules||[],timetable:pl.timetable||[],reserved:pl.reserved||null,escalation:pl.escalation||'',vetLine:pl.vetLine||'',readyLabel:pl.readyLabel||''};
+  DATA={isoLabel:pl.isoLabel||'',isoState:pl.isoState||'',tl:pl.tl||'',score:pl.score,walkRule:pl.walkRule||'',scoreProvisional:!!pl.scoreProvisional,scoredN:pl.scoredN,scoredOf:pl.scoredOf,floored:!!pl.floored,floorCat:pl.floorCat||'',eaCat:pl.eaCat||'',eaMgmt:pl.eaMgmt||'',contagious:pl.contagious||[],zoonotic:!!pl.zoonotic,restrictedLabel:pl.restrictedLabel||'',restrictedXl:!!pl.restrictedXl,warnings:pl.warnings||[],notices:pl.notices||[],photo:pl.photo||'',foot:pl.foot||'',inDay:pl.inDay,weightTrend:pl.weightTrend||'',nextVet:pl.nextVet||'',rules:pl.rules||[],timetable:pl.timetable||[],reserved:pl.reserved||null,escalation:pl.escalation||'',vetLine:pl.vetLine||'',readyLabel:pl.readyLabel||'',walkLine:pl.walkLine||'',settleLine:pl.settleLine||'',reason:pl.reason||''};
 }
 function newDog(){FIELDS.forEach(function(id){setVal(id,'');});DATA={};render();window.scrollTo(0,0);}
 function downloadPage(){var css=document.querySelector('style').innerHTML;var name=(val('f_name')||'dog').replace(/[^a-z0-9]/gi,'-').toLowerCase();
