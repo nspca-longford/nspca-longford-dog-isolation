@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kennel card — Holdfast</title>
+<title>Kennel card — NSPCA Longford</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 body{margin:0;font-family:Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f4f5f2;color:#282932}
@@ -9,6 +9,7 @@ body{margin:0;font-family:Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,
 .btn{background:#fff;border:1.5px solid #d9dcd3;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:#282932}
 .btnp{background:#c6e76c;border-color:#c6e76c;font-weight:800}
 .wrap{display:grid;grid-template-columns:340px 1fr;gap:18px;padding:18px;max-width:1300px;margin:0 auto}
+@media(max-width:820px){.wrap{grid-template-columns:1fr;padding:10px}.form{position:static;max-height:none}.top{flex-wrap:wrap}.top>div:last-child{width:100%;display:flex;gap:6px}.top .btn{flex:1;padding:9px 6px;font-size:12px}}
 .form{background:#fff;border:1px solid #e4e7e0;border-radius:14px;padding:16px;align-self:start;position:sticky;top:64px;max-height:calc(100vh - 80px);overflow:auto}
 .fg{margin-bottom:10px}.fg label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.11em;color:#868b7e;margin-bottom:4px}
 .fg input{width:100%;box-sizing:border-box;border:1.5px solid #e4e7e0;background:#fbfcf9;border-radius:9px;padding:8px 10px;font-size:13px;font-weight:600;color:#282932;font-family:inherit;outline:none}
@@ -17,9 +18,6 @@ body{margin:0;font-family:Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,
 .drop.on{border-color:#c6e76c;background:#f7fbe9}
 .previewPane{overflow:auto}
 #scaler{transform-origin:top left}
-.kc-sheet{box-shadow:0 12px 40px rgba(40,41,50,.15)}
-@media print{.top,.form,.previewPane>:not(#scaler){display:none!important}.wrap{display:block;padding:0}#scaler{transform:none!important;height:auto!important}.kc-sheet{box-shadow:none}}
-
 .kc-sheet{width:210mm;min-height:297mm;background:#fff;color:#282932;font-family:Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;box-sizing:border-box;padding:0;position:relative;display:flex;flex-direction:column}
 .kc-sheet *{box-sizing:border-box}
 .kc-band{background:#282932;color:#fff;padding:9mm 12mm 7mm;display:flex;align-items:center;justify-content:space-between;gap:10mm}
@@ -65,9 +63,19 @@ body{margin:0;font-family:Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,
 .kc-grid th,.kc-grid td{border:.4mm solid #cfd4c8;height:8mm;font-size:8pt;font-weight:800;text-align:center;color:#6b7280;text-transform:uppercase;letter-spacing:.06em}
 .kc-grid th{background:#f1f3ee}
 .kc-grid td:first-child{text-align:left;padding-left:2.5mm;width:26mm;color:#282932}
-.kc-notes{min-height:22mm;border:.5mm solid #cfd4c8;border-radius:3.5mm;padding:3mm 4mm;font-size:11pt;font-weight:600;line-height:1.5;white-space:pre-wrap;background:repeating-linear-gradient(transparent 0,transparent 7mm,#eef0ea 7mm,#eef0ea 7.4mm)}.kc-notes:empty::before{content:attr(data-ph);color:#9a9fa8;font-weight:600}.kc-notes:focus{outline:.6mm solid #c6e76c}
 .kc-foot{margin-top:auto;padding:4mm 12mm 7mm;display:flex;justify-content:space-between;align-items:center;font-size:8.5pt;color:#9a9fa8;font-weight:600}
 .kc-foot b{color:#282932;letter-spacing:.08em}
+
+.kc-bandr{display:flex;align-items:center;gap:5mm}
+.kc-since{text-align:right;color:#cdd3df;font-size:8.5pt;font-weight:700;line-height:1.3}.kc-since b{color:#fff}.kc-since .lm{color:#c6e76c}
+.kc-words{margin-top:3mm}.kc-words span{display:inline-block;background:#eef1ea;color:#3f4a2e;font-size:11.5pt;font-weight:800;padding:1mm 3mm;border-radius:2mm;margin:0 1.5mm 1.5mm 0}
+.kc-qr{width:26mm;flex-shrink:0;text-align:center}.kc-qr img{width:26mm;height:26mm;display:block;border:.5mm solid #cfd4c8;border-radius:2mm;padding:1mm;background:#fff}.kc-qr div{font-size:7pt;font-weight:800;color:#6b7280;margin-top:1.5mm;line-height:1.25}
+.kc-rules{display:flex;flex-wrap:wrap;gap:2mm;margin:4mm 12mm 0}.kc-rules span{font-size:9.5pt;font-weight:900;padding:2mm 3.5mm;border-radius:2.5mm;letter-spacing:.02em}.kc-rules .no{background:#fee2e2;color:#991b1b}.kc-rules .ok{background:#dcfce7;color:#166534}
+.kc-secnote{font-weight:700;letter-spacing:0;text-transform:none;color:#9a9fa8;font-size:8pt;margin-left:2mm}
+.kc-sched{width:100%;border-collapse:collapse;margin-bottom:3.5mm}.kc-sched td,.kc-sched th{border:.4mm solid #e4e7e0;font-size:9.5pt;padding:1.8mm 2.5mm;text-align:left}.kc-sched th{background:#f1f3ee;font-size:8pt;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;text-align:center}.kc-sched th:first-child,.kc-sched th:nth-child(2){text-align:left}.kc-sched td.t{width:15mm;font-weight:900}.kc-sched td.tick{width:8mm;text-align:center}.kc-sched td.tick i{display:inline-block;width:4.5mm;height:4.5mm;border:.5mm solid #cfd4c8;border-radius:1mm}
+.kc-fact .v small{color:#166534;font-size:8.5pt;font-weight:800}
+.kc-box.ok{border-color:#16a34a}.kc-box.ok .h{color:#166534}
+
 @page{size:A4;margin:0}
 @media print{body{background:#fff;margin:0}.kc-sheet{width:210mm;height:297mm;box-shadow:none;page-break-after:always}}
 
@@ -76,7 +84,7 @@ body{margin:0;font-family:Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,
 <div class="wrap">
   <div class="form">
     <div class="drop" id="drop">Drop a photo here, or click to choose<input type="file" id="file" accept="image/*" style="display:none"></div>
-    <div class="fg"><label for="f_name">Name</label><input type="text" id="f_name" oninput="render()"></div><div class="fg"><label for="f_ref">Reference no.</label><input type="text" id="f_ref" oninput="render()"></div><div class="fg"><label for="f_kennel">Kennel / Pod</label><input type="text" id="f_kennel" oninput="render()"></div><div class="fg"><label for="f_breed">Breed / Type</label><input type="text" id="f_breed" oninput="render()"></div><div class="fg"><label for="f_breed2">Crossed with</label><input type="text" id="f_breed2" oninput="render()"></div><div class="fg"><label for="f_sex">Sex</label><input type="text" id="f_sex" oninput="render()"></div><div class="fg"><label for="f_age">Age</label><input type="text" id="f_age" oninput="render()"></div><div class="fg"><label for="f_size">Size</label><input type="text" id="f_size" oninput="render()"></div><div class="fg"><label for="f_colour">Colour / markings</label><input type="text" id="f_colour" oninput="render()"></div><div class="fg"><label for="f_weight">Weight</label><input type="text" id="f_weight" oninput="render()"></div><div class="fg"><label for="f_chip">Microchip no.</label><input type="text" id="f_chip" oninput="render()"></div><div class="fg"><label for="f_vax">Vaccinations</label><input type="text" id="f_vax" oninput="render()"></div><div class="fg"><label for="f_parasite">Parasite treatment</label><input type="text" id="f_parasite" oninput="render()"></div><div class="fg"><label for="f_neutered">Neutered / spayed</label><input type="text" id="f_neutered" oninput="render()"></div><div class="fg"><label for="f_intake">Intake date</label><input type="text" id="f_intake" oninput="render()"></div><div class="fg"><label for="f_isoends">Isolation ends</label><input type="text" id="f_isoends" oninput="render()"></div><div class="fg"><label for="f_meds">Medication</label><input type="text" id="f_meds" oninput="render()"></div><div class="fg"><label for="f_feeding">Feeding</label><input type="text" id="f_feeding" oninput="render()"></div><div class="fg"><label for="f_handling">Handling equipment</label><input type="text" id="f_handling" oninput="render()"></div><div class="fg"><label for="f_notes">Notes for the door</label><textarea id="f_notes" rows="3" oninput="render()" style="width:100%;box-sizing:border-box;border:1.5px solid #e4e7e0;background:#fbfcf9;border-radius:9px;padding:8px 10px;font-size:13px;font-weight:600;color:#282932;font-family:inherit;outline:none"></textarea></div>
+    <div class="fg"><label for="f_name">Name</label><input type="text" id="f_name" oninput="render()"></div><div class="fg"><label for="f_ref">Reference no.</label><input type="text" id="f_ref" oninput="render()"></div><div class="fg"><label for="f_kennel">Kennel / Pod</label><input type="text" id="f_kennel" oninput="render()"></div><div class="fg"><label for="f_words">In three words</label><input type="text" id="f_words" oninput="render()" placeholder="Gentle · Slow to trust · Loves the hose"></div><div class="fg"><label for="f_assessor">Ask for</label><input type="text" id="f_assessor" oninput="render()" placeholder="Shane"></div><div class="fg"><label for="f_web">Website profile link (QR)</label><input type="text" id="f_web" oninput="render()" placeholder="https://nspca.ie/…"></div><div class="fg"><label for="f_breed">Breed / Type</label><input type="text" id="f_breed" oninput="render()"></div><div class="fg"><label for="f_breed2">Crossed with</label><input type="text" id="f_breed2" oninput="render()"></div><div class="fg"><label for="f_sex">Sex</label><input type="text" id="f_sex" oninput="render()"></div><div class="fg"><label for="f_age">Age</label><input type="text" id="f_age" oninput="render()"></div><div class="fg"><label for="f_size">Size</label><input type="text" id="f_size" oninput="render()"></div><div class="fg"><label for="f_colour">Colour / markings</label><input type="text" id="f_colour" oninput="render()"></div><div class="fg"><label for="f_weight">Weight</label><input type="text" id="f_weight" oninput="render()"></div><div class="fg"><label for="f_chip">Microchip no.</label><input type="text" id="f_chip" oninput="render()"></div><div class="fg"><label for="f_vax">Vaccinations</label><input type="text" id="f_vax" oninput="render()"></div><div class="fg"><label for="f_parasite">Parasite treatment</label><input type="text" id="f_parasite" oninput="render()"></div><div class="fg"><label for="f_neutered">Neutered / spayed</label><input type="text" id="f_neutered" oninput="render()"></div><div class="fg"><label for="f_intake">Intake date</label><input type="text" id="f_intake" oninput="render()"></div><div class="fg"><label for="f_isoends">Isolation ends</label><input type="text" id="f_isoends" oninput="render()"></div><div class="fg"><label for="f_meds">Medication</label><input type="text" id="f_meds" oninput="render()"></div><div class="fg"><label for="f_feeding">Feeding</label><input type="text" id="f_feeding" oninput="render()"></div><div class="fg"><label for="f_handling">Handling equipment</label><input type="text" id="f_handling" oninput="render()"></div><div class="fg"><label for="f_notes">Notes for the door</label><textarea id="f_notes" rows="3" oninput="render()" style="width:100%;box-sizing:border-box;border:1.5px solid #e4e7e0;background:#fbfcf9;border-radius:9px;padding:8px 10px;font-size:13px;font-weight:600;color:#282932;font-family:inherit;outline:none"></textarea></div>
   </div>
   <div class="previewPane"><div id="scaler"><div id="sheet"></div></div></div>
 </div>
@@ -87,7 +95,7 @@ var FIELDS=["f_name", "f_ref", "f_kennel", "f_breed", "f_breed2", "f_sex", "f_ag
 function val(id){var e=document.getElementById(id);return e?e.value.trim():'';}
 function setVal(id,v){var e=document.getElementById(id);if(e)e.value=(v==null?'':v);}
 
-var KC_TL={Green:["#dcfce7","#166534"],Yellow:["#fef9c3","#854d0e"],Red:["#fee2e2","#991b1b"],Black:["#282932","#f1f3ee"]};
+var KC_TL={Green:["#dcfce7","#166534"],Yellow:["#fef9c3","#854d0e"],Red:["#fee2e2","#991b1b"],Black:["#282932","#f1f5f9"]};
 function kcEsc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
 function kcShortKennel(k){return String(k||"").replace(/^Kennel\s*/i,"K").replace(/^Pod\s*/i,"P")||"—";}
 function kcCardHtml(P,MARK){
@@ -97,53 +105,61 @@ function kcCardHtml(P,MARK){
   if(P.eaCat)pills.push('<span class="kc-pill" style="background:#fef3c7;color:#92400e">EA '+e(P.eaCat)+'</span>');
   if(P.contagious&&P.contagious.length)pills.push('<span class="kc-pill" style="background:#dc2626;color:#fff">Contagious'+(P.zoonotic?' · zoonotic':'')+'</span>');
   if(P.restrictedLabel)pills.push('<span class="kc-pill" style="background:'+(P.restrictedXl?'#7f1d1d':'#b45309')+';color:#fff">'+e(P.restrictedLabel)+'</span>');
+  if(P.readyLabel)pills.push('<span class="kc-pill" style="background:#dcfce7;color:#166534">'+e(P.readyLabel)+'</span>');
   if(P.neutered)pills.push('<span class="kc-pill" style="background:#eef1ea;color:#3f4a2e">'+e(P.neutered)+'</span>');
   var meta=[P.breed+(P.breed2?' × '+P.breed2:''),P.sex,P.age,P.colour].filter(Boolean).join(' · ');
+  var words=P.threeWords?'<div class="kc-words">'+String(P.threeWords).split(/[·,;]+/).map(function(w){return w.trim();}).filter(Boolean).slice(0,4).map(function(w){return '<span>'+e(w)+'</span>';}).join('')+'</div>':'';
+  var bandR='<div class="kc-bandr">'+(P.intake?'<div class="kc-since">In since <b>'+e(P.intake)+'</b>'+(P.inDay?' · day '+e(String(P.inDay)):'')+(P.assessor?'<br>Ask for <b class="lm">'+e(P.assessor)+'</b>':'')+'</div>':'')+'<div class="kc-kennel">'+e(kcShortKennel(P.kennel))+'</div></div>';
+  var qr=P.webUrl?'<div class="kc-qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data='+encodeURIComponent(P.webUrl)+'" alt=""><div>Scan to see '+e(P.name||'this dog')+' online</div></div>':'';
+  var rules=(P.rules&&P.rules.length)?'<div class="kc-rules">'+P.rules.map(function(r){return '<span class="'+(r[0]==='ok'?'ok':'no')+'">'+e(r[1])+'</span>';}).join('')+'</div>':'';
   var light='';
   if(tl){var lbl=P.tl+(P.score!=null&&P.score!==''?' · '+P.score+'/24':'');var note='';
     if(P.floored)note='<div class="note">Held at '+e(P.tl)+(P.floorCat?' by a severe finding in '+e(P.floorCat):'')+' — do not downgrade.</div>';
     else if(P.scoreProvisional)note='<div class="note">Provisional — '+(P.scoredN!=null?P.scoredN:'?')+' of '+(P.scoredOf!=null?P.scoredOf:6)+' categories scored. Confirm before relying on it.</div>';
     light='<div class="kc-light" style="background:'+tl[0]+';color:'+tl[1]+(P.scoreProvisional&&!P.floored?';border:.7mm dashed '+tl[1]:'')+'"><div><div class="lbl">Walk light</div><div class="big">'+e(lbl)+'</div></div><div class="rule">'+(P.walkRule?e(P.walkRule):'Who can walk this dog: see the assessor.')+note+'</div></div>';
   }else light='<div class="kc-light" style="background:#f1f3ee;color:#4b5160;border:.7mm dashed #cfd4c8"><div><div class="lbl">Walk light</div><div class="big">Not scored</div></div><div class="rule">No traffic light yet — designated staff only until assessed.</div></div>';
-  var facts=[["Reference",P.ref],["Microchip",P.chip],["Intake",P.intake],["Isolation ends",P.isoEnds],["Size",P.size],["Weight",P.weight],["Vaccinations",P.vax],["Parasite treatment",P.parasite]].filter(function(f){return f[1];});
-  var factsHtml=facts.map(function(f){return '<div class="kc-fact"><div class="k">'+e(f[0])+'</div><div class="v">'+e(f[1])+'</div></div>';}).join('');
-  var care=[["Feed",P.feeding],["Meds",P.meds],["Handling",P.handling]].filter(function(r){return r[1];});
-  var careHtml=care.length?'<div class="kc-sec">Daily care</div><div class="kc-care">'+care.map(function(r){return '<div class="r"><div class="k">'+e(r[0])+'</div><div class="v">'+e(r[1])+'</div></div>';}).join('')+'</div>':'';
+  var facts=[["Reference",P.ref],["Microchip",P.chip],["Intake",P.intake],["Isolation ends",P.isoEnds],["Size",P.size],["Weight",P.weight?(P.weight+(P.weightTrend?' <small>'+e(P.weightTrend)+'</small>':'')):''],["Vaccinations",P.vax],["Parasite treatment",P.parasite],["Next vet",P.nextVet]].filter(function(f){return f[1];});
+  var factsHtml=facts.map(function(f){return '<div class="kc-fact"><div class="k">'+e(f[0])+'</div><div class="v">'+(f[0]==='Weight'?f[1]:e(f[1]))+'</div></div>';}).join('');
+  var tt=P.timetable||[];var careHtml='';
+  if(tt.length){careHtml='<div class="kc-sec">Daily care <span class="kc-secnote">tick as you go</span></div><table class="kc-sched"><tr><th>When</th><th>What</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>'+tt.map(function(r){return '<tr><td class="t">'+e(r.t)+'</td><td>'+e(r.w)+'</td>'+'<td class="tick"><i></i></td>'.repeat(5)+'</tr>';}).join('')+'</table>';}
+  else{var care=[["Feed",P.feeding],["Meds",P.meds]].filter(function(r){return r[1];});if(care.length)careHtml='<div class="kc-sec">Daily care</div><div class="kc-care">'+care.map(function(r){return '<div class="r"><div class="k">'+e(r[0])+'</div><div class="v">'+e(r[1])+'</div></div>';}).join('')+'</div>';}
+  if(P.handling)careHtml+='<div class="kc-care"><div class="r"><div class="k">Kit</div><div class="v">'+e(P.handling)+'</div></div></div>';
   var alerts='';
   if(P.contagious&&P.contagious.length)alerts+='<div class="kc-box red"><div class="h">Contagious — strict isolation and PPE</div><div class="t">'+e(P.contagious.join(', '))+(P.zoonotic?' · zoonotic risk':'')+'</div></div>';
   if(P.restrictedLabel)alerts+='<div class="kc-box amber"><div class="h">'+e(P.restrictedLabel)+'</div><div class="t">Muzzle and lead in public — legal requirement.</div></div>';
   if(P.warnings&&P.warnings.length)alerts+='<div class="kc-box warn"><div class="h">Handling warnings</div><ul>'+P.warnings.map(function(w){var t=typeof w==="string"?w:w.text;var c=typeof w==="object"&&w.critical;return '<li style="color:'+(c?'#991b1b':'#282932')+'">'+e(t)+(c?' — critical':'')+'</li>';}).join('')+'</ul></div>';
   if(P.notices&&P.notices.length)alerts+='<div class="kc-box blue"><div class="h">Care notices</div><ul>'+P.notices.map(function(n){return '<li>'+e(typeof n==="string"?n:n.text)+'</li>';}).join('')+'</ul></div>';
   if(P.eaMgmt)alerts+='<div class="kc-box"><div class="h" style="color:#6b7280">EA management</div><div class="t">'+e(P.eaMgmt)+'</div></div>';
-  var days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-  var grid='<table class="kc-grid"><tr><th></th>'+days.map(function(d){return '<th>'+d+'</th>';}).join('')+'</tr>'+["Fed AM","Fed PM","Cleaned","Walked","Meds"].map(function(r){return '<tr><td>'+r+'</td>'+days.map(function(){return '<td></td>';}).join('')+'</tr>';}).join('')+'</table>';
+  if(P.reserved)alerts+='<div class="kc-box ok"><div class="h">Reserved'+(P.reserved.who?' · '+e(P.reserved.who):'')+'</div><div class="t">'+(P.reserved.hc?'Home check '+e(P.reserved.hc)+'. ':'')+e(P.reserved.note||'')+'</div></div>';
+  alerts+='<div class="kc-box"><div class="h" style="color:#6b7280">If something\'s wrong</div><div class="t">'+e(P.escalation||'Unit supervisor first · then the manager')+(P.vetLine?' · vet line '+e(P.vetLine):'')+'</div></div>';
+
   var notesBox='<div class="kc-write" style="padding-top:4mm"><div class="kc-sec">Notes for the door</div><div class="kc-notes" data-ph="Tap here to type before printing \u2014 or write it in pen.">'+kcEsc(P.notes||'')+'</div></div>';
   return '<div class="kc-sheet">'
-    +'<div class="kc-band"><div class="l"><img src="'+MARK+'" alt="NSPCA"><div class="ttl">Kennel card</div></div><div class="kc-kennel">'+e(kcShortKennel(P.kennel))+'</div></div>'
-    +'<div class="kc-hero">'+(P.photo?'<img class="kc-photo" src="'+P.photo+'" alt="">':'<div class="kc-nophoto">No photo on record</div>')+'<div class="kc-id"><div class="kc-name">'+e(P.name||'Unnamed dog')+'</div><div class="kc-meta">'+e(meta||'—')+'</div><div class="kc-pills">'+pills.join('')+'</div></div></div>'
-    +light
+    +'<div class="kc-band"><div class="l"><img src="'+MARK+'" alt="NSPCA"><div class="ttl">Kennel card</div></div>'+bandR+'</div>'
+    +'<div class="kc-hero">'+(P.photo?'<img class="kc-photo" src="'+P.photo+'" alt="">':'<div class="kc-nophoto">No photo on record</div>')+'<div class="kc-id"><div class="kc-name">'+e(P.name||'Unnamed dog')+'</div><div class="kc-meta">'+e(meta||'—')+'</div><div class="kc-pills">'+pills.join('')+'</div>'+words+'</div>'+qr+'</div>'
+    +light+rules
     +'<div class="kc-cols"><div class="kc-col"><div class="kc-sec">Details</div><div class="kc-facts">'+(factsHtml||'<div class="kc-fact"><div class="v" style="color:#9a9fa8">—</div></div>')+'</div>'+careHtml+'</div><div class="kc-col">'+(alerts||'<div class="kc-box"><div class="h" style="color:#166534">No warnings on record</div><div class="t">Standard handling applies. Check the record before any change.</div></div>')+'</div></div>'
-    +notesBox+'<div class="kc-write"><div class="kc-sec">This week</div>'+grid+'</div>'
-    +'<div class="kc-foot"><span>'+e(P.foot||'')+'</span><b>HOLDFAST · NSPCA LONGFORD</b></div>'
+    +notesBox
+    +'<div class="kc-foot"><span>'+e(P.foot||'')+'</span><b>NSPCA LONGFORD · DOG ISOLATION UNIT</b></div>'
     +'</div>';
 }
 
 function payloadFromForm(){var P={};for(var k in DATA)P[k]=DATA[k];
-  P.name=val('f_name');P.ref=val('f_ref');P.kennel=val('f_kennel');P.breed=val('f_breed');P.breed2=val('f_breed2');P.sex=val('f_sex');P.age=val('f_age');P.size=val('f_size');P.colour=val('f_colour');P.weight=val('f_weight');P.chip=val('f_chip');P.vax=val('f_vax');P.parasite=val('f_parasite');P.neutered=val('f_neutered');P.intake=val('f_intake');P.isoEnds=val('f_isoends');P.meds=val('f_meds');P.feeding=val('f_feeding');P.handling=val('f_handling');P.notes=val('f_notes');
+  P.name=val('f_name');P.ref=val('f_ref');P.kennel=val('f_kennel');P.breed=val('f_breed');P.breed2=val('f_breed2');P.sex=val('f_sex');P.age=val('f_age');P.size=val('f_size');P.colour=val('f_colour');P.weight=val('f_weight');P.chip=val('f_chip');P.vax=val('f_vax');P.parasite=val('f_parasite');P.neutered=val('f_neutered');P.intake=val('f_intake');P.isoEnds=val('f_isoends');P.meds=val('f_meds');P.feeding=val('f_feeding');P.handling=val('f_handling');P.notes=val('f_notes');P.threeWords=val('f_words');P.assessor=val('f_assessor');P.webUrl=val('f_web');
   P.foot=DATA.foot||('Printed '+new Date().toLocaleString('en-IE'));return P;}
 function render(){document.getElementById('sheet').innerHTML=kcCardHtml(payloadFromForm(),MARK).replace('<div class="kc-sheet">','<div class="kc-sheet" contenteditable="true" spellcheck="false">');fit();}
 function loadPayload(){try{var raw=localStorage.getItem('nspca-kennelcard');if(raw)return JSON.parse(raw);}catch(e){}
   var p=new URLSearchParams(location.search),obj=null;['name','ref','kennel','breed','breed2','sex','age','size','colour','weight','chip','vax','parasite','neutered','intake','isoends','meds','feeding','handling'].forEach(function(k){if(p.has(k)){obj=obj||{};obj[k]=p.get(k);}});return obj;}
 function applyPayload(pl){if(!pl)return;
-  setVal('f_name',pl.name);setVal('f_ref',pl.ref!=null?pl.ref:pl.refNo);setVal('f_kennel',pl.kennel);setVal('f_breed',pl.breed);setVal('f_breed2',pl.breed2);setVal('f_sex',pl.sex);setVal('f_age',pl.age);setVal('f_size',pl.size);setVal('f_colour',pl.colour);setVal('f_weight',pl.weight);setVal('f_chip',pl.chip!=null?pl.chip:pl.microchip);setVal('f_intake',pl.intake!=null?pl.intake:pl.intakeDate);setVal('f_vax',pl.vax);setVal('f_parasite',pl.parasite);setVal('f_neutered',pl.neutered);setVal('f_isoends',pl.isoEnds!=null?pl.isoEnds:pl.isoends);setVal('f_meds',pl.meds);setVal('f_feeding',pl.feeding);setVal('f_handling',pl.handling);
-  DATA={isoLabel:pl.isoLabel||'',isoState:pl.isoState||'',tl:pl.tl||'',score:pl.score,walkRule:pl.walkRule||'',scoreProvisional:!!pl.scoreProvisional,scoredN:pl.scoredN,scoredOf:pl.scoredOf,floored:!!pl.floored,floorCat:pl.floorCat||'',eaCat:pl.eaCat||'',eaMgmt:pl.eaMgmt||'',contagious:pl.contagious||[],zoonotic:!!pl.zoonotic,restrictedLabel:pl.restrictedLabel||'',restrictedXl:!!pl.restrictedXl,warnings:pl.warnings||[],notices:pl.notices||[],photo:pl.photo||'',foot:pl.foot||''};
+  setVal('f_name',pl.name);setVal('f_ref',pl.ref!=null?pl.ref:pl.refNo);setVal('f_kennel',pl.kennel);setVal('f_breed',pl.breed);setVal('f_breed2',pl.breed2);setVal('f_sex',pl.sex);setVal('f_age',pl.age);setVal('f_size',pl.size);setVal('f_colour',pl.colour);setVal('f_weight',pl.weight);setVal('f_chip',pl.chip!=null?pl.chip:pl.microchip);setVal('f_intake',pl.intake!=null?pl.intake:pl.intakeDate);setVal('f_vax',pl.vax);setVal('f_parasite',pl.parasite);setVal('f_neutered',pl.neutered);setVal('f_isoends',pl.isoEnds!=null?pl.isoEnds:pl.isoends);setVal('f_meds',pl.meds);setVal('f_feeding',pl.feeding);setVal('f_handling',pl.handling);setVal('f_words',pl.threeWords);setVal('f_assessor',pl.assessor);setVal('f_web',pl.webUrl);
+  DATA={isoLabel:pl.isoLabel||'',isoState:pl.isoState||'',tl:pl.tl||'',score:pl.score,walkRule:pl.walkRule||'',scoreProvisional:!!pl.scoreProvisional,scoredN:pl.scoredN,scoredOf:pl.scoredOf,floored:!!pl.floored,floorCat:pl.floorCat||'',eaCat:pl.eaCat||'',eaMgmt:pl.eaMgmt||'',contagious:pl.contagious||[],zoonotic:!!pl.zoonotic,restrictedLabel:pl.restrictedLabel||'',restrictedXl:!!pl.restrictedXl,warnings:pl.warnings||[],notices:pl.notices||[],photo:pl.photo||'',foot:pl.foot||'',inDay:pl.inDay,weightTrend:pl.weightTrend||'',nextVet:pl.nextVet||'',rules:pl.rules||[],timetable:pl.timetable||[],reserved:pl.reserved||null,escalation:pl.escalation||'',vetLine:pl.vetLine||'',readyLabel:pl.readyLabel||''};
 }
 function newDog(){FIELDS.forEach(function(id){setVal(id,'');});DATA={};render();window.scrollTo(0,0);}
 function downloadPage(){var css=document.querySelector('style').innerHTML;var name=(val('f_name')||'dog').replace(/[^a-z0-9]/gi,'-').toLowerCase();
   var html='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet"><title>'+name+' — kennel card</title><style>'+css+'body{background:#fff}@media screen{.kc-sheet{margin:18px auto}}</style></head><body>'+document.getElementById('sheet').innerHTML+'</body></html>';
   var blob=new Blob([html],{type:'text/html'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name+'-kennel-card.html';a.click();}
-function fit(){var pane=document.querySelector('.previewPane'),sheet=document.querySelector('.kc-sheet'),sc=document.getElementById('scaler');if(!sheet)return;sc.style.transform='scale(1)';var avail=pane.clientWidth-8,sw=sheet.offsetWidth;var k=Math.min(1,avail/sw);sc.style.transform='scale('+k+')';sc.style.height=(sheet.offsetHeight*k)+'px';}
-window.addEventListener('resize',fit);
+function fit(){var pane=document.querySelector('.previewPane'),sheet=document.querySelector('.kc-sheet'),sc=document.getElementById('scaler');if(!sheet)return;sc.style.transform='scale(1)';var avail=Math.min(pane.clientWidth,document.documentElement.clientWidth)-8,sw=sheet.offsetWidth;var k=Math.min(1,avail/sw);sc.style.transform='scale('+k+')';sc.style.height=(sheet.offsetHeight*k)+'px';}
+window.addEventListener('resize',fit);window.addEventListener('beforeprint',function(){var sc=document.getElementById('scaler');sc.style.transform='none';sc.style.height='auto';});window.addEventListener('afterprint',fit);
 (function(){var drop=document.getElementById('drop'),file=document.getElementById('file');
   function readImg(f){if(!f||!f.type.match(/^image\//))return;var rd=new FileReader();rd.onload=function(){var img=new Image();img.onload=function(){var MAX=900,w=img.width,h=img.height;if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);DATA.photo=cv.toDataURL('image/jpeg',0.85);render();};img.src=rd.result;};rd.readAsDataURL(f);}
   drop.onclick=function(){file.click();};file.onchange=function(){readImg(file.files[0]);};
