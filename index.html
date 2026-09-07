@@ -133,6 +133,16 @@ nav::-webkit-scrollbar{display:none}
 .sp-t{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:#868b7e;margin-bottom:5px}
 .sp-v{font-size:12.5px;line-height:1.45;color:#282932}.sp-v b{font-weight:800}
 .sp-r b{color:#991b1b}.sp-a b{color:#92400e}.sp-t b{color:#0f766e}.sp-q b{color:#4b5563}
+.cchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.cchip{font-size:12px;font-weight:700;padding:7px 12px;border-radius:20px;border:1.5px solid #e4e7e0;background:#fff;color:#6b7280;cursor:pointer;user-select:none}
+.cchip.on{background:#282932;color:#c6e76c;border-color:#282932}
+.cchip.bad.on{background:#dc2626;border-color:#dc2626;color:#fff}
+.cchip.add{padding:0;border-style:dashed}.cchip.add input{border:none;background:transparent;font:inherit;padding:7px 12px;width:90px;min-height:0;outline:none;color:#282932}
+.clight{border-radius:10px;padding:9px 12px;font-size:12.5px;font-weight:700;margin-bottom:10px}
+.crow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eef0ea;font-size:13px}.crow:last-of-type{border:none}.crow small{color:#6b7280;font-weight:600;font-size:11.5px}.crow .btn{padding:6px 12px;font-size:12px;min-height:0}
+.camber{font-style:normal;background:#fef3c7;color:#92400e;font-size:10px;font-weight:800;padding:1px 7px;border-radius:8px;margin-left:4px}
+.cpre{background:#eef1ea;border-radius:9px;padding:9px 10px;font-size:13px;font-weight:700;color:#3f4a2e}
+.cout{background:#282932;color:#fff;border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.55;margin-bottom:12px}.cout b{color:#c6e76c}
 .ldoors{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
 .ldoor{border:1.5px solid #e4e7e0;border-radius:13px;padding:12px 13px;cursor:pointer;background:#fbfcf9;min-height:74px}
 .ldoor b{display:block;font-size:14.5px;font-weight:800;margin-bottom:3px}.ldoor span{font-size:11px;color:#6b7280;font-weight:600;line-height:1.35}
@@ -505,8 +515,8 @@ var TABS=[
   {id:"picture",l:"Overview",g:"Profile"},{id:"dog",l:"Dog",g:"Profile"},{id:"photos",l:"Photos",g:"Profile"},{id:"notes",l:"Notes",g:"Profile"},
   {id:"assessment",l:"Assessment",g:"Assessment"},{id:"scoring",l:"Scoring",g:"Assessment"},{id:"sessions",l:"Sessions",g:"Assessment"},{id:"ea",l:"EA",g:"Assessment"},{id:"rehoming",l:"Clearance",g:"Assessment"},
   {id:"arrival",l:"Arrival",g:"Isolation"},{id:"days",l:"Day reports",g:"Isolation"},
-  {id:"feeding",l:"Feeding",g:"Care"},
-  {id:"medical",l:"Medical",g:"Health"},{id:"weights",l:"Weights",g:"Health"},
+  {id:"care",l:"Care",g:"Care"},{id:"feeding",l:"Feeding",g:"Care"},
+  {id:"medical",l:"Medical",g:"Health"},{id:"weights",l:"Weights",g:"Care"},
   {id:"rehome",l:"Rehoming",g:"Departure"},{id:"foster",l:"Foster",g:"Departure"},{id:"outcome",l:"Outcome",g:"Departure"},
   {id:"story",l:"Story",g:"Records"},{id:"files",l:"Files",g:"Records"},{id:"report",l:"Report",g:"Records"}
 ];
@@ -521,7 +531,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.219",date:"2026-09-07",note:"Outcome: the small empty squares before each card title (where icons used to sit) are gone."},{version:"3.218",date:"2026-09-07",note:"Puppy audit. One rule for what a puppy is (date of birth under 26 weeks, or the Under-1-year age when there\u0027s no DOB) used everywhere \u2014 the Puppies filter, the pup card, the feeding formula, the weigh nudge. A pup without a DOB now gets a card asking for an estimate, since the timeline needs one. The timeline matches the nursery handbook: worming every two weeks to 12 weeks, first vaccination at 8 weeks, second at 10\u201312, isolation until the first jab, no rehoming before 8 weeks."},{version:"3.217",date:"2026-09-07",note:"Kennel card v2. The band shows in-since, the day and who to ask for; three words under the name (new field on the Dog tab); a QR code that opens the dog\u0027s page on the website (new Website profile link on the Rehoming tab \u2014 no link, no QR); a red/green NO \u00b7 OK strip built from the assessment (children, cats, other dogs, lifting, food, muzzle); weight trend and next vet appointment in the details; daily care as a timetable of feeds and meds at their times with tick boxes, replacing the week grid; a Reserved box when there\u0027s an adopter; and an If-something\u0027s-wrong line with the escalation ladder and vet line (set in Profile by an admin). Ready-to-go shows as a pill when the dog truly is."},{version:"3.216",date:"2026-09-06",note:"Outcome rebuilt as the sketch. Six doors as tiles (Rehomed, Reclaimed by owner, Transferred, Moved to Kennels, Euthanised, Died / Escaped); each door asks its own questions \u2014 Rehomed pulls the adopter and fee from the Rehoming tab, Reclaimed asks for the owner and fees, Transferred where to and who received, Euthanised the reason, vet and approver; a Before-they-go checklist that changes with the door (chip transferred, vaccination card, meds, food, kennel card off the door, turnaround logged\u2026) with who ticked what; sign-off with a required second signature for euthanasia; and one button to close the record, which tells you what\u0027s still unticked first."},{version:"3.215",date:"2026-09-06",note:"Scoring now looks like the sketch. Each category is a card with four tiles carrying the app\u0027s own wording for levels 1\u20134; tap one to score the whole category (it sets every sub-criterion to that level), then open Detail underneath to refine the weighted sub-criteria and mark evidence as before. The verdict strip stays pinned at the top; the meter, snapshots and flags fold away under it. A 3 or 4 still asks for a reason."}
+var CHANGELOG=[{version:"3.220",date:"2026-09-07",note:"Care tab. How to look after this dog, set once: Comfort (settles with, sleeps, best time, fears / avoid, what makes them worse), Walking & exercise (the light in words, kit chips suggested from the assessment, out with other dogs?, restriction with an until-date, toilet routine, enrichment that works) and Grooming & coat (coat type, what they tolerate from Handling, and Done-today taps for brush, bath, nails, ears that just remember the date). The kennel card\u0027s Care notices and Kit lines and the Summary panel read from it. Weights moves into the Care group beside Feeding."},{version:"3.219",date:"2026-09-07",note:"Outcome: the small empty squares before each card title (where icons used to sit) are gone."},{version:"3.218",date:"2026-09-07",note:"Puppy audit. One rule for what a puppy is (date of birth under 26 weeks, or the Under-1-year age when there\u0027s no DOB) used everywhere \u2014 the Puppies filter, the pup card, the feeding formula, the weigh nudge. A pup without a DOB now gets a card asking for an estimate, since the timeline needs one. The timeline matches the nursery handbook: worming every two weeks to 12 weeks, first vaccination at 8 weeks, second at 10\u201312, isolation until the first jab, no rehoming before 8 weeks."},{version:"3.217",date:"2026-09-07",note:"Kennel card v2. The band shows in-since, the day and who to ask for; three words under the name (new field on the Dog tab); a QR code that opens the dog\u0027s page on the website (new Website profile link on the Rehoming tab \u2014 no link, no QR); a red/green NO \u00b7 OK strip built from the assessment (children, cats, other dogs, lifting, food, muzzle); weight trend and next vet appointment in the details; daily care as a timetable of feeds and meds at their times with tick boxes, replacing the week grid; a Reserved box when there\u0027s an adopter; and an If-something\u0027s-wrong line with the escalation ladder and vet line (set in Profile by an admin). Ready-to-go shows as a pill when the dog truly is."},{version:"3.216",date:"2026-09-06",note:"Outcome rebuilt as the sketch. Six doors as tiles (Rehomed, Reclaimed by owner, Transferred, Moved to Kennels, Euthanised, Died / Escaped); each door asks its own questions \u2014 Rehomed pulls the adopter and fee from the Rehoming tab, Reclaimed asks for the owner and fees, Transferred where to and who received, Euthanised the reason, vet and approver; a Before-they-go checklist that changes with the door (chip transferred, vaccination card, meds, food, kennel card off the door, turnaround logged\u2026) with who ticked what; sign-off with a required second signature for euthanasia; and one button to close the record, which tells you what\u0027s still unticked first."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -2032,7 +2042,7 @@ function buildKennelCard(w){
   var restrictedLabel=rb?(rb.xl?"XL Bully — no rehoming":"Restricted breed — muzzle in public"):"";
   var ws=(S.warnings||[]).slice().sort(function(a,b){return(a.level==="Critical"?0:1)-(b.level==="Critical"?0:1);}).map(function(w){return{text:w.text,critical:w.level==="Critical"};});
   assessmentBiteFlags(S).slice().reverse().forEach(function(t){ws.unshift({text:"Assessment: "+t,critical:true});});
-  var ns=(S.careNotices||[]).map(function(n){return{text:n.text};});
+  var _cl=careSummaryLine();var ns=(_cl?[{text:_cl}]:[]).concat((S.careNotices||[]).map(function(n){return{text:n.text};}));
   var fp=S.feedingPlan||{};
   var feeding=[fp.brand,fp.grams?(fp.grams+"g"):"",fp.frequency].filter(Boolean).join(" \u00b7 ");
   var wt=d.weight?(/kg/i.test(String(d.weight))?String(d.weight):(d.weight+" kg")):"";
@@ -2050,7 +2060,7 @@ function buildKennelCard(w){
   var isoEnds=d.intakeDate?isoClearDate(d.intakeDate,isoExtraDays(d)):"";
   if(isoEnds&&typeof fmtDMY==="function")isoEnds=fmtDMY(isoEnds);
   var meds=(m.medications||[]).filter(function(x){return x.active!==false&&(!x.endDate||x.endDate>=tdy);}).map(function(x){return [x.name,x.dose,x.frequency].filter(Boolean).join(" ");}).filter(Boolean).join("; ");
-  var handling=rb?"Muzzle in public (legal requirement)":"";
+  ensureCare();var handling=[careKitLine(),rb?"Muzzle in public (legal requirement)":""].filter(Boolean).join(" \u00b7 ");
   var payload={
     name:d.name||"",ref:d.refNo||"",kennel:d.kennel||"",
     breed:d.breed||"",breed2:(d.crossbreed?d.breed2:"")||"",sex:d.sex||"",
@@ -3005,6 +3015,7 @@ function diseaseShortName(t){return(t||"").replace(/ \(.*$/,"");}
 
 function defaultState(){return{_id:null,tab:"dog",
   dog:{name:"",breed:"",sex:"",age:"",colour:"",weight:"",microchip:"",intakeDate:"",intakeReason:"",assessor:"",refNo:"",photo:"",kennel:"",crossbreed:false,size:"",mumId:"",dob:"",litterBorn:"",litterSurviving:"",rearing:"",returnType:"",returnDate:"",broughtInBy:"",inspectorRef:""},
+  care:{settles:[],sleeps:"",bestTime:"",fears:[],worse:"",kit:[],withDogs:"",restriction:"",restrictionUntil:"",toilet:"",enrichment:[],coat:"",groom:{}},
   rehome:{stage:"",availableSince:"",fee:"",adopterName:"",adopterPhone:"",adopterEmail:"",adopterHome:"",adopterOther:"",homeCheckDate:"",homeCheckBy:"",log:[]},
   foster:{out:false,type:"",carer:"",phone:"",address:"",since:"",due:"",instructions:"",log:[]},
   arrival:{demeanour:"",muzzle:"",lead:"",vet:"",notes:"",dogDog:"",catTolerance:"",equineHistory:"",smallMammalHistory:"",childHistory:"",biteHistory:""},
@@ -5325,6 +5336,7 @@ function page(){
     return '<h2>Scoring</h2><div class="sub">Tap the level that fits each category \u2014 1 is best, 4 is worst \u2014 then open Detail to refine the sub-criteria. Any 3 or 4 asks you to say what you saw.</div>'+stick+staleBanner+more+cats+'<div class="sc-label">Cross-check</div>'+secondAssessorCardHtml()+browNav("scoring");
   }
 
+  if(t==="care")return renderCare();
   if(t==="rehome")return renderRehome();
   if(t==="foster")return renderFoster();
   if(t==="outcome"){migrateFinLists();
@@ -5576,6 +5588,7 @@ function tabDone(id){
     case "behaviour": return !!(S.behaviour&&((S.behaviour.log&&S.behaviour.log.length)||S.behaviour.notes));
     case "scoring": return Object.values(S.scores||{}).some(function(v){return (parseInt(v)||0)>0;});
     case "ea": if(!S.ea||S.ea.needed!=="Yes")return null; return !!eaCalc(S.ea).complete;
+    case "care": {var c=S.care||{};return (c.settles&&c.settles.length)||(c.fears&&c.fears.length)||c.sleeps||c.kit&&c.kit.length||c.restriction?true:null;}
     case "rehome": ensureRF();return S.rehome.stage?true:null;
     case "foster": ensureRF();return (S.foster.out||S.foster.carer)?true:null;
     case "outcome": return !!(S.fin&&S.fin.outcome);
@@ -5657,6 +5670,7 @@ function summaryHtml(){
   if(rec){var nx=dogNextThing(rec,computeDueToday([rec],true));if(nx)h+='<div class="sp-card" data-go="'+(nx.c==="r"||nx.t.indexOf("Vaccine")===0||nx.t.indexOf("On medication")===0||nx.t.indexOf("Parasite")===0?"medical":"dog")+'"><div class="sp-t">Next thing</div><div class="sp-v sp-'+nx.c+'"><b>'+nx.t+'</b></div></div>';}
   var vv=((S.medical&&S.medical.vetVisits)||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");})[0];
   if(vv)h+='<div class="sp-card" data-go="medical"><div class="sp-t">Latest vet note</div><div class="sp-v">'+esc(fmtDMY(vv.date))+(vv.vet?' \u00b7 '+esc(vv.vet):'')+' \u2014 '+esc((vv.findings||vv.reason||"").slice(0,140))+(vv.followUp?' <b>Follow-up: '+esc(vv.followUp)+'</b>':'')+'</div></div>';
+  ensureCare();var _cs=careSummaryLine();if(_cs)h+='<div class="sp-card" data-go="care"><div class="sp-t">Comfort</div><div class="sp-v">'+esc(_cs)+'</div></div>';
   var fp=S.feedingPlan||{};
   if(fp.brand||fp.grams)h+='<div class="sp-card" data-go="feeding"><div class="sp-t">Feeding</div><div class="sp-v"><b>'+esc(fp.brand||"")+'</b>'+(fp.grams?' \u00b7 '+esc(fp.grams)+' g':'')+(fp.frequency?' \u00b7 '+esc(fp.frequency.toLowerCase()):'')+(fp.notes?' \u00b7 <b style="color:#991b1b">'+esc(fp.notes)+'</b>':'')+'</div></div>';
   var days=S.days||[];var last=null;for(var i=days.length-1;i>=0;i--){var de=days[i];if(de&&(de.demeanour||de.notes||de.feeding)){last={i:i,d:de};break;}}
@@ -5725,6 +5739,45 @@ function renderFoster(){ensureRF();var f=S.foster;
   h+='<div class="card"><div class="lbl" style="margin-bottom:8px">Check-ins</div>'+logListHtml(f.log)+'<div style="display:flex;gap:8px;margin-top:10px"><input id="foster-log-in" placeholder="e.g. check-in call: eating well, stitches clean" style="flex:1"><button class="btn" onclick="addLogEntry(\'foster\',\'foster-log-in\')">+ Add</button></div></div>';
   h+='<div class="brow">'+(f.out?'<button class="btn btnp" onclick="backFromFoster()">Back from foster</button>':'<button class="btn btnp" onclick="sendToFoster()">Send to foster</button>')+'</div>';
   return h+browNav("foster");
+}
+var CARE_SETTLES=["Kong","Radio on","Blanket from home","Covered front","Chew","Company nearby","Quiet corner","Toy in the bed"];
+var CARE_FEARS=["Hoover","Men in hats","Loud voices","Being reached over","Other dogs at the bars","Sudden movement","Being cornered","Rain / hose"];
+var CARE_KIT=["Slip lead","Harness","Muzzle","Double clip","Head collar","Long line"];
+var CARE_ENRICH=["Snuffle mat","Scatter feed","Cardboard box","Scent trail","Frozen kong","Ball","Lick mat","Tug"];
+function ensureCare(){if(!S.care)S.care={settles:[],sleeps:"",bestTime:"",fears:[],worse:"",kit:[],withDogs:"",restriction:"",restrictionUntil:"",toilet:"",enrichment:[],coat:"",groom:{}};["settles","fears","kit","enrichment"].forEach(function(k){if(!Array.isArray(S.care[k]))S.care[k]=[];});if(!S.care.groom)S.care.groom={};}
+function careToggle(list,val){ensureCare();var arr=S.care[list];var i=arr.indexOf(val);if(i>=0)arr.splice(i,1);else arr.push(val);persistSave();debouncedSave();renderMain();}
+function careAddOther(list,inputId){ensureCare();var el=document.getElementById(inputId);var v=el?(el.value||"").trim():"";if(!v)return;if(S.care[list].indexOf(v)<0)S.care[list].push(v);persistSave();debouncedSave();renderMain();}
+function careGroomDone(k){ensureCare();S.care.groom[k]={date:new Date().toISOString().slice(0,10),by:currentName()};persistSave();debouncedSave();renderMain();}
+function careKitDefault(){var a=S.assessment||{};var kit=[];if(a.muzzleRequired==="Yes")kit.push("Muzzle");if(/Strong|Moderate/.test(a.leadBehaviour||""))kit.push("Harness");kit.push("Slip lead");return kit;}
+function careSummaryLine(){ensureCare();var c=S.care;var parts=[];
+  if(c.settles.length)parts.push("Settles with "+c.settles.map(function(x){return x.toLowerCase();}).join(", "));
+  if(c.sleeps)parts.push("sleeps "+c.sleeps.toLowerCase());
+  if(c.fears.length)parts.push("avoid "+c.fears.map(function(x){return x.toLowerCase();}).join(", "));
+  if(c.worse)parts.push(c.worse);
+  return parts.join(" \u00b7 ");}
+function careKitLine(){ensureCare();var c=S.care;var kit=c.kit.length?c.kit:careKitDefault();var parts=[kit.join(" + ")];
+  if(c.withDogs)parts.push(c.withDogs);if(c.restriction)parts.push(c.restriction+(c.restrictionUntil?" until "+fmtDMY(c.restrictionUntil):""));if(c.toilet)parts.push(c.toilet);
+  return parts.filter(Boolean).join(" \u00b7 ");}
+function renderCare(){ensureCare();var c=S.care;var a=S.assessment||{};
+  var chips=function(list,opts,bad){var cur=S.care[list];var all=opts.slice();cur.forEach(function(v){if(all.indexOf(v)<0)all.push(v);});return '<div class="cchips">'+all.map(function(o){var on=cur.indexOf(o)>=0;return '<span class="cchip'+(on?" on":"")+(bad?" bad":"")+'" onclick="careToggle(\''+list+'\',\''+esc(o).replace(/'/g,"\\'")+'\')">'+esc(o)+'</span>';}).join("")+'<span class="cchip add"><input id="care-add-'+list+'" placeholder="+ other" onkeydown="if(event.key===\'Enter\'){careAddOther(\''+list+'\',\'care-add-'+list+'\');}"></span></div>';};
+  var total=Object.values(S.scores||{}).reduce(function(x,y){return x+(parseInt(y)||0);},0);var tl=total?handlingLight(total,S.scores):null;
+  var lightLine=tl?'<div class="clight" style="background:'+tl.bg+';color:'+tl.tc+'">'+esc(tl.l)+' \u00b7 '+total+'/24 \u2014 '+esc((function(){var m={Green:"any handler",Yellow:"experienced handlers only",Red:"designated staff only",Black:"management-directed"};return m[tl.l]||"";})())+(c.withDogs?" \u00b7 "+esc(c.withDogs.toLowerCase()):"")+'</div>':'<div class="clight" style="background:#f1f3ee;color:#4b5160">Not scored yet \u2014 designated staff only until assessed.</div>';
+  var h='<h2 style="margin-bottom:4px">Care</h2><div class="sub">How to look after '+esc(S.dog.name||"this dog")+'. Set it once; everyone on shift reads it. Nothing here needs updating daily.</div>';
+  h+='<div class="card"><div class="lbl" style="margin-bottom:8px">Comfort \u2014 what settles '+esc(S.dog.name||"them")+'</div>'
+    +'<div class="f"><label class="lbl">Settles with</label>'+chips("settles",CARE_SETTLES,false)+'</div>'
+    +'<div class="dog-fg">'+slct("Sleeps",c.sleeps||"","care.sleeps",[["","-- not noted --"],["At the back of the kennel","At the back of the kennel"],["At the front, watching","At the front, watching"],["In the bed","In the bed"],["On the floor, not the bed","On the floor, not the bed"],["Curled small / hidden","Curled small / hidden"]])+slct("Best time of day",c.bestTime||"","care.bestTime",[["","-- not noted --"],["Mornings","Mornings"],["After walks","After walks"],["Evenings","Evenings"],["Quiet after lunch","Quiet after lunch"],["No pattern yet","No pattern yet"]])+'</div>'
+    +'<div class="f" style="margin-top:8px"><label class="lbl">Fears / avoid</label>'+chips("fears",CARE_FEARS,true)+'</div>'
+    +fld("What makes them worse",c.worse||"","care.worse","text","e.g. being rushed at the door \u2014 wait for them to come forward")+'</div>';
+  h+='<div class="card"><div class="lbl" style="margin-bottom:8px">Walking & exercise</div>'+lightLine
+    +'<div class="f"><label class="lbl">Kit <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 '+(c.kit.length?'as set here':'suggested from the assessment: '+esc(careKitDefault().join(" + "))+' \u2014 tap to set')+'</span></label>'+chips("kit",CARE_KIT,false)+'</div>'
+    +'<div class="dog-fg">'+slct("Out with other dogs?",c.withDogs||"","care.withDogs",[["","-- not decided --"],["Walk alone","Walk alone"],["With a steady buddy only","With a steady buddy only"],["Fine with calm dogs","Fine with calm dogs"]])+slct("Exercise restriction",c.restriction||"","care.restriction",[["","None"],["Post-op rest \u2014 no walks","Post-op rest \u2014 no walks"],["Short lead walks only","Short lead walks only"],["No stairs / jumping","No stairs / jumping"],["Cool times of day only","Cool times of day only"]])+fld("Restriction until",c.restrictionUntil||"","care.restrictionUntil","date")+fld("Toilet routine",c.toilet||"","care.toilet","text","e.g. needs the grass \u2014 won\u0027t go on concrete")+'</div>'
+    +'<div class="f" style="margin-top:8px"><label class="lbl">Enrichment that works</label>'+chips("enrichment",CARE_ENRICH,false)+'</div></div>';
+  var tol=[];if(a.grooming)tol.push("Brush: "+a.grooming);if(a.nailHandling)tol.push("Nails: "+a.nailHandling);if(a.touchEars)tol.push("Ears: "+a.touchEars);
+  var rows=[["brush","Brushed"],["bath","Bath"],["nails","Nails"],["ears","Ears checked"]].map(function(r){var g=c.groom[r[0]];var days=g&&g.date?daysSince(g.date):null;var amber=(r[0]==="nails"&&(days===null||days>28))||(r[0]==="brush"&&days!==null&&days>14);return '<div class="crow"><span>'+r[1]+' <small>\u00b7 '+(g&&g.date?('last '+esc(fmtDMY(g.date))+(g.by?' \u00b7 '+esc(g.by):'')):'never')+'</small>'+(amber?' <em class="camber">overdue</em>':'')+'</span><button class="btn" onclick="careGroomDone(\''+r[0]+'\')">Done today</button></div>';}).join("");
+  h+='<div class="card"><div class="lbl" style="margin-bottom:8px">Grooming & coat</div><div class="dog-fg">'+slct("Coat",c.coat||"","care.coat",[["","-- not noted --"],["Short \u2014 weekly brush","Short \u2014 weekly brush"],["Medium \u2014 brush twice a week","Medium \u2014 brush twice a week"],["Long / double \u2014 daily brush","Long / double \u2014 daily brush"],["Wire \u2014 hand strip / clip","Wire \u2014 hand strip / clip"],["Clipped breed \u2014 groomer","Clipped breed \u2014 groomer"]])+'<div class="f"><label class="lbl">Tolerates <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">(from Handling)</span></label><div class="cpre">'+(tol.length?esc(tol.join(" \u00b7 ")):"Not assessed yet")+'</div></div></div>'+rows+'<div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:6px">\u201cDone today\u201d remembers the date and who \u2014 it isn\u0027t a log to keep up. Nails go amber after four weeks.</div></div>';
+  var line=careSummaryLine();
+  h+='<div class="cout"><b>On the kennel card:</b> '+(line?esc(line):'<i>nothing yet \u2014 tap a few chips above</i>')+'<br><b>Kit line:</b> '+esc(careKitLine())+'</div>';
+  return h+browNav("care");
 }
 function renderMain(){document.getElementById("content").innerHTML=page();}
 function render(){renderNav();renderMain();updateIsoChip();updateWarnChip();updateNoticeChip();updateSaveBar();updateHeaderDog();checkDuplicateName();checkMicrochip();}
