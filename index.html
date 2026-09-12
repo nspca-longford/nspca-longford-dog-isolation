@@ -532,7 +532,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.234",date:"2026-09-12",note:"The pop-ups that open on a record (isolation, contagious, warnings, notices) had an empty square where their icon used to be \u2014 replaced with a slim colour bar. The isolation pop-up is in the app\u0027s own colours rather than the old teal."},{version:"3.233",date:"2026-09-12",note:"Who changed what actually appears at the foot of Overview now \u2014 3.230 built it but never placed it on the page."},{version:"3.232",date:"2026-09-12",note:"Who changed what refreshes after a save and each time a record is opened, instead of once per visit."},{version:"3.231",date:"2026-09-12",note:"Invite and password-reset links now land in the app properly: the login screen shows Set your password (and an optional device PIN), saves it, and signs you in."}
+var CHANGELOG=[{version:"3.235",date:"2026-09-12",note:"Isolation pop-up: the Got it button is readable again (Lichen, as everywhere else) and the colour bar beside the title is visible."},{version:"3.234",date:"2026-09-12",note:"The pop-ups that open on a record (isolation, contagious, warnings, notices) had an empty square where their icon used to be \u2014 replaced with a slim colour bar. The isolation pop-up is in the app\u0027s own colours rather than the old teal."},{version:"3.233",date:"2026-09-12",note:"Who changed what actually appears at the foot of Overview now \u2014 3.230 built it but never placed it on the page."},{version:"3.232",date:"2026-09-12",note:"Who changed what refreshes after a save and each time a record is opened, instead of once per visit."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -2719,11 +2719,11 @@ function showIsolationOverlay(){
   }
   ov.innerHTML='<div class="med-modal" style="border-top:5px solid '+t[1]+'">'
     +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
-    +'<div style="width:6px;height:34px;border-radius:3px;background:'+t[0]+';flex-shrink:0"></div>'
+    +'<div style="width:6px;height:34px;border-radius:3px;background:'+t[1]+';flex-shrink:0"></div>'
     +'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700;color:'+t[2]+'">'+t[3]+'</div><div style="font-size:11px;color:#9a9fa8">Isolation protocol</div></div>'
     +'<button class="med-close-btn" onclick="hideIsolationOverlay()">&#10005;</button></div>'
     +bodyHtml
-    +'<button class="med-save-btn" style="background:'+t[1]+';margin-top:18px" onclick="hideIsolationOverlay()">Got it</button>'
+    +'<button class="med-save-btn" style="margin-top:18px" onclick="hideIsolationOverlay()">Got it</button>'
     +'</div>';
   requestAnimationFrame(function(){ov.classList.add("show");});
 }
