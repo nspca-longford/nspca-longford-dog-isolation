@@ -532,7 +532,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.240",date:"2026-09-12",note:"Photo quality: new photos are stored at up to 1800px (they were 1200, and before that 400), so the half-page card prints sharp. The card\u0027s print bar warns when the dog\u0027s photo on file is a small one from earlier \u2014 add a new photo and the card uses it."},{version:"3.239",date:"2026-09-12",note:"Kennel card, the \u2018Meet Rex\u2019 version. The photo is half the page with the name over it; then the light and its sentence; then three short paragraphs the app writes about the dog from Arrival, the assessment, Care and the assessor\u0027s report \u2014 how they came in and how they\u0027ve changed, what they\u0027re like with people and dogs with the hard rules highlighted inline, what settles them \u2014 and the assessor\u0027s own words if there are any. The routine, the facts and a whiteboard box sit small on the right. Made to be read, and to be laminated."},{version:"3.238",date:"2026-09-12",note:"Kennel card: the who-to-call and vet-line footer is removed; the foot now carries only the print date and the unit name."},{version:"3.237",date:"2026-09-12",note:"Kennel card made to last a laminate: the day count is off the top line (In since stays), and the pen box is a whiteboard-marker box."}
+var CHANGELOG=[{version:"3.241",date:"2026-09-12",note:"Adoption blurb, on the Rehoming tab: tap Write it and the app reads the Dog, Assessment and Care tabs and drafts a few adoption sentences for the website \u2014 who the dog is, what they love, who they get on with, the home that would suit. Edit it freely, Copy it, or rewrite from the record after the assessment changes."},{version:"3.240",date:"2026-09-12",note:"Photo quality: new photos are stored at up to 1800px (they were 1200, and before that 400), so the half-page card prints sharp. The card\u0027s print bar warns when the dog\u0027s photo on file is a small one from earlier \u2014 add a new photo and the card uses it."},{version:"3.239",date:"2026-09-12",note:"Kennel card, the \u2018Meet Rex\u2019 version. The photo is half the page with the name over it; then the light and its sentence; then three short paragraphs the app writes about the dog from Arrival, the assessment, Care and the assessor\u0027s report \u2014 how they came in and how they\u0027ve changed, what they\u0027re like with people and dogs with the hard rules highlighted inline, what settles them \u2014 and the assessor\u0027s own words if there are any. The routine, the facts and a whiteboard box sit small on the right. Made to be read, and to be laminated."},{version:"3.238",date:"2026-09-12",note:"Kennel card: the who-to-call and vet-line footer is removed; the foot now carries only the print date and the unit name."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -5719,6 +5719,40 @@ function kcStoryFor(st){var d=st.dog||{},a=st.assessment||{},ar=st.arrival||{},c
   // 4 · the assessor's own words, first two sentences
   var rep=(a.assessorReport||"").trim();if(rep){var sents=rep.split(/(?<=[.!?])\s+/).slice(0,2).join(" ");if(sents.length>220)sents=sents.slice(0,217).replace(/\s+\S*$/,"")+"\u2026";paras.push("<i>\u201c"+e(sents)+"\u201d</i> \u2014 "+e(a.assessorReportBy||d.assessor||"the assessor"));}
   return paras.map(function(p){return "<p>"+p+"</p>";}).join("");}
+function adoptionBlurbFor(st){var d=st.dog||{},a=st.assessment||{},c=st.care||{},ar=st.arrival||{};var name=d.name||"This dog";
+  var fem=(d.sex||"").toLowerCase().indexOf("female")===0;var he=fem?"she":"he",him=fem?"her":"him",his=fem?"her":"his";var He=he.charAt(0).toUpperCase()+he.slice(1);
+  var breed=(d.breed||"dog").toLowerCase().replace(/ cross$/,"").replace(/ x$/,"");var cross=d.breed2||(/cross|x\b/i.test(d.breed||"")?"cross":"");
+  var age=(d.age||"").replace(/\s*\(.*\)/,"").toLowerCase();var ageTxt=/under 1/.test(age)?"puppy":age?age.replace("years","year-old").replace("year ","year-old ").replace(/(\d+) year-old$/,"$1-year-old"):"";
+  var words=String(d.threeWords||"").split(/[·,;]+/).map(function(x){return x.trim().toLowerCase();}).filter(Boolean);
+  var days=d.intakeDate?Math.max(1,Math.round((Date.now()-new Date(d.intakeDate))/864e5)):0;var since=d.intakeDate?(function(){try{return new Date(d.intakeDate).toLocaleDateString("en-IE",{month:"long"});}catch(e){return"";}})():"";
+  // temperament
+  var conf=(a.confidence||"").toLowerCase(),energy=(a.energy||"").toLowerCase(),demean=(a.demeanour||"").toLowerCase();
+  var shy=/nervous|timid|low|anxious|fearful/.test(conf+" "+demean);var bold=/confident|bold|outgoing/.test(conf+" "+demean);
+  var lively=/high/.test(energy),calm=/low/.test(energy);
+  var openers=[
+    name+" is a "+[ageTxt,breed+(cross?" "+cross:"")].filter(Boolean).join(" ")+(since?" who\u0027s been with us since "+since:"")+".",
+    (ageTxt?ageTxt.charAt(0).toUpperCase()+ageTxt.slice(1)+" "+breed:breed.charAt(0).toUpperCase()+breed.slice(1))+" "+name+(days>60?" has been waiting a while for the right person":" is looking for "+his+" people")+"."];
+  var p1=openers[(name.length)%openers.length];
+  if(words.length)p1+=" "+(words.length===3?words[0].charAt(0).toUpperCase()+words[0].slice(1)+", "+words[1]+" and "+words[2]+".":words.map(function(w,i){return i?w:w.charAt(0).toUpperCase()+w.slice(1);}).join(", ")+".");
+  if(shy)p1+=" "+He+"\u0027s shy at first \u2014 "+he+"\u0027ll size you up before "+he+" decides \u2014 but once "+he+" has, "+he+"\u0027s all yours.";
+  else if(bold)p1+=" "+He+"\u0027s confident and easy company, the kind of dog who walks into a room like "+he+" already lives there.";
+  if(lively)p1+=" "+He+"\u0027s got plenty of energy and will want a home that enjoys getting out.";else if(calm)p1+=" "+He+"\u0027s a calm soul who\u0027d rather be beside you than out front.";
+  // what they love / how they are with people & dogs
+  var likes=[];var str=(a.strangerApproach||"");if(/Friendly/.test(str))likes.push("loves meeting people");var pp=(a.playPeople||"");if(/enjoys|plays/i.test(pp))likes.push("loves a game");var toy=(a.toyInterest||"");if(/high|moderate/i.test(toy))likes.push("is mad about toys");var food=(a.foodMotivation||"");if(/high/i.test(food))likes.push("will do anything for a treat");
+  var en=(c.enrichment||[]);if(en.length)likes.push("goes daft for a "+en[0].toLowerCase());
+  var dogs=(a.dogOnLead||"")+" "+(a.dogOffLead||"");var dogTxt=/Friendly/.test(dogs)?"gets on well with other dogs":/Aggressive|Reactive/.test(dogs)?"would be happiest as the only dog":/Nervous/.test(dogs)?"is a little unsure of other dogs and would suit being the only one":"";
+  var cat=(a.suitableCats||a.catResponse||"");var catTxt=/Yes|friendly/.test(cat)?"has lived happily alongside cats":/No|prey|Chases/.test(cat)?"needs a cat-free home":"";
+  var ch=(a.childrenSuitable||"");var chTxt=ch==="All ages"?"is great with children":ch==="Over 12 only"?"would suit a home with older children":ch==="Adults only"||ch==="Not suitable"?"would be best in an adult home":"";
+  var handle=/Accepts/.test(a.liftHandling||"")&&/Accepts/.test(a.grooming||"")?"is easy to handle and happy to be groomed":"";
+  var p2=[];if(likes.length)p2.push(He+" "+likes.slice(0,2).join(" and ")+".");if(dogTxt||catTxt||chTxt)p2.push(He+" "+[dogTxt,catTxt,chTxt].filter(Boolean).join(", ")+".");if(handle)p2.push(He+" "+handle+".");
+  var lead=(a.leadBehaviour||"");if(/Strong|Moderate/.test(lead))p2.push(He+" pulls on the lead \u2014 a harness and a bit of patience sort it.");
+  // the home
+  var homes=[];if(shy)homes.push("a quiet, patient home");if(lively)homes.push("an active home");if(chTxt&&/adult|older/.test(chTxt))homes.push("");
+  var settle=(c.settles||[]).map(function(x){return x.toLowerCase();});
+  var p3=(homes.filter(Boolean).length?He+"\u0027d suit "+homes.filter(Boolean).join(" or ")+", ":He+"\u0027d suit a home ")+"with someone who\u0027ll give "+him+" "+(shy?"time to come forward at "+his+" own pace":"a routine and a bit of adventure")+"."+(settle.length?" A "+settle[0]+(settle[1]?" and "+settle[1]:"")+(settle.length===1?" goes":" go")+" a long way with "+him+".":"")+" "+He+"\u0027ll repay it every day.";
+  return [p1,p2.join(" "),p3].filter(function(x){return x&&x.trim();}).join("\n\n");}
+function regenBlurb(){ensureRF();S.rehome.blurb=adoptionBlurbFor(S);persistSave();debouncedSave();renderMain();}
+function copyBlurb(){var t=(S.rehome&&S.rehome.blurb)||"";if(!t)return;try{navigator.clipboard.writeText(t).then(function(){miniToast("Copied");});}catch(e){miniToast("Select and copy");}}
 function tabDone(id){
   function anyVal(o){return o?Object.keys(o).some(function(k){var v=o[k];return v!==""&&v!==null&&v!==undefined&&v!==false&&v!==0&&!(Array.isArray(v)&&v.length===0);}):false;}
   switch(id){
@@ -5843,6 +5877,8 @@ function renderRehome(){ensureRF();var r=S.rehome;var cur=REHOME_STAGES.indexOf(
     +fld("Website profile link",r.webUrl||"","rehome.webUrl","url","https://nspca.ie/\u2026 \u2014 the kennel card\u0027s QR points here")
     +'</div><div style="display:flex;align-items:center;gap:14px;margin-top:8px;flex-wrap:wrap"><label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;cursor:pointer"><input type="checkbox" data-save="rehome.trial" '+(r.trial?'checked':'')+' style="width:auto"> Trial adoption</label>'+(r.trial?'<div class="f" style="margin:0;min-width:180px">'+fld("Trial ends on",r.trialEnds||"","rehome.trialEnds","date").replace('<div class="f">','').replace(/<\/div>$/,'')+'</div>':'')+'</div>'
     +ta("Comments",r.comments||"","rehome.comments","Anything about this adoption \u2014 conditions agreed, what was sent home, follow-up arranged...")+'</div>';
+  var blurb=r.blurb||"";
+  h+='<div class="card"><div class="lbl" style="margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">Adoption blurb <span style="text-transform:none;letter-spacing:0;font-weight:600;color:#9a9fa8">written from every tab \u2014 edit freely</span></div>'+(blurb?'<textarea rows="9" data-save="rehome.blurb" style="width:100%;font-family:inherit;line-height:1.55">'+esc(blurb)+'</textarea>':'<div style="font-size:12.5px;color:#6b7280;font-weight:600;padding:6px 0 10px">Nothing written yet. Tap Write it and the app reads the Dog, Assessment and Care tabs and drafts a few adoption sentences for the website.</div>')+'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn" onclick="regenBlurb()">'+(blurb?'Rewrite from the record':'Write it')+'</button>'+(blurb?'<button class="btn" onclick="copyBlurb()">Copy</button>':'')+'</div></div>';
   // Adopter
   h+='<div class="card"><div class="lbl" style="margin-bottom:10px">Adopter</div><div class="dog-fg">'+fld("Name",r.adopterName||"","rehome.adopterName","text","")+fld("Phone",r.adopterPhone||"","rehome.adopterPhone","tel","")+fld("Email",r.adopterEmail||"","rehome.adopterEmail","email","")+fld("Address",r.adopterAddress||"","rehome.adopterAddress","text","")+fld("County",r.adopterCounty||"","rehome.adopterCounty","text","")+fld("Eircode",r.adopterEircode||"","rehome.adopterEircode","text","")+fld("Home",r.adopterHome||"","rehome.adopterHome","text","e.g. house \u00b7 garden")+fld("Other pets / children",r.adopterOther||"","rehome.adopterOther","text","")+fld("Home check date",r.homeCheckDate||"","rehome.homeCheckDate","date")+fld("Home check by",r.homeCheckBy||"","rehome.homeCheckBy","text","e.g. Laura")+'</div></div>';
   // Viewings & contacts
