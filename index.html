@@ -72,11 +72,11 @@ nav::-webkit-scrollbar{display:none}
 .pnav-row::after{content:"";flex:none;width:14px;height:1px}
 .pnav-row::-webkit-scrollbar{display:none}
 .pnav-row .pglide{position:absolute;top:0;left:0;height:100%;border-radius:999px;z-index:0;pointer-events:none;transition:transform .3s cubic-bezier(.34,1.2,.4,1),width .3s cubic-bezier(.34,1.2,.4,1)}
-.pnav-groups{padding:3px;background:#333542;border-radius:999px;display:inline-flex;min-width:min-content;flex:none}
+.pnav-groups{padding:3px;background:#333542;border-radius:999px;display:flex;width:max-content;max-width:100%;min-width:0}
 .pnav-groups .pglide{background:#c6e76c}
 .ppill{position:relative;z-index:1;border:none;background:transparent;cursor:pointer;font-family:inherit;white-space:nowrap;transition:color .18s ease;padding:8px 16px;font-size:12.5px;font-weight:700;color:#9aa0b0;border-radius:999px}
 .pnav-groups .ppill.on{color:#282932}
-.pnav-subs{margin-top:8px;padding:2px;display:inline-flex;min-width:min-content}
+.pnav-subs{margin-top:8px;padding:2px;display:flex;width:max-content;max-width:100%;min-width:0}
 .pnav-subs .pglide{background:#c6e76c}
 .pnav-subs .ppill{font-size:11.5px;font-weight:600;padding:6px 11px}
 .pnav-subs .ppill.on{color:#282932}
@@ -146,6 +146,13 @@ nav::-webkit-scrollbar{display:none}
 .sv-dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:#282932;margin-right:7px;vertical-align:-1px;animation:svpop .25s cubic-bezier(.2,.8,.2,1)}@keyframes svpop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 #save-btn.saved{background:#c6e76c;color:#282932}
 .fs-slot{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #eef0ea}.fs-slot:last-of-type{border-bottom:none}.fs-slot.na{opacity:.7}.fs-ic{width:7px;height:32px;border-radius:3px;flex-shrink:0}.fs-tx{flex:1;min-width:0}.fs-tx b{font-size:13.5px;font-weight:800;display:block}.fs-tx small{font-size:11.5px;color:#6b7280;font-weight:600}.fs-tag{font-size:11px;font-weight:800;padding:5px 10px;border-radius:9px;white-space:nowrap;text-align:right;border:none;font-family:inherit;cursor:default}.fs-tag em{display:block;font-style:normal;font-size:10px;font-weight:600;opacity:.8}.fs-tag.have{background:#dcfce7;color:#166534}.fs-tag.need{background:#fef3c7;color:#92400e;cursor:pointer}.fs-tag.na{background:#f1f3ee;color:#9a9fa8}
+.pf-me{background:#282932;color:#fff;border-radius:16px;padding:18px;display:flex;gap:16px;align-items:center;margin-bottom:12px;position:relative;overflow:hidden}.pf-me::after{content:"";position:absolute;right:-50px;top:-50px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(198,231,108,.22),transparent 60%);pointer-events:none}.pf-av{width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #c6e76c;display:block}.pf-edit{position:absolute;right:-4px;bottom:-4px;background:#c6e76c;color:#282932;font-size:10px;font-weight:900;padding:3px 7px;border-radius:8px;cursor:pointer}.pf-me b{font-size:22px;font-weight:900;display:block;letter-spacing:-.01em}.pf-me small{font-size:12px;color:#cdd3df;font-weight:600;display:block;margin-top:2px}.pf-me .since{font-size:11px;color:#9a9fa8;font-weight:700;margin-top:6px}
+.pf-nums{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.pf-nums div{background:#f7f9f2;border-radius:10px;padding:9px 10px}.pf-nums b{display:block;font-size:20px;font-weight:900;line-height:1}.pf-nums span{font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#6b7280}.pf-dogs{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.pf-dogs span{font-size:11.5px;font-weight:700;background:#eef1ea;padding:5px 10px;border-radius:20px}
+.pf-grp{padding-top:8px;padding-bottom:4px}.pf-grp>.lbl{margin:4px 0 4px}.pf-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #eef0ea}.pf-row:last-child{border-bottom:none}.pf-row b{font-size:13.5px;font-weight:700;display:block}.pf-row small{font-size:11.5px;color:#6b7280;font-weight:600;display:block;margin-top:2px}.pf-row .btn{padding:6px 11px;font-size:11.5px;min-height:0;white-space:nowrap}
+.pf-tog{width:40px;height:22px;border-radius:11px;background:#e4e7e0;position:relative;flex-shrink:0;cursor:pointer;transition:background .15s}.pf-tog.on{background:#282932}.pf-tog::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}.pf-tog.on::after{left:21px;background:#c6e76c}
+.pf-seg{display:inline-flex;border:1.5px solid #e4e7e0;border-radius:9px;overflow:hidden;flex-shrink:0}.pf-seg span{font-size:11.5px;font-weight:800;padding:6px 10px;color:#6b7280;cursor:pointer}.pf-seg span.on{background:#282932;color:#c6e76c}
+html.bigtext body{font-size:16px}html.bigtext input,html.bigtext select,html.bigtext textarea{font-size:16px}html.bigtext .btn{font-size:14px}html.bigtext .lbl{font-size:11.5px}
+@media(max-width:560px){.pf-nums{grid-template-columns:repeat(2,1fr)}.pf-row{flex-wrap:wrap}}
 .cchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 .cchip{font-size:12px;font-weight:700;padding:7px 12px;border-radius:20px;border:1.5px solid #e4e7e0;background:#fff;color:#6b7280;cursor:pointer;user-select:none}
 .cchip.on{background:#282932;color:#c6e76c;border-color:#282932}
@@ -536,7 +543,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.260",date:"2026-09-18",note:"The read-before-handling pop-up had the last of the empty icon squares; it\u0027s a colour bar now, red or amber with the warning level. Close record on the Outcome tab works again \u2014 it was still asking the leaving checklist that was removed."},{version:"3.259",date:"2026-09-17",note:"The Gone Home poster is removed; The month stands on its own."},{version:"3.258",date:"2026-09-17",note:"Housekeeping. Gone: the map, the Unit contacts box, the Move-photos menu item, the Director role, the Report\u0027s Narrative view (Story tells it), the board\u0027s sort menu (kennel order, always), and about 40 KB of code nothing reached. New: Today reminds admins when there\u0027s been no backup for a fortnight; Assessor is picked from the users list; every board card says who last touched it and when, in red after two days of silence; an incident logged today or yesterday is on Today; a dog down 3% or more between weigh-ins shows Losing weight on its card."},{version:"3.257",date:"2026-09-17",note:"The map. A List / Map switch on the board. The map is the building from your drawing: kitchen down the left, Pods 3 and 4 over the laundry and the crate over Pods 2 and 1, the desk and boards down the centre strip, K6 K5 K4 over the kennel corridor over K1 K2 K3, the C-runs ringing the outside (exercise only, C1 marked iso only), the yard and fence along the bottom. Each kennel is a tile \u2014 name, breed and the isolation day, the border in the dog\u0027s light, PPE hatching when contagious, empty kennels dashed with + assign. Tap a tile for Open \u00b7 Note \u00b7 Move to\u2026 (moving updates the record and reminds you to reprint the door card). Toggles repaint the tiles: Lights, Next thing, Days here, Contagious."}
+var CHANGELOG=[{version:"3.261",date:"2026-09-18",note:"My profile rebuilt: who you are (photo, role, email, on the team since, devices); Your week counted from the records you saved \u2014 day reports, weigh-ins, assessments, dogs cleared, and which dogs; About me; Sign-in (email, password reset, this device\u0027s PIN, forget other people on this device); how the app behaves for you (auto sign-out as a choice, open records on Overview, the catch-up card, larger text); Admin with the last-backup date on the button; This app. The tab rail: the group row now scrolls itself, so tapping Records on a narrow screen scrolls to it and the Lichen pill sits on it."},{version:"3.260",date:"2026-09-18",note:"The read-before-handling pop-up had the last of the empty icon squares; it\u0027s a colour bar now, red or amber with the warning level. Close record on the Outcome tab works again \u2014 it was still asking the leaving checklist that was removed."},{version:"3.259",date:"2026-09-17",note:"The Gone Home poster is removed; The month stands on its own."},{version:"3.258",date:"2026-09-17",note:"Housekeeping. Gone: the map, the Unit contacts box, the Move-photos menu item, the Director role, the Report\u0027s Narrative view (Story tells it), the board\u0027s sort menu (kennel order, always), and about 40 KB of code nothing reached. New: Today reminds admins when there\u0027s been no backup for a fortnight; Assessor is picked from the users list; every board card says who last touched it and when, in red after two days of silence; an incident logged today or yesterday is on Today; a dog down 3% or more between weigh-ins shows Losing weight on its card."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1067,64 +1074,49 @@ function userAvatarHtml(user,size){
 
 function userMeta(code){try{return JSON.parse(localStorage.getItem("nspca-user-meta-"+code)||"{}");}catch(e){return{};}}
 function setUserMeta(code,k,v){var m=userMeta(code);m[k]=v;try{localStorage.setItem("nspca-user-meta-"+code,JSON.stringify(m));}catch(e){}if(supabaseClient){var u={};u[k]=v;supabaseClient.from("users").update(u).eq("code",code).then(function(){},function(){});}}
-function myMonthHtml(name){var since=new Date(Date.now()-30*864e5).toISOString().slice(0,10);var saved=0,reports=0,sessions=0,weights=0,vet=0;
-  records.forEach(function(r){var st=r.state||{};if(r.savedBy===name&&(r.savedAt||"")>=since)saved++;
-    (st.days||[]).forEach(function(d){if(d&&d.date>=since&&(d.by===name||(!d.by&&r.savedBy===name)))reports++;});
-    ((st.behaviour&&st.behaviour.log)||[]).forEach(function(e){if(e&&e.date>=since&&(e.by===name||!e.by))sessions++;});
-    (st.weights||[]).forEach(function(w){if(w&&w.date>=since&&(w.by===name||!w.by))weights++;});
-    ((st.medical&&st.medical.vetVisits)||[]).forEach(function(v){if(v&&v.date>=since)vet++;});});
-  var tile=function(n,l){return '<div style="background:#282932;border-radius:12px;padding:10px 12px;flex:1;min-width:90px"><b style="display:block;font-size:20px;font-weight:800;color:#c6e76c">'+n+'</b><span style="font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#8d93a5">'+l+'</span></div>';};
-  return '<div class="card"><div class="lbl" style="margin-bottom:8px">My month</div><div style="display:flex;gap:8px;flex-wrap:wrap">'+tile(saved,"records saved")+tile(reports,"day reports")+tile(weights,"weigh-ins")+tile(sessions,"notes & sessions")+'</div><div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:8px">Last 30 days, from what\u0027s recorded under your name.</div></div>';}
+function prefGet(k,dflt){try{var v=localStorage.getItem("nspca-pref-"+k);return v===null?dflt:v;}catch(e){return dflt;}}
+function prefSet(k,v){try{localStorage.setItem("nspca-pref-"+k,String(v));}catch(e){}if(k==="bigtext")document.documentElement.classList.toggle("bigtext",v==="1");showDashSection("profile");}
+function myWeek(name){var now=new Date();var day=(now.getDay()+6)%7;var mon=new Date(now);mon.setDate(now.getDate()-day);var start=mon.toISOString().slice(0,10);var out={reports:0,weighs:0,assess:0,cleared:0,dogs:[]};
+  records.forEach(function(r){var st=r.state||{};var touched=false;(st.days||[]).forEach(function(d){if(d&&d.date>=start&&(d.demeanour||d.notes)&&(!d.by||d.by===name)){out.reports++;touched=true;}});(st.weights||[]).forEach(function(w){if(w&&w.date>=start&&(!w.by||w.by===name)){out.weighs++;touched=true;}});(st.scoreHistory||[]).forEach(function(h){if(h&&h.date>=start&&(!h.by||h.by===name)){out.assess++;touched=true;}});var a=st.assessment||{};if(a.rehomingStatus==="Cleared for rehoming"&&a.rehomingDate&&a.rehomingDate>=start&&(!a.clearedBy||a.clearedBy===name)){out.cleared++;touched=true;}if(!touched&&r.savedBy===name&&(r.savedAt||"")>=start)touched=true;if(touched)out.dogs.push(r.name||(st.dog||{}).name||"");});
+  out.start=start;return out;}
 function renderProfile(){
-  var me=CURRENT_USER||{name:currentName(),code:localStorage.getItem("nspca-intake-auth")||"",role:currentRole()};
-  var meta=userMeta(me.code);
-  var role=me.role||currentRole();
+  var me=CURRENT_USER||{name:currentName(),code:localStorage.getItem("nspca-intake-auth")||"",role:currentRole()};var meta=userMeta(me.code);var role=me.role||currentRole();
   var roleLabel=role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Dog Trainer \u0026 Behaviour Specialist":"Staff";
-  var ll=userLastLogin(me.code);
-  var myActivity=getUserActivity(me.name,30);
-  var totalSaved=records.filter(function(r){return r.savedBy===me.name;}).length;
-  var photo=userPhoto(me.code);
-  var autoMins=getAutoLogoutMins();
-
-  var photoBlock=photo
-    ? '<img src="'+photo+'" style="width:80px;height:80px;border-radius:50%;object-fit:cover">'
-    : '<div style="width:80px;height:80px;border-radius:50%;background:'+avatarColor(me.name)+';color:#fff;font-size:30px;font-weight:600;display:flex;align-items:center;justify-content:center">'+initials(me.name)+'</div>';
-
-  var h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+backToDashBtn()+'<h2 style="margin:0;flex:1">Profile</h2>'+(role==="admin"?'<button onclick="showDashSection(\'users\')" class="btn" style="font-size:12px;padding:6px 12px">Manage users</button>':'')+'</div>';
-
-  h+='<div class="card" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div style="position:relative">'+photoBlock+'<label style="position:absolute;bottom:-2px;right:-2px;background:#282932;color:#c6e76c;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #fff;font-size:12px"><input type="file" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></label></div>';
-  h+='<div style="flex:1;min-width:200px"><div style="font-size:22px;font-weight:700;color:#282932">'+esc(me.name)+'</div><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><span style="background:#282932;color:#c6e76c;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px">'+roleLabel+'</span><span style="background:#f1f3ee;color:#6b7280;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;font-family:monospace">'+esc(me.code||"")+'</span></div></div>';
-  if(photo)h+='<button onclick="removeAvatar()" class="btn" style="font-size:11px;padding:5px 10px;background:#fee2e2;color:#991b1b;border:none">Remove photo</button>';
-  h+='</div>';
-
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px">'
-    +'<div class="card" style="margin:0;padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:#0d9488">'+totalSaved+'</div><div style="font-size:10px;color:#6b7280;text-transform:uppercase;margin-top:2px">Saves all-time</div></div>'
-    +'<div class="card" style="margin:0;padding:12px;text-align:center"><div style="font-size:13px;font-weight:700;color:#282932;line-height:1.2">'+fmtAgo(ll)+'</div><div style="font-size:10px;color:#6b7280;text-transform:uppercase;margin-top:2px">Last login</div></div>'
-    +'<div class="card" style="margin:0;padding:12px;text-align:center"><div style="font-size:13px;font-weight:700;color:#282932;line-height:1.2">'+(myActivity.length?fmtAgo(myActivity[0].savedAt):"-")+'</div><div style="font-size:10px;color:#6b7280;text-transform:uppercase;margin-top:2px">Last save</div></div>'
-  +'</div>';
-
-  h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;margin-bottom:10px">Settings</div>';
-  h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><div style="font-size:13px;font-weight:600">Auto-logout when inactive</div><div style="font-size:11px;color:#6b7280;margin-top:2px">For shared devices in the staff room</div></div><select onchange="setAutoLogoutMins(parseInt(this.value)||0)" style="font-size:12px;padding:6px 8px;border-radius:6px;border:1px solid #cfd4cf;font-family:inherit"><option value="0"'+(autoMins===0?" selected":"")+'>Off</option><option value="15"'+(autoMins===15?" selected":"")+'>15 minutes</option><option value="30"'+(autoMins===30?" selected":"")+'>30 minutes</option><option value="60"'+(autoMins===60?" selected":"")+'>1 hour</option><option value="120"'+(autoMins===120?" selected":"")+'>2 hours</option></select></div>';
-  h+='</div>';
-
-  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280">Your recent activity</span><span style="font-size:11px;color:#6b7280">'+myActivity.length+' shown</span></div>';
-  if(myActivity.length){
-    h+=myActivity.map(function(r){
-      var d=r.state&&r.state.dog?r.state.dog:{};
-      var ph=d.photo?'<img src="'+d.photo+'" alt="'+esc(d.name||'dog')+'" style="width:30px;height:30px;border-radius:6px;object-fit:cover;object-position:'+(d.photoPos||'50% 50%')+'">':'<div style="width:30px;height:30px;border-radius:6px;background:linear-gradient(135deg,#fbfdf4,#eef7d8);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" style="width:14px;height:14px;opacity:.45" fill="#8fae3f"><ellipse cx="8.5" cy="8" rx="1.8" ry="2.4"/><ellipse cx="15.5" cy="8" rx="1.8" ry="2.4"/><ellipse cx="5" cy="11.5" rx="1.6" ry="2.1"/><ellipse cx="19" cy="11.5" rx="1.6" ry="2.1"/><path d="M12 11c-2.8 0-5 2.4-5 4.7 0 1.6 1.2 2.8 2.8 2.8.8 0 1.5-.3 2.2-.3s1.4.3 2.2.3c1.6 0 2.8-1.2 2.8-2.8C17 13.4 14.8 11 12 11z"/></svg></div>';
-      return '<div onclick="openDog('+r.id+')" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #e4e7e0;cursor:pointer">'+ph+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(r.name)+'</div><div style="font-size:10px;color:#6b7280">'+esc(r.breed||"")+(d.kennel?" &middot; "+esc(d.kennel):"")+'</div></div><div style="font-size:11px;color:#9a9fa8;flex-shrink:0">'+fmtAgo(r.savedAt)+'</div></div>';
-    }).join("");
-  }else{h+='<div style="text-align:center;padding:20px;color:#9a9fa8;font-size:12px">No activity yet</div>';}
-  h+='</div>';
-
-  h+='<div style="margin-top:14px;display:flex;justify-content:center"><button onclick="appConfirm(\'Log out of NSPCA Longford?\',doLogout)" class="btn" style="padding:10px 20px;background:#fee2e2;color:#991b1b;border:none;font-weight:600">Log out</button></div>';
-  h+='<div class="card"><div class="lbl" style="margin-bottom:10px">About me</div><div class="dog-fg"><div class="f"><label class="lbl">Phone</label><input value="'+esc(meta.phone||"")+'" placeholder="for the rota and call-outs" onchange="setUserMeta(\''+esc(me.code)+'\',\'phone\',this.value)"></div><div class="f"><label class="lbl">Since</label><input value="'+esc(meta.since||"")+'" placeholder="e.g. 2023" onchange="setUserMeta(\''+esc(me.code)+'\',\'since\',this.value)"></div></div><div class="f"><label class="lbl">A line about you</label><textarea rows="2" placeholder="e.g. Intake coordinator. Big dogs, quiet mornings." onchange="setUserMeta(\''+esc(me.code)+'\',\'about\',this.value)">'+esc(meta.about||"")+'</textarea></div></div>';
-  h+=myMonthHtml(me.name);
-
+  var photo=userPhoto(me.code);var autoMins=getAutoLogoutMins();var email=(me.email||authEmail()||"");var devices=devProfiles().length;var wk=myWeek(me.name);
+  var av=photo?'<img src="'+photo+'" class="pf-av">':'<div class="pf-av" style="background:'+avatarColor(me.name)+';color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center">'+initials(me.name)+'</div>';
+  var row=function(l,sub,act){return '<div class="pf-row"><div><b>'+l+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div>'+(act||'')+'</div>';};
+  var seg=function(cur,opts,fn){return '<div class="pf-seg">'+opts.map(function(o){return '<span class="'+(String(cur)===String(o[0])?"on":"")+'" onclick="'+fn.replace("%v",o[0])+'">'+o[1]+'</span>';}).join("")+'</div>';};
+  var tog=function(k,dflt){var on=prefGet(k,dflt)==="1";return '<div class="pf-tog'+(on?" on":"")+'" onclick="prefSet(\''+k+'\',\''+(on?"0":"1")+'\')"></div>';};
+  var lb="";try{lb=localStorage.getItem("nspca-last-backup")||"";}catch(e){}
+  var h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+backToDashBtn()+'<h2 style="margin:0;flex:1">My profile</h2></div>';
+  h+='<div class="pf-me"><div style="position:relative;flex-shrink:0">'+av+'<label class="pf-edit"><input type="file" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">Edit</label></div><div style="min-width:0"><b>'+esc(me.name)+'</b><small>'+esc(roleLabel)+(email?' \u00b7 '+esc(email):'')+'</small><div class="since">'+(meta.since?'On the team since '+esc(meta.since):'')+(devices?(meta.since?' \u00b7 ':'')+'signed in on '+devices+' device'+(devices===1?'':'s'):'')+'</div></div>'+(photo?'<button onclick="removeAvatar()" class="btn" style="margin-left:auto;font-size:11px;padding:5px 10px;background:#333542;color:#fca5a5;border:none">Remove photo</button>':'')+'</div>';
+  h+='<div class="card"><div class="lbl" style="margin-bottom:8px">Your week <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 from '+esc(fmtDMY(wk.start))+'</span></div><div class="pf-nums"><div><b>'+wk.reports+'</b><span>day reports</span></div><div><b>'+wk.weighs+'</b><span>weigh-ins</span></div><div><b>'+wk.assess+'</b><span>assessments</span></div><div><b>'+wk.cleared+'</b><span>dogs cleared</span></div></div>'+(wk.dogs.length?'<div class="pf-dogs">'+wk.dogs.slice(0,8).map(function(n){return '<span>'+esc(n)+'</span>';}).join("")+(wk.dogs.length>8?'<span>+'+(wk.dogs.length-8)+'</span>':'')+'</div>':'')+'<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:8px">Counted from the records you saved. Nobody else sees this page.</div></div>';
+  h+='<div class="card pf-grp"><div class="lbl">About me</div><div class="dog-fg"><div class="f"><label class="lbl">Phone</label><input value="'+esc(meta.phone||"")+'" placeholder="for the rota and call-outs" onchange="setUserMeta(\''+esc(me.code)+'\',\'phone\',this.value)"></div><div class="f"><label class="lbl">On the team since</label><input value="'+esc(meta.since||"")+'" placeholder="e.g. Mar 2025" onchange="setUserMeta(\''+esc(me.code)+'\',\'since\',this.value)"></div></div><div class="f"><label class="lbl">A line about you <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 shows on Manage Users</span></label><textarea rows="2" placeholder="e.g. Intake, assessments, and the one who reprints the door cards." onchange="setUserMeta(\''+esc(me.code)+'\',\'about\',this.value)">'+esc(meta.about||"")+'</textarea></div></div>';
+  var pinSet=devProfiles().some(function(p){return p.email===email&&p.pin;});
+  h+='<div class="card pf-grp"><div class="lbl">Sign-in</div>'
+    +row("Email",email?esc(email):"Signed in with an access code \u2014 ask an admin to add your email")
+    +(email?row("Password","Sent as a reset link to your email",'<button class="btn" onclick="authRecover(\''+esc(email)+'\').then(function(ok){miniToast(ok?\'Reset link sent\':\'Couldn\\u0027t send it\');})">Change</button>'):'')
+    +(email?row("PIN on this device",pinSet?"Set \u00b7 quick unlock":"Not set",'<button class="btn" onclick="setDevicePin()">'+(pinSet?'Change':'Set')+'</button>'):'')
+    +row("This device","Remembered for quick unlock"+(devices>1?' \u00b7 '+(devices-1)+' other'+(devices>2?'s':'')+' on this device too':''),'<button class="btn" onclick="forgetOtherProfiles()">Forget others</button>')
+    +'</div>';
+  h+='<div class="card pf-grp"><div class="lbl">How the app behaves for you</div>'
+    +row("Auto sign-out","after this long with nothing touched",seg(autoMins,[[0,"Off"],[15,"15 min"],[30,"30 min"],[120,"2 h"]],"setAutoLogoutMins(%v);showDashSection(&quot;profile&quot;)"))
+    +row("Open records on Overview","off: opens on the Dog tab",tog("openoverview","1"))
+    +row("Catch-up card on sign-in","what changed since you were last here",tog("catchup","1"))
+    +row("Larger text","for the corridor, gloves on",tog("bigtext","0"))
+    +'</div>';
+  if(role==="admin"||role==="manager"){var users=getAllUsersSync();var invited=users.filter(function(u){return u.email&&!u.active;}).length;
+    h+='<div class="card pf-grp"><div class="lbl">Admin <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 only admins see this</span></div>'
+      +(role==="admin"?row("Manage users",users.length+" people",'<button class="btn" onclick="showDashSection(\'users\')">Open</button>'):'')
+      +row("Download backup",lb?"Last backup "+esc(fmtDMY(lb))+" \u00b7 "+daysSince(lb)+" days ago":"No backup on this device yet",'<button class="btn btnp" onclick="downloadBackup()">Download</button>')
+      +row("The month","Print the unit report",'<button class="btn" onclick="showDashSection(\'month\')">Open</button>')
+      +'</div>';}
+  h+='<div class="card pf-grp"><div class="lbl">This app</div>'+row("NSPCA Longford \u00b7 Dog Isolation Unit","v"+esc(APP_VERSION),'<button class="btn" onclick="showWhatsNew(true)">What\u0027s new</button>')+row("Sign out","On this device",'<button class="btn" style="background:#fee2e2;color:#991b1b;border:none" onclick="appConfirm(\'Sign out of NSPCA Longford?\',doLogout)">Sign out</button>')+'</div>';
   return h;
 }
-
-
+function appPrompt(msg,cb){var v=window.prompt(msg,"");if(v!==null)cb(v);}
+function setDevicePin(){var email=authEmail();if(!email){appAlert("Sign in with your email first.");return;}appPrompt("New 4-digit PIN for this device",function(pin){if(!/^\d{4}$/.test(pin||"")){appAlert("Four digits.");return;}devProfileSet(email,currentName(),pin).then(function(){miniToast("PIN set");showDashSection("profile");});});}
+function forgetOtherProfiles(){var email=authEmail();devProfilesSave(devProfiles().filter(function(p){return p.email===email;}));miniToast("Only you are remembered on this device");showDashSection("profile");}
 function renderUsersAdmin(){
   var all=getAllUsersSync();
   all=all.slice().sort(function(a,b){return(a.name||"").localeCompare(b.name||"");});
@@ -2313,7 +2305,7 @@ function catchupEvents(){
   evs.sort(function(a,b){return a.rank-b.rank||b.e.date.localeCompare(a.e.date);});
   return evs.slice(0,6);
 }
-function catchupHtml(){
+function catchupHtml(){if(prefGet("catchup","1")!=="1")return"";
   if(window._catchupDismissed)return"";
   var evs=catchupEvents();
   if(!evs.length)return"";
@@ -5435,7 +5427,7 @@ function renderNav(){
   var gHtml=groups.map(function(grp){
     return '<button class="ppill'+(grp.g===activeGroup?" on":"")+'" data-gogroup="'+grp.g+'">'+grp.g+'</button>';
   }).join("");
-  document.getElementById("pnav-groups").innerHTML='<span class="pglide" id="pnav-gglide"></span>'+gHtml;
+  var _gEl=document.getElementById("pnav-groups");var _gScroll=_gEl.scrollLeft;_gEl.innerHTML='<span class="pglide" id="pnav-gglide"></span>'+gHtml;_gEl.scrollLeft=_gScroll;
 
   var curGrp=map[activeGroup];
   var subsEl=document.getElementById("pnav-subs");
@@ -5464,6 +5456,7 @@ function renderNav(){
     var sOn=document.querySelector("#pnav-subs .ppill.on");
     pnavGlide(document.getElementById("pnav-sglide"),sOn,"s");
     if(sOn&&sOn.scrollIntoView){try{sOn.scrollIntoView({inline:"center",block:"nearest"});}catch(e){}}
+    if(gOn){try{var _row=document.getElementById("pnav-groups");var _l=gOn.offsetLeft,_r=_l+gOn.offsetWidth;if(_l<_row.scrollLeft+8)_row.scrollLeft=Math.max(0,_l-8);else if(_r>_row.scrollLeft+_row.clientWidth-8)_row.scrollLeft=_r-_row.clientWidth+8;}catch(e){}}
   });
 }
 function pnavGlide(glideEl,btn,key){
@@ -5976,7 +5969,7 @@ function loadCurrent(){
 
 // ── Init ──────────────────────────────────────────────────────────
 (function(){
-  initSupabase();loadCurrent();authLoad();
+  initSupabase();loadCurrent();authLoad();try{if(prefGet("bigtext","0")==="1")document.documentElement.classList.add("bigtext");}catch(e){}
   (function(){var p=authFromHash();if(p){authSave({access_token:p.access_token,refresh_token:p.refresh_token||"",expires_at:Date.now()+((parseInt(p.expires_in)||3600)*1000),user:{email:""}});window._setPw=true;fetch(SUPABASE_URL+"/auth/v1/user",{headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+p.access_token}}).then(function(r){return r.json();}).then(function(u){if(u&&u.email){AUTH.user={email:u.email,id:u.id};authSave(AUTH);}renderLoginState();});localStorage.removeItem("nspca-intake-auth");}})();
   var savedCode=localStorage.getItem("nspca-intake-auth");
   if(AUTH&&AUTH.refresh_token&&savedCode&&savedCode.indexOf("EMAIL:")===0){savedCode="";(async function(){var ok=await authRefresh();var u=ok?await userForEmail(authEmail()):null;if(u&&u.active!==false){await finishAuthLogin(u);}else{authSave(null);showScreen("login-screen");}})();}
