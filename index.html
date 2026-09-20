@@ -530,6 +530,7 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
         <div id="dash-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e4e7e0;border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,0.18);min-width:210px;z-index:50;overflow-y:auto;max-height:calc(100vh - 90px)">
           <div class="dml">Daily work</div>
           <div onclick="dashMenuGo('weighin')" class="dmi">Batch weigh-in</div>
+          <div onclick="dashMenuGo('feedboard')" class="dmi">Feeding board</div>
           <div onclick="dashMenuGo('readytogo')" class="dmi">Ready to Go</div>
           <div onclick="dashMenuGo('healthboard')" class="dmi">Unit Health Board</div>
           <div class="dml">Records &amp; reports</div>
@@ -624,7 +625,8 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.281",date:"2026-09-19",note:"Clearance rebuilt: a strip that says the decision, who made it and when, and what\u0027s in the way; What would stop it as a checklist with a dot per item (isolation, score, report, infection, health, chip, puppy age), each a link; the assessor\u0027s report, with the Assessment\u0027s paragraph offered as a starting point; the decision as five big choices with the date, who decided, and conditions (or what needs to happen first). Suitability is gone \u2014 the adoption card, the ready check and the Report read the Assessment\u0027s own answers about children, dogs and cats instead."},{version:"3.280",date:"2026-09-19",note:"Overview rebuilt: a strip (light, kennel and day, what\u0027s happening, the next thing, who last touched it); the dog written out \u2014 one paragraph from the whole record with every underlined phrase a link to its tab; then Now, Since arrival with sparklines, Still to do ranked, and Who changed what. A record opens on Overview once it has a day report, on the Dog tab before that; the profile toggle for this is gone."},{version:"3.279",date:"2026-09-19",note:"The September overhaul, in one place. Every screen now opens by telling you where things stand before it shows you a form. THE BOARD: a morning page written from the records each time you open it \u2014 who\u0027s in, who\u0027s contagious, what\u0027s to do, whose report is missing, who\u0027s been waiting on a decision, who\u0027s reserved, who\u0027s in foster; six vitals; one search box in the header; filter chips with counts, plus Unscored and Quiet 2+ days; Today beside the board on the laptop, grouped Do first / Decide / Write; cards with the photo, the light as a left edge, one line of what\u0027s next and who last touched the dog; the contagious and awaiting-outcome banners folded into one alerts rail of chips. THE RECORD: one-row tab rail that unfolds in place, with a dot on every group; a bottom bar on the phone. Dog tab with the photo hero and the four facts. Assessment as a numbered walk through the handbook with chips, Not tested, what Arrival reported, and a paragraph written from the answers. Scoring in the same voice, with evidence under every band. Medical as alert, four facts, due, on now, one history. Day reports, Weights, Rehoming and Sessions each with a strip that says where things stand. ALSO: My profile rebuilt; returns keep the original intake; the door card, staff card and adoption card unchanged; Vet run, Then and now, kennel QR, board note, Find and After the shift retired unbuilt. HOUSEKEEPING: the map, the poster, the Director role and about 90 KB of code nothing reached are gone; new home-screen icons and a clearer favicon. If something you relied on moved, it\u0027s still there \u2014 the same record, the same fields; tell Shane where you expected it."}
+var CHANGELOG=[{version:"3.282",date:"2026-09-20",note:"Feeding now works from the laminated feeding guide, figure for figure \u2014 Adult Sensitive, Small and Mini, Hypoallergenic, Gastro, Hills Gastro Biome, and Puppy Sensitive by age. The Feeding tab works out grams per feed for you: it feeds towards the weight the dog should be (from the breed, or a target you type in), uses the stressed column for thin dogs and new arrivals, suggests four feeds for thin dogs and pups, and warns you to step up slowly with a very thin dog. One tap uses the figure; it never changes a plan on its own. New in the menu: Feeding board \u2014 the whiteboard in the app, Pods then Kennels, grams \u00d7 feeds for every dog, printable. Four times daily is now a frequency."},
+{version:"3.281",date:"2026-09-19",note:"Clearance rebuilt: a strip that says the decision, who made it and when, and what\u0027s in the way; What would stop it as a checklist with a dot per item (isolation, score, report, infection, health, chip, puppy age), each a link; the assessor\u0027s report, with the Assessment\u0027s paragraph offered as a starting point; the decision as five big choices with the date, who decided, and conditions (or what needs to happen first). Suitability is gone \u2014 the adoption card, the ready check and the Report read the Assessment\u0027s own answers about children, dogs and cats instead."},{version:"3.280",date:"2026-09-19",note:"Overview rebuilt: a strip (light, kennel and day, what\u0027s happening, the next thing, who last touched it); the dog written out \u2014 one paragraph from the whole record with every underlined phrase a link to its tab; then Now, Since arrival with sparklines, Still to do ranked, and Who changed what. A record opens on Overview once it has a day report, on the Dog tab before that; the profile toggle for this is gone."},{version:"3.279",date:"2026-09-19",note:"The September overhaul, in one place. Every screen now opens by telling you where things stand before it shows you a form. THE BOARD: a morning page written from the records each time you open it \u2014 who\u0027s in, who\u0027s contagious, what\u0027s to do, whose report is missing, who\u0027s been waiting on a decision, who\u0027s reserved, who\u0027s in foster; six vitals; one search box in the header; filter chips with counts, plus Unscored and Quiet 2+ days; Today beside the board on the laptop, grouped Do first / Decide / Write; cards with the photo, the light as a left edge, one line of what\u0027s next and who last touched the dog; the contagious and awaiting-outcome banners folded into one alerts rail of chips. THE RECORD: one-row tab rail that unfolds in place, with a dot on every group; a bottom bar on the phone. Dog tab with the photo hero and the four facts. Assessment as a numbered walk through the handbook with chips, Not tested, what Arrival reported, and a paragraph written from the answers. Scoring in the same voice, with evidence under every band. Medical as alert, four facts, due, on now, one history. Day reports, Weights, Rehoming and Sessions each with a strip that says where things stand. ALSO: My profile rebuilt; returns keep the original intake; the door card, staff card and adoption card unchanged; Vet run, Then and now, kennel QR, board note, Find and After the shift retired unbuilt. HOUSEKEEPING: the map, the poster, the Director role and about 90 KB of code nothing reached are gone; new home-screen icons and a clearer favicon. If something you relied on moved, it\u0027s still there \u2014 the same record, the same fields; tell Shane where you expected it."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1367,6 +1369,8 @@ function showDashSection(section){try{bumpActivity();}catch(e){}
     el.innerHTML='<div style="text-align:center;padding:40px;color:#6b7280">Loading users...</div>';
   }else if(section==="readytogo"){
     el.innerHTML=renderReadyToGo();
+  }else if(section==="feedboard"){
+    el.innerHTML=renderFeedBoard();
   }else if(section==="healthboard"){
     el.innerHTML=renderHealthBoard();
   }else if(section==="weighin"){
@@ -2929,10 +2933,118 @@ function updateWarnChip(){
 // ── Care notices ──────────────────────────────────────────────────
 var PRESET_NOTICES=["Needs neutering","Needs spaying","No walking \u2014 on rest","Short walks only","Lead only \u2014 no off-lead","Vet follow-up due","No vaccines","Awaiting paperwork","Not ready for rehoming","Needs grooming","On medication"];
 var FEEDS=["Purina Pro Plan Adult Sensitive","Purina Pro Plan Small & Mini Adult","Purina Pro Plan Hypoallergenic","Purina Pro Plan Gastro","Purina Pro Plan Puppy Sensitive","Hills Gastro Biome"];
-var FEED_FORMULA={"Purina Pro Plan Puppy Sensitive":{a:51,b:0.67},"Purina Pro Plan Adult Sensitive":{a:35.9,b:0.67},"Purina Pro Plan Small & Mini Adult":{a:36.6,b:0.65},"Purina Pro Plan Hypoallergenic":{a:37.5,b:0.67},"Purina Pro Plan Gastro":{a:37.5,b:0.67},"Hills Gastro Biome":{a:18.1,b:0.74}};
-function suggestFeedG(food,wkg){if(!wkg||wkg<=0)return null;var f=FEED_FORMULA[food]||{a:31,b:0.75};return Math.round(f.a*Math.pow(wkg,f.b));}
-function feedIsGeneric(food){return !FEED_FORMULA[food];}
+// ── Feeding guide (the laminated NSPCA Longford sheet) ─────────────
+// Grams per day. lo = under 1 hr activity, hi = 1 to 3 hrs / athletic or stressed.
+var _HYPO={kg:[2.5,5,10,15,25,35,45],lo:[70,110,175,230,325,410,485],hi:[80,125,195,255,365,460,545]};
+var FEED_GUIDE={
+  "Purina Pro Plan Adult Sensitive":{kg:[5,10,15,20,25,35,45,60,70],lo:[105,170,220,270,310,390,460,560,620],hi:[120,195,255,305,355,445,530,640,710]},
+  "Purina Pro Plan Small & Mini Adult":{kg:[1,5,10,15],lo:[15,105,165,210],hi:[40,120,190,245]},
+  "Hills Gastro Biome":{kg:[2.5,5,10,20,30,40],lo:[65,110,185,310,420,520],hi:[75,125,205,335,450,570]},
+  "Purina Pro Plan Hypoallergenic":_HYPO,
+  "Purina Pro Plan Gastro":_HYPO
+};
+var PUPPY_FEED="Purina Pro Plan Puppy Sensitive";
+// by expected adult weight; each band runs from the younger end to the older end
+var PUPPY_GUIDE={kg:[1,5,10,15,20,25,35,45,60,70],bands:[
+  {from:1.5,to:4,label:"1\u00bd to 3 months",g:[[30,45],[80,125],[105,180],[130,230],[145,270],[150,300],[185,310],[200,325],[250,400],[275,445]]},
+  {from:4,to:6,label:"4 to 5 months",g:[[50,50],[130,135],[195,210],[270,290],[325,350],[330,385],[385,415],[405,435],[480,540],[530,600]]},
+  {from:6,to:9,label:"6 to 8 months",g:[[50,40],[135,115],[210,180],[285,280],[360,345],[415,400],[445,490],[455,500],[585,655],[645,725]]},
+  {from:9,to:12,label:"9 to 11 months",g:[[40,40],[115,110],[180,170],[265,250],[325,305],[380,355],[515,480],[535,515],[695,660],[770,730]]},
+  {from:12,to:24,label:"12 to 24 months",g:[[40,40],[110,110],[170,170],[230,230],[280,280],[330,330],[420,420],[460,460],[580,575],[645,640]]}
+]};
+// Expected adult weight by breed, kg [male, female]. A starting point, not a rule \u2014 the target on the Feeding tab overrides it.
+var BREED_KG={"Affenpinscher":[4,4],"Afghan Hound":[27,23],"Airedale Terrier":[25,21],"Akita":[45,36],"Alaskan Malamute":[38,34],"American Bulldog":[45,36],"American Bully":[35,30],"American Cocker Spaniel":[12,11],"American Pit Bull Terrier":[25,21],"American Staffordshire Terrier":[28,25],"Anatolian Shepherd":[55,45],"Australian Cattle Dog":[20,17],"Australian Shepherd":[27,20],"Australian Terrier":[7,6],"Basenji":[11,10],"Basset Hound":[27,23],"Beagle":[12,10],"Bearded Collie":[24,20],"Bedlington Terrier":[9,8],"Belgian Malinois":[30,24],"Belgian Shepherd":[28,23],"Bernese Mountain Dog":[48,40],"Bichon Frise":[6,5],"Boerboel":[75,60],"Border Collie":[20,17],"Border Terrier":[7,6],"Borzoi":[40,32],"Boston Terrier":[9,8],"Boxer":[32,27],"Briard":[38,30],"Brittany Spaniel":[17,15],"Bull Mastiff":[55,48],"Bull Terrier":[28,23],"Cairn Terrier":[7,6],"Cane Corso":[48,42],"Caucasian Shepherd":[70,55],"Cavachon":[8,7],"Cavalier King Charles Spaniel":[8,7],"Cavapoo":[8,7],"Chihuahua":[2.5,2.5],"Chinese Crested":[5,4.5],"Chow Chow":[28,23],"Clumber Spaniel":[34,29],"Cockalier":[10,9],"Cockapoo":[9,8],"Cocker Spaniel":[14,13],"Collie":[20,17],"Corgi (Cardigan)":[15,13],"Corgi (Pembroke)":[12,11],"Coton de Tulear":[6,5],"Czechoslovakian Wolfdog":[26,20],"Dachshund":[10,9],"Dalmatian":[28,24],"Doberman Pinscher":[40,32],"Dogo Argentino":[42,38],"Dogue de Bordeaux":[55,48],"English Bulldog":[25,23],"English Setter":[30,26],"English Springer Spaniel":[23,20],"English Toy Terrier":[3.5,3],"Field Spaniel":[22,20],"Flat-Coated Retriever":[32,28],"Foxhound":[32,29],"French Bulldog":[12,11],"Frenchton":[10,9],"German Pinscher":[16,14],"German Shepherd":[35,28],"German Shorthaired Pointer":[30,25],"Giant Schnauzer":[40,34],"Glen of Imaal Terrier":[16,15],"Golden Retriever":[32,28],"Goldendoodle":[28,24],"Gordon Setter":[30,26],"Great Dane":[70,58],"Greyhound":[32,28],"Harrier":[25,22],"Hungarian Vizsla":[27,22],"Husky (Siberian)":[24,19],"Irish Red and White Setter":[30,26],"Irish Setter":[30,26],"Irish Soft-coated Wheaten Terrier":[18,16],"Irish Terrier":[12,11],"Irish Water Spaniel":[28,24],"Irish Wolfhound":[60,50],"Italian Greyhound":[5,4.5],"Jack Russell Terrier":[7,6],"Jackapoo":[7,6],"Japanese Akita":[38,30],"Japanese Spitz":[8,7],"Keeshond":[19,17],"Kerry Blue Terrier":[17,15],"King Charles Spaniel":[6,5],"Labradoodle":[28,24],"Labrador Retriever":[32,28],"Lakeland Terrier":[8,7],"Leonberger":[65,52],"Lhasa Apso":[7,6],"Lurcher":[25,22],"Maltese":[3.5,3],"Maltipoo":[5,4.5],"Manchester Terrier":[8,7],"Mastiff":[85,68],"Miniature Pinscher":[5,4.5],"Miniature Schnauzer":[8,7],"Morkie":[4,3.5],"Neapolitan Mastiff":[65,55],"Newfoundland":[65,52],"Norfolk Terrier":[5.5,5],"Norwegian Elkhound":[24,21],"Norwich Terrier":[5.5,5],"Old English Bulldog":[32,27],"Old English Sheepdog":[40,32],"Papillon":[4,3.5],"Parson Russell Terrier":[7.5,6.5],"Patterdale Terrier":[6,5.5],"Pekingese":[5,5],"Pharaoh Hound":[24,21],"Pointer":[30,25],"Pomapoo":[5,4.5],"Pomeranian":[2.5,2.5],"Pomsky":[11,10],"Poodle (Miniature)":[7,6],"Poodle (Standard)":[27,22],"Poodle (Toy)":[3.5,3],"Portuguese Water Dog":[23,19],"Presa Canario":[55,45],"Pug":[8,7],"Puggle":[11,10],"Rhodesian Ridgeback":[38,32],"Rottweiler":[52,42],"Rough Collie":[28,23],"Saint Bernard":[75,62],"Saluki":[25,20],"Samoyed":[25,20],"Schipperke":[7,6],"Schnauzer":[18,16],"Schnoodle":[9,8],"Scottish Deerhound":[45,38],"Scottish Terrier":[9.5,8.5],"Shar Pei":[25,21],"Shetland Sheepdog":[9,8],"Shiba Inu":[10,8],"Shih Tzu":[6.5,6],"Shihpoo":[6,5.5],"Shorkie":[5,4.5],"Smooth Collie":[26,22],"Spinone Italiano":[36,31],"Sproodle":[22,19],"Staffordshire Bull Terrier":[16,14],"Sussex Spaniel":[22,20],"Tibetan Mastiff":[60,48],"Tibetan Terrier":[12,10],"Weimaraner":[35,29],"Welsh Springer Spaniel":[20,17],"Welsh Terrier":[9.5,9],"West Highland White Terrier":[8.5,7.5],"Whippet":[13,11],"Wire Fox Terrier":[8,7],"Working Cocker Spaniel":[14,12],"XL Bully":[55,45],"Yorkipoo":[4.5,4],"Yorkshire Terrier":[3,3]};
+function breedKgOne(breed,sex){var p=BREED_KG[breed];if(!p)return null;var s=String(sex||"");if(/^Female/.test(s))return p[1];if(/^Male/.test(s))return p[0];return(p[0]+p[1])/2;}
+// Expected adult weight for this dog from the Dog tab: breed, the cross, the sex. null = no honest guess.
+function breedTargetKg(d){d=d||{};var a=breedKgOne(d.breed,d.sex);if(a===null)return null;if(d.crossbreed){var b=d.breed2?breedKgOne(d.breed2,d.sex):null;if(b===null)return null;a=(a+b)/2;}return Math.round(a*2)/2;}
+function feedInterp(xs,ys,x){if(x<=xs[0])return ys[0]*Math.pow(x/xs[0],0.75);var n=xs.length-1;if(x>=xs[n])return ys[n]*Math.pow(x/xs[n],0.75);for(var i=0;i<n;i++){if(x<=xs[i+1]){var t=(x-xs[i])/(xs[i+1]-xs[i]);return ys[i]+t*(ys[i+1]-ys[i]);}}return ys[n];}
+function feedsOf(freq){var f=String(freq||"").toLowerCase();if(!f)return null;if(/free/.test(f))return 0;if(/four/.test(f))return 4;if(/three/.test(f))return 3;if(/once/.test(f))return 1;return 2;}
+function feedFreqLabel(n){return n===4?"Four times daily":n===3?"Three times daily":n===1?"Once daily":"Twice daily";}
+function round5(g){return Math.max(5,Math.round(g/5)*5);}
+function feedIsGeneric(food){return !FEED_GUIDE[food]&&food!==PUPPY_FEED;}
+// The one home for "how much should this dog get". Works on any record's state, so the Feeding tab and the feeding board agree.
+function feedAdvice(st){st=st||{};var d=st.dog||{},fp=st.feedingPlan||{};var A={brand:fp.brand||"",notes:[]};
+  var wl=(st.weights||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");});var now=null;for(var i=0;i<wl.length;i++){var pv=parseFloat(wl[i].weight);if(!isNaN(pv)&&pv>0){now=pv;break;}}A.nowKg=now;
+  var bl=st.bcsLog||[];var bcs=bl.length?bl[bl.length-1].score:(parseInt(String((st.medical&&st.medical.bcs)||"").charAt(0))||null);A.bcs=bcs;
+  var thin=bcs!==null&&bcs<=3,heavy=bcs!==null&&bcs>=6,ideal=bcs!==null&&!thin&&!heavy;A.thin=thin;
+  var ageM=null;if(d.dob){var t=new Date(d.dob).getTime();if(!isNaN(t)&&t<=Date.now())ageM=(Date.now()-t)/(864e5*30.44);}A.ageM=ageM;
+  var pupFood=fp.brand===PUPPY_FEED;A.pup=pupFood||(ageM!==null&&ageM<12);
+  var manual=parseFloat(fp.targetKg);if(isNaN(manual)||manual<=0)manual=null;var breedKg=breedTargetKg(d);A.breedKg=breedKg;
+  var target=null,src="";
+  if(manual){target=manual;src="target set on this tab";}
+  else if(A.pup){if(breedKg){target=breedKg;src="expected adult weight for the breed";}}
+  else if(ideal&&now){target=now;src="at a good weight now";}
+  else if(thin&&(breedKg||now)){target=Math.max(breedKg||0,now||0);src=(breedKg&&breedKg>=(now||0))?"breed weight":"current weight";}
+  else if(heavy&&(breedKg||now)){target=(breedKg&&now)?Math.min(breedKg,now):(breedKg||now);src=(target===breedKg)?"breed weight":"current weight";}
+  else if(breedKg){target=breedKg;src="breed weight";}
+  else if(now){target=now;src="current weight";}
+  A.targetKg=target;A.targetSrc=src;
+  if(!fp.brand){A.need="Pick a food to get an amount.";return A;}
+  if(/\b(wet|tins?|tinned|pouch(es)?|chicken|rice)\b/i.test(fp.brand)&&feedIsGeneric(fp.brand)){A.need="No guide figure for this food \u2014 amount by hand.";return A;}
+  if(!target){A.need=A.pup?"Set the expected adult weight to get an amount.":"Log a weight, or set a target weight, to get an amount.";return A;}
+  var days=d.intakeDate?Math.floor((Date.now()-new Date(d.intakeDate).getTime())/864e5):null;
+  var col=fp.column==="lo"||fp.column==="hi"?fp.column:(thin?"hi":(days!==null&&days>=0&&days<7?"hi":"lo"));A.col=col;
+  A.colWhy=fp.column==="lo"||fp.column==="hi"?"column set on this tab":(thin?"thin \u2014 stressed column":(col==="hi"?"first week in \u2014 stressed column":"settled column"));
+  var daily=null;
+  if(pupFood){
+    if(ageM===null){A.need="Add the date of birth on the Dog tab \u2014 the puppy table goes by age.";return A;}
+    var B=PUPPY_GUIDE.bands,band=B[B.length-1];for(var k=0;k<B.length;k++){if(ageM<B[k].to){band=B[k];break;}}
+    var f=Math.min(1,Math.max(0,(ageM-band.from)/(band.to-band.from)));
+    daily=feedInterp(PUPPY_GUIDE.kg,band.g.map(function(r){return r[0]+f*(r[1]-r[0]);}),target);A.band=band.label;A.colWhy="";A.col="";
+    if(ageM>=24)A.notes.push("Over 24 months \u2014 time to change to an adult food.");
+  } else if(FEED_GUIDE[fp.brand]){var G=FEED_GUIDE[fp.brand];daily=feedInterp(G.kg,G[col],target);
+    if(A.pup)A.notes.push("Puppy on an adult food \u2014 needs more than the adult rate; Puppy Sensitive has its own table.");
+  } else {daily=31*Math.pow(target,0.75)*(col==="hi"?1.14:1);A.generic=true;A.notes.push("Not on the feeding guide \u2014 generic dry-food rate, check the bag.");}
+  A.daily=round5(daily);
+  var want=A.pup?(ageM!==null&&ageM<6?4:3):(thin?4:2);A.feedsSuggested=want;
+  var n=feedsOf(fp.frequency);A.feeds=(n===null)?want:n;A.freqSet=n!==null;
+  A.per=A.feeds>0?round5(A.daily/A.feeds):null;
+  if(A.freqSet&&A.feeds>0&&A.feeds<want)A.notes.push(A.pup?("Pups do better on "+want+" feeds a day."):"Thin dog \u2014 four small feeds are easier on the gut than fewer big ones.");
+  if(bcs!==null&&bcs<=2&&now&&FEED_GUIDE[fp.brand]&&target>now){var start=round5(feedInterp(FEED_GUIDE[fp.brand].kg,FEED_GUIDE[fp.brand].lo,now));if(start<A.daily){A.stepStart=start;A.notes.push("Very thin \u2014 don\u2019t jump straight to this. Start near "+start+" g a day and step up about 10% every 2\u20133 days. The vet sets the pace.");}}
+  if(A.pup&&!manual)A.gap="expected adult weight "+target+" kg";else if(A.pup)A.gap="expected adult weight "+target+" kg (set on this tab)";else if(now&&target&&Math.abs(target-now)>=0.5)A.gap="feeding for "+target+" kg, now "+now+" kg";else A.gap="based on "+target+" kg";
+  A.ok=true;return A;}
+function feedAdviceLine(A){if(!A||!A.ok)return"";return(A.per?(A.per+" g \u00d7 "+A.feeds):(A.daily+" g a day"));}
+function applyFeedAdvice(){var A=feedAdvice(S);if(!A.ok||!A.per)return;if(!S.feedingPlan)S.feedingPlan={};S.feedingPlan.grams=String(A.per);if(!A.freqSet)S.feedingPlan.frequency=feedFreqLabel(A.feeds);saveRecord();renderMain();miniToast("Feeding set to "+A.per+" g \u00d7 "+A.feeds);}
 function applyFeedGrams(g){if(!S.feedingPlan)S.feedingPlan={};S.feedingPlan.grams=String(g);saveRecord();renderMain();miniToast("Feeding set to "+g+" g per meal");}
+// ── Feeding board (the whiteboard, in the app) ─────────────────────
+function feedBoardRows(){
+  var list=records.filter(function(r){var st=r.state||{};var o=st.fin?st.fin.outcome:"";if(st.foster&&st.foster.out)return false;return !o||o==="Active \u2014 in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
+  var bySlot={};list.forEach(function(r){var k=(r.state&&r.state.dog&&r.state.dog.kennel)||"";(bySlot[k]=bySlot[k]||[]).push(r);});
+  Object.keys(bySlot).forEach(function(k){bySlot[k].sort(function(a,b){return(a.name||"").localeCompare(b.name||"");});});
+  var groups=[["Pods",KENNEL_SLOTS[1][1]],["Kennels",KENNEL_SLOTS[0][1]],["Crate",KENNEL_SLOTS[2][1]]];var used={};
+  var out=groups.map(function(g){return{title:g[0],slots:g[1].map(function(k){used[k]=1;return{slot:k,dogs:bySlot[k]||[]};})};});
+  var rest=Object.keys(bySlot).filter(function(k){return !used[k];}).sort(kennelCompare).map(function(k){return{slot:k||"No kennel",dogs:bySlot[k]};});
+  if(rest.length)out.push({title:"Elsewhere",slots:rest});
+  return out;}
+function feedBoardDog(r){var st=r.state||{};var fp=st.feedingPlan||{};var A=feedAdvice(st);var n=feedsOf(fp.frequency);var g=parseFloat(String(fp.grams||"").replace(/[^0-9.]/g,""));if(isNaN(g)||g<=0)g=null;
+  var plan=g?(g+" g"+(n?(" \u00d7 "+n):(n===0?" \u00b7 free-feed":""))):"";
+  var guide=A.ok?feedAdviceLine(A):"";var differs=false;
+  if(g&&A.ok&&A.per){var pd=g*(n||A.feeds),gd=A.per*A.feeds;differs=Math.abs(pd-gd)>Math.max(15,gd*0.08)||(n&&n!==A.feeds&&A.feeds>n&&(A.thin||A.pup));}
+  return{id:r.id,name:r.name||(st.dog&&st.dog.name)||"Unnamed",plan:plan,guide:guide,differs:differs,A:A,food:fp.brand||"",note:fp.notes||""};}
+var FB_CSS='.fb{max-width:760px;margin:0 auto}.fb-sheet{background:#fff;border:1px solid #e4e7e0;border-radius:14px;padding:18px 20px 10px}.fb-g{font-size:17px;font-weight:800;color:#282932;margin:14px 0 6px;padding-bottom:3px;border-bottom:3px solid #282932;display:inline-block}.fb-g:first-child{margin-top:0}.fb-slot{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid #eef0ea;align-items:flex-start}.fb-k{width:40px;flex:none;font-size:17px;font-weight:800;color:#282932;font-variant-numeric:tabular-nums}.fb-dogs{flex:1;min-width:0}.fb-dog{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;padding:2px 0;cursor:pointer}.fb-dog+.fb-dog{margin-top:6px;padding-top:8px;border-top:1px dashed #e4e7e0}.fb-n{font-size:16px;font-weight:700;color:#282932;min-width:110px}.fb-amt{font-size:17px;font-weight:800;color:#1d4ed8;font-variant-numeric:tabular-nums}.fb-amt.sug{color:#4d5e22}.fb-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:999px;background:#edf6cf;color:#3a4a16}.fb-tag.warn{background:#fef3c7;color:#92400e}.fb-sub{flex-basis:100%;font-size:11.5px;color:#6b7280}.fb-note{flex-basis:100%;font-size:12.5px;color:#282932;font-weight:600}.fb-empty{color:#c3c7bd;font-size:13px;padding-top:3px}';
+function renderFeedBoard(){
+  var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#333542;color:#9a9fa8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1;font-size:18px">Feeding board</h2><button class="btn" onclick="printFeedBoard()">Print</button></div>';
+  var sub='<div class="sub" style="margin-bottom:12px">What goes in each bowl. The big figure is the plan on the dog\u2019s Feeding tab; where there is no plan yet, it is the feeding guide\u2019s amount for that dog\u2019s breed, weight and age. Tap a dog to change it.</div>';
+  var h='<style>'+FB_CSS+'</style><div class="fb">'+back+sub+'<div class="fb-sheet">';
+  feedBoardRows().forEach(function(G){h+='<div><span class="fb-g">'+esc(G.title)+'</span></div>';
+    G.slots.forEach(function(sl){h+='<div class="fb-slot"><div class="fb-k">'+esc(kennelShort(sl.slot))+'</div><div class="fb-dogs">';
+      if(!sl.dogs.length)h+='<div class="fb-empty">\u2014</div>';
+      sl.dogs.forEach(function(r){var D=feedBoardDog(r),A=D.A;
+        h+='<div class="fb-dog" onclick="openDogAt('+JSON.stringify(D.id).replace(/"/g,"&quot;")+',&quot;feeding&quot;)"><span class="fb-n">'+esc(D.name)+'</span>';
+        if(D.plan)h+='<span class="fb-amt">'+esc(D.plan)+'</span>'+(D.differs?'<span class="fb-tag warn">guide says '+esc(D.guide)+'</span>':'');
+        else if(D.guide)h+='<span class="fb-amt sug">'+esc(D.guide)+'</span><span class="fb-tag">from the guide</span>';
+        else h+='<span class="fb-empty">'+esc(A.need||"No plan yet")+'</span>';
+        if(D.note)h+='<span class="fb-note">'+esc(D.note)+'</span>';
+        var bits=[D.food];if(A.ok){bits.push(A.daily+" g a day");bits.push(A.gap);if(A.band)bits.push(A.band);else if(A.col==="hi")bits.push("stressed column");}
+        h+='<span class="fb-sub">'+esc(bits.filter(Boolean).join(" \u00b7 "))+'</span></div>';});
+      h+='</div></div>';});});
+  h+='</div><div style="font-size:11.5px;color:#9a9fa8;margin:10px 2px 0">Guidelines only \u2014 adjust for the individual dog. A dog off its food for two meals goes to the Supervisor.</div></div>';
+  return h;}
+function printFeedBoard(){var w=window.open("","_blank");window._printWin=w;if(!w){appAlert("Allow pop-ups for this site to print.");return;}
+  var b='';feedBoardRows().forEach(function(G){b+='<h2>'+esc(G.title)+'</h2>';G.slots.forEach(function(sl){b+='<div class="r"><div class="k">'+esc(kennelShort(sl.slot))+':</div><div class="d">';
+    sl.dogs.forEach(function(r){var D=feedBoardDog(r);b+='<div class="dg"><b>'+esc(D.name)+':</b> <span class="a">'+esc(D.plan||D.guide||"")+'</span>'+(D.note?' <span class="n">+ '+esc(D.note)+'</span>':'')+(D.food?'<small>'+esc(D.food)+'</small>':'')+'</div>';});
+    b+='</div></div>';});});
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Feeding board</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&display=swap" rel="stylesheet"><style>@page{size:A4;margin:14mm}body{font-family:Inter,Arial,sans-serif;color:#282932;margin:0}h1{font-size:15pt;margin:0 0 2mm}p.s{font-size:9pt;color:#6b7280;margin:0 0 5mm}h2{font-size:17pt;margin:6mm 0 2mm;border-bottom:1.2mm solid #282932;display:inline-block}.r{display:flex;gap:5mm;padding:3mm 0;border-bottom:.3mm solid #d9dcd3;min-height:9mm}.k{width:14mm;font-size:16pt;font-weight:800}.d{flex:1}.dg{font-size:14pt;margin-bottom:1.5mm}.a{font-weight:800}.n{font-weight:500}small{display:block;font-size:8.5pt;color:#6b7280;font-weight:500}.f{margin-top:6mm;font-size:8pt;color:#6b7280;letter-spacing:.06em}</style></head><body><h1>Feeding board</h1><p class="s">'+esc(fmtDMYwk(new Date()))+' \u00b7 grams per feed \u00d7 feeds a day</p>'+b+'<div class="f">NSPCA LONGFORD \u00b7 DOG ISOLATION UNIT</div><script>window.onload=function(){setTimeout(function(){window.print();},350);};<\/script></body></html>');w.document.close();}
 function ageOptions(cur){var o=[["","-- select --"],["Under 1 year (puppy)","Under 1 year (puppy)"]];for(var y=1;y<=14;y++){var lbl=y+(y===1?" year":" years");o.push([lbl,lbl]);}o.push(["15+ years","15+ years"]);if(cur&&!o.some(function(x){return x[0]===cur;}))o.splice(1,0,[cur,cur+" (current)"]);return o;}
 var NOTICE_BG="#e0f2fe",NOTICE_BORDER="#0ea5e9",NOTICE_FG="#075985",NOTICE_ACCENT="#0284c7";
 function addQuickNotice(pi){var t=PRESET_NOTICES[pi];if(!t)return;if(!S.careNotices)S.careNotices=[];if(S.careNotices.some(function(n){return n.text===t;}))return;S.careNotices.push({text:t,by:currentName(),date:new Date().toISOString().slice(0,10)});saveRecord();renderMain();}
@@ -3989,22 +4101,21 @@ function renderFeeding(){
 
   // Plan card
   h+='<div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px">Feeding Plan</div>';
-  h+='<div class="g2">'+fld("Food brand / type",fp.brand||"","feedingPlan.brand","text","Pick or type a feed\u2026",'list="nspca-feeds"')+slct("Frequency",fp.frequency||"","feedingPlan.frequency",[["","-- select --"],["Once daily","Once daily"],["Twice daily","Twice daily — morning + evening"],["Three times daily","Three times daily"],["Free-feed","Free-feed"]])+'</div>';
+  h+='<div class="g2">'+fld("Food brand / type",fp.brand||"","feedingPlan.brand","text","Pick or type a feed\u2026",'list="nspca-feeds"')+slct("Frequency",fp.frequency||"","feedingPlan.frequency",[["","-- select --"],["Once daily","Once daily"],["Twice daily","Twice daily — morning + evening"],["Three times daily","Three times daily"],["Four times daily","Four times daily \u2014 thin dogs and pups"],["Free-feed","Free-feed"]])+'</div>';
   h+='<datalist id="nspca-feeds">'+FEEDS.map(function(f){return'<option value="'+esc(f)+'">';}).join("")+'</datalist>';
   h+='<div class="g2">'+fld("Grams per meal",fp.grams||"","feedingPlan.grams","number","e.g. 200")+slct("Diet type",fp.dietType||"","feedingPlan.dietType",[["","-- select --"],["Standard","Standard adult"],["Puppy","Puppy"],["Senior","Senior"],["Weight management","Weight management"],["Sensitive stomach","Sensitive stomach"],["Hypoallergenic","Hypoallergenic"],["Prescription","Prescription"]])+'</div>';
-  var _fw=null;var _wl=(S.weights||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");});if(_wl.length){var _pv=parseFloat(_wl[0].weight);if(!isNaN(_pv))_fw=_pv;}
-  var _fdaily=suggestFeedG(fp.brand,_fw);
-  if(_fdaily){
-    var _meals=fp.frequency==="Three times daily"?3:(fp.frequency==="Once daily"?1:(fp.frequency==="Free-feed"?0:2));
-    var _per=_meals>0?Math.round(_fdaily/_meals):_fdaily;
-    var _flab=(fp.frequency||"twice daily").toLowerCase();
-    h+='<div'+(_meals>0?' onclick="applyFeedGrams('+_per+')"':'')+' style="background:#edf6cf;border:1px solid #c6e76c;border-radius:10px;padding:10px 12px;margin:0 0 12px;font-size:12px;color:#3a4a16'+(_meals>0?';cursor:pointer':'')+'">'
-      +'<div style="font-weight:700;margin-bottom:2px">Suggested &middot; ~'+_fdaily+' g/day</div>'
-      +'<div style="color:#4d5e22">'+(_meals>0?(_per+' g per meal ('+_flab+')'):'pick a frequency to split into meals')+' &middot; based on '+_fw+' kg'+(feedIsGeneric(fp.brand)?' &middot; generic dry-food rate \u2014 check the bag':'')+(String(S.dog.age||"").indexOf("Under 1")===0&&fp.brand!=="Purina Pro Plan Puppy Sensitive"?' &middot; puppy \u2014 needs more than adult rate':'')+'</div>'
-      +(_meals>0?'<div style="margin-top:7px;display:inline-block;background:#282932;color:#fff;font-size:11px;font-weight:700;padding:5px 11px;border-radius:6px">Tap to use '+_per+' g/meal &rarr;</div>':'')
+  var _A=feedAdvice(S);
+  h+='<div class="g2">'+fld("Target weight (kg)",fp.targetKg||"","feedingPlan.targetKg","number",_A.breedKg?(_A.breedKg+" \u2014 from the breed"):(_A.pup?"expected adult weight":"e.g. 20"))+slct("Guide column",fp.column||"","feedingPlan.column",[["","Auto \u2014 stressed when thin or new in"],["lo","Under 1 hr activity"],["hi","1 to 3 hrs \u00b7 athletic or stressed"]])+'</div>';
+  if(_A.ok){
+    var _cur=parseFloat(fp.grams);var _same=_A.per&&_cur===_A.per&&(!_A.freqSet||feedsOf(fp.frequency)===_A.feeds)&&_A.freqSet;
+    h+='<div'+(_A.per&&!_same?' onclick="applyFeedAdvice()"':'')+' style="background:#edf6cf;border:1px solid #c6e76c;border-radius:10px;padding:10px 12px;margin:0 0 12px;font-size:12px;color:#3a4a16'+(_A.per&&!_same?';cursor:pointer':'')+'">'
+      +'<div style="font-weight:700;margin-bottom:2px">From the feeding guide &middot; '+(_A.per?('<span style="font-size:15px">'+_A.per+' g &times; '+_A.feeds+'</span> &middot; '):'')+_A.daily+' g a day</div>'
+      +'<div style="color:#4d5e22">'+esc([_A.gap,_A.targetSrc,_A.band||_A.colWhy,(!_A.freqSet&&_A.feeds)?(_A.feeds+" feeds suggested"):""].filter(Boolean).join(" \u00b7 "))+'</div>'
+      +_A.notes.map(function(n){return '<div style="margin-top:5px;color:#92400e;font-weight:600">'+esc(n)+'</div>';}).join("")
+      +(_A.per&&!_same?'<div style="margin-top:7px;display:inline-block;background:#282932;color:#fff;font-size:11px;font-weight:700;padding:5px 11px;border-radius:6px">Use '+_A.per+' g &times; '+_A.feeds+' &rarr;</div>':(_same?'<div style="margin-top:5px;font-weight:700">The plan matches the guide.</div>':''))
     +'</div>';
-  } else if(FEED_FORMULA[fp.brand]&&!_fw){
-    h+='<div style="background:#f1f3ee;border:1px solid var(--color-border-secondary);border-radius:10px;padding:9px 12px;margin:0 0 12px;font-size:11.5px;color:#4b5160">Log a weight on the Weights tab to get a suggested amount for this feed.</div>';
+  } else if(_A.need){
+    h+='<div style="background:#f1f3ee;border:1px solid var(--color-border-secondary);border-radius:10px;padding:9px 12px;margin:0 0 12px;font-size:11.5px;color:#4b5160">'+esc(_A.need)+'</div>';
   }
   h+=ta("Special notes (allergies, restrictions, vet-prescribed amounts...)",fp.notes||"","feedingPlan.notes","");
   h+='</div>';
@@ -4559,7 +4670,7 @@ function renderPicture(){
   var ph=(function(){var ps=photosFor();var st=ps?starRow(ps):null;return (st&&st.data)||d.photo||"";})();
   h+='<div class="ovstory">'+(ph?'<img src="'+ph+'" style="object-position:'+esc(d.photoPos||"50% 50%")+'">':'')+'<div><p>'+picParagraph()+'</p><small>Written from the record at '+new Date().toTimeString().slice(0,5)+'</small></div></div>';
   // four cards
-  var fe=S.feeding||{};var feedTxt=[fe.food,fe.amount?fe.amount+(/g$|ml$|cups?$/i.test(fe.amount)?"":" g"):"",fe.timesPerDay?fe.timesPerDay+"\u00d7 daily":""].filter(Boolean).join(" \u00b7 ");
+  var fe=S.feedingPlan||{};var feedTxt=[fe.brand,fe.grams?String(fe.grams).replace(/\s*g$/i,"")+" g":"",fe.frequency||""].filter(Boolean).join(" \u00b7 ");
   var medsToday=(S.medical&&S.medical.medications||[]).filter(function(x){return x.active!==false&&(!x.endDate||x.endDate>=new Date().toISOString().slice(0,10));}).map(function(x){return [x.name,x.dose,x.frequency].filter(Boolean).join(" ");});
   var lastRep=(S.days||[]).map(function(x,i){return {x:x,i:i};}).filter(function(o){return o.x&&(o.x.demeanour||o.x.notes);}).pop();
   var muz=(S.care&&S.care.muzzle)||(a.muzzleRequired&&/^Yes/.test(a.muzzleRequired)?"Required":"");
@@ -5270,7 +5381,7 @@ var INSPECTORS=[{n:"Karen Lyons",c:""},{n:"James McCormick",c:""},{n:"Lyndsey De
 function inspectorOpts(cur){var o=[["","-- select inspector --"]];INSPECTORS.forEach(function(i){o.push([i.n,i.n+(i.c?" \u2014 "+i.c:"")]);});o.push(["Other","Other / not listed"]);if(cur&&!o.some(function(x){return x[0]===cur;}))o.splice(1,0,[cur,cur+" (as recorded)"]);return o;}
 function inspectorLine(d){d=d||{};return [d.inspector&&d.inspector!=="Other"?d.inspector:(d.inspectorOther||""),d.inspectorRef?"case "+d.inspectorRef:""].filter(Boolean).join(" \u00b7 ");}
 function goneHomeMonthKey(offset){var d=new Date();d.setDate(1);d.setMonth(d.getMonth()-(offset||0));return d.toISOString().slice(0,7);}
-function dayTimetableFor(st,date){var fp=st.feedingPlan||{};var rows=[];var freq=String(fp.frequency||"").toLowerCase();var times=/three/.test(freq)?["08:00","13:00","17:00"]:/once/.test(freq)?["08:00"]:["08:00","17:00"];
+function dayTimetableFor(st,date){var fp=st.feedingPlan||{};var rows=[];var freq=String(fp.frequency||"").toLowerCase();var times=/four/.test(freq)?["08:00","11:00","14:00","17:00"]:/three/.test(freq)?["08:00","13:00","17:00"]:/once/.test(freq)?["08:00"]:["08:00","17:00"];
   var feedTxt=((fp.grams?fp.grams+" g ":"")+(fp.brand||"")+(fp.notes?" \u00b7 "+fp.notes:"")).trim();
   if(fp.brand||fp.grams)times.forEach(function(t){rows.push({key:"feed-"+t,t:t,w:feedTxt,kind:"feed",src:"Feeding"});});
   ((st.medical&&st.medical.medications)||[]).filter(function(m){return m.active!==false&&(!m.endDate||!date||m.endDate>=date)&&(!m.startDate||!date||m.startDate<=date);}).forEach(function(m){var fr=String(m.frequency||"").toLowerCase();var mt=/three|3/.test(fr)?["08:00","13:00","17:00"]:/twice|2|bid/.test(fr)?["08:00","17:00"]:["08:00"];var dayN=(m.startDate&&date)?Math.round((new Date(date)-new Date(m.startDate))/864e5)+1:null;var total=(m.startDate&&m.endDate)?Math.round((new Date(m.endDate)-new Date(m.startDate))/864e5)+1:null;mt.forEach(function(t){rows.push({key:"med-"+(m.name||"med").replace(/[^a-z0-9]/gi,"_")+"-"+t,t:t,w:(m.name||"")+(m.dose?" "+m.dose:""),sub:(dayN&&total?"day "+dayN+" of "+total:(m.endDate?"until "+fmtDMY(m.endDate):""))+" \u00b7 from Medical",kind:"med",med:m.name||""});});});
