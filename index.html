@@ -2966,6 +2966,7 @@ function feedIsGeneric(food){return !FEED_GUIDE[food]&&food!==PUPPY_FEED;}
 function feedAdvice(st){st=st||{};var d=st.dog||{},fp=st.feedingPlan||{};var A={brand:fp.brand||"",notes:[]};
   var wl=(st.weights||[]).slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");});var now=null;for(var i=0;i<wl.length;i++){var pv=parseFloat(wl[i].weight);if(!isNaN(pv)&&pv>0){now=pv;break;}}A.nowKg=now;
   var bl=st.bcsLog||[];var bcs=bl.length?bl[bl.length-1].score:(parseInt(String((st.medical&&st.medical.bcs)||"").charAt(0))||null);A.bcs=bcs;
+  var bcsDate=bl.length?(bl[bl.length-1].date||""):"";var wDate=wl.length?(wl[0].date||""):"";A.bcsStale=!!(bcs!==null&&wDate&&bcsDate&&wDate>bcsDate);
   var thin=bcs!==null&&bcs<=3,heavy=bcs!==null&&bcs>=6,ideal=bcs!==null&&!thin&&!heavy;A.thin=thin;
   var ageM=null;if(d.dob){var t=new Date(d.dob).getTime();if(!isNaN(t)&&t<=Date.now())ageM=(Date.now()-t)/(864e5*30.44);}A.ageM=ageM;
   var pupFood=fp.brand===PUPPY_FEED;A.pup=pupFood||(ageM!==null&&ageM<12);
@@ -2979,6 +2980,8 @@ function feedAdvice(st){st=st||{};var d=st.dog||{},fp=st.feedingPlan||{};var A={
   else if(breedKg){target=breedKg;src="breed weight";}
   else if(now){target=now;src="current weight";}
   A.targetKg=target;A.targetSrc=src;
+  A.atTarget=!!(target&&now&&!A.pup&&now>=target-0.25);
+  if(A.atTarget&&thin){thin=false;A.thin=false;A.reachedTarget=true;}
   if(!fp.brand){A.need="Pick a food to get an amount.";return A;}
   if(/\b(wet|tins?|tinned|pouch(es)?|chicken|rice)\b/i.test(fp.brand)&&feedIsGeneric(fp.brand)){A.need="No guide figure for this food \u2014 amount by hand.";return A;}
   if(!target){A.need=A.pup?"Set the expected adult weight to get an amount.":"Log a weight, or set a target weight, to get an amount.";return A;}
@@ -2996,8 +2999,10 @@ function feedAdvice(st){st=st||{};var d=st.dog||{},fp=st.feedingPlan||{};var A={
     if(A.pup)A.notes.push("Puppy on an adult food \u2014 needs more than the adult rate; Puppy Sensitive has its own table.");
   } else {daily=31*Math.pow(target,0.75)*(col==="hi"?1.14:1);A.generic=true;A.notes.push("Not on the feeding guide \u2014 generic dry-food rate, check the bag.");}
   A.daily=round5(daily);
+  if(A.reachedTarget)A.notes.push("At target weight \u2014 settled column and two feeds from here. Log a body score to confirm.");
+  else if(A.atTarget&&A.bcsStale)A.notes.push("At target weight \u2014 the last body score is older than the last weigh-in; log a new one.");
   var want=A.pup?(ageM!==null&&ageM<6?4:3):(thin?4:2);A.feedsSuggested=want;
-  var n=feedsOf(fp.frequency);A.feeds=(n===null)?want:n;A.freqSet=n!==null;
+  var n=feedsOf(fp.frequency);A.feeds=(n===null||A.reachedTarget)?want:n;A.freqSet=n!==null&&!A.reachedTarget;
   A.per=A.feeds>0?round5(A.daily/A.feeds):null;
   if(A.freqSet&&A.feeds>0&&A.feeds<want)A.notes.push(A.pup?("Pups do better on "+want+" feeds a day."):"Thin dog \u2014 four small feeds are easier on the gut than fewer big ones.");
   if(bcs!==null&&bcs<=2&&now&&FEED_GUIDE[fp.brand]&&target>now){var start=round5(feedInterp(FEED_GUIDE[fp.brand].kg,FEED_GUIDE[fp.brand].lo,now));if(start<A.daily){A.stepStart=start;A.notes.push("Very thin \u2014 don\u2019t jump straight to this. Start near "+start+" g a day and step up about 10% every 2\u20133 days. The vet sets the pace.");}}
@@ -3020,7 +3025,8 @@ function feedBoardDog(r){var st=r.state||{};var fp=st.feedingPlan||{};var A=feed
   var plan=g?(g+" g"+(n?(" \u00d7 "+n):(n===0?" \u00b7 free-feed":""))):"";
   var guide=A.ok?feedAdviceLine(A):"";var differs=false;
   if(g&&A.ok&&A.per){var pd=g*(n||A.feeds),gd=A.per*A.feeds;differs=Math.abs(pd-gd)>Math.max(15,gd*0.08)||(n&&n!==A.feeds&&A.feeds>n&&(A.thin||A.pup));}
-  return{id:r.id,name:r.name||(st.dog&&st.dog.name)||"Unnamed",plan:plan,guide:guide,differs:differs,A:A,food:fp.brand||"",note:fp.notes||""};}
+  var atTarget=!!(A.reachedTarget||(A.atTarget&&g&&A.ok&&A.per&&(g*(n||A.feeds))>(A.per*A.feeds)+10));
+  return{id:r.id,name:r.name||(st.dog&&st.dog.name)||"Unnamed",plan:plan,guide:guide,differs:differs||atTarget,atTarget:atTarget,A:A,food:fp.brand||"",note:fp.notes||""};}
 var FB_CSS='.fb{max-width:760px;margin:0 auto}.fb-sheet{background:#fff;border:1px solid #e4e7e0;border-radius:14px;padding:18px 20px 10px}.fb-g{font-size:17px;font-weight:800;color:#282932;margin:14px 0 6px;padding-bottom:3px;border-bottom:3px solid #282932;display:inline-block}.fb-g:first-child{margin-top:0}.fb-slot{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid #eef0ea;align-items:flex-start}.fb-k{width:40px;flex:none;font-size:17px;font-weight:800;color:#282932;font-variant-numeric:tabular-nums}.fb-dogs{flex:1;min-width:0}.fb-dog{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;padding:2px 0;cursor:pointer}.fb-dog+.fb-dog{margin-top:6px;padding-top:8px;border-top:1px dashed #e4e7e0}.fb-n{font-size:16px;font-weight:700;color:#282932;min-width:110px}.fb-amt{font-size:17px;font-weight:800;color:#1d4ed8;font-variant-numeric:tabular-nums}.fb-amt.sug{color:#4d5e22}.fb-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:999px;background:#edf6cf;color:#3a4a16}.fb-tag.warn{background:#fef3c7;color:#92400e}.fb-sub{flex-basis:100%;font-size:11.5px;color:#6b7280}.fb-note{flex-basis:100%;font-size:12.5px;color:#282932;font-weight:600}.fb-empty{color:#c3c7bd;font-size:13px;padding-top:3px}';
 function renderFeedBoard(){
   var back='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#333542;color:#9a9fa8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button><h2 style="margin:0;flex:1;font-size:18px">Feeding board</h2><button class="btn" onclick="printFeedBoard()">Print</button></div>';
@@ -3031,7 +3037,7 @@ function renderFeedBoard(){
       if(!sl.dogs.length)h+='<div class="fb-empty">\u2014</div>';
       sl.dogs.forEach(function(r){var D=feedBoardDog(r),A=D.A;
         h+='<div class="fb-dog" onclick="openDogAt('+JSON.stringify(D.id).replace(/"/g,"&quot;")+',&quot;feeding&quot;)"><span class="fb-n">'+esc(D.name)+'</span>';
-        if(D.plan)h+='<span class="fb-amt">'+esc(D.plan)+'</span>'+(D.differs?'<span class="fb-tag warn">guide says '+esc(D.guide)+'</span>':'');
+        if(D.plan)h+='<span class="fb-amt">'+esc(D.plan)+'</span>'+(D.differs?'<span class="fb-tag warn">'+(D.atTarget?'At target \u2014 drop to ':'Guide says ')+esc(D.guide)+'</span>':'');
         else if(D.guide)h+='<span class="fb-amt sug">'+esc(D.guide)+'</span><span class="fb-tag">from the guide</span>';
         else h+='<span class="fb-empty">'+esc(A.need||"No plan yet")+'</span>';
         if(D.note)h+='<span class="fb-note">'+esc(D.note)+'</span>';
@@ -4059,7 +4065,7 @@ function renderNotes(){
         if(f.kind==="incident"){
           var sevCol=f.severity==="Serious"||f.severity==="Injury"?"#dc2626":f.severity==="Moderate"?"#f59e0b":"#6b7280";
           h+='<div style="padding:8px 10px;display:flex;gap:10px;align-items:flex-start;background:#fef2f2;border-left:3px solid '+sevCol+';margin-bottom:6px;border-radius:4px">'
-            +'<span style="font-size:11px;color:#6b7280;min-width:42px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(f.time||"")+'</span>'
+            +''
             +'<div style="flex:1;min-width:0">'
               +'<div style="font-size:10px;font-weight:700;color:'+sevCol+';text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px">'+esc(f.severity||"Incident")+'</div>'
               +'<div style="font-size:12px;color:#282932;white-space:pre-wrap;line-height:1.4">'+esc(f.text||"")+'</div>'
@@ -4068,7 +4074,7 @@ function renderNotes(){
             +'<button onclick="deleteIncident('+f._idx+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;flex-shrink:0">&#10005;</button>'
           +'</div>';
         }else{
-          h+='<div style="padding:8px 0;display:flex;gap:10px;align-items:flex-start"><span style="font-size:11px;color:#6b7280;min-width:42px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(f.time||"")+'</span><div style="flex:1;min-width:0"><div style="font-size:12px;color:#282932;white-space:pre-wrap;line-height:1.4">'+esc(f.text||"")+'</div>'+(f.staff?'<div style="font-size:10px;color:#9a9fa8;margin-top:3px">'+esc(f.staff)+'</div>':"")+'</div><button onclick="deleteNote('+f._idx+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;flex-shrink:0">&#10005;</button></div>';
+          h+='<div style="padding:8px 0;display:flex;gap:10px;align-items:flex-start"><div style="flex:1;min-width:0"><div style="font-size:12px;color:#282932;white-space:pre-wrap;line-height:1.4">'+esc(f.text||"")+'</div>'+(f.staff?'<div style="font-size:10px;color:#9a9fa8;margin-top:3px">'+esc(f.staff)+'</div>':"")+'</div><button onclick="deleteNote('+f._idx+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;flex-shrink:0">&#10005;</button></div>';
         }
       });
       h+='</div>';
