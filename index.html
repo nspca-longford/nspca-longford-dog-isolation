@@ -275,6 +275,15 @@ html.bigtext body{font-size:16px}html.bigtext input,html.bigtext select,html.big
 .dglance div{font-size:12px;font-weight:600;color:#4b5160;padding:5px 0;border-bottom:1px solid #eef0ea;line-height:1.5}.dglance div:last-child{border-bottom:none}.dglance b{display:block;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#6b7280}
 .mrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #eef0ea}.mrow:last-of-type{border-bottom:none}.mrow .k{font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:7px;background:#eef1ea;color:#3f4a2e;flex-shrink:0;width:62px;text-align:center}.mrow.g .k{background:#dcfce7;color:#166534}.mrow.a .k{background:#fef3c7;color:#92400e}.mrow.n .k{background:#fee2e2;color:#991b1b}.mrow.b .k{background:#dbeafe;color:#1e3a8a}.mrow .t{flex:1;min-width:0}.mrow .t b{font-size:12.5px;font-weight:800;display:block}.mrow .t small{font-size:11px;color:#6b7280;font-weight:600;display:block;line-height:1.35}.mrow .act span{font-size:10.5px;font-weight:800;padding:5px 9px;border-radius:8px;background:#c6e76c;white-space:nowrap;cursor:pointer;display:inline-block}
 .asec.msec.bad .anum{background:#fee2e2;color:#991b1b}.msec .abody{padding-top:6px}.msec .abody .cq{padding:8px 0}
+.msec .abody .g2,.msec .abody .g3,.msec .abody .dog-fg{display:grid!important}.msec .abody .g2{grid-template-columns:1fr 1fr;gap:10px 16px}.msec .abody .dog-fg{gap:12px 16px}.mblk{padding:12px 0 6px;border-bottom:1px solid #eef0ea}.mblk:last-child{border-bottom:none}.mblk>.lbl{margin-bottom:10px}.mblk .f{margin-bottom:10px}@media(max-width:560px){.msec .abody .g2{grid-template-columns:1fr}}
+#dash-menu{position:fixed;inset:0;z-index:80}.mscrim{position:absolute;inset:0;background:rgba(15,16,21,.45)}
+.mpanel{position:absolute;top:0;right:0;bottom:0;width:360px;max-width:92vw;background:#282932;color:#fff;padding:16px;overflow:auto;box-shadow:-12px 0 40px rgba(0,0,0,.35);animation:mslide .18s ease-out}@keyframes mslide{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+.mpanel .me{display:flex;align-items:center;gap:12px;padding:6px 4px 14px;border-bottom:1px solid #454857;margin-bottom:10px;cursor:pointer}.mpanel .me i,.mpanel .me img{width:44px;height:44px;border-radius:50%;font-style:normal;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;object-fit:cover;flex-shrink:0}.mpanel .me b{display:block;font-size:15px;color:#fff}.mpanel .me small{font-size:11px;color:#9a9fa8;font-weight:700}.mpanel .me .x{margin-left:auto;width:32px;height:32px;border-radius:50%;background:#333542;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.mpanel .h{font-size:9.5px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:#9a9fa8;margin:12px 4px 6px}
+.mpanel .mi{display:flex;align-items:center;gap:10px;background:#333542;border-radius:12px;padding:11px 12px;margin-bottom:6px;cursor:pointer}.mpanel .mi:active{background:#3d3f4d}.mpanel .mi b{display:block;font-size:13.5px;font-weight:800;color:#fff}.mpanel .mi small{display:block;font-size:11px;color:#cdd3df;font-weight:600;margin-top:1px}.mpanel .mi .ch{margin-left:auto;color:#9a9fa8;font-size:18px}.mpanel .mi .bd{margin-left:auto;background:#c6e76c;color:#282932;font-size:10.5px;font-weight:900;padding:4px 8px;border-radius:8px;white-space:nowrap}.mpanel .mi .bd.r{background:#ef4444;color:#fff}
+.mpanel .also{display:flex;gap:6px;flex-wrap:wrap;margin:4px 4px 0}.mpanel .also span{font-size:11px;font-weight:700;color:#cdd3df;border:1px solid #454857;padding:5px 10px;border-radius:20px;cursor:pointer}
+.mpanel .foot{margin-top:14px;display:flex;justify-content:space-between;align-items:center;padding:12px 4px 0;border-top:1px solid #454857;font-size:11px;color:#9a9fa8;font-weight:700}.mpanel .foot a{color:#cdd3df}.mpanel .foot .out{color:#fca5a5;font-weight:800;cursor:pointer}
+@media(max-width:640px){.mpanel{top:auto;left:0;right:0;bottom:0;width:100%;max-width:none;max-height:88vh;border-radius:18px 18px 0 0;animation:mup .18s ease-out;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}@keyframes mup{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}}
 .cchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 .cchip{font-size:12px;font-weight:700;padding:7px 12px;border-radius:20px;border:1.5px solid #e4e7e0;background:#fff;color:#6b7280;cursor:pointer;user-select:none}
 .cchip.on{background:#282932;color:#c6e76c;border-color:#282932}
@@ -541,26 +550,7 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
       <button id="dash-new-btn" onclick="openNewDog()" class="db2-btn p" title="Start a new dog">+ New dog</button>
       <div style="position:relative">
         <button id="dash-menu-btn" onclick="toggleDashMenu(event)" class="db2-menu" title="Menu" aria-label="Menu"><svg width="16" height="14" viewBox="0 0 16 14" aria-hidden="true"><rect y="0" width="16" height="2" rx="1" fill="currentColor"/><rect y="6" width="16" height="2" rx="1" fill="currentColor"/><rect y="12" width="16" height="2" rx="1" fill="currentColor"/></svg></button>
-        <div id="dash-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e4e7e0;border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,0.18);min-width:210px;z-index:50;overflow-y:auto;max-height:calc(100vh - 90px)">
-          <div class="dml">Daily work</div>
-          <div onclick="dashMenuGo('weighin')" class="dmi">Batch weigh-in</div>
-          <div onclick="dashMenuGo('feedboard')" class="dmi">Feeding board</div>
-          <div onclick="dashMenuGo('readytogo')" class="dmi">Ready to Go</div>
-          <div onclick="dashMenuGo('healthboard')" class="dmi">Unit Health Board</div>
-          <div class="dml">Records &amp; reports</div>
-          <div onclick="dashMenuGo('records')" class="dmi">Records</div>
-          <div onclick="dashMenuGo('incidents')" class="dmi">Incident register</div>
-          <div onclick="dashMenuGo('upcomingMedical')" class="dmi">Upcoming Medical</div>
-          <div onclick="dashMenuGo('month')" class="dmi">The month</div>
-          <div class="dml">Team &amp; data</div>
-          <div onclick="dashMenuGo('profile')" class="dmi">My profile</div>
-          <div id="dash-menu-users" onclick="dashMenuGo('users')" class="dmi" style="display:none">Manage Users</div>
-          <div id="dmi-backup" onclick="closeDashMenu();downloadBackup()" class="dmi">Download backup</div>
-          <div onclick="closeDashMenu();restoreBackupOpen()" class="dmi" id="dash-menu-restore">Restore backup</div>
-          <div onclick="showWhatsNew()" class="dmi">What&#8217;s new</div>
-          <div style="border-top:1px solid #e4e7e0;margin:4px 0"></div>
-          <div onclick="closeDashMenu();appConfirm('Log out of NSPCA Longford?',doLogout)" class="dmi" style="color:#991b1b">Log out</div>
-        </div>
+        <div id="dash-menu" style="display:none"></div>
       </div>
     </div>
   </div>
@@ -639,7 +629,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.293",date:"2026-09-22",note:"Medical, second pass: six numbered sections like every other tab \u2014 Vaccinations (each jab a row, Given today one tap), Worming, flea & tick (wormer and flea/tick with last and next, Given today when due), What\u0027s wrong now (disease with status as chips, medication with day N of M and Stop), The vet (next appointment, visits with attach-report, + vet visit), The body (health, arrival, neuter, dental), History. Each header a one-line summary; only the sections that need you open. The strip says it in a sentence."},{version:"3.292",date:"2026-09-22",note:"Isolation rebuilt. Arrival is five numbered sections in the order the first hour happens \u2014 source & handover (brought-in-by and reason as chips, paperwork as chips that attach straight to Files), first look, handling on the day, arrival photos, reported \u2014 with what the assessment later saw beside each reported line and the disagreements named. Day reports: a strip of days with a colour bar for how each went, the report as five rows of chips and one line, Same as yesterday and Also this day kept, and the days at a glance reading each question across the stay."},{version:"3.291",date:"2026-09-22",note:"Departure rebuilt. Rehoming is a numbered path \u2014 Cleared, Available, Reserved, Home check, Adopted \u2014 each section saying what happened and when, the current one open with its fields, tap to move; the home check has a result; enquiries and the return sit below; the adoption blurb is gone (the adoption card writes its own). Foster is a loan: who has the dog, what went with them read from the record, a printable carer sheet, check-ins, and Coming back \u2014 back in the unit, extend, or foster-to-adopt straight into Rehoming. Outcome is seven doors as tiles; tap one and only that door\u0027s fields appear, pre-filled from Rehoming with the contract checked, then one box that says what closing does."},{version:"3.290",date:"2026-09-22",note:"Care, Feeding and Weights rebuilt in the same voice as the rest. Care: a strip that reads the kit, what settles the dog and what to avoid; five cards of chips \u2014 what he wears, walks & exercise, what settles him, in the kennel, grooming \u2014 no dropdowns. Feeding: food as chips, grams as a stepper in fives, feeds and target as chips, the guide\u0027s suggestion as one box with Use, and Appetite \u2014 the last seven day reports as a colour strip. Weights: the strip says the change, the score and the distance to target; a one-tap weigh-in; the chart with the target dashed; body condition as nine tappable numbers with the wording; the log with the change per weigh-in. Same keys; old records keep what they have."}
+var CHANGELOG=[{version:"3.294",date:"2026-09-22",note:"The menu is a panel \u2014 from the right on the laptop, from the bottom on the phone \u2014 with you at the top, then Today (feeding board, batch weigh-in, incidents), Records, Admin, each item with a line saying what\u0027s in it and a count where one helps: bowls changed, dogs due on the scales, incidents this week, days since the last backup. The rarely-opened pages sit as small chips under also. Version, What\u0027s new and Sign out in the foot."},{version:"3.293",date:"2026-09-22",note:"Medical, second pass: six numbered sections like every other tab \u2014 Vaccinations (each jab a row, Given today one tap), Worming, flea & tick (wormer and flea/tick with last and next, Given today when due), What\u0027s wrong now (disease with status as chips, medication with day N of M and Stop), The vet (next appointment, visits with attach-report, + vet visit), The body (health, arrival, neuter, dental), History. Each header a one-line summary; only the sections that need you open. The strip says it in a sentence."},{version:"3.292",date:"2026-09-22",note:"Isolation rebuilt. Arrival is five numbered sections in the order the first hour happens \u2014 source & handover (brought-in-by and reason as chips, paperwork as chips that attach straight to Files), first look, handling on the day, arrival photos, reported \u2014 with what the assessment later saw beside each reported line and the disagreements named. Day reports: a strip of days with a colour bar for how each went, the report as five rows of chips and one line, Same as yesterday and Also this day kept, and the days at a glance reading each question across the stay."},{version:"3.291",date:"2026-09-22",note:"Departure rebuilt. Rehoming is a numbered path \u2014 Cleared, Available, Reserved, Home check, Adopted \u2014 each section saying what happened and when, the current one open with its fields, tap to move; the home check has a result; enquiries and the return sit below; the adoption blurb is gone (the adoption card writes its own). Foster is a loan: who has the dog, what went with them read from the record, a printable carer sheet, check-ins, and Coming back \u2014 back in the unit, extend, or foster-to-adopt straight into Rehoming. Outcome is seven doors as tiles; tap one and only that door\u0027s fields appear, pre-filled from Rehoming with the contract checked, then one box that says what closing does."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1632,32 +1622,32 @@ setInterval(updateClock,30000);
 function showDashboard(){restoreDashFilters();showScreen("dashboard-screen");renderDashboard();if(window._dashScroll){var _sy=window._dashScroll;window._dashScroll=0;setTimeout(function(){window.scrollTo(0,_sy);},30);}showWelcomeToast();maybeShowWhatsNew();startDashRefresh();}
 
 // ── Header dropdown menu ──────────────────────────────────────────
-function toggleDashMenu(e){var _bk=document.getElementById("dmi-backup");if(_bk)_bk.style.display=(currentRole()==="admin")?"":"none";
-  if(e){e.stopPropagation();}
-  var m=document.getElementById("dash-menu");if(!m)return;
-  var open=m.style.display==="block";
-  if(open){closeDashMenu();return;}
-  // Show admin-only items
-  var au=document.getElementById("dash-menu-users");
-  if(au)au.style.display=currentRole()==="admin"?"flex":"none";
-  var ar=document.getElementById("dash-menu-restore");
-  if(ar)ar.style.display=currentRole()==="admin"?"flex":"none";
-  m.style.display="block";
-  // Defer outside-click handler so this click doesn't immediately close it
-  setTimeout(function(){document.addEventListener("click",_outsideDashMenu);},0);
-}
-function closeDashMenu(){
-  var m=document.getElementById("dash-menu");if(m)m.style.display="none";
-  document.removeEventListener("click",_outsideDashMenu);
-}
-function _outsideDashMenu(e){
-  var m=document.getElementById("dash-menu");if(!m)return;
-  if(m.contains(e.target))return;
-  closeDashMenu();
-}
+function menuCounts(){var c={};try{var act=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return (!o||/^Active/.test(o)||o==="Finished Isolation")&&!((r.state&&r.state.foster)||{}).out;});
+  c.feed=act.filter(function(r){try{var D=feedBoardDog(r);return D.differs||D.atTarget;}catch(e){return false;}}).length;
+  c.weigh=act.filter(function(r){var wl=(r.state.weights||[]).map(function(w){return w.date||"";}).sort();var last=wl[wl.length-1];var pup=(r.state.dog||{}).dob||/puppy/i.test((r.state.dog||{}).age||"");return !last||daysSince(last)>=(pup?1:7);}).length;
+  var wk=addDaysStr(new Date().toISOString().slice(0,10),-7);c.inc=records.reduce(function(n,r){return n+((r.state.incidents||[]).filter(function(x){return x.date&&x.date>=wk;}).length);},0);
+  c.users=getAllUsersSync().length;c.invited=getAllUsersSync().filter(function(u){return u.email&&!u.active;}).length;
+  var lb="";try{lb=localStorage.getItem("nspca-last-backup")||"";}catch(e){}c.backupDays=lb?daysSince(lb):null;c.backupDate=lb;}catch(e){}return c;}
+function toggleDashMenu(e){if(e){e.stopPropagation();}var m=document.getElementById("dash-menu");if(!m)return;if(m.parentNode!==document.body)document.body.appendChild(m);if(m.style.display==="block"){closeDashMenu();return;}
+  var role=currentRole();var me=CURRENT_USER||{name:currentName()};var nm=me.name||currentName();var ph=userPhoto(me.code);var c=menuCounts();var e2=esc;
+  var roleLabel=role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Dog Trainer":"Staff";
+  var item=function(sec,t,s,badge,red){return '<div class="mi" onclick="dashMenuGo(\''+sec+'\')"><div><b>'+t+'</b><small>'+s+'</small></div>'+(badge?'<span class="bd'+(red?" r":"")+'">'+badge+'</span>':'<span class="ch">&rsaquo;</span>')+'</div>';};
+  var h='<div class="mscrim" onclick="closeDashMenu()"></div><div class="mpanel">'
+    +'<div class="me" onclick="dashMenuGo(\'profile\')">'+(ph?'<img src="'+ph+'">':'<i style="background:'+avatarColor(nm)+'">'+e2(initials(nm))+'</i>')+'<div><b>'+e2(nm)+'</b><small>'+e2(roleLabel)+' \u00b7 My profile \u203a</small></div><span class="x" onclick="event.stopPropagation();closeDashMenu()">&#10005;</span></div>'
+    +'<div class="h">Today</div>'
+    +item("feedboard","Feeding board","what goes in each bowl \u00b7 Pods then Kennels",c.feed?c.feed+" change"+(c.feed===1?"":"s"):"")
+    +item("weighin","Batch weigh-in","everyone on the scales, one screen",c.weigh?c.weigh+" due":"")
+    +item("incidents","Incident register","the unit\u0027s log of bites, escapes, injuries",c.inc?c.inc+" this week":"",c.inc>0)
+    +'<div class="h">Records</div>'
+    +item("records","All records","every dog, here or gone \u00b7 search and filter")
+    +item("month","The month","ins, outs, stays, lights, vet \u00b7 the unit report")
+    +(role==="admin"||role==="manager"?'<div class="h">Admin</div>'+(role==="admin"?item("users","Manage users",c.users+" people"+(c.invited?" \u00b7 "+c.invited+" invited":"")):'')+'<div class="mi" onclick="closeDashMenu();downloadBackup()"><div><b>Backup</b><small>'+(c.backupDate?"download a copy \u00b7 last "+e2(fmtDMY(c.backupDate)):"download a copy \u00b7 none on this device yet")+'</small></div>'+(c.backupDays===null||c.backupDays>=14?'<span class="bd r">'+(c.backupDays===null?"never":c.backupDays+" days")+'</span>':'<span class="ch">&rsaquo;</span>')+'</div>':'')
+    +'<div class="also">'+(role==="admin"?'<span onclick="closeDashMenu();restoreBackupOpen()">Restore a backup</span>':'')+'<span onclick="dashMenuGo(\'healthboard\')">Unit health board</span><span onclick="dashMenuGo(\'readytogo\')">Ready to go</span><span onclick="dashMenuGo(\'upcomingMedical\')">Upcoming medical</span></div>'
+    +'<div class="foot"><span>v'+e2(APP_VERSION)+' \u00b7 <a href="#" onclick="closeDashMenu();showWhatsNew(true);return false">What\u0027s new \u203a</a></span><span class="out" onclick="closeDashMenu();appConfirm(\'Sign out of NSPCA Longford?\',doLogout)">Sign out</span></div></div>';
+  m.innerHTML=h;m.style.display="block";document.body.classList.add("menu-open");setTimeout(function(){document.addEventListener("keydown",_escDashMenu);},0);}
+function _escDashMenu(ev){if(ev.key==="Escape")closeDashMenu();}
+function closeDashMenu(){var m=document.getElementById("dash-menu");if(m){m.style.display="none";}document.body.classList.remove("menu-open");document.removeEventListener("keydown",_escDashMenu);try{document.removeEventListener("click",_outsideDashMenu);}catch(e){}}
 function dashMenuGo(section){closeDashMenu();showDashSection(section);}
-
-// ── Auto-refresh dashboard from Supabase (60s background poll) ────
 function startDashRefresh(){
   stopDashRefresh();
   _dashRefreshTimer=setInterval(async function(){
@@ -3412,7 +3402,6 @@ function renderMedical(){
     +'<span style="width:9px;height:9px;border-radius:50%;flex-shrink:0;background:'+(chS?chS.dot:"#9a9fa8")+'"></span>'
     +'<span style="font-size:12.5px;font-weight:700">'+(chS?chS.l:"Health status not set")+'</span></div>';
   bCur+='<div class="g2">';
-  bCur+=fld("Next vet appointment",m.nextVetDate||"","medical.nextVetDate","date")+fld("Appointment for",m.nextVetReason||"","medical.nextVetReason","text","e.g. DHP 2 \u00b7 recheck ear");
   bCur+=slct("Current health status",m.currentStatus||"","medical.currentStatus",[["","-- not set --"],["Healthy","Healthy — fit and well"],["Recovering","Recovering"],["Under treatment","Under treatment"],["Monitoring","Monitoring — keep an eye"],["Not fit for rehoming","Not fit for rehoming"]]);
   var _lw=latestWeight();
   bCur+='<div class="f"><label class="lbl">Latest weight</label><div style="border:1px solid #e4e7e0;border-radius:8px;padding:8px 10px;font-size:12.5px;color:'+(_lw?"#282932":"#9a9fa8")+';background:#f8f9f6">'+(_lw?esc(_lw.weight||"")+' &middot; '+fmtDMY(_lw.date):"No weight logged \u2014 add on the Weights tab")+'</div></div>';
@@ -3749,7 +3738,7 @@ function renderMedical(){
   h+=sec(4,"The vet",(m.nextVetDate?"next "+(m.nextVetDate<today?"was due ":"")+e(fmtDMY(m.nextVetDate))+(m.nextVetReason?" \u00b7 "+e(m.nextVetReason):""):"nothing booked")+(vets.length?" \u00b7 last seen "+e(fmtDMY(vets[0].date)):" \u00b7 never seen"),m.nextVetDate&&m.nextVetDate<=today?"warn":vets.length?"done":"",vbody,m.nextVetDate&&m.nextVetDate<=addDaysStr(today,3));
   // 5 the body
   var bodySum=[_wlast?e(_wlast.weight):"",m.bcs?"BCS "+e(String(m.bcs).charAt(0)):"",_wd?(_wd<0?"losing "+Math.abs(_wd).toFixed(1):"up "+_wd.toFixed(1)):"",_neut.toLowerCase()+(m.neuterDate?" "+e(fmtDMY(m.neuterDate)):""),m.dental?"teeth "+e(String(m.dental).toLowerCase().split(" ")[0]):"",m.skinCondition?"skin "+e(String(m.skinCondition).toLowerCase().split(" ")[0]):""].filter(Boolean).join(" \u00b7 ");
-  var bbody='<div class="cq"><label>Current health</label>'+bCur.replace(/<div style="margin-top:6px;border-top:[^"]*">[\s\S]*$/,"")+'</div>'+'<div class="cq"><label>On arrival</label>'+bArr+'</div><div class="cq"><label>Neuter / spay</label>'+bNeu+'</div><div class="cq"><label>Dental</label>'+bDen+'</div>';
+  var bbody='<div class="mblk"><div class="lbl">Current health</div>'+bCur.replace(/<div style="margin-top:6px;border-top:[^"]*">[\s\S]*$/,"")+'</div>'+'<div class="mblk"><div class="lbl">On arrival</div>'+bArr+'</div><div class="mblk"><div class="lbl">Neuter / spay</div>'+bNeu+'</div><div class="mblk"><div class="lbl">Dental</div>'+bDen+'</div>';
   h+=sec(5,"The body",bodySum||"Weight, condition, neuter, teeth, skin",_wd<-0.2?"warn":"",bbody);
   // 6 history
   var ev=[];var e2=esc;
