@@ -2443,6 +2443,7 @@ function setMumLink(id){if(!S.dog)return;S.dog.mumId=id?(isNaN(+id)?id:+id):"";d
 // 8-week rehoming gate. Pup mode = DOB set and under 26 weeks.
 function dogAgeWeeks(){var dob=S.dog&&S.dog.dob;if(!dob)return null;var t=new Date(dob).getTime();if(isNaN(t))return null;var ms=Date.now()-t;if(ms<0)return null;return Math.floor(ms/6048e5);}
 var PUP_SOCIAL=["Men","Women","Children","Hats / beards","Other dogs","Cats","Hoover","Traffic","Car ride","Collar & lead","Being lifted","Alone 10 min","Surfaces: grass / floor / stairs","Being groomed","Vet table"];
+function pupGrowthFrac(weeks){var f=[[0,0.03],[4,0.10],[8,0.20],[12,0.30],[16,0.42],[20,0.53],[26,0.65],[36,0.82],[52,1.0]];if(weeks>=52)return 1;for(var i=0;i<f.length-1;i++){if(weeks<=f[i+1][0]){var t=(weeks-f[i][0])/(f[i+1][0]-f[i][0]);return f[i][1]+(f[i+1][1]-f[i][1])*Math.max(0,t);}}return 1;}
 function pupExpectedKg(weeks,adultKg){if(!adultKg||weeks===null)return null;var f=[[0,0.03],[4,0.10],[8,0.20],[12,0.30],[16,0.42],[20,0.53],[26,0.65],[36,0.82],[52,1.0]];var lo=f[0],hi=f[f.length-1];for(var i=0;i<f.length-1;i++){if(weeks>=f[i][0]&&weeks<=f[i+1][0]){lo=f[i];hi=f[i+1];break;}}var t=(hi[0]===lo[0])?0:(weeks-lo[0])/(hi[0]-lo[0]);return Math.round(adultKg*(lo[1]+(hi[1]-lo[1])*t)*10)/10;}
 function pupGain(){var wl=(S.weights||[]).filter(function(w){return w.date&&w.weight;}).map(function(w){return{d:w.date,kg:parseFloat(String(w.weight).replace(/[^0-9.]/g,""))};}).filter(function(x){return x.kg>0;}).sort(function(a,b){return a.d.localeCompare(b.d);});if(wl.length<2)return null;var a=wl[wl.length-1],b=wl[0];var days=Math.max(1,Math.round((new Date(a.d)-new Date(b.d))/864e5));return{perDay:Math.round((a.kg-b.kg)/days*1000),days:days,total:Math.round((a.kg-b.kg)*10)/10,list:wl};}
 function pupAlarm(){var g=pupGain();if(!g||dogAgeWeeks()===null||dogAgeWeeks()>=12)return "";var l=g.list;var n=l.length;if(n>=3&&l[n-1].kg<l[n-2].kg&&l[n-2].kg<l[n-3].kg)return "lost weight two weigh-ins running";if(n>=4&&l[n-1].kg<=l[n-4].kg)return "no gain over the last three weigh-ins";return "";}
@@ -3018,12 +3019,12 @@ function feedAdvice(st){st=st||{};var d=st.dog||{},fp=st.feedingPlan||{};var A={
   var bl=st.bcsLog||[];var bcs=bl.length?bl[bl.length-1].score:(parseInt(String((st.medical&&st.medical.bcs)||"").charAt(0))||null);A.bcs=bcs;
   var bcsDate=bl.length?(bl[bl.length-1].date||""):"";var wDate=wl.length?(wl[0].date||""):"";A.bcsStale=!!(bcs!==null&&wDate&&bcsDate&&wDate>bcsDate);
   var thin=bcs!==null&&bcs<=3,heavy=bcs!==null&&bcs>=6,ideal=bcs!==null&&!thin&&!heavy;A.thin=thin;
-  var ageM=null;if(d.dob){var t=new Date(d.dob).getTime();if(!isNaN(t)&&t<=Date.now())ageM=(Date.now()-t)/(864e5*30.44);}A.ageM=ageM;
-  var pupFood=fp.brand===PUPPY_FEED;A.pup=pupFood||(ageM!==null&&ageM<12);
+  var ageM=null;if(d.dob){var t=new Date(d.dob).getTime();if(!isNaN(t)&&t<=Date.now())ageM=(Date.now()-t)/(864e5*30.44);}if(ageM===null&&d.age){var _ag=String(d.age);if(/^Under 1/.test(_ag)){ageM=6;A.ageGuess="no date of birth \u2014 taken as about 6 months";}else{var _y=parseInt(_ag);if(!isNaN(_y)){ageM=_y*12+6;A.ageGuess="age from the Dog tab";}}}A.ageM=ageM;
+  var pupFood=fp.brand===PUPPY_FEED;A.pup=(ageM!==null)?ageM<12:pupFood;
   var manual=parseFloat(fp.targetKg);if(isNaN(manual)||manual<=0)manual=null;var breedKg=breedTargetKg(d);A.breedKg=breedKg;
   var target=null,src="";
   if(manual){target=manual;src="target set on this tab";}
-  else if(A.pup){if(breedKg){target=breedKg;src="expected adult weight for the breed";}}
+  else if(A.pup){if(breedKg){target=breedKg;src="breed weight";}else if(now){var _fr=(ageM===null||ageM>=12)?1:pupGrowthFrac(ageM*4.345);target=Math.round(now/_fr*2)/2;src=_fr<1?"adult weight estimated from today\u2019s "+now+" kg":"current weight";A.estAdult=_fr<1;}}
   else if(ideal&&now){target=now;src="at a good weight now";}
   else if(thin&&(breedKg||now)){target=Math.max(breedKg||0,now||0);src=(breedKg&&breedKg>=(now||0))?"breed weight":"current weight";}
   else if(heavy&&(breedKg||now)){target=(breedKg&&now)?Math.min(breedKg,now):(breedKg||now);src=(target===breedKg)?"breed weight":"current weight";}
@@ -3035,13 +3036,13 @@ function feedAdvice(st){st=st||{};var d=st.dog||{},fp=st.feedingPlan||{};var A={
   if(A.atTarget&&thin){thin=false;A.thin=false;A.reachedTarget=true;}
   if(!fp.brand){A.need="Pick a food to get an amount.";return A;}
   if(/\b(wet|tins?|tinned|pouch(es)?|chicken|rice)\b/i.test(fp.brand)&&feedIsGeneric(fp.brand)){A.need="No guide figure for this food \u2014 amount by hand.";return A;}
-  if(!target){A.need=A.pup?"Set the expected adult weight to get an amount.":"Log a weight, or set a target weight, to get an amount.";return A;}
+  if(!target){A.need=A.pup?"Log a weight, or set the expected adult weight, to get an amount.":"Log a weight, or set a target weight, to get an amount.";return A;}
   var days=d.intakeDate?Math.floor((Date.now()-new Date(d.intakeDate).getTime())/864e5):null;
   var col=fp.column==="lo"||fp.column==="hi"?fp.column:(thin?"hi":(days!==null&&days>=0&&days<7?"hi":"lo"));A.col=col;
   A.colWhy=fp.column==="lo"||fp.column==="hi"?"column set on this tab":(thin?"thin \u2014 stressed column":(col==="hi"?"first week in \u2014 stressed column":"settled column"));
   var daily=null;
   if(pupFood){
-    if(ageM===null){A.need="Add the date of birth on the Dog tab \u2014 the puppy table goes by age.";return A;}
+    if(ageM===null){A.need="Add the date of birth or age on the Dog tab \u2014 the puppy table goes by age.";return A;}if(A.ageGuess)A.notes.push(A.ageGuess==="age from the Dog tab"?"No date of birth \u2014 worked from the age on the Dog tab.":"No date of birth \u2014 taken as about 6 months. Add it on the Dog tab for an exact amount.");
     var B=PUPPY_GUIDE.bands,band=B[B.length-1];for(var k=0;k<B.length;k++){if(ageM<B[k].to){band=B[k];break;}}
     var f=Math.min(1,Math.max(0,(ageM-band.from)/(band.to-band.from)));
     daily=feedInterp(PUPPY_GUIDE.kg,band.g.map(function(r){return r[0]+f*(r[1]-r[0]);}),target);A.band=band.label;A.colWhy="";A.col="";
@@ -3052,6 +3053,7 @@ function feedAdvice(st){st=st||{};var d=st.dog||{},fp=st.feedingPlan||{};var A={
   A.daily=round5(daily);
   if(/ob/.test(A.breedFlags||""))A.notes.push("Obesity-prone breed \u2014 aim for the lower end of the range; re-check body score monthly.");
   if(/br/.test(A.breedFlags||""))A.notes.push("Short-nosed breed \u2014 keep to the lower half of the range; extra weight worsens breathing.");
+  if(A.estAdult)A.notes.push("No breed weight \u2014 adult weight estimated from today\u2019s weight and age. Set it on this tab if you know better.");
   if(A.reachedTarget)A.notes.push("At target weight \u2014 settled column and two feeds from here. Log a body score to confirm.");
   else if(A.atTarget&&A.bcsStale)A.notes.push("At target weight \u2014 the last body score is older than the last weigh-in; log a new one.");
   var want=A.pup?(ageM!==null&&ageM<6?4:3):(thin?4:2);A.feedsSuggested=want;
@@ -3059,7 +3061,7 @@ function feedAdvice(st){st=st||{};var d=st.dog||{},fp=st.feedingPlan||{};var A={
   A.per=A.feeds>0?round5(A.daily/A.feeds):null;
   if(A.freqSet&&A.feeds>0&&A.feeds<want)A.notes.push(A.pup?("Pups do better on "+want+" feeds a day."):"Thin dog \u2014 four small feeds are easier on the gut than fewer big ones.");
   if(bcs!==null&&bcs<=2&&now&&FEED_GUIDE[fp.brand]&&target>now){var start=round5(feedInterp(FEED_GUIDE[fp.brand].kg,FEED_GUIDE[fp.brand].lo,now));if(start<A.daily){A.stepStart=start;A.notes.push("Very thin \u2014 don\u2019t jump straight to this. Start near "+start+" g a day and step up about 10% every 2\u20133 days. The vet sets the pace.");}}
-  if(A.pup&&!manual)A.gap="expected adult weight "+target+" kg";else if(A.pup)A.gap="expected adult weight "+target+" kg (set on this tab)";else if(now&&target&&Math.abs(target-now)>=0.5)A.gap="feeding for "+target+" kg, now "+now+" kg";else A.gap="based on "+target+" kg";
+  if(A.pup)A.gap="adult weight "+target+" kg";else if(now&&target&&Math.abs(target-now)>=0.5)A.gap="feeding for "+target+" kg, now "+now+" kg";else A.gap="based on "+target+" kg";
   A.ok=true;return A;}
 function feedAdviceLine(A){if(!A||!A.ok)return"";return(A.per?(A.per+" g \u00d7 "+A.feeds):(A.daily+" g a day"));}
 function applyFeedAdvice(){var A=feedAdvice(S);if(!A.ok||!A.per)return;if(!S.feedingPlan)S.feedingPlan={};S.feedingPlan.grams=String(A.per);if(!A.freqSet)S.feedingPlan.frequency=feedFreqLabel(A.feeds);saveRecord();renderMain();miniToast("Feeding set to "+A.per+" g \u00d7 "+A.feeds);}
@@ -4146,7 +4148,7 @@ function feedSet(k,v){if(!S.feedingPlan)S.feedingPlan={};S.feedingPlan[k]=(S.fee
 function feedStep(d){if(!S.feedingPlan)S.feedingPlan={};var g=parseFloat(String(S.feedingPlan.grams||"").replace(/[^0-9.]/g,""))||0;g=Math.max(0,Math.round((g+d)/5)*5);S.feedingPlan.grams=g?String(g):"";S.feedingPlan.by=currentName();S.feedingPlan.setOn=new Date().toISOString().slice(0,10);persistSave();debouncedSave();renderMain();}
 function renderFeeding(){if(!S.feedingPlan)S.feedingPlan={};var fp=S.feedingPlan;var e=esc;var A=feedAdvice(S);
   var g=parseFloat(String(fp.grams||"").replace(/[^0-9.]/g,""))||0;var n=feedsOf(fp.frequency);
-  var foods=Object.keys(FEED_GUIDE);foods=(A.pup||isPup())?[PUPPY_FEED].concat(foods):foods.concat([PUPPY_FEED]);var isGuide=foods.indexOf(fp.brand)>=0;var short=function(f){return f.replace(/^Purina Pro Plan\s*/i,"");};
+  var foods=Object.keys(FEED_GUIDE);foods.splice(1,0,PUPPY_FEED);var isGuide=foods.indexOf(fp.brand)>=0;var short=function(f){return f.replace(/^Purina Pro Plan\s*/i,"");};
   var days=(S.days||[]).filter(function(d){return d&&d.date;}).slice().sort(function(x,y){return x.date.localeCompare(y.date);}).slice(-7);
   var appTone=function(v){v=String(v||"").toLowerCase();if(!v)return "e";if(/well|all|good|ate/.test(v)&&!/not|refus|pick|half|left/.test(v))return "g";if(/refus|nothing|none|didn/.test(v))return "n";return "h";};
   var ateWell=days.filter(function(d){return appTone(d.feeding)==="g";}).length;var ateAny=days.filter(function(d){return d.feeding;}).length;
