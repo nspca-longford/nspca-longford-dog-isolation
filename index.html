@@ -160,6 +160,22 @@ nav::-webkit-scrollbar{display:none}
 #dashboard-content mark{background:#e3f3b0;color:#282932;border-radius:2px;padding:0}
 .rxmore{text-align:center;font-size:11.5px;font-weight:800;color:#6b7280;padding:12px 0 2px;cursor:pointer}.rxmore.q{font-weight:700;padding-top:6px}
 .rxempty{text-align:center;padding:30px 10px;color:#6b7280;font-size:13px;font-weight:600}
+.dose{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid #e4e7e0;border-left:3px solid #cfd4c8;border-radius:12px;padding:10px 12px;margin-bottom:6px;cursor:pointer}
+.dose .tk{width:24px;height:24px;border-radius:7px;border:2px solid #cfd4c8;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;color:#fff}
+.dose.done{border-left-color:#16a34a}.dose.done .tk{background:#16a34a;border-color:#16a34a}.dose.done .m b{color:#6b7280}
+.dose.late{border-left-color:#ef4444;background:#fef2f2}.dose.late .tk{border-color:#ef4444}
+.dose .m{flex:1;min-width:0}.dose .m b{display:block;font-size:13.5px;color:#282932}.dose .m small{display:block;font-size:11.5px;color:#6b7280;font-weight:600;margin-top:1px}
+.dose .w{font-size:11px;font-weight:800;color:#6b7280;white-space:nowrap}.dose.late .w{color:#b91c1c}.dose.done .w{color:#16a34a}
+.dkt{font-size:10px;font-weight:800;background:#eef0ea;color:#6b7280;padding:1px 6px;border-radius:20px;margin-left:4px;vertical-align:1px}
+.rxlbl em{font-style:normal;font-weight:700;letter-spacing:.04em;text-transform:none;color:#9aa0a8}
+.hoc{background:#fff;border:1px solid #e4e7e0;border-left:3px solid #cfd4c8;border-radius:12px;padding:9px 12px;margin-bottom:6px;cursor:pointer}
+.hoc.eyes{border-left-color:#ef4444;background:#fef2f2}.hoc b{font-size:13px;color:#282932}
+.hoc ul{margin:3px 0 0;padding-left:16px;font-size:12px;color:#4b5563;line-height:1.5}
+.hoquiet{font-size:11.5px;color:#6b7280;font-weight:600;padding:2px 2px 4px}
+.hobtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.hoboard{background:#282932;color:#fff;border-radius:14px;padding:12px 16px;margin-bottom:12px}
+.hoboard .k{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:#c6e76c}
+.hoboard p{margin:4px 0 0;font-size:13px;line-height:1.5;color:#e5e7eb}.hoboard a{color:#c6e76c;font-weight:800;text-decoration:none}
 .rxbar{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#282932;color:#fff;padding:11px 16px calc(11px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;box-shadow:0 -6px 20px rgba(0,0,0,.18)}.rxbar span{margin-right:auto}.rxbar i{font-style:normal;font-size:11.5px;padding:7px 12px;border-radius:9px;background:#3a3c48;color:#e5e7eb;cursor:pointer}.rxbar i.d{background:#dc2626;color:#fff}
 .rxwide{background:#fff;border:1px solid #e4e7e0;border-radius:14px;padding:6px 10px 4px;overflow-x:auto;margin-top:6px}
 .rxtable{width:100%;border-collapse:collapse;font-size:12.5px}.rxtable th{text-align:left;font-size:9.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#9a9fa8;padding:9px 8px;border-bottom:2px solid #e4e7e0;white-space:nowrap;cursor:pointer;user-select:none}.rxtable th.s{color:#282932}
@@ -1239,7 +1255,6 @@ function renderProfile(){
     +'</div>';
   h+='<div class="card pf-grp"><div class="lbl">How the app behaves for you</div>'
     +row("Auto sign-out","after this long with nothing touched",seg(autoMins,[[0,"Off"],[15,"15 min"],[30,"30 min"],[120,"2 h"]],"setAutoLogoutMins(%v);showDashSection(&quot;profile&quot;)"))
-    +row("Catch-up card on sign-in","what changed since you were last here",tog("catchup","1"))
     +row("Larger text","for the corridor, gloves on",tog("bigtext","0"))
     +'</div>';
   if(role==="admin"||role==="manager"){var users=getAllUsersSync();var invited=users.filter(function(u){return u.email&&!u.active;}).length;
@@ -1424,6 +1439,10 @@ function showDashSection(section){try{bumpActivity();}catch(e){}
     el.innerHTML=renderFeedBoard();
   }else if(section==="weighin"){
     el.innerHTML=renderBatchWeighIn();
+  }else if(section==="medround"){
+    el.innerHTML=renderMedRound();
+  }else if(section==="handover"){
+    el.innerHTML=renderHandover();
   }else if(section==="incidents"){
     el.innerHTML=renderIncidentRegister();
   }
@@ -1597,11 +1616,108 @@ setInterval(updateClock,30000);
 function showDashboard(){restoreDashFilters();showScreen("dashboard-screen");renderDashboard();if(window._dashScroll){var _sy=window._dashScroll;window._dashScroll=0;setTimeout(function(){window.scrollTo(0,_sy);},30);}showWelcomeToast();maybeShowWhatsNew();startDashRefresh();}
 
 // ── Header dropdown menu ──────────────────────────────────────────
+
+// ── Medication round ───────────────────────────────────────────────
+// Doses come from Medical: name, dose, frequency, start and end. Ticks live in medical.doseLog.
+var MED_SLOTS={am:["Morning","08:30"],mid:["Midday","13:00"],pm:["Evening","17:30"],prn:["As needed",""]};
+function tdISO(){return new Date().toISOString().slice(0,10);}
+function medKey(x){return String(x.name||"")+"|"+String(x.startDate||"");}
+function medActiveOn(x,td){return !!(x&&x.name&&x.active!==false&&(!x.startDate||x.startDate<=td)&&(!x.endDate||x.endDate>=td));}
+function medSlotsFor(x,td){var f=String(x.frequency||"").toLowerCase();if(/as needed/.test(f))return["prn"];if(/single/.test(f))return(!x.startDate||x.startDate===td)?["am"]:[];if(/weekly/.test(f)){if(!x.startDate)return["am"];return new Date(x.startDate+"T12:00:00").getDay()===new Date(td+"T12:00:00").getDay()?["am"]:[];}if(/three|8 hours/.test(f))return["am","mid","pm"];if(/twice|12 hours/.test(f))return["am","pm"];return["am"];}
+function slotMin(slot){var t=(MED_SLOTS[slot]||[])[1];if(!t)return null;var p=t.split(":");return parseInt(p[0],10)*60+parseInt(p[1],10);}
+function nowMin(){var d=new Date();return d.getHours()*60+d.getMinutes();}
+function medDayOf(x,td){if(!x.startDate)return"";var n=Math.round((new Date(td)-new Date(x.startDate))/864e5)+1;var tot=x.endDate?Math.round((new Date(x.endDate)-new Date(x.startDate))/864e5)+1:null;return "day "+n+(tot?" of "+tot:"");}
+function dosesFor(st,td){td=td||tdISO();var m=st.medical||{};var log=m.doseLog||[];var out=[];var nm=nowMin();var isToday=td===tdISO();
+  (m.medications||[]).forEach(function(x){if(!medActiveOn(x,td))return;var k=medKey(x);medSlotsFor(x,td).forEach(function(sl){var g=log.filter(function(e){return e.date===td&&e.key===k&&e.slot===sl;})[0]||null;var sm=slotMin(sl);out.push({med:x,key:k,slot:sl,given:g,late:!g&&sl!=="prn"&&isToday&&sm!==null&&nm>sm+60,due:!g&&sl!=="prn"&&isToday&&sm!==null&&nm>=sm});});});
+  var ord={am:0,mid:1,pm:2,prn:3};out.sort(function(a,b){return ord[a.slot]-ord[b.slot];});return out;}
+function doseTog(recId,key,slot){var td=tdISO();var now=new Date().toTimeString().slice(0,5);
+  var apply=function(st){st.medical=st.medical||defaultMedical();var log=st.medical.doseLog=st.medical.doseLog||[];var i=-1;log.forEach(function(e,j){if(e.date===td&&e.key===key&&e.slot===slot)i=j;});if(i>=0){log.splice(i,1);return false;}log.push({date:td,key:key,slot:slot,by:currentName(),time:now});return true;};
+  var onRecord=S&&S._id&&String(S._id)===String(recId)&&document.getElementById("wrap")&&document.getElementById("wrap").style.display!=="none";
+  var rec=records.find(function(r){return String(r.id)===String(recId);});var added;
+  if(onRecord){added=apply(S);persistSave();saveRecord();if(rec&&rec.state)rec.state.medical=JSON.parse(JSON.stringify(S.medical));renderMain();}
+  else if(rec&&rec.state){added=apply(rec.state);if(S&&S._id&&String(S._id)===String(recId)){S.medical=JSON.parse(JSON.stringify(rec.state.medical));}try{saveRecordChange(rec);}catch(e){}if(window._dashSection==="medround")showDashSection("medround");}
+  miniToast(added?"Given \u00b7 "+now:"Tick removed");}
+function doseRowHtml(d,recId,showDog,r){var e=esc;var x=d.med;var st=d.given?"done":d.late?"late":"";var who=d.given?e((d.given.by||"").split(" ")[0])+" "+e(d.given.time||""):d.late?"overdue "+Math.max(1,Math.floor((nowMin()-slotMin(d.slot))/60))+" h":d.slot==="prn"?"\u2014":"from "+MED_SLOTS[d.slot][1];
+  var title=showDog?e(r.name)+((r.state.dog||{}).kennel?' <span class="dkt">'+e(kennelShort(r.state.dog.kennel))+'</span>':''):e(x.name);
+  var sub=showDog?e([x.name,x.dose,medDayOf(x,tdISO())].filter(Boolean).join(" \u00b7 ")):e([x.dose,MED_SLOTS[d.slot][0].toLowerCase(),medDayOf(x,tdISO())].filter(Boolean).join(" \u00b7 "));
+  return '<div class="dose '+st+'" onclick="doseTog(\''+recId+'\',\''+e(d.key).replace(/'/g,"\\'")+'\',\''+d.slot+'\')"><span class="tk">'+(d.given?"\u2713":"")+'</span><div class="m"><b>'+title+'</b><small>'+sub+'</small></div><div class="w">'+who+'</div></div>';}
+function medTodayHtml(){var ds=dosesFor(S);if(!ds.length)return "";return '<div class="cq" style="padding-bottom:2px"><label>Today\u2019s doses<em>same ticks as the Medication round</em></label></div>'+ds.map(function(d){return doseRowHtml(d,S._id,false,null);}).join("");}
+function medRoundStats(){var td=tdISO();var tot=0,given=0,late=0,next=null;roundsActiveDogs().forEach(function(r){if(((r.state||{}).foster||{}).out)return;dosesFor(r.state||{},td).forEach(function(d){if(d.slot==="prn")return;tot++;if(d.given)given++;else{if(d.late)late++;var sm=slotMin(d.slot);if(!d.late&&(!next||sm<next.sm))next={sm:sm,r:r,d:d};}});});return{tot:tot,given:given,late:late,next:next};}
+function renderMedRound(){var e=esc;var td=tdISO();var groups={am:[],mid:[],pm:[],prn:[]};
+  roundsActiveDogs().forEach(function(r){if(((r.state||{}).foster||{}).out)return;dosesFor(r.state||{},td).forEach(function(d){groups[d.slot].push({r:r,d:d});});});
+  var S2=medRoundStats();
+  var h='<div class="rxhead"><button onclick="loadRecordsList().then(function(){renderDashboard();})" class="rxback">&#8592; Dashboard</button><h2>Medication round</h2></div><div class="rxsub">Every dose due today, kennel order. Tap to tick \u2014 it records who and when. Doses come from each dog\u2019s Medical tab.</div>';
+  var sent=!S2.tot?'<b>No doses today.</b> Nobody is on a course of medication.':(S2.given===S2.tot?'<b>All done.</b> Every dose today is given.':(S2.late?'<b style="color:#fca5a5">'+S2.late+' overdue.</b> ':'')+S2.given+' of '+S2.tot+' given.'+(S2.next?' Next: '+e(S2.next.r.name)+' at '+MED_SLOTS[S2.next.d.slot][1]+'.':''));
+  h+='<div class="rxstrip"><div class="rxlt"'+(S2.late?' style="background:#ef4444;color:#fff"':'')+'>'+S2.given+'<small>of '+S2.tot+'</small></div><div class="rxtx">'+sent+'</div></div>';
+  ["am","mid","pm","prn"].forEach(function(sl){var g=groups[sl];if(!g.length)return;var done=g.filter(function(x){return x.d.given;}).length;h+='<div class="rxlbl">'+MED_SLOTS[sl][0]+' <em>'+(sl==="prn"?"tick only if given":MED_SLOTS[sl][1]+" \u00b7 "+done+" of "+g.length)+'</em></div>'+g.map(function(x){return doseRowHtml(x.d,x.r.id,true,x.r);}).join("");});
+  if(!S2.tot&&!groups.prn.length)h+='<div class="rxempty">Nothing due today.</div>';
+  return '<div style="max-width:640px;margin:0 auto">'+h+'</div>';}
+
+// ── Handover ───────────────────────────────────────────────────────
+function hoFeedBad(v){return /refus|nothing|didn|half|picked|left|off food|not eat/i.test(String(v||""));}
+function handoverData(){var td=tdISO();var tm=addDaysStr(td,1);var e=function(x){return x;};var eyes=[],today=[],quiet=[],tomorrow=[];
+  records.forEach(function(r){var st=r.state||{};var d=st.dog||{},m=st.medical||{},f=st.fin||{},a=st.assessment||{},fo=st.foster||{},rh=st.rehome||{};var o=f.outcome||"";
+    var here=!o||/^Active/.test(o)||o==="Finished Isolation";var leftToday=!here&&f.outcomeDate===td;if(!here&&!leftToday)return;
+    var lbl=r.name+(d.kennel&&here?" ("+kennelShort(d.kennel)+")":"");var E=[],T=[];
+    var ds=dosesFor(st,td);var _ml=ds.filter(function(x){return x.late;});if(_ml.length===1)E.push(_ml[0].med.name+" "+MED_SLOTS[_ml[0].slot][0].toLowerCase()+" dose missed");else if(_ml.length){var _bn={};_ml.forEach(function(x){_bn[x.med.name]=(_bn[x.med.name]||0)+1;});E.push(_ml.length+" doses missed \u2014 "+Object.keys(_bn).map(function(k){return k+(_bn[k]>1?" \u00d7"+_bn[k]:"");}).join(", "));}
+    var giv=(m.doseLog||[]).filter(function(x){return x.date===td;}).length;if(giv)T.push(giv+" dose"+(giv===1?"":"s")+" given");
+    var day=(st.days||[]).filter(function(x){return x&&x.date===td;})[0];if(day){if(hoFeedBad(day.feeding))E.push("Off food \u2014 "+String(day.feeding).toLowerCase());T.push("Day report"+[day.demeanour,day.feeding].filter(Boolean).map(function(x){return " \u00b7 "+String(x).toLowerCase();}).join(""));}
+    (st.incidents||[]).filter(function(x){return x.date===td;}).forEach(function(x){E.push("Incident"+(x.severity?" ("+x.severity.toLowerCase()+")":"")+" \u2014 "+String(x.text||"").slice(0,80));});
+    var con=activeContagiousList(m);if(con.length&&here)E.push("Contagious \u2014 "+con.map(function(x){return diseaseShortName(x.type);}).join(", ")+", served last");
+    var ws=(st.weights||[]).filter(function(x){return x.date&&x.weight;}).sort(function(x,y){return x.date.localeCompare(y.date);});var wt=ws.filter(function(x){return x.date===td;}).slice(-1)[0];if(wt){var prev=ws.filter(function(x){return x.date<td;}).slice(-1)[0];var a1=parseFloat(String(wt.weight).replace(/[^0-9.]/g,"")),b1=prev?parseFloat(String(prev.weight).replace(/[^0-9.]/g,"")):null;T.push("Weighed "+a1+" kg");if(b1&&(b1-a1)/b1>=0.03)E.push("Weight down "+(b1-a1).toFixed(1)+" kg since "+fmtDMY(prev.date));}
+    if(d.intakeDate===td)T.unshift("Came in"+(d.intakeReason?" \u2014 "+d.intakeReason.toLowerCase():"")+(d.broughtInBy?" \u00b7 "+d.broughtInBy:""));
+    if(leftToday)T.unshift("Left \u2014 "+(o==="Moved to Kennels"?"moved to kennels":o.toLowerCase()));
+    (st.notes||[]).filter(function(x){return x.date===td&&!/incident/i.test(x.tag||"");}).forEach(function(x){T.push("Note: \u201c"+String(x.text||"").slice(0,90)+(String(x.text||"").length>90?"\u2026":"")+"\u201d"+(x.staff?" \u2014 "+String(x.staff).split(" ")[0]:""));});
+    if(a.rehomingAt===td&&a.rehomingStatus)T.push("Clearance: "+a.rehomingStatus.toLowerCase()+(a.rehomingBy?" \u2014 "+a.rehomingBy:""));
+    (m.vetVisits||[]).filter(function(x){return x.date===td;}).forEach(function(x){T.push("Vet"+(x.vet?" ("+x.vet+")":"")+(x.reason?" \u2014 "+x.reason:""));});
+    (rh.log||[]).filter(function(x){return x.date===td;}).forEach(function(x){T.push("Rehoming \u2014 "+String(x.text||"").replace(/^Stage:\s*/,"").toLowerCase());});
+    (fo.log||[]).filter(function(x){return x.date===td;}).forEach(function(x){T.push("Foster \u2014 "+String(x.text||"").toLowerCase());});
+    if(E.length)eyes.push({r:r,l:lbl,items:E});
+    if(T.length)today.push({r:r,l:lbl,items:T});else if(!E.length&&here&&!fo.out)quiet.push(r.name);
+    if(here){var Tm=[];(m.medications||[]).forEach(function(x){if(x.active!==false&&x.endDate===tm)Tm.push(x.name+" \u2014 last day");if(x.startDate===tm)Tm.push(x.name+" starts");});
+      if(m.nextVetDate===tm)Tm.push("vet"+(m.nextVetReason?" \u2014 "+m.nextVetReason:""));
+      (m.vaccinations||[]).forEach(function(v){if(v.nextDue===tm)Tm.push(v.type+" due");});
+      var ii=d.intakeDate?isolationInfo(d.intakeDate,o,isoExtraDays(d),pupIsoVax(d,m)):null;if(ii&&ii.clears===tm&&ii.state!=="done")Tm.push("finishes isolation");
+      if(fo.out&&fo.due===tm)Tm.push("due back from foster"+(fo.carer?" ("+fo.carer+")":""));
+      if(rh.homeCheckDate===tm)Tm.push("home check"+(rh.adopterName?" \u2014 "+rh.adopterName:""));
+      if(f.followUp===tm)Tm.push("follow-up call");
+      if(Tm.length)tomorrow.push({r:r,l:lbl,items:Tm});}});
+  var inU=records.filter(function(r){var o=((r.state||{}).fin||{}).outcome||"";return (!o||/^Active/.test(o)||o==="Finished Isolation")&&!(((r.state||{}).foster||{}).out);}).length;
+  var came=records.filter(function(r){return ((r.state||{}).dog||{}).intakeDate===td;}).length;var went=records.filter(function(r){var f=(r.state||{}).fin||{};var o=f.outcome||"";return f.outcomeDate===td&&o&&!/^Active/.test(o)&&o!=="Finished Isolation";}).length;
+  return{td:td,eyes:eyes,today:today,quiet:quiet,tomorrow:tomorrow,inU:inU,came:came,went:went};}
+function handoverText(D,line){var d=new Date();var L=["Handover \u2014 "+d.toLocaleDateString("en-IE",{weekday:"short",day:"numeric",month:"short"})+", "+currentName()+" ("+d.toTimeString().slice(0,5)+")",D.inU+" dogs in"+(D.came?", "+D.came+" came in":"")+(D.went?", "+D.went+" left":"")+"."];
+  if(D.eyes.length){L.push("");L.push("NEEDS EYES FIRST");D.eyes.forEach(function(x){L.push("\u2022 "+x.l+": "+x.items.join("; "));});}
+  if(D.today.length){L.push("");L.push("TODAY");D.today.forEach(function(x){L.push("\u2022 "+x.l+": "+x.items.join("; "));});}
+  if(D.quiet.length)L.push("No change: "+D.quiet.join(", ")+".");
+  if(D.tomorrow.length){L.push("");L.push("TOMORROW");D.tomorrow.forEach(function(x){L.push("\u2022 "+x.l+": "+x.items.join("; "));});}
+  if(line){L.push("");L.push("NOTE: "+line);}
+  return L.join("\n");}
+function handoverSave(){var t=document.getElementById("ho-line");var line=t?t.value.trim():"";var D=handoverData();var rec={date:D.td,by:currentName(),at:new Date().toISOString(),line:line,text:handoverText(D,line),eyes:D.eyes.map(function(x){return x.r.name+" \u2014 "+x.items[0];}).slice(0,3)};setUnitSetting("handover",rec);miniToast("Handover saved \u2014 it shows on the board for the next person");showDashSection("handover");}
+function handoverCopy(){var t=document.getElementById("ho-line");var txt=handoverText(handoverData(),t?t.value.trim():"");try{navigator.clipboard.writeText(txt).then(function(){miniToast("Copied \u2014 paste it into WhatsApp");},function(){fallbackCopy(txt);});}catch(e){fallbackCopy(txt);}}
+function handoverPrint(){var t=document.getElementById("ho-line");var txt=handoverText(handoverData(),t?t.value.trim():"");var w=window.open("","_blank");if(!w){appAlert("Allow pop-ups for this site to print.");return;}w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Handover</title><style>body{font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;max-width:680px;margin:24px auto;padding:0 20px;color:#282932}pre{white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.6}</style></head><body><pre>'+esc(txt)+'</pre><script>window.onload=function(){window.print();};<\/script></body></html>');w.document.close();}
+function renderHandover(){var e=esc;var D=handoverData();var saved=unitSetting("handover")||{};var mine=saved&&saved.date===D.td?saved:null;var d=new Date();
+  var card=function(x,eyes){return '<div class="hoc'+(eyes?' eyes':'')+'" onclick="openDog('+x.r.id+')"><b>'+e(x.l)+'</b><ul>'+x.items.map(function(t){return '<li>'+e(t)+'</li>';}).join("")+'</ul></div>';};
+  var h='<div class="rxhead"><button onclick="loadRecordsList().then(function(){renderDashboard();})" class="rxback">&#8592; Dashboard</button><h2>Handover</h2></div><div class="rxsub">What changed today, written from the records. Read it, add a line, send it on.</div>';
+  h+='<div class="rxstrip"><div class="rxlt">'+e(d.toLocaleDateString("en-IE",{weekday:"short"}).toUpperCase())+'<small>'+e(fmtDMY(D.td).slice(0,5))+'</small></div><div class="rxtx"><b>'+D.inU+' dog'+(D.inU===1?'':'s')+' in'+(D.came?', '+D.came+' came in':'')+(D.went?', '+D.went+' left':'')+'.</b> '+(D.eyes.length?'<b style="color:#fca5a5">'+D.eyes.length+' need'+(D.eyes.length===1?'s':'')+' eyes first.</b> ':'Nothing red. ')+(D.tomorrow.length?D.tomorrow.length+' for tomorrow.':'Nothing booked for tomorrow.')+'</div></div>';
+  if(D.eyes.length)h+='<div class="rxlbl">Needs eyes first <em>'+D.eyes.length+'</em></div>'+D.eyes.map(function(x){return card(x,true);}).join("");
+  h+='<div class="rxlbl">Today <em>'+D.today.length+'</em></div>'+(D.today.length?D.today.map(function(x){return card(x,false);}).join(""):'<div class="rxempty" style="padding:12px">Nothing recorded today yet.</div>');
+  if(D.quiet.length)h+='<div class="hoquiet">'+e(D.quiet.join(", "))+' \u2014 nothing changed today.</div>';
+  h+='<div class="rxlbl">Tomorrow <em>'+D.tomorrow.length+'</em></div>'+(D.tomorrow.length?D.tomorrow.map(function(x){return card(x,false);}).join(""):'<div class="rxempty" style="padding:12px">Nothing booked.</div>');
+  h+='<div class="rxlbl">A line from you</div><textarea id="ho-line" rows="3" placeholder="e.g. hose in K3 leaking, told maintenance\u2026" style="width:100%;font-family:inherit">'+e(mine?mine.line:"")+'</textarea>';
+  h+='<div class="hobtns"><button class="btn btnp" onclick="handoverSave()">'+(mine?'Update the handover':'Save the handover')+'</button><button class="btn" onclick="handoverCopy()">Copy for WhatsApp</button><button class="btn" onclick="handoverPrint()">Print</button></div>';
+  h+='<div class="rxsub" style="margin-top:8px">'+(mine?'Saved by '+e(mine.by)+' at '+e(new Date(mine.at).toTimeString().slice(0,5))+' \u2014 it shows on the board for the next person until they open it.':'Saving puts it on the board for the next person, under the morning card, until they open it.')+'</div>';
+  return '<div style="max-width:640px;margin:0 auto">'+h+'</div>';}
+function handoverBoardHtml(){var hv=unitSetting("handover");if(!hv||!hv.at)return "";var td=tdISO();if(hv.date<addDaysStr(td,-1))return "";var seen="";try{seen=localStorage.getItem("nspca-handover-read")||"";}catch(e){}if(seen===hv.at)return "";if(hv.by===currentName()&&hv.date===td)return "";
+  var at=new Date(hv.at);return '<div class="hoboard"><div class="k">Handover from '+esc(String(hv.by||"").split(" ")[0])+' \u00b7 '+esc(at.toLocaleDateString("en-IE",{weekday:"short"}))+' '+esc(at.toTimeString().slice(0,5))+'</div><p>'+esc([(hv.eyes||[]).join(" \u00b7 "),hv.line].filter(Boolean).join(" \u00b7 ")||"Nothing red.")+' <a href="#" onclick="handoverRead();return false">Read it</a></p></div>';}
+function handoverRead(){var hv=unitSetting("handover")||{};try{localStorage.setItem("nspca-handover-read",hv.at||"");}catch(e){}var ov=document.getElementById("app-confirm-overlay");if(!ov){ov=document.createElement("div");ov.id="app-confirm-overlay";ov.className="cfov";document.body.appendChild(ov);}
+  ov.innerHTML='<div class="cfscrim"></div><div class="cfsheet"><div class="k">Handover</div><div style="white-space:pre-wrap;font-size:12.5px;line-height:1.55;max-height:62vh;overflow:auto;color:#e5e7eb;margin:6px 0 12px">'+esc(hv.text||"")+'</div><div class="bt"><button id="app-confirm-ok" class="p">Got it</button></div></div>';ov.style.display="block";
+  var close=function(){ov.style.display="none";};document.getElementById("app-confirm-ok").onclick=close;ov.querySelector(".cfscrim").onclick=close;renderDashboard();}
+
 function menuCounts(){var c={};try{var act=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return (!o||/^Active/.test(o)||o==="Finished Isolation")&&!((r.state&&r.state.foster)||{}).out;});
   c.feed=act.filter(function(r){try{var D=feedBoardDog(r);return D.differs||D.atTarget;}catch(e){return false;}}).length;
   c.weigh=act.filter(function(r){var wl=(r.state.weights||[]).map(function(w){return w.date||"";}).sort();var last=wl[wl.length-1];var pup=(r.state.dog||{}).dob||/puppy/i.test((r.state.dog||{}).age||"");return !last||daysSince(last)>=(pup?1:7);}).length;
   var wk=addDaysStr(new Date().toISOString().slice(0,10),-7);c.inc=records.reduce(function(n,r){return n+((r.state.incidents||[]).filter(function(x){return x.date&&x.date>=wk;}).length);},0);
-  c.users=getAllUsersSync().length;c.invited=getAllUsersSync().filter(function(u){return u.email&&!u.active;}).length;
+  try{c.med=medRoundStats();}catch(_e){c.med={tot:0,given:0,late:0};}c.users=getAllUsersSync().length;c.invited=getAllUsersSync().filter(function(u){return u.email&&!u.active;}).length;
   var lb="";try{lb=localStorage.getItem("nspca-last-backup")||"";}catch(e){}c.backupDays=lb?daysSince(lb):null;c.backupDate=lb;}catch(e){}return c;}
 function toggleDashMenu(e){if(e){e.stopPropagation();}var m=document.getElementById("dash-menu");if(!m)return;if(m.parentNode!==document.body)document.body.appendChild(m);if(m.style.display==="block"){closeDashMenu();return;}
   var role=currentRole();var me=CURRENT_USER||{name:currentName()};var nm=me.name||currentName();var ph=userPhoto(me.code);var c=menuCounts();var e2=esc;
@@ -1610,14 +1726,16 @@ function toggleDashMenu(e){if(e){e.stopPropagation();}var m=document.getElementB
   var h='<div class="mscrim" onclick="closeDashMenu()"></div><div class="mpanel">'
     +'<div class="me" onclick="dashMenuGo(\'profile\')">'+(ph?'<img src="'+blobSrc(ph)+'">':'<i style="background:'+avatarColor(nm)+'">'+e2(initials(nm))+'</i>')+'<div><b>'+e2(nm)+'</b><small>'+e2(roleLabel)+' \u00b7 My profile \u203a</small></div><span class="x" onclick="event.stopPropagation();closeDashMenu()">&#10005;</span></div>'
     +'<div class="h">Today</div>'
+    +item("medround","Medication round","every dose due today \u00b7 tick as you give",c.med&&c.med.late?c.med.late+" overdue":(c.med&&c.med.tot>c.med.given?(c.med.tot-c.med.given)+" to give":""),c.med&&c.med.late>0)
     +item("feedboard","Feeding board","what goes in each bowl \u00b7 Pods then Kennels",c.feed?c.feed+" change"+(c.feed===1?"":"s"):"")
     +item("weighin","Batch weigh-in","everyone on the scales, one screen",c.weigh?c.weigh+" due":"")
     +item("incidents","Incident register","the unit\u0027s log of bites, escapes, injuries",c.inc?c.inc+" this week":"",c.inc>0)
+    +item("handover","Handover","what changed today \u00b7 send it on")
     +'<div class="h">Records</div>'
     +item("records","All records","every dog, here or gone \u00b7 search and filter")
     +item("month","The month","ins, outs, stays, lights, vet \u00b7 the unit report")
     +(role==="admin"||role==="manager"?'<div class="h">Admin</div>'+(role==="admin"?item("users","Manage users",c.users+" people"+(c.invited?" \u00b7 "+c.invited+" invited":"")):'')+'<div class="mi" onclick="closeDashMenu();downloadBackup()"><div><b>Backup</b><small>'+(c.backupDate?"download a copy \u00b7 last "+e2(fmtDMY(c.backupDate)):"download a copy \u00b7 none on this device yet")+'</small></div>'+(c.backupDays===null||c.backupDays>=14?'<span class="bd r">'+(c.backupDays===null?"never":c.backupDays+" days")+'</span>':'<span class="ch">&rsaquo;</span>')+'</div>':'')
-    +'<div class="also">'+(role==="admin"?'<span onclick="closeDashMenu();restoreBackupOpen()">Restore a backup</span>':'')+'<span onclick="dashMenuGo(\'upcomingMedical\')">Upcoming medical</span><a href="cats.html" style="color:inherit">Cats \u203a</a></div>'
+    +'<div class="also">'+'<span onclick="dashMenuGo(\'upcomingMedical\')">Upcoming medical</span><a href="cats.html" style="color:inherit">Cats \u203a</a></div>'
     +'<div class="foot"><span>v'+e2(APP_VERSION)+' \u00b7 <a href="#" onclick="closeDashMenu();showWhatsNew(true);return false">What\u0027s new \u203a</a></span><span class="out" onclick="closeDashMenu();appConfirm(\'Sign out of NSPCA Longford?\',doLogout)">Sign out</span></div></div>';
   m.innerHTML=h;m.style.display="block";document.body.classList.add("menu-open");setTimeout(function(){document.addEventListener("keydown",_escDashMenu);},0);}
 function _escDashMenu(ev){if(ev.key==="Escape")closeDashMenu();}
@@ -1712,7 +1830,7 @@ function dogNextThing(r,cats){
   var st=r.state||{};var d=st.dog||{};var inc=function(k){return cats&&cats[k]&&cats[k].indexOf(r)>=0;};
   var con=activeContagiousList(st.medical||null);
   if(con.length)return{c:"r",t:diseaseShortName(con[0].type)+" \u00b7 served last"};
-  if(inc("meds"))return{c:"a",t:"On medication \u00b7 dose today"};
+  if(inc("meds")){var _ds=dosesFor(st).filter(function(x){return x.slot!=="prn";});var _lt=_ds.filter(function(x){return x.late;})[0];if(_lt)return{c:"r",t:_lt.med.name+" "+MED_SLOTS[_lt.slot][0].toLowerCase()+" dose overdue"};var _nx=_ds.filter(function(x){return !x.given;})[0];if(_nx)return{c:"a",t:_nx.med.name+" \u00b7 "+MED_SLOTS[_nx.slot][0].toLowerCase()+" "+MED_SLOTS[_nx.slot][1]};if(_ds.length)return{c:"g",t:"Today\u0027s doses given"};}
   var _nv=(st.medical||{}).nextVetDate;if(_nv&&_nv<=new Date().toISOString().slice(0,10))return{c:"a",t:(_nv===new Date().toISOString().slice(0,10)?"Vet appointment today":"Vet appointment overdue")+((st.medical||{}).nextVetReason?" \u00b7 "+(st.medical||{}).nextVetReason:"")};
   if(inc("vaccs"))return{c:"a",t:"Vaccine due"};
   if(recIsPup(r)&&!(st.foster||{}).out){
@@ -1738,7 +1856,7 @@ function openDogTab(id,tab){openDog(id);S.tab=tab||"dog";render();window.scrollT
 function todayItems(activeRecords){
   var cats=computeDueToday(activeRecords,true);var items=[];
   var push=function(r,pri,cls,icon,job,sub,tab){icon="";var d=r.state&&r.state.dog?r.state.dog:{};items.push({pri:pri,cls:cls,icon:icon,id:r.id,name:r.name||d.name||"\u2014",k:kennelShort(d.kennel),job:job,sub:sub,tab:tab});};
-  cats.meds.forEach(function(r){push(r,1,"r","","on medication","give today\u0027s dose \u00b7 log it on Medical","medical");});
+  cats.meds.forEach(function(r){push(r,1,"r","","on medication","give today\u0027s dose \u00b7 tick it on the Medication round","medical");});
   activeRecords.forEach(function(r){var inc=((r.state||{}).incidents)||[];inc.forEach(function(x){if(x&&x.date&&daysSince(x.date)<=1)push(r,1,"a","","incident \u00b7 "+(x.type||"logged").toLowerCase()+(daysSince(x.date)===0?" today":" yesterday"),(x.desc||x.text||"see the Notes tab").slice(0,80),"notes");});});
   if(currentRole()==="admin"||currentRole()==="manager"){var lb="";try{lb=localStorage.getItem("nspca-last-backup")||"";}catch(e){}var dsb=lb?daysSince(lb):null;if(dsb===null||dsb>=14)items.push({id:0,name:"Unit",pri:5,cls:"q",c:"q",job:dsb===null?"no backup on this device yet":"no backup for "+dsb+" days",sub:"Menu \u2192 Download backup \u2014 a minute, once a fortnight",tab:"",go:""});}
   activeRecords.forEach(function(r){var ar=(r.state||{}).arrival||{};if(ar.vetToday==="Today"&&(!((r.state||{}).medical||{}).vetVisits||[]).length)push(r,1,"a","","needs the vet today \u2014 flagged on arrival",ar.obvious||"see Arrival","medical");});
@@ -1851,6 +1969,8 @@ function setScoredDate(v){
   S.assessment.scoredDate=v||"";
   debouncedSave();renderMain();
 }
+// Scores record themselves: the first save of a changed score each day adds an entry; later changes that day update it.
+function autoScoreHistory(total){if(!total)return;var h=S.scoreHistory=S.scoreHistory||[];var last=h[h.length-1];var sig=JSON.stringify(S.scores||{});if(last&&JSON.stringify(last.scores||{})===sig)return;var now=new Date();var td=now.toISOString().slice(0,10);var e={date:td,time:now.toTimeString().slice(0,5),scores:JSON.parse(sig),notes:JSON.parse(JSON.stringify(S.scoreNotes||{})),total:total,light:(effLight(total,S.scores)||{}).l||"",by:currentName()};if(last&&last.date===td&&last.by===e.by&&last.auto)h[h.length-1]=Object.assign(e,{auto:true});else h.push(Object.assign(e,{auto:true}));}
 function scoreSnapshot(){
   var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
   if(!total){appAlert("Score at least one category before saving a snapshot.");return;}
@@ -2193,7 +2313,7 @@ function renderDashboard(){
   var overdueDogs=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return (!o||o==="Active — in isolation"||o==="Active - in isolation")&&daysInIsolation(r.intakeDate)>5+isoExtraDays(r.state&&r.state.dog);});
   var stickyEl=document.getElementById("overdue-sticky");
   if(stickyEl)stickyEl.innerHTML=alertsRailHtml();
-  if(!active.length){el.innerHTML=offlineBannerHtml()+catchupHtml()+statusStrip+fb+renderIncomingStrip()+'<div style="text-align:center;padding:40px"><div style="font-size:40px"></div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+brandFooterHtml();return;}
+  if(!active.length){el.innerHTML=offlineBannerHtml()+statusStrip+fb+renderIncomingStrip()+'<div style="text-align:center;padding:40px"><div style="font-size:40px"></div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+brandFooterHtml();return;}
 
   var _cats=computeDueToday(active,true);
   var cards=active.map(function(rec){
@@ -2255,7 +2375,7 @@ function renderDashboard(){
   var viewBody='<div class="dcardgrid">'+cards+'</div>';
   window._vitalsHtml='<div class="mnums"><div><b>'+_v.inunit+'</b><span>in unit</span></div><div><b class="'+(_v.con?"r":"")+'">'+_v.con+'</b><span>contagious</span></div><div><b class="'+(_v.ready?"g":"")+'">'+_v.ready+'</b><span>ready to go</span></div><div><b class="'+(_v.fin?"a":"")+'">'+_v.fin+'</b><span>finishing this week</span></div><div><b>'+_v.fost+'</b><span>in foster</span></div><div><b>'+_v.empty+'</b><span>empty kennels</span></div></div>';
   var mainCol=(window._morningOff?vitals:'')+statusStrip+renderIncomingStrip();
-  el.innerHTML=offlineBannerHtml()+morningHtml(active)+catchupHtml()+mainCol+viewBody+brandFooterHtml()+kbHintHtml();
+  el.innerHTML=offlineBannerHtml()+morningHtml(active)+handoverBoardHtml()+mainCol+viewBody+brandFooterHtml();
   var hs=document.getElementById("dash-hsearch");if(hs&&hs.value!==_s&&window._dbSearchActive!=="h")hs.value=_s;
   if(window._dbSearchActive){var si=hs;if(si){si.focus();var l=(window._dbCaret!=null?window._dbCaret:si.value.length);si.setSelectionRange(l,l);}window._dbSearchActive=false;window._dbCaret=null;}
 }
@@ -2297,6 +2417,7 @@ function storyEvents(){
   if(S.rehome&&S.rehome.webUrl&&(S.rehome.webUrlDate))push(S.rehome.webUrlDate,"key","","Website profile linked",S.rehome.webUrl,"rehome");
   var a4=S.assessment||{};if(a4.assessorReport&&a4.assessorReportDate)push(a4.assessorReportDate,"key","","Assessor\u0027s report written",(a4.assessorReportBy?"by "+a4.assessorReportBy+" \u00b7 ":"")+String(a4.assessorReport).slice(0,120)+(a4.assessorReport.length>120?"\u2026":""),"rehoming");
   var rh=S.rehome||{},fo=S.foster||{};
+  ((m.doseLog)||[]).forEach(function(x){var nm=String(x.key||"").split("|")[0];push(x.date,"med","","Dose given \u2014 "+nm,[(MED_SLOTS[x.slot]||["",""])[0].toLowerCase(),x.by?"by "+x.by:""].filter(Boolean).join(" \u00b7 "),"medical",x.time);});
   (rh.log||[]).forEach(function(e){push(e.date,"key","",(/^Stage:/.test(e.text||"")?e.text.replace(/^Stage:\s*/,"Rehoming \u2014 "):("Rehoming \u2014 "+(e.text||""))),e.by?("by "+e.by):"","rehome",e.time);});
   if(rh.adoptedDate)push(rh.adoptedDate,"key","","Adopted"+(rh.adopterName?" by "+rh.adopterName:"")+(rh.trial?" (trial"+(rh.trialEnds?" to "+fmtDMY(rh.trialEnds):"")+")":""),[rh.source?("Source: "+rh.source):"",rh.fee?("Fee "+rh.fee):""].filter(Boolean).join(" \u00b7 "),"rehome");
   if(rh.returnDate)push(rh.returnDate,"key","","Returned from adoption"+(rh.returnCategory?" \u2014 "+rh.returnCategory:""),[rh.returnedBy?("by "+rh.returnedBy):"",rh.returnReason||""].filter(Boolean).join(" \u00b7 "),"rehome");
@@ -3744,6 +3865,7 @@ function renderMedical(){
   // 3 what's wrong now
   var wrows='';_actCond.forEach(function(p,i2){var idx=(m.diseases||[]).indexOf(p);wrows+=row("n","disease",e(p.type||""),"since "+e(p.date?fmtDMY(p.date):"?")+(CONTAGIOUS_DISEASES[p.type]?" \u00b7 contagious":"")+(p.treatment?" \u00b7 "+e(p.treatment):""),'<span onclick="editMedEntry(\'diseases\','+idx+')">Edit</span>')+'<div class="cq" style="padding-top:0"><label>Status</label><div class="cchips">'+["Suspected","Confirmed","Recovering","Cleared"].map(function(o){return '<span class="cchip'+(p.status===o?" on":"")+'" onclick="setDiseaseStatus('+idx+',\''+o+'\')">'+o+'</span>';}).join("")+'</div></div>';});
   _actMeds.forEach(function(x){var idx=(m.medications||[]).indexOf(x);var dayN=x.startDate?Math.round((new Date(today)-new Date(x.startDate))/864e5)+1:null;var tot=(x.startDate&&x.endDate)?Math.round((new Date(x.endDate)-new Date(x.startDate))/864e5)+1:null;wrows+=row("b","med",e([x.name,x.dose,x.frequency].filter(Boolean).join(" \u00b7 ")),(dayN&&tot?"day "+dayN+" of "+tot+" \u00b7 to "+e(fmtDMY(x.endDate)):x.endDate?"to "+e(fmtDMY(x.endDate)):"ongoing")+(x.notes?" \u00b7 "+e(x.notes):""),'<span onclick="toggleMedActive('+idx+')">Stop</span>');});
+  wrows+=medTodayHtml();
   wrows+='<div class="madd"><span class="p" onclick="showMedOverlay(\'dis\')">+ Disease</span><span onclick="showMedOverlay(\'med\')">+ Medication</span></div>';
   h+=sec(3,"What\u0027s wrong now",(_actCond.length||_actMeds.length)?e(_actCond.map(function(p){return diseaseShortName(p.type)+" "+(p.status||"").toLowerCase();}).concat(_actMeds.map(function(x){var dayN=x.startDate?Math.round((new Date(today)-new Date(x.startDate))/864e5)+1:null;var tot=(x.startDate&&x.endDate)?Math.round((new Date(x.endDate)-new Date(x.startDate))/864e5)+1:null;return x.name+(dayN&&tot?" day "+dayN+" of "+tot:"");})).join(" \u00b7 ")):"Nothing active",_actCond.length?"bad":_actMeds.length?"warn":"",wrows,_actCond.length||_actMeds.length);
   // 4 the vet
@@ -5163,7 +5285,7 @@ function page(){
     var stick='<div class="astrip sstrip"><div class="slt" style="background:'+(tl?tl.dot:"#454857")+';color:'+(tl&&tl.l==="Yellow"?"#422006":"#fff")+'">'+(tl?tl.l.toUpperCase():"NOT SCORED")+'<small>'+total+' / 24</small></div><div class="stx">'+_sent+trend+'</div><div class="ar">'+(_lastSnap?'Scored<b>'+esc(_lastSnap.by||S.dog.assessor||"")+' \u00b7 '+esc(fmtDMY(_lastSnap.date))+'</b>':'Scored<b>not saved yet</b>')+'</div></div>';
     var moreOpen=!!window._scMore;
     var floorBox='<div class="sfloor">The floor rule: a <b>3 or 4</b> in a floor-flagged category (the ones marked in Detail) holds the light at Yellow or above, whatever the total says.'+(_floored?' '+esc(S.dog.name||"This dog")+' has one \u2014 <b>'+esc(tl.floorCat)+'</b>. Re-test it on the Assessment to lift it.':' Nothing is holding this score.')+'</div>';
-    var hist2=(S.scoreHistory||[]);var histRow='<div class="card" style="margin-top:12px"><div class="lbl" style="margin-bottom:8px">Every score, in order</div><div class="shist">'+(hist2.length?hist2.slice(-5).map(function(e,i2){var v=parseInt(e.total)||0;var l2=tlc(v);return '<div><b>'+v+' \u00b7 '+esc(l2?l2.l:"")+'</b><small>'+esc(fmtDMY(e.date))+(e.by?' \u00b7 '+esc(e.by):'')+(i2===0&&hist2.length<=5?' \u00b7 first score':'')+'</small></div>';}).join(""):'')+'<div class="next"><b>?</b><small>'+(_unscored.length?'next \u2014 when '+esc(_unscored[0])+' is scored':'next review')+'</small></div></div>'+scoreHistoryCardHtml().replace(/<div class="lbl"[^>]*>[^<]*<\/div>/,"")+'</div>';
+    var hist2=(S.scoreHistory||[]);var histRow='<div class="card" style="margin-top:12px"><div class="lbl" style="margin-bottom:8px">Every score, in order</div><div class="shist">'+(hist2.length?hist2.slice(-5).map(function(e,i2){var v=parseInt(e.total)||0;var l2=tlc(v);return '<div><b>'+v+' \u00b7 '+esc(l2?l2.l:"")+'</b><small>'+esc(fmtDMY(e.date))+(e.by?' \u00b7 '+esc(e.by):'')+(i2===0&&hist2.length<=5?' \u00b7 first score':'')+'</small></div>';}).join(""):'')+'<div class="next"><b>?</b><small>'+(_unscored.length?'next \u2014 when '+esc(_unscored[0])+' is scored':'next review')+'</small></div></div>'+'</div>';
     var more='<div class="sc-det-h" style="margin:12px 0 10px" onclick="window._scMore=!window._scMore;renderMain()"><span>Meter, flags and the EA check</span><span class="med-chev" style="transform:rotate('+(moreOpen?'90':'0')+'deg)">&#8250;</span></div>'+(moreOpen?resultPanel+flagHtml+eaBlock:'');
     cats=cats.replace('<div class="sc-label">Categories</div>','');
     return '<h2>Scoring</h2><div class="sub">Six categories, one to four each. Tap the band that fits; the evidence from the Assessment sits under it so the number rests on something.</div>'+stick+staleBanner+cats+floorBox+handleAsHtml()+histRow+more+'<div class="sc-label">Cross-check</div>'+secondAssessorCardHtml()+browNav("scoring");
@@ -6119,6 +6241,7 @@ async function saveRecord(){if(S&&S._id){try{delete _histCache[S._id];}catch(e){
   var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
   var tl=(handlingLight(total,S.scores)||{}).l||"";
   var st=JSON.parse(JSON.stringify(S));delete st._id;st._savedBy=currentName();
+  try{autoScoreHistory(total);st.scoreHistory=JSON.parse(JSON.stringify(S.scoreHistory||[]));}catch(_e){}
   var row={name:S.dog.name,breed:S.dog.breed||"",ref_no:S.dog.refNo||"",intake_date:S.dog.intakeDate||null,assessor:S.dog.assessor||"",score:total,traffic_light:tl,saved_at:new Date().toISOString(),data:st};
   try{
     if(S._id){
