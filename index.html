@@ -664,8 +664,9 @@ var USERS=[
   {code:"SAR01",name:"Sarah",role:"manager"},
   {code:"CIA01",name:"Ciara",role:"supervisor"},
   {code:"LAU01",name:"Laura",role:"coordinator"},
-  {code:"KAT01",name:"Kate",role:"trainer"},
   {code:"NSPCA2024",name:"Staff",role:"staff"},
+  {code:"CAT01",name:"Cattery",role:"staff"},
+  {code:"CISO01",name:"Cat Iso",role:"staff"},
   {code:"ISO01",name:"Isolation",role:"staff"}
 ];
 var CURRENT_USER=null;
@@ -4954,7 +4955,7 @@ function page(){
     var _st=_ps?starRow(_ps):null;var _heroSrc=(_st&&_st.data)||d.photo;var _heroLoading=!(_st&&_st.data)&&!!d.photo&&_ps===null&&!!supabaseClient;
     var hero='<div class="dhero'+(_heroLoading?' loading':'')+'"'+(_heroSrc?' style="background-image:url('+blobSrc(_heroSrc)+');background-position:'+esc(d.photoPos||"50% 50%")+'"':' data-nophoto="1"')+'>'
       +'<div class="top">'+(_kn&&_kn!=="\u2014"?'<span class="k">'+esc(_kn)+'</span>':'<span class="k" style="background:#fff;color:#6b7280">no kennel</span>')+(dayTxt?'<span>'+esc(dayTxt)+'</span>':'')+'</div>'
-      +'<div class="nm"><h1>'+esc(d.name||"Unnamed dog")+'</h1><div class="who">'+esc(who)+'</div><div class="words">'+(words.length?words.map(function(w){return '<span>'+esc(w)+'</span>';}).join(""):'<span class="add" onclick="document.getElementById(\'three-words\').focus()">+ three words</span>')+'</div></div>'
+      +'<div class="nm"><h1>'+esc(d.name||"Unnamed dog")+'</h1><div class="who">'+esc(who)+'</div></div>'
       +'<div class="ph"><label>'+(d.photo?'Change photo':'Add photo')+'<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>'+(d.photo?'<span onclick="showRepositionPhoto()">Reposition</span><span onclick="removePhoto()" style="color:#991b1b">Remove</span>':'')+'</div></div>';
     var rh=S.rehome||{};var clr=(S.assessment||{}).rehomingStatus||"";var stage=rh.stage||"";
     var strip='<div class="dstrip">'
@@ -4976,7 +4977,7 @@ function page(){
       +fld("Microchip no."+(d.microchip?' <a href="#" class="today-link" onclick="try{navigator.clipboard.writeText(\''+esc(d.microchip)+'\');miniToast(\'Chip copied\');}catch(e){}return false">copy</a>':""),d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')
       +fld("Unit ref",d.refNo,"dog.refNo","text","e.g. 023-MH-2026")
       +'</div><div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">There&rsquo;s already an active dog with this name.</div><div id="chip-info" style="margin:0 0 4px;font-size:11px">'+chipInfoHtml(d.microchip)+'</div>'
-      +'<div class="f" style="margin-top:6px"><label class="lbl">In three words <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 on every card</span></label><input id="three-words" type="text" value="'+esc(d.threeWords||"")+'" placeholder="e.g. Gentle \u00b7 Slow to trust \u00b7 Loves the hose" data-save="dog.threeWords"></div>';
+      +'';
     var srcOpts=[["NSPCA Inspector","Inspector"],["Owner","Owner"],["Dog warden","Dog warden"],["Member of the public","Public"],["Garda","Garda"],["Transfer","Transfer"],["Return","Return"],["Foster","Foster"],["Other","Other"]];
     var camein=''
       +'<div class="cchips" style="margin-bottom:10px">'+srcOpts.map(function(o){return '<span class="cchip'+(d.broughtInBy===o[0]?" on":"")+'" onclick="setDogVal(\'broughtInBy\',\''+o[0]+'\')">'+o[1]+'</span>';}).join("")+'</div>'
