@@ -202,6 +202,12 @@ nav::-webkit-scrollbar{display:none}
 .tgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.tt{border:1.5px solid #e4e7e0;border-radius:11px;padding:10px 12px;background:#fff;cursor:pointer}.tt b{display:block;font-size:13px;font-weight:800}.tt small{display:block;font-size:11px;color:#6b7280;font-weight:600;margin-top:2px}.tt.on{background:#f0fdf4;border-color:#86efac}.tt.on b{color:#166534}.tt.pick{border-color:#282932}
 .dpill{position:relative}.dpill .pd{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%}.dpill .ps{position:absolute;bottom:4px;right:6px;font-size:9px;font-weight:900;color:#6b7280}.dpill.on .ps{color:#c6e76c}
 @media(max-width:520px){.sgrid,.tgrid{grid-template-columns:1fr}}
+.ctbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}.ctbl th{text-align:left;font-size:10px;font-weight:800;color:#6f7466;text-transform:uppercase;letter-spacing:.08em;padding:5px 6px;border-bottom:1px solid #e4e7e0}.ctbl td{padding:6px;border-bottom:1px solid #eef0ea;font-weight:600}.ctbl tr:last-child td{border-bottom:0}
+.must{display:inline-block;background:#c6e76c;color:#282932;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:1px 6px;border-radius:6px;vertical-align:1px;margin-left:4px}
+.mustleg{font-size:11.5px;color:#6b7280;font-weight:600;margin:-4px 0 10px}
+.crcard .crrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 0;border-top:1px solid #eef0ea}.crcard .crrow.done{opacity:.7}
+.crn{min-width:110px;cursor:pointer}.crn b{display:block;font-size:13px;font-weight:800}.crn small{font-size:11px;color:#6b7280;font-weight:700}
+.crc{display:flex;gap:4px;align-items:center;flex-wrap:wrap}.crc i{font-style:normal;font-size:10px;font-weight:800;color:#6f7466;text-transform:uppercase;letter-spacing:.08em;margin-right:2px}.crc .cchip{padding:5px 10px;font-size:11.5px}.cchip.on.bad{background:#991b1b;border-color:#991b1b;color:#fff}
 .only-wide{display:none}
 @media(min-width:960px){.only-wide{display:block}.hide-wide{display:none}}
 .sidepanel{display:flex;flex-direction:column;gap:10px}
@@ -690,7 +696,6 @@ var USERS=[
   {code:"SAR01",name:"Sarah",role:"manager"},
   {code:"CIA01",name:"Ciara",role:"supervisor"},
   {code:"LAU01",name:"Laura",role:"coordinator"},
-  {code:"KAT01",name:"Kate",role:"trainer"},
   {code:"NSPCA2024",name:"Staff",role:"staff"},
   {code:"ISO01",name:"Isolation",role:"staff"}
 ];
@@ -874,7 +879,7 @@ window.addEventListener("focus",bumpActivity);
 function initials(n){var p=(n||"").trim().split(/\s+/);return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():(n||"?").slice(0,2).toUpperCase();}
 function avatarColor(n){var c=["#0d9488","#7c3aed","#dc2626","#d97706","#2563eb","#16a34a","#db2777"];var h=0;for(var i=0;i<(n||"").length;i++)h=(h*31+n.charCodeAt(i))&0xfffffff;return c[h%c.length];}
 function esc(s){return(s===null||s===undefined?"":""+s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
-var _persistT=null;function persistSave(){if(_persistT)return;_persistT=setTimeout(function(){_persistT=null;try{localStorage.setItem("nspca-cats-current",JSON.stringify(S));}catch(e){}},250);}
+var _persistT=null;function dogPersistSave(){if(_persistT)return;_persistT=setTimeout(function(){_persistT=null;try{localStorage.setItem("nspca-cats-current",JSON.stringify(S));}catch(e){}},250);}
 window.addEventListener("pagehide",function(){persistNow();});
 function persistNow(){if(_persistT){clearTimeout(_persistT);_persistT=null;}try{localStorage.setItem("nspca-cats-current",JSON.stringify(S));}catch(e){}}
 // ── Unsaved-changes safety net ──────────────────────────────────
@@ -3447,7 +3452,7 @@ function dogRenderMedical(){
   var _lw=latestWeight();
   bCur+='<div class="f"><label class="lbl">Latest weight</label><div style="border:1px solid #e4e7e0;border-radius:8px;padding:8px 10px;font-size:12.5px;color:'+(_lw?"#282932":"#9a9fa8")+';background:#f8f9f6">'+(_lw?esc(_lw.weight||"")+' &middot; '+fmtDMY(_lw.date):"No weight logged \u2014 add on the Weights tab")+'</div></div>';
   bCur+='</div>';
-  bCur+=ta("Current condition note",m.currentNote||"","medical.currentNote","How is the dog right now? e.g. settled, eating well, wound healing, energy good...");
+  bCur+=ta("Current condition note",m.currentNote||"","medical.currentNote","How is the cat right now? e.g. settled, eating well, wound healing, energy good...");
   // Auto-assembled live picture (read-only)
   var _actCond=(m.diseases||[]).filter(function(p){return p.status!=="Recovered / cleared";});
   var _actMeds=(m.medications||[]).filter(function(x){return x.active!==false&&(!x.endDate||x.endDate>=today);});
@@ -3501,7 +3506,7 @@ function dogRenderMedical(){
     });
   }else{bDis+='<div style="text-align:center;padding:12px 0;color:#9a9fa8;font-size:12px">No diseases or infections recorded on arrival</div>';}
   // Vaccinations (logic unchanged)
-  var VAC_FIXED=["1st RCP","2nd RCP","FeLV vaccine","Booster"];
+  var VAC_FIXED=catVaxFixed(S);
   var vacList=m.vaccinations||[];
   function vaxStatus(vt){
     var match=vacList.slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");}).find(function(v){return v.type===vt;});
@@ -3746,7 +3751,7 @@ function dogRenderMedical(){
   h='<h2>Medical</h2><div class="sub">Six sections in the order you\u0027d ask a vet: jabs, worms and fleas, what\u0027s wrong now, the vet, the body, the history. Anything due is one tap to log.</div>';
   h+=tabStrip(lt[0],lt[1],lt[2],bits.filter(Boolean).join(" "),"Vet",e(unitSetting("vetPractice")||"\u2014"));
   window._medSec=window._medSec||{};
-  var sec=function(n,title,summary,state,body,forceOpen){var id="m"+n;var _nn=n+(window._medOff||0);var open=(window._medSec[id]!==undefined)?window._medSec[id]:!!forceOpen;return '<div class="asec msec '+state+(open?" open":"")+'"><div class="ash" onclick="window._medSec[\''+id+'\']=!'+(open?'true':'false')+';renderMain()"><span class="anum">'+_nn+'</span><div class="ast"><b>'+title+'</b><small>'+summary+'</small></div><span class="acnt"></span></div>'+(open?'<div class="abody">'+body+'</div>':'')+'</div>';};
+  var sec=function(n,title,summary,state,body,forceOpen){var id="m"+n;var _nn=window._medNum?window._medNum(n):n;var open=(window._medSec[id]!==undefined)?window._medSec[id]:!!forceOpen;return '<div class="asec msec '+state+(open?" open":"")+'"><div class="ash" onclick="window._medSec[\''+id+'\']=!'+(open?'true':'false')+';renderMain()"><span class="anum">'+_nn+'</span><div class="ast"><b>'+title+'</b><small>'+summary+'</small></div><span class="acnt"></span></div>'+(open?'<div class="abody">'+body+'</div>':'')+'</div>';};
   var row=function(tone,tag,t,s2,act){return '<div class="mrow '+tone+'"><span class="k">'+tag+'</span><div class="t"><b>'+t+'</b>'+(s2?'<small>'+s2+'</small>':'')+'</div>'+(act?'<span class="act">'+act+'</span>':'')+'</div>';};
   // 1 vaccinations
   var vrows='';var vSum=[];
@@ -3758,7 +3763,7 @@ function dogRenderMedical(){
   vrows+='<div class="madd"><span onclick="showMedOverlay(\'vac\')">+ Other vaccine</span><span onclick="filePick(\'vax\')">'+(vaxCard?'Vax card on Files \u2713':'+ Vax card \u2192 Files')+'</span></div>';
   h+=sec(1,"Vaccinations",e(vSum.join(" \u00b7 "))+(_vnext?" \u00b7 next "+e(_vnext.type.toLowerCase())+" "+e(String(fmtDue(_vnext.due)).replace(/&middot;/g,"\u00b7")):""),_vroll.overdue?"bad":_vroll.upcoming?"warn":_vroll.done>=2?"done":"",vrows,_vroll.overdue||_vroll.upcoming||!_vroll.done);
   // 2 parasites
-  var byType={};(m.parasiteTreatments||[]).forEach(function(p){var key=/worm|milpro|milbemax|drontal|panacur|parazole/i.test(p.type||p.product||"")?"Wormer":/flea|tick|bravecto|nexgard|frontline|seresto|advocate|stronghold/i.test(p.type||p.product||"")?"Flea & tick":"Other";if(!byType[key]||(p.date||"")>(byType[key].date||""))byType[key]=p;});
+  var byType={};(m.parasiteTreatments||[]).forEach(function(p){var _pt=p.type||p.product||"";var _ks=[];if(/worm|milpro|milbemax|drontal|panacur|parazole/i.test(_pt))_ks.push("Wormer");if(/flea|tick|bravecto|nexgard|frontline|seresto|advocate|stronghold|broadline/i.test(_pt))_ks.push("Flea & tick");if(!_ks.length)_ks.push("Other");_ks.forEach(function(key){if(!byType[key]||(p.date||"")>(byType[key].date||""))byType[key]=p;});});
   var prows='';var pSum=[];["Wormer","Flea & tick","Other"].forEach(function(key){var p=byType[key];if(!p&&key==="Other")return;var over=p&&p.nextDue&&p.nextDue<today;var soon=p&&p.nextDue&&!over&&p.nextDue<=addDaysStr(today,14);var name=p?String(p.type||p.product||"").split(" \u2014 ")[0]:"";
     prows+=row(over?"n":soon?"a":p?"g":"",over?"overdue":soon?"due":p?"ok":"none",e(key)+(name?" \u00b7 "+e(name):""),p?("last "+e(fmtDMY(p.date))+(p.nextDue?(over?" \u00b7 was due ":" \u00b7 next ")+e(fmtDMY(p.nextDue)):"")):"never logged",(!p||over||soon)?'<span onclick="showMedOverlay(\'para\')">Given today</span>':'');
     pSum.push(key.toLowerCase()+" "+(over?"overdue "+daysSince(p.nextDue)+" d":soon?"due":p?(p.nextDue?"to "+fmtDMY(p.nextDue):"\u2713"):"none"));});
@@ -3778,7 +3783,7 @@ function dogRenderMedical(){
   h+=sec(4,"The vet",(m.nextVetDate?"next "+(m.nextVetDate<today?"was due ":"")+e(fmtDMY(m.nextVetDate))+(m.nextVetReason?" \u00b7 "+e(m.nextVetReason):""):"nothing booked")+(vets.length?" \u00b7 last seen "+e(fmtDMY(vets[0].date)):" \u00b7 never seen"),m.nextVetDate&&m.nextVetDate<=today?"warn":vets.length?"done":"",vbody,m.nextVetDate&&m.nextVetDate<=addDaysStr(today,3));
   // 5 the body
   var bodySum=[_wlast?e(_wlast.weight):"",m.bcs?"BCS "+e(String(m.bcs).charAt(0)):"",_wd?(_wd<0?"losing "+Math.abs(_wd).toFixed(1):"up "+_wd.toFixed(1)):"",_neut.toLowerCase()+(m.neuterDate?" "+e(fmtDMY(m.neuterDate)):""),m.dental?"teeth "+e(String(m.dental).toLowerCase().split(" ")[0]):"",m.skinCondition?"skin "+e(String(m.skinCondition).toLowerCase().split(" ")[0]):""].filter(Boolean).join(" \u00b7 ");
-  var bbody='<div class="mblk"><div class="lbl">Current health</div>'+bCur.replace(/<div style="margin-top:6px;border-top:[^"]*">[\s\S]*$/,"")+'</div>'+'<div class="mblk"><div class="lbl">On arrival</div>'+bArr+'</div><div class="mblk"><div class="lbl">Neuter / spay</div>'+bNeu+'</div><div class="mblk"><div class="lbl">Dental</div>'+bDen+'</div>';
+  var bbody='<div class="mblk"><div class="lbl">Current health</div>'+bCur.replace(/<div style="margin-top:6px;border-top:[^"]*">[\s\S]*$/,"")+'</div>'+catBodyPointers();
   h+=sec(5,"The body",bodySum||"Weight, condition, neuter, teeth, skin",_wd<-0.2?"warn":"",bbody);
   // 6 history
   var ev=[];var e2=esc;
@@ -6333,7 +6338,7 @@ var FLU_SIGNS=["Sneezing","Eye discharge","Nose discharge","Mouth ulcers","Off f
 function catDays(st){return (st.days||[]).filter(function(x){return x&&x.date;}).slice().sort(function(a,b){return a.date.localeCompare(b.date);});}
 function fluSuspect(st){var ds=catDays(st);var td=new Date().toISOString().slice(0,10),yd=addDaysStr(td,-1);var last=ds.filter(function(x){return x.date===td||x.date===yd;}).slice(-1)[0];var sg=last?(last.flu||[]).filter(function(x){return FLU_SIGNS.indexOf(x)>=0;}):[];var dt=last?last.date:"";var d0=(st.dog||{}).intakeDate||"";if(d0&&d0>=yd){var a=st.arrival||{};var ad=(a.health||[]).filter(function(x){return FLU_SIGNS.indexOf(x)>=0;});if(a.mouth==="Ulcers")ad.push("Mouth ulcers");ad.forEach(function(x){if(sg.indexOf(x)<0)sg.push(x);});if(ad.length&&!dt)dt=d0;}return sg.length>=2?{date:dt,signs:sg}:null;}
 function hoursSinceAte(st){var d=st.dog||{};var t=st.lastAte?new Date(st.lastAte).getTime():(d.intakeDate?new Date(d.intakeDate+"T09:00:00").getTime():null);if(!t||isNaN(t))return null;return Math.floor((Date.now()-t)/36e5);}
-function eatAlarm(r){if(!catIsHere(r))return null;var st=r.state||{};if((st.fin||{}).outcome==="Finished Isolation")return null;var h=hoursSinceAte(st);if(h===null||h<24)return null;return{h:h,red:h>=48};}
+function eatAlarm(r){if(!catIsHere(r))return null;var st=r.state||{};if((st.fin||{}).outcome==="Finished Isolation")return crAlarm(st);var h=hoursSinceAte(st);if(h===null||h<24)return null;return{h:h,red:h>=48};}
 function lastStress(st){var ds=catDays(st).filter(function(x){return x.stress;});return ds.length?parseInt(ds[ds.length-1].stress,10):null;}
 
 // ── Kitten weight gain: 50–100 g a week ────────────────────────────
@@ -6345,7 +6350,7 @@ var TEMPER_WORDS={"Social · confident":["Social","#dcfce7","#166534"],"Shy but 
 function temperOf(st){var t=(st.temper||{}).overall||"";return TEMPER_WORDS[t]||null;}
 
 // ── Home type: indoor unless FIV-negative and FeLV-vaccinated ──────
-function homeTypeOf(st){var m=st.medical||{};var d=st.dog||{};if(d.homeOverride)return{t:d.homeOverride,why:"set by hand",auto:false};if(m.fiv==="Positive")return{t:"Indoor only",why:"FIV positive",auto:true};var felvVax=(m.vaccinations||[]).some(function(v){return v.date&&/FeLV/i.test(v.type||"");});if(!felvVax)return{t:"Indoor only",why:"no FeLV vaccine yet",auto:true};return{t:"Indoor or outdoor",why:"FIV negative · FeLV vaccinated",auto:true};}
+function homeTypeOf(st){var m=st.medical||{};var d=st.dog||{};if(d.homeOverride)return{t:d.homeOverride,why:"set by hand",auto:false};var wk=catAgeWeeks(d);if(m.fiv==="Positive")return{t:"Indoor only",why:"FIV positive"+(wk!==null&&wk<26?" \u2014 retest at 6 months":""),auto:true};var fl=(m.vaccinations||[]).filter(function(v){return v.date&&/FeLV/i.test(v.type||"");}).length;var hd=(typeof headingOf==="function")?headingOf(st):"";if(/barn|TNR/i.test(hd)||(st.temper||{}).bestHome==="Barn / outdoor home")return{t:"Outdoor / barn",why:fl>=2?"FeLV vaccinated":"FeLV vaccine \u00d72 before going out",auto:true};return{t:"Indoor or outdoor",why:fl>=2?"FeLV vaccinated":"FeLV vaccine \u00d72 before "+(String(d.sex||"").indexOf("Female")===0?"she goes":"he goes")+" outdoors",auto:true};}
 
 // ── Ringworm ───────────────────────────────────────────────────────
 function ringwormHold(st){var m=st.medical||{};var sus=m.woods==="Positive"||m.culture==="Pending"||m.culture==="Positive"||activeContagiousList(m).some(function(x){return /Ringworm/.test(x.type);});if(!sus)return null;if(m.culture==="Negative")return null;return{t:m.culture==="Positive"?"Ringworm culture positive":m.culture==="Pending"?"Ringworm culture pending":"Ringworm suspected — culture needed"};}
@@ -6360,8 +6365,8 @@ function catGate(r,noPair){var st=r.state||{};var d=st.dog||{},m=st.medical||{};
   C.push({k:"con",ok:!con.length&&!flu,t:"Nothing contagious",s:con.length?con.map(function(x){return diseaseShortName(x.type);}).join(", ")+" active":flu?"suspected cat flu — "+flu.signs.join(", ").toLowerCase():"no cat flu, no ringworm"});
   var tested=m.felv&&m.felv!=="Not tested"&&m.fiv&&m.fiv!=="Not tested";var felvPos=m.felv==="Positive";
   C.push({k:"test",ok:tested&&!felvPos,bad:felvPos,t:"FeLV / FIV tested",s:felvPos?"FeLV positive — never clears for the Cattery":tested?("FeLV "+m.felv.toLowerCase()+" · FIV "+m.fiv.toLowerCase()+(m.testDate?" · "+fmtDMY(m.testDate):"")):"not tested yet"});
-  C.push({k:"rcp",ok:rcp,t:"First RCP given",s:rcp?"given":"not given yet"});
-  C.push({k:"kit",ok:!kit||rcp,t:"Kitten rule",s:kit?(wk+" weeks — "+(rcp?"first RCP given":"needs the first RCP before moving")):(wk!==null?wk+" weeks":"adult")+" — doesn’t apply"});
+  var wait=rcpWaitOf(st);var preg=/Pregnant|Nursing/.test((st.arrival||{}).pregnant||"");C.push({k:"rcp",ok:rcp||!!wait,t:"First RCP given",s:rcp?"given":wait?"vet says wait \u2014 "+wait.toLowerCase():preg?"not given \u2014 "+(st.arrival.pregnant.split(" \u2014")[0].toLowerCase())+": ask the vet first":"not given yet"});
+  C.push({k:"kit",ok:!kit||rcp||!!wait,t:"Kitten rule",s:kit?(wk+" weeks — "+(rcp?"first RCP given":"needs the first RCP before moving")):(wk!==null?wk+" weeks":"adult")+" — doesn’t apply"});
   if(rw)C.push({k:"rw",ok:false,t:"Ringworm clear",s:rw.t});
   if(d.bondId&&!noPair){var p=records.find(function(x){return String(x.id)===String(d.bondId);});if(p){var pg=catGate(p,true);C.push({k:"pair",ok:pg.ready||pg.moved,t:"Bonded pair — "+(p.name||"partner")+" clear too",s:pg.moved?"already in the Cattery":pg.ready?"clear":pg.blocks.map(function(x){return x.t.toLowerCase();}).join(", ")});}}
   var blocks=C.filter(function(x){return !x.ok;});var moved=fin.outcome==="Finished Isolation";
@@ -6378,7 +6383,7 @@ function catMoveTo(pod){var r=curRec();var g=catGate(r);if(!g.ready){appAlert("N
     S.fin=S.fin||{};S.fin.outcome="Finished Isolation";S.fin.outcomeDate=td;S.dog.cattery=td;S.dog.qPen=from;S.dog.kennel=pod;
     S.notes=S.notes||[];S.notes.push({date:td,time:new Date().toTimeString().slice(0,5),text:"Moved to the Cattery — "+pod+(from?" (from "+kennelShort(from)+")":""),staff:currentName(),tag:"Milestone"});
     persistSave();saveRecord();
-    var pid=S.dog.bondId;if(pid){var p=records.find(function(x){return String(x.id)===String(pid);});if(p&&p.state&&(p.state.fin||{}).outcome!=="Finished Isolation"){var pst=p.state;pst.fin=pst.fin||{};pst.fin.outcome="Finished Isolation";pst.fin.outcomeDate=td;pst.dog=pst.dog||{};pst.dog.qPen=pst.dog.kennel||"";pst.dog.kennel=pod;pst.dog.cattery=td;pst.notes=pst.notes||[];pst.notes.push({date:td,time:new Date().toTimeString().slice(0,5),text:"Moved to the Cattery with "+(S.dog.name||"partner")+" — "+pod,staff:currentName(),tag:"Milestone"});try{saveRecordChange(p);}catch(e){}}}
+    var pid=S.dog.bondId;if(pid){var p=records.find(function(x){return String(x.id)===String(pid);});if(p&&p.state&&(p.state.fin||{}).outcome!=="Finished Isolation"){var pst=p.state;pst.fin=pst.fin||{};pst.fin.outcome="Finished Isolation";pst.fin.outcomeDate=td;pst.dog=pst.dog||{};pst.dog.qPen=pst.dog.kennel||"";pst.dog.kennel=pod;try{penLogSync(pst);}catch(e){}pst.dog.cattery=td;pst.notes=pst.notes||[];pst.notes.push({date:td,time:new Date().toTimeString().slice(0,5),text:"Moved to the Cattery with "+(S.dog.name||"partner")+" — "+pod,staff:currentName(),tag:"Milestone"});try{saveRecordChange(p);}catch(e){}}}
     renderMain();miniToast("Moved to "+pod);},{kind:"Move"});}
 function catBackToQ(){appConfirm("Move "+esc(S.dog.name||"this cat")+" back out of the Cattery? Use this if the move was a mistake.",function(){S.fin.outcome="";S.fin.outcomeDate="";S.dog.cattery="";if(S.dog.qPen)S.dog.kennel=S.dog.qPen;persistSave();saveRecord();renderMain();},{kind:"Undo"});}
 function freePods(){return KENNEL_SLOTS[2][1].filter(function(p){return !penOccupants(p,S._id).length;});}
@@ -6392,15 +6397,25 @@ function catPenSelect(d){var opts=[["",'-- not in a pen --']];KENNEL_SLOTS.forEa
 function bondSet(id){S.dog.bondId=id||"";persistSave();debouncedSave();var p=records.find(function(x){return String(x.id)===String(id);});if(p&&p.state&&S._id){p.state.dog=p.state.dog||{};if(String(p.state.dog.bondId||"")!==String(S._id)){p.state.dog.bondId=S._id;try{saveRecordChange(p);}catch(e){}}}renderMain();}
 function bondClear(){var pid=S.dog.bondId;S.dog.bondId="";persistSave();debouncedSave();var p=records.find(function(x){return String(x.id)===String(pid);});if(p&&p.state&&p.state.dog&&String(p.state.dog.bondId)===String(S._id)){p.state.dog.bondId="";try{saveRecordChange(p);}catch(e){}}renderMain();}
 function podSetToggle(k){S.dog.podSetup=S.dog.podSetup||{};S.dog.podSetup[k]=!S.dog.podSetup[k];persistSave();debouncedSave();renderMain();}
+var CAT_PATTERNS=[["Tabby","Tabby"],["Black","Black"],["Black & white","Black and white"],["Ginger","Ginger"],["Tortie","Tortoiseshell"],["Calico","Calico"],["Grey","Grey / blue"],["White","White"],["Colourpoint","Colourpoint"]];
+function catPattern(k,v){var d=S.dog;d.pattern=(d.pattern===v)?"":v;if(d.pattern&&!d.colour){var m=CAT_PATTERNS.find(function(x){return x[0]===v;});if(m)d.colour=m[1];}persistSave();debouncedSave();renderMain();}
+function penLogSync(st){st=st||S;var d=st&&st.dog;if(!d||!d.kennel)return;var L=d.penLog=Array.isArray(d.penLog)?d.penLog:[];var last=L[L.length-1];var td=new Date().toISOString().slice(0,10);if(!last){L.push({pen:d.kennel,from:d.intakeDate||td,by:d.assessor||currentName()});return;}if(last.pen!==d.kennel)L.push({pen:d.kennel,from:td,by:currentName()});}
+function persistSave(){try{penLogSync();}catch(e){}return dogPersistSave.apply(this,arguments);}
+function penHistoryHtml(d){var L=d.penLog||[];if(!L.length)return '<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:6px">Pen history starts with the first pen picked.</div>';var e=esc;
+  var rows=L.map(function(x,i){var nx=L[i+1];return '<tr><td>'+e(kennelShort(x.pen)||x.pen)+'</td><td>'+e(fmtDMY(x.from).slice(0,5))+'</td><td>'+(nx?e(fmtDMY(nx.from).slice(0,5)):'\u2014 now')+'</td><td>'+e(x.by||"")+'</td></tr>';}).join("");
+  var cur=L[L.length-1];var days=cur&&cur.from?Math.max(0,Math.round((new Date(new Date().toISOString().slice(0,10))-new Date(cur.from))/864e5)):null;
+  return '<div class="lbl" style="margin-top:10px">Pen history</div><table class="ctbl"><tr><th>Pen</th><th>From</th><th>To</th><th>Moved by</th></tr>'+rows+'</table><div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:4px">Writes itself every time the pen changes.'+(days!==null?' '+days+' day'+(days===1?'':'s')+' in '+e(kennelShort(cur.pen)||cur.pen)+'.':'')+'</div>';}
+var CHIP_TO=["Nobody","A previous owner","NSPCA","The adopter"],CHIP_XFER=["Not needed yet","To NSPCA \u2014 done","To the adopter \u2014 done"];
+function chipXferDue(r){var st=r.state||{};var d=st.dog||{};var f=st.fin||{};var rh=st.rehome||{};if(!d.microchip)return false;var adopted=f.outcome==="Rehomed"||rh.stage==="Adopted";if(!adopted)return false;if(d.chipTransfer==="To the adopter \u2014 done")return false;var od=f.outcomeDate||rh.adoptedDate||"";return !od||od>=addDaysStr(new Date().toISOString().slice(0,10),-60);}
 var POD_SETUP=[["hide","Hide box"],["feliway","Feliway"],["perch","Perch / shelf"],["scratch","Scratch post"],["bedding","Bedding from home"]];
 function renderCatTab(){var d=S.dog,f=S.fin||{};var e=esc;var r=curRec();var g=catGate(r);var ii=g.ii;
   var who=[d.breed,d.sex,(d.age||"").replace(/\s*\(.*\)/,""),d.colour].filter(Boolean).join(" \u00b7 ");
   var dayTxt=g.moved?"In the Cattery"+(d.cattery?" since "+fmtDMY(d.cattery).slice(0,5):""):ii?(ii.state==="done"||ii.state==="final"?"Quarantine served":ii.day<=0?"Arrived today":(penArea(d.kennel)==="iso"?"Isolation":"Quarantine")+" \u00b7 day "+ii.day+" of "+g.qDays):"";
-  var words=String(d.threeWords||"").split(/[\u00b7,;]+/).map(function(w){return w.trim();}).filter(Boolean);var _kn=kennelShort(d.kennel||"");
+  var _kn=kennelShort(d.kennel||"");
   var _ps=photosFor();if(_ps===null&&d.photo&&S._id&&supabaseClient&&window._heroLoading!==S._id){window._heroLoading=S._id;var _hid=S._id;loadDogPhotos(_hid).then(function(){if(window._heroLoading===_hid)window._heroLoading=null;if(S&&S._id===_hid&&S.tab==="dog")renderMain();},function(){window._heroLoading=null;});}
   var _st=_ps?starRow(_ps):null;var _heroSrc=(_st&&_st.data)||d.photo;
   var hero='<div class="dhero"'+(_heroSrc?' style="background-image:url('+blobSrc(_heroSrc)+');background-position:'+e(d.photoPos||"50% 50%")+'"':' data-nophoto="1"')+'><div class="top">'+(_kn?'<span class="k">'+e(_kn)+'</span>':'<span class="k" style="background:#fff;color:#6b7280">no pen</span>')+(dayTxt?'<span>'+e(dayTxt)+'</span>':'')+'</div>'
-    +'<div class="nm"><h1>'+e(d.name||"Unnamed cat")+'</h1><div class="who">'+e(who)+'</div><div class="words">'+(words.length?words.map(function(w){return '<span>'+e(w)+'</span>';}).join(""):'<span class="add" onclick="var i=document.getElementById(\'three-words\');if(i)i.focus();else{window._dogSec.d1=true;renderMain();}">+ three words</span>')+'</div></div>'
+    +'<div class="nm"><h1>'+e(d.name||"Unnamed cat")+'</h1><div class="who">'+e(who)+'</div></div>'
     +'<div class="ph"><label>'+(d.photo?'Change photo':'Add photo')+'<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>'+(d.photo?'<span onclick="showRepositionPhoto()">Reposition</span><span onclick="removePhoto()" style="color:#991b1b">Remove</span>':'')+'</div></div>';
   var tp=temperOf(S);var rh=S.rehome||{};
   var strip='<div class="dstrip"><div class="'+(tp?(tp[0]==="Social"?"g":tp[0]==="Feral"?"r":"y"):"")+'" data-go="temperament"><b>'+e(tp?tp[0]:"Not yet")+'</b><span>temperament</span></div>'
@@ -6415,7 +6430,10 @@ function renderCatTab(){var d=S.dog,f=S.fin||{};var e=esc;var r=curRec();var g=c
     +fld("Date of birth",d.dob||"","dog.dob","date")+slct("Age (approx.)",d.age,"dog.age",ageOptions(d.age))
     +fld("Microchip no."+(d.microchip?' <a href="#" class="today-link" onclick="try{navigator.clipboard.writeText(\''+e(d.microchip)+'\');miniToast(\'Chip copied\');}catch(x){}return false">copy</a>':""),d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')
     +fld("Unit ref",d.refNo,"dog.refNo","text","e.g. C-041-2026")+'</div><div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">There\u2019s already a cat here with this name.</div><div id="chip-info" style="margin:0 0 4px;font-size:11px">'+chipInfoHtml(d.microchip)+'</div>'
-    +'<div class="f" style="margin-top:6px"><label class="lbl">In three words <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 on every card</span></label><input id="three-words" type="text" value="'+e(d.threeWords||"")+'" placeholder="e.g. Purrs on the lap \u00b7 Hates the carrier" data-save="dog.threeWords"></div>';
+    
+    +chipRow("Coat length","long coats get a grooming line on Care","coatLength",["Short","Medium","Long"],d.coatLength||"")
+    +chipRow("Pattern","fills Colour if it\u2019s empty","pattern",CAT_PATTERNS.map(function(x){return x[0];}),d.pattern||"","catPattern")
+    +'<div class="dog-fg">'+fld("Distinguishing marks",d.marks||"","dog.marks","text","what would let an owner prove "+(String(d.sex||"").indexOf("Female")===0?"she\u2019s":"he\u2019s")+" theirs")+'</div>';
   // 2 came in
   var reasons=[["Stray","Stray"],["Owner surrender","Surrender"],["Return","Return"],["Welfare / seizure","Welfare / seizure"],["Transfer","Transfer"],["Born here","Born here"],["Trapped (TNR)","Trapped \u2014 feral"]];
   var camein=chipRow("Reason","quarantine is "+catQDays(d)+" days","intakeReason",reasons,d.intakeReason||"")
@@ -6423,15 +6441,17 @@ function renderCatTab(){var d=S.dog,f=S.fin||{};var e=esc;var r=curRec();var g=c
     +(d.broughtInBy==="NSPCA Inspector"?'<div class="dog-fg">'+slct("Inspector",d.inspector||"","dog.inspector",inspectorOpts(d.inspector))+(d.inspector==="Other"?fld("Inspector name",d.inspectorOther||"","dog.inspectorOther","text",""):"")+fld("Case ref",d.inspectorRef||"","dog.inspectorRef","text","e.g. 26-0412")+'</div>':'')
     +'<div class="dog-fg">'+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()
     +(/Stray|Trapped/.test(d.intakeReason||"")?fld("Found / trapped at",d.foundAt||"","dog.foundAt","text","e.g. Ballymahon, farm yard"):'')
-    +fld("Taken in by",d.assessor||"","dog.assessor","text","e.g. Shane")+'</div>';
+    +fld("Taken in by",d.assessor||"","dog.assessor","text","e.g. Shane")+'</div>'
+    +(/Stray|Trapped/.test(d.intakeReason||"")?'<div class="g2">'+fld("Colony or site",d.colony||"","dog.colony","text","e.g. behind the mart")+fld("Feeder / caretaker",d.feeder||"","dog.feeder","text","name and phone")+'</div><div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:-4px">A TNR cat goes back to this exact spot \u2014 it fills the TNR door on Outcome and the TNR site form on Files.</div>':'');
   // 3 where
   var whereis='<div class="dog-fg">'+catPenSelect(d)+'</div><div class="ovkv"><span>Quarantine</span><b>'+e(g.moved?"done \u2014 moved "+(d.cattery?fmtDMY(d.cattery):""):ii?(g.served?"served":"day "+Math.max(0,ii.day)+" of "+g.qDays):"no intake date")+'</b></div><div class="ovkv"><span>Status</span><b>'+e((S.foster||{}).out?"Out in foster":f.outcome&&f.outcome!=="Finished Isolation"?f.outcome:g.moved?"In the Cattery":"In isolation / quarantine")+'</b></div>'
-    +(g.moved?'<div style="margin-top:8px;font-size:11.5px"><a href="#" onclick="catBackToQ();return false" style="color:#6b7280">Undo the Cattery move</a></div>':'<div style="font-size:11.5px;color:#166534;font-weight:700;margin-top:8px">The move to the Cattery is on the Overview, once the gate is clear.</div>');
+    +(g.moved?'<div style="margin-top:8px;font-size:11.5px"><a href="#" onclick="catBackToQ();return false" style="color:#6b7280">Undo the Cattery move</a></div>':'<div style="font-size:11.5px;color:#166534;font-weight:700;margin-top:8px">The move to the Cattery is on the Overview, once the gate is clear.</div>')+penHistoryHtml(d);
   // 4 family & pairs
   var fi=familyInfo();var partner=d.bondId?records.find(function(x){return String(x.id)===String(d.bondId);}):null;
   var cands=records.filter(function(x){return x.id!==S._id&&catIsHere(x);});
   var famBody='<div class="cq"><label>Bonded to<em>shown as one card, moved and rehomed together</em></label>'+(partner?'<div class="pairrow"><b>'+e(partner.name)+'</b><small>'+e(kennelShort((partner.state.dog||{}).kennel)||"")+'</small><span onclick="bondClear()">Unlink</span></div>':'<select onchange="bondSet(this.value)"><option value="">-- not bonded --</option>'+cands.map(function(x){return '<option value="'+x.id+'">'+e(x.name)+(x.state&&x.state.dog&&x.state.dog.kennel?' \u00b7 '+e(kennelShort(x.state.dog.kennel)):'')+'</option>';}).join("")+'</select>')+'</div>';
-  if(fi.pups.length){famBody+='<div class="cq"><label>Kittens<em>latest weights</em></label>'+fi.pups.map(function(p){var kg=kittenGain(p.state||{});var lw=((p.state||{}).weights||[]).filter(function(x){return x.date&&x.weight;}).sort(function(a,b){return b.date.localeCompare(a.date);})[0];return '<div class="kwrow" onclick="openFamilyDog('+p.id+')"><b>'+e(p.name)+'</b><span>'+(lw?Math.round(kgOf(lw.weight)*1000)+" g":"not weighed")+'</span><i class="'+(kg?kg.tone:"")+'">'+(kg?(kg.perWeek>=0?"+":"")+kg.perWeek+" g a week"+(kg.tone==="a"?" \u00b7 watch":kg.tone==="r"?" \u00b7 losing":""):"\u2014")+'</i></div>';}).join("")+'<div style="font-size:10.5px;color:#6b7280;font-weight:600;margin-top:4px">Expect 50\u2013100 g a week. Under 50 goes amber; any loss goes red.</div></div>';}
+  if(fi.pups.length){famBody+='<div class="lbl" style="margin-top:6px">Litter at a glance</div><table class="ctbl"><tr><th>Kitten</th><th>Age</th><th>Last weight</th><th>A week</th><th>1st RCP</th></tr>'+fi.pups.map(function(p){var pst=p.state||{};var pd=pst.dog||{};var kg=kittenGain(pst);var lw=(pst.weights||[]).filter(function(x){return x.date&&x.weight;}).sort(function(a,b){return b.date.localeCompare(a.date);})[0];var wk=catAgeWeeks(pd);var rcp=((pst.medical||{}).vaccinations||[]).filter(function(v){return v.date&&/^1st RCP|^RCP/i.test(v.type||"");})[0];var col=kg?{g:"#166534",a:"#92400e",r:"#991b1b"}[kg.tone]:"#6b7280";
+    return '<tr onclick="openFamilyDog('+p.id+')" style="cursor:pointer"><td><b>'+e(p.name)+'</b></td><td>'+(wk!==null?wk+" wks":"\u2014")+'</td><td>'+(lw?Math.round(kgOf(lw.weight)*1000)+" g":"not weighed")+'</td><td><b style="color:'+col+'">'+(kg?(kg.perWeek>=0?"+":"")+kg.perWeek+" g":"\u2014")+'</b></td><td>'+(rcp?"given "+e(fmtDMY(rcp.date).slice(0,5)):wk!==null&&wk<9?"due 9 wks":"due now")+'</td></tr>';}).join("")+'</table><div style="font-size:10.5px;color:#6b7280;font-weight:600;margin-top:4px">One line per kitten linked to her. Under 50 g a week goes amber, a loss goes red \u2014 the same rule as the Kitten tab. Tap a name to open that kitten.</div>';}
   famBody+=familyCardInner(fi);
   var famSum=[partner?"bonded to "+partner.name:"",fi.pups.length?(d.sex&&/Female/.test(d.sex)?"queen \u00b7 ":"")+fi.pups.length+" kitten"+(fi.pups.length===1?"":"s"):"",fi.mumId?"with mum":""].filter(Boolean).join(" \u00b7 ")||"Bonded pairs, queens and litters";
   // 5 pod setup
@@ -6439,7 +6459,14 @@ function renderCatTab(){var d=S.dog,f=S.fin||{};var e=esc;var r=curRec();var g=c
   var podBody='<div class="ptick">'+POD_SETUP.map(function(x){return '<div onclick="podSetToggle(\''+x[0]+'\')"><i class="'+(ps[x[0]]?"y":"")+'"></i>'+x[1]+'</div>';}).join("")+'</div>';
   // 6 home type
   var ht=homeTypeOf(S);
-  var homeBody='<div class="homebox"><b>'+e(ht.t)+'</b><small>'+e(ht.why)+'</small></div>'+chipRow("Override","only if you know better","homeOverride",[["Indoor only","Indoor only"],["Indoor or outdoor","Indoor or outdoor"]],d.homeOverride||"")+'<div style="font-size:10.5px;color:#6b7280;font-weight:600;margin-top:4px">FIV positive or no FeLV vaccine means indoor only. Goes on Best home and the rehoming card.</div>';
+  var homeBody='<div class="homebox"><b>'+e(ht.t)+'</b><small>'+e(ht.why)+'</small></div>'+chipRow("Override","only if you know better","homeOverride",[["Indoor only","Indoor only"],["Indoor or outdoor","Indoor or outdoor"],["Outdoor / barn","Outdoor / barn"]],d.homeOverride||"")+'<div style="font-size:10.5px;color:#6b7280;font-weight:600;margin-top:4px">FIV positive means indoor only. Any other cat can go to an indoor or outdoor home \u2014 outdoors needs the FeLV vaccine first. Goes on Best home and the rehoming card.</div>';
+  // 7 microchip registration
+  var chipBody=(d.microchip?'':'<div class="cflag a" style="margin:0 0 8px">No chip number yet \u2014 add it under Who '+(String(d.sex||"").indexOf("Female")===0?"she":"he")+' is. The Rehoming checklist asks for one.</div>')
+    +chipRow("Registered to","","chipTo",CHIP_TO,d.chipTo||"")+'<div class="g2">'+fld("Database",d.chipDb||"","dog.chipDb","text","where the chip is registered")+fld("Owner on the database",d.chipOwner||"","dog.chipOwner","text","name, any contact that worked")+'</div>'
+    +chipRow("Transfer","","chipTransfer",CHIP_XFER,d.chipTransfer||"")
+    +'<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:4px">A chip registered to someone is a lead for the owner search on Arrival. Once adopted, an untransferred chip lands in Today until it\u2019s moved to the adopter.</div>';
+  var chipSum=d.microchip?([d.chipTo?"registered to "+d.chipTo.toLowerCase():"registration not checked",d.chipDb,d.chipTransfer&&d.chipTransfer!=="Not needed yet"?d.chipTransfer.toLowerCase():""].filter(Boolean).join(" \u00b7 ")):"no chip yet";
+  var chipSt=!d.microchip?"":chipXferDue(r)?"warn":d.chipTo?(d.chipTo==="A previous owner"&&!(d.chipTransfer||"").match(/done/)?"warn":"done"):"warn";
   // 7 flags
   var ws=(S.warnings||[]).filter(function(w){return w&&w.text&&!w.resolved;}),ns=S.careNotices||[];var _con=activeContagiousList(S.medical);var flu=fluSuspect(S);var ea=eatAlarm(r);
   var flags=dogFold("warn","","Warnings &amp; notices",ws.length||ns.length?(ws.length?ws.length+" warning"+(ws.length>1?"s":""):"")+(ws.length&&ns.length?" \u00b7 ":"")+(ns.length?ns.length+" notice"+(ns.length>1?"s":""):""):"None active \u2014 tap to add",ws.length?e(ws.map(function(w){return w.text;}).join(" \u00b7 ")):(ns.length?e(ns[0].text||""):""),ws.length?"warn":"plain",warningsCardHtml()+noticesCardHtml())
@@ -6448,9 +6475,9 @@ function renderCatTab(){var d=S.dog,f=S.fin||{};var e=esc;var r=curRec();var g=c
   var flN=ws.length+ns.length+(_con.length||flu?1:0)+(ea?1:0);
   var he=((d.sex||"").toLowerCase().indexOf("female")===0?"she":"he");
   var idDone=!!(d.name&&d.sex&&(d.dob||d.age));var inDone=!!(d.intakeReason&&d.intakeDate);var whDone=!!d.kennel;var firstOpen=[idDone,inDone,whDone].indexOf(false);
-  var idSum=[d.sex?String(d.sex).replace(/\s*\(.*\)/,"").toLowerCase():"",d.breed,(d.age||"").replace(/\s*\(.*\)/,""),d.colour?d.colour.toLowerCase():"",d.microchip?"chip \u2026"+String(d.microchip).slice(-4):"no chip"].filter(Boolean).join(" \u00b7 ");
-  var inSum=[d.intakeReason?d.intakeReason.toLowerCase():"no reason yet",d.intakeDate?fmtDMY(d.intakeDate):"",catQDays(d)+"-day quarantine",d.foundAt?"found at "+d.foundAt:""].filter(Boolean).join(" \u00b7 ");
-  var whSum=(d.kennel?kennelShort(d.kennel):"no pen")+" \u00b7 "+(g.moved?"in the Cattery":g.served?"quarantine served":"quarantine");
+  var idSum=[d.sex?String(d.sex).replace(/\s*\(.*\)/,"").toLowerCase():"",d.breed,(d.age||"").replace(/\s*\(.*\)/,""),d.coatLength?d.coatLength.toLowerCase()+" coat":"",d.colour?d.colour.toLowerCase():"",d.marks?d.marks:"",d.microchip?"chip \u2026"+String(d.microchip).slice(-4):"no chip"].filter(Boolean).join(" \u00b7 ");
+  var inSum=[d.intakeReason?d.intakeReason.toLowerCase():"no reason yet",d.intakeDate?fmtDMY(d.intakeDate):"",catQDays(d)+"-day quarantine",d.foundAt?"found at "+d.foundAt:"",d.colony?d.colony+" colony":""].filter(Boolean).join(" \u00b7 ");
+  var _pl=d.penLog||[];var _pc=_pl[_pl.length-1];var _pd=_pc&&_pc.from&&_pc.pen===d.kennel?Math.max(0,Math.round((new Date(new Date().toISOString().slice(0,10))-new Date(_pc.from))/864e5)):null;var whSum=(d.kennel?kennelShort(d.kennel):"no pen")+(_pd!==null?" \u00b7 "+_pd+" day"+(_pd===1?"":"s"):"")+(_pl.length>1?" \u00b7 pen "+_pl.length:"")+" \u00b7 "+(g.moved?"in the Cattery":g.served?"quarantine served":"quarantine");
   var sec=function(n,t,s,st,b,df){return catSecHtml("_dogSec","d"+n,n,t,s,st,b,df);};
   return hero+strip
     +sec(1,"Who "+he+" is",e(idSum)||"Name, sex, age, colour, chip",idDone?"done":"",identity,firstOpen===0)
@@ -6459,7 +6486,8 @@ function renderCatTab(){var d=S.dog,f=S.fin||{};var e=esc;var r=curRec();var g=c
     +sec(4,"Family &amp; pairs",e(famSum),(partner||fi.pups.length||fi.mumId)?"done":"",famBody,false)
     +sec(5,"Pod setup",e(psOn.length?psOn.map(function(x){return x[1].toLowerCase();}).join(" \u00b7 "):"hide box, Feliway, perch, scratch post"),psOn.length>=4?"done":psOn.length?"warn":"",podBody,false)
     +sec(6,"Home type",e(ht.t+" \u2014 "+ht.why),"done",homeBody,false)
-    +sec(7,"Flags",e([ws.length?ws.length+" warning"+(ws.length>1?"s":""):"",_con.length||flu?"contagious":"",ea?"not eating "+ea.h+" h":""].filter(Boolean).join(" \u00b7 ")||"nothing flagged"),(_con.length||flu||(ea&&ea.red))?"bad":flN?"warn":"done",flags,flN>0)
+    +sec(7,"Microchip registration",e(chipSum),chipSt,chipBody,false)
+    +sec(8,"Flags",e([ws.length?ws.length+" warning"+(ws.length>1?"s":""):"",_con.length||flu?"contagious":"",ea?"not eating "+ea.h+" h":""].filter(Boolean).join(" \u00b7 ")||"nothing flagged"),(_con.length||flu||(ea&&ea.red))?"bad":flN?"warn":"done",flags,flN>0)
     +'<div class="brow" style="margin-top:12px"><button class="btn btnp" data-go="arrival">Next: Arrival &rarr;</button></div>';}
 
 // ── Overview + the Cattery gate ────────────────────────────────────
@@ -6529,7 +6557,7 @@ function renderCatCare(){var c=S.care||{};var e=esc;var tog=function(l,em,k,opts
   h+=sec(2,"Avoid",e(fe.join(" \u00b7 ").toLowerCase()||"what upsets"),fe.length?"warn":"",tog("Upset by","","fears",["Loud noise","Dogs barking","Being reached for","Picked up","Other cats nearby","Fast movement","Hoover"]));
   h+=sec(3,"Enrichment",e(en.join(" \u00b7 ").toLowerCase()||"toys, perch, scratch"),en.length?"done":"",tog("In the pen","","enrichment",["Wand toy","Ball","Catnip","Cardboard box","Perch","Scratch post","Puzzle feeder","Window view"]));
   h+=sec(4,"Handling kit",e(kit.join(" \u00b7 ").toLowerCase()||"towel, gloves, crush cage"),kit.length?"done":"",tog("Use","","kit",["Towel wrap","Gloves","Crush cage","Basket carrier","Top-opening carrier","Two people"]));
-  h+=sec(5,"Grooming",e(c.coat||"coat and claws"),c.coat?"done":"",chipRow("Coat","","coat",["Easy","Needs brushing","Matted \u2014 clip","Won\u2019t allow"],c.coat||"","careSet"));
+  h+=sec(5,"Grooming",e(c.coat||"coat and claws"),c.coat?"done":"",chipRow("Coat","","coat",["Easy","Needs brushing","Matted \u2014 clip","Won\u2019t allow"],c.coat||"","careSet")+((S.dog||{}).coatLength==="Long"?'<div style="font-size:11.5px;color:#92400e;font-weight:700;margin-top:4px">Long coat \u2014 brush daily so it doesn\u2019t mat in the pen.</div>':''));
   return h+browNav("care");}
 
 // ── Feeding ────────────────────────────────────────────────────────
@@ -6549,19 +6577,87 @@ function renderCatFeeding(){if(!S.feedingPlan)S.feedingPlan={};var fp=S.feedingP
 
 // ── Medical: FeLV/FIV first, ringworm last ─────────────────────────
 function medCSet(k,v){if(!S.medical)S.medical=defaultMedical();S.medical[k]=(S.medical[k]===v)?"":v;if((k==="felv"||k==="fiv")&&S.medical[k]&&!S.medical.testDate)S.medical.testDate=new Date().toISOString().slice(0,10);if(k==="culture"&&v==="Pending"&&!S.medical.cultureDate)S.medical.cultureDate=new Date().toISOString().slice(0,10);persistSave();debouncedSave();renderMain();}
-function renderCatMedical(){window._medOff=1;var html;try{html=dogRenderMedical();}finally{window._medOff=0;}
-  var m=S.medical||{};var e=esc;window._medSec=window._medSec||{};
+function medTog(k,v){if(!S.medical)S.medical=defaultMedical();var a=S.medical[k]=Array.isArray(S.medical[k])?S.medical[k]:[];var i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);persistSave();debouncedSave();renderMain();}
+function neuSet(k,v){if(!S.medical)S.medical=defaultMedical();S.medical[k]=(S.medical[k]===v)?"":v;if(k==="neuterStatus"&&S.medical.neuterStatus==="Done"&&!S.medical.neuterDate)S.medical.neuterDate=new Date().toISOString().slice(0,10);persistSave();debouncedSave();renderMain();}
+function neuterStatus(st){var m=st.medical||{},d=st.dog||{};if(m.neuterDate)return "Done";if(m.neuterStatus)return m.neuterStatus;if(arrNeutered(st)||/\(N\)|\(S\)/.test(d.sex||""))return "Neutered before arrival";var wk=catAgeWeeks(d);if(wk!==null&&wk<17)return "Too young yet";return "Entire";}
+function seniorCat(d){d=d||{};var wk=catAgeWeeks(d);if(wk!==null)return wk>=520;var m=String(d.age||"").match(/^(\d+)/);return !!(m&&parseInt(m[1],10)>=10);}
+var TEETH=["0 — clean","1 — gingivitis","2 — mild","3 — moderate","4 — severe"];
+function teethOf(st){var m=st.medical||{};if(m.teethGrade)return{g:m.teethGrade,from:""};var mo=(st.arrival||{}).mouth;var map={"Healthy":TEETH[0],"Gingivitis":TEETH[1],"Bad teeth":TEETH[3]};return mo&&map[mo]?{g:map[mo],from:"Arrival"}:{g:"",from:""};}
+function catParaFill(st){var d=st.dog||{};((st.medical||{}).parasiteTreatments||[]).forEach(function(p){if(!p||!p.date||p.nextDue)return;var t=p.type||p.product||"";var n=30;if(!/flea/i.test(t)&&/worm/i.test(t)){var ag=null;if(d.dob){ag=Math.floor((new Date(p.date)-new Date(d.dob))/6048e5);}n=ag!==null&&ag<8?14:ag!==null&&ag<26?30:90;}p.nextDue=addDaysStr(p.date,n);});}
+function catVaxCourse(st){var d=st.dog||{},m=st.medical||{};var td=new Date().toISOString().slice(0,10);var wk=catAgeWeeks(d);var kit=wk!==null&&wk<12;
+  var vx=(m.vaccinations||[]).filter(function(v){return v.date&&v.date<=td;});var dt=function(re){return vx.filter(function(v){return re.test(v.type||"");}).map(function(v){return v.date;}).sort();};
+  var f1=dt(/^1st RCP|^RCP/i)[0],f2=dt(/^2nd RCP/i)[0],fl=dt(/FeLV/i);var D=function(x){return fmtDMY(x).slice(0,5);};var R=[];
+  var due1=f1?null:(wk!==null&&wk<9&&d.dob?addDaysStr(d.dob,63):td);
+  R.push({j:"1st RCP",w:"on arrival, or 8–9 weeks for kittens",s:f1?"given "+D(f1):due1>td?"due "+D(due1):"due now",t:f1?"g":"a"});
+  var due2=f1?addDaysStr(f1,21):null;if(due2&&d.dob&&wk!==null&&wk<16){var w12=addDaysStr(d.dob,84);if(w12>due2)due2=w12;}
+  R.push({j:"2nd RCP",w:"3–4 weeks after the 1st"+(kit?" · not before 12 weeks":""),s:f2?"given "+D(f2):due2?(due2<td?"overdue — was due "+D(due2):"due "+D(due2)):"after the 1st",t:f2?"g":due2&&due2<td?"r":"a"});
+  var ht=homeTypeOf(st);var inOnly=ht.t==="Indoor only";var out=ht.t==="Outdoor / barn";
+  R.push({j:"FeLV × 2",w:"2 doses 3–4 weeks apart, before going outdoors",s:fl.length>=2?"given ×2":fl.length===1?"1 of 2 — 2nd due "+D(addDaysStr(fl[0],21)):inOnly?"not needed — indoor only":out?"due — outdoor / barn home":"before going outdoors — for the adopter if not here",t:fl.length>=2?"g":out||fl.length===1?"a":"",act:!inOnly&&fl.length<2?"FeLV vaccine":""});
+  R.push({j:"Booster",w:"a year after the 2nd RCP",s:f2?"due "+fmtDMY(addDaysStr(f2,365))+" — for the adopter":"for the adopter — on the handover",t:""});
+  var sum=[f1?"1st RCP ✓":"1st RCP due",f2?"2nd RCP ✓":due2?"2nd RCP "+(due2<td?"overdue":"due "+D(due2)):"",fl.length===1?"FeLV 2nd due":"","booster for the adopter"].filter(Boolean).join(" · ");
+  var state=(due2&&!f2&&due2<td)?"bad":(f1&&f2)?"done":"warn";
+  return{rows:R,sum:sum,state:state,due2:f2?null:due2};}
+function catVaxFixed(st){var fl=((st.medical||{}).vaccinations||[]).some(function(v){return v.date&&/FeLV/i.test(v.type||"");});return fl?["1st RCP","2nd RCP","FeLV vaccine"]:["1st RCP","2nd RCP"];}
+function catBodyPointers(){var m=S.medical||{};var e=esc;var fnd=arrivalFindings(S);var a=S.arrival||{};var bl=(S.bcsLog||[]).slice(-1)[0];var ns=neuterStatus(S);var tg=teethOf(S);
+  var row=function(l,v,go){return '<div class="ovkv"'+(go?' data-go="'+go+'" style="cursor:pointer"':'')+'><span>'+l+'</span><b>'+e(v)+'</b></div>';};
+  return '<div class="mblk"><div class="lbl">Kept in one place</div>'+row("On arrival",[(a.health||[]).join(", ").toLowerCase(),fnd.join(", ")].filter(Boolean).join(" \u00b7 ")||"nothing noted \u2014 Arrival tab","arrival")+row("Body condition",bl?bl.score+" of 9 \u00b7 "+fmtDMY(bl.date).slice(0,5):"not scored \u2014 Weights tab","weights")+row("Neutering",ns+(m.neuterDate?" \u00b7 "+fmtDMY(m.neuterDate):""),null)+row("Teeth",tg.g?tg.g+(m.dentalStatus?" \u00b7 dental "+m.dentalStatus.toLowerCase():""):"not graded",null)+'<div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:4px">Arrival findings live on Arrival, body condition on Weights, neutering and teeth in their own sections above \u2014 one place each.</div></div>';}
+function _msecs(h){var idx=[];var k=0;while((k=h.indexOf('<div class="asec msec',k))>=0){idx.push(k);k+=10;}return idx;}
+function _secPatch(h,n,fn){var idx=_msecs(h);if(n>=idx.length)return h;var a=idx[n];var b=n+1<idx.length?idx[n+1]:h.indexOf('<div id="med-ov-picker"',a);if(b<0)b=h.length;return h.slice(0,a)+fn(h.slice(a,b))+h.slice(b);}
+function _secSum(sec,sum,state){sec=sec.replace(/<small>[\s\S]*?<\/small>/,'<small>'+sum+'</small>');if(state!=null)sec=sec.replace(/^<div class="asec msec [^"]*?( open)?"/,function(x,o){return '<div class="asec msec '+state+(o||"")+'"';});return sec;}
+function _secBody(sec,html){var k=sec.indexOf('<div class="abody">');return k<0?sec:sec.slice(0,k+19)+html+sec.slice(k+19);}
+function renderCatMedical(){var m=S.medical||{};var e=esc;var d=S.dog||{};window._medSec=window._medSec||{};var td=new Date().toISOString().slice(0,10);
+  catParaFill(S);var senior=seniorCat(d);var extra=2+(senior?1:0);
+  window._medNum=function(n){return n<=4?n+1:n+1+extra;};var html;try{html=dogRenderMedical();}finally{window._medNum=null;}
   var mk=function(id,n,t,s,st,b,df){var open=(window._medSec[id]!==undefined)?window._medSec[id]:!!df;return '<div class="asec msec '+st+(open?" open":"")+'"><div class="ash" onclick="window._medSec[\''+id+'\']='+(open?'false':'true')+';renderMain()"><span class="anum">'+n+'</span><div class="ast"><b>'+t+'</b><small>'+s+'</small></div><span class="acnt"></span></div>'+(open?'<div class="abody">'+b+'</div>':'')+'</div>';};
+  var tbl=function(head,rows){return '<table class="ctbl"><tr>'+head.map(function(x){return '<th>'+x+'</th>';}).join("")+'</tr>'+rows.join("")+'</table>';};
+  // 1 FeLV / FIV
   var felvPos=m.felv==="Positive";var tested=m.felv&&m.felv!=="Not tested"&&m.fiv&&m.fiv!=="Not tested";
-  var tb=chipRow("FeLV","","felv",["Negative","Positive","Not tested"],m.felv||"","medCSet")+chipRow("FIV","","fiv",["Negative","Positive","Not tested"],m.fiv||"","medCSet")+'<div class="dog-fg">'+fld("Tested on",m.testDate||"","medical.testDate","date")+'</div><div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:4px">FeLV positive never clears for the Cattery. FIV positive can \u2014 it isn\u2019t passed on by casual contact \u2014 but it means an indoor-only home.</div>'+(catHasFile(S,"felvfiv")?'<div style="font-size:11.5px;color:#166534;font-weight:700;margin-top:6px">Result sheet on file \u2713</div>':'<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:6px">Result sheet not on file yet \u2014 <span class="lnk" data-go="files">Files</span></div>');
-  var felvSec=mk("mfelv",1,"FeLV / FIV test",e(tested?"FeLV "+m.felv.toLowerCase()+" \u00b7 FIV "+m.fiv.toLowerCase()+(m.testDate?" \u00b7 "+fmtDMY(m.testDate):""):"not tested yet"),felvPos?"bad":tested?(m.fiv==="Positive"?"warn":"done"):"warn",tb,!tested);
+  var tb=chipRow("FeLV","","felv",["Negative","Positive","Not tested"],m.felv||"","medCSet")+chipRow("FIV","","fiv",["Negative","Positive","Not tested"],m.fiv||"","medCSet")+'<div class="dog-fg">'+fld("Tested on",m.testDate||"","medical.testDate","date")+'</div><div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:4px">FeLV positive never clears for the Cattery. FIV positive can — it isn’t passed on by casual contact — but it means an indoor-only home. Kittens under 6 months: an FIV positive can be mum\u2019s antibodies \u2014 retest at 6 months before deciding anything.</div>'+(catHasFile(S,"felvfiv")?'<div style="font-size:11.5px;color:#166534;font-weight:700;margin-top:6px">Result sheet on file ✓</div>':'<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:6px">Result sheet not on file yet — <span class="lnk" data-go="files">Files</span></div>');
+  var felvSec=mk("mfelv",1,"FeLV / FIV test",e(tested?"FeLV "+m.felv.toLowerCase()+" · FIV "+m.fiv.toLowerCase()+(m.testDate?" · "+fmtDMY(m.testDate):""):"not tested yet"),felvPos?"bad":tested?(m.fiv==="Positive"?"warn":"done"):"warn",tb,!tested);
+  var fnd=arrivalFindings(S);if(fnd.length)felvSec='<div class="cflag a" style="margin-bottom:8px">Found on arrival: <b>'+e(fnd.join(", "))+'</b> — <span class="lnk" data-go="arrival">Arrival</span></div>'+felvSec;
+  // 2 vaccinations: the course for this cat's age
+  var vc=catVaxCourse(S);var tc={g:"#166534",a:"#92400e",r:"#991b1b","":"#6b7280"};
+  html=_secPatch(html,0,function(sec){sec=_secSum(sec,e(vc.sum),vc.state);return _secBody(sec,rcpWaitHtml()+'<div class="lbl">The course, for '+e(d.name||"this cat")+'’s age</div>'+tbl(["Jab","When","Status"],vc.rows.map(function(r){return '<tr><td><b>'+e(r.j)+'</b></td><td>'+e(r.w)+'</td><td><b style="color:'+tc[r.t]+'">'+e(r.s)+'</b>'+(r.act?' <span class="lnk" onclick="quickVax(\''+r.act+'\')">Given today</span>':'')+'</td></tr>';}))+'<div style="height:10px"></div>');});
+  // 3 worming, flea & tick
+  var pt=(m.parasiteTreatments||[]).filter(function(p){return p&&p.date;}).sort(function(a,b){return b.date.localeCompare(a.date);});var lf=pt.filter(function(p){return /flea/i.test(p.type||p.product||"");})[0],lw=pt.filter(function(p){return /worm/i.test(p.type||p.product||"");})[0];var last=pt[0];
+  var nm=function(p){return String(p.type||p.product||"").split(" —")[0];};
+  var wSum=[last?nm(last)+" "+fmtDMY(last.date).slice(0,5):"nothing logged",lf?"flea ✓":"flea ✗",lw?"worm ✓":"worm ✗",lf&&lf.nextDue?"next flea "+fmtDMY(lf.nextDue).slice(0,5):""].filter(Boolean).join(" · ");
+  var wOver=(lf&&lf.nextDue<td)||(lw&&lw.nextDue<td);
+  html=_secPatch(html,1,function(sec){sec=_secSum(sec,e(wSum),wOver?"warn":(lf&&lw)?"done":"warn");var b='';
+    if(last&&/flea/i.test(last.type||"")&&/worm/i.test(last.type||""))b+=ckRow({tone:"ok",t:nm(last)+" — "+fmtDMY(last.date).slice(0,5),s:"covers fleas and worms — ticks both rows"});
+    if(lf||lw)b+=ckRow({tone:wOver?"a":"n",t:"Next due",s:[lf?"flea "+fmtDMY(lf.nextDue).slice(0,5)+(lf.nextDue<td?" (overdue)":"")+" (monthly)":"",lw?"worm "+fmtDMY(lw.nextDue).slice(0,5)+(lw.nextDue<td?" (overdue)":"")+(lw===lf?"":" ("+(catAgeWeeks(d)!==null&&catAgeWeeks(d)<26?"kitten":"every 3 months")+")"):""].filter(Boolean).join(" · ")}).replace('>—</span>','>→</span>');
+    b+='<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin:2px 0 10px">Next due fills itself in. Kittens: worm every 2 weeks to 8 weeks old, then monthly to 6 months.</div>';return _secBody(sec,b);});
+  // 4 what's wrong now: barrier nursing while anything contagious is active
+  var con=activeContagiousList(m);var flu=fluSuspect(S);
+  if(con.length||flu)html=_secPatch(html,2,function(sec){var pan=con.some(function(x){return /panleuk/i.test(x.type||"");});return _secBody(sec,'<div class="card" style="background:#fef2f2;border-color:#fecaca;margin:0 0 10px"><div class="lbl" style="color:#991b1b">Barrier nursing — '+e(con.length?con.map(function(x){return diseaseShortName(x.type);}).join(", "):"suspected cat flu")+'</div><div style="font-size:12.5px;font-weight:600;line-height:1.6;color:#4b5160">Served last · own gloves and apron for this pen · own bowls, tray and scoop · footbath at the door.'+(pan?'<br><b>Panleukopenia:</b> a disinfectant that kills parvovirus — ask the vet which.':'')+'<br><span style="color:#9a9fa8">Pen rest after: waiting on the vet’s sign-off, same as the dog unit.</span></div></div>');});
+  // new: neutering, teeth, senior checks (before The body)
+  var ns=neuterStatus(S);var wk=catAgeWeeks(d);
+  var nb=chipRow("Status","Arrival’s sex check and ear tip fill this in","neuterStatus",["Entire","Booked","Done","Neutered before arrival","Too young yet"],ns,"neuSet")
+    +'<div class="g2">'+fld("Booked for",m.neuterBooked||"","medical.neuterBooked","date")+fld("Vet",m.neuterVet||"","medical.neuterVet","text","practice")+'</div>'
+    +(ns==="Done"?'<div class="dog-fg">'+fld("Done on",m.neuterDate||"","medical.neuterDate","date")+'</div>':'')
+    +'<div class="cq"><label>After the op<em>tap as they happen</em></label><div class="cchips">'+["Wound checked day 3","Wound checked day 10","Cone on","Stitches out"].map(function(o){return '<span class="cchip'+((m.neuterPost||[]).indexOf(o)>=0?" on":"")+'" onclick="medTog(\'neuterPost\',\''+o+'\')">'+o+'</span>';}).join("")+'</div></div>'
+    +'<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:4px">Done fills Neutered on Rehoming and asks for the neuter certificate on Files. Kittens too young to neuter go home with a neuter agreement, signed on Files. Kittens: book from 4 months'+(wk!==null&&wk<17&&d.dob?' — '+e(d.name||"this kitten")+' is 4 months on '+e(fmtDMY(addDaysStr(d.dob,122))):'')+'. A booking lands in Today the day before.</div>';
+  var nSum=[ns==="Booked"&&m.neuterBooked?"booked "+fmtDMY(m.neuterBooked).slice(0,5):ns.toLowerCase(),ns==="Done"&&m.neuterDate?fmtDMY(m.neuterDate).slice(0,5):"",m.neuterVet||""].filter(Boolean).join(" · ");
+  var nSt=/Done|before/.test(ns)?"done":ns==="Too young yet"?"":"warn";
+  var tg=teethOf(S);var ds=m.dentalStatus||"";
+  var tb2=chipRow("Teeth","from Arrival’s mouth check, then the vet’s","teethGrade",TEETH,tg.g,"neuSet")+(tg.from?'<div style="font-size:11px;color:#6b7280;font-weight:600;margin:-4px 0 8px">Suggested from Arrival — tap a grade to set it.</div>':'')
+    +chipRow("Dental","","dentalStatus",["Not needed","Needed","Booked","Done"],ds,"neuSet")+'<div class="dog-fg">'+(ds==="Done"||ds==="Booked"?fld(ds==="Done"?"Done on":"Booked for",m.dentalDate||"","medical.dentalDate","date"):'')+fld("Extractions / notes",m.dentalNotes||"","medical.dentalNotes","text","e.g. two molars out, soft food 5 days")+'</div>';
+  var gn=tg.g?parseInt(tg.g,10):null;var tSum=[tg.g?"grade "+gn+(tg.from?" (from Arrival)":""):"not graded",ds?"dental "+ds.toLowerCase():""].filter(Boolean).join(" — ");
+  var tSt=(ds==="Needed"||ds==="Booked"||(gn!==null&&gn>=3&&ds!=="Done"))?"warn":tg.g?"done":"";
+  var SR=[["srKidney","Bloods — kidneys",["Normal","High","Not done"]],["srThyroid","Bloods — thyroid",["Normal","High","Not done"]],["srBP","Blood pressure",["Normal","High","Not done"]],["srUrine","Urine",["Normal","Abnormal","Not done"]]];
+  var srHigh=SR.filter(function(x){return /High|Abnormal/.test(m[x[0]]||"");});var srDone=SR.filter(function(x){return m[x[0]]&&m[x[0]]!=="Not done";});
+  var sb=SR.map(function(x){return chipRow(x[1],"",x[0],x[2],m[x[0]]||"","neuSet");}).join("")+'<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:4px">Only shows for cats 10 and over. Anything high goes on the strip at the top and the report for the adopter.</div>';
+  var extraHtml=mk("mneut",6,"Neutering",e(nSum),nSt,nb,ns==="Booked"||ns==="Entire"&&!(wk!==null&&wk<17))+mk("mteeth",7,"Teeth",e(tSum),tSt,tb2,!!tg.from&&!m.teethGrade)
+    +(senior?mk("msenior",8,"Senior checks",e(srHigh.length?srHigh.map(function(x){return x[1].replace("Bloods — ","").toLowerCase()+" "+m[x[0]].toLowerCase();}).join(" · "):srDone.length+" of 4 done"),srHigh.length?"warn":srDone.length===4?"done":"",sb,!srDone.length):'');
+  var idx=_msecs(html);if(idx.length>=5)html=html.slice(0,idx[4])+extraHtml+html.slice(idx[4]);else html+=extraHtml;
+  // strip: neuter booking, dental, senior bloods
+  var sbits=[];if(ns==="Booked")sbits.push("Neuter booked"+(m.neuterBooked?" "+fmtDMY(m.neuterBooked).slice(0,5):"")+".");if(ds==="Needed")sbits.push("Dental needed.");if(srHigh.length)sbits.push("Senior checks: "+srHigh.map(function(x){return x[1].replace("Bloods — ","").toLowerCase();}).join(", ")+" high.");
+  if(sbits.length){var si=html.indexOf('<div class="stx">');if(si>=0){var se=html.indexOf('</div>',si);html=html.slice(0,se)+' '+e(sbits.join(" "))+html.slice(se);}}
+  // ringworm
   var rw=ringwormHold(S);
-  var rb=chipRow("Wood\u2019s lamp","","woods",["Negative","Positive","Not done"],m.woods||"","medCSet")+chipRow("Fungal culture",m.cultureDate?"sent "+fmtDMY(m.cultureDate):"","culture",["Negative","Positive","Pending","Not sent"],m.culture||"","medCSet")+(rw?'<div style="font-size:11.5px;color:#92400e;font-weight:700;margin-top:4px">'+e(rw.t)+' \u2014 this holds the Cattery move until the culture is negative.</div>':'<div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:4px">A positive lamp or a pending culture holds the Cattery move until the culture comes back negative.</div>');
-  var rwSec=mk("mring",8,"Ringworm checks",e([m.woods?"Wood\u2019s lamp "+m.woods.toLowerCase():"",m.culture?"culture "+m.culture.toLowerCase():""].filter(Boolean).join(" \u00b7 ")||"not checked"),rw?"warn":(m.woods||m.culture)?"done":"",rb,!!rw);
-  var fnd=arrivalFindings(S);if(fnd.length)felvSec='<div class="cflag a" style="margin-bottom:8px">Found on arrival: <b>'+e(fnd.join(", "))+'</b> \u2014 <span class="lnk" data-go="arrival">Arrival</span></div>'+felvSec;
+  var rb=chipRow("Wood’s lamp","","woods",["Negative","Positive","Not done"],m.woods||"","medCSet")+chipRow("Fungal culture",m.cultureDate?"sent "+fmtDMY(m.cultureDate):"","culture",["Negative","Positive","Pending","Not sent"],m.culture||"","medCSet")+(rw?'<div style="font-size:11.5px;color:#92400e;font-weight:700;margin-top:4px">'+e(rw.t)+' — this holds the Cattery move until the culture is negative.</div>':'<div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:4px">A positive lamp or a pending culture holds the Cattery move until the culture comes back negative.</div>');
+  var rwSec=mk("mring",8+extra,"Ringworm checks",e([m.woods?"Wood’s lamp "+m.woods.toLowerCase():"",m.culture?"culture "+m.culture.toLowerCase():""].filter(Boolean).join(" · ")||"not checked"),rw?"warn":(m.woods||m.culture)?"done":"",rb,!!rw);
   var i=html.indexOf('<div class="asec msec');if(i<0)return html+felvSec+rwSec;
-  var j=html.lastIndexOf('<div class="asec msec');var jEnd=html.indexOf('</div>',html.indexOf('<span class="acnt"></span></div>',j)+30);
-  // put ringworm after the last section: find the browNav start instead (simplest stable anchor)
   var k=html.lastIndexOf('<div class="brow"');if(k<0)k=html.length;
   return html.slice(0,i)+felvSec+html.slice(i,k)+rwSec+html.slice(k);}
 
@@ -6594,9 +6690,9 @@ function pupRehomeGate(){var w=dogAgeWeeks();if(w!==null&&w<9)return{ok:false,t:
 // ── Outcome: TNR door ──────────────────────────────────────────────
 var LEAVE_DOORS=[["Finished Isolation","In the Cattery \u2014 still here","Quarantine done, in a Cattery pod"],["Rehomed","Rehomed","Adopted \u2014 details from the Rehoming tab"],["Returned to Owner","Reclaimed by owner","Stray returned home"],["Returned to site (TNR)","Neutered & returned to site","Feral or community cat \u2014 TNR"],["Transferred","Transferred","To a rescue partner or another centre"],["Euthanised","Euthanised","Vet-certified \u00b7 management-approved \u00b7 never alone"],["Died in care","Died in care","The record closes with the facts"],["Escaped / Lost","Escaped / Lost","Reported, searched, logged"]];
 function finSet(k,v){S.fin=S.fin||{};S.fin[k]=(S.fin[k]===v)?"":v;persistSave();debouncedSave();renderMain();}
-function tnrFieldsHtml(f){var d=S.dog||{};var td=new Date().toISOString().slice(0,10);if(!f.outcomeDate){}return chipRow("Ear tip","","earTip",["Left ear tipped","Already tipped","Not tipped"],f.earTip||"","finSet")
+function tnrFieldsHtml(f){var d=Object.assign({},S.dog||{});d.foundAt=d.colony||d.foundAt;var td=new Date().toISOString().slice(0,10);if(!f.outcomeDate){}return chipRow("Ear tip",(!f.earTip&&(S.arrival||{}).earTip==="Ear-tipped")?"Arrival says already tipped":"","earTip",["Left ear tipped","Already tipped","Not tipped"],f.earTip||((S.arrival||{}).earTip==="Ear-tipped"?"Already tipped":""),"finSet")
   +'<div class="cq"><label>Returned to</label><div class="cchips"><span class="cchip'+(f.returnTo&&f.returnTo===d.foundAt?" on":"")+'" onclick="finSet(\'returnTo\',\''+esc(d.foundAt||"Where trapped").replace(/'/g,"\\'")+'\')">'+esc(d.foundAt?"Where trapped \u2014 "+d.foundAt:"Where trapped")+'</span><span class="cchip'+(f.returnTo&&f.returnTo!==d.foundAt?" on":"")+'" onclick="window._tnrOther=true;renderMain()">Somewhere else</span></div>'+((window._tnrOther||(f.returnTo&&f.returnTo!==d.foundAt))?'<div class="dog-fg" style="margin-top:6px">'+fld("Returned to",f.returnTo||"","fin.returnTo","text","place")+'</div>':'')+'</div>'
-  +'<div class="dog-fg">'+fld("Returned on",f.outcomeDate||"","fin.outcomeDate","date")+fld("Neutered on",(S.medical||{}).neuterDate||"","medical.neuterDate","date")+'</div>';}
+  +((S.dog||{}).feeder?'<div style="font-size:11.5px;color:#4b5160;font-weight:600;margin:-2px 0 8px">Feeder: '+esc(S.dog.feeder)+'</div>':'')+'<div class="dog-fg">'+fld("Returned on",f.outcomeDate||"","fin.outcomeDate","date")+fld("Neutered on",(S.medical||{}).neuterDate||"","medical.neuterDate","date")+'</div>';}
 
 // ── Tabs and the page ──────────────────────────────────────────────
 var TABS=[
@@ -6628,11 +6724,11 @@ function rowToRec(row){var st=null;try{st=typeof row.data==="string"?JSON.parse(
   if(!st.dog.name&&row.name)st.dog.name=row.name;if(!st.dog.intakeDate&&row.intake_date)st.dog.intakeDate=row.intake_date;
   if(!st.dog.kennel&&(st.dog.pen||st.dog.pod))st.dog.kennel=st.dog.pen||st.dog.pod;
   if(st.dog.kennel&&/^iso\s*\d/i.test(st.dog.kennel))st.dog.kennel=st.dog.kennel.replace(/^iso\s*/i,"Iso ");
+  if(st.dog.kennel&&!(Array.isArray(st.dog.penLog)&&st.dog.penLog.length))st.dog.penLog=[{pen:st.dog.kennel,from:st.dog.intakeDate||row.intake_date||"",by:st.dog.assessor||""}];
   return{id:row.id,savedAt:row.saved_at||row.updated_at||row.created_at||"",savedBy:st._savedBy||"",name:row.name||st.dog.name||"Unknown",breed:row.breed||st.dog.breed||"",refNo:row.ref_no||st.dog.refNo||"",intakeDate:row.intake_date||st.dog.intakeDate||"",assessor:row.assessor||"",score:0,trafficLight:"",state:st};}
 var REC_COLS="*";
 function handlingLight(){return null;}
 async function loadHistory(id){return [];}
-function renderIncomingStrip(){return "";}
 function incSync(){}
 // ── Report ─────────────────────────────────────────────────────────
 var REPORT_PAGES=[["id","Identity & arrival",/Cat details|Arrival/i],["asmt","Temperament",/Temperament/i],["med","Medical",/Medical|Vaccinations|FeLV/i],["iso","Day reports",/Day reports/i],["rh","Rehoming & outcome",/Rehoming|Foster|Outcome/i],["story","Notes",/Notes/i]];
@@ -6641,11 +6737,11 @@ function catReportFull(){var d=S.dog,e=esc;var m=S.medical||{};var t=S.temper||{
   var row=function(k,v){return v?'<div class="rrow"><span class="rk">'+k+'</span><span class="rv">'+e(v)+'</span></div>':'';};
   var head='<div style="background:#282932;color:#fff;border-radius:12px;padding:14px 18px;margin-bottom:12px">'+(d.refNo?'<div style="font-size:10px;color:#9a9fa8;font-weight:700">'+e(d.refNo)+'</div>':'')+'<div style="font-size:21px;font-weight:800">'+e(d.name||"Unnamed")+'</div><div style="font-size:11.5px;color:#cfd4c8">'+e([d.breed,d.sex,d.age,d.colour].filter(Boolean).join(" · "))+'</div></div>';
   var h=head;
-  h+=card("Cat details",row("Ref. no.",d.refNo)+row("Intake date",d.intakeDate?fmtDMY(d.intakeDate):"")+row("Reason",d.intakeReason)+row("Found at",d.foundAt)+row("Brought in by",d.broughtInBy)+row("Microchip",d.microchip)+row("Pen",kennelShort(d.kennel))+row("Quarantine",g.qDays+" days"+(g.moved?" · moved to the Cattery "+fmtDMY(d.cattery||f.outcomeDate||""):g.served?" · served":""))+row("Bonded to",d.bondId?((records.find(function(x){return String(x.id)===String(d.bondId);})||{}).name||""):""));
+  h+=card("Cat details",row("Ref. no.",d.refNo)+row("Intake date",d.intakeDate?fmtDMY(d.intakeDate):"")+row("Reason",d.intakeReason)+row("Found at",d.foundAt)+row("Brought in by",d.broughtInBy)+row("Microchip",d.microchip)+row("Chip registered to",d.chipTo?d.chipTo+(d.chipDb?" ("+d.chipDb+")":"")+(d.chipTransfer?" · "+d.chipTransfer:""):"")+row("Coat",[d.coatLength?d.coatLength.toLowerCase()+" coat":"",d.pattern].filter(Boolean).join(" · "))+row("Distinguishing marks",d.marks)+row("Colony or site",d.colony)+row("Feeder",d.feeder)+row("Pen",kennelShort(d.kennel))+row("Quarantine",g.qDays+" days"+(g.moved?" · moved to the Cattery "+fmtDMY(d.cattery||f.outcomeDate||""):g.served?" · served":""))+row("Bonded to",d.bondId?((records.find(function(x){return String(x.id)===String(d.bondId);})||{}).name||""):""));
   h+=card("Arrival",row("In the carrier",a.carrier)+row("First look",a.demeanour)+row("Weight on arrival",a.weight)+row("Chip scan",a.chipScan)+row("Sex, checked",a.sexCheck)+row("Ear tip",a.earTip)+row("Pregnant or nursing",a.pregnant&&a.pregnant!=="No"?a.pregnant:"")+row("Age by teeth",a.ageTeeth)+row("Health on arrival",(a.health||[]).join(", "))+row("Body condition",a.bcs)+row("Found on arrival",arrivalFindings(S).join(", "))+row("Handled",a.handled)+row("Home before",a.prevHome)+row("Other pets",a.prevPets)+(catIsStray(d)?row("Owner search",SEARCH_STEPS.filter(function(x){return (a.search||{})[x[0]];}).map(function(x){return x[1]+" ("+fmtDMY(a.search[x[0]].date)+")";}).join(", ")||"nothing logged")+row("Owner",a.ownerFound):""));
   var tp=temperOf(S);var _si=settleInfo(S);var _pf=(t.pf||[]).filter(function(x){return pfScore(x).full;});h+=card("Temperament",row("Overall",t.overall)+row("Pen-front tests",_pf.map(function(x){return dayWord(stayDay(d,x.date))+": "+pfScore(x).s+"/12";}).join(" · "))+row("Settling",_si.word?_si.word+(_si.text?" — "+_si.text:""):"")+row("Heading for",headingOf(S))+row("Picked up",t.pickup)+row("Stroked",t.stroke)+row("Brushed",t.brush)+row("Carrier",t.carrier)+row("Claws / paws",t.claws)+row("Nails clipped",t.nails)+row("Pills / meds",t.pills)+row("Strokes before it’s too much",t.strokeLimit)+row("Sensitive spots",(t.sensitive||[]).join(", "))+row("Other cats",t.withCats?t.withCats+(t.withCatsHow?" ("+t.withCatsHow.toLowerCase()+")":""):"")+row("Dogs",t.withDogs?t.withDogs+(t.withDogsHow?" ("+t.withDogsHow.toLowerCase()+")":""):"")+row("Children",t.withKids?t.withKids+(t.withKidsHow?" ("+t.withKidsHow.toLowerCase()+")":""):"")+row("Litter tray",t.tray)+row("Hide box",t.hide)+row("Voice",t.voice)+row("At the bowl",t.bowl)+row("Nights",t.nights)+row("Best home",t.bestHome)+row("What an adopter should know",t.adopterNote)+row("Home type",homeTypeOf(S).t)+((t.sits||[]).length?'<div style="font-size:12px;margin-top:6px">'+t.sits.map(function(s){return '<div><b>'+e(fmtDMY(s.date))+'</b> — '+e([(s.tags||[]).join(", ").toLowerCase(),s.text].filter(Boolean).join(" — "))+'</div>';}).join("")+'</div>':'')+(tp?'':'<div style="font-size:12px;color:#9a9fa8;font-style:italic">Not set yet.</div>'));
   var vac=(m.vaccinations||[]).filter(function(v){return v.date;}).sort(function(x,y){return x.date.localeCompare(y.date);});var par=(m.parasiteTreatments||m.parasites||[]).filter(function(v){return v.date;});
-  h+=card("Medical record",row("FeLV",m.felv||"not tested")+row("FIV",m.fiv||"not tested")+row("Tested on",m.testDate?fmtDMY(m.testDate):"")+row("Wood’s lamp",m.woods)+row("Fungal culture",m.culture)+vac.map(function(v){return row(v.type,fmtDMY(v.date));}).join("")+par.map(function(p){return row(p.product||p.type||"Treatment",fmtDMY(p.date));}).join("")+row("Neutered",m.neuterDate?fmtDMY(m.neuterDate):"")+row("Contagious now",activeContagiousList(m).map(function(x){return diseaseShortName(x.type);}).join(", ")));
+  h+=card("Medical record",row("FeLV",m.felv||"not tested")+row("FIV",m.fiv||"not tested")+row("Tested on",m.testDate?fmtDMY(m.testDate):"")+row("Wood’s lamp",m.woods)+row("Fungal culture",m.culture)+vac.map(function(v){return row(v.type,fmtDMY(v.date));}).join("")+par.map(function(p){return row(p.product||p.type||"Treatment",fmtDMY(p.date));}).join("")+row("Neutered",m.neuterDate?fmtDMY(m.neuterDate):neuterStatus(S))+row("Neuter agreement",m.neuterAgreement?"signed \u2014 neuter by "+(neuterAgreementDue(S)?fmtDMY(neuterAgreementDue(S)):"6 months old"):"")+row("RCP — vet says wait",m.rcpWait?m.rcpWait+(m.rcpWaitBy?" ("+m.rcpWaitBy+")":""):"")+row("Neuter booked",neuterStatus(S)==="Booked"&&m.neuterBooked?fmtDMY(m.neuterBooked)+(m.neuterVet?" · "+m.neuterVet:""):"")+row("Teeth",teethOf(S).g?teethOf(S).g+(m.dentalStatus?" · dental "+m.dentalStatus.toLowerCase():""):"")+row("Dental notes",m.dentalNotes)+(seniorCat(d)?row("Senior — kidneys",m.srKidney)+row("Senior — thyroid",m.srThyroid)+row("Senior — blood pressure",m.srBP)+row("Senior — urine",m.srUrine):"")+row("Contagious now",activeContagiousList(m).map(function(x){return diseaseShortName(x.type);}).join(", ")));
   var ds=catDays(S);h+=card("Day reports",ds.length?ds.map(function(x,i){return row(fmtDMY(x.date),[x.stress?"stress "+x.stress:"",x.eating,x.tray?"tray: "+x.tray.toLowerCase():"",x.wee&&x.wee!=="Normal"?"wee: "+x.wee.toLowerCase():"",x.water&&x.water!=="Normal"?"water: "+x.water.toLowerCase():"",x.pen?x.pen.toLowerCase():"",x.groom==="No"?"not grooming":"",(x.flu||[]).filter(function(y){return y!=="None";}).length?"flu: "+x.flu.join(", ").toLowerCase():"",x.notes].filter(Boolean).join(" · ")||"—");}).join(""):'<div style="font-size:12px;color:#9a9fa8;font-style:italic">None recorded.</div>');
   h+=card("Rehoming &amp; outcome",row("Rehoming stage",rh.stage)+row("Adopter",rh.adopterName)+row("Foster",(S.foster||{}).carer?(S.foster.carer+((S.foster||{}).out?" (out now)":"")):"")+row("Outcome",f.outcome==="Finished Isolation"?"In the Cattery":f.outcome)+row("Outcome date",f.outcomeDate?fmtDMY(f.outcomeDate):"")+row("Ear tip",f.earTip)+row("Returned to",f.returnTo));
   var ns=(S.notes||[]).slice().reverse();h+=card("Notes",ns.length?ns.map(function(n){return row(fmtDMY(n.date),n.text+(n.staff?" — "+n.staff:""));}).join(""):'<div style="font-size:12px;color:#9a9fa8;font-style:italic">None recorded.</div>');
@@ -6678,12 +6774,16 @@ function morningHtml(active){try{if(window._morningOff)return '';var me=currentN
   inU.forEach(function(r){if(said[r.id])return;var st=r.state||{};var c=activeContagiousList(st.medical||null);var flu=fluSuspect(st);if(c.length||flu){said[r.id]=1;s.push(L(r)+" "+(c.length?"has <b>"+esc(c.map(function(x){return diseaseShortName(x.type).toLowerCase();}).join(", "))+"</b>":"is <b>suspected cat flu</b>")+" — served last.");}});
   inU.forEach(function(r){if(strainRecent(r.state||{}))s.push(L(r)+' was <b style="color:#fca5a5">straining in the tray</b> \u2014 vet now.');});
   var plate=[];inU.forEach(function(r){var g=catGate(r,true);if(g.moved)return;qPlan(r.state||{}).filter(function(x){return x.late;}).forEach(function(x){plate.push(L(r)+" \u2014 "+esc(x.t.toLowerCase())+" "+(x.late===1?"a day":x.late+" days")+" late");});});if(plate.length)s.push("Quarantine plan: "+plate.join("; ")+".");
-  inU.filter(function(r){return settleWorry(r);}).forEach(function(r){s.push(L(r)+" <b>isn\u2019t settling</b> \u2014 talk to Kate before the Cattery move.");});
+  var tmw=addDaysStr(new Date().toISOString().slice(0,10),1),tdy=new Date().toISOString().slice(0,10);inU.forEach(function(r){var m=(r.state||{}).medical||{};if(neuterStatus(r.state||{})==="Booked"&&(m.neuterBooked===tdy||m.neuterBooked===tmw))s.push(L(r)+" is booked for neutering <b>"+(m.neuterBooked===tdy?"today":"tomorrow")+"</b>"+(m.neuterVet?" at "+esc(m.neuterVet):"")+".");});
+  records.filter(function(r){return chipXferDue(r);}).forEach(function(r){s.push(L(r)+"\u2019s chip still needs <b>transferring to the adopter</b>.");});
+  var crLeft=inU.filter(function(r){var c=inCattery(r)?(crOf(r.state)||{}):null;return c&&!(c.eat&&c.tray);});if(crLeft.length)s.push("Cattery round: <b>"+crLeft.length+" not checked</b> yet today.");
+  records.filter(function(r){return agreementFollowUp(r);}).forEach(function(r){s.push(L(r)+"\u2019s <b>neuter is due</b> under the agreement \u2014 check with the adopter, then log the date on Medical.");});
+  inU.filter(function(r){return settleWorry(r);}).forEach(function(r){s.push(L(r)+" <b>isn\u2019t settling</b> \u2014 look again before the Cattery move.");});
   var ready=inU.filter(function(r){return catGate(r).ready;});var shown={};
   ready.forEach(function(r){if(shown[r.id])return;var p=(r.state.dog||{}).bondId;var pr=p?ready.find(function(x){return String(x.id)===String(p);}):null;if(pr){shown[pr.id]=1;s.push(L(r)+" &amp; "+L(pr)+" are <b>ready for the Cattery</b> together.");}else s.push(L(r)+" is <b>ready for the Cattery</b>.");shown[r.id]=1;});
   var finToday=inU.filter(function(r){var g=catGate(r);return g.ii&&g.ii.state==="final"&&!g.moved;});if(finToday.length)s.push(finToday.map(function(r){return L(r);}).join(", ")+" finish"+(finToday.length===1?"es":"")+" quarantine today.");
   var kit=inU.filter(function(r){return recIsPup(r)&&!said[r.id];}).map(function(r){var g=catGate(r);if(g.kitten&&!firstRcpGiven(r.state))return L(r)+" needs "+(((r.state.dog||{}).sex||"").indexOf("Female")===0?"her":"his")+" first RCP";var kg=kittenGain(r.state);if(kg&&kg.tone!=="g")return L(r)+" is gaining "+kg.perWeek+" g a week";return null;}).filter(Boolean);if(kit.length)s.push("Kittens: "+kit.join("; ")+".");
-  var td=new Date().toISOString().slice(0,10);var rep=inU.filter(function(r){var g=catGate(r);return !g.moved&&!catDays(r.state).some(function(x){return x.date===td&&(x.eating||x.stress);});});if(rep.length)s.push("Day reports not written: "+rep.slice(0,5).map(function(r){return L(r);}).join(", ")+(rep.length>5?" and "+(rep.length-5)+" more":"")+".");
+  var td=new Date().toISOString().slice(0,10);var rep=inU.filter(function(r){var g=catGate(r);return !g.moved&&!catDays(r.state).some(function(x){return x.date===td&&dayMinDone(x);});});if(rep.length)s.push("Day reports not written: "+rep.slice(0,5).map(function(r){return L(r);}).join(", ")+(rep.length>5?" and "+(rep.length-5)+" more":"")+".");
   if(fost.length)s.push(fost.map(function(r){var f=r.state.foster;return L(r)+" is in foster"+(f.carer?" with "+esc(f.carer):"")+(f.due?", due back "+esc(fmtDMY(f.due)):"");}).join("; ")+".");
   var now=new Date();var stamp=now.toLocaleDateString("en-IE",{weekday:"long",day:"numeric",month:"long"})+" · written from the records at "+now.toTimeString().slice(0,5);
   return '<div class="morning"><div class="k">'+esc(stamp)+'<span onclick="window._morningOff=true;renderDashboard()">hide</span></div><p>'+s.join(" ")+'</p>'+(window._vitalsHtml||'')+'</div>';}catch(e){console.error(e);return '';}}
@@ -6693,12 +6793,6 @@ function catVitals(active){var inU=active.filter(function(r){return !((r.state&&
 var CAT_FILTERS=[["","All",function(r){return true;}],["q","Iso &amp; Q",function(r){return !catGate(r).moved;}],["cattery","Cattery",function(r){return catGate(r).moved;}],["ready","Ready",function(r){return catGate(r).ready;}],["contagious","Contagious",function(r){return activeContagiousList(r.state&&r.state.medical?r.state.medical:null).length>0||!!fluSuspect(r.state||{});}],["eating","Not eating",function(r){return !!eatAlarm(r);}],["kittens","Kittens",function(r){return recIsPup(r);}],["untested","Not tested",function(r){var m=(r.state||{}).medical||{};return !m.felv||m.felv==="Not tested";}],["foster","In foster",function(r){return !!((r.state&&r.state.foster)||{}).out;}]];
 
 // ── Data layer: the cats table, tolerant of missing columns ────────
-async function loadRecordsList(){if(!supabaseClient){records=[];return;}
-  if(!records.length)loadCachedRecordsList();
-  var res;try{res=await supabaseClient.from("cats").select("*").limit(1000);}catch(e){res={error:{message:e.message}};}
-  if(!res||res.error){console.error(res&&res.error);if(!records.length&&!loadCachedRecordsList())records=[];return;}
-  records=(res.data||[]).map(rowToRec).sort(function(a,b){return String(b.savedAt||"").localeCompare(String(a.savedAt||""));});
-  _recordsFromCache=false;_recordsCacheSlim=false;cacheRecordsList();}
 function catStripMissing(err,rows){var msg=String((err&&(err.message||err.details||err.hint))||"");var m=msg.match(/'([a-z_]+)' column/i)||msg.match(/column "?([a-z_]+)"? (?:of relation|does not exist)/i);if(!m)return false;var col=m[1];var hit=false;(Array.isArray(rows)?rows:[rows]).forEach(function(r){if(r&&Object.prototype.hasOwnProperty.call(r,col)){delete r[col];hit=true;}});return hit;}
 function initSupabase(){dogInitSupabase();var base=supabaseClient.from;supabaseClient.from=function(t){var q=base(t);if(t!=="cats")return q;
   var ins=q.insert,upd=q.update;
@@ -6748,16 +6842,15 @@ function catRehomeChecks(r){var st=r.state||{};var d=st.dog||{},m=st.medical||{}
   var tested=m.felv&&m.felv!=="Not tested"&&m.fiv&&m.fiv!=="Not tested";var felvPos=m.felv==="Positive";
   C.push({k:"test",tone:felvPos?"r":tested?"ok":"a",t:"FeLV / FIV",s:tested?(m.felv.toLowerCase()+" \u00b7 "+m.fiv.toLowerCase()+(m.testDate?" \u00b7 tested "+fmtDMY(m.testDate).slice(0,5):"")+(felvPos?" \u2014 talk to the vet before listing":"")):"not tested yet \u2014 Medical",go:"medical"});
   var vx=(m.vaccinations||[]).filter(function(v){return v.date&&v.date<=td;});var f1=vx.filter(function(v){return /^1st RCP|^RCP/i.test(v.type||"");}).map(function(v){return v.date;}).sort()[0];var f2=vx.filter(function(v){return /^2nd RCP/i.test(v.type||"");}).map(function(v){return v.date;}).sort()[0];
-  C.push({k:"rcp2",tone:f2?"ok":"a",t:"Second RCP",s:f2?"given "+fmtDMY(f2).slice(0,5):f1?"first given "+fmtDMY(f1).slice(0,5)+" \u00b7 second due "+fmtDMY(addDaysStr(f1,21)).slice(0,5)+" \u2014 Medical":"first not given yet \u2014 Medical",go:"medical"});
+  var _vc=catVaxCourse(st);C.push({k:"rcp2",tone:f2?"ok":"a",t:"Second RCP",s:f2?"given "+fmtDMY(f2).slice(0,5):f1?"first given "+fmtDMY(f1).slice(0,5)+" \u00b7 second "+(_vc.due2&&_vc.due2<td?"overdue \u2014 was due ":"due ")+fmtDMY(_vc.due2||addDaysStr(f1,21)).slice(0,5)+" \u2014 Medical":"first not given yet \u2014 Medical",go:"medical"});
   var nd=m.neuterDate||"";var ncert=catHasFile(st,"neutercert");
-  var preN=arrNeutered(st);C.push({k:"neuter",tone:(nd||ncert||preN)?"ok":"a",t:"Neutered",s:nd?"on "+fmtDMY(nd).slice(0,5):ncert?"certificate on file":preN?"already neutered \u2014 checked on arrival":"not recorded \u2014 Medical",go:"medical"});
+  var preN=arrNeutered(st)||m.neuterStatus==="Neutered before arrival";var agr=!(nd||ncert||preN)&&neuterAgreement(st);C.push({k:"neuter",tone:(nd||ncert||preN||agr)?"ok":"a",t:"Neutered",s:nd?"on "+fmtDMY(nd).slice(0,5):ncert?"certificate on file":preN?"already neutered \u2014 checked on arrival":agr?"too young \u2014 goes home with a neuter agreement"+(catHasFile(st,"neuteragr")?" (signed)":" \u2014 signed on Files when reserved"):"not recorded \u2014 Medical",go:agr?"files":"medical"});
   C.push({k:"chip",tone:d.microchip?"ok":"a",t:"Microchipped",s:d.microchip?"chip "+d.microchip:"no chip recorded \u2014 Cat tab",go:"dog"});
   var wk=catAgeWeeks(d);var young=wk!==null&&wk<9;
   C.push({k:"age",tone:young?"a":"ok",t:"Old enough",s:wk===null?"age not known \u00b7 kittens need 9 weeks":wk>=26?"adult \u00b7 kittens need 9 weeks":wk+" weeks"+(young?" \u2014 needs 9":" \u00b7 kittens need 9 weeks")});
   var p=catPartner(d);
   if(p){var pc=catRehomeChecks({id:p.id,state:Object.assign({},p.state,{dog:Object.assign({},(p.state||{}).dog,{bondId:""})})});var pl=pc.toGo;C.push({k:"pair",tone:"i",info:true,t:"Bonded with "+(p.name||"partner"),s:"they go to the same home \u2014 "+(pl?(p.name||"partner")+" has "+pl+" to go":(p.name||"partner")+" is ready too")});}
   var hd=headingOf(st);if(hd!=="Rehome as a pet")C.push({k:"head",tone:"n",info:true,t:"Heading for: "+hd.toLowerCase(),s:/TNR/.test(hd)?"goes back to site \u2014 the TNR door on Outcome":/Socialise/.test(hd)?"socialise first \u2014 Temperament":"a barn or yard home, not a house",go:/TNR/.test(hd)?"outcome":"temperament"});
-  if(catIsStray(d))C.push({k:"hold",tone:"n",info:true,t:"Stray hold",s:"waiting on the rule from Sarah / Ciara"});
   var toGo=C.filter(function(c){return !c.info&&c.tone!=="ok";}).length;
   return{checks:C,toGo:toGo,partner:p};}
 function catHomeCard(){var d=S.dog||{},t=S.temper||{};var e=esc;var nm=d.name||"this cat";var ht=homeTypeOf(S);var p=catPartner(d);var hd=headingOf(S);if(/barn/i.test(hd))ht={t:"Working / barn home",why:"from Temperament"};
@@ -6793,8 +6886,10 @@ function fileSlots(){var d=S.dog||{},m=S.medical||{},r=S.rehome||{},f=S.fin||{};
   add("Going out","contract","Adoption contract",reserved?(r.adopterName?"with "+r.adopterName:"adopter"):"appears when a cat is reserved",reserved);
   add("Going out","homecheck","Home-check report",reserved?"before the cat goes home":"appears when a cat is reserved",reserved);
   add("Going out","transfer","Transfer letter",f.outcome==="Transferred"?"to the receiving rescue":"only for a transfer to rescue",f.outcome==="Transferred");
+  var agrN=neuterAgreement(S);add("Going out","neuteragr","Neuter agreement",agrN?(reserved?"adopter agrees to neuter by "+(neuterAgreementDue(S)?fmtDMY(neuterAgreementDue(S)):"6 months old"):"appears when a kitten too young to neuter is reserved"):"only for kittens too young to neuter",agrN&&reserved);
   var tnr=f.outcome==="Returned to site (TNR)";
   add("Going out","tnr","TNR site form",tnr?"where returned, the feeder\u2019s name and consent":"where returned, the feeder\u2019s name and consent \u00b7 TNR only",tnr);
+  if(catHasFile(S,"neuteragr")&&S.medical&&!S.medical.neuterAgreement)S.medical.neuterAgreement=true;
   var files=S.files||[];out.forEach(function(sl){sl.files=files.map(function(x,idx){x._i=idx;return x;}).filter(function(x){return x.kind===sl.kind;});sl.state=sl.files.length?"have":(sl.applies?"need":"na");});
   return out;}
 
@@ -6852,7 +6947,7 @@ function settleCardHtml(){var d=S.dog,e=esc;var si=settleInfo(S);var g=catGate(c
     +'<div class="sgrid"><div><div class="sl">Pen-front test <b>of 12</b></div>'+miniBars(si.pv.map(function(v){return Math.round(v);}),12,"#22c55e")+'</div><div><div class="sl">Stress, from day reports <b>1\u20137</b></div>'+miniBars(si.sv,7,"#f59e0b")+'</div></div>'
     +(si.word?'<div style="font-size:12.5px;font-weight:700;margin-top:10px;color:'+col+'">'+si.word+(si.text?' \u2014 '+e(si.text)+'.':'.')+'</div>':'<div style="font-size:12.5px;font-weight:600;margin-top:10px;color:#6b7280">Two pen-front tests or two stress scores and this reads the trend.</div>')
     +(si.pens.length?'<div style="font-size:11.5px;font-weight:600;color:#4b5160;margin-top:4px">In the pen: '+e(si.pens.join(" \u2192 "))+'.</div>':'')
-    +'<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:4px;line-height:1.45">Steady or worse by the last day of quarantine lands in Today: \u201c'+e(d.name||"This cat")+' isn\u2019t settling \u2014 talk to Kate before the Cattery move\u201d.</div></div>';}
+    +'<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:4px;line-height:1.45">Steady or worse by the last day of quarantine lands in Today: \u201c'+e(d.name||"This cat")+' isn\u2019t settling \u2014 look again before the Cattery move\u201d.</div></div>';}
 
 // ── Where the cat is heading ───────────────────────────────────────
 var HEADINGS=["Rehome as a pet","Socialise first","Working / barn home","TNR \u2014 back to site"];
@@ -6934,6 +7029,8 @@ function arrIC(k,v){S.arrival=S.arrival||{};S.arrival[k]=(S.arrival[k]===v)?"":v
   if(k==="sexCheck"&&nv&&!d.sex)d.sex=/^Female/.test(nv)?"Female":/^Male/.test(nv)?"Male":"";
   if(k==="ageTeeth"&&nv==="Kitten teeth"&&!d.dob&&!d.age)d.age="Under 6 months (kitten)";
   persistSave();debouncedSave();renderMain();}
+function arrBcsCur(){var d0=S.dog.intakeDate;var e=(S.bcsLog||[]).filter(function(x){return x.date===d0;})[0];return e?String(e.score):((S.arrival||{}).bcs||"");}
+function arrBcs(k,v){S.arrival=S.arrival||{};var off=arrBcsCur()===v;S.arrival.bcs=off?"":v;var d0=S.dog.intakeDate||new Date().toISOString().slice(0,10);if(off){S.bcsLog=(S.bcsLog||[]).filter(function(x){return x.date!==d0;});}else setBCS(parseInt(v,10),d0);persistSave();debouncedSave();renderMain();}
 function arrNeutered(st){var a=st.arrival||{};return /neutered|spayed/i.test(a.sexCheck||"")||a.earTip==="Ear-tipped";}
 function arrSearch(k){S.arrival=S.arrival||{};var s=S.arrival.search=S.arrival.search||{};if(s[k])delete s[k];else s[k]={by:currentName(),date:new Date().toISOString().slice(0,10)};persistSave();debouncedSave();renderMain();}
 var SEARCH_STEPS=[["chipdb","Chip database checked"],["posts","Lost & found posts checked"],["notice","Found notice put up"],["vets","Local vets told"]];
@@ -6942,16 +7039,16 @@ function renderCatArrival(){var a=S.arrival||{};var d=S.dog,e=esc;var m=S.medica
   var q=function(l,em,k,opts){return chipRow(l,em,k,opts,a[k]||"","arrCSet");};var qi=function(l,em,k,opts){return chipRow(l,em,k,opts,a[k]||"","arrIC");};
   var stray=catIsStray(d);
   var s1=q("In the carrier","","carrier",["Calm","Crouched","Hissing","Thrashing"])+q("First look","","demeanour",["Relaxed","Alert","Frozen","Hiding","Aggressive"]);
-  var s2='<div class="g2"><div class="f"><label class="lbl">Weight on arrival</label><input type="text" inputmode="decimal" value="'+e(a.weight||"")+'" placeholder="kg, e.g. 3.9" onchange="arrWeightSave(this);renderMain()"></div><div class="f"><label class="lbl">Microchip</label><input type="text" value="'+e(d.microchip||"")+'" placeholder="scan \u2014 number, or none" data-save="dog.microchip"></div></div>'
+  var s2='<div class="g2"><div class="f"><label class="lbl">Weight on arrival'+mustTag()+'</label><input type="text" inputmode="decimal" value="'+e(a.weight||"")+'" placeholder="kg, e.g. 3.9" onchange="arrWeightSave(this);renderMain()"></div><div class="f"><label class="lbl">Microchip</label><input type="text" value="'+e(d.microchip||"")+'" placeholder="scan \u2014 number, or none" data-save="dog.microchip"></div></div>'
     +'<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin:-4px 0 6px">Weight goes in as the first weigh-in. A chip number goes onto the Cat tab and the Files slot.</div>'
-    +qi("Chip scan","","chipScan",["Chip found","No chip","Not scanned"])+qi("Sex, checked","","sexCheck",["Male entire","Male neutered","Female entire","Female spayed","Not sure"])
+    +qi("Chip scan"+mustTag(),"","chipScan",["Chip found","No chip","Not scanned"])+qi("Sex, checked","","sexCheck",["Male entire","Male neutered","Female entire","Female spayed","Not sure"])
     +qi("Ear tip","a tipped ear means already neutered on a TNR","earTip",["Ear-tipped","No tip"])+qi("Pregnant or nursing","queens only","pregnant",["No","Pregnant","Nursing \u2014 kittens with her","Not sure"])
     +qi("Age by teeth","fills the age if there\u2019s no date of birth","ageTeeth",["Kitten teeth","Young adult","Adult","Senior"]);
-  var s3=tog("Health on arrival","tap all that apply","health",["Sneezing","Eye discharge","Nose discharge","Thin","Fleas","Ear mites","Wounds","Matted","Diarrhoea","Looks well"])+q("Body condition (1\u20139)","","bcs",["1","2","3","4","5","6","7","8","9"])
+  var s3=tog("Health on arrival","tap all that apply","health",["Sneezing","Eye discharge","Nose discharge","Thin","Fleas","Ear mites","Wounds","Matted","Diarrhoea","Looks well"])+chipRow("Body condition (1\u20139)","same score as Weights \u2014 ideal is 5","bcs",["1","2","3","4","5","6","7","8","9"],arrBcsCur(),"arrBcs")
     +q("Ears","","ears",["Clean","Waxy","Mites","Infected"])+q("Eyes","","eyes",["Clear","Discharge","Cloudy","Injured"])+q("Mouth","","mouth",["Healthy","Gingivitis","Ulcers","Bad teeth"])+q("Hydration","the skin tent","hydration",["Normal","Skin slow back","Dehydrated"])+q("Flea comb","","fleaComb",["Clear","Flea dirt","Live fleas"])
     +'<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:4px">Anything off here shows on Medical as found on arrival; mouth ulcers count toward suspected cat flu.</div>';
   var fg=fleaGiven(S),wg=wormGiven(S);var tested=m.felv&&m.felv!=="Not tested"&&m.fiv&&m.fiv!=="Not tested";var due2=d.intakeDate?addDaysStr(d.intakeDate,2):"";
-  var tile=function(k,on,title,sub){return '<div class="tt'+(on?" on":"")+(window._arrTx===k?" pick":"")+'" onclick="window._arrTx=(window._arrTx===\''+k+'\'?null:\''+k+'\');renderMain()"><b>'+title+'</b><small>'+sub+'</small></div>';};
+  var tile=function(k,on,title,sub){return '<div class="tt'+(on?" on":"")+(window._arrTx===k?" pick":"")+'" onclick="window._arrTx=(window._arrTx===\''+k+'\'?null:\''+k+'\');renderMain()"><b>'+title+(k!=="woods"?mustTag():"")+'</b><small>'+sub+'</small></div>';};
   var s4='<div class="tgrid">'+tile("flea",!!fg,"Flea treatment",fg?e(String(fg.type).split(" \u2014")[0])+" \u00b7 given "+e(fmtDMY(fg.date).slice(0,5)):"not given \u2014 tap to pick")
     +tile("worm",!!wg,"Wormer",wg?e(String(wg.type).split(" \u2014")[0])+" \u00b7 given "+e(fmtDMY(wg.date).slice(0,5)):"not given \u2014 tap to pick")
     +tile("test",tested,"FeLV / FIV snap test",tested?"FeLV "+e(m.felv.toLowerCase())+" \u00b7 FIV "+e(m.fiv.toLowerCase()):"due "+(due2?"day 2 \u00b7 "+e(fmtDMY(due2).slice(0,5)):"day 2")+" \u2014 tap to record")
@@ -6965,15 +7062,16 @@ function renderCatArrival(){var a=S.arrival||{};var d=S.dog,e=esc;var m=S.medica
   var s6='<div class="dog-fg">'+fld("Indoor or outdoor before",a.prevHome||"","arrival.prevHome","text","e.g. indoor only, farm cat")+fld("Other pets at home",a.prevPets||"","arrival.prevPets","text","e.g. lived with a dog")+fld("Food they were on",a.prevFood||"","arrival.prevFood","text","")+fld("Why they came in, in their words",a.ownerWords||"","arrival.ownerWords","text","")+'</div>';
   var srch=a.search||{};var sDone=SEARCH_STEPS.filter(function(x){return srch[x[0]];});
   var s7='<div class="cq"><label>Done so far<em>each tap is dated and signed</em></label><div class="cchips">'+SEARCH_STEPS.map(function(x){return '<span class="cchip'+(srch[x[0]]?" on":"")+'" onclick="arrSearch(\''+x[0]+'\')">'+e(x[1])+'</span>';}).join("")+'</div>'+(sDone.length?'<div style="font-size:11px;color:#6b7280;font-weight:600">'+sDone.map(function(x){return e(x[1])+' \u2014 '+e(srch[x[0]].by||"")+', '+e(fmtDMY(srch[x[0]].date).slice(0,5));}).join(" \u00b7 ")+'</div>':'')+'</div>'
-    +q("Owner","","ownerFound",["No one yet","Someone came forward"])
+    +(d.chipTo==="A previous owner"?'<div class="cflag a" style="margin:0 0 8px">The chip is registered to a previous owner'+(d.chipOwner?' \u2014 '+e(d.chipOwner):'')+(d.chipDb?' ('+e(d.chipDb)+')':'')+'. Follow that lead first \u2014 <b data-go="dog" style="cursor:pointer;text-decoration:underline">Cat tab</b>.</div>':'')+q("Owner","","ownerFound",["No one yet","Someone came forward"])
     +(a.ownerFound==="Someone came forward"?'<div class="cflag a" style="margin:6px 0 0">An owner has come forward \u2014 check proof of ownership, then use the <b data-go="outcome" style="cursor:pointer;text-decoration:underline">Reclaimed by owner</b> door on Outcome.</div>':'')
-    +'<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:6px">The stray hold rule is still waiting on Sarah / Ciara \u2014 it slots in here when it comes.</div>';
+    +'<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:6px">A stray becomes rehomeable once quarantine is served \u2014 there\u2019s no separate hold.</div>';
   var sec=function(n,t,s,st,b){return catSecHtml("_arrOpen","a"+n,n,t,s,st,b,false);};
   var ok1=!!(a.carrier&&a.demeanour),ok2=!!(a.weight&&a.chipScan&&a.sexCheck),ok3=!!((a.health||[]).length&&a.bcs),ok4=!!(fg&&wg&&tested),ok5=!!(a.handled),ok6=!!(a.prevHome||a.prevPets||a.prevFood||a.ownerWords),ok7=sDone.length===SEARCH_STEPS.length||a.ownerFound==="Someone came forward";
   var oks=[ok1,ok2,ok3,ok4,ok5,ok6].concat(stray?[ok7]:[]);
   var fnd=arrivalFindings(S);var sick=(a.health||[]).some(function(x){return /Sneezing|discharge|Diarrhoea|Ear mites|Wounds/.test(x);})||/Mites|Infected|Discharge|Cloudy|Injured|Ulcers|Dehydrated|Live fleas/.test([a.ears,a.eyes,a.mouth,a.hydration,a.fleaComb].join(" "));
   var h='<h2 style="margin-bottom:4px">Arrival</h2><div class="sub">The first hour. What you note here feeds Medical, Temperament and the Overview.</div>';
-  h+=tabStrip(d.intakeDate?e(fmtDMY(d.intakeDate).slice(0,5)):'\u2014',"#c6e76c","#282932",'<b>'+e(d.intakeReason||"No reason yet")+'</b>'+(d.foundAt?' \u00b7 found at '+e(d.foundAt):'')+' \u00b7 '+oks.filter(Boolean).length+' of '+oks.length+' sections done.',"Quarantine",qLen(d)+" days");
+  h+=tabStrip(d.intakeDate?e(fmtDMY(d.intakeDate).slice(0,5)):'\u2014',"#c6e76c","#282932",'<b>'+e(d.intakeReason||"No reason yet")+'</b>'+(d.foundAt?' \u00b7 found at '+e(d.foundAt):'')+' \u00b7 '+oks.filter(Boolean).length+' of '+oks.length+' sections done. '+(function(){var mn=arrMin(S);return mn.left.length?'<b style="color:#fcd34d">Minimum: '+mn.left.join(", ")+' to do.</b>':'<b>Minimum done.</b>';})(),"Quarantine",qLen(d)+" days");
+  h+=mustLegend();
   h+=sec(1,"First look",e([a.carrier,a.demeanour].filter(Boolean).join(" \u00b7 ").toLowerCase()||"in the carrier, first look"),ok1?"done":"",s1);
   h+=sec(2,"Intake checks",e([a.weight,a.chipScan==="Chip found"?(d.microchip?"chip "+d.microchip:"chip found"):a.chipScan,a.sexCheck,a.earTip,a.pregnant&&a.pregnant!=="No"?a.pregnant:"",a.ageTeeth].filter(Boolean).join(" \u00b7 ").toLowerCase()||"weight, chip, sex, ear tip, age"),ok2?"done":"",s2);
   h+=sec(3,"Health on arrival",e([(a.health||[]).join(", ").toLowerCase(),a.bcs?"BCS "+a.bcs:""].concat(fnd).filter(Boolean).join(" \u00b7 ")||"what you can see"),ok3?(sick?"warn":"done"):"",s3);
@@ -6991,7 +7089,7 @@ function qPlan(st){var d=st.dog||{},m=st.medical||{};var td=new Date().toISOStri
   var tested=m.felv&&m.felv!=="Not tested"&&m.fiv&&m.fiv!=="Not tested";var d2=addDaysStr(d.intakeDate,2);
   it.push({k:"test",ok:tested,t:"FeLV / FIV test",s:tested?("FeLV "+m.felv.toLowerCase()+" \u00b7 FIV "+m.fiv.toLowerCase()):"due day 2 \u00b7 not done",late:tested?0:late(d2)});
   var rcp=firstRcpGiven(st);
-  it.push({k:"rcp",ok:rcp,t:"First RCP",s:rcp?"given":"any day in quarantine \u00b7 not given",late:0});
+  var _w=rcpWaitOf(st);it.push({k:"rcp",ok:rcp||!!_w,t:"First RCP",s:rcp?"given":_w?"vet says wait \u2014 "+_w.toLowerCase():"any day in quarantine \u00b7 not given",late:0});
   var rw=ringwormHold(st);if(rw)it.push({k:"rw",ok:false,t:"Ringworm",s:rw.t.toLowerCase(),late:0});
   var end=addDaysStr(d.intakeDate,N);var g=catGate({id:0,state:st},true);
   it.push({k:"end",ok:g.served||g.moved,num:N,t:"Quarantine ends",s:"day "+N+" \u00b7 "+fmtDMY(end).slice(0,5)+(g.moved?" \u2014 in the Cattery":" \u2014 then the Cattery gate"),late:0});
@@ -7004,28 +7102,30 @@ function qPlanHtml(){var it=qPlan(S);if(!it.length)return "";var g=catGate(curRe
 
 // ── Day reports ────────────────────────────────────────────────────
 function cdTog(k,v){var i=window._cdView||0;cdEnsure(i+1);var x=S.days[i];var a=x[k]=Array.isArray(x[k])?x[k]:[];var j=a.indexOf(v);if(j>=0)a.splice(j,1);else a.push(v);x.by=currentName();persistSave();debouncedSave();renderMain();}
-function strainRecent(st){var td=new Date().toISOString().slice(0,10),yd=addDaysStr(td,-1);return catDays(st).some(function(x){return (x.date===td||x.date===yd)&&x.wee==="Straining";});}
+function strainRecent(st){var td=new Date().toISOString().slice(0,10),yd=addDaysStr(td,-1);return catDays(st).some(function(x){return (x.date===td||x.date===yd)&&x.wee==="Straining";})||crStrain(st);}
 function renderCatDays(){var d=S.dog,e=esc;var r=curRec();var g=catGate(r);var N=Math.max(g.qDays,(S.days||[]).filter(function(x){return x&&x.date;}).length);cdEnsure(N);var td=new Date().toISOString().slice(0,10);
   var cur=window._cdView;if(cur==null||cur>=N){cur=0;for(var i=0;i<N;i++){if(S.days[i].date&&S.days[i].date<=td)cur=i;}}window._cdView=cur;
-  var done=S.days.slice(0,N).filter(function(x){return x.eating||x.stress;}).length;
+  var done=S.days.slice(0,N).filter(dayMinDone).length;
   var hh=g.moved?null:hoursSinceAte(S);var flu=fluSuspect(S);var he=heShe(d,"she","he"),him=heShe(d,"herself","himself");
   var h='<h2 style="margin-bottom:4px">Day reports</h2><div class="sub">One report a day through quarantine. Stress, eating, the tray and cat flu signs \u2014 a tap each.</div>';
-  var ls=lastStress(S);var sent=done+' of '+N+' reports written.'+(ls?' Stress '+ls+' ('+CSS_WORDS[ls-1]+').':'')+(flu?' <b style="color:#fca5a5">Suspected cat flu.</b>':'');
+  var ls=lastStress(S);var sent=done+' of '+N+' reports done (the minimum).'+(ls?' Stress '+ls+' ('+CSS_WORDS[ls-1]+').':'')+(flu?' <b style="color:#fca5a5">Suspected cat flu.</b>':'');
   h+=tabStrip(done>=N?'DONE':String(done)+'<small>of '+N+'</small>',done>=N?"#22c55e":"#c6e76c","#282932",sent,"Last ate",hh===null?"\u2014":hh<1?"just now":hh+" h ago");
   if(hh!==null&&hh>=24&&catIsHere(r))h+='<div class="cflag '+(hh>=48?"r":"a")+'">'+e(d.name||"This cat")+' last ate <b>'+(S.lastAte?e(new Date(S.lastAte).toLocaleString("en-IE",{weekday:"short",hour:"2-digit",minute:"2-digit"})):"before the first report")+' \u2014 '+hh+' hours</b>. Over 24 h is amber, over 48 h red \u2014 tell the vet. Cats go downhill fast off food. <span class="lnk" onclick="catAteNow()">Ate just now</span></div>';
   if(flu)h+='<div class="cflag r">Two or more cat flu signs on '+e(fmtDMY(flu.date))+' \u2014 <b>suspected cat flu</b>: served last, gloves and apron. Add it on Medical if the vet confirms.</div>';
   if(strainRecent(S))h+='<div class="cflag r"><b>Straining in the tray \u2014 vet now.</b> '+(heShe(d,false,true)?'In a male it can be a blocked bladder, which kills within a day or two.':'Could be cystitis or a blockage \u2014 don\u2019t wait.')+'</div>';
+  if(g.moved)h+=crHistoryHtml();
+  h+=mustLegend();
   h+=qPlanHtml();
   var dot=function(x){return /Ate all|Ate some/.test(x.eating||"")?"#22c55e":x.eating==="Picked"?"#f59e0b":x.eating==="Nothing"?"#ef4444":"";};
-  h+='<div class="dpills">'+S.days.slice(0,N).map(function(x,i){var st=(x.eating||x.stress)?"g":x.date&&x.date<td?"m":"";var dc=dot(x);return '<div class="dpill'+(i===cur?" on":"")+(x.date===td?" dtoday":"")+' '+st+'" onclick="window._cdView='+i+';renderMain()"><b>Day '+(i+1)+'</b><small>'+(x.date?e(fmtDMY(x.date).slice(0,5)):"")+'</small>'+(dc?'<span class="pd" style="background:'+dc+'"></span>':'')+(x.stress?'<span class="ps">'+e(x.stress)+'</span>':'')+'</div>';}).join("")+'</div>';
+  h+='<div class="dpills">'+S.days.slice(0,N).map(function(x,i){var st=dayMinDone(x)?"g":x.date&&x.date<td?"m":"";var dc=dot(x);return '<div class="dpill'+(i===cur?" on":"")+(x.date===td?" dtoday":"")+' '+st+'" onclick="window._cdView='+i+';renderMain()"><b>Day '+(i+1)+'</b><small>'+(x.date?e(fmtDMY(x.date).slice(0,5)):"")+'</small>'+(dc?'<span class="pd" style="background:'+dc+'"></span>':'')+(x.stress?'<span class="ps">'+e(x.stress)+'</span>':'')+'</div>';}).join("")+'</div>';
   var x=S.days[cur];
-  var b='<div class="cq"><label>Cat Stress Score<em>Kessler &amp; Turner, 1\u20137</em></label><div class="cssg">'+CSS_WORDS.map(function(w,k){var v=String(k+1);return '<span class="'+(String(x.stress)===v?"on":"")+'" onclick="cdSet('+cur+',\'stress\',\''+v+'\')"><b>'+v+'</b><small>'+w+'</small></span>';}).join("")+'</div>';
+  var b='<div class="cq"><label>Cat Stress Score'+mustTag()+'<em>Kessler &amp; Turner, 1\u20137</em></label><div class="cssg">'+CSS_WORDS.map(function(w,k){var v=String(k+1);return '<span class="'+(String(x.stress)===v?"on":"")+'" onclick="cdSet('+cur+',\'stress\',\''+v+'\')"><b>'+v+'</b><small>'+w+'</small></span>';}).join("")+'</div>';
   var trend=S.days.slice(0,N).map(function(y){return parseInt(y.stress,10)||0;});b+='<div class="csst">'+trend.map(function(v,k){return '<i class="'+(k===cur?"n":"")+'" style="height:'+(v?Math.round(v/7*100):4)+'%" title="Day '+(k+1)+(v?": "+v:"")+'"></i>';}).join("")+'</div></div>';
-  b+=chipRow("Eating","","eating",["Ate all","Ate some","Picked","Nothing"],x.eating||"","cdSetCur");
+  b+=chipRow("Eating"+mustTag(),"","eating",["Ate all","Ate some","Picked","Nothing"],x.eating||"","cdSetCur");
   if(x.eating==="Picked"||x.eating==="Nothing")b+=multiRow("Tried","shows when "+he+" picked or ate nothing",["Warmed it","Different food","Hand-fed","Appetite help from the vet"],x.tried,"cdTog","tried");
   b+=chipRow("Water","","water",["Normal","Drinking more","Barely","Not seen"],x.water||"","cdSetCur");
-  b+=chipRow("Litter tray","","tray",["Normal","Diarrhoea","Nothing passed","Outside the tray"],x.tray||"","cdSetCur");
-  b+=chipRow("Wee","","wee",["Normal","None seen","Straining"],x.wee||"","cdSetCur");
+  b+=chipRow("Litter tray"+mustTag(),"","tray",["Normal","Diarrhoea","Nothing passed","Outside the tray"],x.tray||"","cdSetCur");
+  b+=chipRow("Wee"+mustTag(),"","wee",["Normal","None seen","Straining"],x.wee||"","cdSetCur");
   if(x.wee==="Straining")b+='<div class="cflag r" style="margin:0 0 8px"><b>Straining with little or nothing coming out \u2014 vet now.</b> In a male it can be a blocked bladder, which kills within a day or two.</div>';
   b+='<div class="cq"><label>Cat flu signs<em>two or more = suspected, served last</em></label><div class="cchips">'+FLU_SIGNS.concat(["None"]).map(function(s){return '<span class="cchip'+((x.flu||[]).indexOf(s)>=0?" on":"")+'" onclick="cdFlu('+cur+',\''+s+'\')">'+s+'</span>';}).join("")+'</div></div>';
   b+=chipRow("In the pen","feeds Settling in on Temperament","pen",["Out and about","Back of the pen","In the hide box","Came to the front"],x.pen||"","cdSetCur");
@@ -7034,6 +7134,48 @@ function renderCatDays(){var d=S.dog,e=esc;var r=curRec();var g=catGate(r);var N
   h+='<div class="card">'+b+'</div>';
   if(N<20)h+='<div style="text-align:center;margin:6px 0 4px"><span class="lnk" onclick="cdEnsure('+(N+1)+');S.dog.isoExt=S.dog.isoExt||[];S.dog.isoExt.push({days:1,reason:\'Extra day report\',by:currentName(),date:new Date().toISOString().slice(0,10)});persistSave();debouncedSave();window._cdView='+N+';renderMain()">+ another day</span></div>';
   return h+browNav("days");}
+
+// ══ Decisions 10 Oct: neuter agreement · vet says wait · Cattery round · the minimum ══
+
+// ── The minimum: what has to be filled; everything else is optional ──
+function mustTag(){return ' <span class="must">must</span>';}
+function mustLegend(){return '<div class="mustleg"><span class="must">must</span> is the minimum. Everything else helps, but it’s optional.</div>';}
+function dayMinDone(x){return !!(x&&x.stress&&x.eating&&x.tray&&x.wee);}
+function arrMin(st){var a=st.arrival||{},m=st.medical||{};var tested=m.felv&&m.felv!=="Not tested"&&m.fiv&&m.fiv!=="Not tested";
+  var it=[["weight",!!a.weight],["chip scan",!!a.chipScan],["flea",!!fleaGiven(st)],["wormer",!!wormGiven(st)],["FeLV / FIV test",!!tested]];
+  return{left:it.filter(function(x){return !x[1];}).map(function(x){return x[0];}),done:it.filter(function(x){return x[1];}).length,n:it.length};}
+
+// ── Neuter agreement: kittens too young to neuter go home on one ───
+function neuterAgreement(st){var ns=neuterStatus(st);if(/Done|before/.test(ns))return false;var wk=catAgeWeeks(st.dog||{});return ns==="Too young yet"||(wk!==null&&wk<17);}
+function neuterAgreementDue(st){var d=st.dog||{};return d.dob?addDaysStr(d.dob,182):"";}
+function agreementFollowUp(r){var st=r.state||{};var f=st.fin||{};if(f.outcome!=="Rehomed")return false;var m=st.medical||{};if(m.neuterDate||!m.neuterAgreement)return false;var due=neuterAgreementDue(st);if(!due)return false;return due<=addDaysStr(new Date().toISOString().slice(0,10),7);}
+
+// ── Vet says wait: pregnant, nursing, too young or unwell — no RCP yet ──
+var RCP_WAIT=["Pregnant","Nursing","Too young","Unwell"];
+function rcpWaitSet(k,v){if(!S.medical)S.medical=defaultMedical();var m=S.medical;m.rcpWait=(m.rcpWait===v)?"":v;m.rcpWaitBy=m.rcpWait?currentName():"";m.rcpWaitOn=m.rcpWait?new Date().toISOString().slice(0,10):"";persistSave();debouncedSave();renderMain();}
+function rcpWaitOf(st){var m=(st||{}).medical||{};return m.rcpWait||"";}
+function rcpWaitHtml(){var m=S.medical||{};var a=S.arrival||{};var hint=!m.rcpWait&&/Pregnant|Nursing/.test(a.pregnant||"")?'<div class="cflag a" style="margin:0 0 8px">Arrival says <b>'+esc(a.pregnant.split(" —")[0].toLowerCase())+'</b> — ask the vet before giving the RCP.</div>':'';
+  return hint+chipRow("Vet says wait","no RCP yet — the Cattery gate lets the cat through on the vet’s word","rcpWait",RCP_WAIT,m.rcpWait||"","rcpWaitSet")+(m.rcpWait?'<div style="font-size:11px;color:#6b7280;font-weight:600;margin:-4px 0 10px">Set by '+esc(m.rcpWaitBy||"")+(m.rcpWaitOn?' on '+esc(fmtDMY(m.rcpWaitOn)):'')+'. Clear it once the vet says go.</div>':'');}
+
+// ── Cattery round: two taps a day for every cat in the Cattery ─────
+var CR_EAT=["Ate","Some","Nothing"],CR_TRAY=["Normal","Loose","Nothing","Straining"];
+function inCattery(r){var st=r.state||{};return catIsHere(r)&&(st.fin||{}).outcome==="Finished Isolation";}
+function crToday(){return new Date().toISOString().slice(0,10);}
+function crOf(st,date){return ((st||{}).cchk||{})[date||crToday()]||null;}
+function crSet(id,k,v){var td=crToday();var rec=records.find(function(x){return String(x.id)===String(id);});var open=S&&String(S._id)===String(id);var st=open?S:(rec&&rec.state);if(!st)return;
+  st.cchk=st.cchk||{};var c=st.cchk[td]=st.cchk[td]||{};c[k]=(c[k]===v)?"":v;c.by=currentName();if(k==="eat"&&(v==="Ate"||v==="Some")&&c[k])st.lastAte=new Date().toISOString();
+  if(open){if(rec)rec.state=S;persistSave();debouncedSave();}else{try{saveRecordChange(rec);}catch(e){}}
+  if(document.getElementById("dashboard-screen")&&document.getElementById("dashboard-screen").offsetParent!==null){try{renderDashboard();}catch(e){}}else renderMain();}
+function crAlarm(st){var td=crToday(),yd=addDaysStr(td,-1);var a=crOf(st,td),b=crOf(st,yd);var nt=a&&a.eat==="Nothing",ny=b&&b.eat==="Nothing";if(nt&&ny)return{h:48,red:true};if(nt||(ny&&!(a&&a.eat)))return{h:24,red:false};return null;}
+function crStrain(st){var td=crToday(),yd=addDaysStr(td,-1);return [crOf(st,td),crOf(st,yd)].some(function(c){return c&&c.tray==="Straining";});}
+function crRow(r){var st=r.state||{};var c=crOf(st)||{};var d=st.dog||{};var e=esc;var ch=function(k,opts){return opts.map(function(o){var on=c[k]===o;var bad=(o==="Nothing"&&k==="eat")||o==="Straining";return '<span class="cchip'+(on?" on":"")+(on&&bad?" bad":"")+'" onclick="event.stopPropagation();crSet('+r.id+',\''+k+'\',\''+o+'\')">'+o+'</span>';}).join("");};
+  var done=c.eat&&c.tray;return '<div class="crrow'+(done?" done":"")+'"><div class="crn" onclick="openDogAt('+r.id+',\'days\')"><b>'+e(r.name||"")+'</b><small>'+e(kennelShort(d.kennel)||"")+'</small></div><div class="crc"><i>Ate</i>'+ch("eat",CR_EAT)+'</div><div class="crc"><i>Tray</i>'+ch("tray",CR_TRAY)+'</div></div>';}
+function renderIncomingStrip(){var cats=records.filter(inCattery).sort(function(a,b){return kennelCompare((a.state.dog||{}).kennel,(b.state.dog||{}).kennel);});if(!cats.length)return "";
+  var done=cats.filter(function(r){var c=crOf(r.state)||{};return c.eat&&c.tray;}).length;var open=window._crOpen!==undefined?window._crOpen:done<cats.length;
+  return '<div class="card crcard"><div class="lbl" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;margin:0" onclick="window._crOpen='+(open?'false':'true')+';renderDashboard()">Cattery round · today<span style="text-transform:none;letter-spacing:0;color:'+(done===cats.length?"#166534":"#92400e")+'">'+done+' of '+cats.length+' checked '+(open?'▴':'▾')+'</span></div>'+(open?'<div style="margin-top:8px">'+cats.map(crRow).join("")+'</div><div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:6px">Two taps a cat. Nothing eaten two days running goes red; straining goes red straight away.</div>':'')+'</div>';}
+function crHistoryHtml(){var st=S;var td=crToday();var rows=[];for(var i=0;i<7;i++){var dt=addDaysStr(td,-i);var c=crOf(st,dt);rows.push('<tr><td>'+esc(fmtDMY(dt).slice(0,5))+'</td><td>'+esc(c&&c.eat||"—")+'</td><td>'+esc(c&&c.tray||"—")+'</td><td>'+esc(c&&c.by||"")+'</td></tr>');}
+  var c0=crOf(st)||{};var ch=function(k,opts){return '<div class="cchips">'+opts.map(function(o){return '<span class="cchip'+(c0[k]===o?" on":"")+'" onclick="crSet('+JSON.stringify(String(S._id)).replace(/"/g,"&quot;")+',\''+k+'\',\''+o+'\')">'+o+'</span>';}).join("")+'</div>';};
+  return '<div class="card"><div class="lbl" style="margin-bottom:8px">Cattery round — today</div><div class="cq"><label>Ate'+mustTag()+'</label>'+ch("eat",CR_EAT)+'</div><div class="cq"><label>Tray'+mustTag()+'</label>'+ch("tray",CR_TRAY)+'</div>'+(crStrain(st)?'<div class="cflag r" style="margin:6px 0 0"><b>Straining in the tray — vet now.</b></div>':'')+'<div class="lbl" style="margin-top:10px">The last 7 days</div><table class="ctbl"><tr><th>Day</th><th>Ate</th><th>Tray</th><th>By</th></tr>'+rows.join("")+'</table><div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:4px">The same two taps as the Cattery round on the board.</div></div>';}
 
 // ── Init ──────────────────────────────────────────────────────────
 (function(){
