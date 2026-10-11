@@ -6165,6 +6165,7 @@ function handleAppClick(e){
   if(dl){var role=currentRole();if(role==="staff"){appAlert("You don't have permission to delete records.");return;}appConfirm("Delete this record? Cannot be undone.",function(){deleteRecord(parseInt(dl.dataset.delete));},{danger:true});return;}
 }
 document.getElementById("wrap").addEventListener("click",handleAppClick);
+document.addEventListener("click",function(e){var t=e.target&&e.target.closest?e.target.closest("#bottombar [data-go], #moresheet [data-go]"):null;if(!t)return;var ms=document.getElementById("moresheet");if(ms)ms.style.display="none";S.tab=t.getAttribute("data-go");render();try{renderBottomBar();}catch(_e){}window.scrollTo(0,0);});
 document.getElementById("dashboard-screen").addEventListener("click",handleAppClick);
 document.getElementById("wrap").addEventListener("input",function(e){
   var el=e.target;
