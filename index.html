@@ -160,6 +160,8 @@ nav::-webkit-scrollbar{display:none}
 #dashboard-content mark{background:#e3f3b0;color:#282932;border-radius:2px;padding:0}
 .rxmore{text-align:center;font-size:11.5px;font-weight:800;color:#6b7280;padding:12px 0 2px;cursor:pointer}.rxmore.q{font-weight:700;padding-top:6px}
 .rxempty{text-align:center;padding:30px 10px;color:#6b7280;font-size:13px;font-weight:600}
+.db2-sw a{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:20px;color:#9a9fa8;text-decoration:none}.db2-sw a:hover{color:#fff}
+@media(max-width:420px){.db2 .db2-sw b{display:inline}.db2 .db2-sw a{padding:4px 7px}}
 .fd2{background:#fff;border:1px solid #e4e7e0;border-left:4px solid #cfd4c8;border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;margin-bottom:6px;cursor:pointer}.fd2:hover{border-color:#cfd4c8}.fd2 .jk{margin-top:2px}.fd2 .m{flex:1;min-width:0}.fd2 .m b{font-size:14.5px;color:#282932;display:block}.fd2 .m small{display:block;font-size:11.5px;color:#6b7280;font-weight:600;margin-top:1px}
 .fd2 .g{font-size:21px;font-weight:900;color:#1d4ed8;text-align:right;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums}.fd2 .g.sug{color:#4d7c0f}.fd2 .g small{display:block;font-size:11px;color:#6b7280;font-weight:800;margin-top:4px}
 .fd2 .ap{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}.fd2 .ap span{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:20px;background:#f1f3ee;color:#6b7280}.fd2 .ap .ok{background:#dcfce7;color:#166534}.fd2 .ap .warn{background:#fef3c7;color:#92400e}.fd2 .ap .bad{background:#fee2e2;color:#991b1b}.fd2 .ap .con{background:#ef4444;color:#fff}
@@ -665,7 +667,7 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
     <div class="db2-mid"><b id="dash-clock"></b><span id="dash-count"></span><div class="db2-srch hide-narrow"><input id="dash-hsearch" placeholder="Name, breed, kennel, chip, adopter…" oninput="setDashFilter('S',this.value);window._dbCaret=this.selectionStart;window._dbSearchActive='h';dashSearchRender()"></div></div>
     <div class="db2-r">
       <span id="dash-user" onclick="showDashSection('profile')" class="db2-av" style="display:none"></span>
-      <a href="cats.html" class="db2-sw" title="Switch to the cat app"><b>Dogs</b><span>Cats</span></a>
+      <span class="db2-sw"><b>Dogs</b><a href="cats.html">Cats</a><a href="stables.html">Stables</a></span>
       <button onclick="showIncidentModal()" class="db2-btn i" title="Quickly log an incident">Incident</button>
       <button id="dash-new-btn" onclick="openNewDog()" class="db2-btn p" title="Start a new dog">+ New dog</button>
       <div style="position:relative">
@@ -1786,7 +1788,7 @@ function toggleDashMenu(e){if(e){e.stopPropagation();}var m=document.getElementB
     +item("records","All records","every dog, here or gone \u00b7 search and filter")
     +item("month","The month","ins, outs, stays, lights, vet \u00b7 the unit report")
     +(role==="admin"||role==="manager"?'<div class="h">Admin</div>'+(role==="admin"?item("users","Manage users",c.users+" people"+(c.invited?" \u00b7 "+c.invited+" invited":"")):'')+'<div class="mi" onclick="closeDashMenu();downloadBackup()"><div><b>Backup</b><small>'+(c.backupDate?"download a copy \u00b7 last "+e2(fmtDMY(c.backupDate)):"download a copy \u00b7 none on this device yet")+'</small></div>'+(c.backupDays===null||c.backupDays>=14?'<span class="bd r">'+(c.backupDays===null?"never":c.backupDays+" days")+'</span>':'<span class="ch">&rsaquo;</span>')+'</div>':'')
-    +'<div class="also">'+'<span onclick="dashMenuGo(\'upcomingMedical\')">Upcoming medical</span><a href="cats.html" style="color:inherit">Cats \u203a</a></div>'
+    +'<div class="also">'+'<span onclick="dashMenuGo(\'upcomingMedical\')">Upcoming medical</span><a href="cats.html" style="color:inherit">Cats \u203a</a><a href="stables.html" style="color:inherit">Stables \u203a</a></div>'
     +'<div class="foot"><span>v'+e2(APP_VERSION)+' \u00b7 <a href="#" onclick="closeDashMenu();showWhatsNew(true);return false">What\u0027s new \u203a</a></span><span class="out" onclick="closeDashMenu();appConfirm(\'Sign out of NSPCA Longford?\',doLogout)">Sign out</span></div></div>';
   m.innerHTML=h;m.style.display="block";document.body.classList.add("menu-open");setTimeout(function(){document.addEventListener("keydown",_escDashMenu);},0);}
 function _escDashMenu(ev){if(ev.key==="Escape")closeDashMenu();}
