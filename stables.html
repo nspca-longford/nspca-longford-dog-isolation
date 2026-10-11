@@ -242,6 +242,11 @@ nav::-webkit-scrollbar{display:none}
 
 .stpair u{text-decoration:none;cursor:pointer}.stpair u:hover{text-decoration:underline}
 .rxdot,.rxea,.rxlp{display:none!important}
+
+.stph2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stph{background:#e4e7e0 center/cover no-repeat;border-radius:10px;height:110px;display:flex;align-items:flex-end;padding:6px}.stph b{font-size:11px;font-weight:800;background:rgba(255,255,255,.85);padding:2px 6px;border-radius:6px}
+.stx-del{text-decoration:none;color:#9a9fa8;font-weight:700;cursor:pointer;margin-left:6px}
+.dueg{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.dueg .f{min-width:0}
+.stclock b{white-space:nowrap}
 .only-wide{display:none}
 @media(min-width:960px){.only-wide{display:block}.hide-wide{display:none}}
 .sidepanel{display:flex;flex-direction:column;gap:10px}
@@ -1292,7 +1297,7 @@ function myWeek(name){var now=new Date();var day=(now.getDay()+6)%7;var mon=new 
   out.start=start;return out;}
 function renderProfile(){
   var me=CURRENT_USER||{name:currentName(),code:localStorage.getItem("nspca-intake-auth")||"",role:currentRole()};var meta=userMeta(me.code);var role=me.role||currentRole();
-  var roleLabel=(CURRENT_USER&&CURRENT_USER.title)?CURRENT_USER.title:role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Animal Trainer \u0026 Behaviour Specialist":"Staff";
+  var roleLabel=userTitle(CURRENT_USER)?userTitle(CURRENT_USER):role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Animal Trainer \u0026 Behaviour Specialist":"Staff";
   var photo=userPhoto(me.code);var autoMins=getAutoLogoutMins();var email=(me.email||authEmail()||"");var devices=devProfiles().length;var wk=myWeek(me.name);
   var av=photo?'<img src="'+blobSrc(photo)+'" class="pf-av">':'<div class="pf-av" style="background:'+avatarColor(me.name)+';color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center">'+initials(me.name)+'</div>';
   var row=function(l,sub,act){return '<div class="pf-row"><div><b>'+l+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div>'+(act||'')+'</div>';};
@@ -1338,7 +1343,7 @@ function renderUsersAdmin(){
   var quiet=people.filter(function(u){var t=userLastIn(u);return t&&now-t>14*864e5&&u.active!==false;});
   var bits=['<b>'+emailN+' on email sign-in</b>'];if(codes.length)bits.push(codes.length+' shared code'+(codes.length===1?'':'s'));if(invited.length)bits.push('<b>'+esc(invited.map(function(u){return u.name;}).join(", "))+' invited</b> — not in yet');
   var sent=bits.join(", ")+'.'+(quiet.length?' '+esc(quiet.slice(0,2).map(function(u){return u.name;}).join(" and "))+' last in '+fmtAgo(userLastIn(quiet[0]))+'.':'');
-  var row=function(u){var ri=userRoleInfo(u.role);var t=userLastIn(u);var off=u.active===false;var inv=off&&u.email;var r;
+  var row=function(u){var ri=userTitle(u)?[esc(userTitle(u)).toUpperCase(),"#0d9488"]:userRoleInfo(u.role);var t=userLastIn(u);var off=u.active===false;var inv=off&&u.email;var r;
     if(u.code===me)r='<span class="ur-s on">in now</span>';else if(inv)r='<span class="ur-s inv">invited</span>';else if(off)r='<span class="ur-s off">switched off</span>';else r='<span class="ur-s'+(t&&now-t<7*864e5?' on':'')+'">'+(t?esc(fmtAgo(t)):'—')+'</span>';
     var sub=u.email?'email · '+esc(u.email):'code '+esc(u.code)+(shared(u)?' · shared':'');if(u.source==="app")sub+=' · built-in';
     return '<div class="ur'+(off&&!inv?' off':'')+'" onclick="userTap(\''+esc(u.code)+'\')">'+userAvatarHtml(u,34)+'<div class="ur-m"><b>'+esc(u.name)+' <span class="ur-rp" style="background:'+ri[1]+'">'+ri[0]+'</span></b><small>'+sub+'</small></div>'+r+'</div>';};
@@ -1473,7 +1478,7 @@ function removeAvatar(){
   },{danger:true});
 }
 
-function showDashSection(section){try{bumpActivity();}catch(e){}
+function dogShowDashSection(section){try{bumpActivity();}catch(e){}
   window._dashSection=section;
   var st=document.getElementById("overdue-sticky");if(st)st.innerHTML="";
   var el=document.getElementById("dashboard-content");if(!el)return;if(el.parentNode&&el.parentNode.style)el.parentNode.style.maxWidth=(section==="records")?"1180px":"900px";
@@ -1794,13 +1799,14 @@ function menuCounts(){var c={};try{var act=records.filter(function(r){var o=r.st
   var lb="";try{lb=localStorage.getItem("nspca-stables-last-backup")||"";}catch(e){}c.backupDays=lb?daysSince(lb):null;c.backupDate=lb;}catch(e){}return c;}
 function toggleDashMenu(e){if(e){e.stopPropagation();}var m=document.getElementById("dash-menu");if(!m)return;if(m.parentNode!==document.body)document.body.appendChild(m);if(m.style.display==="block"){closeDashMenu();return;}
   var role=currentRole();var me=CURRENT_USER||{name:currentName()};var nm=me.name||currentName();var ph=userPhoto(me.code);var c=menuCounts();var e2=esc;
-  var roleLabel=(CURRENT_USER&&CURRENT_USER.title)?CURRENT_USER.title:role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Animal Trainer":"Staff";
+  var roleLabel=userTitle(CURRENT_USER)?userTitle(CURRENT_USER):role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Animal Trainer":"Staff";
   var item=function(sec,t,s,badge,red){return '<div class="mi" onclick="dashMenuGo(\''+sec+'\')"><div><b>'+t+'</b><small>'+s+'</small></div>'+(badge?'<span class="bd'+(red?" r":"")+'">'+badge+'</span>':'<span class="ch">&rsaquo;</span>')+'</div>';};
   var h='<div class="mscrim" onclick="closeDashMenu()"></div><div class="mpanel">'
     +'<div class="me" onclick="dashMenuGo(\'profile\')">'+(ph?'<img src="'+blobSrc(ph)+'">':'<i style="background:'+avatarColor(nm)+'">'+e2(initials(nm))+'</i>')+'<div><b>'+e2(nm)+'</b><small>'+e2(roleLabel)+' \u00b7 My profile \u203a</small></div><span class="x" onclick="event.stopPropagation();closeDashMenu()">&#10005;</span></div>'
     +'<div class="h">Today</div>'
     +item("medround","Medication round","every dose due today \u00b7 tick as you give",c.med&&c.med.late?c.med.late+" overdue":(c.med&&c.med.tot>c.med.given?(c.med.tot-c.med.given)+" to give":""),c.med&&c.med.late>0)
     +item("weighin","Batch weigh-in","everyone on the scales, one screen",c.weigh?c.weigh+" due":"")
+    +item("farrier","Farrier &amp; dentist","who\u2019s due in the next 2 weeks \u00b7 log the visit",(function(){var n=stFdCount();return n?n+" due":"";})())
     +item("incidents","Incident register","the unit\u0027s log of bites, escapes, injuries",c.inc?c.inc+" this week":"",c.inc>0)
     +'<div class="h">Records</div>'
     +item("records","All records","every animal, here or gone \u00b7 search and filter")
@@ -2325,7 +2331,7 @@ function renderDashboard(){
   var ce=document.getElementById("dash-count");
   if(ce){var ac=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return (!o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation")&&!((r.state&&r.state.foster)||{}).out;}).length;var _used={};records.forEach(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";if(!(!o||/^Active/.test(o)||o==="Finished Isolation"))return;if(((r.state&&r.state.foster)||{}).out)return;var k=kennelRank(r.state&&r.state.dog?r.state.dog.kennel:"");_used[k.sec+":"+k.num]=1;});var _emp=0;KENNEL_SLOTS.forEach(function(sec){sec[1].forEach(function(slot){var kr=kennelRank(slot);if(!_used[kr.sec+":"+kr.num])_emp++;});});ce.textContent=ac+" in";ce.style.display=ac||_emp?"inline":"none";}
   var ue=document.getElementById("dash-user");
-  if(ue){var col=avatarColor(currentName());var ini=initials(currentName());var role=currentRole();var roleLabel=(CURRENT_USER&&CURRENT_USER.title)?CURRENT_USER.title:role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Dog Trainer \u0026 Behaviour Specialist":"Staff";ue.innerHTML=avatarByName(currentName(),18)+'<span>'+esc(currentName())+' &middot; '+roleLabel+'</span>';ue.style.display="inline-flex";ue.style.alignItems="center";ue.style.gap="6px";}
+  if(ue){var col=avatarColor(currentName());var ini=initials(currentName());var role=currentRole();var roleLabel=userTitle(CURRENT_USER)?userTitle(CURRENT_USER):role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Dog Trainer \u0026 Behaviour Specialist":"Staff";ue.innerHTML=avatarByName(currentName(),18)+'<span>'+esc(currentName())+' &middot; '+roleLabel+'</span>';ue.style.display="inline-flex";ue.style.alignItems="center";ue.style.gap="6px";}
   var ks=[];records.forEach(function(r){var k=r.state&&r.state.dog?r.state.dog.kennel:"";if(k&&ks.indexOf(k)<0)ks.push(k);});ks.sort(kennelCompare);
   var fb='';var kennelSel='<select class="fp fpsel" onchange="setDashFilter(\'K\',this.value);renderDashboard()"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select>';
   var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
@@ -5472,7 +5478,7 @@ function dogPage(){
   return"";
 }
 
-function tabWarn(id){if(id==="medical"){var c=activeContagiousList(S.medical);return !!(c&&c.length);}return false;}
+function dogTabWarn(id){if(id==="medical"){var c=activeContagiousList(S.medical);return !!(c&&c.length);}return false;}
 function quickBand(ck,band){if(!S.subScores)S.subScores={};S.subScores[ck]={};(SUBCRIT[ck]||[]).forEach(function(sub){S.subScores[ck][sub.k]=Math.max(0,Math.min(3,band-1));});recalcCat(ck);window._scDetail=window._scDetail||{};debouncedSave();renderMain();}
 function toggleScDetail(ck){window._scDetail=window._scDetail||{};window._scDetail[ck]=!window._scDetail[ck];renderMain();}
 var LEAVE_DOORS=[["Finished Isolation","Finished isolation \u2014 still here","Isolation done, staying in the unit for assessment or rehoming"],["Rehomed","Rehomed","Adopted \u2014 details from the Rehoming tab"],["Returned to Owner","Reclaimed by owner","Stray or seizure returned to its owner"],["Transferred","Transferred","To a rescue partner or another centre"],["Moved to Kennels","Moved to Kennels","Out of isolation, still ours"],["Euthanised","Euthanised","Vet-certified \u00b7 management-approved \u00b7 never alone"],["Died in care","Died in care","The record closes with the facts"],["Escaped / Lost","Escaped / Lost","Reported, searched, logged"]];
@@ -5767,7 +5773,7 @@ function reportCompose(full){var e=esc;window._rpPages=window._rpPages||{id:1,as
   var strip=tabStrip('A4<small>'+n+' page'+(n===1?'':'s')+'</small>',"#454857","#cdd3df",'<b>'+({file:"Full record",vet:"For the vet",adopter:"For the adopter",court:"For the inspector or court",transfer:"For the transfer"})[F]+'</b> \u00b7 '+chosen.map(function(p){return p[1].toLowerCase();}).join(", ")+(S.fin&&S.fin.assessorName?' \u00b7 signed by '+e(S.fin.assessorName):'')+'. Ready to print or save as PDF.',"Last printed",last?e(fmtDMY(last)):"never");
   var sig='<div class="rsig"><div>Assessor \u00b7 '+e(S.dog.assessor||"")+' \u00b7 '+e(fmtDMY(new Date().toISOString().slice(0,10)))+'</div><div>Supervisor</div></div>';
   return '<h2>Report</h2><div class="sub">The formal record on paper. What prints is what\u0027s on the record; you only choose which pages and who it\u0027s for.</div>'+strip+pageBar+'<div id="report-paper" class="rpaper"><div class="rtop"><img src="'+NSPCA_MARK+'" alt=""><span>Animal record \u00b7 NSPCA Longford \u00b7 Stables'+(F!=="file"?' \u00b7 '+e(({vet:"vet copy",adopter:"adopter copy",court:"inspector / court copy",transfer:"transfer copy"})[F])+'':'')+'</span></div>'+head+body+sig+'</div>'+browNav("report");}
-function tabDone(id){
+function dogTabDone(id){
   function anyVal(o){return o?Object.keys(o).some(function(k){var v=o[k];return v!==""&&v!==null&&v!==undefined&&v!==false&&v!==0&&!(Array.isArray(v)&&v.length===0);}):false;}
   switch(id){
     case "dog": return !!(S.dog&&S.dog.name);
@@ -5795,7 +5801,7 @@ var _navLastTab={}; // in-memory only: remembers last-visited tab per group (per
 var _glidePos={};   // remembers each glide's last x/width so re-renders don't animate from 0
 function tabGroupOf(id){var t=TABS.find(function(x){return x.id===id;});return t?t.g:null;}
 function groupDot(grp){var warn=false,todo=false,any=false,alldone=true;grp.tabs.forEach(function(tb){if(tabWarn(tb.id))warn=true;var d=tabDone(tb.id);if(d!==null){any=true;if(!d)alldone=false;}});if(warn)return"warn";if(!any)return"";return alldone?"done":"todo";}
-function renderNav(){
+function renderNav(){stSyncTabs();
   var groups=[],map={};
   TABS.forEach(function(tb){if(tb.pup&&!isPup())return;if(!map[tb.g]){map[tb.g]={g:tb.g,tabs:[]};groups.push(map[tb.g]);}map[tb.g].tabs.push(tb);});
   var activeGroup=tabGroupOf(S.tab)||groups[0].g;
@@ -6423,9 +6429,9 @@ function loadCurrent(){
 //  horses and ponies, goats and poultry. Later declarations win.
 // ════════════════════════════════════════════════════════════════════
 var IS_STABLES=true;
-var CHANGELOG=[{version:"1.0",date:"2026-10-11",note:"The Stables app, on the same layout as the dogs. Donkeys, horses and ponies, goats and poultry. Board grouped by species with red alarms at the top (a donkey not eating, colic signs, a bloated goat, poultry losses, strangles). How each animal came in: seized with a court hold, impounded with a holding period, surrendered or transferred. Passport and food-chain status, strangles isolation, Henneke 1–9, goats on 1–5 with FAMACHA, one record per poultry flock, a bird flu housing order switch, handling ticks, turnout and feeding, and rehomed outright or out on loan."}];
+var CHANGELOG=[{version:"1.1",date:"2026-10-11",note:"More tabs, so the Animal tab is short again: who, how they came in, passport or tag, leaving. Health is Daily check, Isolation, Body and Medical. A new Care group has Feet & teeth, Handling and Feeding. Feet & teeth keeps every farrier and dentist visit, and the next one fills in itself (farrier 6 weeks, dentist 12 months). Body has Henneke since arrival, a weigh-tape that works out the weight (donkeys on their own formula), and first and latest photo side by side. Isolation has a ready-to-come-out checklist and who shares a yard \u2014 if one turns strangles positive, the others go red. Handling has what to watch for and who should handle. Feeding has grazing and AM and PM feeds. Worming and flu & tetanus dates sit at the top of Medical. Goats get Feet, Body & eyes and Isolation & tests; a flock gets Flock and Mites & worms. Menu \u2192 Farrier & dentist: everyone due in the next 2 weeks, log the visit from the list, or print it."},{version:"1.0",date:"2026-10-11",note:"The Stables app, on the same layout as the dogs. Donkeys, horses and ponies, goats and poultry. Board grouped by species with red alarms at the top (a donkey not eating, colic signs, a bloated goat, poultry losses, strangles). How each animal came in: seized with a court hold, impounded with a holding period, surrendered or transferred. Passport and food-chain status, strangles isolation, Henneke 1–9, goats on 1–5 with FAMACHA, one record per poultry flock, a bird flu housing order switch, handling ticks, turnout and feeding, and rehomed outright or out on loan."}];
 APP_VERSION=CHANGELOG[0].version;
-var WHATS_NEW_HEADLINE={title:"The Stables app",sub:"donkeys, horses, goats and poultry",items:[["Board by species","Red alarms at the top: a donkey not eating, colic, bloat, poultry losses, strangles."],["A record for each species","Passport and food chain, Henneke, feet and teeth, handling and turnout for equines; FAMACHA and tests for goats; one record per flock."],["Holds and leaving","Court holds block leaving. Impounded animals count down their holding period. Rehomed outright or out on loan."]]};
+var WHATS_NEW_HEADLINE={title:"More tabs",sub:"farrier and dentist, body, handling, feeding",items:[["Feet & teeth","Every farrier and dentist visit kept, and the next one fills in itself. Menu \u2192 Farrier & dentist shows who\u2019s due, to log or print."],["Body","Henneke since arrival, a weigh-tape that works out the weight, and first and latest photo side by side."],["Isolation, Handling, Feeding","Their own tabs. A ready-to-come-out checklist, who shares a yard, what to watch for, grazing and AM / PM feeds."]]};
 
 // ── Species ────────────────────────────────────────────────────────
 var SPECIES=["Horse","Pony","Donkey","Goat","Poultry"];
@@ -6450,6 +6456,8 @@ function pupWeightBanners(){return "";}
 function pupAlarm(){return false;}
 function pupAssessBanner(){return "";}
 function stIsHere(r){var st=r.state||{};var o=(st.fin||{}).outcome||"";if((st.foster||{}).out)return false;return !o||/^Active/.test(o)||o==="Finished Isolation";}
+// a person's own job title, shown instead of the role name (built-in sign-ins carry it)
+function userTitle(u){if(!u)return "";if(u.title)return u.title;var b=(typeof USERS!=="undefined"?USERS:[]).find(function(x){return x.code===u.code;});return (b&&b.title)||"";}
 function curRec(){return S&&S._id?records.find(function(r){return String(r.id)===String(S._id);})||{state:S,id:S._id}:{state:S,id:null};}
 
 // ── No fixed stalls: "where" is a free place name ───────────────────
@@ -6491,7 +6499,9 @@ function stAlarms(r){var st=r.state||{};var td=tdISO();var x=dayOf(st,td)||{};va
   if(isGoat(st)&&x.eat==="None")A.push({t:"Not eating",go:"days",long:"isn’t eating — ring the vet"});
   if(isFlock(st)&&n>1)A.push({t:n+" lost today",go:"days",long:"lost "+n+" birds today — ring the vet and think bird flu"});
   if(isFlock(st)&&x.eat==="No")A.push({t:"Off food",go:"days",long:"aren’t all eating and drinking — check the drinkers and ring the vet"});
-  if(stranglesPos(st))A.push({t:"Strangles positive",go:"dog",long:"is strangles positive — strict isolation, served last"});
+  if(stranglesPos(st))A.push({t:"Strangles positive",go:"iso",long:"is strangles positive — strict isolation, served last"});
+  var sc=typeof stStranglesContact==="function"&&r.id!=null?stStranglesContact(r):null;if(sc)A.push({t:"Strangles contact",go:"iso",long:"shares a yard with "+sc.name+", who is strangles positive — test and keep apart"});
+  if(isEquine(st)&&(st.eq||{}).lami)A.push({t:"Laminitis signs",go:"feet",long:"has laminitis signs — ring the vet now"});
   return A;}
 function housingOrder(){var h=unitSetting("housingOrder");return h&&h.on?h:null;}
 function setHousingOrder(on){setUnitSetting("housingOrder",on?{on:true,since:tdISO(),by:currentName()}:{on:false,off:tdISO(),by:currentName()});miniToast(on?"Housing order on — birds stay housed":"Housing order off");try{if(document.getElementById("wrap").style.display!=="none")renderMain();else renderDashboard();}catch(e){}}
@@ -6502,15 +6512,34 @@ var HENNEKE=["","Poor","Very thin","Thin","Moderately thin","Moderate","Moderate
 var GOAT_BCS=["","Emaciated","Thin","Ideal","Fat","Obese"];
 
 // ── Tabs and the page ──────────────────────────────────────────────
-var TABS=[
+// Every tab the Stables app can show; stSyncTabs() fills TABS with the ones
+// that fit the open record's species (TABS is mutated in place so every
+// dog-app reader of it sees the same list).
+var ST_ALL_TABS=[
   {id:"picture",l:"Overview",g:"Animal"},{id:"dog",l:"Animal",g:"Animal"},{id:"photos",l:"Photos",g:"Animal"},{id:"notes",l:"Notes",g:"Animal"},
-  {id:"days",l:"Daily check",g:"Health"},{id:"medical",l:"Medical",g:"Health"},{id:"weights",l:"Weights",g:"Health"},
+  {id:"days",l:"Daily check",g:"Health"},{id:"iso",l:"Isolation",g:"Health",sp:"any"},{id:"weights",l:"Body",g:"Health",sp:"eg"},{id:"medical",l:"Medical",g:"Health"},
+  {id:"feet",l:"Feet & teeth",g:"Care",sp:"eg"},{id:"flock",l:"Flock",g:"Care",sp:"p"},{id:"hand",l:"Handling",g:"Care",sp:"eg"},{id:"feed",l:"Feeding",g:"Care",sp:"eg"},{id:"mites",l:"Mites & worms",g:"Care",sp:"p"},
   {id:"rehome",l:"Rehoming",g:"Departure"},{id:"foster",l:"Foster",g:"Departure"},{id:"outcome",l:"Outcome",g:"Departure"},
   {id:"story",l:"Story",g:"Record"},{id:"files",l:"Files",g:"Record"}];
-function page(){var t=S.tab;if(!TABS.some(function(x){return x.id===t;})){S.tab=t="dog";}
+var TABS=[];
+function stTabsFor(st){var sp=spOf(st);var k=isEquine(st)?"e":isGoat(st)?"g":isFlock(st)?"p":"";
+  return ST_ALL_TABS.filter(function(t){if(!t.sp)return true;if(!k)return false;return t.sp==="any"||t.sp.indexOf(k)>=0;}).map(function(t){var x={id:t.id,l:t.l,g:t.g};
+    if(k==="g"){if(t.id==="iso")x.l="Isolation & tests";if(t.id==="weights")x.l="Body & eyes";if(t.id==="feet")x.l="Feet";}
+    return x;});}
+function stSyncTabs(){var L=stTabsFor(typeof S!=="undefined"&&S?S:{});TABS.length=0;L.forEach(function(t){TABS.push(t);});}
+stSyncTabs();
+function page(){stSyncTabs();var t=S.tab;if(!TABS.some(function(x){return x.id===t;})){S.tab=t="dog";}
   if(t==="dog")return renderAnimalTab();
   if(t==="picture")return renderStOverview();
   if(t==="days")return renderStDaily();
+  if(t==="iso")return renderStIso();
+  if(t==="weights")return renderStBody();
+  if(t==="feet")return renderStFeet();
+  if(t==="hand")return renderStHandling();
+  if(t==="feed")return renderStFeeding();
+  if(t==="flock")return renderStFlock();
+  if(t==="mites")return renderStMites();
+  if(t==="medical"){var mh=dogPage();var due=stMedDue();if(!due)return mh;var k=mh.indexOf('<div class="asec msec');return k>=0?mh.slice(0,k)+due+mh.slice(k):due+mh;}
   if(t==="outcome"||t==="rehome"){var h=holdInfo(S);if(h&&h.court)return '<h2>'+(t==="outcome"?"Outcome":"Rehoming")+'</h2><div class="cflag r"><b>Court hold'+(S.dog.caseRef?' · '+esc(S.dog.caseRef):'')+'.</b> This animal is evidence in a case and can’t be rehomed or leave until the hold is cleared. Clear it on the <span class="lnk" data-go="dog">Animal tab</span>, under \u201cHow it came in\u201d, once the case allows.</div>'+browNav(t);}
   return dogPage();}
 
@@ -6576,14 +6605,6 @@ function secCameIn(n){var d=S.dog,e=esc;var h=holdInfo(S);var ci=d.cameIn||"";
   var st=h&&h.court?"bad":h?"warn":ci?"done":"warn";
   var sum=[ci||"not set",d.intakeDate?fmtDMY(d.intakeDate):"",d.caseRef?"case "+d.caseRef:"",h?h.t.toLowerCase():""].filter(Boolean).join(" \u00b7 ");
   return stSecHtml("came",n,"How "+stHe()[0]+" came in",e(sum),st,b,!ci);}
-function secIso(n){var d=S.dog,e=esc;var ii=stIso(S);var tot=stIsoDays(d)+((d.isoExt||[]).reduce(function(a,x){return a+(parseInt(x.days)||0);},0));var L=stranglesOf(S);var pos=stranglesPos(S);
-  var clk=ii&&ii.day!=null?(ii.state==="done"?"Out of isolation \u2014 day "+ii.day:"Day "+Math.max(0,ii.day)+" of "+tot):"No arrival date";
-  var b='<div class="stclock"><b>'+e(clk)+'</b><small>'+(ii&&ii.clears&&ii.state!=="done"?"ends "+e(fmtDMY(ii.clears)):"")+'</small></div>';
-  if(isEquine(S)){b+='<div class="lbl" style="margin:10px 0 4px">Strangles tests</div>'+(L.length?L.map(function(x,i){return '<div class="srow"><b>'+e(fmtDMY(x.date))+'</b><span>'+e(x.type||"Swab")+'</span><i class="'+(x.result==="Positive"?"r":x.result==="Clear"?"g":"a")+'">'+e(x.result||"Pending")+'</i><u onclick="stStrDel('+i+')">remove</u></div>';}).join(""):'<div class="smt2">No tests logged yet.</div>')
-    +'<div class="sadd"><input type="date" id="str-date" value="'+tdISO()+'"><select id="str-type"><option>Swab</option><option>Guttural pouch wash</option><option>Blood test</option></select><select id="str-res"><option>Pending</option><option>Clear</option><option>Positive</option></select><button class="btn" onclick="stStrAdd()">+ Add</button></div>';}
-  var st=pos?"bad":ii&&ii.state==="done"?"done":"warn";
-  var sum=clk.toLowerCase()+(isEquine(S)?(pos?" \u00b7 strangles positive":L.length?" \u00b7 "+stranglesClear(S)+" clear":" \u00b7 no strangles test yet"):"");
-  return stSecHtml("iso",n,isEquine(S)?"Isolation \u00b7 strangles":"Isolation",e(sum),st,b,pos);}
 function stStrAdd(){var dt=(document.getElementById("str-date")||{}).value,ty=(document.getElementById("str-type")||{}).value,rs=(document.getElementById("str-res")||{}).value;if(!dt)return;S.eq=S.eq||{};S.eq.strangles=S.eq.strangles||[];S.eq.strangles.push({date:dt,type:ty,result:rs,by:currentName()});persistSave();debouncedSave();renderMain();}
 function stStrDel(i){var L=stranglesOf(S);var x=L[i];if(!x)return;S.eq.strangles=(S.eq.strangles||[]).filter(function(y){return y!==x;});persistSave();debouncedSave();renderMain();}
 function secLeaving(n){var e=esc;var h=holdInfo(S);var f=S.fin||{};var o=f.outcome&&f.outcome!=="Finished Isolation"?f.outcome:"";
@@ -6602,56 +6623,18 @@ function scoreRow(key,max,labels,target,em){var ls=lastScore(S,key);var cur=ls&&
   b+='</div></div>';
   if(ls&&ls.all.length>1){var A=ls.all.slice(-8);b+='<div class="spk">'+A.map(function(x){return '<i style="height:'+Math.round(x.score/max*100)+'%" title="'+esc(fmtDMY(x.date))+'"></i>';}).join("")+'<b>'+(ls.prev?ls.prev.score+" \u2192 "+ls.now.score+" since "+fmtDMY(ls.prev.date).slice(0,5):"")+'</b></div>';}
   return b;}
-function secBody(n){var e=esc;var ls=lastScore(S,"hk");var ws=(S.weights||[]).filter(function(w){return w.date&&w.weight;}).sort(function(a,b){return a.date.localeCompare(b.date);});var lw=ws[ws.length-1];
-  var b=scoreRow("hk",9,HENNEKE,[5,6],"1\u20139 \u00b7 5\u20136 is the target")+'<div class="smt2">'+(lw?'Weigh-tape: <b>'+e(lw.weight)+'</b> '+e(stAgo(lw.date))+'. ':'No weigh-tape yet. ')+'<span class="lnk" data-go="weights">Log a weight</span> \u00b7 <span class="lnk" data-go="photos">Add this week\u2019s photo</span> (same angle each week \u2014 it\u2019s the before-and-after).</div>';
-  var s=ls?ls.now.score:0;var st=!s?"warn":s<=3?"bad":s>=8?"warn":"done";
-  return stSecHtml("body",n,"Body",e(ls?"Henneke "+s+" \u00b7 "+(HENNEKE[s]||"").toLowerCase()+(ls.prev?" \u00b7 was "+ls.prev.score:"")+(lw?" \u00b7 "+lw.weight:""):"not scored yet"),st,b,!ls||s<=3);}
-function dueLine(lbl,last,next,lp,np){var d=stDue(next);return '<div class="dueg"><div class="f"><label class="lbl">'+lbl+' \u2014 last</label><input type="date" value="'+esc(last||"")+'" data-save="eq.'+lp+'"></div><div class="f"><label class="lbl">Next'+(d.t?' <i class="'+d.c+'">'+esc(d.t)+'</i>':'')+'</label><input type="date" value="'+esc(next||"")+'" data-save="eq.'+np+'"></div></div>';}
-function secRoutine(n){var q=S.eq||{},e=esc;var goat=isGoat(S);
-  var b=goat?dueLine("Feet trimmed",q.trimLast,q.trimNext,"trimLast","trimNext"):dueLine("Farrier",q.farrierLast,q.farrierNext,"farrierLast","farrierNext")+dueLine("Dentist",q.dentistLast,q.dentistNext,"dentistLast","dentistNext");
-  b+=dueLine("Wormed",q.wormLast,q.wormNext,"wormLast","wormNext")+'<div class="dog-fg">'+fld("Faecal egg count (epg)",q.fec,"eq.fec","text","e.g. 250 on 02-10")+(goat?fld("Clostridial vaccine",q.clostridial,"eq.clostridial","date"):fld("Flu & tetanus",q.fluTet,"eq.fluTet","date"))+'</div>'
-    +(goat?'':'<div class="smt2">Vaccines and wormers given also go on <span class="lnk" data-go="medical">Medical</span>.</div>');
-  var bits=[];var add=function(l,nx){var d=stDue(nx);if(d.t)bits.push(l+" "+d.t);};if(goat)add("feet",q.trimNext);else{add("farrier",q.farrierNext);add("dentist",q.dentistNext);}add("worming",q.wormNext);
-  var late=[q.farrierNext,q.dentistNext,q.wormNext,q.trimNext].some(function(x){return x&&x<tdISO();});
-  return stSecHtml("routine",n,goat?"Feet \u00b7 worms \u00b7 vaccines":"Feet \u00b7 teeth \u00b7 worms \u00b7 vaccines",e(bits.join(" \u00b7 ")||"nothing booked"),late?"warn":bits.length?"done":"",b,false);}
+function dueLine(lbl,last,next,lp,np){var d=stDue(next);d={c:d.c,t:d.t.replace(/^next /,"")};return '<div class="dueg"><div class="f"><label class="lbl">'+lbl+' \u2014 last</label><input type="date" value="'+esc(last||"")+'" data-save="eq.'+lp+'"></div><div class="f"><label class="lbl">Next'+(d.t?' <i class="'+d.c+'">'+esc(d.t)+'</i>':'')+'</label><input type="date" value="'+esc(next||"")+'" data-save="eq.'+np+'"></div></div>';}
 var HANDLING_EQ=[["catch","Catches in the field"],["lead","Leads"],["tie","Ties up"],["feet","Picks up feet"],["farrier","Stands for the farrier"],["vet","Stands for the vet"],["rug","Rugs"],["load","Loads in a trailer"]];
 var HANDLING_GOAT=[["catch","Catches"],["lead","Leads"],["feet","Feet handled"],["vet","Stands for the vet"]];
-function secHandling(n,list,withFeed){var q=S.eq||{},e=esc;var b='<div class="hgrid">'+list.map(function(h){var v=q["h_"+h[0]]||"";return '<div><b>'+e(h[1])+'</b><span class="cchips">'+["Yes","No","?"].map(function(o){return '<span class="cchip'+(v===o?" on":"")+'" onclick="stSet(\'eq.h_'+h[0]+'\',\''+o+'\')">'+o+'</span>';}).join("")+'</span></div>';}).join("")+'</div>';
-  if(isEquine(S))b+=chipRow("Ridden","","eq.ridden",["Ridden","Unbacked","Don\u2019t know"],q.ridden||"");
-  if(withFeed)b+='<div class="dog-fg">'+fld("Feeding",q.feed,"eq.feed","text","hay, browse, no grain")+'</div>';
-  var done=list.filter(function(h){return q["h_"+h[0]];});var sum=done.map(function(h){return h[1].split(" ")[0].toLowerCase()+" "+({Yes:"\u2713",No:"\u2717","?":"?"}[q["h_"+h[0]]]);}).join(" \u00b7 ");
-  return stSecHtml("hand",n,withFeed?"Handling &amp; feeding":"Handling",e(sum||"nothing ticked yet"),done.length===list.length?"done":"",b,false);}
-function secTurnout(n){var q=S.eq||{},d=S.dog,e=esc;
-  var b='<div class="dog-fg">'+stWhere(d)+fld("Turned out with",q.with,"eq.with","text","e.g. Ned & Nell")+fld("Hay (kg a day)",q.hay,"eq.hay","number","6")+fld("Hard feed",q.hard,"eq.hard","text","e.g. 2 small feeds of Allen & Page")+fld("Supplements",q.supp,"eq.supp","text","")+'</div>'
-    +chipRow("Hay","","eq.soak",["Soaked","Dry","Haylage"],q.soak||"")+chipRow("Rug","","eq.rugs",["On","Off","None"],q.rugs||"");
-  return stSecHtml("turn",n,"Turnout &amp; feeding",e([d.kennel,q.soak?(q.soak.toLowerCase()+" hay"+(q.hay?" "+q.hay+" kg":"")):q.hay?q.hay+" kg hay":"",q.hard].filter(Boolean).join(" \u00b7 ")||"not set"),q.hay||q.hard?"done":"",b,false);}
-
 // ── Goat ───────────────────────────────────────────────────────────
 function secTag(n){var d=S.dog,e=esc;var b='<div class="dog-fg">'+fld("Ear tag",d.tag,"dog.tag","text","IE 0123\u2026")+fld("Herd / flock number",d.herdNo,"dog.herdNo","text","")+'</div>';
   return stSecHtml("tag",n,"Tag &amp; herd number",e([d.tag?"tag "+d.tag:"no tag",d.herdNo?"herd no. on file":""].filter(Boolean).join(" \u00b7 ")),d.tag?"done":"warn",b,!d.tag);}
-function secGoatBody(n){var e=esc;var a=lastScore(S,"goatBcs"),f=lastScore(S,"famacha");
-  var b=scoreRow("goatBcs",5,GOAT_BCS,[3],"goats 1\u20135 \u00b7 3 is ideal")+scoreRow("famacha",5,["","Red \u2014 healthy","Red-pink","Pink \u2014 borderline","Pink-white \u2014 anaemic","White \u2014 severely anaemic"],[1,2],"anaemia from worms")+'<div class="smt2">FAMACHA 4 or 5 means worm now and tell the vet.</div>';
-  var bad=(a&&a.now.score<=1)||(f&&f.now.score>=4);
-  return stSecHtml("gbody",n,"Body &amp; eyes",e([a?"condition "+a.now.score+" of 5":"",f?"FAMACHA "+f.now.score:""].filter(Boolean).join(" \u00b7 ")||"not scored yet"),bad?"bad":a&&f?"done":"warn",b,!a);}
-function secTests(n){var q=S.eq||{},e=esc;var T=[["cae","CAE"],["cl","CL"],["johnes","Johne\u2019s"]];var b=T.map(function(t){return chipRow(t[1],"","eq.t_"+t[0],["Negative","Positive","Pending","Not done"],q["t_"+t[0]]||"");}).join("");
-  var pos=T.some(function(t){return q["t_"+t[0]]==="Positive";});var done=T.filter(function(t){var v=q["t_"+t[0]];return v&&v!=="Not done";}).length;
-  return stSecHtml("tests",n,"Tests",e(T.map(function(t){return t[1]+" "+((q["t_"+t[0]]||"not done").toLowerCase());}).join(" \u00b7 ")),pos?"bad":done===3?"done":"warn",b,false);}
-
 // ── Poultry ────────────────────────────────────────────────────────
 function secFlockReg(n){var d=S.dog,e=esc;var lost=(S.days||[]).reduce(function(a,x){return a+(parseInt(x.losses||0,10)||0);},0);var now=Math.max(0,(parseInt(d.count,10)||0)-lost);
   var b='<div class="dog-fg">'+fld("Flock registration number",d.herdNo,"dog.herdNo","text","")+'</div><div class="smt2">'+(d.count?e(d.count)+' in, '+lost+' lost \u2014 <b>'+now+' now</b>.':'Put the number of birds in section 1.')+'</div>';
   return stSecHtml("freg",n,"Flock registration",e((d.herdNo?"flock no. on file":"no flock number")+(d.count?" \u00b7 "+d.count+" in, "+lost+" lost":"")),d.herdNo?"done":"warn",b,false);}
-function secFlockToday(n){var x=dayOf(S,tdISO())||{};var e=esc;var b='<div class="smt2" style="margin-bottom:6px">One tick for the whole flock. It\u2019s the same as the <span class="lnk" data-go="days">Daily check</span>.</div>'+flockDayFields(x);
-  var done=!!(x.eat||x.eggs||x.losses);return stSecHtml("ftoday",n,"Today",e(done?[x.eat==="Yes"?"all eating":x.eat==="No"?"not all eating":"",x.eggs?x.eggs+" eggs":"",x.losses?x.losses+" lost":"0 lost",x.mites?"mites checked":""].filter(Boolean).join(" \u00b7 "):"not ticked yet"),done?(parseInt(x.losses||0,10)>1||x.eat==="No"?"bad":"done"):"warn",b,!done);}
-function secBirds(n){var L=(S.eq||{}).birds||[];var open=L.filter(function(x){return !x.done;});var e=esc;
-  var b=(L.length?L.map(function(x,i){return '<div class="srow'+(x.done?" off":"")+'"><b>'+e(x.name||"Bird")+'</b><span>'+e(x.issue||"")+'</span><i>'+e(fmtDMY(x.date).slice(0,5))+'</i><u onclick="stBirdDone('+i+')">'+(x.done?"reopen":"better")+'</u></div>';}).join(""):'<div class="smt2">None. Only name a bird when it needs attention.</div>')
-    +'<div class="sadd"><input id="bird-name" placeholder="e.g. Hen 4"><input id="bird-issue" placeholder="feather loss, lame\u2026"><button class="btn" onclick="stBirdAdd()">+ Add</button></div>';
-  return stSecHtml("birds",n,"Birds needing attention",e(open.length?open.length+" \u00b7 "+open.map(function(x){return x.name+" "+x.issue;}).join(" \u00b7 "):"none"),open.length?"warn":"done",b,open.length>0);}
 function stBirdAdd(){var nm=(document.getElementById("bird-name")||{}).value||"",is=(document.getElementById("bird-issue")||{}).value||"";if(!nm&&!is)return;S.eq=S.eq||{};S.eq.birds=S.eq.birds||[];S.eq.birds.push({name:nm,issue:is,date:tdISO(),by:currentName()});persistSave();debouncedSave();renderMain();}
 function stBirdDone(i){var x=((S.eq||{}).birds||[])[i];if(!x)return;x.done=!x.done;persistSave();debouncedSave();renderMain();}
-function secMites(n){var q=S.eq||{},e=esc;var b=dueLine("Wormed",q.wormLast,q.wormNext,"wormLast","wormNext")+dueLine("Red mite check",q.miteLast,q.miteNext,"miteLast","miteNext")+dueLine("Lice / scaly leg check",q.liceLast,q.liceNext,"liceLast","liceNext");
-  var bits=[];[["worming",q.wormNext],["mite check",q.miteNext],["lice check",q.liceNext]].forEach(function(x){var d=stDue(x[1]);if(d.t)bits.push(x[0]+" "+d.t);});var late=[q.wormNext,q.miteNext,q.liceNext].some(function(x){return x&&x<tdISO();});
-  return stSecHtml("mites",n,"Worms \u00b7 lice \u00b7 mites",e(bits.join(" \u00b7 ")||"nothing booked"),late?"warn":bits.length?"done":"",b,false);}
 function housingBanner(){var h=housingOrder();var can=/^(admin|manager|supervisor)$/.test(currentRole());
   if(!h)return can?'<div class="hof off">Bird flu housing order <b>off</b><span class="lnk" onclick="setHousingOrder(true)">Turn on</span></div>':'';
   return '<div class="hof">Bird flu housing order <b>ON</b> \u00b7 since '+esc(fmtDMY(h.since).slice(0,5))+' \u00b7 birds stay housed'+(can?'<span class="lnk" onclick="setHousingOrder(false)">Turn off</span>':'<span>set by '+esc(String(h.by||"").split(" ")[0])+'</span>')+'</div>';}
@@ -6671,9 +6654,9 @@ function renderAnimalTab(){var d=S.dog,e=esc;var sp=d.species||"";var h=holdInfo
   secs+=secWho(N());
   if(!sp){return hero+top+secs+'<div class="smt2" style="margin:8px 2px">Pick the species and the rest of the record appears.</div>';}
   secs+=secCameIn(N());
-  if(isEquine(S)){secs+=secPassport(N())+secIso(N())+secBody(N())+secRoutine(N())+secHandling(N(),HANDLING_EQ,false)+secTurnout(N());}
-  else if(isGoat(S)){secs+=secTag(N())+secIso(N())+secGoatBody(N())+secRoutine(N())+secTests(N())+secHandling(N(),HANDLING_GOAT,true);}
-  else if(isFlock(S)){secs+=secFlockReg(N())+secIso(N())+secFlockToday(N())+secBirds(N())+secMites(N());}
+  if(isEquine(S))secs+=secPassport(N());
+  else if(isGoat(S))secs+=secTag(N());
+  else if(isFlock(S))secs+=secFlockReg(N());
   secs+=secLeaving(N());
   return hero+top+secs+browNav("dog");}
 
@@ -6715,7 +6698,7 @@ function renderStOverview(){var d=S.dog,e=esc;var r=curRec();var al=stAlarms(r);
   var kv=function(k,v,c){return '<div class="ovkv"><span>'+k+'</span><b'+(c?' style="color:'+c+'"':'')+'>'+v+'</b></div>';};
   var x=dayOf(S,tdISO());
   var now=kv("Where",e(d.kennel||"not set"))+kv("Isolation",ii&&ii.day!=null?(ii.state==="done"?"Done \u00b7 day "+ii.day:"Day "+Math.max(0,ii.day)+" of "+stIsoDays(d)):"\u2014",ii&&ii.state==="done"?"#166534":"#92400e")+kv("Daily check",x?"done today":"not yet today",x?"#166534":"#92400e")
-    +(isEquine(S)?kv("Farrier",e(stDue(q.farrierNext).t||"not booked"))+kv("Passport",e(d.passport||"not checked")):"")+(isGoat(S)?kv("Feet",e(stDue(q.trimNext).t||"not booked")):"")+(isFlock(S)?kv("Housing order",housingOrder()?"ON \u2014 birds housed":"off",housingOrder()?"#92400e":""):"");
+    +(isEquine(S)?kv("Farrier",e(stDue(q.farrierNext).t||"not booked"))+kv("Dentist",e(stDue(q.dentistNext).t||"not booked"))+kv("Passport",e(d.passport||"not checked")):"")+(isGoat(S)?kv("Feet",e(stDue(q.trimNext).t||"not booked")):"")+(isFlock(S)?kv("Housing order",housingOrder()?"ON \u2014 birds housed":"off",housingOrder()?"#92400e":""):"");
   out+='<div class="card"><div class="lbl" style="margin-bottom:6px">Now</div>'+now+'</div>';
   return out+browNav("picture");}
 
@@ -6795,6 +6778,202 @@ function stPairCard(a,b){var e=esc;var rank=function(x){return x?"rqatg".indexOf
   var sc=[stTag(a).replace(/^Henneke /,""),stTag(b).replace(/^Henneke /,"")].filter(Boolean);var lbl=stDayLabel(a);
   var cls=w[1]?(w[1].c==="r"?"bad":w[1].c==="g"?"ok":w[1].c==="t"?"info":"warn"):"";
   return '<div class="dc2 stpair" style="--tl:'+edge+'"><div class="ph ini" style="background:'+edge+';color:#fff;font-size:20px">'+e((a.name||"?").charAt(0)+"&"+(b.name||"?").charAt(0))+'</div><div class="bd"><div class="r1"><b><u onclick="openDog('+a.id+')">'+e(a.name)+'</u> &amp; <u onclick="openDog('+b.id+')">'+e(b.name)+'</u></b>'+((sa.dog||{}).kennel?'<span class="k">'+e(sa.dog.kennel)+'</span>':'')+'</div><div class="m">'+e([spOf(sa)==="Donkey"?"Donkeys":spOf(sa)+"s","bonded \u00b7 never split"].join(" \u00b7 "))+'</div>'+(w[1]?'<div class="nx '+cls+'">'+e(w[0].name+": "+w[1].t)+'</div>':'')+'<div class="r3"><span class="day">'+e([lbl,sc.length?(/condition/.test(sc[0])?sc.join(" \u00b7 "):"Henneke "+sc.join(" \u00b7 ")):""].filter(Boolean).join(" \u00b7 "))+'</span></div></div></div>';}
+
+// ════════════════════════════════════════════════════════════════════
+//  STABLES TABS — Isolation, Body, Feet & teeth, Handling, Feeding,
+//  Flock, Mites & worms, the Medical due block, and the board's
+//  Farrier & dentist list.
+// ════════════════════════════════════════════════════════════════════
+var FARRIER_WEEKS=6,DENTIST_MONTHS=12,GOAT_TRIM_WEEKS=6;
+function stShortD(dt){if(!dt)return "";var f=fmtDMY(dt);return dt.slice(0,4)===tdISO().slice(0,4)?f.slice(0,5):f.slice(0,6)+f.slice(8,10);}
+function stAddMonths(dt,m){var d=new Date(dt+"T12:00:00");d.setMonth(d.getMonth()+m);return d.toISOString().slice(0,10);}
+function stEq(){S.eq=S.eq||{};return S.eq;}
+function stSaved(){persistSave();debouncedSave();renderMain();}
+function stMulti(path,v){var a=path.split(".");var o=stObj(a[0]);var L=Array.isArray(o[a[1]])?o[a[1]]:[];var i=L.indexOf(v);if(i>=0)L.splice(i,1);else L.push(v);o[a[1]]=L;stSaved();}
+function multiRow(label,em,path,opts,cur){cur=Array.isArray(cur)?cur:[];return '<div class="cq"><label>'+label+(em?'<em>'+em+'</em>':'')+'</label><div class="cchips">'+opts.map(function(o){return '<span class="cchip'+(cur.indexOf(o)>=0?" on":"")+'" onclick="stMulti(\''+path+'\',\''+String(o).replace(/'/g,"\\'")+'\')">'+esc(o)+'</span>';}).join("")+'</div></div>';}
+function stName(){return (S.dog||{}).name||"this animal";}
+function stPhotoPair(){var ps=photosFor();var d=S.dog||{};
+  if(ps===null&&d.photo&&S._id&&supabaseClient&&window._heroLoading!==S._id){window._heroLoading=S._id;var id=S._id;loadDogPhotos(id).then(function(){if(window._heroLoading===id)window._heroLoading=null;if(S&&S._id===id&&S.tab==="weights")renderMain();},function(){window._heroLoading=null;});}
+  var L=(ps||[]).filter(function(p){return p&&p.data;}).slice().sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});
+  var tile=function(p,lbl){return '<div class="stph"'+(p?' style="background-image:url('+blobSrc(p.data)+')"':'')+'><b>'+esc(lbl)+'</b></div>';};
+  var first=L[0],last=L.length>1?L[L.length-1]:null;
+  return '<div class="card"><div class="lbl">Before &amp; after</div><div class="stph2">'+tile(first,first?stShortD(first.date)+" \u00b7 arrival":"no photo yet")+tile(last,last?stShortD(last.date)+" \u00b7 latest":"next photo")+'</div><div class="smt2">First and latest photo from <span class="lnk" data-go="photos">Photos</span>. Same angle each week.</div></div>';}
+
+// ── Isolation ──────────────────────────────────────────────────────
+function stYardOf(st,id){var mine=((((st||{}).eq)||{}).yard||[]).map(String);var out=mine.slice();
+  records.forEach(function(r){if(String(r.id)===String(id))return;var y=((((r.state||{}).eq)||{}).yard||[]).map(String);if(y.indexOf(String(id))>=0&&out.indexOf(String(r.id))<0)out.push(String(r.id));});return out;}
+function stStranglesContact(r){var st=r.state||{};if(!isEquine(st)||stranglesPos(st))return null;var ids=stYardOf(st,r.id);
+  var hit=records.filter(function(x){return ids.indexOf(String(x.id))>=0&&stIsHere(x)&&stranglesPos(x.state||{});})[0];return hit||null;}
+function stYardTog(id){var L=(stEq().yard||[]).map(String);var i=L.indexOf(String(id));if(i>=0)L.splice(i,1);else L.push(String(id));S.eq.yard=L;
+  var p=records.find(function(x){return String(x.id)===String(id);});if(p&&p.state&&i>=0){p.state.eq=p.state.eq||{};p.state.eq.yard=(p.state.eq.yard||[]).map(String).filter(function(v){return v!==String(S._id);});try{saveRecordChange(p);}catch(e){}}
+  stSaved();}
+function stReady(st){var q=(st||{}).eq||{},d=(st||{}).dog||{};var ii=stIso(st);var L=[];
+  L.push([stIsoDays(d)+" days done",!!(ii&&ii.day!=null&&(ii.state==="done"||ii.day>=stIsoDays(d)))]);
+  if(isEquine(st)){var S2=stranglesOf(st);L.push(["Strangles clear",!!(S2.length&&S2[S2.length-1].result==="Clear")]);L.push(["Passport seen",d.passport==="Seen"||d.passport==="No passport"]);L.push(["Wormed",!!q.wormLast]);L.push(["Farrier seen",!!q.farrierLast]);}
+  else if(isGoat(st)){L.push(["CAE, CL and Johne\u2019s tested",["cae","cl","johnes"].every(function(k){var v=q["t_"+k];return v==="Negative"||v==="Positive";})]);L.push(["Wormed",!!q.wormLast]);L.push(["Feet trimmed",!!q.trimLast]);}
+  else if(isFlock(st)){var td=tdISO();var lost=(st.days||[]).filter(function(x){return x&&x.date>addDaysStr(td,-7)&&(parseInt(x.losses||0,10)||0)>0;}).length;L.push(["No losses in the last 7 days",!lost]);L.push(["Red mite check done",!!q.miteLast]);}
+  return L;}
+function renderStIso(){var d=S.dog,e=esc,q=stEq();var ii=stIso(S);var tot=stIsoDays(d)+((d.isoExt||[]).reduce(function(a,x){return a+(parseInt(x.days)||0);},0));var L=stranglesOf(S);var pos=stranglesPos(S);var r=curRec();var con=S._id?stStranglesContact(r):null;
+  var done=ii&&ii.state==="done";var day=ii&&ii.day!=null?Math.max(0,ii.day):null;
+  var h='<h2>'+(isGoat(S)?"Isolation &amp; tests":"Isolation")+'</h2><div class="sub">The clock'+(isEquine(S)?", strangles":isGoat(S)?", the herd tests":"")+', and what has to be done before '+stHe()[0]+(stHe()[0]==="they"?" come":" comes")+' out.</div>';
+  var right=isEquine(S)?["Strangles",pos?"positive":L.length?stranglesClear(S)+" clear":"not tested"]:["Ends",ii&&ii.clears?fmtDMY(ii.clears).slice(0,5):"\u2014"];
+  h+=tabStrip(pos?"!":done?"OK":"ISO",pos?"#ef4444":done?"#c6e76c":"#f59e0b",pos?"#fff":"#282932",day==null?'<b>No arrival date.</b> Set it on the <span class="lnk" data-go="dog">Animal tab</span>.':done?'<b>Out of isolation</b> \u00b7 day '+e(ii.day)+'.':'<b>Day '+day+' of '+tot+'</b>'+(ii.clears?' \u00b7 ends '+e(fmtDMY(ii.clears).slice(0,5)):'')+'.',right[0],e(right[1]));
+  if(pos)h+='<div class="cflag r"><b>'+e(stName())+'</b> is strangles positive \u2014 strict isolation, served last.</div>';
+  if(con)h+='<div class="cflag r"><b>'+e(stName())+'</b> shares a yard with '+e(con.name)+', who is strangles positive. Test and keep apart.</div>';
+  if(isEquine(S)){h+='<div class="card"><div class="lbl">Strangles tests</div>'+(L.length?L.map(function(x,i){return '<div class="srow"><b>'+e(stShortD(x.date))+'</b><span>'+e(x.type||"Swab")+'</span><i class="'+(x.result==="Positive"?"r":x.result==="Clear"?"g":"a")+'">'+e(x.result||"Pending")+'</i><u onclick="stStrDel('+i+')">remove</u></div>';}).join(""):'<div class="smt2">No tests logged yet.</div>')
+    +'<div class="sadd"><input type="date" id="str-date" value="'+tdISO()+'"><select id="str-type"><option>Swab</option><option>Guttural pouch wash</option><option>Blood test</option></select><select id="str-res"><option>Pending</option><option>Clear</option><option>Positive</option></select><button class="btn" onclick="stStrAdd()">+ Add</button></div></div>';}
+  if(isGoat(S)){var T=[["cae","CAE"],["cl","CL"],["johnes","Johne\u2019s"]];h+='<div class="card"><div class="lbl">Tests</div>'+T.map(function(t){return chipRow(t[1],"","eq.t_"+t[0],["Negative","Positive","Pending","Not done"],q["t_"+t[0]]||"");}).join("")+'</div>';}
+  var R=stReady(S);h+='<div class="card"><div class="lbl">Ready to come out</div><div class="ptick">'+R.map(function(x){return '<div style="cursor:default"><i class="'+(x[1]?"y":"")+'"></i>'+e(x[0])+'</div>';}).join("")+'</div><div class="smt2">Ticks itself from the record. Shows what\u2019s still missing \u2014 it doesn\u2019t block anything.</div></div>';
+  if(isEquine(S)&&S._id){var mine=stYardOf(S,S._id);var others=records.filter(function(x){return String(x.id)!==String(S._id)&&stIsHere(x)&&isEquine(x.state||{});});
+    h+='<div class="card"><div class="lbl">Shares a yard with</div>'+(others.length?'<div class="cchips">'+others.map(function(x){return '<span class="cchip'+(mine.indexOf(String(x.id))>=0?" on":"")+'" onclick="stYardTog(\''+x.id+'\')">'+e(x.name)+'</span>';}).join("")+'</div>':'<div class="smt2">No other horses, ponies or donkeys in.</div>')+'<div class="smt2">If one of them turns strangles positive, the others are flagged too.</div></div>';}
+  return h+browNav("iso");}
+
+// ── Body ───────────────────────────────────────────────────────────
+function stWeights(){return (S.weights||[]).map(function(w,i){return{i:i,date:w.date||"",kg:parseFloat(String(w.weight||"").replace(/[^0-9.]/g,"")),note:w.note||""};}).filter(function(w){return w.date&&w.kg>0;}).sort(function(a,b){return b.date.localeCompare(a.date);});}
+function stTapeKg(){var q=stEq();var g=parseFloat(q.tapeG),l=parseFloat(q.tapeL);if(!(g>0&&l>0))return null;return Math.round(isDonkey(S)?Math.pow(g,2.12)*Math.pow(l,0.688)/3801:g*g*l/11880);}
+function stTapeIn(k,v){stEq()[k]=v;persistSave();debouncedSave();var o=document.getElementById("tape-out");if(o){var kg=stTapeKg();o.innerHTML=kg?'\u2248 '+kg+' kg':'\u2014';}}
+function stTapeSave(){var kg=stTapeKg();if(!kg){miniToast("Put in girth and length first");return;}S.weights=S.weights||[];var td=tdISO();S.weights=S.weights.filter(function(w){return !(w.date===td&&/tape/i.test(w.note||""));});S.weights.push({date:td,weight:kg+" kg",note:"Weigh-tape",by:currentName()});miniToast("Saved "+kg+" kg");stSaved();}
+function stWAdd(){var d=(document.getElementById("w-add-date")||{}).value,v=parseFloat((document.getElementById("w-add-kg")||{}).value);if(!d||!(v>0))return;S.weights=S.weights||[];S.weights.push({date:d,weight:v+" kg",note:"Scales",by:currentName()});stSaved();}
+function stWDel(i){var w=(S.weights||[])[i];if(!w)return;appConfirm("Remove "+(w.weight||"this weight")+" on "+fmtDMY(w.date)+"?",function(){S.weights.splice(i,1);stSaved();});}
+function renderStBody(){var e=esc;var goat=isGoat(S);var key=goat?"goatBcs":"hk";var ls=lastScore(S,key);var W=stWeights();var lw=W[0];var he=stHe();
+  var s=ls?ls.now.score:0;var labels=goat?GOAT_BCS:HENNEKE;var lt=!s?["\u2014","#e4e7e0","#282932"]:(goat?(s<=1?["#ef4444","#fff"]:s>=5?["#f59e0b","#282932"]:["#c6e76c","#282932"]):(s<=3?["#ef4444","#fff"]:s>=8?["#f59e0b","#282932"]:["#c6e76c","#282932"]));if(s)lt=[String(s)].concat(lt);
+  var trend=ls&&ls.prev?(ls.now.score>ls.prev.score?" \u2014 gaining":ls.now.score<ls.prev.score?" \u2014 dropping":" \u2014 steady"):"";
+  var h='<h2>'+(goat?"Body &amp; eyes":"Body")+'</h2><div class="sub">'+(goat?"Condition, FAMACHA, weight and the weekly photo.":"Henneke, weight and the weekly photo.")+'</div>';
+  h+=tabStrip(lt[0],lt[1],lt[2],ls?'<b>'+(goat?"Condition "+s+" of 5":"Henneke "+s)+' \u00b7 '+e((labels[s]||"").toLowerCase())+'.</b>'+(ls.prev?' Was '+ls.prev.score+' on '+e(fmtDMY(ls.prev.date).slice(0,5))+e(trend)+'.':''):'<b>Not scored yet.</b> Score '+he[1]+' today \u2014 every later score is measured against it.',"Weight",lw?lw.kg+" kg":"\u2014");
+  var b=goat?scoreRow("goatBcs",5,GOAT_BCS,[3],"goats 1\u20135 \u00b7 3 is ideal")+scoreRow("famacha",5,["","Red \u2014 healthy","Red-pink","Pink \u2014 borderline","Pink-white \u2014 anaemic","White \u2014 severely anaemic"],[1,2],"anaemia from worms")+'<div class="smt2">FAMACHA 4 or 5 means worm now and tell the vet.</div>'
+    :scoreRow("hk",9,HENNEKE,[5,6],"1\u20139 \u00b7 5\u20136 is the target").replace(/<div class="spk">[\s\S]*$/,"");
+  if(!goat&&ls&&ls.all.length){var A=ls.all.slice(-12);b+='<div class="lbl" style="margin:10px 0 2px">Since '+he[0]+(he[0]==="they"?" came":" came")+' in</div><div class="spk" style="height:60px">'+A.map(function(x){return '<i style="height:'+Math.round(x.score/9*100)+'%" title="'+e(fmtDMY(x.date))+' \u00b7 '+x.score+'"></i>';}).join("")+'<b>'+(ls.prev?ls.all[0].score+" \u2192 "+ls.now.score+" since "+e(fmtDMY(ls.all[0].date).slice(0,5)):"first score "+e(fmtDMY(ls.now.date).slice(0,5)))+'</b></div>';}
+  h+='<div class="card">'+b+'</div>';
+  if(isEquine(S)){var q=stEq();var kg=stTapeKg();h+='<div class="card"><div class="lbl">Weigh-tape</div><div class="dueg"><div class="f"><label class="lbl">Heart girth (cm)</label><input type="number" inputmode="decimal" value="'+e(q.tapeG||"")+'" oninput="stTapeIn(\'tapeG\',this.value)"></div><div class="f"><label class="lbl">Body length (cm)</label><input type="number" inputmode="decimal" value="'+e(q.tapeL||"")+'" oninput="stTapeIn(\'tapeL\',this.value)"></div></div><div class="stclock"><b id="tape-out">'+(kg?'\u2248 '+kg+' kg':'\u2014')+'</b><small>'+(isDonkey(S)?"donkey formula":"horse &amp; pony formula \u00b7 donkeys use their own")+'</small></div><div class="brow" style="margin-top:8px"><button class="btn" onclick="stTapeSave()">Save as today\u2019s weight</button></div></div>';}
+  h+='<div class="card"><div class="lbl">Weights</div>'+(W.length?W.slice(0,12).map(function(w){return '<div class="ovkv"><span>'+e(stShortD(w.date))+'</span><b>'+w.kg+' kg'+(w.note?' \u00b7 '+e(/tape/i.test(w.note)?"tape":w.note.toLowerCase()):'')+' <u class="stx-del" onclick="stWDel('+w.i+')">\u00d7</u></b></div>';}).join(""):'<div class="smt2">No weights yet.</div>')
+    +'<div class="sadd"><input type="date" id="w-add-date" value="'+tdISO()+'"><input type="number" inputmode="decimal" id="w-add-kg" placeholder="kg on the scales"><button class="btn" onclick="stWAdd()">+ Add</button></div></div>';
+  h+=stPhotoPair();
+  return h+browNav("weights");}
+
+// ── Feet & teeth ───────────────────────────────────────────────────
+function stVisitRows(L,kind){var e=esc;return (L||[]).map(function(v,i){return{v:v,i:i};}).sort(function(a,b){return String(b.v.date).localeCompare(String(a.v.date));}).map(function(x){var v=x.v;
+  var span=kind==="dent"?[v.by,(v.found||[]).join(", ").toLowerCase(),v.note,v.sedated?"sedated":""].filter(Boolean).join(" \u00b7 "):[v.work,v.by,v.note].filter(Boolean).join(" \u00b7 ");
+  var pill=kind==="dent"?(v.work||"Rasp"):(v.work||"Trim");
+  return '<div class="srow"><b>'+e(stShortD(v.date))+'</b><span>'+e(span)+'</span><i>'+e(pill)+'</i><u onclick="stVisitDel(\''+kind+'\','+x.i+')">remove</u></div>';}).join("");}
+var ST_VISIT_KEYS={far:["farrierVisits","farrierLast","farrierNext"],dent:["dentVisits","dentistLast","dentistNext"],trim:["trimVisits","trimLast","trimNext"]};
+function stNextFor(kind,dt){return kind==="dent"?stAddMonths(dt,DENTIST_MONTHS):addDaysStr(dt,7*(kind==="trim"?GOAT_TRIM_WEEKS:FARRIER_WEEKS));}
+function stLogVisit(st,kind,v){st.eq=st.eq||{};var K=ST_VISIT_KEYS[kind];var L=st.eq[K[0]]=st.eq[K[0]]||[];L.push(v);
+  var latest=L.map(function(x){return x.date;}).sort().pop();if(!st.eq[K[1]]||latest>=st.eq[K[1]]){st.eq[K[1]]=latest;st.eq[K[2]]=stNextFor(kind,latest);}}
+function stVisitAdd(kind){var g=function(id){return ((document.getElementById(id)||{}).value||"").trim();};var q=stEq();var v;
+  if(kind==="far")v={date:g("fv-date"),by:g("fv-by"),work:g("fv-work")||"Trim",note:g("fv-note")};
+  else if(kind==="dent"){v={date:g("dv-date"),by:g("dv-by")||"EDT",note:g("dv-note"),found:(q.dentFound||[]).slice(),sedated:!!q.dentSed};v.work=/rasp/i.test(v.note)?"Rasp":v.found.length?"Rasp":"Check";}
+  else v={date:g("tv-date"),by:g("tv-by"),work:"Trim",note:g("tv-note")};
+  if(!v.date)return;v.logged=currentName();stLogVisit(S,kind,v);if(kind==="dent")q.dentSed=false;miniToast("Visit logged \u00b7 next "+fmtDMY(q[ST_VISIT_KEYS[kind][2]]).slice(0,5));stSaved();}
+function stVisitDel(kind,i){var K=ST_VISIT_KEYS[kind];var L=stEq()[K[0]]||[];var v=L[i];if(!v)return;appConfirm("Remove the visit on "+fmtDMY(v.date)+"?",function(){L.splice(i,1);stSaved();});}
+function stFarrierList(){var e=esc;var ks={};records.forEach(function(r){((((r.state||{}).eq)||{}).farrierVisits||[]).forEach(function(v){if(v.by)ks[v.by]=1;});});return '<datalist id="st-farriers">'+Object.keys(ks).map(function(k){return '<option value="'+e(k)+'">';}).join("")+'</datalist>';}
+function renderStFeet(){var e=esc,q=stEq();var goat=isGoat(S);
+  if(goat){var dt=stDue(q.trimNext);var h='<h2>Feet</h2><div class="sub">Trims, with every one kept.</div>';
+    h+=tabStrip(dt.c?"!":q.trimNext?"OK":"\u2014",dt.c==="r"?"#ef4444":dt.c==="a"?"#f59e0b":q.trimNext?"#c6e76c":"#e4e7e0",dt.c==="r"?"#fff":"#282932",q.trimNext?'<b>Feet '+e(dt.t)+'.</b>':'<b>No trim booked.</b>',"Last trim",q.trimLast?fmtDMY(q.trimLast).slice(0,5):"\u2014");
+    h+='<div class="card"><div class="lbl">Foot trims</div>'+dueLine("Feet trimmed",q.trimLast,q.trimNext,"trimLast","trimNext")+'<div class="lbl" style="margin:8px 0 4px">Trims</div>'+(stVisitRows(q.trimVisits,"trim")||'<div class="smt2">None logged yet.</div>')
+      +'<div class="sadd"><input type="date" id="tv-date" value="'+tdISO()+'"><input id="tv-by" placeholder="Who"><input id="tv-note" placeholder="Note"><button class="btn" onclick="stVisitAdd(\'trim\')">+ Log trim</button></div><div class="smt2">Next due fills in '+GOAT_TRIM_WEEKS+' weeks after a trim.</div>'
+      +'<div class="ptick" style="margin-top:8px">'+stTick("Scald","eq.scald",!!q.scald)+stTick("Foot rot","eq.footrot",!!q.footrot)+stTick("Lame","eq.glame",!!q.glame)+'</div></div>';
+    return h+browNav("feet");}
+  var fd=stDue(q.farrierNext),dd=stDue(q.dentistNext);var bits=[];if(fd.t)bits.push('<b>Farrier '+e(fd.t)+'</b>');if(dd.t)bits.push((bits.length?'dentist ':'<b>Dentist ')+e(dd.t)+(bits.length?'':'</b>'));
+  var worst=[fd.c,dd.c].indexOf("r")>=0?"r":[fd.c,dd.c].indexOf("a")>=0?"a":"";
+  var h='<h2>Feet &amp; teeth</h2><div class="sub">Farrier and dentist, with every visit kept.</div>';
+  h+=tabStrip(worst?"!":bits.length?"OK":"\u2014",worst==="r"?"#ef4444":worst==="a"?"#f59e0b":bits.length?"#c6e76c":"#e4e7e0",worst==="r"?"#fff":"#282932",bits.length?bits.join(" \u00b7 ")+'.':'<b>Nothing booked.</b> Log a visit and the next one fills in.',"Shod",e(q.shod||"\u2014"));
+  if(q.lami)h+='<div class="cflag r"><b>'+e(stName())+'</b> has laminitis signs \u2014 ring the vet now and keep '+stHe()[1]+' in.</div>';
+  h+='<div class="card"><div class="lbl">Farrier</div>'+chipRow("Feet","","eq.shod",["Barefoot","Front shoes","Full set","Remedial"],q.shod||"")+dueLine("Farrier",q.farrierLast,q.farrierNext,"farrierLast","farrierNext")
+    +'<div class="lbl" style="margin:8px 0 4px">Visits</div>'+(stVisitRows(q.farrierVisits,"far")||'<div class="smt2">None logged yet.</div>')
+    +'<div class="sadd"><input type="date" id="fv-date" value="'+tdISO()+'"><input id="fv-by" list="st-farriers" placeholder="Farrier"><select id="fv-work"><option>Trim</option><option>Reset</option><option>New shoes</option><option>Remedial</option></select><input id="fv-note" placeholder="Note"><button class="btn" onclick="stVisitAdd(\'far\')">+ Log visit</button></div>'+stFarrierList()
+    +'<div class="smt2">Next due fills in '+FARRIER_WEEKS+' weeks after a visit. Change it if the farrier says otherwise.</div>'
+    +'<div class="ptick" style="margin-top:8px">'+stTick("Thrush","eq.thrush",!!q.thrush)+stTick("Abscess","eq.abscess",!!q.abscess)+stTick("Cracks","eq.cracks",!!q.cracks)+stTick("Laminitis signs \u2014 heat, strong pulse, rocking back","eq.lami",!!q.lami)+'</div></div>';
+  h+='<div class="card"><div class="lbl">Dentist</div>'+dueLine("Dentist",q.dentistLast,q.dentistNext,"dentistLast","dentistNext")
+    +'<div class="lbl" style="margin:8px 0 4px">Visits</div>'+(stVisitRows(q.dentVisits,"dent")||'<div class="smt2">None logged yet.</div>')
+    +'<div class="sadd"><input type="date" id="dv-date" value="'+tdISO()+'"><select id="dv-by"><option>EDT</option><option>Vet</option></select><input id="dv-note" placeholder="What they found"><button class="btn" onclick="stVisitAdd(\'dent\')">+ Log visit</button></div>'
+    +multiRow("Found","","eq.dentFound",["Sharp edges","Hooks","Loose / missing","Diastema","Wolf teeth"],q.dentFound)
+    +'<div class="ptick">'+stTick("Sedated","eq.dentSed",!!q.dentSed)+stTick("Quidding \u2014 dropping half-chewed food","eq.quidding",!!q.quidding)+'</div><div class="smt2">Next due fills in '+DENTIST_MONTHS+' months after a visit.</div></div>';
+  return h+browNav("feet");}
+
+// ── Handling ───────────────────────────────────────────────────────
+function renderStHandling(){var q=stEq(),e=esc;var list=isGoat(S)?HANDLING_GOAT:HANDLING_EQ;var he=stHe();
+  var h='<h2>Handling</h2><div class="sub">What '+he[0]+'\u2019ll let you do, and who should do it.</div>';
+  h+='<div class="card"><div class="hgrid">'+list.map(function(x){var v=q["h_"+x[0]]||"";return '<div><b>'+e(x[1])+'</b><span class="cchips">'+["Yes","No","?"].map(function(o){return '<span class="cchip'+(v===o?" on":"")+'" onclick="stSet(\'eq.h_'+x[0]+'\',\''+o+'\')">'+o+'</span>';}).join("")+'</span></div>';}).join("")+'</div>'
+    +(isEquine(S)?chipRow("Ridden","","eq.ridden",["Ridden","Unbacked","Don\u2019t know"],q.ridden||""):'')+'</div>';
+  var W=Array.isArray(q.watch)?q.watch:[];h+='<div class="card"><div class="lbl">Watch for</div><div class="cchips" style="margin-bottom:6px">'+(isGoat(S)?["Hard to catch","Butts","Jumps out","Barges","Nervous"]:["Hard to catch","Kicks","Bites","Barges","Head-shy","Nervous of men"]).map(function(o){return '<span class="cchip'+(W.indexOf(o)>=0?" on":"")+'" onclick="stMulti(\'eq.watch\',\''+o+'\')">'+e(o)+'</span>';}).join("")+'</div>'
+    +chipRow("Who handles "+he[1],"","eq.who",["Anyone","Experienced staff","Two people"],q.who||"")
+    +'<div class="f"><label class="lbl">Notes</label><input value="'+e(q.handNotes||"")+'" data-save="eq.handNotes" placeholder="e.g. Bring a bucket to catch"></div></div>';
+  return h+browNav("hand");}
+
+// ── Feeding ────────────────────────────────────────────────────────
+function renderStFeeding(){var q=stEq(),d=S.dog,e=esc;var eqn=isEquine(S);
+  var h='<h2>Feeding</h2><div class="sub">Turnout, grazing and the feed sheet.</div>';
+  h+='<div class="card"><div class="dog-fg">'+stWhere(d)+fld("Turned out with",q.with||"","eq.with","text","e.g. Ned & Nell")+'</div>'+(eqn?chipRow("Grazing","","eq.graze",["Full","Restricted","Muzzle","Off grass"],q.graze||""):'')+'</div>';
+  var am=q.hardAm!=null?q.hardAm:(q.hard||"");
+  h+='<div class="card"><div class="dog-fg">'+fld("Hay (kg a day)",q.hay||"","eq.hay","number","6")+'</div>'+(eqn?chipRow("Hay","","eq.soak",["Soaked","Dry","Haylage"],q.soak||""):'')
+    +'<div class="dueg">'+fld("Hard feed \u2014 AM",am,"eq.hardAm","text","e.g. 1 scoop")+fld("Hard feed \u2014 PM",q.hardPm||"","eq.hardPm","text","")+'</div>'+fld("Supplements",q.supp||"","eq.supp","text","")
+    +(eqn?chipRow("Rug","","eq.rugs",["On","Off","None"],q.rugs||""):fld("Feeding notes",q.feed||"","eq.feed","text","browse, no grain"))+'</div>';
+  return h+browNav("feed");}
+
+// ── Poultry: Flock and Mites & worms ───────────────────────────────
+function renderStFlock(){var e=esc;var d=S.dog;var x=dayOf(S,tdISO())||{};var L=(stEq().birds)||[];var open=L.filter(function(b){return !b.done;});
+  var lost=(S.days||[]).reduce(function(a,y){return a+(parseInt(y.losses||0,10)||0);},0);var now=Math.max(0,(parseInt(d.count,10)||0)-lost);var bad=parseInt(x.losses||0,10)>1||x.eat==="No";var done=!!(x.eat||x.eggs||x.losses);
+  var h='<h2>Flock</h2><div class="sub">Today\u2019s tick, the birds needing attention, and the count.</div>'+housingBanner();
+  h+=tabStrip(d.count?String(now):"\u2014",bad?"#ef4444":"#c6e76c",bad?"#fff":"#282932",(d.count?'<b>'+now+' birds now</b> \u00b7 '+e(d.count)+' in, '+lost+' lost. ':'<b>Put the number of birds in</b> on the Animal tab. ')+(done?'Checked today.':'Not checked yet today.'),"Needing attention",String(open.length));
+  h+='<div class="card"><div class="lbl">Today</div>'+flockDayFields(x)+'<div class="smt2">One tick for the whole flock \u2014 the same as the <span class="lnk" data-go="days">Daily check</span>.</div></div>';
+  h+='<div class="card"><div class="lbl">Birds needing attention</div>'+(L.length?L.map(function(b,i){return '<div class="srow'+(b.done?" off":"")+'"><b>'+e(b.name||"Bird")+'</b><span>'+e(b.issue||"")+'</span><i>'+e(stShortD(b.date))+'</i><u onclick="stBirdDone('+i+')">'+(b.done?"reopen":"better")+'</u></div>';}).join(""):'<div class="smt2">None. Only name a bird when it needs attention.</div>')
+    +'<div class="sadd"><input id="bird-name" placeholder="e.g. Hen 4"><input id="bird-issue" placeholder="feather loss, lame\u2026"><button class="btn" onclick="stBirdAdd()">+ Add</button></div></div>';
+  return h+browNav("flock");}
+function renderStMites(){var q=stEq(),e=esc;var late=[q.wormNext,q.miteNext,q.liceNext].some(function(x){return x&&x<tdISO();});
+  var bits=[];[["Worming",q.wormNext],["Mite check",q.miteNext],["Lice check",q.liceNext]].forEach(function(x){var d=stDue(x[1]);if(d.t)bits.push(x[0]+" "+d.t);});
+  var h='<h2>Mites &amp; worms</h2><div class="sub">Worming, red mite and lice checks for the flock.</div>';
+  h+=tabStrip(late?"!":bits.length?"OK":"\u2014",late?"#f59e0b":bits.length?"#c6e76c":"#e4e7e0","#282932",bits.length?'<b>'+e(bits[0])+'</b>'+(bits.length>1?' \u00b7 '+e(bits.slice(1).join(" \u00b7 ")):'')+'.':'<b>Nothing booked.</b>',"Last wormed",q.wormLast?fmtDMY(q.wormLast).slice(0,5):"\u2014");
+  h+='<div class="card">'+dueLine("Wormed",q.wormLast,q.wormNext,"wormLast","wormNext")+dueLine("Red mite check",q.miteLast,q.miteNext,"miteLast","miteNext")+dueLine("Lice / scaly leg check",q.liceLast,q.liceNext,"liceLast","liceNext")+'</div>';
+  return h+browNav("mites");}
+
+// ── Medical: worming and jabs on top ───────────────────────────────
+function stMedDue(){if(!isEquine(S)&&!isGoat(S))return "";var q=stEq();
+  var b=dueLine("Wormed",q.wormLast,q.wormNext,"wormLast","wormNext")+'<div class="dog-fg">'+fld("Faecal egg count (epg)",q.fec||"","eq.fec","text","e.g. 250 on 02-10")+'</div>'
+    +(isGoat(S)?dueLine("Clostridial",q.clostridial,q.clostNext,"clostridial","clostNext"):dueLine("Flu &amp; tetanus",q.fluTet,q.fluTetNext,"fluTet","fluTetNext"));
+  return '<div class="card"><div class="lbl">Due</div>'+b+'</div>';}
+
+// ── Board: Farrier & dentist list ──────────────────────────────────
+function stFdItems(days){var lim=addDaysStr(tdISO(),days||14);var out={far:[],dent:[],trim:[]};
+  records.filter(stIsHere).forEach(function(r){var st=r.state||{};var q=st.eq||{};if((st.foster||{}).out)return;
+    if(isEquine(st)){if(q.farrierNext&&q.farrierNext<=lim)out.far.push({r:r,due:q.farrierNext});if(q.dentistNext&&q.dentistNext<=lim)out.dent.push({r:r,due:q.dentistNext});}
+    if(isGoat(st)&&q.trimNext&&q.trimNext<=lim)out.trim.push({r:r,due:q.trimNext});});
+  Object.keys(out).forEach(function(k){out[k].sort(function(a,b){return a.due.localeCompare(b.due);});});return out;}
+function stFdCount(){var o=stFdItems(14);return o.far.length+o.dent.length+o.trim.length;}
+function stFdRow(x,kind){var e=esc;var r=x.r,st=r.state||{},d=st.dog||{},q=st.eq||{};var td=tdISO();var od=x.due<td;
+  var sub=[d.kennel,kind==="far"?(q.shod||"").toLowerCase():"",isDonkey(st)?"donkey":""].filter(Boolean).join(" \u00b7 ");var key=kind+":"+r.id;var open=window._fdOpen===key;
+  var h='<div class="srow"><b onclick="openDogAt('+r.id+',\'feet\')" style="cursor:pointer">'+e(r.name)+'</b><span>'+e(sub)+'</span><i class="'+(od?"r":"a")+'">'+(od?"overdue":x.due===td?"today":e(fmtDMY(x.due).slice(0,5)))+'</i><u onclick="window._fdOpen='+(open?'null':'\''+key+'\'')+';showDashSection(\'farrier\')">'+(open?"close":"log")+'</u></div>';
+  if(open){var by=kind==="dent"?'<select id="fd-by"><option>EDT</option><option>Vet</option></select>':'<input id="fd-by" list="st-farriers" placeholder="'+(kind==="trim"?"Who":"Farrier")+'">';
+    var work=kind==="far"?'<select id="fd-work"><option>Trim</option><option>Reset</option><option>New shoes</option><option>Remedial</option></select>':'';
+    h+='<div class="sadd" style="margin:2px 0 8px"><input type="date" id="fd-date" value="'+td+'">'+by+work+'<input id="fd-note" placeholder="Note"><button class="btn btnp" onclick="stFdLog(\''+kind+'\','+r.id+')">Save</button></div>';}
+  return h;}
+function stFdLog(kind,id){var r=records.find(function(x){return String(x.id)===String(id);});if(!r||!r.state)return;var g=function(k){return ((document.getElementById(k)||{}).value||"").trim();};
+  var v={date:g("fd-date"),by:g("fd-by"),note:g("fd-note"),logged:currentName()};if(!v.date)return;if(kind==="far")v.work=g("fd-work")||"Trim";else if(kind==="trim")v.work="Trim";else v.work=/rasp/i.test(v.note)?"Rasp":"Check";
+  stLogVisit(r.state,kind,v);window._fdOpen=null;try{saveRecordChange(r);}catch(e){}miniToast(r.name+" logged \u00b7 next "+fmtDMY(r.state.eq[ST_VISIT_KEYS[kind][2]]).slice(0,5));showDashSection("farrier");}
+function renderFarrierList(){var o=stFdItems(14);var sec=function(lbl,L,kind){return L.length?'<div class="card"><div class="lbl">'+lbl+' \u00b7 '+L.length+'</div>'+L.map(function(x){return stFdRow(x,kind);}).join("")+'</div>':'';};
+  var h='<div class="rxhead"><button onclick="loadRecordsList().then(function(){renderDashboard();})" class="rxback">&#8592; Dashboard</button><h2>Farrier &amp; dentist</h2></div><div class="rxsub">Everyone due in the next 2 weeks, for the visit. Print it or tick it off on the day.</div>';
+  var body=sec("Farrier",o.far,"far")+sec("Dentist",o.dent,"dent")+sec("Goat feet",o.trim,"trim");
+  h+=body||'<div class="rxempty">Nobody due in the next 2 weeks.</div>';
+  if(body)h+='<div class="brow"><button class="btn" onclick="printFarrierList()">Print the list</button></div>';
+  return '<div style="max-width:640px;margin:0 auto">'+h+stFarrierListAll()+'</div>';}
+function stFarrierListAll(){var ks={};records.forEach(function(r){((((r.state||{}).eq)||{}).farrierVisits||[]).forEach(function(v){if(v.by)ks[v.by]=1;});});return '<datalist id="st-farriers">'+Object.keys(ks).map(function(k){return '<option value="'+esc(k)+'">';}).join("")+'</datalist>';}
+function printFarrierList(){var o=stFdItems(14);var td=tdISO();var rows=function(lbl,L){return L.length?'<h3>'+lbl+'</h3><table><tr><th>Animal</th><th>Where</th><th>Due</th><th>Done</th><th>Notes</th></tr>'+L.map(function(x){var d=(x.r.state||{}).dog||{};return '<tr><td>'+esc(x.r.name)+'</td><td>'+esc(d.kennel||"")+'</td><td>'+(x.due<td?"overdue ("+fmtDMY(x.due)+")":fmtDMY(x.due))+'</td><td style="width:50px"></td><td style="width:40%"></td></tr>';}).join("")+'</table>':'';};
+  var w=window.open("","_blank");w.document.write('<!DOCTYPE html><html><head><title>Farrier &amp; dentist</title><style>body{font-family:system-ui,sans-serif;padding:24px;color:#282932}h1{font-size:17px;margin:0 0 2px}h2{font-size:12px;font-weight:400;color:#555;margin:0 0 14px}h3{font-size:13px;margin:16px 0 6px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #cfd4cf;padding:7px 8px;text-align:left}th{background:#f1f3ee;font-size:9px;text-transform:uppercase}@media print{body{padding:6px}}</style></head><body><h1>Farrier &amp; dentist &middot; NSPCA Longford Stables</h1><h2>Due in the next 2 weeks &middot; printed '+esc(fmtDMY(td))+'</h2>'+rows("Farrier",o.far)+rows("Dentist",o.dent)+rows("Goat feet",o.trim)+'</body></html>');w.document.close();setTimeout(function(){w.print();},300);}
+function showDashSection(section){if(section==="farrier"){try{bumpActivity();}catch(e){}window._dashSection=section;var st=document.getElementById("overdue-sticky");if(st)st.innerHTML="";var el=document.getElementById("dashboard-content");if(!el)return;if(el.parentNode&&el.parentNode.style)el.parentNode.style.maxWidth="900px";el.innerHTML=renderFarrierList();return;}
+  return dogShowDashSection(section);}
+
+// ── Tab dots ───────────────────────────────────────────────────────
+function tabDone(id){var q=(S&&S.eq)||{};
+  switch(id){
+    case "iso":{var ii=stIso(S);if(!ii||ii.day==null)return null;return ii.state==="done";}
+    case "weights":return !!(lastScore(S,isGoat(S)?"goatBcs":"hk")||(S.weights||[]).length);
+    case "feet":{var nx=isGoat(S)?[q.trimNext]:[q.farrierNext,q.dentistNext];if(nx.every(function(x){return !x;}))return false;return !nx.some(function(x){return x&&x<tdISO();});}
+    case "hand":{var L=isGoat(S)?HANDLING_GOAT:HANDLING_EQ;return L.every(function(h){return q["h_"+h[0]];})?true:null;}
+    case "feed":return (q.hay||q.hardAm||q.hard||q.hardPm)?true:null;
+    case "flock":return !!dayOf(S,tdISO());
+    case "mites":{var m=[q.wormNext,q.miteNext,q.liceNext];if(m.every(function(x){return !x;}))return false;return !m.some(function(x){return x&&x<tdISO();});}
+  }
+  return dogTabDone(id);}
+function tabWarn(id){if(id==="iso")return stranglesPos(S)||!!(S._id&&stStranglesContact(curRec()));if(id==="feet")return !!(S.eq&&S.eq.lami);if(id==="flock"){var x=dayOf(S,tdISO())||{};return parseInt(x.losses||0,10)>1||x.eat==="No";}return dogTabWarn(id);}
 
 // ── Init ──────────────────────────────────────────────────────────
 (function(){
