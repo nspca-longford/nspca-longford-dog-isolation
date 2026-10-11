@@ -229,6 +229,8 @@ nav::-webkit-scrollbar{display:none}
 .more{border-top:1px dashed #e4e7e0;margin-top:12px;padding-top:10px}.mh{font-size:12.5px;font-weight:800;margin-bottom:6px}.mh span{font-weight:600;color:#9a9fa8;font-size:11.5px;margin-left:6px}
 .copied{background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:9px 12px;font-size:12.5px;font-weight:600;color:#166534;line-height:1.5;margin-bottom:10px}
 @media(max-width:600px){.howto,.kgrid,.mgrid{grid-template-columns:1fr}}
+.db2-sw3 a{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:20px;color:#9a9fa8;text-decoration:none}.db2-sw3 a:hover{color:#c6e76c}.db2-sw3 b{display:inline-block!important}
+@media(max-width:640px){.db2-sw3 a,.db2-sw3 b{padding:4px 7px;font-size:10px}}
 .only-wide{display:none}
 @media(min-width:960px){.only-wide{display:block}.hide-wide{display:none}}
 .sidepanel{display:flex;flex-direction:column;gap:10px}
@@ -671,7 +673,7 @@ h2::after{content:"";flex:1;height:2px;min-width:24px;background:linear-gradient
     <div class="db2-mid"><b id="dash-clock"></b><span id="dash-count"></span><div class="db2-srch hide-narrow"><input id="dash-hsearch" placeholder="Name, pen, chip, colour, adopter…" oninput="setDashFilter('S',this.value);window._dbCaret=this.selectionStart;window._dbSearchActive='h';dashSearchRender()"></div></div>
     <div class="db2-r">
       <span id="dash-user" onclick="showDashSection('profile')" class="db2-av" style="display:none"></span>
-      <a href="index.html" class="db2-sw" title="Switch to the dog app"><span>Dogs</span><b>Cats</b></a>
+      <span class="db2-sw db2-sw3"><a href="index.html" title="Switch to the dog app">Dogs</a><b>Cats</b><a href="stables.html" title="Switch to the stables app">Stables</a></span>
       <button onclick="showIncidentModal()" class="db2-btn i" title="Quickly log an incident">Incident</button>
       <button id="dash-new-btn" onclick="openNewDog()" class="db2-btn p" title="Start a new cat">+ New cat</button>
       <div style="position:relative">
@@ -1667,7 +1669,7 @@ function toggleDashMenu(e){if(e){e.stopPropagation();}var m=document.getElementB
     +'<div class="h">Records</div>'
     +item("records","All records","every cat, here or gone \u00b7 search and filter")
     +(role==="admin"||role==="manager"?'<div class="h">Admin</div>'+(role==="admin"?item("users","Manage users",c.users+" people"+(c.invited?" \u00b7 "+c.invited+" invited":"")):'')+'<div class="mi" onclick="closeDashMenu();downloadBackup()"><div><b>Backup</b><small>'+(c.backupDate?"download a copy \u00b7 last "+e2(fmtDMY(c.backupDate)):"download a copy \u00b7 none on this device yet")+'</small></div>'+(c.backupDays===null||c.backupDays>=14?'<span class="bd r">'+(c.backupDays===null?"never":c.backupDays+" days")+'</span>':'<span class="ch">&rsaquo;</span>')+'</div>':'')
-    +'<div class="also">'+(role==="admin"?'<span onclick="closeDashMenu();restoreBackupOpen()">Restore a backup</span>':'')+'<span onclick="dashMenuGo(\'upcomingMedical\')">Upcoming medical</span><a href="index.html" style="color:inherit">Dogs \u203a</a></div>'
+    +'<div class="also">'+(role==="admin"?'<span onclick="closeDashMenu();restoreBackupOpen()">Restore a backup</span>':'')+'<span onclick="dashMenuGo(\'upcomingMedical\')">Upcoming medical</span><a href="index.html" style="color:inherit">Dogs \u203a</a><a href="stables.html" style="color:inherit">Stables \u203a</a></div>'
     +'<div class="foot"><span>v'+e2(APP_VERSION)+' \u00b7 <a href="#" onclick="closeDashMenu();showWhatsNew(true);return false">What\u0027s new \u203a</a></span><span class="out" onclick="closeDashMenu();appConfirm(\'Sign out of NSPCA Longford?\',doLogout)">Sign out</span></div></div>';
   m.innerHTML=h;m.style.display="block";document.body.classList.add("menu-open");setTimeout(function(){document.addEventListener("keydown",_escDashMenu);},0);}
 function _escDashMenu(ev){if(ev.key==="Escape")closeDashMenu();}
