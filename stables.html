@@ -740,7 +740,7 @@ var USERS=[
   {code:"CISO01",name:"Cat Iso",role:"staff"},
   {code:"ISO01",name:"Isolation",role:"staff"},
   {code:"STA01",name:"Stables",role:"staff"},
-  {code:"JAM01",name:"Jamie",role:"staff"}
+  {code:"JAM01",name:"Jamie",role:"manager",title:"Senior Equine Animal Care Assistant"}
 ];
 var CURRENT_USER=null;
 
@@ -1292,7 +1292,7 @@ function myWeek(name){var now=new Date();var day=(now.getDay()+6)%7;var mon=new 
   out.start=start;return out;}
 function renderProfile(){
   var me=CURRENT_USER||{name:currentName(),code:localStorage.getItem("nspca-intake-auth")||"",role:currentRole()};var meta=userMeta(me.code);var role=me.role||currentRole();
-  var roleLabel=role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Animal Trainer \u0026 Behaviour Specialist":"Staff";
+  var roleLabel=(CURRENT_USER&&CURRENT_USER.title)?CURRENT_USER.title:role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Animal Trainer \u0026 Behaviour Specialist":"Staff";
   var photo=userPhoto(me.code);var autoMins=getAutoLogoutMins();var email=(me.email||authEmail()||"");var devices=devProfiles().length;var wk=myWeek(me.name);
   var av=photo?'<img src="'+blobSrc(photo)+'" class="pf-av">':'<div class="pf-av" style="background:'+avatarColor(me.name)+';color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center">'+initials(me.name)+'</div>';
   var row=function(l,sub,act){return '<div class="pf-row"><div><b>'+l+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div>'+(act||'')+'</div>';};
@@ -1794,7 +1794,7 @@ function menuCounts(){var c={};try{var act=records.filter(function(r){var o=r.st
   var lb="";try{lb=localStorage.getItem("nspca-stables-last-backup")||"";}catch(e){}c.backupDays=lb?daysSince(lb):null;c.backupDate=lb;}catch(e){}return c;}
 function toggleDashMenu(e){if(e){e.stopPropagation();}var m=document.getElementById("dash-menu");if(!m)return;if(m.parentNode!==document.body)document.body.appendChild(m);if(m.style.display==="block"){closeDashMenu();return;}
   var role=currentRole();var me=CURRENT_USER||{name:currentName()};var nm=me.name||currentName();var ph=userPhoto(me.code);var c=menuCounts();var e2=esc;
-  var roleLabel=role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Animal Trainer":"Staff";
+  var roleLabel=(CURRENT_USER&&CURRENT_USER.title)?CURRENT_USER.title:role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Animal Trainer":"Staff";
   var item=function(sec,t,s,badge,red){return '<div class="mi" onclick="dashMenuGo(\''+sec+'\')"><div><b>'+t+'</b><small>'+s+'</small></div>'+(badge?'<span class="bd'+(red?" r":"")+'">'+badge+'</span>':'<span class="ch">&rsaquo;</span>')+'</div>';};
   var h='<div class="mscrim" onclick="closeDashMenu()"></div><div class="mpanel">'
     +'<div class="me" onclick="dashMenuGo(\'profile\')">'+(ph?'<img src="'+blobSrc(ph)+'">':'<i style="background:'+avatarColor(nm)+'">'+e2(initials(nm))+'</i>')+'<div><b>'+e2(nm)+'</b><small>'+e2(roleLabel)+' \u00b7 My profile \u203a</small></div><span class="x" onclick="event.stopPropagation();closeDashMenu()">&#10005;</span></div>'
@@ -2325,7 +2325,7 @@ function renderDashboard(){
   var ce=document.getElementById("dash-count");
   if(ce){var ac=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return (!o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation")&&!((r.state&&r.state.foster)||{}).out;}).length;var _used={};records.forEach(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";if(!(!o||/^Active/.test(o)||o==="Finished Isolation"))return;if(((r.state&&r.state.foster)||{}).out)return;var k=kennelRank(r.state&&r.state.dog?r.state.dog.kennel:"");_used[k.sec+":"+k.num]=1;});var _emp=0;KENNEL_SLOTS.forEach(function(sec){sec[1].forEach(function(slot){var kr=kennelRank(slot);if(!_used[kr.sec+":"+kr.num])_emp++;});});ce.textContent=ac+" in";ce.style.display=ac||_emp?"inline":"none";}
   var ue=document.getElementById("dash-user");
-  if(ue){var col=avatarColor(currentName());var ini=initials(currentName());var role=currentRole();var roleLabel=role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Dog Trainer \u0026 Behaviour Specialist":"Staff";ue.innerHTML=avatarByName(currentName(),18)+'<span>'+esc(currentName())+' &middot; '+roleLabel+'</span>';ue.style.display="inline-flex";ue.style.alignItems="center";ue.style.gap="6px";}
+  if(ue){var col=avatarColor(currentName());var ini=initials(currentName());var role=currentRole();var roleLabel=(CURRENT_USER&&CURRENT_USER.title)?CURRENT_USER.title:role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Dog Trainer \u0026 Behaviour Specialist":"Staff";ue.innerHTML=avatarByName(currentName(),18)+'<span>'+esc(currentName())+' &middot; '+roleLabel+'</span>';ue.style.display="inline-flex";ue.style.alignItems="center";ue.style.gap="6px";}
   var ks=[];records.forEach(function(r){var k=r.state&&r.state.dog?r.state.dog.kennel:"";if(k&&ks.indexOf(k)<0)ks.push(k);});ks.sort(kennelCompare);
   var fb='';var kennelSel='<select class="fp fpsel" onchange="setDashFilter(\'K\',this.value);renderDashboard()"><option value="">Kennel</option>'+ks.map(function(k){return'<option value="'+esc(k)+'"'+(_k===k?' selected':'')+'>'+esc(k)+'</option>';}).join("")+'</select>';
   var active=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return !o||o==="Active — in isolation"||o==="Active - in isolation"||o==="Finished Isolation";});
