@@ -1,0 +1,18 @@
+{
+  "name": "NSPCA Longford — Dog Isolation Unit",
+  "short_name": "NSPCA",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#282932",
+  "theme_color": "#282932",
+  "description": "NSPCA Longford — Dog Isolation Unit records",
+  "categories": ["productivity"],
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-round.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-square.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
