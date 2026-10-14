@@ -931,6 +931,35 @@ body.offline #netbar{display:block}body.offline{padding-top:30px}body.offline .d
 body.lookonly #content input:not([type=search]),body.lookonly #content textarea,body.lookonly #content select,body.lookonly .dtsh input,body.lookonly .dtsh textarea,body.lookonly .dtsh select,body.lookonly #expsheet input{pointer-events:none;opacity:.55;background:#f1f3ee!important}
 body.lookonly #save-bar .svb,body.lookonly #save-btn,body.lookonly .nsplit,body.lookonly .fsave,body.lookonly .dc2.sl.emp u,body.lookonly .dempties span,body.lookonly .bact label,body.lookonly .bact .hn,body.lookonly .idpic .pact,body.lookonly .cqv u,body.lookonly .idct u,body.lookonly .dtsh-h u,body.lookonly .exph .ea{display:none!important}
 body.lookonly #save-bar.dirty{display:none!important}
+
+.actpg .actg{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start;margin-top:6px}
+.actlbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:#6b7280;margin:6px 0 8px;display:flex;align-items:center;gap:10px}.actlbl::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,#c6e76c,transparent)}.actlbl em{font-style:normal;font-weight:700;letter-spacing:0;text-transform:none;color:#9a9fa8}
+.actcard{background:#fff;border:1px solid #e4e7e0;border-radius:14px;padding:2px 12px}
+.actwho{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f1ec;cursor:pointer}.actwho:last-child{border-bottom:none}.actwho.off{opacity:.55}.actwho:hover b{text-decoration:underline}
+.actwho div{flex:1;min-width:0}.actwho b{font-size:13px;display:block;color:#282932}.actwho small{font-size:11.5px;color:#6b7280;font-weight:600}
+.actwho em{font-style:normal;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:20px;background:#f0f1ec;color:#6b7280;white-space:nowrap}.actwho em.g{background:#dcfce7;color:#166534}.actwho em.c{background:#ede9fe;color:#5b21b6}
+.actav{border-radius:50%;flex:none;display:inline-flex;align-items:center;justify-content:center;font-weight:900;color:#fff;position:relative;line-height:1}.actav img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.actav.on::after{content:"";position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;border-radius:50%;background:#22c55e;border:2px solid #fff}
+.acthint{font-size:11.5px;color:#9a9fa8;font-weight:600;margin:8px 4px}
+.actchips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;align-items:center}.actchips span{font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:20px;border:1.5px solid #e4e7e0;color:#6b7280;background:#fff;white-space:nowrap;cursor:pointer}.actchips span.on{background:#282932;color:#c6e76c;border-color:#282932}
+.actsel{font:inherit;font-size:11.5px;font-weight:700;padding:5px 9px;border-radius:20px;border:1.5px solid #e4e7e0;color:#6b7280;background:#fff;max-width:160px}
+.actday{font-size:11px;font-weight:900;color:#282932;margin:12px 0 6px;letter-spacing:.06em;text-transform:uppercase}
+.actev{display:grid;grid-template-columns:44px 30px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;background:#fff;border:1px solid #e4e7e0;border-radius:12px;margin-bottom:5px;cursor:pointer}.actev:hover{border-color:#c9cdc2}.actev.nc{cursor:default}.actev.cat{border-style:dashed}
+.actev .t{font-size:12px;font-weight:800;color:#6b7280;font-variant-numeric:tabular-nums}
+.actev .pt{width:30px;height:30px;border-radius:8px;overflow:hidden;background:#e8e6e1;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;color:#6b7280;font-size:13px}.actev .pt img{width:100%;height:100%;object-fit:cover}
+.actev .tx b{font-size:13px;color:#282932}.actev .tx small{display:block;font-size:12px;color:#3f4250;font-weight:600;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.actev .by{font-size:11px;font-weight:800;color:#6b7280;display:flex;align-items:center;gap:6px}
+.ct{font-style:normal;font-size:9.5px;color:#5b21b6;font-weight:900;letter-spacing:.06em}
+.actmore{text-align:center;font-size:12px;font-weight:800;color:#6b7280;padding:9px;cursor:pointer}
+.actnone{background:#fff;border:1px solid #e4e7e0;border-radius:12px;padding:16px;color:#6b7280;font-size:13px;font-weight:600;text-align:center}
+.actfaces{display:none}
+.actback{font-size:12px;font-weight:800;color:#6b7280;cursor:pointer;margin:2px 0 8px}
+.actpv{background:#282932;color:#fff;border-radius:16px;padding:14px;margin-bottom:12px}.actpv .h{display:flex;align-items:center;gap:10px}.actpv .h b{font-size:15px}.actpv .h small{display:block;font-size:11px;color:#9a9fa8;font-weight:700}.actpv .actav.on::after{border-color:#282932}
+.actpv .nums{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid #3a3c48}.actpv .nums b{display:block;font-size:19px;font-weight:900;color:#c6e76c}.actpv .nums span{font-size:8px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#9a9fa8}
+.actwk{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px}.actwk div{background:#fff;border:1px solid #e4e7e0;border-radius:8px;text-align:center;padding:6px 0}.actwk b{display:block;font-size:9px;color:#6b7280;font-weight:900;letter-spacing:.08em}.actwk span{font-size:11px;font-weight:800}.actwk div.x{opacity:.45}
+.actdogs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.actdogs>span{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #e4e7e0;border-radius:20px;padding:3px 10px 3px 3px;font-size:12px;font-weight:700;cursor:pointer}.actdogs i{width:22px;height:22px;border-radius:50%;overflow:hidden;background:#e8e6e1;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:10px;color:#6b7280}.actdogs i img{width:100%;height:100%;object-fit:cover}.actdogs em{font-style:normal;color:#6b7280;font-weight:800}
+@media(max-width:760px){.actpg .actg{grid-template-columns:1fr}.actpg .actl{display:none}.actfaces{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0 4px}.actfaces>span{cursor:pointer}.actfaces small{font-size:11.5px;color:#6b7280;font-weight:700;margin-left:4px}
+.actev{grid-template-columns:40px minmax(0,1fr);}.actev .pt{display:none}.actev .by{grid-column:2;margin-top:-2px}.actev .by .actav{display:none}}
 </style>
 </head>
 <body>
@@ -1056,7 +1085,7 @@ var _allUsersCache=null,_autoLogoutTimer=null,_lastActivity=Date.now(),_dashRefr
 function userPhoto(code){try{return localStorage.getItem("nspca-user-photo-"+code)||"";}catch(e){return"";}}
 function setUserPhoto(code,dataUrl){try{localStorage.setItem("nspca-user-photo-"+code,dataUrl||"");}catch(e){}if(supabaseClient&&dataUrl)supabaseClient.from("users").update({photo:dataUrl}).eq("code",code).then(function(){},function(){});}
 function userLastLogin(code){try{var v=localStorage.getItem("nspca-user-lastlogin-"+code);return v?parseInt(v):0;}catch(e){return 0;}}
-function recordLastLogin(code){try{localStorage.setItem("nspca-user-lastlogin-"+code,Date.now().toString());}catch(e){}if(supabaseClient)supabaseClient.from("users").update({last_login_at:new Date().toISOString()}).eq("code",code).then(function(){},function(){});}
+function recordLastLogin(code){try{localStorage.setItem("nspca-user-lastlogin-"+code,Date.now().toString());}catch(e){}if(supabaseClient)supabaseClient.from("users").update({last_login_at:new Date().toISOString()}).eq("code",code).then(function(){},function(){});setTimeout(function(){try{seenBeat();}catch(e){}},4000);}
 
 // Map name → user record (search hardcoded + Supabase)
 
@@ -1751,7 +1780,7 @@ function removeAvatar(){
 function showDashSection(section){try{bumpActivity();}catch(e){}
   window._dashSection=section;
   var st=document.getElementById("overdue-sticky");if(st)st.innerHTML="";
-  var el=document.getElementById("dashboard-content");if(!el)return;if(el.parentNode&&el.parentNode.style)el.parentNode.style.maxWidth=(section==="records")?"1180px":"900px";
+  var el=document.getElementById("dashboard-content");if(!el)return;if(el.parentNode&&el.parentNode.style)el.parentNode.style.maxWidth=(section==="records"||section==="activity")?"1180px":"900px";
   if(section==="records"){
     el.innerHTML='<div class="rxhead"><button onclick="window._rSel=false;window._rPick={};loadRecordsList().then(function(){renderDashboard();})" class="rxback">&#8592; Dashboard</button><h2>All records</h2></div><div class="rxsub">Every dog that\u2019s come through the unit \u2014 here now first, then everyone who\u2019s left, month by month.</div>'+page_records();
     if(window._rSearchActive){var _rsi=document.getElementById("rec-search");if(_rsi){_rsi.focus();var _rl=(window._rCaret!=null?window._rCaret:_rsi.value.length);try{_rsi.setSelectionRange(_rl,_rl);}catch(e){}}window._rSearchActive=false;window._rCaret=null;}
@@ -1767,6 +1796,8 @@ function showDashSection(section){try{bumpActivity();}catch(e){}
     if(currentRole()!=="admin"){el.innerHTML='<div style="text-align:center;padding:40px"><h2>Admin only</h2><div style="color:#6b7280;margin-top:8px">User management is restricted to admin accounts.</div><button onclick="showDashSection(\'profile\')" class="btn" style="margin-top:14px">&larr; Back to profile</button></div>';return;}
     refreshAllUsers().then(function(){el.innerHTML=renderUsersAdmin();});
     el.innerHTML='<div style="text-align:center;padding:40px;color:#6b7280">Loading users...</div>';
+  }else if(section==="activity"){
+    window._act.rows=null;window._act.person="";el.innerHTML=renderActivity();
   }else if(section==="feedboard"){
     el.innerHTML=renderFeedBoard();
   }else if(section==="weighin"){
@@ -2117,7 +2148,7 @@ function closeNewMenu(){var m=document.getElementById("new-menu");if(m)m.style.d
 function toggleDashMenu(e){if(e){e.stopPropagation();}var m=document.getElementById("dash-menu");if(!m)return;if(m.parentNode!==document.body)document.body.appendChild(m);if(m.style.display==="block"){closeDashMenu();return;}
   var role=currentRole();var me=CURRENT_USER||{name:currentName()};var nm=me.name||currentName();var ph=userPhoto(me.code);var c=menuCounts();var e2=esc;
   var roleLabel=role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Dog Trainer":"Staff";
-  var MI={medround:"\ud83d\udc8a",feedboard:"\ud83e\udd63",weighin:"\u2696\ufe0f",incidents:"\u26a0\ufe0f",records:"\ud83d\uddc2\ufe0f",month:"\ud83d\udcc5",upcomingMedical:"\ud83e\ude7a",users:"\ud83d\udc65",backup:"\u2b07\ufe0f"};
+  var MI={medround:"\ud83d\udc8a",feedboard:"\ud83e\udd63",weighin:"\u2696\ufe0f",incidents:"\u26a0\ufe0f",records:"\ud83d\uddc2\ufe0f",month:"\ud83d\udcc5",upcomingMedical:"\ud83e\ude7a",users:"\ud83d\udc65",activity:"\ud83d\udc41\ufe0f",backup:"\u2b07\ufe0f"};
   var item=function(sec,t,s,badge,red,amb){return '<div class="mi" onclick="dashMenuGo(\''+sec+'\')" title="'+esc(s)+'"><span class="ic">'+(MI[sec]||"")+'</span><b>'+t+'</b>'+(badge?'<span class="bd'+(red?" r":amb?" y":"")+'">'+badge+'</span>':'')+'</div>';};
   var h='<div class="mscrim" onclick="closeDashMenu()"></div><div class="mpanel sl">'
     +'<div class="me" onclick="dashMenuGo(\'profile\')">'+(ph?'<img src="'+blobSrc(ph)+'">':'<i style="background:'+avatarColor(nm)+'">'+e2(initials(nm))+'</i>')+'<div><b>'+e2(nm)+'</b><small>'+e2(roleLabel)+' \u00b7 My profile \u203a</small></div><span class="x" onclick="event.stopPropagation();closeDashMenu()">&#10005;</span></div>'
@@ -2130,7 +2161,7 @@ function toggleDashMenu(e){if(e){e.stopPropagation();}var m=document.getElementB
     +item("records","All records","every dog, here or gone \u00b7 search and filter")
     +item("month","The month","ins, outs, stays, lights, vet \u00b7 the unit report")
     +item("upcomingMedical","Upcoming medical","vaccinations, boosters and vet checks due")
-    +(role==="admin"||role==="manager"?'<div class="h">Admin</div>'+(role==="admin"?item("users","Manage users",c.users+" people"+(c.invited?" \u00b7 "+c.invited+" invited":""),c.users):'')+'<div class="mi" onclick="closeDashMenu();downloadBackup()" title="Download a copy'+(c.backupDate?" \u00b7 last "+e2(fmtDMY(c.backupDate)):"")+'"><span class="ic">'+MI.backup+'</span><b>Backup</b>'+(c.backupDays===null||c.backupDays>=14?'<span class="bd r">'+(c.backupDays===null?"never":c.backupDays+" days")+'</span>':'<span class="bd">'+e2(fmtDMY(c.backupDate))+'</span>')+'</div>':'')
+    +(role==="admin"||role==="manager"?'<div class="h">Admin</div>'+(role==="admin"?item("activity","Activity","who's been in today and every saved change",(function(){var n=getAllUsersSync().filter(function(u){var t=u.last_seen_at?new Date(u.last_seen_at).getTime():0;return t&&Date.now()-t<6*60000;}).length;return n?n+" in now":"";})()):'')+(role==="admin"?item("users","Manage users",c.users+" people"+(c.invited?" \u00b7 "+c.invited+" invited":""),c.users):'')+'<div class="mi" onclick="closeDashMenu();downloadBackup()" title="Download a copy'+(c.backupDate?" \u00b7 last "+e2(fmtDMY(c.backupDate)):"")+'"><span class="ic">'+MI.backup+'</span><b>Backup</b>'+(c.backupDays===null||c.backupDays>=14?'<span class="bd r">'+(c.backupDays===null?"never":c.backupDays+" days")+'</span>':'<span class="bd">'+e2(fmtDMY(c.backupDate))+'</span>')+'</div>':'')
     +'<div class="foot"><span>v'+e2(APP_VERSION)+' \u00b7 <a href="#" onclick="closeDashMenu();showWhatsNew(true);return false">What\u0027s new \u203a</a></span><span class="out" onclick="closeDashMenu();appConfirm(\'Sign out of NSPCA Longford?\',doLogout)">Sign out</span></div></div>';
   m.innerHTML=h;m.style.display="block";document.body.classList.add("menu-open");setTimeout(function(){document.addEventListener("keydown",_escDashMenu);},0);}
 function _escDashMenu(ev){if(ev.key==="Escape")closeDashMenu();}
@@ -2147,6 +2178,7 @@ function startDashRefresh(){
     if(ae){var tag=(ae.tagName||"").toLowerCase();if(tag==="input"||tag==="textarea"||tag==="select")return;}
     if(document.querySelector('.med-overlay.show, .incident-ov, .add-user-ov, .edit-user-ov, #app-confirm-overlay[style*="display:flex"]'))return;
     // Refresh quietly
+    if(document.querySelector("#dashboard-content .actpg")){if(!window._act.person)window._act.rows&&actLoad();return;}
     try{await loadRecordsList();var ds=document.getElementById("dashboard-content");if(ds&&ds.children.length)renderDashboard();}catch(e){console.warn("Auto-refresh failed:",e);}
   },60000);
 }
@@ -6806,6 +6838,7 @@ function initSupabase(){
         var q=base+"?select="+(cols||"*");
         var chain={
           eq:function(col,val){q+="&"+col+"=eq."+encodeURIComponent(val);return chain;},
+          gte:function(col,val){q+="&"+col+"=gte."+encodeURIComponent(val);return chain;},
           in:function(col,vals){q+="&"+col+"=in.("+(vals||[]).map(function(v){return encodeURIComponent(v);}).join(",")+")";return chain;},
           limit:function(n){q+="&limit="+n;return chain;},
           order:function(col,opts){q+="&order="+col+(opts&&opts.ascending===false?".desc":".asc");return chain;},
@@ -7003,6 +7036,100 @@ function loadCurrent(){
     else{showScreen("login-screen");}
   }else{showScreen("login-screen");}
 })();
+
+// ── Activity (admin): who's been in today and every saved change, from dog_history ──
+var ACT_SEC={dog:["Dog details","dog"],arrival:["Arrival","arrival"],assessment:["Assessment","assessment"],scores:["Scored","scoring"],subScores:["Scored","scoring"],scoreNotes:["Scored","scoring"],subEvidence:["Scored","scoring"],scoreHistory:["Scored","scoring"],scores2:["Scored","scoring"],scorer2:["Scored","scoring"],trafficLight:["Scored","scoring"],medical:["Medical","medical"],weights:["Weighed","weights"],bcsLog:["Body condition","weights"],days:["Day report","days"],notes:["Note","notes"],fin:["Outcome","outcome"],rehome:["Rehoming","rehome"],foster:["Foster","foster"],files:["Files","files"],feedingPlan:["Feeding","feeding"],feeding:["Feeding","feeding"],care:["Care","care"],ea:["Extended assessment","ea"],warnings:["Warning","picture"],careNotices:["Care notice","picture"],behaviour:["Behaviour","notes"],pup:["Puppy","dog"],incidents:["Incident","picture"],exercises:["Exercise","care"],cat:["Cat details",""],_new:["New record","dog"]};
+window._act={rows:null,loading:false,day:"today",who:"",dog:"",cats:true,lim:60,person:""};
+function actPad(n){return ("0"+n).slice(-2);}
+function actDayKey(d){return d.getFullYear()+"-"+actPad(d.getMonth()+1)+"-"+actPad(d.getDate());}
+function actHM(d){return actPad(d.getHours())+":"+actPad(d.getMinutes());}
+function actName(raw){raw=String(raw||"").trim();if(!raw||raw==="unknown")return "Unknown";if(raw.indexOf("@")>0){var l=raw.toLowerCase();var u=getAllUsersSync().filter(function(x){return x.email&&String(x.email).toLowerCase()===l;})[0];return u?u.name:raw.split("@")[0];}return raw;}
+function actKeys(sum){sum=String(sum||"");if(/^Record created/i.test(sum))return["_new"];return sum.replace(/^Changed:\s*/i,"").split(/\s*,\s*/).filter(Boolean);}
+function actLabels(keys){var out=[];keys.forEach(function(k){var m=ACT_SEC[k];if(m&&out.indexOf(m[0])<0)out.push(m[0]);});return out;}
+function actTab(keys){var pri=["_new","days","weights","notes","medical","fin","rehome","foster","scores","assessment","arrival","feedingPlan","care","files","ea","dog"];for(var i=0;i<pri.length;i++)if(keys.indexOf(pri[i])>=0)return ACT_SEC[pri[i]][1];return "picture";}
+// a day report autosaves every pause in typing, so one sitting's saves become one line
+function actCollapse(rows){var out=[],open={};rows.slice().sort(function(a,b){return a.t-b.t;}).forEach(function(r){var k=r.app+"|"+r.id+"|"+r.who;var o=open[k];if(o&&r.t-o.t<=20*60000){r.keys.forEach(function(x){if(o.keys.indexOf(x)<0)o.keys.push(x);});o.t=r.t;o.n++;return;}o={app:r.app,id:r.id,who:r.who,keys:r.keys.slice(),t0:r.t,t:r.t,n:1};open[k]=o;out.push(o);});return out.sort(function(a,b){return b.t-a.t;});}
+async function actLoad(){var A=window._act;if(A.loading||!supabaseClient)return;A.loading=true;A.err="";
+  var since=new Date(Date.now()-8*86400000).toISOString();var raw=[];
+  try{await refreshAllUsers();}catch(e){}
+  try{var q=supabaseClient.from("dog_history").select("id,dog_id,changed_at,changed_by,summary");if(q.gte)q=q.gte("changed_at",since);var res=await q.order("changed_at",{ascending:false}).limit(3000);
+    if(res&&res.error)A.err="Couldn’t read the change history.";
+    ((res&&res.data)||[]).forEach(function(r){var t=new Date(r.changed_at).getTime();if(isNaN(t)||t<Date.now()-8*86400000)return;raw.push({app:"dog",id:r.dog_id,who:actName(r.changed_by),keys:actKeys(r.summary),t:t});});
+  }catch(e){A.err="Couldn’t read the change history.";}
+  A.catNames=A.catNames||{};
+  try{var qc=supabaseClient.from("cat_history").select("id,cat_id,changed_at,changed_by,summary");if(qc.gte)qc=qc.gte("changed_at",since);var rc=await qc.order("changed_at",{ascending:false}).limit(3000);
+    var ids={};if(rc&&!rc.error)((rc.data)||[]).forEach(function(r){var t=new Date(r.changed_at).getTime();if(isNaN(t)||t<Date.now()-8*86400000)return;ids[r.cat_id]=1;raw.push({app:"cat",id:r.cat_id,who:actName(r.changed_by),keys:actKeys(r.summary),t:t});});
+    var need=Object.keys(ids).filter(function(k){return !A.catNames[k];});
+    if(need.length){var rn=await supabaseClient.from("cats").select("id,name").in("id",need);((rn&&rn.data)||[]).forEach(function(c){A.catNames[c.id]=c.name||"Cat";});}
+  }catch(e){}
+  A.rows=actCollapse(raw);A.loading=false;A.at=Date.now();actRender();}
+function actRender(){var el=document.getElementById("dashboard-content");if(el&&el.querySelector(".actpg"))el.innerHTML=renderActivity();}
+function actSet(k,v){var A=window._act;A[k]=v;if(k!=="lim")A.lim=60;actRender();if(k==="person")window.scrollTo(0,0);}
+function actDog(e){if(e.app==="cat"){var n=window._act.catNames[e.id];return{name:n||"Cat",photo:""};}var r=records.find(function(x){return String(x.id)===String(e.id);});var d=r?((r.state||{}).dog||{}):{};return{name:(r&&r.name)||d.name||"A dog no longer here",photo:d.photo||"",pos:d.photoPos||"",gone:!r};}
+function actOpen(id,tab){var r=records.find(function(x){return String(x.id)===String(id);});if(!r){miniToast("That dog isn’t in the records list any more");return;}openDog(r.id);S.tab=tab||"picture";render();window.scrollTo(0,0);try{hideIsolationOverlay();}catch(e){}}
+function actSeen(u){var t=u&&u.last_seen_at?new Date(u.last_seen_at).getTime():0;return isNaN(t)?0:t;}
+function actPeople(){var A=window._act,rows=A.rows||[],now=Date.now(),td=actDayKey(new Date());
+  var users=getAllUsersSync().filter(function(u){return u.active!==false;});var by={};
+  users.forEach(function(u){var li=userLastIn(u);by[u.name]={u:u,name:u.name,lastIn:li,inToday:li&&actDayKey(new Date(li))===td,seen:actSeen(u),n:0,dogN:0,catN:0};});
+  rows.forEach(function(e){if(actDayKey(new Date(e.t))!==td)return;var p=by[e.who];if(!p)p=by[e.who]={u:null,name:e.who,lastIn:0,inToday:false,seen:0,n:0,dogN:0,catN:0};p.n++;if(e.app==="cat")p.catN++;else p.dogN++;p.first=Math.min(p.first||e.t,e.t);});
+  var L=Object.keys(by).map(function(k){var p=by[k];p.now=p.seen&&now-p.seen<6*60000;p.today=p.inToday||p.n>0||p.now;return p;});
+  L.sort(function(a,b){return (b.now-a.now)||(b.today-a.today)||(b.n-a.n)||((b.lastIn||0)-(a.lastIn||0))||String(a.name).localeCompare(String(b.name));});return L;}
+function actAv(name,size,on){var u=getAllUsersSync().find(function(x){return x.name===name;});var ph=u?(userPhoto(u.code)||u.photo||""):"";size=size||30;
+  return '<span class="actav'+(on?" on":"")+'" style="width:'+size+'px;height:'+size+'px;font-size:'+Math.round(size*.36)+'px;background:'+avatarColor(name)+'">'+(ph?'<img src="'+blobSrc(ph)+'" alt="">':esc(initials(name)))+'</span>';}
+function actRange(){var A=window._act,now=new Date();var t0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();if(A.day==="today")return[t0,Infinity];if(A.day==="yesterday")return[t0-86400000,t0];return[t0-6*86400000,Infinity];}
+function actDayHead(t){var d=new Date(t),now=new Date();var k=actDayKey(d);if(k===actDayKey(now))return "Today";if(k===actDayKey(new Date(now.getTime()-86400000)))return "Yesterday";return d.toLocaleDateString("en-IE",{weekday:"short",day:"numeric",month:"short"});}
+function actEvHtml(e,showWho){var g=actDog(e),labs=actLabels(e.keys);var tab=actTab(e.keys);var click=e.app==="cat"||g.gone?'':' onclick="actOpen(\''+esc(String(e.id))+'\',\''+tab+'\')" role="button" tabindex="0"';
+  var ph=g.photo?'<i class="pt"><img src="'+blobSrc(g.photo)+'" alt="" style="object-position:'+esc(g.pos||"50% 50%")+'"></i>':'<i class="pt ini">'+esc(String(g.name||"?").charAt(0).toUpperCase())+'</i>';
+  return '<div class="actev'+(e.app==="cat"?" cat":"")+(click?"":" nc")+'"'+click+'><span class="t">'+actHM(new Date(e.t))+'</span>'+ph+'<div class="tx"><b>'+esc(g.name)+(e.app==="cat"?' <em class="ct">CAT</em>':'')+'</b><small>'+esc(labs.join(" · ")||"Record updated")+'</small></div>'+(showWho?'<span class="by">'+actAv(e.who,20)+'<span>'+esc(e.who)+'</span></span>':'')+'</div>';}
+function actFeed(list,showWho){var A=window._act;if(!list.length)return '<div class="actnone">Nothing saved '+(A.day==="today"?"today yet":A.day==="yesterday"?"yesterday":"in the last 7 days")+'.</div>';
+  var h="",last="";list.slice(0,A.lim).forEach(function(e){var dh=actDayHead(e.t);if(dh!==last){h+='<div class="actday">'+esc(dh)+'</div>';last=dh;}h+=actEvHtml(e,showWho);});
+  if(list.length>A.lim)h+='<div class="actmore" onclick="actSet(\'lim\','+(A.lim+60)+')" role="button" tabindex="0">Show '+Math.min(60,list.length-A.lim)+' more</div>';return h;}
+function actPerson(name){var A=window._act,rows=(A.rows||[]).filter(function(e){return e.who===name;});var now=new Date();var t0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+  var wk=rows.filter(function(e){return e.t>=t0-6*86400000;});var has=function(e,k){return e.keys.indexOf(k)>=0;};
+  var nDays=wk.filter(function(e){return has(e,"days");}).length,nW=wk.filter(function(e){return has(e,"weights");}).length,nN=wk.filter(function(e){return has(e,"notes");}).length,nNew=wk.filter(function(e){return has(e,"_new");}).length;
+  var u=getAllUsersSync().find(function(x){return x.name===name;})||{};var seen=actSeen(u);var on=seen&&Date.now()-seen<6*60000;var li=userLastIn(u);
+  var role=u.role?userRoleInfo(u.role)[0].toLowerCase().replace(/(^|\s)\S/g,function(c){return c.toUpperCase();}):"";
+  var days="";for(var i=6;i>=0;i--){var d=new Date(t0-i*86400000);var k=actDayKey(d);var f=wk.filter(function(e){return actDayKey(new Date(e.t))===k;});var first=f.length?Math.min.apply(null,f.map(function(e){return e.t0||e.t;})):0;days+='<div'+(first?'':' class="x"')+'><b>'+d.toLocaleDateString("en-IE",{weekday:"short"}).toUpperCase()+'</b><span>'+(first?actHM(new Date(first)):"—")+'</span></div>';}
+  var dc={};wk.forEach(function(e){var k=e.app+"|"+e.id;dc[k]=dc[k]||{e:e,n:0};dc[k].n++;});var dl=Object.keys(dc).map(function(k){return dc[k];}).sort(function(a,b){return b.n-a.n;});
+  var h='<div class="actback" onclick="actSet(\'person\',\'\')" role="button" tabindex="0">‹ Everyone</div>'
+   +'<div class="actpv"><div class="h">'+actAv(name,38,on)+'<div><b>'+esc(name)+'</b><small>'+esc([role,on?"in now":li?"last in "+actAgo(li):""].filter(Boolean).join(" · "))+'</small></div></div>'
+   +'<div class="nums"><div><b>'+nDays+'</b><span>day reports</span></div><div><b>'+nW+'</b><span>weigh-ins</span></div><div><b>'+nN+'</b><span>notes</span></div><div><b>'+nNew+'</b><span>new records</span></div></div></div>'
+   +'<div class="actlbl">This week <em>first change each day</em></div><div class="actwk">'+days+'</div>'
+   +(dl.length?'<div class="actlbl">Worked on</div><div class="actdogs">'+dl.map(function(x){var g=actDog(x.e);var c=x.e.app==="cat"||g.gone?'':' onclick="actOpen(\''+esc(String(x.e.id))+'\',\'picture\')" role="button" tabindex="0"';return '<span'+c+'>'+(g.photo?'<i><img src="'+blobSrc(g.photo)+'" alt=""></i>':'<i class="ini">'+esc(String(g.name).charAt(0))+'</i>')+esc(g.name)+(x.e.app==="cat"?' <em class="ct">CAT</em>':'')+' <em>'+x.n+'</em></span>';}).join("")+'</div>':'')
+   +'<div class="actlbl">Changes this week <em>'+wk.length+'</em></div>'+(function(){var sv=A.day;A.day="week";var o=actFeed(wk,false);A.day=sv;return o;})();
+  return h;}
+function actAgo(t){var d=Math.floor((Date.now()-t)/86400000);if(d<=0)return "today "+actHM(new Date(t));if(d===1)return "yesterday";if(d<14)return d+" days ago";return new Date(t).toLocaleDateString("en-IE",{day:"numeric",month:"short"});}
+function renderActivity(){
+  var head='<div class="actpg"><div class="rxhead"><button onclick="loadRecordsList().then(function(){renderDashboard();})" class="rxback">&#8592; Dashboard</button><h2>Activity</h2></div><div class="rxsub">Every saved change, newest first. Opening a record and reading it leaves no trace.</div>';
+  if(currentRole()!=="admin")return head+'<div class="actnone">Activity is for admin accounts only.</div></div>';
+  var A=window._act;if(!A.rows){actLoad();return head+'<div class="actnone">Loading…</div></div>';}
+  var people=actPeople(),hasSeen=getAllUsersSync().some(function(u){return "last_seen_at" in u;});var nNow=people.filter(function(p){return p.now;}).length;var today=people.filter(function(p){return p.today;});
+  var dt=new Date().toLocaleDateString("en-IE",{weekday:"short",day:"numeric",month:"short"});
+  var plist=people.filter(function(p){return p.u||p.n;}).map(function(p){var sub,tag;
+    if(p.now){tag='<em class="g">in now</em>';}else if(p.n&&p.catN===p.n){tag='<em class="c">Cats</em>';}else if(p.today){tag='<em>'+(p.lastIn&&p.inToday?actHM(new Date(p.lastIn)):"today")+'</em>';}else tag='<em>'+(p.lastIn?actAgo(p.lastIn):"never")+'</em>';
+    if(p.today)sub=(p.inToday?"Signed in "+actHM(new Date(p.lastIn)):"In today")+' · '+(p.n?p.n+" change"+(p.n===1?"":"s")+(p.catN&&p.catN<p.n?" ("+p.catN+" cats)":p.catN?" in Cats":""):"no changes");
+    else sub=p.lastIn?"Last in "+actAgo(p.lastIn):"Never signed in";
+    return '<div class="actwho'+(p.today?"":" off")+'" onclick="actSet(\'person\','+esc(JSON.stringify(p.name)).replace(/"/g,"&quot;")+')" role="button" tabindex="0">'+actAv(p.name,30,p.now)+'<div><b>'+esc(p.name)+'</b><small>'+esc(sub)+'</small></div>'+tag+'</div>';}).join("");
+  var left='<div class="actl"><div class="actlbl">Today <em>'+esc(dt)+'</em></div><div class="actcard">'+plist+'</div>'+(hasSeen?'':'<div class="acthint">“In now” isn’t switched on yet — it needs one line of SQL.</div>')+'</div>';
+  var faces='<div class="actfaces">'+today.map(function(p){return '<span onclick="actSet(\'person\','+esc(JSON.stringify(p.name)).replace(/"/g,"&quot;")+')" role="button" tabindex="0" title="'+esc(p.name)+'">'+actAv(p.name,34,p.now)+'</span>';}).join("")+'<small>'+today.length+' in today'+(hasSeen?' · '+nNow+' now':'')+'</small></div>';
+  var right;
+  if(A.person){right=actPerson(A.person);}
+  else{var rg=actRange();var list=(A.rows||[]).filter(function(e){return e.t>=rg[0]&&e.t<rg[1];});var hasCat=list.some(function(e){return e.app==="cat";});if(!A.cats)list=list.filter(function(e){return e.app!=="cat";});
+    var whos=[];list.forEach(function(e){if(whos.indexOf(e.who)<0)whos.push(e.who);});if(A.who&&whos.indexOf(A.who)<0)whos.push(A.who);
+    var dogs={};list.forEach(function(e){if(e.app==="dog"){dogs[e.id]=actDog(e).name;}});
+    if(A.who)list=list.filter(function(e){return e.who===A.who;});if(A.dog)list=list.filter(function(e){return e.app==="dog"&&String(e.id)===String(A.dog);});
+    var chip=function(on,t,fn){return '<span class="'+(on?"on":"")+'" onclick="'+fn+'" role="button" tabindex="0">'+t+'</span>';};
+    var dsel='<select class="actsel" onchange="actSet(\'dog\',this.value)"><option value="">All dogs</option>'+Object.keys(dogs).sort(function(a,b){return String(dogs[a]).localeCompare(String(dogs[b]));}).map(function(id){return '<option value="'+esc(id)+'"'+(String(A.dog)===String(id)?" selected":"")+'>'+esc(dogs[id])+'</option>';}).join("")+'</select>';
+    right='<div class="actlbl">What changed</div>'
+      +'<div class="actchips">'+chip(!A.who,"Everyone","actSet(\'who\',\'\')")+whos.map(function(w){return chip(A.who===w,esc(w),"actSet(\'who\',"+esc(JSON.stringify(w)).replace(/"/g,"&quot;")+")");}).join("")+'</div>'
+      +'<div class="actchips">'+chip(A.day==="today","Today","actSet(\'day\',\'today\')")+chip(A.day==="yesterday","Yesterday","actSet(\'day\',\'yesterday\')")+chip(A.day==="week","This week","actSet(\'day\',\'week\')")+dsel+(hasCat?chip(A.cats,"Dogs + Cats","actSet(\'cats\','+(!A.cats)+')"):"")+'</div>'
+      +(A.err?'<div class="actnone">'+esc(A.err)+'</div>':actFeed(list,true));}
+  return head+faces+'<div class="actg">'+left+'<div class="actr">'+right+'</div></div></div>';}
+// "In now": note who's active every few minutes (needs users.last_seen_at; switches itself off if the column isn't there)
+function seenBeat(){if(window._seenOff||typeof LOGGED_IN==="undefined"||!LOGGED_IN||!supabaseClient||!CURRENT_USER)return;if(Date.now()-(_lastActivity||0)>5*60000)return;
+  var em=CURRENT_USER.email||authEmail()||"";var q=supabaseClient.from("users").update({last_seen_at:new Date().toISOString()});var p=em?q.eq("email",em):(CURRENT_USER.code?q.eq("code",CURRENT_USER.code):null);
+  if(p)Promise.resolve(p).then(function(r){if(r&&r.error)window._seenOff=true;},function(){});}
+setInterval(seenBeat,180000);
 
 // ── Look only (v3.309): per person, outside their home app they can read everything but change nothing ──
 // Built-in default: Sarah (Assistant Supervisor, Cattery) opens in Cats and is look-only elsewhere.
