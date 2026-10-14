@@ -337,6 +337,18 @@ nav::-webkit-scrollbar{display:none}
   .cidfacts{grid-column:1;grid-row:2;margin-top:10px}
   .cgate .gr small{white-space:normal}
 }
+/* Activity (admin) */
+.actw{max-width:680px;margin:0 auto}
+.actin{display:flex;gap:6px;flex-wrap:wrap}.actin span{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #e4e7e0;border-radius:20px;padding:5px 11px 5px 9px;cursor:pointer;font-size:12px}
+.actin span i{width:8px;height:8px;border-radius:50%;background:#cfd4c8}.actin span.on i{background:#22c55e;box-shadow:0 0 0 3px #dcfce7}.actin span b{font-weight:800}.actin span small{color:#6b7280;font-weight:600;font-size:11px}.actin span.sel{border-color:#282932;background:#f7f9f2}.actq{color:#6b7280;font-weight:600}
+.actf{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0 10px}.actf .cchips{margin:0}.actf select,.actf input{width:auto;min-width:130px;padding:7px 10px!important;font-size:12.5px!important}
+.actp{background:#fff;border:1px solid #e4e7e0;border-radius:14px;padding:12px 14px;margin-bottom:10px}.actph{display:flex;align-items:center;gap:10px}.actph b{display:block;font-size:15px;font-weight:900}.actph small{font-size:11.5px;color:#6b7280;font-weight:600}.actph u{margin-left:auto;text-decoration:none;color:#166534;font-weight:800;font-size:12px;cursor:pointer}
+.actpn{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}.actpn div{background:#f7f9f2;border-radius:10px;padding:7px 8px;text-align:center}.actpn b{display:block;font-size:17px;font-weight:900}.actpn small{font-size:10px;color:#6b7280;font-weight:700}
+.actday{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#6b7280;background:#f7f9f2;padding:6px 12px;border-bottom:1px solid #eef0ea}
+.actr{display:grid;grid-template-columns:40px 24px 1fr;gap:10px;align-items:start;padding:9px 12px;border-bottom:1px solid #eef0ea}.actt{font-size:12px;font-weight:800;color:#6b7280;padding-top:3px;font-variant-numeric:tabular-nums}
+.actav{width:24px;height:24px;border-radius:50%;background:#eef1ea;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900}
+.actm{font-size:13px;line-height:1.35;min-width:0}.actm b{font-weight:800}.actc{font-weight:800;color:#282932}.actc.go{color:#166534;cursor:pointer;text-decoration:underline;text-decoration-color:#bbf7d0;text-underline-offset:2px}.actm small{display:block;color:#4b5160;font-weight:600;font-size:12px;margin-top:1px}
+@media(max-width:640px){.actpn{grid-template-columns:repeat(3,1fr)}.actf select,.actf input{flex:1}}
 .only-wide{display:none}
 @media(min-width:960px){.only-wide{display:block}.hide-wide{display:none}}
 .sidepanel{display:flex;flex-direction:column;gap:10px}
@@ -1387,7 +1399,7 @@ var EX_TYPES=[
 
 async function saveRecordChange(rec){
   if(!supabaseClient)return;
-  var st=JSON.parse(JSON.stringify(rec.state));delete st._id;st._savedBy=currentName();
+  var st=JSON.parse(JSON.stringify(rec.state));delete st._id;st._savedBy=currentName();st._change=rec.state._changeHint||"";delete st._changeHint;delete rec.state._changeHint;
   var row={name:rec.name,breed:rec.breed||"",ref_no:rec.refNo||"",intake_date:rec.intakeDate||null,assessor:rec.assessor||"",score:rec.score||0,traffic_light:rec.trafficLight||"",saved_at:new Date().toISOString(),data:st};
   try{await supabaseClient.from("cats").update(row).eq("id",rec.id);rec.savedAt=row.saved_at;rec.savedBy=currentName();}catch(e){console.error("Exercise save error:",e);}
 }
@@ -1682,7 +1694,7 @@ function renderProfile(){
     +'</div>';
   if(role==="admin"||role==="manager"){var users=getAllUsersSync();var invited=users.filter(function(u){return u.email&&!u.active;}).length;
     h+='<div class="card pf-grp"><div class="lbl">Admin <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 only admins see this</span></div>'
-      +(role==="admin"?row("Manage users",users.length+" people",'<button class="btn" onclick="showDashSection(\'users\')">Open</button>'):'')
+      +(role==="admin"?row("Activity","who changed what, who’s in",'<button class="btn" onclick="showDashSection(\'activity\')">Open</button>'):'')+(role==="admin"?row("Manage users",users.length+" people",'<button class="btn" onclick="showDashSection(\'users\')">Open</button>'):'')
       +row("Download backup",lb?"Last backup "+esc(fmtDMY(lb))+" \u00b7 "+daysSince(lb)+" days ago":"No backup on this device yet",'<button class="btn btnp" onclick="downloadBackup()">Download</button>')
       +row("The month","Print the unit report",'<button class="btn" onclick="showDashSection(\'month\')">Open</button>')
       +'</div>';}
@@ -1843,7 +1855,7 @@ function removeAvatar(){
   },{danger:true});
 }
 
-function showDashSection(section){try{bumpActivity();}catch(e){}
+function dogShowDashSection(section){try{bumpActivity();}catch(e){}
   window._dashSection=section;
   var st=document.getElementById("overdue-sticky");if(st)st.innerHTML="";
   var el=document.getElementById("dashboard-content");if(!el)return;if(el.parentNode&&el.parentNode.style)el.parentNode.style.maxWidth=(section==="records")?"1180px":"900px";
@@ -6935,7 +6947,7 @@ async function saveRecord(){if(S&&S._id){try{delete _histCache[S._id];}catch(e){
   _recSaveBusy=true;
   var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
   var tl=(handlingLight(total,S.scores)||{}).l||"";
-  var st=JSON.parse(JSON.stringify(S));delete st._id;st._savedBy=currentName();
+  var st=JSON.parse(JSON.stringify(S));delete st._id;st._savedBy=currentName();try{st._change=catChangeSummary(window._lastSavedJson,S);}catch(_e){}
   try{autoScoreHistory(total);st.scoreHistory=JSON.parse(JSON.stringify(S.scoreHistory||[]));}catch(_e){}
   var row={name:S.dog.name,breed:S.dog.breed||"",ref_no:S.dog.refNo||"",intake_date:S.dog.intakeDate||null,assessor:S.dog.assessor||"",score:total,traffic_light:tl,saved_at:new Date().toISOString(),data:st};
   try{
@@ -7171,7 +7183,7 @@ function catMoveTo(pod){var r=curRec();var g=catGate(r);if(!g.ready){appAlert("N
     S.fin=S.fin||{};S.fin.outcome="Finished Isolation";S.fin.outcomeDate=td;S.dog.cattery=td;S.dog.qPen=from;S.dog.kennel=pod;
     S.notes=S.notes||[];S.notes.push({date:td,time:new Date().toTimeString().slice(0,5),text:"Moved to the Cattery — "+pod+(from?" (from "+kennelShort(from)+")":""),staff:currentName(),tag:"Milestone"});
     persistSave();saveRecord();
-    var pid=S.dog.bondId;if(pid){var p=records.find(function(x){return String(x.id)===String(pid);});if(p&&p.state&&(p.state.fin||{}).outcome!=="Finished Isolation"){var pst=p.state;pst.fin=pst.fin||{};pst.fin.outcome="Finished Isolation";pst.fin.outcomeDate=td;pst.dog=pst.dog||{};pst.dog.qPen=pst.dog.kennel||"";pst.dog.kennel=pod;try{penLogSync(pst);}catch(e){}pst.dog.cattery=td;pst.notes=pst.notes||[];pst.notes.push({date:td,time:new Date().toTimeString().slice(0,5),text:"Moved to the Cattery with "+(S.dog.name||"partner")+" — "+pod,staff:currentName(),tag:"Milestone"});try{saveRecordChange(p);}catch(e){}}}
+    var pid=S.dog.bondId;if(pid){var p=records.find(function(x){return String(x.id)===String(pid);});if(p&&p.state&&(p.state.fin||{}).outcome!=="Finished Isolation"){var pst=p.state;pst.fin=pst.fin||{};pst.fin.outcome="Finished Isolation";pst.fin.outcomeDate=td;pst.dog=pst.dog||{};pst.dog.qPen=pst.dog.kennel||"";pst.dog.kennel=pod;try{penLogSync(pst);}catch(e){}pst.dog.cattery=td;pst.notes=pst.notes||[];pst.notes.push({date:td,time:new Date().toTimeString().slice(0,5),text:"Moved to the Cattery with "+(S.dog.name||"partner")+" — "+pod,staff:currentName(),tag:"Milestone"});p.state._changeHint="Moved to the Cattery \u2014 "+pod;try{saveRecordChange(p);}catch(e){}}}
     renderMain();miniToast("Moved to "+pod);},{kind:"Move"});}
 function catBackToQ(){appConfirm("Move "+esc(S.dog.name||"this cat")+" back out of the Cattery? Use this if the move was a mistake.",function(){S.fin.outcome="";S.fin.outcomeDate="";S.dog.cattery="";if(S.dog.qPen)S.dog.kennel=S.dog.qPen;persistSave();saveRecord();renderMain();},{kind:"Undo"});}
 function freePods(){return KENNEL_SLOTS[2][1].filter(function(p){return !penOccupants(p,S._id).length;});}
@@ -7182,8 +7194,8 @@ var CAT_COLOURS=["Black","White","Black and white","Tabby","Ginger","Ginger and 
 function catSecHtml(ns,id,n,title,summary,state,body,dflt){window[ns]=window[ns]||{};var open=(window[ns][id]!==undefined)?window[ns][id]:!!dflt;return '<div class="asec dogsec '+state+(open?" open":"")+'"><div class="ash" onclick="window.'+ns+'[\''+id+'\']='+(open?'false':'true')+';renderMain()"><span class="anum">'+n+'</span><div class="ast"><b>'+title+'</b><small>'+summary+'</small></div><span class="acnt">'+(state==="done"?"done":"")+'</span></div>'+(open?'<div class="abody">'+body+'</div>':'')+'</div>';}
 function chipRow(label,em,key,opts,cur,setter){setter=setter||"setDogVal";return '<div class="cq"><label>'+label+(em?'<em>'+em+'</em>':'')+'</label><div class="cchips">'+opts.map(function(o){var v=Array.isArray(o)?o[0]:o,l=Array.isArray(o)?o[1]:o;return '<span class="cchip'+(cur===v?" on":"")+'" onclick="'+setter+'(\''+key+'\',\''+String(v).replace(/'/g,"\\'")+'\')">'+esc(l)+'</span>';}).join("")+'</div></div>';}
 function catPenSelect(d){var opts=[["",'-- not in a pen --']];KENNEL_SLOTS.forEach(function(sec){sec[1].forEach(function(p){var occ=penOccupants(p,S._id).map(function(r){return r.name;});opts.push([p,p+(occ.length?" \u2014 "+occ.join(", "):"")]);});});if(d.kennel&&!opts.some(function(o){return o[0]===d.kennel;}))opts.push([d.kennel,d.kennel]);return slct("Pen",d.kennel||"","dog.kennel",opts);}
-function bondSet(id){S.dog.bondId=id||"";persistSave();debouncedSave();var p=records.find(function(x){return String(x.id)===String(id);});if(p&&p.state&&S._id){p.state.dog=p.state.dog||{};if(String(p.state.dog.bondId||"")!==String(S._id)){p.state.dog.bondId=S._id;try{saveRecordChange(p);}catch(e){}}}renderMain();}
-function bondClear(){var pid=S.dog.bondId;S.dog.bondId="";persistSave();debouncedSave();var p=records.find(function(x){return String(x.id)===String(pid);});if(p&&p.state&&p.state.dog&&String(p.state.dog.bondId)===String(S._id)){p.state.dog.bondId="";try{saveRecordChange(p);}catch(e){}}renderMain();}
+function bondSet(id){S.dog.bondId=id||"";persistSave();debouncedSave();var p=records.find(function(x){return String(x.id)===String(id);});if(p&&p.state&&S._id){p.state.dog=p.state.dog||{};if(String(p.state.dog.bondId||"")!==String(S._id)){p.state.dog.bondId=S._id;p.state._changeHint="Bonded pair \u2014 linked to "+(S.dog.name||"a cat");try{saveRecordChange(p);}catch(e){}}}renderMain();}
+function bondClear(){var pid=S.dog.bondId;S.dog.bondId="";persistSave();debouncedSave();var p=records.find(function(x){return String(x.id)===String(pid);});if(p&&p.state&&p.state.dog&&String(p.state.dog.bondId)===String(S._id)){p.state.dog.bondId="";p.state._changeHint="Bonded pair unlinked";try{saveRecordChange(p);}catch(e){}}renderMain();}
 function podSetToggle(k){S.dog.podSetup=S.dog.podSetup||{};S.dog.podSetup[k]=!S.dog.podSetup[k];persistSave();debouncedSave();renderMain();}
 var CAT_PATTERNS=[["Tabby","Tabby"],["Black","Black"],["Black & white","Black and white"],["Ginger","Ginger"],["Tortie","Tortoiseshell"],["Calico","Calico"],["Grey","Grey / blue"],["White","White"],["Colourpoint","Colourpoint"]];
 function catPattern(k,v){var d=S.dog;d.pattern=(d.pattern===v)?"":v;if(d.pattern&&!d.colour){var m=CAT_PATTERNS.find(function(x){return x[0]===v;});if(m)d.colour=m[1];}persistSave();debouncedSave();renderMain();}
@@ -7436,7 +7448,7 @@ function rowToRec(row){var st=null;try{st=typeof row.data==="string"?JSON.parse(
   return{id:row.id,savedAt:row.saved_at||row.updated_at||row.created_at||"",savedBy:st._savedBy||"",name:row.name||st.dog.name||"Unknown",breed:row.breed||st.dog.breed||"",refNo:row.ref_no||st.dog.refNo||"",intakeDate:row.intake_date||st.dog.intakeDate||"",assessor:row.assessor||"",score:0,trafficLight:"",state:st};}
 var REC_COLS="*";
 function handlingLight(){return null;}
-async function loadHistory(id){return [];}
+
 function incSync(){}
 // ── Report ─────────────────────────────────────────────────────────
 var REPORT_PAGES=[["id","Identity & arrival",/Cat details|Arrival/i],["asmt","Temperament",/Temperament/i],["med","Medical",/Medical|Vaccinations|FeLV/i],["iso","Day reports",/Day reports/i],["rh","Rehoming & outcome",/Rehoming|Foster|Outcome/i],["story","Notes",/Notes/i]];
@@ -7790,7 +7802,7 @@ function crToday(){return new Date().toISOString().slice(0,10);}
 function crOf(st,date){return ((st||{}).cchk||{})[date||crToday()]||null;}
 function crSet(id,k,v){var td=crToday();var rec=records.find(function(x){return String(x.id)===String(id);});var open=S&&String(S._id)===String(id);var st=open?S:(rec&&rec.state);if(!st)return;
   st.cchk=st.cchk||{};var c=st.cchk[td]=st.cchk[td]||{};c[k]=(c[k]===v)?"":v;c.by=currentName();if(k==="eat"&&(v==="Ate"||v==="Some")&&c[k])st.lastAte=new Date().toISOString();
-  if(open){if(rec)rec.state=S;persistSave();debouncedSave();}else{try{saveRecordChange(rec);}catch(e){}}
+  if(open){if(rec)rec.state=S;persistSave();debouncedSave();}else{st._changeHint="Cattery round \u00b7 "+({eat:"eating",tray:"tray",wee:"wee"}[k]||k)+(c[k]?": "+String(c[k]).toLowerCase():" cleared");try{saveRecordChange(rec);}catch(e){}}
   if(document.getElementById("dashboard-screen")&&document.getElementById("dashboard-screen").offsetParent!==null){try{renderDashboard();}catch(e){}}else renderMain();}
 function crAlarm(st){var td=crToday(),yd=addDaysStr(td,-1);var a=crOf(st,td),b=crOf(st,yd);var nt=a&&a.eat==="Nothing",ny=b&&b.eat==="Nothing";if(nt&&ny)return{h:48,red:true};if(nt||(ny&&!(a&&a.eat)))return{h:24,red:false};return null;}
 function crStrain(st){var td=crToday(),yd=addDaysStr(td,-1);return [crOf(st,td),crOf(st,yd)].some(function(c){return c&&c.tray==="Straining";});}
@@ -7941,12 +7953,83 @@ function catMoveTo(pod){var r=curRec();var g=catGate(r);if(!g.ready){appAlert("N
   var snap=JSON.parse(JSON.stringify({fin:S.fin||{},dog:S.dog,notes:S.notes||[]}));var td=new Date().toISOString().slice(0,10);var from=S.dog.kennel||"";
   S.fin=S.fin||{};S.fin.outcome="Finished Isolation";S.fin.outcomeDate=td;S.dog.cattery=td;S.dog.qPen=from;S.dog.kennel=pod;
   S.notes=S.notes||[];S.notes.push({date:td,time:new Date().toTimeString().slice(0,5),text:"Moved to the Cattery — "+pod+(from?" (from "+kennelShort(from)+")":""),staff:currentName(),tag:"Milestone"});
-  var pid=S.dog.bondId,p=null,psnap=null;if(pid){p=records.find(function(x){return String(x.id)===String(pid);});if(p&&p.state&&(p.state.fin||{}).outcome!=="Finished Isolation"){psnap=JSON.parse(JSON.stringify({fin:p.state.fin||{},dog:p.state.dog||{},notes:p.state.notes||[]}));var pst=p.state;pst.fin=pst.fin||{};pst.fin.outcome="Finished Isolation";pst.fin.outcomeDate=td;pst.dog=pst.dog||{};pst.dog.qPen=pst.dog.kennel||"";pst.dog.kennel=pod;pst.dog.cattery=td;try{penLogSync(pst);}catch(e){}pst.notes=pst.notes||[];pst.notes.push({date:td,time:new Date().toTimeString().slice(0,5),text:"Moved to the Cattery with "+(S.dog.name||"partner")+" — "+pod,staff:currentName(),tag:"Milestone"});try{saveRecordChange(p);}catch(e){}}else p=null;}
+  var pid=S.dog.bondId,p=null,psnap=null;if(pid){p=records.find(function(x){return String(x.id)===String(pid);});if(p&&p.state&&(p.state.fin||{}).outcome!=="Finished Isolation"){psnap=JSON.parse(JSON.stringify({fin:p.state.fin||{},dog:p.state.dog||{},notes:p.state.notes||[]}));var pst=p.state;pst.fin=pst.fin||{};pst.fin.outcome="Finished Isolation";pst.fin.outcomeDate=td;pst.dog=pst.dog||{};pst.dog.qPen=pst.dog.kennel||"";pst.dog.kennel=pod;pst.dog.cattery=td;try{penLogSync(pst);}catch(e){}pst.notes=pst.notes||[];pst.notes.push({date:td,time:new Date().toTimeString().slice(0,5),text:"Moved to the Cattery with "+(S.dog.name||"partner")+" — "+pod,staff:currentName(),tag:"Milestone"});p.state._changeHint="Moved to the Cattery \u2014 "+pod;try{saveRecordChange(p);}catch(e){}}else p=null;}
   persistSave();saveRecord();renderMain();var myId=S._id;
-  undoToast((S.dog.name||"Cat")+(p?" & "+p.name:"")+" moved to "+pod,function(){if(String(S._id)!==String(myId))return;S.fin=snap.fin;S.dog=snap.dog;S.notes=snap.notes;persistSave();saveRecord();renderMain();if(p&&psnap){p.state.fin=psnap.fin;p.state.dog=psnap.dog;p.state.notes=psnap.notes;try{saveRecordChange(p);}catch(e){}}});}
+  undoToast((S.dog.name||"Cat")+(p?" & "+p.name:"")+" moved to "+pod,function(){if(String(S._id)!==String(myId))return;S.fin=snap.fin;S.dog=snap.dog;S.notes=snap.notes;persistSave();saveRecord();renderMain();if(p&&psnap){p.state.fin=psnap.fin;p.state.dog=psnap.dog;p.state.notes=psnap.notes;p.state._changeHint="Cattery move undone";try{saveRecordChange(p);}catch(e){}}});}
 function catBackToQ(){var snap=JSON.parse(JSON.stringify({fin:S.fin||{},dog:S.dog}));S.fin.outcome="";S.fin.outcomeDate="";S.dog.cattery="";if(S.dog.qPen)S.dog.kennel=S.dog.qPen;persistSave();saveRecord();renderMain();var myId=S._id;
   undoToast((S.dog.name||"Cat")+" moved back out of the Cattery",function(){if(String(S._id)!==String(myId))return;S.fin=snap.fin;S.dog=snap.dog;persistSave();saveRecord();renderMain();});}
 function vDel(kind,i){var t=S.temper||{};var a=kind==="s"?t.sits:t.pf;if(!a||!a[i])return;var gone=a.splice(i,1)[0];persistSave();saveRecord();renderMain();undoToast("Visit deleted",function(){a.splice(i,0,gone);persistSave();saveRecord();renderMain();});}
+
+// ══ Activity (admin, 14 Oct): who changed what, and who's in ══
+// Every save carries a one-line summary (_change); the cat_history trigger files it with the name and time.
+var ACT_KEYS={dog:"Cat tab",days:"Day reports",weights:"Weights",medical:"Medical",temper:"Temperament",arrival:"Arrival",feedingPlan:"Feeding",care:"Care",rehome:"Rehoming",foster:"Foster",fin:"Outcome",warnings:"Warnings",careNotices:"Notices",files:"Files",notes:"Notes",cchk:"Cattery round",lastAte:"Ate",story:"Story",photos:"Photos",isoExt:"Quarantine extended",penLog:"Pen moves"};
+var ACT_DOG={name:"name",sex:"sex",breed:"coat",colour:"colour",dob:"date of birth",age:"age",microchip:"microchip",refNo:"unit ref",sbId:"ShelterBuddy ID",intakeReason:"intake reason",broughtInBy:"brought in by",assessor:"taken in by",intakeDate:"intake date",foundAt:"found at",colony:"colony",feeder:"feeder",marks:"marks",bondId:"bonded pair",podSetup:"pod setup",homeOverride:"home type",chipTo:"chip registration",chipDb:"chip registration",chipOwner:"chip registration",chipTransfer:"chip transfer",coatLength:"coat",photo:"photo",photoPos:"photo",inspector:"inspector",inspectorRef:"case ref"};
+function actJ(x){return JSON.stringify(x===undefined?null:x);}
+function catChangeSummary(oldJson,st){if(!st)return "";if(!st._id)return "New cat added"+(st.dog&&st.dog.name?" — "+st.dog.name:"");var o={};try{o=oldJson?JSON.parse(oldJson):{};}catch(e){o={};}
+  var out=[];var add=function(t){if(t&&out.indexOf(t)<0)out.push(t);};
+  Object.keys(st).forEach(function(k){if(k.charAt(0)==="_"||k==="tab")return;var a=o[k],b=st[k];if(actJ(a)===actJ(b))return;
+    if(k==="dog"){var da=a||{},db=b||{};if(db.kennel!==da.kennel){add(db.kennel?"Moved to "+kennelShort(db.kennel):"Taken out of "+kennelShort(da.kennel||""));}
+      Object.keys(db).concat(Object.keys(da)).forEach(function(f){if(f==="kennel"||f==="penLog"||f==="thumbV"||actJ(da[f])===actJ(db[f]))return;var l=ACT_DOG[f];if(l==="photo")add("Photo");else if(l)add("Cat tab: "+l);else add("Cat tab");});return;}
+    if(k==="days"){var A=a||[],B=b||[];for(var i=0;i<B.length;i++){if(actJ(A[i])!==actJ(B[i])&&B[i]){var dd=B[i];add("Day report · day "+(i+1)+(dd.eating?" · "+String(dd.eating).toLowerCase():"")+(dd.stress?" · stress "+dd.stress:""));}}return;}
+    if(k==="weights"){var wa=(a||[]).length,wb=(b||[]).length;if(wb>wa){var lw=b[wb-1]||{};var kg=kgOf(lw.weight);add("Weighed "+(kg!==null?(kg<2?Math.round(kg*1000)+" g":kg+" kg"):""));}else add("Weights");return;}
+    if(k==="medical"){var ma=a||{},mb=b||{};var va=(ma.vaccinations||[]).length,vb=(mb.vaccinations||[]).length;if(vb>va){var v=mb.vaccinations[vb-1]||{};add("Vaccination"+(v.type?": "+v.type:""));}
+      if(mb.felv!==ma.felv||mb.fiv!==ma.fiv)add("FeLV/FIV: "+(mb.felv||"—")+" / "+(mb.fiv||"—"));if(!out.length||!/^(Vaccination|FeLV)/.test(out[out.length-1]))add("Medical");return;}
+    if(k==="temper"){var ta=a||{},tb=b||{};if((tb.visits||[]).length>(ta.visits||[]).length)add("Temperament visit");else if(tb.signedBy&&tb.signedBy!==ta.signedBy)add("Temperament signed");else add("Temperament");return;}
+    if(k==="fin"){var fa=a||{},fb=b||{};if(fb.outcome!==fa.outcome)add("Outcome: "+(fb.outcome||"cleared"));else add("Outcome");return;}
+    if(k==="rehome"){var ra=a||{},rb=b||{};add(rb.stage&&rb.stage!==ra.stage?"Rehoming: "+rb.stage:"Rehoming");return;}
+    if(k==="files"){if((b||[]).length>(a||[]).length){var fl=b[b.length-1]||{};add("File added"+(fl.kind?": "+fl.kind:""));}else add("Files");return;}
+    if(k==="warnings"){add((b||[]).length>(a||[]).length?"Warning added":"Warnings");return;}
+    add(ACT_KEYS[k]||k);});
+  if(!out.length)return "Saved";return out.slice(0,3).join(" · ")+(out.length>3?" · +"+(out.length-3)+" more":"");}
+function actPretty(s){s=String(s||"");var m=s.match(/^Changed: (.*)$/);if(m)return m[1].split(", ").map(function(k){return ACT_KEYS[k]||k;}).join(" · ");return s;}
+// ── who's in: a light heartbeat while someone is using the app ──
+var _actBeatOff=false,_actBeatAt=0;
+async function actBeat(){if(_actBeatOff||!supabaseClient||!CURRENT_USER||!CURRENT_USER.code||document.hidden)return;var now=Date.now();if(now-_actBeatAt<170000)return;if(typeof _lastActivity!=="undefined"&&now-_lastActivity>300000)return;_actBeatAt=now;
+  try{var r=await supabaseClient.from("users").update({last_seen_at:new Date().toISOString(),last_seen_app:"cats"}).eq("code",CURRENT_USER.code);if(r&&r.error){_actBeatOff=true;}}catch(e){_actBeatOff=true;}}
+setInterval(function(){try{actBeat();}catch(e){}},60000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden){_actBeatAt=0;try{actBeat();}catch(e){}}});
+// ── the page ──
+var _act={rows:null,err:"",users:null,who:"",days:1,q:""};
+async function actLoad(){_act.rows=null;_act.err="";
+  try{var r=await supabaseClient.from("cat_history").select("id,dog_id,changed_at,changed_by,summary,cat_name").order("changed_at",{ascending:false}).limit(800);if(!r||r.error)throw (r&&r.error)||new Error("no table");_act.rows=r.data||[];}
+  catch(e){_act.rows=[];_act.err=String((e&&e.message)||e);}
+  try{var u=await supabaseClient.from("users").select("code,name,role,email,active,last_login_at,last_seen_at,last_seen_app").order("name");if(u&&!u.error)_act.users=u.data||[];else{var u2=await supabaseClient.from("users").select("code,name,role,email,active,last_login_at").order("name");_act.users=(u2&&u2.data)||[];}}catch(e){_act.users=[];}
+  if(window._dashSection==="activity")actRender();}
+function actSet(k,v){_act[k]=v;actRender();}
+function actRender(){var el=document.getElementById("dashboard-content");if(el)el.innerHTML=renderActivity();}
+function renderActivity(){var e=esc;var h='<div class="rxhead"><button onclick="loadRecordsList().then(function(){renderDashboard();})" class="rxback">&#8592; Dashboard</button><h2>Activity</h2></div><div class="rxsub">Every change to a cat, newest first, and who’s been in. Only changes are logged — not what anyone looked at.</div>';
+  if(_act.rows===null)return '<div class="actw">'+h+'<div class="rxsub" style="padding:30px 0;text-align:center">Loading…</div></div>';
+  if(_act.err&&!_act.rows.length)return '<div class="actw">'+h+'<div class="card" style="border-left:3px solid #f59e0b;font-size:12.5px;font-weight:600;color:#854d0e;line-height:1.5"><b>The activity log isn’t switched on yet.</b> Run <b>cats-activity.sql</b> once in Supabase → SQL editor. Changes are logged from that moment on.</div></div>';
+  var now=Date.now();var td=new Date();td.setHours(0,0,0,0);var from=td.getTime()-(_act.days-1)*864e5;
+  var users=_act.users||[];var uBy={};users.forEach(function(u){uBy[u.name]=u;});
+  var rows=_act.rows.filter(function(r){var t=new Date(r.changed_at).getTime();return t>=from&&(!_act.who||r.changed_by===_act.who)&&(!_act.q||String(r.cat_name||"").toLowerCase().indexOf(_act.q.toLowerCase())>=0);});
+  var today=_act.rows.filter(function(r){return new Date(r.changed_at).getTime()>=td.getTime();});
+  var inNow=users.filter(function(u){return u.last_seen_at&&now-new Date(u.last_seen_at).getTime()<6*60000;});
+  var people=[];_act.rows.forEach(function(r){if(r.changed_by&&people.indexOf(r.changed_by)<0)people.push(r.changed_by);});
+  var whoT={};today.forEach(function(r){whoT[r.changed_by]=(whoT[r.changed_by]||0)+1;});
+  h+='<div class="rxstrip"><div class="rxlt">'+today.length+'<small>today</small></div><div class="rxtx">'+(today.length?'<b>'+e(Object.keys(whoT).length+" "+(Object.keys(whoT).length===1?"person":"people"))+'</b> changed things today'+(Object.keys(whoT).length?' — '+e(Object.keys(whoT).sort(function(a,b){return whoT[b]-whoT[a];}).slice(0,3).map(function(n){return n.split(" ")[0]+" "+whoT[n];}).join(", ")):'')+'.':'Nothing changed yet today.')+(inNow.length?' <b>'+inNow.length+' in now.</b>':'')+'</div></div>';
+  // who's in
+  var seen=users.filter(function(u){return u.active!==false&&(u.last_seen_at||u.last_login_at);}).sort(function(a,b){var x=new Date(b.last_seen_at||b.last_login_at).getTime(),y=new Date(a.last_seen_at||a.last_login_at).getTime();return x-y;});
+  h+='<div class="rxlbl">Who’s been in <em>'+(inNow.length?inNow.length+' now':'')+'</em></div><div class="actin">'+seen.slice(0,12).map(function(u){var t=new Date(u.last_seen_at||u.last_login_at).getTime();var on=u.last_seen_at&&now-new Date(u.last_seen_at).getTime()<6*60000;
+      return '<span class="'+(on?"on":"")+(_act.who===u.name?" sel":"")+'" onclick="actSet(\'who\',_act.who===\''+e(String(u.name).replace(/'/g,""))+'\'?\'\':\''+e(String(u.name).replace(/'/g,""))+'\')"><i></i><b>'+e(String(u.name).split(" ")[0])+'</b><small>'+(on?"in now"+(u.last_seen_app&&u.last_seen_app!=="cats"?" · "+e(u.last_seen_app):""):e(fmtAgo(t)))+'</small></span>';}).join("")+(seen.length?'':'<small class="actq">No sign-ins recorded yet.</small>')+'</div>';
+  // filters
+  h+='<div class="actf"><div class="cchips">'+[[1,"Today"],[2,"Since yesterday"],[7,"7 days"],[30,"30 days"]].map(function(o){return '<span class="cchip'+(_act.days===o[0]?" on":"")+'" onclick="actSet(\'days\','+o[0]+')">'+o[1]+'</span>';}).join("")+'</div>'
+    +'<select onchange="actSet(\'who\',this.value)"><option value="">Everyone</option>'+people.map(function(n){return '<option'+(n===_act.who?" selected":"")+'>'+e(n)+'</option>';}).join("")+'</select>'
+    +'<input type="search" placeholder="Cat name…" value="'+e(_act.q)+'" oninput="_act.q=this.value;clearTimeout(window._actQT);window._actQT=setTimeout(function(){actRender();var i=document.querySelector(\'.actf input\');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);}},250)"></div>';
+  // a person's week
+  if(_act.who){var wk=_act.rows.filter(function(r){return r.changed_by===_act.who&&new Date(r.changed_at).getTime()>=now-7*864e5;});var cnt=function(re){return wk.filter(function(r){return re.test(actPretty(r.summary));}).length;};var cats={};wk.forEach(function(r){if(r.cat_name)cats[r.cat_name]=1;});var u=uBy[_act.who];
+    h+='<div class="actp"><div class="actph">'+(u?userAvatarHtml(u,34):'')+'<div><b>'+e(_act.who)+'</b><small>last 7 days'+(u&&u.last_login_at?' · last signed in '+e(fmtAgo(new Date(u.last_login_at).getTime())):'')+'</small></div><u onclick="actSet(\'who\',\'\')">everyone</u></div>'
+      +'<div class="actpn"><div><b>'+wk.length+'</b><small>changes</small></div><div><b>'+cnt(/^Day report|Day reports/)+'</b><small>day reports</small></div><div><b>'+cnt(/Weighed|Weights/)+'</b><small>weigh-ins</small></div><div><b>'+cnt(/Cattery round/)+'</b><small>round ticks</small></div><div><b>'+Object.keys(cats).length+'</b><small>cats</small></div></div></div>';}
+  // feed
+  if(!rows.length)h+='<div class="rxsub" style="text-align:center;padding:24px 0">Nothing in this window'+(_act.who?' for '+e(_act.who):'')+'.</div>';
+  else{var last="";h+='<div class="rxlist actfeed">'+rows.slice(0,300).map(function(r){var d=new Date(r.changed_at);var day=d.toLocaleDateString("en-IE",{weekday:"long",day:"numeric",month:"short"});var hd="";if(day!==last){last=day;hd='<div class="actday">'+e(day)+'</div>';}var u=uBy[r.changed_by];
+      var gone=!records.some(function(x){return String(x.id)===String(r.dog_id);});
+      return hd+'<div class="actr"><span class="actt">'+e(d.toTimeString().slice(0,5))+'</span>'+(u?userAvatarHtml(u,24):'<span class="actav">'+e(String(r.changed_by||"?").charAt(0))+'</span>')+'<div class="actm"><b>'+e(String(r.changed_by||"Unknown").split(" ")[0])+'</b> <span class="actc'+(gone?"":" go")+'"'+(gone?'':' onclick="openDog('+Number(r.dog_id)+')"')+'>'+e(r.cat_name||"a cat")+'</span><small>'+e(actPretty(r.summary))+'</small></div></div>';}).join("")+'</div>'+(rows.length>300?'<div class="rxsub" style="text-align:center">Showing the newest 300.</div>':'');}
+  return '<div class="actw">'+h+'</div>';}
+function showDashSection(section){if(section==="activity"){try{bumpActivity();}catch(e){}window._dashSection="activity";var el=document.getElementById("dashboard-content");if(!el)return;if(el.parentNode&&el.parentNode.style)el.parentNode.style.maxWidth="900px";
+    if(currentRole()!=="admin"){el.innerHTML='<div style="text-align:center;padding:40px"><h2>Admin only</h2></div>';return;}
+    el.innerHTML=renderActivity();actLoad();window.scrollTo(0,0);return;}
+  return dogShowDashSection.apply(this,arguments);}
 
 // ══ Cat tab as an ID card (dog v3.309 layout) — photo, facts, sheets ══
 var CAT_SW={"Black":"#1c1c1c","White":"#f7f7f2","Black and white":"linear-gradient(90deg,#1c1c1c 50%,#f7f7f2 50%)","Tabby":"repeating-linear-gradient(60deg,#5b4632 0 3px,#b08a5c 3px 6px)","Ginger":"#d9822b","Ginger and white":"linear-gradient(90deg,#d9822b 50%,#f7f7f2 50%)","Grey / blue":"#7b8794","Tortoiseshell":"radial-gradient(circle at 30% 35%,#d9822b 22%,transparent 24%),radial-gradient(circle at 70% 70%,#b0601c 18%,transparent 20%),#1c1c1c","Calico":"linear-gradient(90deg,#1c1c1c 33%,#f7f7f2 33% 66%,#d9822b 66%)","Tabby and white":"linear-gradient(90deg,#8a6a48 50%,#f7f7f2 50%)","Cream":"#efe3c2","Colourpoint":"linear-gradient(135deg,#f3ead8 45%,#5b3a26)"};
@@ -8130,7 +8213,7 @@ async function catThumbSweep(){if(_thumbSweep||!supabaseClient||(typeof navigato
   try{var todo=records.filter(function(r){var d=(r.state||{}).dog||{};return d.photo&&d.thumbV!==THUMB_V;});
     for(var i=0;i<todo.length;i++){var r=todo[i];var scr=document.getElementById("dashboard-screen");if(!scr||scr.style.display==="none"||!scr.offsetParent)break;
       var had=Array.isArray(_photoStore[r.id]);var rows=await dogLoadDogPhotos(r.id);if(!rows||!rows.length)continue;var st=starRow(rows);if(!st||!st.data)continue;
-      var th=await thumbOf(st.data);if(!th)continue;r.state.dog.photo=th;r.state.dog.thumbV=THUMB_V;await saveRecordChange(r);n++;
+      var th=await thumbOf(st.data);if(!th)continue;r.state.dog.photo=th;r.state.dog.thumbV=THUMB_V;r.state._changeHint="skip";await saveRecordChange(r);n++;
       if(!had&&!(S&&String(S._id)===String(r.id)))delete _photoStore[r.id];
       await new Promise(function(res){setTimeout(res,250);});}}
   catch(e){console.error("thumb sweep:",e);}
