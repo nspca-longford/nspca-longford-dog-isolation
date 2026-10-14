@@ -894,10 +894,20 @@ body.offline #netbar{display:block}body.offline{padding-top:30px}body.offline .d
 #qsheet .grab{width:36px;height:4px;border-radius:4px;background:#d3d7cd;margin:0 auto 8px}#qsheet .qh{display:flex;align-items:center;margin-bottom:10px}#qsheet .qh b{flex:1;font-size:15px;font-weight:900;color:#282932}#qsheet .qh span{width:30px;height:30px;border-radius:50%;background:#f1f3ee;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;color:#6b7280}
 #qsheet .qa{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}#qsheet .qa button{background:#f4f5f2;border:none;border-radius:12px;padding:12px 4px;font-family:inherit;font-size:11.5px;font-weight:800;color:#282932;cursor:pointer}#qsheet .qa button:active{background:#e9f5c8}#qsheet .qa i{display:block;font-style:normal;font-size:19px;margin-bottom:4px}
 @media(min-width:641px){#qsheet .qbox{bottom:auto;top:50%;transform:translate(-50%,-50%);border-radius:16px}#qsheet .grab{display:none}}
-.micw{position:relative;display:block}.micw textarea{padding-right:44px!important}
-.micb{position:absolute;right:8px;bottom:10px;width:32px;height:32px;border-radius:50%;border:none;background:#f1f3ee;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1}.micb:hover{background:#e4e7e0}
-.micb.on{background:#ef4444;box-shadow:0 0 0 5px rgba(239,68,68,.2);animation:micp 1.2s infinite}@keyframes micp{50%{box-shadow:0 0 0 9px rgba(239,68,68,.08)}}
-#mic-live{display:flex;align-items:center;gap:3px;font-size:11px;font-weight:800;color:#991b1b;margin:6px 0 4px}#mic-live i{width:3px;height:8px;background:#ef4444;border-radius:2px;animation:micw .9s infinite ease-in-out}#mic-live i:nth-child(2){animation-delay:.1s}#mic-live i:nth-child(3){animation-delay:.2s}#mic-live i:nth-child(4){animation-delay:.3s}#mic-live i:nth-child(5){animation-delay:.4s;margin-right:6px}@keyframes micw{50%{height:16px}}
+
+/* ── Dog tab on a computer: photo left, name + facts beside (v3.309) ── */
+.idtop{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start;margin-bottom:12px}
+.idban.side{height:auto;aspect-ratio:4/5;margin-bottom:0}.idban.side::after{background:linear-gradient(180deg,rgba(15,16,21,0) 70%,rgba(15,16,21,.45))}
+.idban.side.np .bigini{right:auto;left:50%;top:50%;transform:translate(-50%,-50%);font-size:150px}
+.idban.side.new{height:auto}
+.idside{min-width:0}
+.idside .bnm{margin-bottom:14px}
+.idside h1{font-size:38px;font-weight:900;line-height:1.02;letter-spacing:-.01em;color:#282932;margin:0 0 6px;cursor:pointer}
+.idside .bnm-in{width:100%;font-size:30px!important;font-weight:900;border:none!important;border-bottom:2px solid #c6e76c!important;border-radius:0!important;background:transparent!important;padding:2px 0 4px!important;margin-bottom:8px;box-shadow:none!important;color:#282932}
+.idside .bwho{font-size:15px;font-weight:700;color:#4b5160;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.idside .bwho span{cursor:pointer}.idside .bwho span:hover{text-decoration:underline}.idside .bwho .q{color:#9a9fa8;font-weight:600}
+.idside .fl{font-style:normal;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px}.idside .fl.r{background:#fee2e2;color:#991b1b}
+.idside .hchips{margin-top:10px}.idside .hchips span{background:#f1f3ee;color:#4b5160;backdrop-filter:none;-webkit-backdrop-filter:none}.idside .hchips span.g{background:#22c55e;color:#fff}.idside .hchips span.y{background:#facc15;color:#282932}.idside .hchips span.r{background:#ef4444;color:#fff}.idside .hchips span.k{background:#111;color:#fff}
+@media(max-width:900px){.idtop{grid-template-columns:230px minmax(0,1fr)}.idside .idfacts{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -2056,6 +2066,7 @@ function dtMissing(){var d=S.dog||{};var m=[];var add=function(t,sec){m.push({t:
   return m;}
 function dtJump(sec){window._dogSec=window._dogSec||{};window._dogSec["d"+sec]=true;renderMain();setTimeout(function(){var el=document.querySelectorAll(".dogsec")[sec-1];if(el)el.scrollIntoView({behavior:"smooth",block:"start"});},40);}
 var DT_SW={"Black":"#1c1c1c","White":"#f7f7f2","Cream":"#efe3c2","Golden":"#d9a441","Fawn":"#d6b38a","Tan":"#b07a3c","Red / Chestnut":"#9b4a24","Brown / Chocolate":"#5b3a26","Blue / Grey":"#7b8794","Sable":"linear-gradient(135deg,#2b2016,#b8873f)","Black and White":"linear-gradient(90deg,#1c1c1c 50%,#f7f7f2 50%)","Black and Tan":"linear-gradient(90deg,#1c1c1c 50%,#b07a3c 50%)","Brown and White":"linear-gradient(90deg,#5b3a26 50%,#f7f7f2 50%)","Tri-colour":"linear-gradient(90deg,#1c1c1c 33%,#f7f7f2 33% 66%,#b07a3c 66%)","Brindle":"repeating-linear-gradient(60deg,#5b3a26 0 3px,#b07a3c 3px 6px)","Merle":"radial-gradient(circle at 30% 30%,#2b2b2b 18%,transparent 20%),radial-gradient(circle at 70% 65%,#2b2b2b 15%,transparent 17%),#9aa3ad"};
+(function(){var w0=window.innerWidth>640,t=null;window.addEventListener("resize",function(){clearTimeout(t);t=setTimeout(function(){var w=window.innerWidth>640;if(w!==w0){w0=w;try{var wr=document.getElementById("wrap");if(S&&S.tab==="dog"&&wr&&wr.style.display!=="none")renderMain();}catch(e){}}},150);});})();
 function dtDay(iso){try{return new Date(iso+"T12:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"});}catch(e){return iso;}}
 function dtSwatch(c){var v=DT_SW[c];return v?'<i class="idsw" style="background:'+v+'"></i>':'';}
 function dtSheet(k){window._dtSheet=k||null;renderMain();if(k){setTimeout(function(){var i=document.querySelector(".dtsh input:not([type=file])");if(i&&window.matchMedia&&!window.matchMedia("(pointer:coarse)").matches)i.focus();},40);if(!window._dtEsc){window._dtEsc=true;document.addEventListener("keydown",function(ev){if(ev.key==="Escape"&&window._dtSheet)dtSheet(null);});}}}
@@ -5514,15 +5525,17 @@ var _phN=_ps?_ps.length:(d.photo?1:0);
     var _isoTop=ii?(ii.state==="done"?"Isolation done":dayTxt):"";var _sexW=d.sex==="Unknown"?"":_sexTxt;
     var _who=[d.breed?'<span onclick="event.stopPropagation();dtSheet(\'breed\')">'+_e(d.breed+(d.crossbreed?(d.breed2?" \u00d7 "+d.breed2:" cross"):""))+'</span>':'',_sexW?'<span onclick="event.stopPropagation();dtSheet(\'sex\')">'+_e(_sexW)+'</span>':'',_ageShort?'<span onclick="event.stopPropagation();dtSheet(\'age\')">'+_e(_ageShort.replace(/^~/,"about "))+'</span>':''].filter(Boolean).join(' \u00b7 ');
     var _flg=(rb?'<i class="fl r">'+(rb.xl?"XL Bully rules":"Restricted breed")+'</i>':'')+(_con.length?'<i class="fl r">Contagious</i>':'');
-    var banner='<div class="idban'+(_heroSrc?'':' np')+(d.name?'':' new')+(_heroLoading?' loading':'')+'"'+(_heroSrc?' style="background-image:url('+blobSrc(_heroSrc)+');background-position:'+_e(d.photoPos||"50% 50%")+'"':'')+'>'
+    var _wideB=window.innerWidth>640;
+    var _nameBlk='<div class="bnm">'+(d.name?'<h1 role="button" tabindex="0" onclick="dtSheet(\'name\')">'+_e(d.name)+'</h1>':'<input class="bnm-in" placeholder="Name\u2026" value="" data-save="dog.name" id="dog-name-input" onblur="checkDuplicateName();if(this.value)renderMain()" onkeydown="if(event.key===\'Enter\')this.blur()">')
+      +'<div class="bwho">'+(_who||(d.name?'<span class="q" onclick="dtSheet(\'breed\')">+ breed, sex and age</span>':'<span class="q">breed, sex and age fill in here</span>'))+_flg+'</div>'
+      +(d.name?_chips:'')+'</div>';
+    var banner='<div class="idban'+(_wideB?' side':'')+(_heroSrc?'':' np')+(d.name?'':' new')+(_heroLoading?' loading':'')+'"'+(_heroSrc?' style="background-image:url('+blobSrc(_heroSrc)+');background-position:'+_e(d.photoPos||"50% 50%")+'"':'')+'>'
       +'<div class="btop"><span class="kn">'+_e(_kn&&_kn!=="\u2014"?_kn:"no kennel")+'</span>'+(_isoTop?'<span class="hs'+(ii&&ii.state==="done"?'':' am')+'">'+_e(_isoTop)+'</span>':'')+'</div>'
       +(!_heroSrc&&d.name?'<div class="bigini">'+_e(String(d.name).trim().charAt(0).toUpperCase())+'</div>':'')
-      +'<div class="bnm">'+(d.name?'<h1 role="button" tabindex="0" onclick="dtSheet(\'name\')">'+_e(d.name)+'</h1>':'<input class="bnm-in" placeholder="Name\u2026" value="" data-save="dog.name" id="dog-name-input" onblur="checkDuplicateName();if(this.value)renderMain()" onkeydown="if(event.key===\'Enter\')this.blur()">')
-      +'<div class="bwho">'+(_who||(d.name?'<span class="q" onclick="dtSheet(\'breed\')">+ breed, sex and age</span>':'<span class="q">breed, sex and age fill in here</span>'))+_flg+'</div>'
-      +(d.name?_chips:'')+'</div>'
+      +(_wideB?'':_nameBlk)
       +'<div class="bact">'+(_heroSrc?'<span data-go="photos">\ud83d\udcf7 '+_phN+'<b class="hn"> photo'+(_phN===1?'':'s')+'</b></span><label>Change<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label><span class="hn" onclick="showRepositionPhoto()">Reposition</span>':'<label class="add">\ud83d\udcf7 Add photo<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>')+'</div>'
       +'</div>'+(d.name?'':'<div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">There&rsquo;s already an active dog with this name.</div>');
-    return '<div class="idwrap">'+banner+'<div class="idfacts">'+facts+'</div>'+prog+'<div class="idgap"></div>'
+    return '<div class="idwrap">'+(_wideB?'<div class="idtop">'+banner+'<div class="idside">'+_nameBlk+'<div class="idfacts">'+facts+'</div>'+prog+'</div></div>':banner+'<div class="idfacts">'+facts+'</div>'+prog)+'<div class="idgap"></div>'
       +'<div class="idtwo">'+cameCard+whereCard+'</div>'+pupCard+flagCard
       +'<div class="idsb"><button class="btn" onclick="sbCopy()">Copy for ShelterBuddy</button></div>'
       +'<div class="brow" style="margin-top:12px"><button class="btn btnp" data-go="arrival">Next: Arrival &rarr;</button></div></div>'+sheet;
@@ -6511,8 +6524,7 @@ function sleekPass(){var c=document.getElementById("content");if(!c)return;
     if(window._cqOpen[key]){q.classList.add("cqopen");q.setAttribute("data-cqk",key);return;}
     q.classList.add("cqfact");var bad=on.some(function(x){return x.classList.contains("bad");});
     var f=document.createElement("div");f.className="cqv"+(bad?" bad":"");f.setAttribute("role","button");f.tabIndex=0;f.innerHTML='<b></b><u>change</u>';f.querySelector("b").textContent=on.map(function(x){return x.textContent.trim();}).join(", ");
-    f.onclick=function(){window._cqOpen[key]=true;renderMain();};f.onkeydown=function(ev){if(ev.key==="Enter")f.onclick();};q.appendChild(f);});
-  try{micStop();micAttach(c);}catch(e){}}
+    f.onclick=function(){window._cqOpen[key]=true;renderMain();};f.onkeydown=function(ev){if(ev.key==="Enter")f.onclick();};q.appendChild(f);});}
 document.addEventListener("click",function(e){var ch=e.target&&e.target.closest&&e.target.closest(".cq.cqopen .cchip");if(ch){var q=ch.closest(".cq");var k=q&&q.getAttribute("data-cqk");if(k&&window._cqOpen&&q.querySelectorAll(".cchip.on").length<2)delete window._cqOpen[k];}},true);
 // ── An actual app (v3.309): install, offline, badge, quick actions, voice, swipe, undo ──
 window._bip=null;
@@ -6562,18 +6574,6 @@ function quickGo(id,what){quickClose();openDog(id);if(what==="move"){S.tab="dog"
   document.addEventListener("touchstart",function(e){var w=document.getElementById("wrap");if(!w||w.style.display==="none"||e.touches.length!==1){ok=false;return;}var t=e.target;if(!t.closest||!t.closest("#content")||t.closest("input,textarea,select,[contenteditable],.dtsh,.noswipe,canvas")||scrollsX(t)){ok=false;return;}ok=true;x0=e.touches[0].clientX;y0=e.touches[0].clientY;t0=Date.now();},{passive:true});
   document.addEventListener("touchend",function(e){if(!ok)return;ok=false;var c=e.changedTouches[0];var dx=c.clientX-x0,dy=c.clientY-y0;if(Date.now()-t0>700||Math.abs(dx)<90||Math.abs(dy)>Math.abs(dx)*0.5)return;if(window.innerWidth>900)return;try{var I=navInfo();if(!I.prev)return;}catch(err){return;}navStep(dx<0?1:-1);},{passive:true});
 })();
-// voice notes
-function micSupported(){return !!(window.SpeechRecognition||window.webkitSpeechRecognition);}
-function micAttach(root){if(!micSupported()||!root)return;[].forEach.call(root.querySelectorAll("textarea"),function(ta){if(ta.closest(".micw")||ta.hasAttribute("data-nomic"))return;var w=document.createElement("span");w.className="micw";ta.parentNode.insertBefore(w,ta);w.appendChild(ta);var b=document.createElement("button");b.type="button";b.className="micb";b.setAttribute("aria-label","Talk instead of typing");b.textContent="🎙";b.onclick=function(ev){ev.preventDefault();micToggle(ta,b);};w.appendChild(b);});}
-var _mic=null;
-function micStop(){var m=_mic;_mic=null;if(!m)return;try{m.rec.stop();}catch(e){}if(m.btn)m.btn.classList.remove("on");var l=document.getElementById("mic-live");if(l)l.remove();if(m.ta.value!==m.base){m.ta.value=m.base;m.ta.dispatchEvent(new Event("input",{bubbles:true}));}}
-function micToggle(ta,btn){if(_mic&&_mic.ta===ta){micStop();return;}micStop();var R=window.SpeechRecognition||window.webkitSpeechRecognition;var rec=new R();rec.lang="en-IE";rec.continuous=true;rec.interimResults=true;
-  var m={rec:rec,ta:ta,btn:btn,base:ta.value};var live=document.createElement("div");live.id="mic-live";live.innerHTML='<i></i><i></i><i></i><i></i><i></i> Listening\u2026 tap the mic to stop';btn.parentNode.parentNode.insertBefore(live,btn.parentNode.nextSibling);
-  rec.onresult=function(ev){var fin="",tmp="";for(var i=ev.resultIndex;i<ev.results.length;i++){var tx=ev.results[i][0].transcript;if(ev.results[i].isFinal)fin+=tx;else tmp+=tx;}
-    if(fin){var b=m.base;b=(b&&!/\s$/.test(b)?b+" ":b)+fin.trim();m.base=b.charAt(0).toUpperCase()+b.slice(1);ta.value=m.base;ta.dispatchEvent(new Event("input",{bubbles:true}));}else{ta.value=(m.base?m.base+" ":"")+tmp;}};
-  rec.onerror=function(ev){if(ev.error==="not-allowed"||ev.error==="service-not-allowed")appAlert("The microphone is blocked for this site. Allow it in the browser settings to talk instead of typing.");if(_mic===m)micStop();};
-  rec.onend=function(){if(_mic===m)micStop();};
-  try{rec.start();}catch(e){live.remove();return;}_mic=m;btn.classList.add("on");}
 function render(){renderNav();renderMain();updateIsoChip();updateWarnChip();updateNoticeChip();updateSaveBar();updateHeaderDog();checkDuplicateName();checkMicrochip();}
 var CHIP_CC={"372":"Ireland","826":"United Kingdom","250":"France","276":"Germany","380":"Italy","724":"Spain","528":"Netherlands","056":"Belgium","620":"Portugal","616":"Poland","642":"Romania","208":"Denmark","752":"Sweden","040":"Austria","348":"Hungary","203":"Czechia","372":"Ireland"};
 function microchipLookup(num){try{if(navigator.clipboard&&num)navigator.clipboard.writeText(num);}catch(e){}window.open("https://www.europetnet.com/","_blank","noopener");}
