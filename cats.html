@@ -301,6 +301,42 @@ nav::-webkit-scrollbar{display:none}
 .fguide{position:relative}.fgex{background:#fef9c3;color:#854d0e;border:1px dashed #facc15;border-radius:8px;font-size:10.5px;font-weight:900;letter-spacing:.06em;padding:5px 8px;margin-bottom:10px;text-align:center}
 .fgres{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:center;background:#f7f9f2;border-radius:12px;padding:10px 12px;margin-top:4px}.fgres b{display:block;font-size:16px;font-weight:900}.fgres small{font-size:10.5px;color:#6b7280;font-weight:700}
 @media(max-width:520px){.fgres{grid-template-columns:1fr 1fr 1fr}.fgres .btn{grid-column:1/-1}}
+/* Cat tab ID card (dog v3.309 layout) */
+.cidc{display:grid;grid-template-columns:300px minmax(0,1fr);grid-template-rows:auto 1fr;gap:0 22px;margin-bottom:14px;align-items:start}
+.cidpic{grid-column:1;grid-row:1/span 2;aspect-ratio:4/5;border-radius:16px;position:relative;overflow:hidden;background:#dfe3d8 center/cover no-repeat}
+.cidpic.np{background:linear-gradient(180deg,#3a3c48,#282932)}
+.cidpic .btop{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:6px;z-index:2;flex-wrap:wrap}
+.cidpic .kn{font-size:11px;font-weight:900;background:#c6e76c;color:#282932;padding:3px 8px;border-radius:7px}
+.cidpic .hs{font-size:10.5px;font-weight:800;background:#111;color:#fff;padding:4px 10px;border-radius:20px}.cidpic .hs.am{background:#fef3c7;color:#92400e}
+.cidpic .bigini{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:190px;font-weight:900;line-height:1;color:rgba(255,255,255,.07);pointer-events:none}
+.cidpic .bact{position:absolute;left:10px;right:10px;bottom:10px;z-index:3;display:flex;gap:5px;flex-wrap:wrap}
+.cidpic .bact span,.cidpic .bact label{font-size:10.5px;font-weight:800;background:rgba(255,255,255,.92);color:#282932;padding:4px 10px;border-radius:20px;cursor:pointer;white-space:nowrap}.cidpic .bact label.add{background:#c6e76c}.cidpic .bact b{font-weight:800}
+.cidhead{grid-column:2;grid-row:1;min-width:0}
+.cidhead h1{font-size:38px;font-weight:900;line-height:1.05;letter-spacing:-.01em;margin:2px 0 6px;color:#282932;cursor:pointer;overflow:hidden;text-overflow:ellipsis}
+.cid-in{width:100%;font-size:28px!important;font-weight:900;border:none!important;border-bottom:2px solid #c6e76c!important;border-radius:0!important;background:transparent!important;padding:2px 0 4px!important;margin-bottom:8px;box-shadow:none!important;color:#282932}
+.cidwho{font-size:15px;font-weight:700;color:#4b5160;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.cidwho span{cursor:pointer}.cidwho span:hover{text-decoration:underline}.cidwho .q{color:#166534;font-weight:800}
+.cidfl{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.cidfl i{font-style:normal;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:20px}.cidfl .r{background:#fee2e2;color:#991b1b}.cidfl .b{background:#dbeafe;color:#1e40af}.cidfl .p{background:#ede9fe;color:#5b21b6}
+.cidhead .hchips span{background:#eef1ea;color:#282932;backdrop-filter:none;-webkit-backdrop-filter:none}.cidhead .hchips span.g{background:#22c55e;color:#fff}.cidhead .hchips span.y{background:#facc15;color:#282932}.cidhead .hchips span.r{background:#ef4444;color:#fff}
+.cidfacts{grid-column:2;grid-row:2;margin-top:14px;min-width:0}
+.dfold-row .dot.b{background:#3b82f6}
+.cgate{margin-top:8px;padding-top:8px;border-top:1px solid #f1f3ee}.cgate .gh{font-size:12px;font-weight:800;margin-bottom:4px}.cgate .gh.g{color:#166534}.cgate .gh.a{color:#92400e}.cgate .gh.r{color:#991b1b}.cgate .gh u{text-decoration:none;color:#166534;margin-left:6px;cursor:pointer}
+.cgate .gr{display:grid;grid-template-columns:16px auto 1fr;gap:6px;align-items:baseline;padding:2px 0;font-size:11.5px}.cgate .gr i{font-style:normal;width:14px;height:14px;border-radius:50%;border:1.5px solid #f59e0b;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:900}
+.cgate .gr.ok i{background:#22c55e;border-color:#22c55e;color:#fff}.cgate .gr.bad i{background:#ef4444;border-color:#ef4444;color:#fff}.cgate .gr b{font-weight:800;color:#282932;white-space:nowrap}.cgate .gr small{color:#6b7280;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cgate .gr.ok b{color:#6b7280;font-weight:700}
+.cpod{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid #f1f3ee}.cpod .pl{border:none!important;background:none!important;padding:0!important;font-size:9.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#9a9fa8;margin-right:2px}
+.cpod span:not(.pl){font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:20px;background:#fff;border:1.5px dashed #cfd4c8;color:#6b7280;cursor:pointer}.cpod span.on{background:#dcfce7;border:1.5px solid #dcfce7;color:#166534}
+@media(max-width:900px){.cidc{grid-template-columns:240px minmax(0,1fr)}}
+@media(max-width:640px){
+  .cidc{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto}
+  .cidpic{grid-column:1;grid-row:1;aspect-ratio:auto;height:260px}.cidpic:not(.np)::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,16,21,0) 30%,rgba(15,16,21,.82));pointer-events:none;z-index:1}
+  .cidpic .bigini{font-size:150px;justify-content:flex-end;padding-right:22px;align-items:flex-start;padding-top:20px}
+  .cidpic .bact{top:40px;bottom:auto;left:auto;right:10px;justify-content:flex-end}.cidpic .bact .hn{display:none}
+  .cidhead{grid-column:1;grid-row:1;align-self:end;z-index:2;padding:0 14px 12px;pointer-events:none}.cidhead>*{pointer-events:auto}
+  .cidhead h1{font-size:30px;color:#fff;margin-bottom:4px}.cid-in{color:#fff!important;font-size:24px!important}.cid-in::placeholder{color:#9a9fa8}
+  .cidwho{font-size:12.5px;color:#e5e7eb}.cidwho .q{color:#c6e76c}
+  .cidhead .hchips span{background:rgba(255,255,255,.18);color:#f1f3ee;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+  .cidfacts{grid-column:1;grid-row:2;margin-top:10px}
+  .cgate .gr small{white-space:normal}
+}
 .only-wide{display:none}
 @media(min-width:960px){.only-wide{display:block}.hide-wide{display:none}}
 .sidepanel{display:flex;flex-direction:column;gap:10px}
@@ -1032,7 +1068,7 @@ var USERS=[
 ];
 var CURRENT_USER=null;
 // ── Home app: some people land straight in their own unit's app ─────
-var APP_HOME="dogs";
+var APP_HOME="cats";
 var HOME_FILES={dogs:"index.html",cats:"cats.html",stables:"stables.html"};
 var HOME_BUILTIN={STA01:"stables",JAM01:"stables",CAT01:"cats",CISO01:"cats"};
 function homeAppFor(u){if(!u)return "";var m={};try{m=unitSetting("homeApps")||{};}catch(e){}var em=String(u.email||"").toLowerCase();return (em&&m[em])||m[u.code||""]||HOME_BUILTIN[u.code||""]||"";}
@@ -2660,7 +2696,7 @@ var KC_TL={Green:["#dcfce7","#166534","#22c55e","#052e16"],Yellow:["#fef9c3","#7
 function kcEsc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
 function kcShortKennel(k){return String(k||"").replace(/^Kennel\s*/i,"K").replace(/^Pod\s*/i,"P")||"—";}
 function dashSearchRender(){clearTimeout(window._dbSrchT);window._dbSrchT=setTimeout(function(){renderDashboard();},160);}
-function renderDashboard(){
+function dogRenderDashboard(){
   if(!window._moCssIn){window._moCssIn=true;try{var st2=document.createElement("style");st2.textContent=MO_CSS.replace(/@page[^}]*}/,"");document.head.appendChild(st2);}catch(e){}}
   if(!window._unitSettingsPulled){window._unitSettingsPulled=true;pullUnitSettings();}
   var el=document.getElementById("dashboard-content");if(!el)return;if(el.parentNode&&el.parentNode.style)el.parentNode.style.maxWidth="";
@@ -4415,7 +4451,7 @@ var _photoStore={},_photoStoreErr="";        // dog id -> rows, or "loading"
 var PHOTO_COLS="id,dog_id,date,note,star,data,created_at";
 function photosFor(){if(!S||!S._id)return[];var v=_photoStore[S._id];return Array.isArray(v)?v:null;}
 function isFullPhoto(p){return !!p&&p.length>40000;}
-function legacyOf(dog){if(!dog)return null;if(Array.isArray(dog.photos)&&dog.photos.length)return dog.photos;if(isFullPhoto(dog.photo))return[{date:dog.intakeDate||"",data:dog.photo,note:"Arrival photo",star:true}];return null;}
+function dogLegacyOf(dog){if(!dog)return null;if(Array.isArray(dog.photos)&&dog.photos.length)return dog.photos;if(isFullPhoto(dog.photo))return[{date:dog.intakeDate||"",data:dog.photo,note:"Arrival photo",star:true}];return null;}
 function legacyPhotos(){return S&&S.dog?legacyOf(S.dog):null;}
 function makeThumb(dataUrl,cb){
   if(!dataUrl){cb("");return;}
@@ -4452,7 +4488,7 @@ async function migrateLegacyPhotos(){
   saveRecord();
   return true;
 }
-async function loadDogPhotos(id){
+async function dogLoadDogPhotos(id){
   if(!id||!supabaseClient)return null;
   if(_photoStore[id]==="loading")return null;
   _photoStore[id]="loading";_photoStoreErr="";
@@ -6955,7 +6991,7 @@ function loadCurrent(){
 //  Same machinery, cat rules. Later declarations win over the dog ones.
 // ════════════════════════════════════════════════════════════════════
 var IS_CATS=true;
-var CHANGELOG=[{version:"1.0",date:"2026-10-10",note:"The cat app, rebuilt on the September layout. Isolation Iso 1–5, Quarantine Q 1–9, Cattery Pod 1–16. Quarantine is 10 days, 5 for strays and returns. The Cattery gate: quarantine served, nothing contagious, FeLV/FIV tested, first RCP, kittens under 12 weeks need the first RCP, ringworm clear if suspected, both of a bonded pair clear. Temperament instead of Assessment and Scoring. Day reports with the Cat Stress Score, eating, the tray and cat flu signs. Not-eating alarm at 24 and 48 hours. Bonded pairs, queens and litters, pod setup, indoor or outdoor home, ringworm checks, and the TNR outcome."}];
+var CHANGELOG=[{version:"1.2",date:"2026-10-14",note:"A new Cat tab \u2014 an ID card for each cat. On a computer the photo sits on the left with the pen and quarantine day on it, and photo count, Change and Reposition along the bottom; on a phone it\u2019s a full-width banner with the name written over it. No photo yet? A big initial fills the space, and a new cat\u2019s name is typed straight onto it. Next to the name: coat, sex and age (tap any one to change it), flags for contagious, FeLV+, kitten and bonded, and the status chips. Then eight boxes \u2014 Sex, Age, Coat (with a colour swatch), Weight, Microchip (15-digit check and look-up), FeLV/FIV, Unit ref and ShelterBuddy. Tap a box and only that question opens; pick an answer and it saves and closes. Empty boxes say + add, and a line shows how many are filled. Underneath: how the cat came in as one sentence, with what\u2019s still to answer and the paperwork; where the cat is, with the pen history, the quarantine day, the Cattery gate and the pod setup; then the flags \u2014 contagious, eating, bonded pair, warnings, family and home type. Kittens under 12 weeks get a Kitten card with the weight gain, 1st RCP and mum. Copy for ShelterBuddy now includes coat, pen, colony and FeLV/FIV."},{version:"1.1",date:"2026-10-14",note:"Sleeker, and an actual app. The board is a pen map with photo tiles \u2014 \u201cx of y in\u201d per group, empty pods fold away, and on a phone each cat is a slim row. Board photos are sharper (each one sharpens itself once, in the background). Hold a tile for six shortcuts, swipe between cats, and Undo replaces \u201cAre you sure?\u201d. It installs as NSPCA Cattery, works offline and shows a count on the icon. Arrival has a step bar and opens on the first step not done. Temperament is three jobs: visit, learn, decide \u2014 and the verdict is signed. Day reports show the week at a glance, the four musts together, and Same as yesterday. Feeding has a guide in grams a day from the last weight \u2014 example numbers until the Cattery\u2019s feeding sheet is in."},{version:"1.0",date:"2026-10-10",note:"The cat app, rebuilt on the September layout. Isolation Iso 1–5, Quarantine Q 1–9, Cattery Pod 1–16. Quarantine is 10 days, 5 for strays and returns. The Cattery gate: quarantine served, nothing contagious, FeLV/FIV tested, first RCP, kittens under 12 weeks need the first RCP, ringworm clear if suspected, both of a bonded pair clear. Temperament instead of Assessment and Scoring. Day reports with the Cat Stress Score, eating, the tray and cat flu signs. Not-eating alarm at 24 and 48 hours. Bonded pairs, queens and litters, pod setup, indoor or outdoor home, ringworm checks, and the TNR outcome."}];
 APP_VERSION=CHANGELOG[0].version;
 var WHATS_NEW_HEADLINE={title:"The cat app",sub:"same layout as the dogs, cat rules",items:[["Quarantine and the Cattery gate","10 days, 5 for strays and returns. Five checks open the Move to the Cattery button."],["Temperament and day reports","Social, shy, fearful or feral. A stress score, eating, the tray and cat flu signs every day."],["Pairs, litters, TNR","Bonded pairs move together, kittens weigh side by side, ferals go back to site."]]};
 
@@ -7062,86 +7098,7 @@ function penHistoryHtml(d){var L=d.penLog||[];if(!L.length)return '<div style="f
 var CHIP_TO=["Nobody","A previous owner","NSPCA","The adopter"],CHIP_XFER=["Not needed yet","To NSPCA \u2014 done","To the adopter \u2014 done"];
 function chipXferDue(r){var st=r.state||{};var d=st.dog||{};var f=st.fin||{};var rh=st.rehome||{};if(!d.microchip)return false;var adopted=f.outcome==="Rehomed"||rh.stage==="Adopted";if(!adopted)return false;if(d.chipTransfer==="To the adopter \u2014 done")return false;var od=f.outcomeDate||rh.adoptedDate||"";return !od||od>=addDaysStr(new Date().toISOString().slice(0,10),-60);}
 var POD_SETUP=[["hide","Hide box"],["feliway","Feliway"],["perch","Perch / shelf"],["scratch","Scratch post"],["bedding","Bedding from home"]];
-function renderCatTab(){var d=S.dog,f=S.fin||{};var e=esc;var r=curRec();var g=catGate(r);var ii=g.ii;
-  var who=[d.breed,d.sex,(d.age||"").replace(/\s*\(.*\)/,""),d.colour].filter(Boolean).join(" \u00b7 ");
-  var dayTxt=g.moved?"In the Cattery"+(d.cattery?" since "+fmtDMY(d.cattery).slice(0,5):""):ii?(ii.state==="done"||ii.state==="final"?"Quarantine served":ii.day<=0?"Arrived today":(penArea(d.kennel)==="iso"?"Isolation":"Quarantine")+" \u00b7 day "+ii.day+" of "+g.qDays):"";
-  var _kn=kennelShort(d.kennel||"");
-  var _ps=photosFor();if(_ps===null&&d.photo&&S._id&&supabaseClient&&window._heroLoading!==S._id){window._heroLoading=S._id;var _hid=S._id;loadDogPhotos(_hid).then(function(){if(window._heroLoading===_hid)window._heroLoading=null;if(S&&S._id===_hid&&S.tab==="dog")renderMain();},function(){window._heroLoading=null;});}
-  var _st=_ps?starRow(_ps):null;var _heroSrc=(_st&&_st.data)||d.photo;
-  var hero='<div class="dhero"'+(_heroSrc?' style="background-image:url('+blobSrc(_heroSrc)+');background-position:'+e(d.photoPos||"50% 50%")+'"':' data-nophoto="1"')+'><div class="top">'+(_kn?'<span class="k">'+e(_kn)+'</span>':'<span class="k" style="background:#fff;color:#6b7280">no pen</span>')+(dayTxt?'<span>'+e(dayTxt)+'</span>':'')+'</div>'
-    +(_heroSrc?'':'<div class="dini">'+e(String(d.name||"?").trim().charAt(0).toUpperCase()||"?")+'</div>')
-    +'<div class="nm">'+(d.name?'<h1>'+e(d.name)+'</h1>':'<input class="dname" type="text" placeholder="Type a name" data-save="dog.name" onblur="checkDuplicateName()" id="hero-name-input">')+'<div class="who">'+e(who)+'</div><!--hchips--></div>'
-    +'<div class="ph"><label>'+(d.photo?'Change photo':'Add photo')+'<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>'+(d.photo?'<span onclick="showRepositionPhoto()">Reposition</span><span onclick="removePhoto()" style="color:#991b1b">Remove</span>':'')+'</div></div>';
-  var tp=temperOf(S);var rh=S.rehome||{};
-  var _cs=g.moved?["Cattery","g"]:g.ready?["Ready to move","g"]:g.served?[g.blocks.length+" to clear","y"]:["Quarantine",""];var _rhs=rh.stage||((S.foster||{}).out?"In foster":"");
-  var strip='';hero=hero.replace('<!--hchips-->','<div class="hchips"><span class="'+(tp?(tp[0]==="Social"?"g":tp[0]==="Feral"?"r":"y"):"")+'" data-go="temperament">'+e(tp?tp[0]:"Temperament not set")+'</span><span class="'+_cs[1]+'" data-go="picture">'+e(_cs[0])+'</span>'+(_rhs?'<span data-go="rehome">'+e(_rhs)+'</span>':'')+'<span data-go="arrival">'+e(d.intakeDate?"In since "+fmtDMY(d.intakeDate):"No arrival date")+'</span></div>');
-  // 1 who
-  var identity='<div class="dog-fg">'+fld("Name",d.name,"dog.name","text","e.g. Biscuit",'onblur="checkDuplicateName()" id="dog-name-input"')
-    +slct("Sex",d.sex,"dog.sex",[["","-- select --"],["Male","Male"],["Female","Female"],["Male (N)","Male (Neutered)"],["Female (S)","Female (Spayed)"],["Unknown","Unknown"]])
-    +slct("Breed / coat",d.breed||"","dog.breed",[["","-- select --"]].concat(CAT_BREEDS.map(function(b){return[b,b];})))
-    +slct("Colour",d.colour||"","dog.colour",[["","-- select --"]].concat(CAT_COLOURS.map(function(c){return[c,c];})))
-    +fld("Date of birth",d.dob||"","dog.dob","date")+slct("Age (approx.)",d.age,"dog.age",ageOptions(d.age))
-    +fld("Microchip no."+(d.microchip?' <a href="#" class="today-link" onclick="try{navigator.clipboard.writeText(\''+e(d.microchip)+'\');miniToast(\'Chip copied\');}catch(x){}return false">copy</a>':""),d.microchip,"dog.microchip","text","15 digits",'inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value)"')
-    +fld("Unit ref",d.refNo,"dog.refNo","text","e.g. C-041-2026")+'</div><div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">There\u2019s already a cat here with this name.</div><div id="chip-info" style="margin:0 0 4px;font-size:11px">'+chipInfoHtml(d.microchip)+'</div>'
-    
-    +chipRow("Coat length","long coats get a grooming line on Care","coatLength",["Short","Medium","Long"],d.coatLength||"")
-    +chipRow("Pattern","fills Colour if it\u2019s empty","pattern",CAT_PATTERNS.map(function(x){return x[0];}),d.pattern||"","catPattern")
-    +'<div class="dog-fg">'+fld("Distinguishing marks",d.marks||"","dog.marks","text","what would let an owner prove "+(String(d.sex||"").indexOf("Female")===0?"she\u2019s":"he\u2019s")+" theirs")+'</div>';
-  // 2 came in
-  var reasons=[["Stray","Stray"],["Owner surrender","Surrender"],["Return","Return"],["Welfare / seizure","Welfare / seizure"],["Transfer","Transfer"],["Born here","Born here"],["Trapped (TNR)","Trapped \u2014 feral"]];
-  var camein=chipRow("Reason","quarantine is "+catQDays(d)+" days","intakeReason",reasons,d.intakeReason||"")
-    +chipRow("Brought in by","","broughtInBy",[["NSPCA Inspector","Inspector"],["Owner","Owner"],["Member of the public","Public"],["Garda","Garda"],["Transfer","Transfer"],["Other","Other"]],d.broughtInBy||"")
-    +(d.broughtInBy==="NSPCA Inspector"?'<div class="dog-fg">'+slct("Inspector",d.inspector||"","dog.inspector",inspectorOpts(d.inspector))+(d.inspector==="Other"?fld("Inspector name",d.inspectorOther||"","dog.inspectorOther","text",""):"")+fld("Case ref",d.inspectorRef||"","dog.inspectorRef","text","e.g. 26-0412")+'</div>':'')
-    +'<div class="dog-fg">'+(function(){if(!S.dog.intakeDate)S.dog.intakeDate=new Date().toISOString().slice(0,10);return fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date");})()
-    +(/Stray|Trapped/.test(d.intakeReason||"")?fld("Found / trapped at",d.foundAt||"","dog.foundAt","text","e.g. Ballymahon, farm yard"):'')
-    +fld("Taken in by",d.assessor||"","dog.assessor","text","e.g. Shane")+'</div>'
-    +(/Stray|Trapped/.test(d.intakeReason||"")?'<div class="g2">'+fld("Colony or site",d.colony||"","dog.colony","text","e.g. behind the mart")+fld("Feeder / caretaker",d.feeder||"","dog.feeder","text","name and phone")+'</div><div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:-4px">A TNR cat goes back to this exact spot \u2014 it fills the TNR door on Outcome and the TNR site form on Files.</div>':'');
-  // 3 where
-  var whereis='<div class="dog-fg">'+catPenSelect(d)+'</div><div class="ovkv"><span>Quarantine</span><b>'+e(g.moved?"done \u2014 moved "+(d.cattery?fmtDMY(d.cattery):""):ii?(g.served?"served":"day "+Math.max(0,ii.day)+" of "+g.qDays):"no intake date")+'</b></div><div class="ovkv"><span>Status</span><b>'+e((S.foster||{}).out?"Out in foster":f.outcome&&f.outcome!=="Finished Isolation"&&!/^Active/.test(f.outcome)?f.outcome:g.moved?"In the Cattery":"In isolation / quarantine")+'</b></div>'
-    +(g.moved?'<div style="margin-top:8px;font-size:11.5px"><a href="#" onclick="catBackToQ();return false" style="color:#6b7280">Undo the Cattery move</a></div>':'<div style="font-size:11.5px;color:#166534;font-weight:700;margin-top:8px">The move to the Cattery is on the Overview, once the gate is clear.</div>')+penHistoryHtml(d);
-  // 4 family & pairs
-  var fi=familyInfo();var partner=d.bondId?records.find(function(x){return String(x.id)===String(d.bondId);}):null;
-  var cands=records.filter(function(x){return x.id!==S._id&&catIsHere(x);});
-  var famBody='<div class="cq"><label>Bonded to<em>shown as one card, moved and rehomed together</em></label>'+(partner?'<div class="pairrow"><b>'+e(partner.name)+'</b><small>'+e(kennelShort((partner.state.dog||{}).kennel)||"")+'</small><span onclick="bondClear()">Unlink</span></div>':'<select onchange="bondSet(this.value)"><option value="">-- not bonded --</option>'+cands.map(function(x){return '<option value="'+x.id+'">'+e(x.name)+(x.state&&x.state.dog&&x.state.dog.kennel?' \u00b7 '+e(kennelShort(x.state.dog.kennel)):'')+'</option>';}).join("")+'</select>')+'</div>';
-  if(fi.pups.length){famBody+='<div class="lbl" style="margin-top:6px">Litter at a glance</div><table class="ctbl"><tr><th>Kitten</th><th>Age</th><th>Last weight</th><th>A week</th><th>1st RCP</th></tr>'+fi.pups.map(function(p){var pst=p.state||{};var pd=pst.dog||{};var kg=kittenGain(pst);var lw=(pst.weights||[]).filter(function(x){return x.date&&x.weight;}).sort(function(a,b){return b.date.localeCompare(a.date);})[0];var wk=catAgeWeeks(pd);var rcp=((pst.medical||{}).vaccinations||[]).filter(function(v){return v.date&&/^1st RCP|^RCP/i.test(v.type||"");})[0];var col=kg?{g:"#166534",a:"#92400e",r:"#991b1b"}[kg.tone]:"#6b7280";
-    return '<tr onclick="openFamilyDog('+p.id+')" style="cursor:pointer"><td><b>'+e(p.name)+'</b></td><td>'+(wk!==null?wk+" wks":"\u2014")+'</td><td>'+(lw?Math.round(kgOf(lw.weight)*1000)+" g":"not weighed")+'</td><td><b style="color:'+col+'">'+(kg?(kg.perWeek>=0?"+":"")+kg.perWeek+" g":"\u2014")+'</b></td><td>'+(rcp?"given "+e(fmtDMY(rcp.date).slice(0,5)):wk!==null&&wk<9?"due 9 wks":"due now")+'</td></tr>';}).join("")+'</table><div style="font-size:10.5px;color:#6b7280;font-weight:600;margin-top:4px">One line per kitten linked to her. Under 50 g a week goes amber, a loss goes red \u2014 the same rule as the Kitten tab. Tap a name to open that kitten.</div>';}
-  famBody+=familyCardInner(fi);
-  var famSum=[partner?"bonded to "+partner.name:"",fi.pups.length?(d.sex&&/Female/.test(d.sex)?"queen \u00b7 ":"")+fi.pups.length+" kitten"+(fi.pups.length===1?"":"s"):"",fi.mumId?"with mum":""].filter(Boolean).join(" \u00b7 ")||"Bonded pairs, queens and litters";
-  // 5 pod setup
-  var ps=d.podSetup||{};var psOn=POD_SETUP.filter(function(x){return ps[x[0]];});
-  var podBody='<div class="ptick">'+POD_SETUP.map(function(x){return '<div onclick="podSetToggle(\''+x[0]+'\')"><i class="'+(ps[x[0]]?"y":"")+'"></i>'+x[1]+'</div>';}).join("")+'</div>';
-  // 6 home type
-  var ht=homeTypeOf(S);
-  var homeBody='<div class="homebox"><b>'+e(ht.t)+'</b><small>'+e(ht.why)+'</small></div>'+chipRow("Override","only if you know better","homeOverride",[["Indoor only","Indoor only"],["Indoor or outdoor","Indoor or outdoor"],["Outdoor / barn","Outdoor / barn"]],d.homeOverride||"")+'<div style="font-size:10.5px;color:#6b7280;font-weight:600;margin-top:4px">FIV positive means indoor only. Any other cat can go to an indoor or outdoor home \u2014 outdoors needs the FeLV vaccine first. Goes on Best home and the rehoming card.</div>';
-  // 7 microchip registration
-  var chipBody=(d.microchip?'':'<div class="cflag a" style="margin:0 0 8px">No chip number yet \u2014 add it under Who '+(String(d.sex||"").indexOf("Female")===0?"she":"he")+' is. The Rehoming checklist asks for one.</div>')
-    +chipRow("Registered to","","chipTo",CHIP_TO,d.chipTo||"")+'<div class="g2">'+fld("Database",d.chipDb||"","dog.chipDb","text","where the chip is registered")+fld("Owner on the database",d.chipOwner||"","dog.chipOwner","text","name, any contact that worked")+'</div>'
-    +chipRow("Transfer","","chipTransfer",CHIP_XFER,d.chipTransfer||"")
-    +'<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:4px">A chip registered to someone is a lead for the owner search on Arrival. Once adopted, an untransferred chip lands in Today until it\u2019s moved to the adopter.</div>';
-  var chipSum=d.microchip?([d.chipTo?"registered to "+d.chipTo.toLowerCase():"registration not checked",d.chipDb,d.chipTransfer&&d.chipTransfer!=="Not needed yet"?d.chipTransfer.toLowerCase():""].filter(Boolean).join(" \u00b7 ")):"no chip yet";
-  var chipSt=!d.microchip?"":chipXferDue(r)?"warn":d.chipTo?(d.chipTo==="A previous owner"&&!(d.chipTransfer||"").match(/done/)?"warn":"done"):"warn";
-  // 7 flags
-  var ws=(S.warnings||[]).filter(function(w){return w&&w.text&&!w.resolved;}),ns=S.careNotices||[];var _con=activeContagiousList(S.medical);var flu=fluSuspect(S);var ea=eatAlarm(r);
-  var flags=dogFold("warn","","Warnings &amp; notices",ws.length||ns.length?(ws.length?ws.length+" warning"+(ws.length>1?"s":""):"")+(ws.length&&ns.length?" \u00b7 ":"")+(ns.length?ns.length+" notice"+(ns.length>1?"s":""):""):"None active \u2014 tap to add",ws.length?e(ws.map(function(w){return w.text;}).join(" \u00b7 ")):(ns.length?e(ns[0].text||""):""),ws.length?"warn":"plain",warningsCardHtml()+noticesCardHtml())
-    +'<div class="dfold-row" data-go="medical"><span class="dot '+(_con.length||flu?"r":"g")+'"></span><div><b>Contagious</b><small>'+e(_con.length?_con.map(function(x){return diseaseShortName(x.type);}).join(", ")+" \u2014 active":flu?"Suspected cat flu \u2014 served last":"None active")+'</small></div><span class="st">Medical \u203a</span></div>'
-    +'<div class="dfold-row" data-go="days"><span class="dot '+(ea?(ea.red?"r":"a"):"g")+'"></span><div><b>Eating</b><small>'+e(ea?"Not eaten for "+ea.h+" hours":"Eating")+'</small></div><span class="st">Day reports \u203a</span></div>';
-  var flN=ws.length+ns.length+(_con.length||flu?1:0)+(ea?1:0);
-  var he=((d.sex||"").toLowerCase().indexOf("female")===0?"she":"he");
-  var idDone=!!(d.name&&d.sex&&(d.dob||d.age));var inDone=!!(d.intakeReason&&d.intakeDate);var whDone=!!d.kennel;var firstOpen=[idDone,inDone,whDone].indexOf(false);
-  var idSum=[d.sex?String(d.sex).replace(/\s*\(.*\)/,"").toLowerCase():"",d.breed,(d.age||"").replace(/\s*\(.*\)/,""),d.coatLength?d.coatLength.toLowerCase()+" coat":"",d.colour?d.colour.toLowerCase():"",d.marks?d.marks:"",d.microchip?"chip \u2026"+String(d.microchip).slice(-4):"no chip"].filter(Boolean).join(" \u00b7 ");
-  var inSum=[d.intakeReason?d.intakeReason.toLowerCase():"no reason yet",d.intakeDate?fmtDMY(d.intakeDate):"",catQDays(d)+"-day quarantine",d.foundAt?"found at "+d.foundAt:"",d.colony?d.colony+" colony":""].filter(Boolean).join(" \u00b7 ");
-  var _pl=d.penLog||[];var _pc=_pl[_pl.length-1];var _pd=_pc&&_pc.from&&_pc.pen===d.kennel?Math.max(0,Math.round((new Date(new Date().toISOString().slice(0,10))-new Date(_pc.from))/864e5)):null;var whSum=(d.kennel?kennelShort(d.kennel):"no pen")+(_pd!==null?" \u00b7 "+_pd+" day"+(_pd===1?"":"s"):"")+(_pl.length>1?" \u00b7 pen "+_pl.length:"")+" \u00b7 "+(g.moved?"in the Cattery":g.served?"quarantine served":"quarantine");
-  var sec=function(n,t,s,st,b,df){return catSecHtml("_dogSec","d"+n,n,t,s,st,b,df);};
-  return hero+strip
-    +sec(1,"Who "+he+" is",e(idSum)||"Name, sex, age, colour, chip",idDone?"done":"",identity,firstOpen===0)
-    +sec(2,"How "+he+" came in",e(inSum),inDone?"done":"",camein,firstOpen===1)
-    +sec(3,"Where "+he+" is",e(whSum),whDone?"done":"",whereis,firstOpen===2)
-    +sec(4,"Family &amp; pairs",e(famSum),(partner||fi.pups.length||fi.mumId)?"done":"",famBody,false)
-    +sec(5,"Pod setup",e(psOn.length?psOn.map(function(x){return x[1].toLowerCase();}).join(" \u00b7 "):"hide box, Feliway, perch, scratch post"),psOn.length>=4?"done":psOn.length?"warn":"",podBody,false)
-    +sec(6,"Home type",e(ht.t+" \u2014 "+ht.why),"done",homeBody,false)
-    +sec(7,"Microchip registration",e(chipSum),chipSt,chipBody,false)
-    +sec(8,"Flags",e([ws.length?ws.length+" warning"+(ws.length>1?"s":""):"",_con.length||flu?"contagious":"",ea?"not eating "+ea.h+" h":""].filter(Boolean).join(" \u00b7 ")||"nothing flagged"),(_con.length||flu||(ea&&ea.red))?"bad":flN?"warn":"done",flags,flN>0)
-    +'<div class="brow" style="margin-top:12px"><button class="btn btnp" data-go="arrival">Next: Arrival &rarr;</button></div>';}
+// renderCatTab lives in l9zz_cattab.js (ID card layout, 14 Oct)
 
 // ── Overview + the Cattery gate ────────────────────────────────────
 function catParagraph(){var d=S.dog,e=esc;var nm=d.name||"This cat";var fem=(d.sex||"").toLowerCase().indexOf("female")===0;var he=fem?"she":"he",He=fem?"She":"He";
@@ -7880,7 +7837,7 @@ function catVitals(active){var inU=active.filter(function(r){return !((r.state&&
   return '<div class="mnums">'+n(inU.length,"in","",true)+n(q,"in quarantine","a")+n(rd,"ready to move","g")+n(con,"contagious","r")+n(ea,"not eating","r")+n(kit,"kittens")+n(fo,"in foster")+'</div>';}
 // hold a tile: six cat shortcuts
 QA=[["days","Day report","▤"],["weights","Weigh","⚖️"],["notes","Note","≡"],["medical","Meds","💊"],["move","Move","⇄"],["photos","Photo","📷"]];
-function quickGo(id,what){quickClose();openDog(id);if(what==="move"){S.tab="dog";window._dogSec=window._dogSec||{};window._dogSec.d3=true;render();}else{S.tab=what;render();}window.scrollTo(0,0);try{hideIsolationOverlay();}catch(e){}}
+function quickGo(id,what){quickClose();openDog(id);if(what==="move"){S.tab="dog";render();dtSheet("where");}else{S.tab=what;render();}window.scrollTo(0,0);try{hideIsolationOverlay();}catch(e){}}
 // Undo instead of "Are you sure?" — the Cattery move, moving back, deleting a visit
 function catMoveTo(pod){var r=curRec();var g=catGate(r);if(!g.ready){appAlert("Not cleared yet: "+g.blocks.map(function(b){return b.t;}).join(", ")+".");return;}
   var snap=JSON.parse(JSON.stringify({fin:S.fin||{},dog:S.dog,notes:S.notes||[]}));var td=new Date().toISOString().slice(0,10);var from=S.dog.kennel||"";
@@ -7892,6 +7849,146 @@ function catMoveTo(pod){var r=curRec();var g=catGate(r);if(!g.ready){appAlert("N
 function catBackToQ(){var snap=JSON.parse(JSON.stringify({fin:S.fin||{},dog:S.dog}));S.fin.outcome="";S.fin.outcomeDate="";S.dog.cattery="";if(S.dog.qPen)S.dog.kennel=S.dog.qPen;persistSave();saveRecord();renderMain();var myId=S._id;
   undoToast((S.dog.name||"Cat")+" moved back out of the Cattery",function(){if(String(S._id)!==String(myId))return;S.fin=snap.fin;S.dog=snap.dog;persistSave();saveRecord();renderMain();});}
 function vDel(kind,i){var t=S.temper||{};var a=kind==="s"?t.sits:t.pf;if(!a||!a[i])return;var gone=a.splice(i,1)[0];persistSave();saveRecord();renderMain();undoToast("Visit deleted",function(){a.splice(i,0,gone);persistSave();saveRecord();renderMain();});}
+
+// ══ Cat tab as an ID card (dog v3.309 layout) — photo, facts, sheets ══
+var CAT_SW={"Black":"#1c1c1c","White":"#f7f7f2","Black and white":"linear-gradient(90deg,#1c1c1c 50%,#f7f7f2 50%)","Tabby":"repeating-linear-gradient(60deg,#5b4632 0 3px,#b08a5c 3px 6px)","Ginger":"#d9822b","Ginger and white":"linear-gradient(90deg,#d9822b 50%,#f7f7f2 50%)","Grey / blue":"#7b8794","Tortoiseshell":"radial-gradient(circle at 30% 35%,#d9822b 22%,transparent 24%),radial-gradient(circle at 70% 70%,#b0601c 18%,transparent 20%),#1c1c1c","Calico":"linear-gradient(90deg,#1c1c1c 33%,#f7f7f2 33% 66%,#d9822b 66%)","Tabby and white":"linear-gradient(90deg,#8a6a48 50%,#f7f7f2 50%)","Cream":"#efe3c2","Colourpoint":"linear-gradient(135deg,#f3ead8 45%,#5b3a26)"};
+function catSwatch(c){var v=CAT_SW[c];return v?'<i class="idsw" style="background:'+v+'"></i>':'';}
+var CAT_COATS=[["DSH","Domestic Shorthair","Short"],["DMH","Domestic Medium Hair","Medium"],["DLH","Domestic Longhair","Long"]];
+function catCoatCode(d){var c=CAT_COATS.filter(function(x){return x[1]===d.breed;})[0];if(c)return c[0];if(d.breed)return d.breed;var l=CAT_COATS.filter(function(x){return x[2]===d.coatLength;})[0];return l?l[0]:"";}
+function catSheetClose(){window._dtSheet=null;}
+function catCoatPick(code){var d=S.dog;var c=CAT_COATS.filter(function(x){return x[0]===code;})[0];if(!c)return;if(d.breed===c[1]){d.breed="";}else{d.breed=c[1];d.coatLength=c[2];}if(d.breed&&d.colour)catSheetClose();dtSave();}
+function catBreedPick(b){var d=S.dog;d.breed=d.breed===b?"":b;if(d.breed&&d.colour)catSheetClose();dtSave();}
+function catColourPick(c){var d=S.dog;d.colour=d.colour===c?"":c;if(d.colour&&d.breed)catSheetClose();dtSave();}
+function catSexPick(v){S.dog.sex=S.dog.sex===v?"":v;catSheetClose();dtSave();}
+function catAgePick(v){S.dog.age=S.dog.age===v?"":v;catSheetClose();dtSave();}
+function catAgeStep(n){var a=String(S.dog.age||"");var y=/^Under 6|6.12 months/.test(a)?0:(parseInt((a.match(/(\d+)/)||[])[1],10)||0);y=Math.max(1,Math.min(19,y+n));S.dog.age=y>=19?"19+ years":y+(y===1?" year":" years");dtSave();}
+function catAgeShort(d){var w=catAgeWeeks(d);if(w!==null){if(w<16)return w+" week"+(w===1?"":"s");var m=Math.floor(w/4.345);if(m<12)return m+" months";var y=Math.floor(m/12);return y+" year"+(y===1?"":"s");}var a=String(d.age||"").replace(/\s*\(.*\)/,"");if(/^Under 6/.test(a))return "under 6 months";return a?"~"+a:"";}
+function sbText(){var d=S.dog||{};var m=S.medical||{};var kg=dtLastKg();var L=[];var row=function(k,v){if(v)L.push(k+": "+v);};
+  row("Name",d.name);row("Unit ref",d.refNo);row("ShelterBuddy ID",d.sbId);row("Species","Cat");row("Breed",d.breed);row("Sex",String(d.sex||"").replace("(N)","(neutered)").replace("(S)","(spayed)"));
+  row("Date of birth",d.dob?fmtDMY(d.dob):"");row("Age",d.dob?"":String(d.age||"").replace(/\s*\(.*\)/,""));row("Colour",d.colour);row("Coat",d.coatLength?d.coatLength.toLowerCase()+" coat":"");row("Distinguishing marks",d.marks);
+  row("Weight",kg.kg!==null?kg.kg+" kg"+(kg.date?" ("+fmtDMY(kg.date)+")":""):"");row("Microchip",d.microchip);
+  row("Intake date",d.intakeDate?fmtDMY(d.intakeDate):"");row("Intake reason",d.intakeReason);row("Brought in by",d.broughtInBy==="NSPCA Inspector"?"NSPCA Inspector "+(d.inspector==="Other"?d.inspectorOther||"":d.inspector||"")+(d.inspectorRef?" (case "+d.inspectorRef+")":""):d.broughtInBy);
+  row("Where found",d.foundAt);row("Colony or site",d.colony);row("Pen",d.kennel?kennelShort(d.kennel):"");row("Taken in by",d.assessor);
+  row("FeLV",m.felv&&m.felv!=="Not tested"?m.felv:"");row("FIV",m.fiv&&m.fiv!=="Not tested"?m.fiv:"");row("Tested on",m.testDate?fmtDMY(m.testDate):"");
+  var c=activeContagiousList(m);row("Contagious",c.map(function(x){return x.type;}).join(", "));
+  return L.join("\n");}
+function renderCatTab(){var d=S.dog,f=S.fin||{},m=S.medical||{};var e=esc;var r=curRec();var g=catGate(r);var ii=g.ii;
+  var he=((d.sex||"").toLowerCase().indexOf("female")===0?"she":"he");var him=he==="she"?"her":"him";
+  var dayTxt=g.moved?"In the Cattery"+(d.cattery?" since "+fmtDMY(d.cattery).slice(0,5):""):ii?(ii.state==="done"||ii.state==="final"?"Quarantine served":ii.day<=0?"Arrived today":(penArea(d.kennel)==="iso"?"Isolation":"Quarantine")+" \u00b7 day "+ii.day+" of "+g.qDays):"";
+  var _kn=kennelShort(d.kennel||"");
+  var _ps=photosFor();var _heroLoading=window._heroLoading===S._id;if(_ps===null&&d.photo&&S._id&&supabaseClient&&window._heroLoading!==S._id){window._heroLoading=S._id;var _hid=S._id;loadDogPhotos(_hid).then(function(){if(window._heroLoading===_hid)window._heroLoading=null;if(S&&S._id===_hid&&S.tab==="dog")renderMain();},function(){window._heroLoading=null;});}
+  var _st=_ps?starRow(_ps):null;var _heroSrc=(_st&&_st.data)||d.photo;var _phN=_ps?_ps.length:(d.photo?1:0);
+  var tp=temperOf(S);var rh=S.rehome||{};
+  var _cs=g.moved?["Cattery","g"]:g.ready?["Ready to move","g"]:g.served?[g.blocks.length+" to clear","y"]:["Quarantine",""];var _rhs=rh.stage||((S.foster||{}).out?"In foster":"");
+  var chips='<div class="hchips"><span class="'+(tp?(tp[0]==="Social"?"g":tp[0]==="Feral"?"r":"y"):"")+'" data-go="temperament">'+e(tp?tp[0]:"Temperament not set")+'</span><span class="'+_cs[1]+'" data-go="picture">'+e(_cs[0])+'</span>'+(_rhs?'<span data-go="rehome">'+e(_rhs)+'</span>':'')+'<span data-go="arrival">'+e(d.intakeDate?"In since "+fmtDMY(d.intakeDate):"No arrival date")+'</span></div>';
+  var _con=activeContagiousList(m);var flu=fluSuspect(S);var ea=eatAlarm(r);var wk=catAgeWeeks(d);var kit=isPup();
+  var ws=(S.warnings||[]).filter(function(w){return w&&w.text&&!w.resolved;}),ns=S.careNotices||[];var fi=familyInfo();
+  var partner=d.bondId?records.find(function(x){return String(x.id)===String(d.bondId);}):null;
+  var _sexW=d.sex==="Unknown"?"":String(d.sex||"").replace(" (N)",", neutered").replace(" (S)",", spayed");
+  var _age=catAgeShort(d);var _coat=catCoatCode(d);
+  // ── header: photo + name, breed line, flags, chips ──
+  var flg=(_con.length?'<i class="r">Contagious</i>':flu?'<i class="r">Cat flu?</i>':'')+(m.felv==="Positive"?'<i class="r">FeLV+</i>':'')+(kit?'<i class="b">Kitten'+(wk!==null?' \u00b7 '+wk+' wks':'')+'</i>':'')+(partner?'<i class="p">Bonded \u00b7 '+e(partner.name)+'</i>':'');
+  var who=[d.breed?'<span onclick="event.stopPropagation();dtSheet(\'coat\')">'+e(d.breed)+'</span>':'',_sexW?'<span onclick="event.stopPropagation();dtSheet(\'sex\')">'+e(_sexW)+'</span>':'',_age?'<span onclick="event.stopPropagation();dtSheet(\'age\')">'+e(_age.replace(/^~/,"about "))+'</span>':''].filter(Boolean).join(' \u00b7 ');
+  var pic='<div class="cidpic'+(_heroSrc?'':' np')+(_heroLoading?' loading':'')+'"'+(_heroSrc?' style="background-image:url('+blobSrc(_heroSrc)+');background-position:'+e(d.photoPos||"50% 50%")+'"':'')+'>'
+    +'<div class="btop"><span class="kn">'+e(_kn||"no pen")+'</span>'+(dayTxt?'<span class="hs'+(g.moved||g.served?'':' am')+'">'+e(dayTxt)+'</span>':'')+'</div>'
+    +(_heroSrc?'':'<div class="bigini">'+e(d.name?String(d.name).trim().charAt(0).toUpperCase():"?")+'</div>')
+    +'<div class="bact">'+(_heroSrc?'<span data-go="photos">\ud83d\udcf7 '+_phN+'<b class="hn"> photo'+(_phN===1?'':'s')+'</b></span><label>Change<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label><span class="hn" onclick="showRepositionPhoto()">Reposition</span>':'<label class="add">\ud83d\udcf7 Add photo<input type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"></label>')+'</div></div>';
+  var head='<div class="cidhead">'+(d.name?'<h1 role="button" tabindex="0" onclick="dtSheet(\'name\')">'+e(d.name)+'</h1>':'<input class="cid-in" placeholder="Type a name\u2026" value="" data-save="dog.name" id="dog-name-input" onblur="checkDuplicateName();if(this.value)renderMain()" onkeydown="if(event.key===\'Enter\')this.blur()"><div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 8px">There\u2019s already a cat here with this name.</div>')
+    +'<div class="cidwho">'+(who||'<span class="q" onclick="dtSheet(\'coat\')">+ coat, sex and age</span>')+'</div>'
+    +(flg?'<div class="cidfl">'+flg+'</div>':'')+(d.name?chips:'')+'</div>';
+  // ── fact boxes ──
+  var fact=function(k,label,val,sub,x){x=x||{};var empty=!val;return '<div class="idf'+(empty?" e":"")+(x.w?" w":"")+'" role="button" tabindex="0"'+(x.go?' data-go="'+x.go+'"':' onclick="dtSheet(\''+k+'\')"')+'><label>'+label+'</label><b'+(x.mono&&val?' class="mono"':'')+'>'+(empty?(x.add||"+ add"):(x.sw||"")+val)+'</b>'+(sub?'<small'+(x.subc?' class="'+x.subc+'"':'')+'>'+sub+'</small>':'')+'</div>';};
+  var kg=dtLastKg();var _cd=String(d.microchip||"").replace(/\D/g,"");var _chipOk=_cd.length===15;var _chipFmt=_cd?_cd.replace(/(\d{3})(?=\d)/g,"$1 "):"";
+  var tested=m.felv&&m.felv!=="Not tested"&&m.fiv&&m.fiv!=="Not tested";var _pos=m.felv==="Positive"||m.fiv==="Positive";
+  var felvTxt=tested?"FeLV "+(m.felv==="Negative"?"\u2212":"+")+" \u00b7 FIV "+(m.fiv==="Negative"?"\u2212":"+"):"";
+  var facts=fact("sex","Sex",e(_sexW||(d.sex==="Unknown"?"Unknown":"")))
+    +fact("age","Age",e(_age.replace(/^~/,"about ")),d.dob?"born "+e(fmtDMY(d.dob)):(_age?"no date of birth":""))
+    +fact("coat","Coat",e(_coat?_coat+(d.colour?" \u00b7 "+d.colour:""):(d.colour||"")),d.marks?e(d.marks):"",{sw:d.colour?catSwatch(d.colour):""})
+    +fact("weight","Weight",kg.kg!==null?(kg.kg<2?Math.round(kg.kg*1000)+" g":kg.kg+" kg"):"",kg.kg!==null?(kg.date?e(fmtDMY(kg.date).slice(0,5))+" \u00b7 ":"")+'<u>weigh</u>':"",{go:"weights",add:"+ weigh"})
+    +fact("felv","FeLV / FIV",e(felvTxt),tested?(m.testDate?"tested "+e(fmtDMY(m.testDate).slice(0,5)):"tested")+" \u00b7 <u>Medical</u>":"",{go:"medical",add:"+ not tested",subc:_pos?"bad":"ok"})
+    +fact("ref","Unit ref",e(d.refNo||""),"",{mono:1})
+    +fact("chip","Microchip",e(_chipFmt),_cd?(_chipOk?"15 digits \u2713 \u00b7 <u onclick=\"event.stopPropagation();microchipLookup('"+_cd+"')\">look up</u>":_cd.length+" digits \u2014 should be 15"):"",{mono:1,w:1,add:"+ scan or type",subc:_cd&&!_chipOk?"bad":"ok"})
+    +fact("sb","ShelterBuddy",e(d.sbId||""),'<u onclick="event.stopPropagation();sbCopy()">copy all for SB</u>',{mono:1,w:1});
+  var stray=/Stray|Trapped/.test(d.intakeReason||"");
+  var _chk=[!!d.name,!!d.sex,!!(d.dob||d.age),!!d.breed,!!d.colour,_chipOk,!!d.intakeReason,!!d.broughtInBy,!!d.assessor,!!d.kennel].concat(stray?[!!d.foundAt]:[]);var _nOk=_chk.filter(Boolean).length;
+  var prog=_nOk<_chk.length?'<div class="idprog"><i style="width:'+Math.round(_nOk/_chk.length*100)+'%"></i></div><div class="idprog-t">'+_nOk+' of '+_chk.length+' filled \u00b7 empty boxes are what\u2019s missing</div>':'';
+  // ── how they came in ──
+  var _bi=d.broughtInBy||"";var _byTxt=_bi==="NSPCA Inspector"?'<b>Inspector '+e(d.inspector==="Other"?d.inspectorOther||"":d.inspector||"")+'</b>'+(d.inspectorRef?' (case '+e(d.inspectorRef)+')':''):_bi==="Owner"?'the <b>owner</b>':_bi==="Member of the public"?'a <b>member of the public</b>':_bi==="Garda"?'the <b>Garda\u00ed</b>':_bi?'<b>'+e(_bi.toLowerCase())+'</b>':'';
+  var _when=d.intakeDate?new Date(d.intakeDate+"T12:00:00").toLocaleDateString("en-IE",{weekday:"short",day:"numeric",month:"short"}):"";
+  var story=[];if(d.intakeReason)story.push('<b>'+e(d.intakeReason)+'.</b>');
+  if(d.foundAt)story.push((/Trapped/.test(d.intakeReason||"")?'Trapped':'Found')+' at <b>'+e(d.foundAt)+'</b>'+(d.colony?' ('+e(d.colony)+' colony'+(d.feeder?', fed by '+e(d.feeder):'')+')':'')+'.');
+  story.push((_byTxt?'Brought in by '+_byTxt+(_when?' on ':''):_when?'Came in on ':'')+(_when?'<b>'+e(_when)+'</b>':'')+(_byTxt||_when?'.':''));
+  if(d.assessor)story.push('Taken in by <b>'+e(d.assessor)+'</b>.');story.push(catQDays(d)+'-day quarantine.');
+  var _ask=[!_bi?"who brought "+him+" in":"",!d.intakeReason?"why "+he+" came in":"",!d.assessor?"who took "+him+" in":"",stray&&!d.foundAt?"where "+he+" was found":"",/Trapped/.test(d.intakeReason||"")&&!d.colony?"which colony":""].filter(Boolean);
+  var _pw=[["surrender","Surrender form",_bi==="Owner"||/surrender/i.test(d.intakeReason||"")],["stray","Found-stray report",stray],["seizure","Seizure form",_bi==="NSPCA Inspector"],["chipcert","Chip cert",true],["vaxcard","Vax card",true]].filter(function(o){return o[2]||catHasFile(S,o[0]);});
+  var docs='<div class="iddocs">'+_pw.map(function(o){var have=catHasFile(S,o[0]);return '<span class="'+(have?"":"add")+'" onclick="filePick(\''+o[0]+'\')">'+(have?"\u2713 ":"+ ")+o[1]+'</span>';}).join("")+'</div>';
+  var cameCard='<div class="idcard"><div class="idct">How '+he+' came in <u onclick="dtSheet(\'came\')">edit</u></div><p class="idstory">'+story.join(" ")+'</p>'
+    +(_ask.length?'<div class="idask">Still to answer: '+_ask.map(function(q){return '<u onclick="dtSheet(\'came\')">'+q+'</u>';}).join(" \u00b7 ")+'</div>':'')+docs+'</div>';
+  // ── where they are: pen history, quarantine, the gate, pod setup ──
+  var L=(d.penLog||[]).filter(function(x){return x&&x.pen;});var area=function(p){var a=penArea(p);return a==="iso"?"Isolation":a==="q"?"Quarantine":a==="cattery"?"Cattery":"";};
+  var td=new Date().toISOString().slice(0,10);
+  var ktl=d.kennel?'<div class="idtl">'+L.slice().reverse().slice(0,4).map(function(x,i){var idx=L.length-1-i;var nx=L[idx+1];var cur=!nx;var days=x.from?Math.max(0,Math.round((new Date(nx?nx.from:td)-new Date(x.from))/864e5)):null;
+      return '<div class="'+(cur?"now":"")+'"><i></i><b>'+e(kennelShort(x.pen)||x.pen)+'</b><span>'+e(area(x.pen))+' \u00b7 '+(cur?'since '+e(dtDay(x.from)):e(dtDay(x.from))+' \u2192 '+e(dtDay(nx.from)))+(days!==null?' \u00b7 '+days+(days===1?" day":" days"):'')+(x.by&&!cur?' \u00b7 '+e(String(x.by).split(" ")[0]):'')+'</span></div>';}).join("")+(L.length?'':'<div class="now"><i></i><b>'+e(_kn)+'</b><span>'+e(area(d.kennel))+'</span></div>')+'</div>'
+    :'<p class="idstory q">No pen yet. <u onclick="dtSheet(\'where\')">+ put '+him+' in one</u></p>';
+  var _dRep=(S.days||[]).filter(function(x){return x&&(x.demeanour||x.feeding||x.toileting||x.notes||x.stress);}).length;
+  var qLine='<div class="idiso">Quarantine <b class="'+(g.served||g.moved?"g":"a")+'">'+e(g.moved?"done \u2014 in the Cattery":ii?(g.served?"served":"day "+Math.max(0,ii.day)+" of "+g.qDays):"no intake date")+'</b>'+(ii&&!g.moved?' \u00b7 '+_dRep+' day report'+(_dRep===1?'':'s'):'')+((S.foster||{}).out?' \u00b7 out in foster':'')+'</div>';
+  var gate=g.moved?'<div class="cgate"><div class="gh g">In the Cattery'+(d.cattery?' since '+e(dtDay(d.cattery)):'')+' <u onclick="catBackToQ()">undo</u></div></div>'
+    :'<div class="cgate"><div class="gh '+(g.ready?"g":g.blocks.some(function(x){return x.bad;})?"r":"a")+'">'+(g.ready?'Ready for the Cattery <u data-go="picture">move \u203a</u>':'Cattery gate \u00b7 '+g.blocks.length+' to clear')+'</div>'
+      +g.checks.filter(function(c){return c.k!=="kit"||g.kitten;}).map(function(c){return '<div class="gr'+(c.ok?" ok":c.bad?" bad":"")+'"><i>'+(c.ok?"\u2713":c.bad?"\u2715":"")+'</i><b>'+e(c.t)+'</b><small>'+e(c.s)+'</small></div>';}).join("")+'</div>';
+  var ps=d.podSetup||{};var pod='<div class="cpod"><span class="pl">Pod setup</span>'+POD_SETUP.map(function(x){return '<span class="'+(ps[x[0]]?"on":"")+'" onclick="podSetToggle(\''+x[0]+'\')">'+(ps[x[0]]?"\u2713 ":"")+x[1]+'</span>';}).join("")+'</div>';
+  var whereCard='<div class="idcard"><div class="idct">Where '+he+' is <u onclick="dtSheet(\'where\')">move</u></div>'+ktl+qLine+gate+pod+'</div>';
+  // ── flags ──
+  var ht=homeTypeOf(S);
+  var row=function(dot,t,s,st,act){return '<div class="dfold-row" '+act+'><span class="dot '+dot+'"></span><div><b>'+t+'</b><small>'+e(s)+'</small></div><span class="st">'+st+'</span></div>';};
+  var flags=row(_con.length||flu?"r":"g",_con.length?"Contagious":flu?"Suspected cat flu":"Nothing contagious",_con.length?_con.map(function(x){return diseaseShortName(x.type);}).join(", ")+" \u2014 active":flu?"served last \u2014 "+flu.signs.join(", ").toLowerCase():"from Medical","Medical \u203a",'data-go="medical"')
+    +(ea?row(ea.red?"r":"a","Not eating","nothing for "+ea.h+" hours","Day reports \u203a",'data-go="days"'):'')
+    +row(partner?"b":"g",partner?"Bonded pair":"Not bonded",partner?"with "+partner.name+" \u2014 moved and rehomed together":"link a partner if they came in together",partner?"change":"link",'onclick="dtSheet(\'family\')"')
+    +dogFold("warn","",ws.length||ns.length?"Warnings &amp; notices":"No warnings or notices",ws.length||ns.length?e(ws.map(function(w){return w.text;}).concat(ns.map(function(n){return n.text||"";})).filter(Boolean).join(" \u00b7 ")):"handling, diet, anything staff must know",ws.length||ns.length?(ws.length?ws.length+" warning"+(ws.length>1?"s":""):"")+(ws.length&&ns.length?" \u00b7 ":"")+(ns.length?ns.length+" notice"+(ns.length>1?"s":""):""):"+ add",ws.length?"warn":"plain",warningsCardHtml()+noticesCardHtml())
+    +(kit&&!(wk!==null&&wk<12)?row("b","Kitten",(wk!==null?wk+" weeks":"under 6 months")+" \u2014 weighed daily, kitten timeline","Kitten \u203a",'data-go="puppy"'):'')
+    +row(fi.mumId||fi.pups.length?"b":"g","Family",fi.mumId?"with mum":fi.pups.length?(he==="she"?"queen \u00b7 ":"")+fi.pups.length+" kitten"+(fi.pups.length===1?"":"s")+" linked":"not linked to a mum or litter",fi.mumId||fi.pups.length?"open":"link",'onclick="dtSheet(\'family\')"')
+    +row(ht.t==="Indoor only"?"a":"g","Home type",ht.t+" \u2014 "+ht.why,"change",'onclick="dtSheet(\'home\')"');
+  var flSum=[ws.length?ws.length+" warning"+(ws.length>1?"s":""):"",_con.length||flu?"contagious":"",ea?"not eating":"",partner?"bonded":"",kit?"kitten":""].filter(Boolean).join(" \u00b7 ")||"nothing flagged";
+  var flagCard='<div class="idcard idflags"><div class="idct">Flags <em>'+e(flSum)+'</em></div>'+flags+'</div>';
+  // ── kitten card (under 12 weeks) ──
+  var kitCard='';if(wk!==null&&wk<12){var kgn=kittenGain(S);var wait=rcpWaitOf(S);var rcp=firstRcpGiven(S);var due=d.dob?new Date(new Date(d.dob).getTime()+63*864e5).toISOString().slice(0,10):"";
+    kitCard='<div class="idcard"><div class="idct">Kitten <em>'+wk+' weeks'+(d.dob?' \u00b7 born '+e(dtDay(d.dob)):'')+'</em><u data-go="puppy">Kitten tab</u></div>'
+      +row(kgn?{g:"g",a:"a",r:"r"}[kgn.tone]||"g":"a","Weight",kgn?(kgn.perWeek>=0?"+":"")+kgn.perWeek+" g a week \u2014 "+(kgn.tone==="g"?"in the 50\u2013100 g band":kgn.tone==="a"?"under 50 g a week":"losing"):"two weigh-ins show the gain","Weights \u203a",'data-go="weights"')
+      +row(rcp||wait?"g":due&&due<=td?"r":"a","1st RCP",rcp?"given":wait?"vet says wait \u2014 "+wait.toLowerCase():due?"due "+dtDay(due)+" (9 weeks) \u2014 needed before the Cattery":"due at 9 weeks","Medical \u203a",'data-go="medical"')
+      +row(fi.mumId?"g":"a","Mum",fi.mumId?"linked":"not linked \u2014 orphan or mum not here","link",'onclick="dtSheet(\'family\')"')+'</div>';}
+  // ── sheets ──
+  var _shk=window._dtSheet||"";var shT="",shB="";
+  var reasons=[["Stray","Stray"],["Owner surrender","Surrender"],["Return","Return"],["Welfare / seizure","Welfare / seizure"],["Transfer","Transfer"],["Born here","Born here"],["Trapped (TNR)","Trapped \u2014 feral"]];
+  if(_shk==="name"){shT="Name";shB=fld("Name",d.name,"dog.name","text","e.g. Biscuit",'onblur="checkDuplicateName()" id="dog-name-input"')+'<div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">There\u2019s already a cat here with this name.</div>';}
+  else if(_shk==="sex"){shT="Sex";shB='<div class="cchips">'+[["Male","Male"],["Male (N)","Male, neutered"],["Female","Female"],["Female (S)","Female, spayed"],["Unknown","Unknown"]].map(function(o){return '<span class="cchip'+(d.sex===o[0]?" on":"")+'" onclick="catSexPick(\''+o[0]+'\')">'+o[1]+'</span>';}).join("")+'</div><div class="dt-small">Neutered here? That goes on Medical \u2014 this is how '+he+' arrived.</div>';}
+  else if(_shk==="age"){var ya=/^\d/.test(d.age||"");shT="Age";shB='<div class="cchips">'+["Under 6 months (kitten)","6\u201312 months"].map(function(a){return '<span class="cchip'+(d.age===a?" on":"")+'" onclick="catAgePick(\''+a+'\')">'+a.replace(" (kitten)","")+'</span>';}).join("")+'<span class="cchip dt-stp" onclick="catAgeStep(-1)">\u2212</span><span class="'+(ya?"cchip on":"dt-yrs")+'" style="min-width:74px;text-align:center">'+(ya?e(d.age):"years")+'</span><span class="cchip dt-stp" onclick="catAgeStep(1)">+</span></div><div class="dog-fg" style="margin-top:10px">'+fld("Or a date of birth \u2014 best for kittens",d.dob||"","dog.dob","date")+'</div><div class="dt-small">A date of birth switches on the kitten timeline and the 12-week rule.</div>';}
+  else if(_shk==="coat"){var code=catCoatCode(d);var ped=d.breed&&!CAT_COATS.some(function(x){return x[1]===d.breed;});shT="Coat";
+    shB='<div class="lbl" style="margin-bottom:6px">Coat</div><div class="cchips">'+CAT_COATS.map(function(c){return '<span class="cchip'+(code===c[0]?" on":"")+'" onclick="catCoatPick(\''+c[0]+'\')">'+c[0]+' <small style="font-weight:600;opacity:.7">'+c[2].toLowerCase()+'</small></span>';}).join("")+'</div>'
+      +'<div class="lbl" style="margin:10px 0 6px">Or a pedigree</div><div class="cchips">'+CAT_BREEDS.filter(function(b){return !CAT_COATS.some(function(x){return x[1]===b;});}).map(function(b){return '<span class="cchip'+(d.breed===b?" on":"")+'" onclick="catBreedPick(\''+b.replace(/'/g,"\\'")+'\')">'+e(b)+'</span>';}).join("")+'</div>'
+      +'<div class="lbl" style="margin:12px 0 6px">Colour</div><div class="cchips">'+CAT_COLOURS.map(function(c){return '<span class="cchip'+(d.colour===c?" on":"")+'" onclick="catColourPick(\''+c.replace(/'/g,"\\'")+'\')">'+catSwatch(c)+e(c)+'</span>';}).join("")+'</div>'
+      +'<div class="dog-fg" style="margin-top:10px">'+fld("Distinguishing marks",d.marks||"","dog.marks","text","what would let an owner prove "+(he==="she"?"she\u2019s":"he\u2019s")+" theirs")+'</div>'+(ped?'<div class="dt-small">Coat length for a pedigree: '+e(d.coatLength||"not set")+'.</div>':'');}
+  else if(_shk==="chip"){shT="Microchip";shB='<div class="f"><label class="lbl">Microchip <span id="chip-count" class="'+(!d.microchip||_chipOk?"ok":"bad")+'">'+(d.microchip?_cd.length+" of 15":"")+'</span></label><input type="text" value="'+e(d.microchip||"")+'" placeholder="15 digits" data-save="dog.microchip" inputmode="numeric" id="chip-input" oninput="checkMicrochip(this.value);dtChipCount(this)"><div id="chip-info" style="margin:6px 0 0;font-size:11px">'+chipInfoHtml(d.microchip)+'</div></div>'
+      +(_cd?'<div class="dt-small" style="margin-bottom:8px"><u style="color:#166534;font-weight:800;cursor:pointer;text-decoration:none" onclick="microchipLookup(\''+_cd+'\')">Look it up \u203a</u> \u2014 copies the number and opens Europetnet.</div>':'')
+      +'<div class="lbl" style="margin:6px 0 4px">Registration</div>'+chipRow("Registered to","","chipTo",CHIP_TO,d.chipTo||"")+'<div class="g2">'+fld("Database",d.chipDb||"","dog.chipDb","text","where it\u2019s registered")+fld("Owner on the database",d.chipOwner||"","dog.chipOwner","text","name, any contact that worked")+'</div>'+chipRow("Transfer","","chipTransfer",CHIP_XFER,d.chipTransfer||"");}
+  else if(_shk==="ref"){shT="Unit ref";shB=fld("Unit ref",d.refNo,"dog.refNo","text","e.g. C-041-2026");}
+  else if(_shk==="sb"){shT="ShelterBuddy";shB=fld("ShelterBuddy ID",d.sbId,"dog.sbId","text","from ShelterBuddy")+'<div class="dt-sb"><button class="btn" onclick="sbCopy()">Copy for ShelterBuddy</button><span>name, chip, coat, intake, FeLV/FIV and more as tidy text to paste in</span></div>';}
+  else if(_shk==="came"){shT="How "+he+" came in";shB=chipRow("Reason","quarantine is "+catQDays(d)+" days","intakeReason",reasons,d.intakeReason||"")
+    +chipRow("Brought in by","","broughtInBy",[["NSPCA Inspector","Inspector"],["Owner","Owner"],["Member of the public","Public"],["Garda","Garda"],["Transfer","Transfer"],["Other","Other"]],d.broughtInBy||"")
+    +(d.broughtInBy==="NSPCA Inspector"?'<div class="dog-fg">'+slct("Inspector",d.inspector||"","dog.inspector",inspectorOpts(d.inspector))+(d.inspector==="Other"?fld("Inspector name",d.inspectorOther||"","dog.inspectorOther","text",""):"")+fld("Case ref",d.inspectorRef||"","dog.inspectorRef","text","e.g. 26-0412")+'</div>':'')
+    +'<div class="dog-fg">'+fld("Intake date",d.intakeDate||"","dog.intakeDate","date")+(stray?fld("Found / trapped at",d.foundAt||"","dog.foundAt","text","e.g. Ballymahon, farm yard"):'')+fld("Taken in by",d.assessor||"","dog.assessor","text","e.g. Shane")+'</div>'
+    +(stray?'<div class="g2">'+fld("Colony or site",d.colony||"","dog.colony","text","e.g. behind the mart")+fld("Feeder / caretaker",d.feeder||"","dog.feeder","text","name and phone")+'</div><div class="dt-small">A TNR cat goes back to this exact spot \u2014 it fills the TNR door on Outcome and the TNR site form on Files.</div>':'')
+    +'<div class="dt-small" style="color:#166534;font-weight:700">First look, intake checks and what the finder said live on the <b data-go="arrival" style="cursor:pointer;text-decoration:underline">Arrival</b> tab.</div>';}
+  else if(_shk==="where"){shT="Where "+he+" is";shB='<div class="dog-fg">'+catPenSelect(d)+'</div><div class="dt-small">Every move is logged in the pen history. The move to the Cattery is on the Overview once the gate is clear.</div>'+(g.moved?'<div style="margin-top:8px;font-size:11.5px"><a href="#" onclick="catBackToQ();return false" style="color:#6b7280">Undo the Cattery move</a></div>':'')+penHistoryHtml(d);}
+  else if(_shk==="family"){var cands=records.filter(function(x){return x.id!==S._id&&catIsHere(x);});shT="Bonded pair and family";
+    shB='<div class="cq"><label>Bonded to<em>shown as one card, moved and rehomed together</em></label>'+(partner?'<div class="pairrow"><b>'+e(partner.name)+'</b><small>'+e(kennelShort((partner.state.dog||{}).kennel)||"")+'</small><span onclick="bondClear()">Unlink</span></div>':'<select onchange="bondSet(this.value)"><option value="">-- not bonded --</option>'+cands.map(function(x){return '<option value="'+x.id+'">'+e(x.name)+(x.state&&x.state.dog&&x.state.dog.kennel?' \u00b7 '+e(kennelShort(x.state.dog.kennel)):'')+'</option>';}).join("")+'</select>')+'</div>';
+    if(fi.pups.length){shB+='<div class="lbl" style="margin-top:6px">Litter at a glance</div><table class="ctbl"><tr><th>Kitten</th><th>Age</th><th>Last weight</th><th>A week</th><th>1st RCP</th></tr>'+fi.pups.map(function(p){var pst=p.state||{};var pd=pst.dog||{};var pk=kittenGain(pst);var lw=(pst.weights||[]).filter(function(x){return x.date&&x.weight;}).sort(function(a,b){return b.date.localeCompare(a.date);})[0];var pw=catAgeWeeks(pd);var pr=((pst.medical||{}).vaccinations||[]).filter(function(v){return v.date&&/^1st RCP|^RCP/i.test(v.type||"");})[0];var col=pk?{g:"#166534",a:"#92400e",r:"#991b1b"}[pk.tone]:"#6b7280";
+      return '<tr onclick="openFamilyDog('+p.id+')" style="cursor:pointer"><td><b>'+e(p.name)+'</b></td><td>'+(pw!==null?pw+" wks":"\u2014")+'</td><td>'+(lw?Math.round(kgOf(lw.weight)*1000)+" g":"not weighed")+'</td><td><b style="color:'+col+'">'+(pk?(pk.perWeek>=0?"+":"")+pk.perWeek+" g":"\u2014")+'</b></td><td>'+(pr?"given "+e(fmtDMY(pr.date).slice(0,5)):pw!==null&&pw<9?"due 9 wks":"due now")+'</td></tr>';}).join("")+'</table>';}
+    shB+=familyCardInner(fi);}
+  else if(_shk==="home"){shT="Home type";shB='<div class="homebox"><b>'+e(ht.t)+'</b><small>'+e(ht.why)+'</small></div>'+chipRow("Override","only if you know better","homeOverride",[["Indoor only","Indoor only"],["Indoor or outdoor","Indoor or outdoor"],["Outdoor / barn","Outdoor / barn"]],d.homeOverride||"")+'<div class="dt-small">FIV positive means indoor only. Any other cat can go to an indoor or outdoor home \u2014 outdoors needs the FeLV vaccine first. Goes on Best home and the rehoming card.</div>';}
+  var sheet=shT?'<div class="dtsh-bg" onclick="dtSheet(null)"></div><div class="dtsh" role="dialog" aria-label="'+e(shT)+'"><div class="grab"></div><div class="dtsh-h"><b>'+e(shT)+'</b><span onclick="dtSheet(null)">Done</span></div><div class="dtsh-b">'+shB+'</div></div>':'';
+  return '<div class="idwrap cid"><div class="cidc">'+pic+head+'<div class="cidfacts"><div class="idfacts">'+facts+'</div>'+prog+'</div></div>'
+    +'<div class="idtwo">'+cameCard+whereCard+'</div>'+kitCard+flagCard
+    +'<div class="idsb"><button class="btn" onclick="sbCopy()">Copy for ShelterBuddy</button></div>'
+    +'<div class="brow" style="margin-top:12px"><button class="btn btnp" data-go="arrival">Next: Arrival &rarr;</button></div></div>'+sheet;}
 
 // ══ Tab enhancements 14 Oct: feeding guide ══
 // ── Feeding guide: grams a day from weight, age and food — from the Cattery's sheet ──
@@ -7913,6 +8010,34 @@ function renderCatFeeding(){var h=catFeedingBase();var g=catFeedGuide(S);var e=e
       +'<div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:6px">From the last weigh-in. Tap Use to set the grams per feed below — it never changes the plan on its own.'+(g.stage==="Kitten"?' Kittens: little and often, four feeds a day.':'')+'</div>'
       :'<div style="font-size:12.5px;color:#92400e;font-weight:700">Weigh '+e(heShe(S.dog,"her","him"))+' first — the guide works from the last weight.</div>')+'</div>';
   var i=h.indexOf('<div class="card">');return i<0?h+card:h.slice(0,i)+card+h.slice(i);}
+
+// ══ Sharper board photos (14 Oct): 480 px thumbs, upgraded once per cat ══
+var THUMB_V=2;
+function thumbDraw(img,MAX,q){var w=img.width,h=img.height;var sc=Math.min(1,MAX/Math.max(w,h));var tw=Math.max(1,Math.round(w*sc)),th=Math.max(1,Math.round(h*sc));
+  var src=img,cw=w,ch=h;while(cw/2>=tw*1.1&&ch/2>=th*1.1){var c2=document.createElement("canvas");c2.width=Math.round(cw/2);c2.height=Math.round(ch/2);var x2=c2.getContext("2d");x2.imageSmoothingEnabled=true;x2.imageSmoothingQuality="high";x2.drawImage(src,0,0,c2.width,c2.height);src=c2;cw=c2.width;ch=c2.height;}
+  var cv=document.createElement("canvas");cv.width=tw;cv.height=th;var cx=cv.getContext("2d");cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality="high";cx.drawImage(src,0,0,tw,th);return cv.toDataURL("image/jpeg",q);}
+// The record carries one small photo for the board. Kept under 38,000 characters so it is never mistaken for an old full-size photo.
+function makeThumb(dataUrl,cb){if(!dataUrl){cb("");return;}var img=new Image();
+  img.onload=function(){try{var S1=[480,420,360,300],Q=[0.84,0.76,0.68];for(var i=0;i<S1.length;i++)for(var j=0;j<Q.length;j++){var u=thumbDraw(img,S1[i],Q[j]);if(u.length<38000){cb(u);return;}}cb(thumbDraw(img,200,0.72));}catch(e){cb(dataUrl);}};
+  img.onerror=function(){cb(dataUrl);};img.src=dataUrl;}
+async function setStarThumb(rows){var st=starRow(rows);S.dog.photo=st?await thumbOf(st.data):"";S.dog.thumbV=st?THUMB_V:0;}
+function legacyOf(dog){if(dog&&dog.thumbV&&!(Array.isArray(dog.photos)&&dog.photos.length))return null;return dogLegacyOf(dog);}
+// Opening a cat with an old soft thumb sharpens it once the photos have loaded.
+async function loadDogPhotos(id){var rows=await dogLoadDogPhotos(id);
+  try{if(rows&&rows.length&&S&&String(S._id)===String(id)&&S.dog&&S.dog.photo&&S.dog.thumbV!==THUMB_V){await setStarThumb(rows);persistSave();debouncedSave();}}catch(e){}
+  return rows;}
+// The board sharpens the rest in the background, one cat at a time, when it's open and online.
+var _thumbSweep=false;
+async function catThumbSweep(){if(_thumbSweep||!supabaseClient||(typeof navigator!=="undefined"&&navigator.onLine===false))return;_thumbSweep=true;var n=0;
+  try{var todo=records.filter(function(r){var d=(r.state||{}).dog||{};return d.photo&&d.thumbV!==THUMB_V;});
+    for(var i=0;i<todo.length;i++){var r=todo[i];var scr=document.getElementById("dashboard-screen");if(!scr||scr.style.display==="none"||!scr.offsetParent)break;
+      var had=Array.isArray(_photoStore[r.id]);var rows=await dogLoadDogPhotos(r.id);if(!rows||!rows.length)continue;var st=starRow(rows);if(!st||!st.data)continue;
+      var th=await thumbOf(st.data);if(!th)continue;r.state.dog.photo=th;r.state.dog.thumbV=THUMB_V;await saveRecordChange(r);n++;
+      if(!had&&!(S&&String(S._id)===String(r.id)))delete _photoStore[r.id];
+      await new Promise(function(res){setTimeout(res,250);});}}
+  catch(e){console.error("thumb sweep:",e);}
+  _thumbSweep=false;if(n){var scr2=document.getElementById("dashboard-screen");if(scr2&&scr2.offsetParent)renderDashboard();}}
+function renderDashboard(){var out=dogRenderDashboard.apply(this,arguments);setTimeout(catThumbSweep,1500);return out;}
 
 // ── Init ──────────────────────────────────────────────────────────
 (function(){
