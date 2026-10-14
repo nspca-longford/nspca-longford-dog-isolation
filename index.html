@@ -1029,10 +1029,8 @@ var USERS=[
   {code:"SAR01",name:"Sarah",role:"manager"},
   {code:"CIA01",name:"Ciara",role:"supervisor"},
   {code:"LAU01",name:"Laura",role:"coordinator"},
-  {code:"NSPCA2024",name:"Staff",role:"staff"},
   {code:"CAT01",name:"Cattery",role:"staff"},
   {code:"CISO01",name:"Cat Iso",role:"staff"},
-  {code:"ISO01",name:"Isolation",role:"staff"},
   {code:"STA01",name:"Stables",role:"staff"},
   {code:"JAM01",name:"Jamie",role:"staff"}
 ];
@@ -1072,7 +1070,7 @@ function browNav(id){
 }
 
 // ── What's new / changelog (newest first; APP_VERSION = top entry) ──
-var CHANGELOG=[{version:"3.308",date:"2026-10-12",note:"Sleeker on every tab, and the photo banner is back on the Dog tab. On a phone the save strip is gone: the \u2039 \u203a arrows sit beside the name, the line under it says which kennel, how many dogs and whether it\u2019s saved (tap the name to jump to any dog), and a Save pill floats up only when something has changed. The paragraph under each tab title hides behind a small \u24d8. The black box at the top of each tab is a light line now. Answers you\u2019ve picked show as one line \u2014 tap \u201cchange\u201d to pick again. Numbered section cards are one list with a coloured dot. Day reports get a \u201cSame as yesterday\u201d button under the answers. Dog tab: the photo runs full width again with the name, breed, sex and age on it, plus the score, decision and \u201cIn since\u201d chips; with no photo yet a big initial fills it, and a new dog\u2019s name is typed straight onto it."},{version:"3.307",date:"2026-10-12",note:"Sleeker all round, and a new Dog tab. The board is now a map of the unit: every kennel is a tile with the dog\u2019s photo on top, empty kennels show as dashed tiles you can assign, and each group says how many are in. On a phone each dog is one slim row with a photo. The header is just search, Dogs \u00b7 Cats \u00b7 Stables, + New dog (the \u25be holds Log an incident) and your initials, which open the menu. The morning card only shows numbers that aren\u2019t zero, and on a phone it\u2019s two lines with \u201cmore\u201d. New filter: Needs something. The menu is lighter, with icons and badges only when something needs doing. Inside a dog: one header row with photo, name, kennel and breed, the chip says \u201cIsolation done\u201d, and the tabs are two plain underlined rows. The Dog tab reads like an ID card: photo first, then each fact in a box \u2014 tap one to change it; empty ones say \u201c+ add\u201d. How they came in is one sentence, and Where they are shows the kennel history. Signing in is just email and password; it offers a PIN for the device once you\u2019re in, and no longer wipes an existing PIN."},{version:"3.306",date:"2026-10-12",note:"Tabs reorganised and Arrival rebuilt. The tabs now follow the dog: Dog, Arrival, Health & care, Assessment, Leaving, Record. Care is renamed Handling, Weights sits beside Medical and Notes beside Story \u2014 nothing removed. Arrival: one line says who brought the dog in and why (it lives on the Dog tab now), with only the paperwork buttons that apply. A step bar \u2014 First look, Body, Handling, Photos, Told us \u2014 and finished steps fold away. A new Body step: coat, eyes, ears and nose, teeth, nails and feet, how they move. What they told us: who said it and their words up top, one line per question, and one button marks the rest \u201cdon\u2019t know\u201d (bite history and where they lived still need an answer). Arrival findings now show on Medical under On arrival."},{version:"3.305",date:"2026-10-12",note:"The Dog tab, rebuilt. Sex, age, size and colour are chips now, not dropdowns \u2014 size is suggested from the last weight, age is a year counter or a date of birth, and breed is a type-to-search box with a crossbreed chip under it. Weight comes from the Weights tab. The chip box counts its digits. A strip at the top lists what\u2019s still missing \u2014 tap one to go to it. How they came in: reason, date and assessor are chips; the inspector and return questions only show when they apply; and strays get a Where found section (place, finder, finder\u2019s phone). Where they are: tap a kennel to move them, with who\u2019s in each kennel shown and every move logged in History. Flags are one card \u2014 the restricted-breed rules show once, and the card opens itself when there\u2019s a warning or something contagious. New: a ShelterBuddy ID field and a Copy for ShelterBuddy button that copies the dog\u2019s details as tidy text to paste in."},{version:"3.304",date:"2026-10-11",note:"Kennel to kennel without going back to the board: arrows in the corners of the save strip go to the next or previous dog in board order (Kennels, Pods, Crate, then round to the start), staying on the same tab and saving first. Tap the \u201c2 of 4\u201d to jump to any dog, with what\u2019s still to do on that tab. Shift + \u2190 \u2192 does the same on a computer. On phones: \u2039 Board in the record header, search on its own row on the board, real icons on the bottom bar, and the last button on a page no longer hides under the strip. Cards with no photo show the dog\u2019s initial on its light colour. The Dog tab\u2019s four tiles are now chips on the photo."},{version:"3.303",date:"2026-10-08",note:"All records, rebuilt to look like the board. A sentence on top \u2014 how many here, in foster, rehomed, to kennels, this month in and out, average stay. One search that also finds chip, ref, adopter and foster carer, and says what it matched. One row of status chips with counts, light dots, EA, sort. Here now first, then everyone who\u2019s left month by month, older months folded. Slim rows: tap to open \u2014 Load and Delete are gone from every card; Archive and Delete live behind Select. On the computer it\u2019s a table with Out and Stay columns; click a heading to sort. ALSO: Puppy Sensitive is on the Feeding tab with a suggested amount like the other foods, even without a date of birth or breed weight. Medical \u2192 The body sits inside its margins again."},{version:"3.302",date:"2026-09-23",note:"Assessment: Conclusions is gone \u2014 progress is the Overview\u0027s arc, concerns are the flags, next steps are Still to do. Handling level moves to Scoring as Handle as, beside the light it overrides. The handler brief is three one-line fields and a who-may-take-him-out chip row, as section 9."},{version:"3.301",date:"2026-09-23",note:"Puppy mode. A Puppy tab appears for any dog under six months with a date of birth: a strip with age, weight and gain, a milestone ladder from the date of birth (worm at 2/4/6/8 weeks, 1st vax at 8, 2nd at 10\u201312, home from 12) with Given today on what\u0027s due, the litter with mum and siblings and who\u0027s lightest, and a socialisation checklist that goes on the adoption card. Weights shows the breed\u0027s expected curve dashed for a pup and shouts if one loses weight two weigh-ins running; Scoring says too young until 12 weeks; the door card shows PUP and the vax status instead of a light; the morning page lists what each pup needs today. Nothing changes for an adult record."},{version:"3.299",date:"2026-09-22",note:"Dashboard, second pass: the six vitals live inside the morning page as a numbers line; empty kennels are one line per group (Empty: K5 \u00b7 + assign); cards get a 72 px photo; the kennel picker and + Expected arrival join the chip row; dogs in foster get a short section of their own. Day reports: the day pills stretch to line up with the report underneath."}
+var CHANGELOG=[{version:"3.309",date:"2026-10-14",note:"It\u2019s a proper app now, and safer with more than one person in it. Put it on your phone or computer from the menu (on an iPhone: Share \u2192 Add to Home Screen); it opens like an app, keeps working with no signal and sends your changes when you\u2019re back, and the icon shows how many dogs need something. Press and hold a dog on the board (right-click on a computer) for quick jobs: day report, weigh, note, meds, move, photo. On a phone, swipe left or right to go to the next dog. Moving a kennel or deleting a note can be undone for a few seconds. Expected arrival is back: it holds a kennel on the board, and \u201cArrived \u2192\u201d starts the dog with who brought it, why, the inspector and the kennel already filled in. Board photos are sharper. On a computer the Dog tab puts the photo on the left beside the name and facts. Admins: Manage users \u2192 Edit user can set someone to look only outside their own app, and \u2630 \u2192 Activity shows who\u2019s been in today and every change saved, newest first. If two people have the same dog open, saving now keeps both people\u2019s changes instead of the last save wiping the other. You stay signed in when the app is reopened, menu pages no longer jump back to the board after a minute, \u201cSame as yesterday\u201d on Day reports works, deactivated people can\u2019t get in with their code, and codes work in small letters. The microphone is gone."},{version:"3.308",date:"2026-10-12",note:"Sleeker on every tab, and the photo banner is back on the Dog tab. On a phone the save strip is gone: the \u2039 \u203a arrows sit beside the name, the line under it says which kennel, how many dogs and whether it\u2019s saved (tap the name to jump to any dog), and a Save pill floats up only when something has changed. The paragraph under each tab title hides behind a small \u24d8. The black box at the top of each tab is a light line now. Answers you\u2019ve picked show as one line \u2014 tap \u201cchange\u201d to pick again. Numbered section cards are one list with a coloured dot. Day reports get a \u201cSame as yesterday\u201d button under the answers. Dog tab: the photo runs full width again with the name, breed, sex and age on it, plus the score, decision and \u201cIn since\u201d chips; with no photo yet a big initial fills it, and a new dog\u2019s name is typed straight onto it."},{version:"3.307",date:"2026-10-12",note:"Sleeker all round, and a new Dog tab. The board is now a map of the unit: every kennel is a tile with the dog\u2019s photo on top, empty kennels show as dashed tiles you can assign, and each group says how many are in. On a phone each dog is one slim row with a photo. The header is just search, Dogs \u00b7 Cats \u00b7 Stables, + New dog (the \u25be holds Log an incident) and your initials, which open the menu. The morning card only shows numbers that aren\u2019t zero, and on a phone it\u2019s two lines with \u201cmore\u201d. New filter: Needs something. The menu is lighter, with icons and badges only when something needs doing. Inside a dog: one header row with photo, name, kennel and breed, the chip says \u201cIsolation done\u201d, and the tabs are two plain underlined rows. The Dog tab reads like an ID card: photo first, then each fact in a box \u2014 tap one to change it; empty ones say \u201c+ add\u201d. How they came in is one sentence, and Where they are shows the kennel history. Signing in is just email and password; it offers a PIN for the device once you\u2019re in, and no longer wipes an existing PIN."},{version:"3.306",date:"2026-10-12",note:"Tabs reorganised and Arrival rebuilt. The tabs now follow the dog: Dog, Arrival, Health & care, Assessment, Leaving, Record. Care is renamed Handling, Weights sits beside Medical and Notes beside Story \u2014 nothing removed. Arrival: one line says who brought the dog in and why (it lives on the Dog tab now), with only the paperwork buttons that apply. A step bar \u2014 First look, Body, Handling, Photos, Told us \u2014 and finished steps fold away. A new Body step: coat, eyes, ears and nose, teeth, nails and feet, how they move. What they told us: who said it and their words up top, one line per question, and one button marks the rest \u201cdon\u2019t know\u201d (bite history and where they lived still need an answer). Arrival findings now show on Medical under On arrival."},{version:"3.305",date:"2026-10-12",note:"The Dog tab, rebuilt. Sex, age, size and colour are chips now, not dropdowns \u2014 size is suggested from the last weight, age is a year counter or a date of birth, and breed is a type-to-search box with a crossbreed chip under it. Weight comes from the Weights tab. The chip box counts its digits. A strip at the top lists what\u2019s still missing \u2014 tap one to go to it. How they came in: reason, date and assessor are chips; the inspector and return questions only show when they apply; and strays get a Where found section (place, finder, finder\u2019s phone). Where they are: tap a kennel to move them, with who\u2019s in each kennel shown and every move logged in History. Flags are one card \u2014 the restricted-breed rules show once, and the card opens itself when there\u2019s a warning or something contagious. New: a ShelterBuddy ID field and a Copy for ShelterBuddy button that copies the dog\u2019s details as tidy text to paste in."},{version:"3.304",date:"2026-10-11",note:"Kennel to kennel without going back to the board: arrows in the corners of the save strip go to the next or previous dog in board order (Kennels, Pods, Crate, then round to the start), staying on the same tab and saving first. Tap the \u201c2 of 4\u201d to jump to any dog, with what\u2019s still to do on that tab. Shift + \u2190 \u2192 does the same on a computer. On phones: \u2039 Board in the record header, search on its own row on the board, real icons on the bottom bar, and the last button on a page no longer hides under the strip. Cards with no photo show the dog\u2019s initial on its light colour. The Dog tab\u2019s four tiles are now chips on the photo."},{version:"3.303",date:"2026-10-08",note:"All records, rebuilt to look like the board. A sentence on top \u2014 how many here, in foster, rehomed, to kennels, this month in and out, average stay. One search that also finds chip, ref, adopter and foster carer, and says what it matched. One row of status chips with counts, light dots, EA, sort. Here now first, then everyone who\u2019s left month by month, older months folded. Slim rows: tap to open \u2014 Load and Delete are gone from every card; Archive and Delete live behind Select. On the computer it\u2019s a table with Out and Stay columns; click a heading to sort. ALSO: Puppy Sensitive is on the Feeding tab with a suggested amount like the other foods, even without a date of birth or breed weight. Medical \u2192 The body sits inside its margins again."},{version:"3.302",date:"2026-09-23",note:"Assessment: Conclusions is gone \u2014 progress is the Overview\u0027s arc, concerns are the flags, next steps are Still to do. Handling level moves to Scoring as Handle as, beside the light it overrides. The handler brief is three one-line fields and a who-may-take-him-out chip row, as section 9."},{version:"3.301",date:"2026-09-23",note:"Puppy mode. A Puppy tab appears for any dog under six months with a date of birth: a strip with age, weight and gain, a milestone ladder from the date of birth (worm at 2/4/6/8 weeks, 1st vax at 8, 2nd at 10\u201312, home from 12) with Given today on what\u0027s due, the litter with mum and siblings and who\u0027s lightest, and a socialisation checklist that goes on the adoption card. Weights shows the breed\u0027s expected curve dashed for a pup and shouts if one loses weight two weigh-ins running; Scoring says too young until 12 weeks; the door card shows PUP and the vax status instead of a light; the morning page lists what each pup needs today. Nothing changes for an adult record."},{version:"3.299",date:"2026-09-22",note:"Dashboard, second pass: the six vitals live inside the morning page as a numbers line; empty kennels are one line per group (Empty: K5 \u00b7 + assign); cards get a 72 px photo; the kennel picker and + Expected arrival join the chip row; dogs in foster get a short section of their own. Day reports: the day pills stretch to line up with the report underneath."}
 ];
 var APP_VERSION=CHANGELOG.length?CHANGELOG[0].version:"1.0";
 
@@ -1082,8 +1080,8 @@ var LOGGED_IN=false,supabaseClient=null,records=[],_dSt=null;
 var _allUsersCache=null,_autoLogoutTimer=null,_lastActivity=Date.now(),_dashRefreshTimer=null;
 
 // ── User feature helpers ──────────────────────────────────────────
-function userPhoto(code){try{return localStorage.getItem("nspca-user-photo-"+code)||"";}catch(e){return"";}}
-function setUserPhoto(code,dataUrl){try{localStorage.setItem("nspca-user-photo-"+code,dataUrl||"");}catch(e){}if(supabaseClient&&dataUrl)supabaseClient.from("users").update({photo:dataUrl}).eq("code",code).then(function(){},function(){});}
+function userPhoto(code){try{var _l=localStorage.getItem("nspca-user-photo-"+code);if(_l!==null)return _l;var _u=(typeof _allUsersCache!=="undefined"&&_allUsersCache||[]).find(function(x){return x.code===code;});return (_u&&_u.photo)||"";}catch(e){return"";}}
+function setUserPhoto(code,dataUrl){try{localStorage.setItem("nspca-user-photo-"+code,dataUrl||"");}catch(e){}if(supabaseClient)supabaseClient.from("users").update({photo:dataUrl||null}).eq("code",code).then(function(){},function(){});}
 function userLastLogin(code){try{var v=localStorage.getItem("nspca-user-lastlogin-"+code);return v?parseInt(v):0;}catch(e){return 0;}}
 function recordLastLogin(code){try{localStorage.setItem("nspca-user-lastlogin-"+code,Date.now().toString());}catch(e){}if(supabaseClient)supabaseClient.from("users").update({last_login_at:new Date().toISOString()}).eq("code",code).then(function(){},function(){});setTimeout(function(){try{seenBeat();}catch(e){}},4000);}
 
@@ -1185,7 +1183,7 @@ function maybeShowWhatsNew(){
 function fmtWnDate(ds){return fmtDMY(ds);}
 function fmtDMY(ds){if(ds===null||ds===undefined||ds==="")return"";if(ds instanceof Date){if(isNaN(ds))return"";return ("0"+ds.getDate()).slice(-2)+"-"+("0"+(ds.getMonth()+1)).slice(-2)+"-"+(""+ds.getFullYear()).slice(2);}var p=(""+ds).slice(0,10).split("-");if(p.length===3&&p[0].length===4)return p[2]+"-"+p[1]+"-"+p[0].slice(2);return ""+ds;}
 function fmtDMYwk(ds){if(!ds)return"";var d=(ds instanceof Date)?ds:new Date((""+ds).slice(0,10)+"T00:00:00");if(isNaN(d))return fmtDMY(ds);return d.toLocaleDateString("en-IE",{weekday:"short"})+" "+fmtDMY(d);}
-var WHATS_NEW_HEADLINE={title:"Sleeker on every tab",sub:"one bar, fewer boxes, the banner back",items:[["One bar on a phone","The ‹ › arrows sit beside the name. Save only appears when something has changed."],["Answers as facts","What you’ve picked shows as one line — tap “change” to pick again. A light status line on every tab."],["The photo banner is back","Full-width photo on the Dog tab with the name on it, and the fact boxes underneath."]]};
+var WHATS_NEW_HEADLINE={title:"A proper app, and safer to share",sub:"install it, work offline, see who did what",items:[["On your home screen","Install from the menu. Works with no signal and catches up when you\u2019re back."],["Two people, one dog","Saving keeps both people\u2019s changes. You stay signed in when you reopen it."],["Hold a dog for quick jobs","Day report, weigh, note, meds, move or photo from the board. Undo for moves and deleted notes."],["Expected arrival is back","It holds a kennel, and Arrived starts the dog already filled in."]]};
 function showWhatsNew(full){closeDashMenu();var ex=document.getElementById("whatsnew");if(ex)ex.remove();var e=esc;var box=document.createElement("div");box.id="whatsnew";
   var inner;if(full){inner='<div class="wn-k">What\u2019s new \u00b7 the full list</div><div class="wn-list">'+CHANGELOG.slice(0,12).map(function(c){return '<div class="wn-row"><b>v'+e(c.version)+' \u00b7 '+e(fmtWnDate(c.date))+'</b><small>'+e(c.note).replace(/ (THE BOARD|THE RECORD|ALSO|HOUSEKEEPING):/g,'<br><br><b style="color:#c6e76c">$1</b> \u2014')+'</small></div>';}).join("")+'</div><div class="wn-foot"><span></span><button onclick="dismissWhatsNew()">Got it</button></div>';}
   else{inner='<div class="wn-k">What\u2019s new</div><h3>'+e(WHATS_NEW_HEADLINE.title)+'</h3><div class="wn-v">v'+e(APP_VERSION)+' \u00b7 '+e(fmtWnDate(CHANGELOG[0].date))+' \u00b7 '+e(WHATS_NEW_HEADLINE.sub||'')+'</div>'+WHATS_NEW_HEADLINE.items.map(function(it,i){return '<div class="wn-item"><i>'+(i+1)+'</i><div><b>'+e(it[0])+'</b><small>'+e(it[1])+'</small></div></div>';}).join("")+'<div class="wn-foot"><span onclick="showWhatsNew(true)">Full list \u203a</span><button onclick="dismissWhatsNew()">Got it</button></div>';}
@@ -1538,9 +1536,11 @@ async function doLogin(){
   errEl.style.display="none";
   if(!code)return;
   btn.textContent="Checking...";btn.disabled=true;
-  var user=USERS.find(function(u){return u.code===code;});
+  var user=USERS.find(function(u){return u.code===code;})||USERS.find(function(u){return String(u.code).toUpperCase()===code.toUpperCase();});
   if(!user&&supabaseClient){try{var res=await supabaseClient.from("users").select("*").eq("code",code).single();if(res.data&&res.data.name)user=res.data;}catch(e){}}
-  if(user){
+  if(!user&&supabaseClient&&code!==code.toUpperCase()){try{var res2=await supabaseClient.from("users").select("*").eq("code",code.toUpperCase()).single();if(res2.data&&res2.data.name)user=res2.data;}catch(e){}}
+  if(user&&user.active===false){errEl.textContent="This account is deactivated.";errEl.style.display="block";btn.textContent="Enter \u2192";btn.disabled=false;return;}
+  if(user){code=user.code||code;
     LOGGED_IN=true;CURRENT_USER=user;window._wnShownSession=false;
     localStorage.setItem("nspca-intake-auth",code);
     localStorage.setItem("nspca-user-name",user.name);
@@ -1551,7 +1551,7 @@ async function doLogin(){
     if(goHomeApp(user,true))return;
     await refreshAllUsers();
     await loadRecordsList();showDashboard();
-  }else{errEl.style.display="block";btn.textContent="Enter →";btn.disabled=false;}
+  }else{errEl.textContent="Incorrect code. Try again.";errEl.style.removeProperty("color");errEl.style.background="";errEl.style.borderLeftColor="";errEl.style.display="block";btn.textContent="Enter →";btn.disabled=false;}
 }
 function doLogout(){
   LOGGED_IN=false;CURRENT_USER=null;try{sessionStorage.removeItem("nspca-home-done");}catch(e){}
@@ -1583,7 +1583,7 @@ function userAvatarHtml(user,size){
   return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+avatarColor(user.name)+';color:#fff;font-size:'+Math.round(size*0.36)+'px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials(user.name)+'</div>';
 }
 
-function userMeta(code){try{return JSON.parse(localStorage.getItem("nspca-user-meta-"+code)||"{}");}catch(e){return{};}}
+function userMeta(code){var m={};try{m=JSON.parse(localStorage.getItem("nspca-user-meta-"+code)||"{}");}catch(e){}try{var _u=(typeof _allUsersCache!=="undefined"&&_allUsersCache||[]).find(function(x){return x.code===code;});if(_u)["phone","since","about"].forEach(function(k){if(m[k]==null&&_u[k])m[k]=_u[k];});}catch(e){}return m;}
 function setUserMeta(code,k,v){var m=userMeta(code);m[k]=v;try{localStorage.setItem("nspca-user-meta-"+code,JSON.stringify(m));}catch(e){}if(supabaseClient){var u={};u[k]=v;supabaseClient.from("users").update(u).eq("code",code).then(function(){},function(){});}}
 function prefGet(k,dflt){try{var v=localStorage.getItem("nspca-pref-"+k);return v===null?dflt:v;}catch(e){return dflt;}}
 function prefSet(k,v){try{localStorage.setItem("nspca-pref-"+k,String(v));}catch(e){}if(k==="bigtext")document.documentElement.classList.toggle("bigtext",v==="1");showDashSection("profile");}
@@ -1606,7 +1606,7 @@ function renderProfile(){
   var pinSet=devProfiles().some(function(p){return p.email===email&&p.pin;});
   h+='<div class="card pf-grp"><div class="lbl">Sign-in</div>'
     +row("Email",email?esc(email):"Signed in with an access code \u2014 ask an admin to add your email")
-    +(email?row("Password","Sent as a reset link to your email",'<button class="btn" onclick="authRecover(\''+esc(email)+'\').then(function(ok){miniToast(ok?\'Reset link sent\':\'Couldn\\u0027t send it\');})">Change</button>'):'')
+    +(email?row("Password","Change it here \u2014 no email needed",'<button class="btn" onclick="pwSheet()">Change</button>'):'')
     +(email?row("PIN on this device",pinSet?"Set \u00b7 quick unlock":"Not set",'<button class="btn" onclick="setDevicePin()">'+(pinSet?'Change':'Set')+'</button>'):'')
     +row("This device","Remembered for quick unlock"+(devices>1?' \u00b7 '+(devices-1)+' other'+(devices>2?'s':'')+' on this device too':''),'<button class="btn" onclick="forgetOtherProfiles()">Forget others</button>')
     +'</div>';
@@ -1677,12 +1677,12 @@ async function saveNewUser(){
   if(getAllUsersSync().some(function(u){return u.code===code;})){appAlert("That code is already in use.");return;}
   if(!supabaseClient){appAlert("Supabase not connected.");return;}
   try{
-    await supabaseClient.from("users").insert([{name:name,code:code,role:role,active:true,email:email||null}]);
+    var _ins=await supabaseClient.from("users").insert([{name:name,code:code,role:role,active:true,email:email||null}]);if(_ins&&_ins.error)throw _ins.error;
     var ov=document.querySelector(".add-user-ov");if(ov)ov.remove();
     await refreshAllUsers();
     showDashSection("users");
     appAlert("User added. They can now log in with code "+code+".");
-  }catch(e){appAlert("Could not add user. Check that your Supabase users table exists.");}
+  }catch(e){appAlert("Could not add user"+(e&&e.message?" \u2014 "+e.message:". Check your connection and try again."));}
 }
 
 function showEditUserModal(code){
@@ -1741,17 +1741,17 @@ async function saveEditedUser(code){
   try{var _lEl=document.getElementById("edit-user-look");if(_lEl){var _u2=getAllUsersSync().find(function(x){return x.code===code;})||{};var _em2=String(((document.getElementById("edit-user-email")||{}).value||_u2.email||"")).trim().toLowerCase();var _lm=JSON.parse(JSON.stringify(unitSetting("lookOnly")||{}));var _k2=_em2||code;_lm[_k2]=_lEl.value==="1";if(_em2&&_k2!==code)delete _lm[code];setUnitSetting("lookOnly",_lm);}}catch(_e){}
   if(!supabaseClient)return;
   try{
-    await supabaseClient.from("users").update(Object.assign({name:name,role:role},{email:(((document.getElementById("edit-user-email")||{}).value||"").trim().toLowerCase())||null})).eq("code",code);
+    var _upd=await supabaseClient.from("users").update(Object.assign({name:name,role:role},{email:(((document.getElementById("edit-user-email")||{}).value||"").trim().toLowerCase())||null})).eq("code",code);if(_upd&&_upd.error)throw _upd.error;
     var ov=document.querySelector(".edit-user-ov");if(ov)ov.remove();
     await refreshAllUsers();
     showDashSection("users");
-  }catch(e){appAlert("Could not save changes.");}
+  }catch(e){appAlert("Could not save changes"+(e&&e.message?" \u2014 "+e.message:"."));}
 }
 
 async function toggleUserActive(code,makeActive){
   if(!supabaseClient)return;
   try{
-    await supabaseClient.from("users").update({active:makeActive}).eq("code",code);
+    var _act2=await supabaseClient.from("users").update({active:makeActive}).eq("code",code);if(_act2&&_act2.error)throw _act2.error;
     await refreshAllUsers();
     showDashSection("users");
   }catch(e){appAlert("Could not update user status.");}
@@ -2179,6 +2179,7 @@ function startDashRefresh(){
     if(document.querySelector('.med-overlay.show, .incident-ov, .add-user-ov, .edit-user-ov, #app-confirm-overlay[style*="display:flex"]'))return;
     // Refresh quietly
     if(document.querySelector("#dashboard-content .actpg")){if(!window._act.person)window._act.rows&&actLoad();return;}
+    if(window._dashSection)return; // a menu page is open — don’t swap it for the board
     try{await loadRecordsList();var ds=document.getElementById("dashboard-content");if(ds&&ds.children.length)renderDashboard();}catch(e){console.warn("Auto-refresh failed:",e);}
   },60000);
 }
@@ -2676,7 +2677,7 @@ function dashSearchRender(){clearTimeout(window._dbSrchT);window._dbSrchT=setTim
 function renderDashboard(){
   if(!window._moCssIn){window._moCssIn=true;try{var st2=document.createElement("style");st2.textContent=MO_CSS.replace(/@page[^}]*}/,"");document.head.appendChild(st2);}catch(e){}}
   if(!window._unitSettingsPulled){window._unitSettingsPulled=true;pullUnitSettings();}
-  var el=document.getElementById("dashboard-content");if(!el)return;if(el.parentNode&&el.parentNode.style)el.parentNode.style.maxWidth="";try{applyLookOnly();}catch(e){}
+  var el=document.getElementById("dashboard-content");if(!el)return;window._dashSection=null;if(el.parentNode&&el.parentNode.style)el.parentNode.style.maxWidth="";try{applyLookOnly();}catch(e){}
   updateClock();incSync();setTimeout(function(){try{upgradeBoardThumbs();}catch(e){}},1500);
   var _s=(window._dbS||"").toLowerCase(),_k=window._dbK||"",_t=window._dbT||"",_o="kennel";
   var ce=document.getElementById("dash-count");
@@ -4628,9 +4629,34 @@ function saveRepositionPhoto(){if(window._repoPos&&S.dog){S.dog.photoPos=Math.ro
 function showPhotoLightbox(src){if(!src)return;var ov=document.getElementById("photo-lightbox");if(!ov){ov=document.createElement("div");ov.id="photo-lightbox";ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,0.88);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;cursor:zoom-out";ov.onclick=function(){ov.style.display="none";ov.innerHTML="";};document.body.appendChild(ov);}ov.innerHTML="";var img=document.createElement("img");img.src=src;img.style.cssText="max-width:100%;max-height:100%;border-radius:10px;object-fit:contain";ov.appendChild(img);ov.style.display="flex";}
 var FILE_BUCKET="dog-files";
 function safeSeg(s){return String(s||"").replace(/[^a-zA-Z0-9._-]/g,"_");}
-function fileURL(f){if(!f)return"";if(f.data)return f.data;if(f.storage)return SUPABASE_URL+"/storage/v1/object/public/"+FILE_BUCKET+"/"+f.storage;return"";}
-async function storageUpload(path,file){var res=await fetch(SUPABASE_URL+"/storage/v1/object/"+FILE_BUCKET+"/"+path,{method:"POST",headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY,"x-upsert":"true","Content-Type":file.type||"application/octet-stream"},body:file});if(!res.ok){var t="";try{t=await res.text();}catch(e){}throw new Error("upload "+res.status+" "+t);}return path;}
-function storageDelete(path){try{fetch(SUPABASE_URL+"/storage/v1/object/"+FILE_BUCKET+"/"+path,{method:"DELETE",headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY}});}catch(e){}}
+function fileURL(f){if(!f)return"";if(f.data)return f.data;if(f.storage){var sg=fileSigned(f.storage);return sg||SUPABASE_URL+"/storage/v1/object/public/"+FILE_BUCKET+"/"+f.storage;}return"";}
+function pwSheet(){var o=document.getElementById("pwsheet");if(!o){o=document.createElement("div");o.id="pwsheet";document.body.appendChild(o);}
+  o.innerHTML='<div class="dtsh-bg" onclick="pwClose()"></div><div class="dtsh" role="dialog" aria-label="Change password"><div class="grab"></div><div class="dtsh-h"><b>Change password</b><span onclick="pwClose()">Cancel</span></div><div class="dtsh-b">'
+    +'<div class="cq"><label>New password <em>8 or more characters</em></label><input id="pw-1" class="expw" type="password" autocomplete="new-password"></div>'
+    +'<div class="cq"><label>Again</label><input id="pw-2" class="expw" type="password" autocomplete="new-password" onkeydown="if(event.key===\'Enter\')pwSave()"></div>'
+    +'<div id="pw-err" style="display:none;color:#b91c1c;font-size:12.5px;font-weight:700;margin:4px 0 8px"></div><button class="lg-btn expsave" id="pw-go" onclick="pwSave()">Save new password</button></div></div>';
+  setTimeout(function(){var e=document.getElementById("pw-1");if(e)e.focus();},50);}
+function pwClose(){var o=document.getElementById("pwsheet");if(o)o.remove();}
+async function pwSave(){var a=(document.getElementById("pw-1")||{}).value||"",b=(document.getElementById("pw-2")||{}).value||"";var er=document.getElementById("pw-err");var say=function(t){er.textContent=t;er.style.display="block";};
+  if(a.length<8)return say("At least 8 characters.");if(a!==b)return say("The two don’t match.");
+  var go=document.getElementById("pw-go");go.disabled=true;go.textContent="Saving…";
+  try{if(AUTH&&AUTH.expires_at&&AUTH.expires_at<Date.now()+60000){try{await authRefresh();}catch(e){}}
+    var r=await fetch(SUPABASE_URL+"/auth/v1/user",{method:"PUT",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+authToken(),"Content-Type":"application/json"},body:JSON.stringify({password:a})});
+    if(!r.ok){var d={};try{d=await r.json();}catch(e){}throw new Error(d.msg||d.message||d.error_description||("error "+r.status));}
+    pwClose();miniToast("Password changed");}
+  catch(e){go.disabled=false;go.textContent="Save new password";say("Couldn’t change it: "+(e.message||"try again"));}}
+// signed links for uploaded paperwork: work whether the bucket is public or private
+window._fsig={};window._fsigBusy=false;
+function fileSigned(path){var c=window._fsig[path];if(c&&c.url&&c.exp>Date.now()+60000)return c.url;if(!c||(!c.url&&!c.fail)||(c.url&&c.exp<=Date.now()+60000)){window._fsig[path]=Object.assign({},c||{},{want:true});fileSignSoon();}return (c&&c.url)||"";}
+function fileSignSoon(){if(window._fsigBusy)return;window._fsigBusy=true;setTimeout(async function(){var want=Object.keys(window._fsig).filter(function(p){return window._fsig[p].want;});
+  try{if(want.length){var r=await fetch(SUPABASE_URL+"/storage/v1/object/sign/"+FILE_BUCKET,{method:"POST",headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+(authToken()||SUPABASE_KEY),"Content-Type":"application/json"},body:JSON.stringify({expiresIn:3600,paths:want})});
+    var d=r.ok?await r.json():[];var got=0;want.forEach(function(p){var hit=(Array.isArray(d)?d:[]).filter(function(x){return x&&x.path===p&&x.signedURL;})[0];window._fsig[p]=hit?{url:SUPABASE_URL+"/storage/v1"+hit.signedURL,exp:Date.now()+3600000}:{fail:true};if(hit)got++;});
+    if(got&&S&&S.tab==="files"){try{renderMain();}catch(e){}}}}
+  catch(e){want.forEach(function(p){window._fsig[p]={fail:true};});}
+  window._fsigBusy=false;},30);}
+
+async function storageUpload(path,file){var res=await fetch(SUPABASE_URL+"/storage/v1/object/"+FILE_BUCKET+"/"+path,{method:"POST",headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+(authToken()||SUPABASE_KEY),"x-upsert":"true","Content-Type":file.type||"application/octet-stream"},body:file});if(!res.ok){var t="";try{t=await res.text();}catch(e){}throw new Error("upload "+res.status+" "+t);}return path;}
+function storageDelete(path){try{fetch(SUPABASE_URL+"/storage/v1/object/"+FILE_BUCKET+"/"+path,{method:"DELETE",headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+(authToken()||SUPABASE_KEY)}});}catch(e){}}
 function showFileImage(i){var f=S.files&&S.files[i];var u=fileURL(f);if(u)showPhotoLightbox(u);}
 function dataURLtoBlob(durl){var parts=durl.split(",");var m=(parts[0].match(/data:([^;]+)/)||[])[1]||"application/octet-stream";var bstr=atob(parts[1]||"");var n=bstr.length;var u8=new Uint8Array(n);while(n--){u8[n]=bstr.charCodeAt(n);}return new Blob([u8],{type:m});}
 function openFile(i){var f=S.files&&S.files[i];if(!f)return;var url=fileURL(f);if(!url)return;if(f.type==="image"){showPhotoLightbox(url);return;}if(f.storage){window.open(url,"_blank");return;}try{var burl=URL.createObjectURL(dataURLtoBlob(f.data));var w=window.open(burl,"_blank");if(!w){var a=document.createElement("a");a.href=burl;a.download=f.name||"document";document.body.appendChild(a);a.click();a.remove();}setTimeout(function(){URL.revokeObjectURL(burl);},60000);}catch(e){try{window.open(f.data,"_blank");}catch(e2){appAlert("Could not open this file.");}}}
@@ -5203,7 +5229,7 @@ function picParagraph(){var d=S.dog||{},a=S.assessment||{},m=S.medical||{},rh=S.
   if(a.guardFood&&!/^none|Not tested/i.test(a.guardFood))p.push(L("assessment","Guards "+his+" bowl")+" ("+e(a.guardFood.toLowerCase())+")"+(tl&&tl.floored?" \u2014 the floor rule holds "+him+" at "+e(tl.l)+" until it\u0027s re-tested":"")+".");
   var wl=(S.weights||[]).slice().sort(function(x,y){return (x.date||"").localeCompare(y.date||"");});if(wl.length>1){var f=parseFloat(String(wl[0].weight).replace(/[^0-9.]/g,"")),l=parseFloat(String(wl[wl.length-1].weight).replace(/[^0-9.]/g,""));if(f&&l&&Math.abs(l-f)>=0.3)p.push(L("weights",(l>f?"Up ":"Down ")+Math.abs(l-f).toFixed(1)+" kg")+" since arrival.");}
   var meds=(m.medications||[]).filter(function(x){return x.active!==false&&(!x.endDate||x.endDate>=new Date().toISOString().slice(0,10));});var con=activeContagiousList(m);var medBits=[];if(con.length)medBits.push(L("medical","contagious \u2014 "+e(con.map(function(x){return diseaseShortName(x.type).toLowerCase();}).join(", "))));if(meds.length)medBits.push("on "+L("medical",e(meds.map(function(x){return x.name;}).join(", "))));else medBits.push("on no medication");
-  var vroll={overdue:0,upcoming:0,done:0};try{VAC_FIXED.forEach(function(vt){var s2=vaxStatus(vt);if(vroll[s2.state]!==undefined)vroll[s2.state]++;});}catch(err){}if(vroll.overdue)medBits.push(L("medical","vaccination overdue"));else if(vroll.upcoming)medBits.push("vaccination "+L("medical","due"));else if(vroll.done)medBits.push("vaccinations up to date");
+  var vroll={overdue:0,upcoming:0,done:0};try{dogMedicalDue({state:S}).forEach(function(it){if(!/Vaccination|Booster|Kennel Cough/.test(it.label||""))return;if(it.state==="overdue")vroll.overdue++;else if(it.state==="soon"||it.state==="booked")vroll.upcoming++;});var _td=new Date().toISOString().slice(0,10);if((m.vaccinations||[]).some(function(v){return v.date&&v.date<=_td;}))vroll.done++;}catch(err){}if(vroll.overdue)medBits.push(L("medical","vaccination overdue"));else if(vroll.upcoming)medBits.push("vaccination "+L("medical","due"));else if(vroll.done)medBits.push("vaccinations up to date");
   var pn=(m.parasiteTreatments||[]).filter(function(x){return x.nextDue;}).sort(function(x,y){return x.nextDue.localeCompare(y.nextDue);})[0];if(pn)medBits.push(e((pn.type||"wormer").split(" ")[0].toLowerCase())+" due "+e(fmtDMY(pn.nextDue)));
   p.push(medBits.join("; ").replace(/^./,function(c){return c.toUpperCase();})+".");
   var fo=S.foster||{};if(fo.out)p.push(L("foster","In foster")+(fo.carer?" with "+e(fo.carer):"")+(fo.due?", due back "+e(fmtDMY(fo.due)):"")+".");
@@ -5674,6 +5700,7 @@ var _phN=_ps?_ps.length:(d.photo?1:0);
     var pills=Array.apply(null,Array(ND)).map(function(_,idx){return idx;}).map(function(idx){var x=S.days[idx];var on=idx===dv;var t=dtone(idx);return '<div class="dpill'+(on?" on":"")+(x.date===today0?" dtoday":"")+'" onclick="setDayView('+idx+')"><b>Day '+(idx+1)+'</b><small>'+(x.date?esc(fmtDMY(x.date).slice(0,5)):"\u2014")+'</small><i class="'+t+'"></i></div>';}).join("")+(currentRole()!=="staff"?'<div class="dpill ext" onclick="isoExtOpen()"><b>+ Extend</b><small>days</small><i></i></div>':'');
     var i=dv,dy=S.days[i];
     var _pup=isPup();
+    var _dk=["demeanour","feeding","toileting","staffInt"];var copyBtn='';var _sameRow=(i>0&&S.days[i-1]&&_dk.some(function(k){return S.days[i-1][k];})&&_dk.some(function(k){return !dy[k]&&S.days[i-1][k];}))?'<div class="same" role="button" tabindex="0" onclick="copyPrevDay('+i+')">\u21ba Same as yesterday'+(_dk.some(function(k){return dy[k];})?' for the rest':'')+'</div>':'';
     var dchip=function(k,cur,opts,bad){return '<div class="cchips">'+opts.map(function(o){var v=o[0],l=o[1]||o[0];var on=cur===v;return '<span class="cchip'+(on?" on":"")+(bad&&bad.indexOf(v)>=0&&on?" bad":"")+'" onclick="daySet('+i+',\''+k+'\',\''+esc(v).replace(/'/g,"\\'")+'\')">'+esc(l)+'</span>';}).join("")+'</div>';};
     var dq=function(l,body,hint){return '<div class="cq"><label>'+l+(hint?'<em>'+hint+'</em>':'')+'</label>'+body+'</div>';};
     var _dd=dy.date||"";var _weighed=_dd&&(S.weights||[]).some(function(w){return w.date===_dd;});
@@ -5688,8 +5715,7 @@ var _phN=_ps?_ps.length:(d.photo?1:0);
       +dq("Anything today?",dchip("incidents",dy.incidents,[["None","Nothing"],["Mouthing"],["Minor — growling","Growling"],["Resource guarding","Guarding"],["Barrier reactivity","At the bars"],["Moderate — snapping","Snapping"],["Escape attempt","Escape attempt"],["Serious — bite","Bite"],["Injury / self-harm","Injury"]],["Serious — bite","Injury / self-harm","Moderate — snapping"]),dy.incidents&&dy.incidents!=="None"?'<span data-go="notes" style="cursor:pointer;text-decoration:underline">log it as an incident</span>':'')
       +_sameRow+dta("One line",dy.notes,i,"notes","What you\u0027d tell the next person about today\u2026")
       +'<div style="font-size:11px;color:#9a9fa8;font-weight:700;margin-top:6px">'+(dy.by?'By '+esc(dy.by)+(dy.time?' \u00b7 '+esc(dy.time):''):'Not written yet')+'</div>';
-    var _dk=["demeanour","feeding","toileting","staffInt"];var copyBtn='';var _sameRow=(i>0&&S.days[i-1]&&_dk.some(function(k){return S.days[i-1][k];})&&_dk.some(function(k){return !dy[k]&&S.days[i-1][k];}))?'<div class="same" role="button" tabindex="0" onclick="copyPrevDay('+i+')">\u21ba Same as yesterday'+(_dk.some(function(k){return dy[k];})?' for the rest':'')+'</div>':'';
-    var prevBtn=i>0?'<button class="btn" onclick="setDayView('+(i-1)+')">&larr; Day '+i+'</button>':'<button class="btn" data-go="arrival">&larr; Arrival</button>';
+        var prevBtn=i>0?'<button class="btn" onclick="setDayView('+(i-1)+')">&larr; Day '+i+'</button>':'<button class="btn" data-go="arrival">&larr; Arrival</button>';
     var nextBtn=i<ND-1?'<button class="btn btnp" onclick="setDayView('+(i+1)+')">Day '+(i+2)+' &rarr;</button>':'<button class="btn btnp" data-go="assessment">Next: assessment &rarr;</button>';
     var glance=(function(){var rows=[["Demeanour","demeanour"],["Feeding","feeding"],["Toileting","toileting"],["With staff","staffInt"]];var written=S.days.filter(function(x,idx){return dayHasData(idx);});if(written.length<2)return '';return '<div class="card"><div class="lbl" style="margin-bottom:8px">The days at a glance</div><div class="dglance">'+rows.map(function(r){var seq=S.days.map(function(x){return x[r[1]]||"";}).filter(function(v,idx){return dayHasData(idx);}).map(function(v){return v?esc(String(v).split(" \u2014 ")[0].replace(/^(Ate partially)$/,"Picked")):"\u2014";});return '<div><b>'+r[0]+'</b>'+seq.join(" \u2192 ")+'</div>';}).join("")+'</div></div>';})();
     var _isoCard=(function(){var ii=_iiD;if(!ii)return '';var con=activeContagiousList(S.medical);var exts=(S.dog.isoExt||[]);
@@ -6024,7 +6050,7 @@ async function sbFetch(url,opts){opts=opts||{};if(AUTH&&AUTH.expires_at&&Date.no
 async function authSignIn(email,password){var r=await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=password",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Content-Type":"application/json"},body:JSON.stringify({email:email,password:password})});var d=await r.json();if(!r.ok||!d.access_token)throw new Error((d&&(d.error_description||d.msg||d.message))||"Sign-in failed");authSave({access_token:d.access_token,refresh_token:d.refresh_token,expires_at:Date.now()+((d.expires_in||3600)*1000),user:d.user});return d.user;}
 async function authSignOut(){try{if(AUTH)await fetch(SUPABASE_URL+"/auth/v1/logout",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+authToken()}});}catch(e){}authSave(null);}
 async function authRecover(email){window._authErr="";try{var r=await fetch(SUPABASE_URL+"/auth/v1/recover?redirect_to="+encodeURIComponent(location.origin+location.pathname),{method:"POST",headers:{"apikey":SUPABASE_KEY,"Content-Type":"application/json"},body:JSON.stringify({email:email})});if(r.ok)return true;var d={};try{d=await r.json();}catch(e){}var msg=String(d.msg||d.message||d.error_description||d.error||"");window._authErr=(r.status===429||/rate limit/i.test(msg))?"Too many emails sent \u2014 Supabase\u2019s built-in email only sends a few an hour. Wait an hour and try once, or sign in with your code for now.":/smtp|sending/i.test(msg)?"Supabase couldn\u2019t send the email ("+msg+"). The email settings in Supabase need checking.":msg?msg+" (error "+r.status+")":"Error "+r.status+".";return false;}catch(e){window._authErr="Couldn\u2019t reach Supabase \u2014 check the connection.";return false;}}
-async function userForEmail(email){if(!supabaseClient||!email)return null;try{var res=await supabaseClient.from("users").select("*").eq("email",email.toLowerCase()).single();return res&&res.data&&res.data.name?res.data:null;}catch(e){return null;}}
+async function userForEmail(email){if(!supabaseClient||!email)return null;var em=email.toLowerCase();try{var res=await supabaseClient.from("users").select("*").eq("email",em).single();if(res&&res.data&&res.data.name)return res.data;var all=await supabaseClient.from("users").select("*");return ((all&&all.data)||[]).filter(function(u){return u&&u.name&&String(u.email||"").toLowerCase()===em;})[0]||null;}catch(e){return null;}}
 // quick unlock: people who have signed in on this device, each with a PIN
 function devProfiles(){try{return JSON.parse(localStorage.getItem("nspca-device-profiles")||"[]");}catch(e){return[];}}
 function devProfilesSave(p){try{localStorage.setItem("nspca-device-profiles",JSON.stringify(p));}catch(e){}}
@@ -6865,11 +6891,30 @@ function showSaving(){var btn=document.getElementById("save-btn");if(btn){btn.in
 function showSaved(){var btn=document.getElementById("save-btn");if(btn){btn.disabled=false;btn.innerHTML='<span class="sv-dot"></span>Saved';btn.classList.add("saved");setTimeout(function(){btn.textContent="Save";btn.classList.remove("saved");},2000);}}
 
 var _recSaveBusy=false,_recSaveAgain=false;
+
+// ── Two people, one dog: before saving, fold in anything someone else saved since this dog was opened ──
+function mrStrip(o){var c=JSON.parse(JSON.stringify(o||{}));delete c._id;delete c.tab;delete c._savedBy;return c;}
+function mrSnap(at){try{window._mrBase=JSON.stringify(mrStrip(S));window._mrAt=at||"";window._mrFor=S._id;}catch(e){}}
+function mrVal(b,m,t,hit){var js=JSON.stringify;var B=js(b),M=js(m),T=js(t);if(B===T||M===T)return m;if(B===M){hit();return t;}
+  if(m&&t&&typeof m==="object"&&typeof t==="object"&&!Array.isArray(m)&&!Array.isArray(t)){var o={},ks={};[b||{},m,t].forEach(function(x){if(x&&typeof x==="object")Object.keys(x).forEach(function(k){ks[k]=1;});});Object.keys(ks).forEach(function(k){var v=mrVal((b||{})[k],m[k],t[k],hit);if(v!==undefined)o[k]=v;});return o;}
+  if(Array.isArray(m)&&Array.isArray(t)){if(Array.isArray(b)&&b.length===m.length&&b.length===t.length)return m.map(function(x,i){return mrVal(b[i],m[i],t[i],hit);});
+    var bs=(Array.isArray(b)?b:[]).map(function(x){return js(x);}),ms=m.map(function(x){return js(x);}),ts=t.map(function(x){return js(x);});
+    var out=t.filter(function(x,i){return !(bs.indexOf(ts[i])>=0&&ms.indexOf(ts[i])<0);});m.forEach(function(x,i){if(ts.indexOf(ms[i])<0&&bs.indexOf(ms[i])<0)out.push(x);});hit();return out;}
+  return m;}
+async function mrMerge(){if(!supabaseClient||!S||!S._id||window._mrFor!==S._id||!window._mrBase)return null;
+  var r=await supabaseClient.from("dogs").select("saved_at").eq("id",S._id);var rem=r&&!r.error&&r.data&&r.data[0];if(!rem||!rem.saved_at||rem.saved_at===window._mrAt)return null;
+  var r2=await supabaseClient.from("dogs").select("saved_at,data").eq("id",S._id);var row=r2&&!r2.error&&r2.data&&r2.data[0];if(!row||!row.data)return null;
+  var who=row.data._savedBy||"";var theirs=mrStrip(restoreState(row.data));var base=JSON.parse(window._mrBase);var mine=mrStrip(S);var took=0;
+  var ks={};[base,mine,theirs].forEach(function(x){Object.keys(x).forEach(function(k){ks[k]=1;});});
+  Object.keys(ks).forEach(function(k){var v=mrVal(base[k],mine[k],theirs[k],function(){took++;});if(v!==undefined)S[k]=v;});
+  window._mrBase=JSON.stringify(theirs);window._mrAt=row.saved_at;
+  return took?{who:who}:null;}
 async function saveRecord(){if(S&&S._id){try{delete _histCache[S._id];}catch(e){}}try{showSaving();}catch(e){}
   if(!supabaseClient){window._lastSavedJson=_stateSig();persistSave();showSaved();updateSaveBar();return;}
   if(!S.dog||!S.dog.name){persistSave();return;}
   if(_recSaveBusy){_recSaveAgain=true;return;}
   _recSaveBusy=true;
+  var _mr=null;if(S._id){try{_mr=await mrMerge();}catch(_e){_mr=null;}}
   var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
   var tl=(handlingLight(total,S.scores)||{}).l||"";
   var st=JSON.parse(JSON.stringify(S));delete st._id;st._savedBy=currentName();
@@ -6885,6 +6930,8 @@ async function saveRecord(){if(S&&S._id){try{delete _histCache[S._id];}catch(e){
       if(res.data&&res.data[0]){S._id=res.data[0].id;}}
     pendingClear(S._id);
     window._lastSavedJson=_stateSig();persistSave();showSaved();syncLocalRecord(S._id,row);updateSaveBar();
+    try{window._mrBase=JSON.stringify(mrStrip(st));window._mrAt=row.saved_at;window._mrFor=S._id;}catch(_e){}
+    if(_mr){var _ae=document.activeElement,_typing=_ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(_ae.tagName);if(!_typing){try{renderMain();}catch(_e){}}miniToast("Added "+(_mr.who&&_mr.who!==currentName()?_mr.who+"’s":"the other")+" changes to this dog as well");}
   }catch(e){
     console.error("saveRecord:",e);
     persistSave();
@@ -6896,7 +6943,8 @@ async function saveRecord(){if(S&&S._id){try{delete _histCache[S._id];}catch(e){
 
 async function deleteRecord(id){
   if(!supabaseClient)return;
-  await supabaseClient.from("dogs").delete().eq("id",id);
+  var _dr=await supabaseClient.from("dogs").delete().eq("id",id);
+  if(_dr&&_dr.error){appAlert("Couldn\u2019t delete the record \u2014 check the connection and try again.");return;}
   try{await supabaseClient.from("dog_photos").delete().eq("dog_id",id);}catch(e){}
   delete _photoStore[id];
   await loadRecordsList();
@@ -6926,7 +6974,7 @@ function loadRecord(id){
   S=restoreState(rec.state);
   window._asmtOpen={};window._medOpen={};   // every card starts closed on a fresh dog
   S._id=rec.id;S.tab="report";render();
-try{window._lastSavedJson=_stateSig();}catch(e){}}
+try{window._lastSavedJson=_stateSig();}catch(e){}try{mrSnap(rec.savedAt||"");}catch(e){}}
 
 // ── Offline reading ─────────────────────────────────────────────
 // The list is kept on the phone so the app still works in the parts
@@ -7033,6 +7081,11 @@ function loadCurrent(){
   if(savedCode){
     var user=USERS.find(function(u){return u.code===savedCode;});
     if(user){LOGGED_IN=true;CURRENT_USER=user;localStorage.setItem("nspca-user-name",user.name);localStorage.setItem("nspca-user-role",user.role);setupAutoLogout();if(goHomeApp(user,false))return;refreshAllUsers().then(function(){return loadRecordsList();}).then(function(){showDashboard();});}
+    else if(supabaseClient){(async function(){var sc=savedCode;if(AUTH&&AUTH.refresh_token){try{await authRefresh();}catch(e){}}
+      var u=null,net=false;try{var res=await supabaseClient.from("users").select("*").eq("code",sc).single();if(res&&res.data&&res.data.name)u=res.data;else if(res&&res.error&&!res.error.code)net=true;}catch(e){net=true;}
+      if(!u&&net){var nm=localStorage.getItem("nspca-user-name");if(nm)u={code:sc,name:nm,role:localStorage.getItem("nspca-user-role")||"staff"};}
+      if(!u||u.active===false){localStorage.removeItem("nspca-intake-auth");showScreen("login-screen");return;}
+      LOGGED_IN=true;CURRENT_USER=u;localStorage.setItem("nspca-user-name",u.name);localStorage.setItem("nspca-user-role",u.role||"staff");setupAutoLogout();if(goHomeApp(u,false))return;await refreshAllUsers();await loadRecordsList();showDashboard();})();}
     else{showScreen("login-screen");}
   }else{showScreen("login-screen");}
 })();
@@ -7057,8 +7110,8 @@ async function actLoad(){var A=window._act;if(A.loading||!supabaseClient)return;
     ((res&&res.data)||[]).forEach(function(r){var t=new Date(r.changed_at).getTime();if(isNaN(t)||t<Date.now()-8*86400000)return;raw.push({app:"dog",id:r.dog_id,who:actName(r.changed_by),keys:actKeys(r.summary),t:t});});
   }catch(e){A.err="Couldn’t read the change history.";}
   A.catNames=A.catNames||{};
-  try{var qc=supabaseClient.from("cat_history").select("id,cat_id,changed_at,changed_by,summary");if(qc.gte)qc=qc.gte("changed_at",since);var rc=await qc.order("changed_at",{ascending:false}).limit(3000);
-    var ids={};if(rc&&!rc.error)((rc.data)||[]).forEach(function(r){var t=new Date(r.changed_at).getTime();if(isNaN(t)||t<Date.now()-8*86400000)return;ids[r.cat_id]=1;raw.push({app:"cat",id:r.cat_id,who:actName(r.changed_by),keys:actKeys(r.summary),t:t});});
+  try{var rc=null,ck="";for(var _ci=0;_ci<3&&!ck;_ci++){var _c=["cat_id","dog_id","record_id"][_ci];var qc=supabaseClient.from("cat_history").select("id,"+_c+",changed_at,changed_by,summary");if(qc.gte)qc=qc.gte("changed_at",since);var _r=await qc.order("changed_at",{ascending:false}).limit(3000);if(_r&&!_r.error){rc=_r;ck=_c;}}
+    var ids={};if(rc&&!rc.error)((rc.data)||[]).forEach(function(r){var t=new Date(r.changed_at).getTime();if(isNaN(t)||t<Date.now()-8*86400000)return;var cid=r[ck];ids[cid]=1;raw.push({app:"cat",id:cid,who:actName(r.changed_by),keys:actKeys(r.summary),t:t});});
     var need=Object.keys(ids).filter(function(k){return !A.catNames[k];});
     if(need.length){var rn=await supabaseClient.from("cats").select("id,name").in("id",need);((rn&&rn.data)||[]).forEach(function(c){A.catNames[c.id]=c.name||"Cat";});}
   }catch(e){}
@@ -7127,7 +7180,7 @@ function renderActivity(){
   return head+faces+'<div class="actg">'+left+'<div class="actr">'+right+'</div></div></div>';}
 // "In now": note who's active every few minutes (needs users.last_seen_at; switches itself off if the column isn't there)
 function seenBeat(){if(window._seenOff||typeof LOGGED_IN==="undefined"||!LOGGED_IN||!supabaseClient||!CURRENT_USER)return;if(Date.now()-(_lastActivity||0)>5*60000)return;
-  var em=CURRENT_USER.email||authEmail()||"";var q=supabaseClient.from("users").update({last_seen_at:new Date().toISOString()});var p=em?q.eq("email",em):(CURRENT_USER.code?q.eq("code",CURRENT_USER.code):null);
+  var em=CURRENT_USER.email||authEmail()||"";var q=supabaseClient.from("users").update({last_seen_at:new Date().toISOString()});var p=CURRENT_USER.code?q.eq("code",CURRENT_USER.code):(em?q.eq("email",em):null);
   if(p)Promise.resolve(p).then(function(r){if(r&&r.error)window._seenOff=true;},function(){});}
 setInterval(seenBeat,180000);
 
