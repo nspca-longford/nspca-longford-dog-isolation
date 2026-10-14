@@ -925,6 +925,12 @@ body.offline #netbar{display:block}body.offline{padding-top:30px}body.offline .d
   .dc2.sl.exph{flex-direction:row;align-items:center;min-height:0;border-left:2px dashed #a3c94a}.dc2.sl.exph .ei{padding:0;width:42px;height:42px;border-radius:9px;background:#e9f5c8;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
   .dc2.sl.exph.late .ei{background:#fef3c7}.dc2.sl.exph .bd{padding:0}.dc2.sl.exph .ea{margin-top:5px}
 }
+/* ── Look only (v3.309) ── */
+#lo-badge{position:fixed;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:65;background:#282932;color:#c6e76c;font-size:11.5px;font-weight:900;padding:6px 11px;border-radius:20px;box-shadow:0 6px 18px rgba(15,16,21,.28);cursor:default}
+@media(min-width:641px){#lo-badge{bottom:auto;top:66px}}
+body.lookonly #content input:not([type=search]),body.lookonly #content textarea,body.lookonly #content select,body.lookonly .dtsh input,body.lookonly .dtsh textarea,body.lookonly .dtsh select,body.lookonly #expsheet input{pointer-events:none;opacity:.55;background:#f1f3ee!important}
+body.lookonly #save-bar .svb,body.lookonly #save-btn,body.lookonly .nsplit,body.lookonly .fsave,body.lookonly .dc2.sl.emp u,body.lookonly .dempties span,body.lookonly .bact label,body.lookonly .bact .hn,body.lookonly .idpic .pact,body.lookonly .cqv u,body.lookonly .idct u,body.lookonly .dtsh-h u,body.lookonly .exph .ea{display:none!important}
+body.lookonly #save-bar.dirty{display:none!important}
 </style>
 </head>
 <body>
@@ -1006,7 +1012,7 @@ var CURRENT_USER=null;
 var APP_HOME="dogs";
 var HOME_FILES={dogs:"index.html",cats:"cats.html",stables:"stables.html"};
 var HOME_BUILTIN={STA01:"stables",JAM01:"stables",CAT01:"cats",CISO01:"cats"};
-function homeAppFor(u){if(!u)return "";var m={};try{m=unitSetting("homeApps")||{};}catch(e){}var em=String(u.email||"").toLowerCase();return (em&&m[em])||m[u.code||""]||HOME_BUILTIN[u.code||""]||"";}
+function homeAppFor(u){if(!u)return "";var m={};try{m=unitSetting("homeApps")||{};}catch(e){}var em=String(u.email||"").toLowerCase();return (em&&m[em])||m[u.code||""]||HOME_BUILTIN[u.code||""]||(typeof lookBuiltin==="function"&&(lookBuiltin(u)||{}).home)||"";}
 function goHomeApp(u,force){var done="";try{done=sessionStorage.getItem("nspca-home-done")||"";}catch(e){}if(done&&!force)return false;try{sessionStorage.setItem("nspca-home-done","1");}catch(e){}var h=homeAppFor(u);if(h&&h!==APP_HOME&&HOME_FILES[h]){location.replace(HOME_FILES[h]);return true;}return false;}
 
 var CATS=[
@@ -1663,6 +1669,7 @@ function showEditUserModal(code){
     +'<div class="f"><label class="lbl">Access code (read-only)</label><input type="text" value="'+esc(u.code)+'" disabled style="background:#f1f3ee;color:#6b7280;font-family:monospace"></div>'
     +'<div class="f"><label class="lbl">Role</label><select id="edit-user-role">'+[["staff","Staff"],["supervisor","Supervisor"],["asst","Assistant Supervisor"],["coordinator","Rehoming Co-Ordinator"],["trainer","Dog Trainer & Behaviour Specialist"],["manager","Manager"],["admin","Admin"]].map(function(r){return'<option value="'+r[0]+'"'+(u.role===r[0]?" selected":"")+'>'+r[1]+'</option>';}).join("")+'</select></div>'
     +'<div class="f"><label class="lbl">Opens in</label><select id="edit-user-home">'+[["","Dogs (the usual)"],["cats","Cats"],["stables","Stables"]].map(function(h){var cur=homeAppFor(u);return '<option value="'+h[0]+'"'+((cur===h[0])||(h[0]===""&&(cur===""||cur==="dogs"))?" selected":"")+'>'+h[1]+'</option>';}).join("")+'</select></div>'
+    +'<div class="f"><label class="lbl">Outside that app</label><select id="edit-user-look">'+[["0","Full use everywhere"],["1","Look only \u2014 can\u2019t change anything"]].map(function(o){var cur=lookOnlyFor(u)?"1":"0";return '<option value="'+o[0]+'"'+(cur===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+'</select><div style="font-size:10.5px;color:#9a9fa8;margin-top:4px">Admins always have full use.</div></div>'
     +'<button onclick="saveEditedUser(\''+esc(code)+'\')" class="btn btnp" style="width:100%;padding:10px;font-size:13px;font-weight:600">Save changes</button>'
     +((u.code!==((CURRENT_USER||{}).code))?'<button onclick="this.closest(\'.edit-user-ov\').remove();toggleUserActive(\''+esc(code)+'\','+(u.active===false)+')" style="width:100%;margin-top:8px;padding:9px;font-size:12px;background:'+(u.active===false?'#dcfce7':'#fef9c3')+';border:none;color:'+(u.active===false?'#166534':'#854d0e')+';border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700">'+(u.active===false?'Switch '+esc(u.name)+' back on':'Switch '+esc(u.name)+' off \u2014 can\u2019t sign in')+'</button>':'')
     +(userRemovable(u)
@@ -1702,6 +1709,7 @@ async function saveEditedUser(code){
   var role=(document.getElementById("edit-user-role")||{}).value||"staff";
   if(!name){appAlert("Please enter a name.");return;}
   try{var _hEl=document.getElementById("edit-user-home");if(_hEl){var _u=getAllUsersSync().find(function(x){return x.code===code;})||{};var _em=String(((document.getElementById("edit-user-email")||{}).value||_u.email||"")).trim().toLowerCase();var _m=JSON.parse(JSON.stringify(unitSetting("homeApps")||{}));var _k=_em||code;if(_hEl.value)_m[_k]=_hEl.value;else delete _m[_k];if(_em&&_m[code]&&_k!==code)delete _m[code];setUnitSetting("homeApps",_m);}}catch(_e){}
+  try{var _lEl=document.getElementById("edit-user-look");if(_lEl){var _u2=getAllUsersSync().find(function(x){return x.code===code;})||{};var _em2=String(((document.getElementById("edit-user-email")||{}).value||_u2.email||"")).trim().toLowerCase();var _lm=JSON.parse(JSON.stringify(unitSetting("lookOnly")||{}));var _k2=_em2||code;_lm[_k2]=_lEl.value==="1";if(_em2&&_k2!==code)delete _lm[code];setUnitSetting("lookOnly",_lm);}}catch(_e){}
   if(!supabaseClient)return;
   try{
     await supabaseClient.from("users").update(Object.assign({name:name,role:role},{email:(((document.getElementById("edit-user-email")||{}).value||"").trim().toLowerCase())||null})).eq("code",code);
@@ -2636,7 +2644,7 @@ function dashSearchRender(){clearTimeout(window._dbSrchT);window._dbSrchT=setTim
 function renderDashboard(){
   if(!window._moCssIn){window._moCssIn=true;try{var st2=document.createElement("style");st2.textContent=MO_CSS.replace(/@page[^}]*}/,"");document.head.appendChild(st2);}catch(e){}}
   if(!window._unitSettingsPulled){window._unitSettingsPulled=true;pullUnitSettings();}
-  var el=document.getElementById("dashboard-content");if(!el)return;if(el.parentNode&&el.parentNode.style)el.parentNode.style.maxWidth="";
+  var el=document.getElementById("dashboard-content");if(!el)return;if(el.parentNode&&el.parentNode.style)el.parentNode.style.maxWidth="";try{applyLookOnly();}catch(e){}
   updateClock();incSync();setTimeout(function(){try{upgradeBoardThumbs();}catch(e){}},1500);
   var _s=(window._dbS||"").toLowerCase(),_k=window._dbK||"",_t=window._dbT||"",_o="kennel";
   var ce=document.getElementById("dash-count");
@@ -5953,7 +5961,7 @@ function closeRecordNow(){var f=S.fin||{};if(!f.outcome){appAlert("Choose a door
   appConfirm(msg,function(){if(!f.outcomeDate)f.outcomeDate=new Date().toISOString().slice(0,10);if(!f.assessorName){f.assessorName=currentName();f.assessorDate=new Date().toISOString().slice(0,10);}f.closedAt=new Date().toISOString();persistSave();saveRecord();renderMain();miniToast((S.dog.name||"Dog")+" \u2014 record closed: "+f.outcome);},{danger:f.outcome==="Euthanised"||f.outcome==="Died in care"});}
 function unitSetting(k){try{var o=JSON.parse(localStorage.getItem("nspca-unit-settings")||"{}");return o[k]||"";}catch(e){return"";}}
 function setUnitSetting(k,v){var o={};try{o=JSON.parse(localStorage.getItem("nspca-unit-settings")||"{}");}catch(e){}o[k]=v;try{localStorage.setItem("nspca-unit-settings",JSON.stringify(o));}catch(e){}if(supabaseClient){supabaseClient.from("incoming").upsert({id:"__unit_settings",data:o}).then(function(){},function(){});}}
-function pullUnitSettings(){if(!supabaseClient)return;supabaseClient.from("incoming").select("id,data").eq("id","__unit_settings").then(function(res){var row=res&&res.data&&res.data[0];if(row&&row.data){try{localStorage.setItem("nspca-unit-settings",JSON.stringify(row.data));}catch(e){}}},function(){});}
+function pullUnitSettings(){if(!supabaseClient)return;supabaseClient.from("incoming").select("id,data").eq("id","__unit_settings").then(function(res){var row=res&&res.data&&res.data[0];if(row&&row.data){try{localStorage.setItem("nspca-unit-settings",JSON.stringify(row.data));}catch(e){}}try{applyLookOnly();}catch(e){}},function(){});}
 var INSPECTORS=[{n:"Karen Lyons",c:""},{n:"James McCormick",c:""},{n:"Lyndsey Delaney",c:""}];
 function inspectorOpts(cur){var o=[["","-- select inspector --"]];INSPECTORS.forEach(function(i){o.push([i.n,i.n+(i.c?" \u2014 "+i.c:"")]);});o.push(["Other","Other / not listed"]);if(cur&&!o.some(function(x){return x[0]===cur;}))o.splice(1,0,[cur,cur+" (as recorded)"]);return o;}
 function inspectorLine(d){d=d||{};return [d.inspector&&d.inspector!=="Other"?d.inspector:(d.inspectorOther||""),d.inspectorRef?"case "+d.inspectorRef:""].filter(Boolean).join(" \u00b7 ");}
@@ -6589,7 +6597,7 @@ function renderArrival(){var a=S.arrival||{};var d=S.dog||{};var as=S.assessment
 }
 function renderMain(){setTimeout(updateSaveBar,0);document.getElementById("content").innerHTML=page();try{sleekPass();}catch(e){}}
 // ── Sleeker everywhere (v3.308): ⓘ instead of the paragraph, picked answers as facts ──
-function sleekPass(){var c=document.getElementById("content");if(!c)return;
+function sleekPass(){var c=document.getElementById("content");if(!c)return;try{applyLookOnly();}catch(e){}
   var h=c.querySelector(":scope > h2");var sub=h&&h.nextElementSibling;
   if(h&&sub&&sub.classList.contains("sub")&&S.tab!=="photos"&&!h.querySelector(".tinfo")&&sub.textContent.trim().length>30){sub.classList.add("subhid");window._subShow=window._subShow||{};if(window._subShow[S.tab])sub.classList.add("subshow");var ti=document.createElement("span");ti.className="tinfo";ti.setAttribute("role","button");ti.tabIndex=0;ti.title="What this tab is for";ti.textContent="\u24d8";ti.onclick=function(){window._subShow[S.tab]=!window._subShow[S.tab];sub.classList.toggle("subshow");};h.appendChild(ti);}
   window._cqOpen=window._cqOpen||{};
@@ -6995,6 +7003,46 @@ function loadCurrent(){
     else{showScreen("login-screen");}
   }else{showScreen("login-screen");}
 })();
+
+// ── Look only (v3.309): per person, outside their home app they can read everything but change nothing ──
+// Built-in default: Sarah (Assistant Supervisor, Cattery) opens in Cats and is look-only elsewhere.
+// Manage users → Edit user overrides it (unitSetting "lookOnly", keyed by email, else code).
+function lookBuiltin(u){if(!u)return null;if(u.role==="asst"&&/^sarah\b/i.test(String(u.name||""))&&u.code!=="SAR01")return{home:"cats",look:true};return null;}
+function lookOnlyFor(u){if(!u)return false;var m={};try{m=unitSetting("lookOnly")||{};}catch(e){}var em=String(u.email||"").toLowerCase();
+  if(em&&Object.prototype.hasOwnProperty.call(m,em))return !!m[em];if(u.code&&Object.prototype.hasOwnProperty.call(m,u.code))return !!m[u.code];var b=lookBuiltin(u);return !!(b&&b.look);}
+function isLookOnly(){try{if(!LOGGED_IN||!CURRENT_USER)return false;if(currentRole()==="admin")return false;if(!lookOnlyFor(CURRENT_USER))return false;var h=homeAppFor(CURRENT_USER)||"dogs";return h!==APP_HOME;}catch(e){return false;}}
+window._loAct=0;
+["click","input","change","keydown","pointerdown"].forEach(function(ev){document.addEventListener(ev,function(){window._loAct=Date.now();},true);});
+var _loToastAt=0;
+function lookOnlyToast(){if(Date.now()-_loToastAt<1200)return;_loToastAt=Date.now();miniToast("Look only here — nothing was changed");}
+function lookOnlyBlocked(force){
+  var user=force||(Date.now()-window._loAct<1500);if(!user)return;
+  lookOnlyToast();
+  if(window._loReverting)return;
+  try{if(!S||S._id==null||!window._lastSavedJson)return;var cur="";try{cur=_stateSig();}catch(e){}if(cur===window._lastSavedJson)return;
+    var snap=JSON.parse(window._lastSavedJson);var fresh=restoreState(JSON.parse(window._lastSavedJson));Object.keys(S).forEach(function(k){if(k.charAt(0)==="_")fresh[k]=S[k];});fresh.tab=S.tab;
+    var rec=records.find(function(r){return String(r.id)===String(S._id);});if(rec&&rec.state){Object.keys(snap).forEach(function(k){rec.state[k]=JSON.parse(JSON.stringify(snap[k]));});}
+    window._loReverting=true;try{S=fresh;window._lastSavedJson=_stateSig();window._dtSheet=null;window._loRerender=true;}finally{window._loReverting=false;}
+    setTimeout(function(){if(!window._loRerender)return;window._loRerender=false;var wr=document.getElementById("wrap");if(wr&&wr.style.display!=="none")render();},0);
+  }catch(e){window._loReverting=false;}
+}
+function applyLookOnly(){var on=isLookOnly();document.body.classList.toggle("lookonly",on);var b=document.getElementById("lo-badge");
+  if(on&&!b){b=document.createElement("div");b.id="lo-badge";b.title="You can read everything here, but changes only work in your own app";b.textContent="👁 Look only";document.body.appendChild(b);}
+  if(!on&&b)b.remove();}
+function loRefusal(){var res={data:null,error:{message:"Look only — nothing was changed"}};var p=new Proxy(function(){},{get:function(t,k){if(k==="then")return function(a,b){return Promise.resolve(res).then(a,b);};if(k==="catch")return function(){return Promise.resolve(res);};if(k==="finally")return function(f){try{f&&f();}catch(e){}return Promise.resolve(res);};return function(){return p;};},apply:function(){return p;}});return p;}
+function lookGuardClient(){var c=supabaseClient;if(!c||c._loGuard||typeof c.from!=="function")return;var f=c.from;c._loGuard=true;
+  c.from=function(t){var b=f.apply(c,arguments);if(t==="users"||!b)return b;["insert","update","upsert","delete"].forEach(function(m){if(typeof b[m]==="function"){var o=b[m];b[m]=function(){if(isLookOnly()){lookOnlyBlocked(false);return loRefusal();}return o.apply(b,arguments);};}});return b;};}
+(function(){
+  var guardAll=function(){
+    ["persistSave","debouncedSave","saveRecord","saveRecordChange","setUnitSetting","handlePhotoUpload","handleFileUpload","filePick","deletePhoto","removePhoto","showRepositionPhoto","openNewDog","openNewDogIn","openExpected","expSave","expArrived","expGone","expTomorrow","showIncidentModal","deleteRecord","rxArchivePicked","rxDeletePicked"].forEach(function(n){var fn=window[n];if(typeof fn!=="function"||fn._lo)return;
+      var w=function(){if(isLookOnly()){var forced=/^(open|show|handle|file|exp|delete|remove|rx|quick)/.test(n)||n==="setUnitSetting";lookOnlyBlocked(forced);if(n==="saveRecord"||n==="saveRecordChange")return Promise.resolve();return;}return fn.apply(this,arguments);};w._lo=true;window[n]=w;});
+    if(typeof window.initSupabase==="function"&&!window.initSupabase._lo){var i0=window.initSupabase;var wi=function(){var r=i0.apply(this,arguments);try{lookGuardClient();}catch(e){}return r;};wi._lo=true;window.initSupabase=wi;}
+    try{lookGuardClient();}catch(e){}
+  };
+  guardAll();document.addEventListener("DOMContentLoaded",guardAll);window.addEventListener("load",function(){guardAll();applyLookOnly();});
+  setInterval(function(){try{lookGuardClient();applyLookOnly();}catch(e){}},4000);
+})();
+
 </script>
 </body>
 </html>
