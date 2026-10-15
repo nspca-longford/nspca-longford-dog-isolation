@@ -474,7 +474,7 @@ function famTable(){if(typeof FAM_TABLE!=="undefined"&&FAM_TABLE)return FAM_TABL
 // the animal's own section of a record: dog / cat / animal / horse — whichever the app uses
 function famAnimalOf(st){st=st||{};return st.dog||st.cat||st.animal||st.horse||{};}
 function famSaveSoft(){try{if(typeof persistSave==="function")persistSave();if(typeof debouncedSave==="function")debouncedSave();if(typeof renderMain==="function")renderMain();}catch(e){}}
-var FAM_WORDS={dogs:{who:"seized dogs and pups",tab:"Dog tab",room:"a kennel or two",one:"A dog"},cats:{who:"seized cats and kittens",tab:"Cat tab",room:"a pen or two",one:"A cat"},stables:{who:"seized horses, ponies, goats and poultry",tab:"animal’s first tab",room:"a stable or a paddock",one:"An animal"}};
+var FAM_WORDS={dogs:{who:"seized dogs and pups",tab:"Dog tab",room:"a kennel or two",one:"A dog"},cats:{who:"seized cats and kittens",tab:"Cat tab",room:"a pen or two",one:"A cat"},stables:{who:"seized horses, ponies, goats and poultry",tab:"Animal tab",room:"a stable or a paddock",one:"An animal"}};
 // Ballinasloe Horse Fair: first Sunday of October, the Monday after and the Saturday after
 function fairCount(y){return (typeof records!=="undefined"?records:[]).filter(function(r){var d=famAnimalOf(r.state);return /Ballinasloe/i.test(d.event||"")&&String(d.intakeDate||r.intakeDate||"").slice(0,4)===String(y);}).length;}
 function fairNoticeHtml(){var f=fairPhase();if(!f)return "";var key="nspca-fair-"+f.y+"-"+(f.phase==="before"?"b":"a");try{if(localStorage.getItem(key))return "";}catch(e){}
