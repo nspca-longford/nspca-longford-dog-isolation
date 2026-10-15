@@ -1,5 +1,6 @@
 // NSPCA Longford — family.js: the parts every app shares (Dogs, Cats, Stables).
-// Sign-in, staying signed in, PINs, My profile, look only and which app someone opens in.
+// Sign-in, staying signed in, PINs, My profile, Manage users, look only, which app someone opens in,
+// the inspector list, saving safely when two people edit one record, and the Ballinasloe Horse Fair notice.
 // Edit this file once and every app gets the change. Each app keeps only its own animals.
 
 var HOME_FILES={dogs:"index.html",cats:"cats.html",stables:"stables.html"};
@@ -219,7 +220,7 @@ function famBoot(){
 //   famEnterApp()            after sign-in: load the app's records and show its board
 //   appWeek(me, monday)      { stats:[[n,"label"],…], names:[…] } for "Your week" in this app
 //   appProfileExtra(role)    extra cards at the foot of My profile (admin tools, version)
-var FAMILY_VERSION="1.0";
+var FAMILY_VERSION="2.0";
 var FAM_APPS=[["dogs","Dogs","dog_history","index.html"],["cats","Cats","cat_history","cats.html"],["stables","Stables","stables_history","stables.html"]];
 function famAppName(k){var a=FAM_APPS.filter(function(x){return x[0]===k;})[0];return a?a[1]:(k||"");}
 function famHere(){return (typeof APP_HOME!=="undefined"&&APP_HOME)||"dogs";}
@@ -320,3 +321,168 @@ function renderProfile(){
 "#famsheet .fam-err{color:#b91c1c;font-size:12.5px;font-weight:700;margin:8px 0 0}#famsheet .fam-go{width:100%;margin-top:12px;border:none;background:#c6e76c;color:#282932;font:inherit;font-size:14px;font-weight:800;padding:12px;border-radius:12px;cursor:pointer}",
 "@media(max-width:420px){.fam-nums b{font-size:16px}.fam-seg span{padding:5px 6px}}"
 ].join("\n");(document.head||document.documentElement).appendChild(st);})();
+
+function userTap(code){var u=getAllUsersSync().find(function(x){return x.code===code;});if(!u)return;if(u.source==="app"){miniToast(u.name+" is built into the app — changed in the code");return;}showEditUserModal(code);}
+function renderUsersAdmin(){
+  var all=getAllUsersSync().slice().sort(function(a,b){var o={admin:0,manager:1,supervisor:2,asst:3,coordinator:4,trainer:5};var x=o[a.role]==null?9:o[a.role],y=o[b.role]==null?9:o[b.role];return x-y||(a.name||"").localeCompare(b.name||"");});
+  var shared=function(u){return !u.email&&(u.role||"staff")==="staff";};
+  var people=all.filter(function(u){return !shared(u);}),codes=all.filter(shared);
+  var now=Date.now(),me=(CURRENT_USER||{}).code;
+  var emailN=all.filter(function(u){return u.email&&u.active!==false;}).length;var invited=all.filter(function(u){return u.email&&u.active===false;});
+  var quiet=people.filter(function(u){var t=userLastIn(u);return t&&now-t>14*864e5&&u.active!==false;});
+  var bits=['<b>'+emailN+' on email sign-in</b>'];if(codes.length)bits.push(codes.length+' shared code'+(codes.length===1?'':'s'));if(invited.length)bits.push('<b>'+esc(invited.map(function(u){return u.name;}).join(", "))+' invited</b> — not in yet');
+  var sent=bits.join(", ")+'.'+(quiet.length?' '+esc(quiet.slice(0,2).map(function(u){return u.name;}).join(" and "))+' last in '+fmtAgo(userLastIn(quiet[0]))+'.':'');
+  var row=function(u){var ri=userRoleInfo(u.role);var t=userLastIn(u);var off=u.active===false;var inv=off&&u.email;var r;
+    if(u.code===me)r='<span class="ur-s on">in now</span>';else if(inv)r='<span class="ur-s inv">invited</span>';else if(off)r='<span class="ur-s off">switched off</span>';else r='<span class="ur-s'+(t&&now-t<7*864e5?' on':'')+'">'+(t?esc(fmtAgo(t)):'—')+'</span>';
+    var sub=u.email?'email · '+esc(u.email):'code '+esc(u.code)+(shared(u)?' · shared':'');if(u.source==="app")sub+=' · built-in';
+    return '<div class="ur'+(off&&!inv?' off':'')+'" onclick="userTap(\''+esc(u.code)+'\')">'+userAvatarHtml(u,34)+'<div class="ur-m"><b>'+esc(u.name)+' <span class="ur-rp" style="background:'+ri[1]+'">'+ri[0]+'</span></b><small>'+sub+'</small></div>'+r+'</div>';};
+  var h='<div class="rxhead"><button onclick="loadRecordsList().then(function(){renderDashboard();})" class="rxback">&#8592; Dashboard</button><h2>Manage users</h2></div><div class="rxsub">Who can sign in, how, and when they were last in.</div>';
+  h+='<div class="rxstrip"><div class="rxlt">'+all.length+'<small>people</small></div><div class="rxtx">'+sent+'</div></div>';
+  h+='<button class="btn btnp" style="width:100%;margin-bottom:4px" onclick="showAddUserModal()">+ Add someone</button>';
+  h+='<div class="rxlbl">People <em>'+people.length+'</em></div><div class="rxlist">'+people.map(row).join("")+'</div>';
+  if(codes.length)h+='<div class="rxlbl">Shared codes <em>'+codes.length+'</em></div><div class="rxlist">'+codes.map(row).join("")+'</div>';
+  h+='<div class="rxsub" style="margin-top:10px">Tap someone to change their name, email or role, or switch them off. Built-in people are set in the app itself.</div>';
+  return '<div style="max-width:640px;margin:0 auto">'+h+'</div>';
+}
+function showAddUserModal(){
+  var ov=document.createElement("div");
+  ov.style.cssText="position:fixed;inset:0;background:rgba(40,41,50,0.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999";
+  ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:380px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,0.25)">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:15px;font-weight:600">Add new user</span><button onclick="this.closest(\'.add-user-ov\').remove()" style="background:#f1f3ee;border:none;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px">&#10005;</button></div>'
+    +'<div class="f"><label class="lbl">Full name</label><input id="new-user-name" type="text" placeholder="e.g. John Murphy"></div>'
+    +'<div class="f"><label class="lbl">Email <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 for sign-in; invite them in Supabase \u2192 Authentication \u2192 Users with the same address</span></label><input id="new-user-email" type="email" placeholder="name@nspca.ie"></div>'
+    +'<div class="f"><label class="lbl">Access code</label><input id="new-user-code" type="text" placeholder="e.g. JM-01" style="font-family:monospace;letter-spacing:0.04em;text-transform:uppercase"></div>'
+    +'<div class="f"><label class="lbl">Role</label><select id="new-user-role"><option value="staff">Staff</option><option value="supervisor">Supervisor</option><option value="asst">Assistant Supervisor</option><option value="coordinator">Rehoming Co-Ordinator</option><option value="trainer">Dog Trainer &amp; Behaviour Specialist</option><option value="manager">Manager</option><option value="admin">Admin</option></select></div>'
+    +'<button onclick="saveNewUser()" class="btn btnp" style="width:100%;padding:10px;font-size:13px;font-weight:600">Add user</button>'
+    +'</div>';
+  ov.className="add-user-ov";
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+  setTimeout(function(){var i=document.getElementById("new-user-name");if(i)i.focus();},50);
+}
+async function saveNewUser(){
+  var name=(document.getElementById("new-user-name")||{}).value;name=name?name.trim():"";
+  var code=(document.getElementById("new-user-code")||{}).value;code=code?code.trim().toUpperCase():"";
+  var role=(document.getElementById("new-user-role")||{}).value||"staff";
+  var email=((document.getElementById("new-user-email")||{}).value||"").trim().toLowerCase();
+  if(!name||!code){appAlert("Please enter a name and access code.");return;}
+  if(getAllUsersSync().some(function(u){return u.code===code;})){appAlert("That code is already in use.");return;}
+  if(!supabaseClient){appAlert("Supabase not connected.");return;}
+  try{
+    var _ins=await supabaseClient.from("users").insert([{name:name,code:code,role:role,active:true,email:email||null}]);if(_ins&&_ins.error)throw _ins.error;
+    var ov=document.querySelector(".add-user-ov");if(ov)ov.remove();
+    await refreshAllUsers();
+    showDashSection("users");
+    appAlert("User added. They can now log in with code "+code+".");
+  }catch(e){appAlert("Could not add user"+(e&&e.message?" \u2014 "+e.message:". Check your connection and try again."));}
+}
+function showEditUserModal(code){
+  var u=getAllUsersSync().find(function(x){return x.code===code;});
+  if(!u)return;
+  var ov=document.createElement("div");
+  ov.className="edit-user-ov";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(40,41,50,0.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999";
+  ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:380px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,0.25)">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:15px;font-weight:600">Edit user</span><button onclick="this.closest(\'.edit-user-ov\').remove()" style="background:#f1f3ee;border:none;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px">&#10005;</button></div>'
+    +'<div class="f"><label class="lbl">Full name</label><input id="edit-user-name" type="text" value="'+esc(u.name)+'"></div>'
+    +'<div class="f"><label class="lbl">Email</label><input id="edit-user-email" type="email" value="'+esc(u.email||"")+'"></div>'
+    +'<div class="f"><label class="lbl">Access code (read-only)</label><input type="text" value="'+esc(u.code)+'" disabled style="background:#f1f3ee;color:#6b7280;font-family:monospace"></div>'
+    +'<div class="f"><label class="lbl">Role</label><select id="edit-user-role">'+[["staff","Staff"],["supervisor","Supervisor"],["asst","Assistant Supervisor"],["coordinator","Rehoming Co-Ordinator"],["trainer","Dog Trainer & Behaviour Specialist"],["manager","Manager"],["admin","Admin"]].map(function(r){return'<option value="'+r[0]+'"'+(u.role===r[0]?" selected":"")+'>'+r[1]+'</option>';}).join("")+'</select></div>'
+    +'<div class="f"><label class="lbl">Opens in</label><select id="edit-user-home">'+[["","Dogs (the usual)"],["cats","Cats"],["stables","Stables"]].map(function(h){var cur=homeAppFor(u);return '<option value="'+h[0]+'"'+((cur===h[0])||(h[0]===""&&(cur===""||cur==="dogs"))?" selected":"")+'>'+h[1]+'</option>';}).join("")+'</select></div>'
+    +'<div class="f"><label class="lbl">Outside that app</label><select id="edit-user-look">'+[["0","Full use everywhere"],["1","Look only \u2014 can\u2019t change anything"]].map(function(o){var cur=lookOnlyFor(u)?"1":"0";return '<option value="'+o[0]+'"'+(cur===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+'</select><div style="font-size:10.5px;color:#9a9fa8;margin-top:4px">Admins always have full use.</div></div>'
+    +'<button onclick="saveEditedUser(\''+esc(code)+'\')" class="btn btnp" style="width:100%;padding:10px;font-size:13px;font-weight:600">Save changes</button>'
+    +((u.code!==((CURRENT_USER||{}).code))?'<button onclick="this.closest(\'.edit-user-ov\').remove();toggleUserActive(\''+esc(code)+'\','+(u.active===false)+')" style="width:100%;margin-top:8px;padding:9px;font-size:12px;background:'+(u.active===false?'#dcfce7':'#fef9c3')+';border:none;color:'+(u.active===false?'#166534':'#854d0e')+';border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700">'+(u.active===false?'Switch '+esc(u.name)+' back on':'Switch '+esc(u.name)+' off \u2014 can\u2019t sign in')+'</button>':'')
+    +(userRemovable(u)
+      ?'<button onclick="removeUser(\''+esc(code)+'\')" style="width:100%;margin-top:8px;padding:9px;font-size:12px;background:none;border:0.5px solid #fca5a5;color:#991b1b;border-radius:8px;cursor:pointer;font-family:inherit">Remove '+esc(u.name)+' from the app</button>'
+      :'<div style="margin-top:8px;font-size:11px;color:#9a9fa8;text-align:center">'+(u.code===((CURRENT_USER||{}).code)?"You cannot remove your own account.":"Built-in accounts cannot be removed \u2014 set them inactive instead.")+'</div>')
+    +'</div>';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}
+function userRemovable(u){
+  if(!u)return false;
+  if(u.source==="app")return false;
+  if(USERS.some(function(x){return x.code===u.code;}))return false;
+  if(CURRENT_USER&&u.code===CURRENT_USER.code)return false;
+  return true;
+}
+async function removeUser(code){
+  var u=getAllUsersSync().find(function(x){return x.code===code;});
+  if(!u||!userRemovable(u)){appAlert("That account cannot be removed.");return;}
+  if(!supabaseClient){appAlert("No connection \u2014 try again when you are back online.");return;}
+  appConfirm("Remove "+u.name+" from the app for good? Their login stops working immediately. Anything they recorded stays on the records.",async function(){
+    try{
+      var res=await supabaseClient.from("users").delete().eq("code",code);
+      if(res&&res.error)throw res.error;
+      var ov=document.querySelector(".edit-user-ov");if(ov)ov.remove();
+      await refreshAllUsers();
+      showDashSection("users");
+      miniToast(u.name+" removed");
+    }catch(e){console.error("removeUser:",e);appAlert("Could not remove that user. Check your connection and try again.");}
+  });
+}
+async function saveEditedUser(code){
+  var name=(document.getElementById("edit-user-name")||{}).value;name=name?name.trim():"";
+  var role=(document.getElementById("edit-user-role")||{}).value||"staff";
+  if(!name){appAlert("Please enter a name.");return;}
+  try{var _hEl=document.getElementById("edit-user-home");if(_hEl){var _u=getAllUsersSync().find(function(x){return x.code===code;})||{};var _em=String(((document.getElementById("edit-user-email")||{}).value||_u.email||"")).trim().toLowerCase();var _m=JSON.parse(JSON.stringify(unitSetting("homeApps")||{}));var _k=_em||code;if(_hEl.value)_m[_k]=_hEl.value;else delete _m[_k];if(_em&&_m[code]&&_k!==code)delete _m[code];setUnitSetting("homeApps",_m);}}catch(_e){}
+  try{var _lEl=document.getElementById("edit-user-look");if(_lEl){var _u2=getAllUsersSync().find(function(x){return x.code===code;})||{};var _em2=String(((document.getElementById("edit-user-email")||{}).value||_u2.email||"")).trim().toLowerCase();var _lm=JSON.parse(JSON.stringify(unitSetting("lookOnly")||{}));var _k2=_em2||code;_lm[_k2]=_lEl.value==="1";if(_em2&&_k2!==code)delete _lm[code];setUnitSetting("lookOnly",_lm);}}catch(_e){}
+  if(!supabaseClient)return;
+  try{
+    var _upd=await supabaseClient.from("users").update(Object.assign({name:name,role:role},{email:(((document.getElementById("edit-user-email")||{}).value||"").trim().toLowerCase())||null})).eq("code",code);if(_upd&&_upd.error)throw _upd.error;
+    var ov=document.querySelector(".edit-user-ov");if(ov)ov.remove();
+    await refreshAllUsers();
+    showDashSection("users");
+  }catch(e){appAlert("Could not save changes"+(e&&e.message?" \u2014 "+e.message:"."));}
+}
+async function toggleUserActive(code,makeActive){
+  if(!supabaseClient)return;
+  try{
+    var _act2=await supabaseClient.from("users").update({active:makeActive}).eq("code",code);if(_act2&&_act2.error)throw _act2.error;
+    await refreshAllUsers();
+    showDashSection("users");
+  }catch(e){appAlert("Could not update user status.");}
+}
+function fairDays(y){var d=new Date(y,9,1);while(d.getDay()!==0)d.setDate(d.getDate()+1);var a=new Date(d),b=new Date(d),c=new Date(d);b.setDate(b.getDate()+1);c.setDate(c.getDate()+6);return [a,b,c];}
+function fairPhase(iso){var t=iso?new Date(String(iso).slice(0,10)+"T12:00:00"):new Date();if(isNaN(t))return null;var y=t.getFullYear();var f=fairDays(y);var t0=new Date(y,t.getMonth(),t.getDate());var s0=new Date(f[0]);s0.setDate(s0.getDate()-10);var e1=new Date(f[2]);e1.setDate(e1.getDate()+14);
+  if(t0<s0||t0>e1)return null;return {y:y,days:f,phase:t0<f[0]?"before":t0<=f[2]?"on":"after",label:"Ballinasloe Horse Fair "+y};}
+var INSPECTORS=[{n:"Karen Lyons",c:""},{n:"James McCormack",c:""},{n:"Lyndsey Delaney",c:""}];
+function inspectorOpts(cur){if(cur==="James McCormick")cur="James McCormack";var o=[["","-- select inspector --"]];INSPECTORS.forEach(function(i){o.push([i.n,i.n+(i.c?" \u2014 "+i.c:"")]);});o.push(["Other","Other / not listed"]);if(cur&&!o.some(function(x){return x[0]===cur;}))o.splice(1,0,[cur,cur+" (as recorded)"]);return o;}
+function inspectorLine(d){d=d||{};if(d.inspector==="James McCormick")d=Object.assign({},d,{inspector:"James McCormack"});return [d.inspector&&d.inspector!=="Other"?d.inspector:(d.inspectorOther||""),d.inspectorRef?"case "+d.inspectorRef:""].filter(Boolean).join(" \u00b7 ");}
+function mrStrip(o){var c=JSON.parse(JSON.stringify(o||{}));delete c._id;delete c.tab;delete c._savedBy;return c;}
+function mrSnap(at){try{window._mrBase=JSON.stringify(mrStrip(S));window._mrAt=at||"";window._mrFor=S._id;}catch(e){}}
+function mrVal(b,m,t,hit){var js=JSON.stringify;var B=js(b),M=js(m),T=js(t);if(B===T||M===T)return m;if(B===M){hit();return t;}
+  if(m&&t&&typeof m==="object"&&typeof t==="object"&&!Array.isArray(m)&&!Array.isArray(t)){var o={},ks={};[b||{},m,t].forEach(function(x){if(x&&typeof x==="object")Object.keys(x).forEach(function(k){ks[k]=1;});});Object.keys(ks).forEach(function(k){var v=mrVal((b||{})[k],m[k],t[k],hit);if(v!==undefined)o[k]=v;});return o;}
+  if(Array.isArray(m)&&Array.isArray(t)){if(Array.isArray(b)&&b.length===m.length&&b.length===t.length)return m.map(function(x,i){return mrVal(b[i],m[i],t[i],hit);});
+    var bs=(Array.isArray(b)?b:[]).map(function(x){return js(x);}),ms=m.map(function(x){return js(x);}),ts=t.map(function(x){return js(x);});
+    var out=t.filter(function(x,i){return !(bs.indexOf(ts[i])>=0&&ms.indexOf(ts[i])<0);});m.forEach(function(x,i){if(ts.indexOf(ms[i])<0&&bs.indexOf(ms[i])<0)out.push(x);});hit();return out;}
+  return m;}
+async function mrMerge(){if(!supabaseClient||!S||!S._id||window._mrFor!==S._id||!window._mrBase)return null;
+  var r=await supabaseClient.from(famTable()).select("saved_at").eq("id",S._id);var rem=r&&!r.error&&r.data&&r.data[0];if(!rem||!rem.saved_at||rem.saved_at===window._mrAt)return null;
+  var r2=await supabaseClient.from(famTable()).select("saved_at,data").eq("id",S._id);var row=r2&&!r2.error&&r2.data&&r2.data[0];if(!row||!row.data)return null;
+  var who=row.data._savedBy||"";var theirs=mrStrip(restoreState(row.data));var base=JSON.parse(window._mrBase);var mine=mrStrip(S);var took=0;
+  var ks={};[base,mine,theirs].forEach(function(x){Object.keys(x).forEach(function(k){ks[k]=1;});});
+  Object.keys(ks).forEach(function(k){var v=mrVal(base[k],mine[k],theirs[k],function(){took++;});if(v!==undefined)S[k]=v;});
+  window._mrBase=JSON.stringify(theirs);window._mrAt=row.saved_at;
+  return took?{who:who}:null;}
+// ── Stage 2: shared across the family — Manage users, inspectors, saving safely, Ballinasloe ──
+// Hooks an app may set:  FAM_TABLE  the app's records table ("dogs" | "cats" | "stables"), default by APP_HOME
+function famTable(){if(typeof FAM_TABLE!=="undefined"&&FAM_TABLE)return FAM_TABLE;return ({dogs:"dogs",cats:"cats",stables:"stables"})[famHere()]||"dogs";}
+// the animal's own section of a record: dog / cat / animal / horse — whichever the app uses
+function famAnimalOf(st){st=st||{};return st.dog||st.cat||st.animal||st.horse||{};}
+function famSaveSoft(){try{if(typeof persistSave==="function")persistSave();if(typeof debouncedSave==="function")debouncedSave();if(typeof renderMain==="function")renderMain();}catch(e){}}
+var FAM_WORDS={dogs:{who:"seized dogs and pups",tab:"Dog tab",room:"a kennel or two",one:"A dog"},cats:{who:"seized cats and kittens",tab:"Cat tab",room:"a pen or two",one:"A cat"},stables:{who:"seized horses, ponies, goats and poultry",tab:"animal’s first tab",room:"a stable or a paddock",one:"An animal"}};
+// Ballinasloe Horse Fair: first Sunday of October, the Monday after and the Saturday after
+function fairCount(y){return (typeof records!=="undefined"?records:[]).filter(function(r){var d=famAnimalOf(r.state);return /Ballinasloe/i.test(d.event||"")&&String(d.intakeDate||r.intakeDate||"").slice(0,4)===String(y);}).length;}
+function fairNoticeHtml(){var f=fairPhase();if(!f)return "";var key="nspca-fair-"+f.y+"-"+(f.phase==="before"?"b":"a");try{if(localStorage.getItem(key))return "";}catch(e){}
+  var w=FAM_WORDS[famHere()]||FAM_WORDS.dogs;var fd=function(d){return d.toLocaleDateString("en-IE",{weekday:"short"})+" "+d.getDate();};var n=fairCount(f.y);
+  var x='<span class="fx" role="button" tabindex="0" title="Hide until next time" onclick="try{localStorage.setItem(\''+key+'\',\'1\')}catch(e){};renderDashboard()">✕</span>';
+  if(f.phase==="before")return '<div class="fairn">'+x+'<b>Ballinasloe Horse Fair is coming up</b><small>Main days '+fd(f.days[0])+', '+fd(f.days[1])+' and '+fd(f.days[2])+' '+f.days[2].toLocaleDateString("en-IE",{month:"short"})+'. NSPCA inspectors attend, and '+w.who+' usually come in over the days after. Worth keeping '+w.room+' free.</small>'+(typeof openExpected==="function"?'<div class="fa"><span onclick="openExpected()">+ Expected arrival</span></div>':'')+'</div>';
+  return '<div class="fairn">'+x+'<b>Ballinasloe Horse Fair '+(f.phase==="on"?"is on":"was on")+'</b><small>'+w.one+' seized there: on its '+w.tab+', open <i>How they came in</i> and tap “Ballinasloe Horse Fair”. '+(n?n+" tagged so far.":"None tagged yet.")+'</small>'+(n?'<div class="fa"><span onclick="window._dbS=\'ballinasloe\';renderDashboard()">See them ›</span></div>':'')+'</div>';}
+// the chip on "How they came in" — only around fair time, or once a record is tagged
+function famFairChip(d){d=d||{};var f=fairPhase(d.intakeDate);if(!d.event&&!(f&&f.phase!=="before"))return "";var lbl=d.event||f.label;return '<div class="cq"><label>Seized at</label><div class="cchips"><span class="cchip'+(d.event?" on":"")+'" onclick="fairTag()">'+famEsc(lbl)+'</span></div></div>';}
+function fairTag(){var d=famAnimalOf(S);var f=fairPhase(d.intakeDate);var lbl=f?f.label:(d.event||"");if(d.event===lbl){d.event="";}else{d.event=lbl;if(!d.intakeReason)d.intakeReason="Seized";}famSaveSoft();}
+(function(){if(document.getElementById("fam-css2"))return;var st=document.createElement("style");st.id="fam-css2";st.textContent=
+".fairn{position:relative;background:#fff;border:1px solid #e4e7e0;border-left:4px solid #c6e76c;border-radius:12px;padding:10px 34px 10px 13px;margin-bottom:10px}.fairn b{display:block;font-size:13.5px;color:#282932}.fairn small{display:block;font-size:12.5px;color:#4b5060;font-weight:600;line-height:1.45;margin-top:2px}"+
+".fairn .fx{position:absolute;top:8px;right:10px;color:#9a9fa8;font-size:13px;cursor:pointer;padding:2px 4px}.fairn .fa{margin-top:7px}.fairn .fa span{font-size:12px;font-weight:800;color:#282932;background:#eef6d6;border-radius:20px;padding:4px 11px;cursor:pointer;display:inline-block}";
+(document.head||document.documentElement).appendChild(st);})();
