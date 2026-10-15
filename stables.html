@@ -1064,8 +1064,7 @@ var USERS=[
   {code:"LAU01",name:"Laura",role:"coordinator"},
   {code:"CAT01",name:"Cattery",role:"staff"},
   {code:"CISO01",name:"Cat Iso",role:"staff"},
-  {code:"STA01",name:"Stables",role:"staff"},
-  {code:"JAM01",name:"Jamie",role:"manager",title:"Senior Equine Animal Care Assistant"}
+  {code:"STA01",name:"Stables",role:"staff"}
 ];
 var CURRENT_USER=null;
 // ── Home app: some people land straight in their own unit's app ─────
@@ -1394,7 +1393,7 @@ function renderUpcomingMedical(){
   var nOver=all.filter(function(x){return x.it.state==="overdue";}).length;
   var nSoon=all.filter(function(x){return x.it.state==="soon";}).length;
   var head='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'+backToDashBtn()+'<h2 style="margin:0;flex:1">Upcoming Medical</h2></div>'
-    +'<div class="sub" style="margin-bottom:12px">Vaccines, worming &amp; flea/tick due across the unit &middot; '+nOver+' overdue, '+nSoon+' due soon</div>';
+    +'<div class="sub" style="margin-bottom:12px">Vaccines and worming due across the unit &middot; '+nOver+' overdue, '+nSoon+' due soon</div>';
   var chips=[["all","All"],["soon","Next 2 weeks"],["overdue","Overdue"]].map(function(c){var sel=filt===c[0];return '<button onclick="window._umFilt=\''+c[0]+'\';showDashSection(\'upcomingMedical\')" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--color-border-secondary);background:'+(sel?"#282932":"var(--color-background-primary)")+';color:'+(sel?"#fff":"var(--color-text-secondary)")+'">'+c[1]+'</button>';}).join("");
   head+='<div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">'+chips+'</div>';
   if(!shown.length)return head+'<div style="text-align:center;padding:40px;color:var(--color-text-secondary)">Nothing '+(filt==="overdue"?"overdue":(filt==="soon"?"due in the next 2 weeks":"coming up"))+'.</div>';
@@ -1413,7 +1412,7 @@ function renderUpcomingMedical(){
     +'</div>';
   }).join("");
   var trows=shown.map(function(x){var r=x.r,it=x.it,d=(r.state&&r.state.dog)||{};var c=SC[it.state]||SC.upcoming;return{onclick:'openDogMedical('+r.id+')',s:{name:r.name||"",kennel:kennelRank(d.kennel).sec*100+kennelRank(d.kennel).num,what:it.label||"",due:it.due||"",state:({overdue:0,soon:1,booked:2,upcoming:3})[it.state]||3},c:{name:'<b>'+esc(r.name)+'</b>',kennel:d.kennel?'<span class="kc">'+esc(kennelShort(d.kennel))+'</span>':'',what:esc(it.label||""),due:esc(it.due?fmtDMY(it.due):""),state:'<span class="pl" style="background:'+c[0]+';color:'+c[1]+'">'+umDueText(it.due)+'</span>'}};});
-  var table=dtable("um","upcomingMedical",[{k:"name",l:"Dog"},{k:"kennel",l:"Kennel",w:"80px"},{k:"what",l:"What"},{k:"due",l:"Due",w:"120px"},{k:"state",l:"Status",w:"130px"}],trows,"due");
+  var table=dtable("um","upcomingMedical",[{k:"name",l:"Animal"},{k:"kennel",l:"Where",w:"80px"},{k:"what",l:"What"},{k:"due",l:"Due",w:"120px"},{k:"state",l:"Status",w:"130px"}],trows,"due");
   return head+'<div class="only-wide">'+table+'</div><div class="hide-wide">'+rows+'</div>';
 }
 
@@ -1560,7 +1559,7 @@ function appProfileExtra(role){var h="";var lb="";try{lb=localStorage.getItem("n
   if(role==="admin"||role==="manager"){var users=getAllUsersSync();h+='<div class="fam-card"><div class="fam-lbl">Admin <em>only admins see this</em></div>'
     +(role==="admin"?famRow("Manage users",users.length+" people",'<span class="fam-btn" onclick="showDashSection(\'users\')">Open</span>')+famRow("Activity","who\u2019s been in and what changed",'<span class="fam-btn" onclick="showDashSection(\'activity\')">Open</span>'):'')
     +famRow("Download backup",lb?"last backup "+esc(fmtDMY(lb))+" \u00b7 "+daysSince(lb)+" days ago":"no backup on this device yet",'<span class="fam-btn" onclick="downloadBackup()">Download</span>')
-    +famRow("The month","the unit report",'<span class="fam-btn" onclick="showDashSection(\'month\')">Open</span>')+'</div>';}
+    +'</div>';}
   h+='<div class="fam-card"><div class="fam-lbl">This app</div>'+famRow("NSPCA Longford \u00b7 Stables","v"+esc(APP_VERSION),'<span class="fam-btn" onclick="showWhatsNew(true)">What\u2019s new</span>')+'</div>';
   return h;}
 function myWeek(name){var now=new Date();var day=(now.getDay()+6)%7;var mon=new Date(now);mon.setDate(now.getDate()-day);var start=mon.toISOString().slice(0,10);var out={reports:0,weighs:0,assess:0,cleared:0,dogs:[]};
@@ -1855,7 +1854,7 @@ function page_records(){
   var CC={all:fil.length,here:0,foster:0,rehomed:0,kennels:0,pts:0,other:0};fil.forEach(function(r){CC[rxChipKey(recStatus(r))]++;});
   fil=fil.filter(function(r){return stat==="all"||rxChipKey(recStatus(r))===stat;});
   var cmp=function(a,b){if(sortK==="name")return(a.name||"").localeCompare(b.name||"");if(sortK==="changed")return(b.savedAt||"").localeCompare(a.savedAt||"");if(sortK==="stay")return(rxStay(b)||0)-(rxStay(a)||0);return(b.intakeDate||b.savedAt||"").localeCompare(a.intakeDate||a.savedAt||"");};
-  var chipDefs=[["all","All"],["here","Here"],["foster","Foster"],["rehomed","Rehomed"],["pts","PTS"]];if(C.other)chipDefs.push(["other","Other"]);
+  var chipDefs=[["all","All"],["here","Here"],["foster","Foster"],["rehomed","Rehomed"],["kennels","Places"],["pts","PTS"]];if(C.other)chipDefs.push(["other","Other"]);
   var chips='<div class="rxchips">'+chipDefs.map(function(c){return '<span class="'+(stat===c[0]?'on':'')+'" onclick="rxSet(\'_rStat\',\''+c[0]+'\')">'+c[1]+'<em>'+CC[c[0]]+'</em></span>';}).join("")+'</div>';
   var dots=[["Green","#22c55e"],["Yellow","#eab308"],["Red","#ef4444"],["Black","#333542"]].map(function(d){return '<i class="rxdot'+(lt[d[0]]?' on':'')+'" style="background:'+d[1]+'" title="'+d[0]+'" onclick="rxLight(\''+d[0]+'\')"></i>';}).join("");
   var row2='<div class="rxrow2">'+dots+'<span class="rxea'+(ea?' on':'')+'" onclick="rxSet(\'_rEA\','+(!ea)+')">EA</span>'
@@ -1884,7 +1883,7 @@ function page_records(){
   var trOf=function(r){var st=r.state||{},d=st.dog||{};var s=recStatus(r);var tg=rxTag(r);var stay=rxStay(r);var m=M[r.id]||{};
     return '<tr class="'+(pick[r.id]?'pick':'')+(isArchived(r)?' arch':'')+'" onclick="rxTap('+r.id+')"><td class="rxn"><div>'+(sel?'<span class="rxck"></span>':'')+'<span class="rxph s">'+phOf(d)+'</span><b>'+rxHl(r.name||"—",q)+'</b>'+(r.refNo?'<small>'+rxHl(r.refNo,q)+'</small>':'')+(m.why&&m.why!=="ref"?'<small class="rxwhy">'+esc(m.why)+': '+rxHl(m.val,q)+'</small>':'')+'</div></td><td>'+(d.kennel&&!s.dep?'<span class="kc">'+esc(kennelShort(d.kennel))+'</span>':'')+'</td><td class="m">'+rxHl(r.breed||d.breed||"",q)+'</td><td>'+lp(r).replace('<small>',' ').replace('/24</small>','')+'</td><td><span class="rxst '+tg.c+'">'+esc(tg.t)+'</span></td><td class="m">'+(r.intakeDate?esc(fmtDMY(r.intakeDate)):'—')+'</td><td class="m">'+(s.dep&&rxOutDate(r)?esc(fmtDMY(rxOutDate(r))):'—')+'</td><td class="m">'+(stay===null?'—':(s.dep?stay+' day'+(stay===1?'':'s'):'day '+stay))+'</td><td class="m">'+(r.savedAt?esc(r.savedBy||"")+(r.savedBy?' · ':'')+esc(fmtAgo(r.savedAt)):'')+'</td></tr>';};
   var tbody=groups.map(function(g){if(g.more)return '<tr class="g more" onclick="rxSet(\'_rOlder\',true)"><td colspan="9">Show older · '+esc(g.t)+' ('+g.n+') ›</td></tr>';return((q||col)?'':'<tr class="g"><td colspan="9">'+esc(g.t)+'<em>'+g.n+'</em></td></tr>')+g.rows.map(trOf).join("");}).join("");
-  var table='<div class="rxwide"><table class="rxtable"><thead><tr>'+th("name","Dog")+th("kennel","Kennel")+th("breed","Breed")+th("light","Light")+th("where","Where / outcome")+th("in","In")+th("out","Out")+th("stay","Stay")+th("changed","Last changed")+'</tr></thead><tbody>'+tbody+'</tbody></table></div>';
+  var table='<div class="rxwide"><table class="rxtable"><thead><tr>'+th("name","Animal")+th("kennel","Where")+th("breed","Breed")+th("light","Light")+th("where","Where / outcome")+th("in","In")+th("out","Out")+th("stay","Stay")+th("changed","Last changed")+'</tr></thead><tbody>'+tbody+'</tbody></table></div>';
   var archLink=archCount?'<div class="rxmore q" onclick="rxSet(\'_showArchived\','+(!showArch)+')">'+archCount+' archived · '+(showArch?'hide':'show')+'</div>':'';
   var pk=Object.keys(pick).length;
   var bar=sel?'<div class="rxbar"><span>'+(pk?pk+' selected':'Tap animals to select')+'</span>'+(pk?'<i onclick="rxArchivePicked()">Archive</i>'+(rxCanDelete()?'<i class="d" onclick="rxDeletePicked()">Delete</i>':''):'')+'<i onclick="rxSelMode()">Done</i></div>':'';
@@ -1992,7 +1991,7 @@ function wiLive(inp){var row=inp.closest(".wi2");if(!row)return;var prev=parseFl
   row.classList.toggle("drop",!!(c&&c.drop));if(!out)return;if(!c||!inp.value){out.textContent="";out.className="dl";return;}
   out.className="dl "+(c.d<0?"dn":"up");out.textContent=(c.d>=0?"+":"−")+Math.abs(c.d).toFixed(1)+" kg"+(c.drop?" · "+Math.round(Math.abs(c.pct))+"%":"");}
 function renderBatchWeighIn(){var e=esc;var L=navList().filter(function(r){return !isFlock(r.state||{});}).map(wiInfo);var due=L.filter(function(x){return x.due;}),done=L.filter(function(x){return x.today;}),rest=L.filter(function(x){return !x.due&&!x.today;});var R=window._wiLast&&window._wiLast.date===tdISO()?window._wiLast:null;
-  var h='<div style="max-width:620px;margin:0 auto"><div class="rxhead"><button onclick="loadRecordsList().then(function(){renderDashboard();})" class="rxback">&#8592; Dashboard</button><h2>Batch weigh-in</h2></div><div class="rxsub">Type weights down the line and save once. Young are due daily, adults weekly. Entries log as “Batch weigh-in”.</div>';
+  var h='<div style="max-width:620px;margin:0 auto"><div class="rxhead"><button onclick="loadRecordsList().then(function(){renderDashboard();})" class="rxback">&#8592; Dashboard</button><h2>Batch weigh-in</h2></div><div class="rxsub">Type weights down the line and save once. Everyone is due weekly. Entries log as “Batch weigh-in”.</div>';
   var sent;if(R&&!due.length)sent='<b>Everyone weighed.</b> '+R.n+' saved by '+e(R.by)+' at '+e(R.at)+'.'+(R.drops.length?' <b style="color:#fca5a5">'+R.drops.map(function(x){return e(x.name)+' is down '+x.d.toFixed(1)+' kg';}).join("; ")+'</b>.':'');
   else if(!L.length)sent='<b>No animals in.</b>';
   else sent=(due.length?'<b>'+due.length+' due today</b>: '+due.map(function(x){return e(x.r.name)+(x.pup?' (young one, daily)':'');}).join(", ")+'.':'<b>Nobody due today.</b>')+(done.length?' '+done.map(function(x){return e(x.r.name);}).join(", ")+' '+(done.length===1?'was':'were')+' weighed today.':'')+(R&&R.drops.length?' <b style="color:#fca5a5">'+R.drops.map(function(x){return e(x.name)+' is down '+x.d.toFixed(1)+' kg';}).join("; ")+'</b>.':'');
@@ -2260,9 +2259,9 @@ function tasksRollupHtml(activeRecords){
   var showAll=!!window._todayAll;var LIM=6;var shown=showAll?items:items.slice(0,LIM);
   var h='<div class="today"><div class="th"><b>Today</b><span>'+(items.length+(t.weighs?1:0)+fu.length)+' thing'+((items.length+(t.weighs?1:0)+fu.length)!==1?"s":"")+' \u00b7 tap to open <span onclick="event.stopPropagation();dismissToday()" style="margin-left:10px;color:#c6e76c;font-weight:800;cursor:pointer">Dismiss</span></span></div>';
   var _grp=function(it){if(it.cls==="r"||it.tab==="medical"||/weigh|vaccin|vet|contagious|incident|antibiotic|worming/i.test(it.job))return "do";if(it.tab==="days"||/report|note/i.test(it.job))return "write";return "decide";};
-  var _sections=[["do","Do first"],["decide","Decide"],["write","Write"]];var _rowH=function(it){return '<div class="ti '+it.cls+'" onclick="openDogAt('+it.id+',\''+it.tab+'\')"><div class="tw"><b>'+esc(it.name)+'</b>'+(it.k?' <span class="tkn">'+esc(it.k)+'</span>':'')+' \u00b7 '+it.job+'<small>'+it.sub+'</small></div><div class="tgo">'+({medical:"Medical",dog:"Dog",days:"Report",rehoming:"Clearance",rehome:"Rehoming",foster:"Foster",weights:"Weigh",scoring:"Scoring",notes:"Notes",files:"Files"}[it.tab]||"Open")+' &rsaquo;</div></div>';};
+  var _sections=[["do","Do first"],["decide","Decide"],["write","Write"]];var _rowH=function(it){return '<div class="ti '+it.cls+'" onclick="openDogAt('+it.id+',\''+it.tab+'\')"><div class="tw"><b>'+esc(it.name)+'</b>'+(it.k?' <span class="tkn">'+esc(it.k)+'</span>':'')+' \u00b7 '+it.job+'<small>'+it.sub+'</small></div><div class="tgo">'+({medical:"Medical",dog:"Animal",days:"Report",rehoming:"Clearance",rehome:"Rehoming",foster:"Foster",weights:"Weigh",scoring:"Scoring",notes:"Notes",files:"Files"}[it.tab]||"Open")+' &rsaquo;</div></div>';};
   _sections.forEach(function(sec){var rows=shown.filter(function(it){return _grp(it)===sec[0];});if(!rows.length)return;h+='<div class="tsec">'+sec[1]+'</div>'+rows.map(_rowH).join("");});
-  if(t.weighs)h+='<div class="ti q" onclick="dashMenuGo(\'weighin\')"><div class="tw"><b>Weigh-ins</b> \u00b7 '+t.weighs+' dog'+(t.weighs!==1?"s":"")+' not weighed in 7 days<small>Batch weigh-in \u00b7 a few minutes</small></div><div class="tgo">Weigh &rsaquo;</div></div>';
+  if(t.weighs)h+='<div class="ti q" onclick="dashMenuGo(\'weighin\')"><div class="tw"><b>Weigh-ins</b> \u00b7 '+t.weighs+' animal'+(t.weighs!==1?"s":"")+' not weighed in 7 days<small>Batch weigh-in \u00b7 a few minutes</small></div><div class="tgo">Weigh &rsaquo;</div></div>';
   fu.forEach(function(x){h+='<div class="ti t"><div class="tw" onclick="openDogAt('+x.id+',\'outcome\')" style="cursor:pointer"><b>'+esc(x.name)+'</b> \u00b7 follow-up due<small>'+esc(x.outcome)+(x.date?' '+esc(fmtDMY(x.date)):'')+' \u00b7 how are they getting on?</small></div><div class="tgo" onclick="markFollowUpDone('+x.id+')" style="cursor:pointer">Done</div></div>';});
   if(items.length>LIM)h+='<div class="tmore" onclick="window._todayAll=!window._todayAll;renderDashboard()">'+(showAll?"Show fewer":"+ "+(items.length-LIM)+" more")+'</div>';
   h+='</div>';
@@ -2519,7 +2518,7 @@ function printIncidentRegister(){
   all.sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
   var rows=all.map(function(e){return '<tr><td>'+fmtDMY(e.date)+(e.time?' '+esc(e.time):'')+'</td><td>'+esc(e.dog)+'</td><td>'+esc(e.kennel)+'</td><td>'+esc(e.severity)+'</td><td>'+esc(e.text)+'</td><td>'+esc(e.staff)+'</td></tr>';}).join("");
   var w=window.open("","_blank");
-  w.document.write('<!DOCTYPE html><html><head><title>Incident Register</title><style>body{font-family:system-ui,sans-serif;padding:24px;color:#282932}h1{font-size:17px;margin:0 0 2px}h2{font-size:12px;font-weight:400;color:#555;margin:0 0 14px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #cfd4cf;padding:6px 8px;text-align:left;vertical-align:top}th{background:#f1f3ee;font-size:9px;text-transform:uppercase}@media print{body{padding:6px}}</style></head><body><h1>Incident Register &middot; NSPCA Longford Isolation</h1><h2>'+all.length+' incidents &middot; generated '+new Date().toLocaleString("en-IE")+' by '+esc(currentName())+'</h2><table><thead><tr><th>Date</th><th>Dog</th><th>Kennel</th><th>Severity</th><th>Details</th><th>Logged by</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>');
+  w.document.write('<!DOCTYPE html><html><head><title>Incident Register</title><style>body{font-family:system-ui,sans-serif;padding:24px;color:#282932}h1{font-size:17px;margin:0 0 2px}h2{font-size:12px;font-weight:400;color:#555;margin:0 0 14px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #cfd4cf;padding:6px 8px;text-align:left;vertical-align:top}th{background:#f1f3ee;font-size:9px;text-transform:uppercase}@media print{body{padding:6px}}</style></head><body><h1>Incident Register &middot; NSPCA Longford Isolation</h1><h2>'+all.length+' incidents &middot; generated '+new Date().toLocaleString("en-IE")+' by '+esc(currentName())+'</h2><table><thead><tr><th>Date</th><th>Animal</th><th>Where</th><th>Severity</th><th>Details</th><th>Logged by</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>');
   w.document.close();w.focus();setTimeout(function(){w.print();},300);
 }
 
@@ -2842,7 +2841,7 @@ function renderStory(){var ev=storyEvents();var e=esc;var d=S.dog||{};var fl=win
 }
 function copyStory(){
   var ev=storyEvents();
-  var lines=[(S.dog.name||"Dog")+" \u2014 chronology"+(S.dog.refNo?" (ref "+S.dog.refNo+")":"")];
+  var lines=[(S.dog.name||"Animal")+" \u2014 chronology"+(S.dog.refNo?" (ref "+S.dog.refNo+")":"")];
   ev.forEach(function(e){lines.push(fmtDMY(e.date)+(e.time?" "+e.time:"")+" \u2014 "+e.title+(e.detail?": "+e.detail:""));});
   var text=lines.join("\n");
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){appAlert("Story copied \u2014 paste it into an email or document.");},function(){appAlert("Couldn\u0027t copy automatically \u2014 use the Report tab\u0027s copy instead.");});}
@@ -3105,7 +3104,7 @@ function generateAutoNotices(){
     // Vaccine reminders
     if(active||finished){
       var med=r.state&&r.state.medical?r.state.medical:{};var vl=med.vaccinations||[];
-      var VAC=["Equine flu","Tetanus","Flu + tetanus","Clostridial"];
+      var VAC=stVacFor(r.state);
       VAC.forEach(function(vt){
         if(vl.some(function(v){return v.type===vt;}))return;
         var explicit=vl.find(function(v){return v.type===vt&&v.nextDue;});
@@ -3949,10 +3948,10 @@ function renderMedical(){
     });
   }else{bDis+='<div style="text-align:center;padding:12px 0;color:#9a9fa8;font-size:12px">No diseases or infections recorded on arrival</div>';}
   // Vaccinations (logic unchanged)
-  var VAC_FIXED=["Equine flu","Tetanus","Flu + tetanus","Clostridial"];
+  var VAC_FIXED=stVacFor(S);
   var vacList=m.vaccinations||[];
   function vaxStatus(vt){
-    var match=vacList.slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");}).find(function(v){return v.type===vt;});
+    var match=vacList.slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"");}).find(function(v){return v.type===vt||(v.type==="Flu + tetanus"&&(vt==="Equine flu"||vt==="Tetanus"));});
     if(match&&match.date&&match.date>todayStr)return{state:"booked",due:match.date,match:match};
     if(match)return{state:"done",match:match};
     var nextDueEntry=vacList.find(function(v){return v.type===vt&&v.nextDue;});
@@ -4206,13 +4205,13 @@ function renderMedical(){
   vrows+='<div class="madd"><span onclick="showMedOverlay(\'vac\')">+ Other vaccine</span><span onclick="filePick(\'vax\')">'+(vaxCard?'Vax card on Files \u2713':'+ Vax card \u2192 Files')+'</span></div>';
   h+=sec(1,"Vaccinations",e(vSum.join(" \u00b7 "))+(_vnext?" \u00b7 next "+e(_vnext.type.toLowerCase())+" "+e(String(fmtDue(_vnext.due)).replace(/&middot;/g,"\u00b7")):""),_vroll.overdue?"bad":_vroll.upcoming?"warn":_vroll.done>=2?"done":"",vrows,_vroll.overdue||_vroll.upcoming||!_vroll.done);
   // 2 parasites
-  var byType={};(m.parasiteTreatments||[]).forEach(function(p){var key=/worm|milpro|milbemax|drontal|panacur|parazole/i.test(p.type||p.product||"")?"Wormer":/flea|tick|bravecto|nexgard|frontline|seresto|advocate|stronghold/i.test(p.type||p.product||"")?"Flea & tick":"Other";if(!byType[key]||(p.date||"")>(byType[key].date||""))byType[key]=p;});
-  var prows='';var pSum=[];["Wormer","Flea & tick","Other"].forEach(function(key){var p=byType[key];if(!p&&key==="Other")return;var over=p&&p.nextDue&&p.nextDue<today;var soon=p&&p.nextDue&&!over&&p.nextDue<=addDaysStr(today,14);var name=p?String(p.type||p.product||"").split(" \u2014 ")[0]:"";
+  var byType={};(m.parasiteTreatments||[]).forEach(function(p){var key=/worm|milpro|milbemax|drontal|panacur|parazole/i.test(p.type||p.product||"")?"Wormer":/louse|lice|mite|flea|tick/i.test(p.type||p.product||"")?"Lice & mites":"Other";if(!byType[key]||(p.date||"")>(byType[key].date||""))byType[key]=p;});
+  var prows='';var pSum=[];["Wormer","Lice & mites","Other"].forEach(function(key){var p=byType[key];if(!p&&key==="Other")return;var over=p&&p.nextDue&&p.nextDue<today;var soon=p&&p.nextDue&&!over&&p.nextDue<=addDaysStr(today,14);var name=p?String(p.type||p.product||"").split(" \u2014 ")[0]:"";
     prows+=row(over?"n":soon?"a":p?"g":"",over?"overdue":soon?"due":p?"ok":"none",e(key)+(name?" \u00b7 "+e(name):""),p?("last "+e(fmtDMY(p.date))+(p.nextDue?(over?" \u00b7 was due ":" \u00b7 next ")+e(fmtDMY(p.nextDue)):"")):"never logged",(!p||over||soon)?'<span onclick="showMedOverlay(\'para\')">Given today</span>':'');
     pSum.push(key.toLowerCase()+" "+(over?"overdue "+daysSince(p.nextDue)+" d":soon?"due":p?(p.nextDue?"to "+fmtDMY(p.nextDue):"\u2713"):"none"));});
   prows+='<div class="madd"><span onclick="showMedOverlay(\'para\')">+ Other treatment</span></div>';
   var pOver=Object.keys(byType).some(function(k){var p=byType[k];return p.nextDue&&p.nextDue<today;});
-  h+=sec(2,"Worming, flea &amp; tick",e(pSum.join(" \u00b7 ")),pOver?"warn":(byType["Wormer"]&&byType["Flea & tick"])?"done":"",prows,pOver||!(byType["Wormer"]&&byType["Flea & tick"]));
+  h+=sec(2,"Worming, lice &amp; mites",e(pSum.join(" \u00b7 ")),pOver?"warn":byType["Wormer"]?"done":"",prows,pOver||!byType["Wormer"]);
   // 3 what's wrong now
   var wrows='';_actCond.forEach(function(p,i2){var idx=(m.diseases||[]).indexOf(p);wrows+=row("n","disease",e(p.type||""),"since "+e(p.date?fmtDMY(p.date):"?")+(CONTAGIOUS_DISEASES[p.type]?" \u00b7 contagious":"")+(p.treatment?" \u00b7 "+e(p.treatment):""),'<span onclick="editMedEntry(\'diseases\','+idx+')">Edit</span>')+'<div class="cq" style="padding-top:0"><label>Status</label><div class="cchips">'+["Suspected","Confirmed","Recovering","Cleared"].map(function(o){return '<span class="cchip'+(p.status===o?" on":"")+'" onclick="setDiseaseStatus('+idx+',\''+o+'\')">'+o+'</span>';}).join("")+'</div></div>';});
   _actMeds.forEach(function(x){var idx=(m.medications||[]).indexOf(x);var dayN=x.startDate?Math.round((new Date(today)-new Date(x.startDate))/864e5)+1:null;var tot=(x.startDate&&x.endDate)?Math.round((new Date(x.endDate)-new Date(x.startDate))/864e5)+1:null;wrows+=row("b","med",e([x.name,x.dose,x.frequency].filter(Boolean).join(" \u00b7 ")),(dayN&&tot?"day "+dayN+" of "+tot+" \u00b7 to "+e(fmtDMY(x.endDate)):x.endDate?"to "+e(fmtDMY(x.endDate)):"ongoing")+(x.notes?" \u00b7 "+e(x.notes):""),'<span onclick="toggleMedActive('+idx+')">Stop</span>');});
@@ -4364,8 +4363,8 @@ function fileSlots(){var d=S.dog||{},m=S.medical||{},r=S.rehome||{},f=S.fin||{};
   add("Health","vaxcard","Vaccination card",(m.vaccinations||[]).filter(function(v){return v.date;}).length?"updated with each vaccination":"no vaccination logged yet",true);
   (m.vetVisits||[]).filter(function(v){return v.date;}).sort(function(x,y){return x.date.localeCompare(y.date);}).forEach(function(v){add("Health","vet:"+v.date,"Vet report \u00b7 "+fmtDMY(v.date),[v.vet,v.reason].filter(Boolean).join(" \u00b7 ")||"vet visit",true);});
   var reserved=r.stage==="Reserved"||r.stage==="Home check"||r.stage==="Adopted"||f.outcome==="Rehomed";
-  add("Going out","contract","Adoption contract",reserved?(r.adopterName?"with "+r.adopterName:"adopter"):"appears when a animal is reserved",reserved);
-  add("Going out","homecheck","Home-check report",reserved?"before the animal goes home":"appears when a animal is reserved",reserved);
+  add("Going out","contract","Adoption contract",reserved?(r.adopterName?"with "+r.adopterName:"adopter"):"appears when an animal is reserved",reserved);
+  add("Going out","homecheck","Home-check report",reserved?"before the animal goes home":"appears when an animal is reserved",reserved);
   add("Going out","transfer","Transfer letter",f.outcome==="Transferred"?"to the receiving rescue":"only for a transfer to rescue",f.outcome==="Transferred");
   var files=S.files||[];out.forEach(function(sl){sl.files=files.map(function(x,idx){x._i=idx;return x;}).filter(function(x){return x.kind===sl.kind;});sl.state=sl.files.length?"have":(sl.applies?"need":"na");});
   return out;}
@@ -5931,7 +5930,7 @@ function toggleScDetail(ck){window._scDetail=window._scDetail||{};window._scDeta
 var LEAVE_DOORS=[["Finished Isolation","Finished isolation \u2014 still here","Isolation done, staying in the unit for assessment or rehoming"],["Rehomed","Rehomed","Adopted \u2014 details from the Rehoming tab"],["Returned to Owner","Reclaimed by owner","Stray or seizure returned to its owner"],["Transferred","Transferred","To a rescue partner or another centre"],["Moved to Kennels","Moved to Kennels","Out of isolation, still ours"],["Euthanised","Euthanised","Vet-certified \u00b7 management-approved \u00b7 never alone"],["Died in care","Died in care","The record closes with the facts"],["Escaped / Lost","Escaped / Lost","Reported, searched, logged"]];
 function setDoor(v){if(currentRole()==="staff")return;if(!S.fin)S.fin={};if(S.fin.outcome===v)return;var _w=dogAgeWeeks();if(_w!==null&&_w<8&&(v==="Rehomed"||v==="Transferred")){appAlert((S.dog.name||"This pup")+" is under 8 weeks \u2014 cannot leave for rehoming or transfer before "+fmtDMY(addDaysStr(S.dog.dob,56))+". Foster is the way out before then (Foster tab).");return;}S.fin.outcome=v;if(v&&!S.fin.outcomeDate)S.fin.outcomeDate=new Date().toISOString().slice(0,10);stampDecision("outcome");if(v==="Rehomed"){ensureRF();if(S.rehome.stage!=="Adopted"){S.rehome.stage="Adopted";if(!S.rehome.adoptedDate)S.rehome.adoptedDate=S.fin.outcomeDate;S.rehome.log.push({date:new Date().toISOString().slice(0,10),text:"Adopted (outcome set to Rehomed)",by:currentName()});}}persistSave();debouncedSave();renderMain();}
 function closeRecordNow(){var f=S.fin||{};if(!f.outcome){appAlert("Choose a door first.");return;}if(f.outcome==="Finished Isolation"){appAlert("Finished isolation keeps the record open \u2014 the animal is still here. Nothing to close.");return;}var msg=(S.dog.name||"This animal")+" \u2014 "+f.outcome+(f.outcomeDate?" \u00b7 "+fmtDMY(f.outcomeDate):"")+"\n\nClose the record? It moves off the board into All Records; Reopen is on the Outcome tab if it\u0027s ever needed.";
-  appConfirm(msg,function(){if(!f.outcomeDate)f.outcomeDate=new Date().toISOString().slice(0,10);if(!f.assessorName){f.assessorName=currentName();f.assessorDate=new Date().toISOString().slice(0,10);}f.closedAt=new Date().toISOString();persistSave();saveRecord();renderMain();miniToast((S.dog.name||"Dog")+" \u2014 record closed: "+f.outcome);},{danger:f.outcome==="Euthanised"||f.outcome==="Died in care"});}
+  appConfirm(msg,function(){if(!f.outcomeDate)f.outcomeDate=new Date().toISOString().slice(0,10);if(!f.assessorName){f.assessorName=currentName();f.assessorDate=new Date().toISOString().slice(0,10);}f.closedAt=new Date().toISOString();persistSave();saveRecord();renderMain();miniToast((S.dog.name||"Animal")+" \u2014 record closed: "+f.outcome);},{danger:f.outcome==="Euthanised"||f.outcome==="Died in care"});}
 function unitSetting(k){try{var o=JSON.parse(localStorage.getItem("nspca-unit-settings")||"{}");return o[k]||"";}catch(e){return"";}}
 function setUnitSetting(k,v){var o={};try{o=JSON.parse(localStorage.getItem("nspca-unit-settings")||"{}");}catch(e){}o[k]=v;try{localStorage.setItem("nspca-unit-settings",JSON.stringify(o));}catch(e){}if(supabaseClient){supabaseClient.from("incoming").upsert({id:"__unit_settings",data:o}).then(function(){},function(){});}}
 function pullUnitSettings(){if(!supabaseClient)return;supabaseClient.from("incoming").select("id,data").eq("id","__unit_settings").then(function(res){var row=res&&res.data&&res.data[0];if(row&&row.data){try{localStorage.setItem("nspca-unit-settings",JSON.stringify(row.data));}catch(e){}}try{applyLookOnly();}catch(e){}},function(){});}
@@ -6325,7 +6324,7 @@ function addLogEntry(which,inputId){ensureRF();var el=document.getElementById(in
 function setRehomeStage(st){ensureRF();S.rehome.stage=st;if(st==="Available"&&!S.rehome.availableSince)S.rehome.availableSince=new Date().toISOString().slice(0,10);if(st==="Reserved"&&!S.rehome.reservedDate)S.rehome.reservedDate=new Date().toISOString().slice(0,10);S.rehome.log.push({date:new Date().toISOString().slice(0,10),text:"Stage: "+st,by:currentName()});persistSave();render();}
 function markAdopted(){ensureRF();appConfirm("Mark "+(S.dog.name||"this animal")+" as adopted? This sets the Outcome to Rehomed today.",function(){S.rehome.stage="Adopted";if(!S.rehome.adoptedDate)S.rehome.adoptedDate=new Date().toISOString().slice(0,10);S.rehome.log.push({date:new Date().toISOString().slice(0,10),text:"Adopted"+(S.rehome.adopterName?" by "+S.rehome.adopterName:""),by:currentName()});if(!S.fin)S.fin={};S.fin.outcome="Rehomed";S.fin.outcomeDate=new Date().toISOString().slice(0,10);stampDecision("outcome");persistSave();S.tab="outcome";render();});}
 function rhSet(k,v){ensureRF();S.rehome[k]=(S.rehome[k]===v)?"":v;persistSave();debouncedSave();renderMain();}
-function renderRehome(){ensureRF();var r=S.rehome;var e=esc;var cur=REHOME_STAGES.indexOf(r.stage);var a=S.assessment||{};var td=new Date().toISOString().slice(0,10);
+function dogRenderRehome(){ensureRF();var r=S.rehome;var e=esc;var cur=REHOME_STAGES.indexOf(r.stage);var a=S.assessment||{};var td=new Date().toISOString().slice(0,10);
   var _clr=a.rehomingStatus||"";var cleared=/^Cleared/.test(_clr);
   var _next=r.stage==="Adopted"?(r.trial&&r.trialEnds?"trial ends "+fmtDMY(r.trialEnds):"follow-up "+(S.fin&&S.fin.followUp?fmtDMY(S.fin.followUp):"not set")):r.stage==="Home check"?(r.homeCheckResult?"home check "+r.homeCheckResult.toLowerCase()+" \u2014 adopt":"home check"+(r.homeCheckDate?" "+fmtDMY(r.homeCheckDate):"")):r.stage==="Reserved"?"home check"+(r.homeCheckDate?" "+fmtDMY(r.homeCheckDate):" to book"):r.stage==="Available"?"find the home":r.stage==="Cleared"?"mark available when the profile is up":(cleared?"cleared \u2014 start with Available":"not cleared yet \u2014 Clearance tab first");
   var flags=[];if(r.stage&&r.stage!=="Cleared"){flags.push(r.webUrl?"website link":"<span style=\"color:#fcd34d\">no website link</span>");}
@@ -6355,7 +6354,7 @@ function logReturn(){ensureRF();var r=S.rehome;if(!r.returnDate){appAlert("Enter
     r.stage="";r.availableSince="";r.reservedDate="";r.adoptedDate="";r.trial=false;r.trialEnds="";
     ensureRF();S.foster.out=false;
     S.notes=S.notes||[];S.notes.push({date:new Date().toISOString().slice(0,10),time:"",text:"Returned from adoption ("+(r.returnCategory||"reason not set")+")"+(r.returnReason?": "+r.returnReason:""),staff:currentName()});
-    persistSave();saveRecord();S.tab="dog";render();miniToast((S.dog.name||"Dog")+" is back in the unit \u2014 returned "+fmtDMY(r.returnDate));
+    persistSave();saveRecord();S.tab="dog";render();miniToast((S.dog.name||"Animal")+" is back in the unit \u2014 returned "+fmtDMY(r.returnDate));
   },{danger:true});
 }
 
@@ -6963,9 +6962,9 @@ function loadCurrent(){
 //  horses and ponies, goats and poultry. Later declarations win.
 // ════════════════════════════════════════════════════════════════════
 var IS_STABLES=true;
-var CHANGELOG=[{version:"1.2",date:"2026-10-11",note:"The Animal tab, done the way the dogs\u2019 Dog tab is. Chips on the photo: holds, Henneke, farrier, in foal, date in \u2014 tap one to go there. Who she is: species, sex, breed, age, height and colour are dropdowns for each species; markings; weight from Body; the chip is checked as you type, with copy and look up. How she came in: came-in chips, inspector, reason and assessor dropdowns, where she was found, court date, Garda ref and the evidence ticks. Where she is: a dropdown of your places (add a new one from it), isolation day and status, bonded with. Flags: warnings and notices that pop up when the record opens, then strangles, court hold, food chain, in foal and bonded, each a tap from where it\u2019s set. Passport: who issued it, name and owner on it, chip matches, and a reminder to send the change of owner. New sections for Owner & keeper, Character & vices and Breeding \u2014 a foaling or kidding date within 30 days goes on the board and the morning brief, as does a court date within a week. Condition on arrival is its own Arrival tab under Health, with weight and handling on arrival."},{version:"1.1",date:"2026-10-11",note:"More tabs, so the Animal tab is short again: who, how they came in, passport or tag, leaving. Health is Daily check, Isolation, Body and Medical. A new Care group has Feet & teeth, Handling and Feeding. Feet & teeth keeps every farrier and dentist visit, and the next one fills in itself (farrier 6 weeks, dentist 12 months). Body has Henneke since arrival, a weigh-tape that works out the weight (donkeys on their own formula), and first and latest photo side by side. Isolation has a ready-to-come-out checklist and who shares a yard \u2014 if one turns strangles positive, the others go red. Handling has what to watch for and who should handle. Feeding has grazing and AM and PM feeds. Worming and flu & tetanus dates sit at the top of Medical. Goats get Feet, Body & eyes and Isolation & tests; a flock gets Flock and Mites & worms. Menu \u2192 Farrier & dentist: everyone due in the next 2 weeks, log the visit from the list, or print it."},{version:"1.0",date:"2026-10-11",note:"The Stables app, on the same layout as the dogs. Donkeys, horses and ponies, goats and poultry. Board grouped by species with red alarms at the top (a donkey not eating, colic signs, a bloated goat, poultry losses, strangles). How each animal came in: seized with a court hold, impounded with a holding period, surrendered or transferred. Passport and food-chain status, strangles isolation, Henneke 1–9, goats on 1–5 with FAMACHA, one record per poultry flock, a bird flu housing order switch, handling ticks, turnout and feeding, and rehomed outright or out on loan."}];
+var CHANGELOG=[{version:"1.3",date:"2026-10-15",note:"Deeper tabs. Daily check goes a day at a time like the dogs\u2019 day reports: tap a day pill to look back or catch up, with temperature, pulse and breathing and a temperature chart (strangles contacts get a morning and evening reading). New questions for drinking, demeanour, nose & cough and feet; goats get cudding, the rumen and FAMACHA; a flock gets eggs, a head count, deaths and signs. Same as yesterday copies the answers. A high temperature, strangles or laminitis signs, bloat, FAMACHA 4\u20135, two bird deaths or a swollen head go red on the board. Feeding works out the hay from the weight, has a day-by-day refeeding plan for anything that came in at Henneke 1\u20132, an appetite strip and a feed-room chart to print. Handling is a ladder of what the animal will let you do, with a log of every session. New Clearance tab: every hold in one list, ticked from the record, then the decision \u2014 outright, loan only, companion only, sanctuary. Rehoming picks outright or on loan, has a home-check list for a yard, and loan welfare visits that schedule themselves and show in the morning brief. New Report tab: the record on paper for our file, the vet, the court, the new home or a transfer."},{version:"1.2",date:"2026-10-11",note:"The Animal tab, done the way the dogs\u2019 Dog tab is. Chips on the photo: holds, Henneke, farrier, in foal, date in \u2014 tap one to go there. Who she is: species, sex, breed, age, height and colour are dropdowns for each species; markings; weight from Body; the chip is checked as you type, with copy and look up. How she came in: came-in chips, inspector, reason and assessor dropdowns, where she was found, court date, Garda ref and the evidence ticks. Where she is: a dropdown of your places (add a new one from it), isolation day and status, bonded with. Flags: warnings and notices that pop up when the record opens, then strangles, court hold, food chain, in foal and bonded, each a tap from where it\u2019s set. Passport: who issued it, name and owner on it, chip matches, and a reminder to send the change of owner. New sections for Owner & keeper, Character & vices and Breeding \u2014 a foaling or kidding date within 30 days goes on the board and the morning brief, as does a court date within a week. Condition on arrival is its own Arrival tab under Health, with weight and handling on arrival."},{version:"1.1",date:"2026-10-11",note:"More tabs, so the Animal tab is short again: who, how they came in, passport or tag, leaving. Health is Daily check, Isolation, Body and Medical. A new Care group has Feet & teeth, Handling and Feeding. Feet & teeth keeps every farrier and dentist visit, and the next one fills in itself (farrier 6 weeks, dentist 12 months). Body has Henneke since arrival, a weigh-tape that works out the weight (donkeys on their own formula), and first and latest photo side by side. Isolation has a ready-to-come-out checklist and who shares a yard \u2014 if one turns strangles positive, the others go red. Handling has what to watch for and who should handle. Feeding has grazing and AM and PM feeds. Worming and flu & tetanus dates sit at the top of Medical. Goats get Feet, Body & eyes and Isolation & tests; a flock gets Flock and Mites & worms. Menu \u2192 Farrier & dentist: everyone due in the next 2 weeks, log the visit from the list, or print it."},{version:"1.0",date:"2026-10-11",note:"The Stables app, on the same layout as the dogs. Donkeys, horses and ponies, goats and poultry. Board grouped by species with red alarms at the top (a donkey not eating, colic signs, a bloated goat, poultry losses, strangles). How each animal came in: seized with a court hold, impounded with a holding period, surrendered or transferred. Passport and food-chain status, strangles isolation, Henneke 1–9, goats on 1–5 with FAMACHA, one record per poultry flock, a bird flu housing order switch, handling ticks, turnout and feeding, and rehomed outright or out on loan."}];
 APP_VERSION=CHANGELOG[0].version;
-var WHATS_NEW_HEADLINE={title:"The Animal tab",sub:"done the way the dogs\u2019 Dog tab is",items:[["Dropdowns and chips","Species, sex, breed, age, height and colour are dropdowns. Chips on the photo take you to holds, Henneke, farrier and in foal."],["Where she is \u00b7 Flags","Place, isolation day and bonded pair in one place. Flags shows warnings, strangles, court hold, food chain and in foal at a glance."],["Owner, character, breeding, Arrival","New sections for owner & keeper, character & vices and in foal. Condition on arrival is its own Arrival tab."]]};
+var WHATS_NEW_HEADLINE={title:"Deeper tabs",sub:"daily check, feeding, handling, clearance, report",items:[["Daily check","A day at a time, with temperature, pulse and breathing and a chart. Goats and flocks get their own questions. Red goes to the board."],["Feeding \u00b7 Handling","Hay worked out from the weight, a refeeding plan for thin arrivals, a feed-room chart. A handling ladder and a log of every session."],["Clearance \u00b7 Rehoming \u00b7 Report","Every hold in one list, then the decision. Outright or on loan, a yard home check, loan visits. The record on paper."]]};
 
 // ── Species ────────────────────────────────────────────────────────
 var SPECIES=["Horse","Pony","Donkey","Goat","Poultry"];
@@ -7012,6 +7011,7 @@ var ZOONOTIC_DISEASES={"Ringworm":1,"Orf (goats)":1,"Avian influenza":1};
 function diseaseShortName(t){t=String(t||"");return t.replace(/\s*\(.*\)$/,"");}
 
 // ── How it came in, and holds ──────────────────────────────────────
+function stVacFor(st){return isEquine(st||{})?["Equine flu","Tetanus"]:isGoat(st||{})?["Clostridial"]:[];}
 var CAME_IN=["Seized","Impounded / stray","Surrendered","Transfer in","Return"];
 function impoundDays(d){var v=parseInt((d||{}).holdDays,10);if(!isNaN(v)&&v>=0)return v;var u=parseInt(unitSetting("impoundDays"),10);return isNaN(u)?5:u;}
 function holdInfo(st){var d=(st||{}).dog||{};var td=tdISO();
@@ -7054,8 +7054,8 @@ var ST_ALL_TABS=[
   {id:"picture",l:"Overview",g:"Animal"},{id:"dog",l:"Animal",g:"Animal"},{id:"photos",l:"Photos",g:"Animal"},{id:"notes",l:"Notes",g:"Animal"},
   {id:"arrival",l:"Arrival",g:"Health",sp:"any"},{id:"days",l:"Daily check",g:"Health"},{id:"iso",l:"Isolation",g:"Health",sp:"any"},{id:"weights",l:"Body",g:"Health",sp:"eg"},{id:"medical",l:"Medical",g:"Health"},
   {id:"feet",l:"Feet & teeth",g:"Care",sp:"eg"},{id:"flock",l:"Flock",g:"Care",sp:"p"},{id:"hand",l:"Handling",g:"Care",sp:"eg"},{id:"feed",l:"Feeding",g:"Care",sp:"eg"},{id:"mites",l:"Mites & worms",g:"Care",sp:"p"},
-  {id:"rehome",l:"Rehoming",g:"Departure"},{id:"foster",l:"Foster",g:"Departure"},{id:"outcome",l:"Outcome",g:"Departure"},
-  {id:"story",l:"Story",g:"Record"},{id:"files",l:"Files",g:"Record"}];
+  {id:"rehoming",l:"Clearance",g:"Departure"},{id:"rehome",l:"Rehoming",g:"Departure"},{id:"foster",l:"Foster",g:"Departure"},{id:"outcome",l:"Outcome",g:"Departure"},
+  {id:"story",l:"Story",g:"Record"},{id:"files",l:"Files",g:"Record"},{id:"report",l:"Report",g:"Record"}];
 var TABS=[];
 function stTabsFor(st){var sp=spOf(st);var k=isEquine(st)?"e":isGoat(st)?"g":isFlock(st)?"p":"";
   return ST_ALL_TABS.filter(function(t){if(!t.sp)return true;if(!k)return false;return t.sp==="any"||t.sp.indexOf(k)>=0;}).map(function(t){var x={id:t.id,l:t.l,g:t.g};
@@ -7075,6 +7075,8 @@ function page(){stSyncTabs();var t=S.tab;if(!TABS.some(function(x){return x.id==
   if(t==="feed")return renderStFeeding();
   if(t==="flock")return renderStFlock();
   if(t==="mites")return renderStMites();
+  if(t==="rehoming")return renderStClear();
+  if(t==="report")return renderStReport();
   if(t==="medical"){var mh=dogPage();var due=stMedDue();if(!due)return mh;var k=mh.indexOf('<div class="asec msec');return k>=0?mh.slice(0,k)+due+mh.slice(k):due+mh;}
   if(t==="outcome"||t==="rehome"){var h=holdInfo(S);if(h&&h.court)return '<h2>'+(t==="outcome"?"Outcome":"Rehoming")+'</h2><div class="cflag r"><b>Court hold'+(S.dog.caseRef?' · '+esc(S.dog.caseRef):'')+'.</b> This animal is evidence in a case and can’t be rehomed or leave until the hold is cleared. Clear it on the <span class="lnk" data-go="dog">Animal tab</span>, under \u201cHow it came in\u201d, once the case allows.</div>'+browNav(t);}
   return dogPage();}
@@ -7763,6 +7765,389 @@ function tabWarn(id){if(id==="iso")return stranglesPos(S)||!!(S._id&&stStrangles
 // ── Look only: every Stables edit stops before it changes anything ──
 (function(){["stSet","stTog","stPut","stPick","stMulti","stScore","stMoveTo","stNewPlace","stHeight","stAgeStep","stDay","stDayTog","stDayVal","stStrAdd","stStrDel","stBirdAdd","stBirdDone","stYardTog","stTapeSave","stWAdd","stWDel","stWeightIn","stVisitAdd","stVisitDel","stFdLog","stArrScore","stBond","stWherePick","setHousingOrder"].forEach(function(n){var fn=window[n];if(typeof fn!=="function"||fn._lo)return;var w=function(){if(typeof isLookOnly==="function"&&isLookOnly()){if(typeof lookOnlyBlocked==="function")lookOnlyBlocked(true);return;}return fn.apply(this,arguments);};w._lo=true;window[n]=w;});})();
 
+// ── Files: the paperwork a stables animal actually has ─────────────
+function fileSlots(){var d=S.dog||{},m=S.medical||{},r=S.rehome||{},f=S.fin||{};var ci=d.cameIn||"";var out=[];
+  var add=function(group,kind,title,sub,applies){out.push({group:group,kind:kind,title:title,sub:sub,applies:!!applies});};
+  var insp=d.inspector&&d.inspector!=="Other"?d.inspector:(d.inspectorOther||"");
+  add("Coming in","seizure","Seizure form",ci==="Seized"?[insp?"Inspector "+insp:"",d.caseRef?"case "+d.caseRef:""].filter(Boolean).join(" · ")||"seizure case":"only for a seizure",ci==="Seized");
+  add("Coming in","vetstmt","Vet statement",ci==="Seized"?"for the case":"only for a seizure",ci==="Seized");
+  add("Coming in","surrender","Surrender form",ci==="Surrendered"?"signed by the owner":"only for an owner surrender",ci==="Surrendered");
+  add("Coming in","impound","Impound notice",ci==="Impounded / stray"?"from the inspector or council":"only for an impounded animal",ci==="Impounded / stray");
+  if(isEquine(S))add("Coming in","passport","Passport copy",d.ueln?"UELN "+d.ueln:d.passport==="No passport"?"no passport":"the ID pages and section IX",d.passport!=="No passport");
+  if(!isFlock(S))add("Coming in","chip","Microchip certificate",d.microchip?"chip "+d.microchip:"no chip recorded yet",!!d.microchip);
+  add("Health","vaxcard","Vaccination record",(m.vaccinations||[]).filter(function(v){return v.date;}).length?"updated with each vaccination":"no vaccination logged yet",!isFlock(S));
+  (m.vetVisits||[]).filter(function(v){return v.date;}).sort(function(x,y){return x.date.localeCompare(y.date);}).forEach(function(v){add("Health","vet:"+v.date,"Vet report · "+fmtDMY(v.date),[v.vet,v.reason].filter(Boolean).join(" · ")||"vet visit",true);});
+  var reserved=r.stage==="Reserved"||r.stage==="Home check"||r.stage==="Adopted"||f.outcome==="Rehomed"||f.outcome==="Out on loan";var loan=f.outcome==="Out on loan";
+  add("Going out","contract",loan?"Loan agreement":"Rehoming agreement",reserved?(r.adopterName?"with "+r.adopterName:"the new home"):"appears when "+stHe()[0]+(stHe()[0]==="they"?" are":" is")+" reserved",reserved);
+  add("Going out","homecheck","Home-check report",reserved?"the yard and field, before "+stHe()[0]+(stHe()[0]==="they"?" go":" goes"):"appears when "+stHe()[0]+(stHe()[0]==="they"?" are":" is")+" reserved",reserved);
+  if(isEquine(S))add("Going out","ownership","Passport change of owner",f.outcome==="Rehomed"||f.outcome==="Transferred"?(d.transferSent?"sent":"to send within 30 days"):"only when ownership passes on",f.outcome==="Rehomed"||f.outcome==="Transferred");
+  add("Going out","transfer","Transfer letter",f.outcome==="Transferred"?"to the receiving sanctuary or rescue":"only for a transfer",f.outcome==="Transferred");
+  var files=S.files||[];out.forEach(function(sl){sl.files=files.map(function(x,idx){x._i=idx;return x;}).filter(function(x){return x.kind===sl.kind||(sl.kind==="chip"&&x.kind==="chipcert");});sl.state=sl.files.length?"have":(sl.applies?"need":"na");});
+  return out;}
+
+// ── Your week (My profile): what this person did in the Stables since Monday ──
+function appWeek(me,mon){var name=me.name;var start=new Date(mon.getTime()-mon.getTimezoneOffset()*60000).toISOString().slice(0,10);var w={checks:0,weighs:0,visits:0,arrivals:0,names:[]};
+  records.forEach(function(r){var st=r.state||{},q=st.eq||{},d=st.dog||{};var touched=false;var mine=function(x){return x&&x.date>=start&&(!x.by||x.by===name||x.logged===name);};
+    (st.days||[]).forEach(function(x){if(mine(x)&&(x.eat||x.dung||x.eggs||x.losses||x.notes)){w.checks++;touched=true;}});
+    (st.weights||[]).forEach(function(x){if(mine(x)){w.weighs++;touched=true;}});
+    ["farrierVisits","dentVisits","trimVisits"].forEach(function(k){(q[k]||[]).forEach(function(x){if(x&&x.date>=start&&(x.logged===name||x.by===name)){w.visits++;touched=true;}});});
+    if(d.intakeDate&&d.intakeDate>=start&&(r.savedBy===name||!r.savedBy)){w.arrivals++;touched=true;}
+    if(touched&&r.name)w.names.push(r.name);});
+  return {stats:[[w.checks,"daily checks"],[w.weighs,"weigh-ins"],[w.visits,"farrier & dentist"],[w.arrivals,"arrivals"]],names:w.names};}
+
+// ════════════════════════════════════════════════════════════════════
+//  DAILY CHECK, in depth — a day at a time like the dogs' day reports,
+//  with temperature, pulse and breathing, and its own questions for
+//  equines, goats and flocks. What's red goes to the board.
+// ════════════════════════════════════════════════════════════════════
+var ST_TPR={Horse:{t:[37.2,38.3],p:[28,44],r:[8,16],hot:38.5,nm:"a horse"},Pony:{t:[37.2,38.3],p:[28,44],r:[8,16],hot:38.5,nm:"a pony"},Donkey:{t:[36.5,37.8],p:[36,68],r:[12,28],hot:38.0,nm:"a donkey"},Goat:{t:[38.5,40.0],p:[70,90],r:[15,30],hot:40.3,nm:"a goat"}};
+function stTpr(st){return ST_TPR[spOf(st)]||null;}
+function stNum(v){var n=parseFloat(String(v==null?"":v).replace(",","."));return isNaN(n)?null:n;}
+function stDayDate(){var v=window._stDayV;return v&&S&&v.id===S._id&&v.date?v.date:tdISO();}
+function stDayView(dt){window._stDayV={id:S._id,date:dt};renderMain();}
+function stDayEnsure(){var dt=stDayDate();S.days=S.days||[];var x=S.days.filter(function(y){return y&&y.date===dt;})[0];if(!x){x={date:dt,by:currentName()};S.days.push(x);}return x;}
+function stDayMulti(k,v){var x=stDayEnsure();var L=Array.isArray(x[k])?x[k]:[];if(v==="__clear"){L=[];x[k+"Clear"]=!x[k+"Clear"];}else{var i=L.indexOf(v);if(i>=0)L.splice(i,1);else L.push(v);x[k+"Clear"]=false;}x[k]=L;x.by=currentName();x.at=new Date().toTimeString().slice(0,5);persistSave();debouncedSave();renderMain();}
+function stDayNum(k,v){var x=stDayEnsure();x[k]=String(v||"").trim();x.by=currentName();x.at=new Date().toTimeString().slice(0,5);persistSave();debouncedSave();renderMain();}
+function stDayFam(i){var x=stDayEnsure();x.fam=String(x.fam)===String(i)?"":String(i);S.eq=S.eq||{};var L=S.eq.famacha=S.eq.famacha||[];var j=-1;L.forEach(function(y,k){if(y.date===x.date)j=k;});if(!x.fam){if(j>=0)L.splice(j,1);}else{var en={date:x.date,score:parseInt(x.fam,10),by:currentName()};if(j>=0)L[j]=en;else L.push(en);}persistSave();debouncedSave();renderMain();}
+function stDayDone(){var x=stDayEnsure();x.done=true;x.by=currentName();x.at=new Date().toTimeString().slice(0,5);persistSave();debouncedSave();miniToast("Daily check saved for "+fmtDMY(x.date).slice(0,5));renderMain();}
+var ST_DAY_COPY=["eat","drink","dung","demean","nose","noseClear","feet","cud","side","goatDung","flEat","flDung","signs","signsClear","rug"];
+function stDaySame(){var dt=stDayDate();var prev=(S.days||[]).filter(function(y){return y&&y.date&&y.date<dt&&stDayHas(y);}).sort(function(a,b){return b.date.localeCompare(a.date);})[0];
+  if(!prev){miniToast("No earlier check to copy");return;}var x=stDayEnsure();ST_DAY_COPY.forEach(function(k){if(prev[k]!==undefined&&prev[k]!==""&&!(Array.isArray(prev[k])&&!prev[k].length))x[k]=Array.isArray(prev[k])?prev[k].slice():prev[k];});
+  x.by=currentName();x.at=new Date().toTimeString().slice(0,5);persistSave();debouncedSave();miniToast("Copied from "+fmtDMY(prev.date).slice(0,5)+" \u2014 change what\u2019s different");renderMain();}
+function stDayHas(x){return !!(x&&(x.eat||x.dung||x.drink||x.demean||x.tAm||x.tPm||x.pulse||x.resp||x.eggs||x.losses||x.notes||x.cud||x.side||x.flEat||x.done||x.colic||x.bloat));}
+
+// what a day's answers mean: red goes to the board, amber colours the pill
+function stDayFlags(st,x){var R=[],A=[];if(!x)return{red:R,amb:A};var sp=spOf(st);var T=ST_TPR[sp];var eqn=isEquine(st),goat=isGoat(st),fl=isFlock(st);
+  if(T){var tt=[stNum(x.tAm),stNum(x.tPm)].filter(function(v){return v!=null;});var hi=tt.length?Math.max.apply(null,tt):null,lo=tt.length?Math.min.apply(null,tt):null;
+    if(hi!=null&&hi>=T.hot)R.push({t:"Temperature "+hi,long:"has a temperature of "+hi+" \u00b0C \u2014 ring the vet"+(eqn?" and think strangles":""),go:"days"});
+    else if(hi!=null&&hi>T.t[1])A.push("temp "+hi);
+    if(lo!=null&&lo<T.t[0])A.push("temp low "+lo);
+    var p=stNum(x.pulse),r=stNum(x.resp);if(p!=null&&(p<T.p[0]||p>T.p[1]))A.push("pulse "+p);if(r!=null&&(r<T.r[0]||r>T.r[1]))A.push("breathing "+r);}
+  if(eqn){if(x.eat==="None")R.push({t:"Not eating",go:"days",long:isDonkey(st)?"hasn\u2019t eaten today. Donkeys go downhill fast when they stop eating \u2014 ring the vet today":"isn\u2019t eating \u2014 ring the vet"});else if(x.eat==="Some")A.push("eating some");
+    if(x.colic)R.push({t:"Colic signs",go:"days",long:"is showing colic signs \u2014 ring the vet now"});else if(x.dung==="None")R.push({t:"No droppings",go:"days",long:"has passed no droppings today \u2014 watch for colic and ring the vet"});
+    if(/Fewer|Dry|Loose/.test(x.dung||""))A.push("droppings "+String(x.dung).toLowerCase());
+    if(/Less|Not seen/.test(x.drink||""))A.push("drinking "+String(x.drink).toLowerCase());
+    if(/Dull|Restless|Down a lot/.test(x.demean||""))A.push(String(x.demean).toLowerCase());
+    var N=Array.isArray(x.nose)?x.nose:[];if(N.indexOf("Thick / yellow")>=0||N.indexOf("Swelling under the jaw")>=0)R.push({t:"Strangles signs",go:"days",long:"has "+(N.indexOf("Swelling under the jaw")>=0?"a swelling under the jaw":"a thick, yellow nose")+" \u2014 isolate, ring the vet and swab for strangles"});else if(N.length)A.push(N.join(", ").toLowerCase());
+    if(/Strong digital pulse|Won\u2019t move/.test(x.feet||""))R.push({t:"Laminitis signs",go:"days",long:"has "+(x.feet==="Won\u2019t move"?"stopped moving":"a strong digital pulse")+" \u2014 laminitis risk, ring the vet now"});else if(/Warm|Lame/.test(x.feet||"")||x.lame)A.push(x.feet?String(x.feet).toLowerCase()+" feet":"lame");}
+  if(goat){if(x.bloat||x.side==="Bloated")R.push({t:"Bloat",go:"days",long:"is bloated on the left side \u2014 ring the vet now"});else if(x.side==="Full / tight")A.push("full on the left");
+    if(x.eat==="None")R.push({t:"Not eating",go:"days",long:"isn\u2019t eating \u2014 ring the vet"});else if(x.eat==="Some")A.push("eating some");
+    if(x.cud==="No")A.push("not cudding");if(x.goatDung==="Scour")A.push("scour");if(x.goatDung==="None")A.push("no droppings");
+    var f=parseInt(x.fam,10);if(f>=4)R.push({t:"FAMACHA "+f,go:"days",long:"is FAMACHA "+f+" \u2014 pale eyelids, likely worms (barber\u2019s pole). Ring the vet"});else if(f===3)A.push("FAMACHA 3");
+    if(x.grind)A.push("grinding teeth");if(x.kneel)A.push("lame");}
+  if(fl){var n=parseInt(x.losses||0,10)||0;var ea=x.flEat||(x.eat==="Yes"?"Normal":x.eat==="No"?"None":"");var sg=Array.isArray(x.signs)?x.signs:[];
+    if(n>1)R.push({t:n+" lost today",go:"days",long:"lost "+n+" birds today \u2014 ring the vet and think bird flu"});else if(n===1)A.push("1 lost");
+    if(sg.indexOf("Swollen head")>=0)R.push({t:"Bird flu signs",go:"days",long:"have a bird with a swollen head \u2014 ring the vet and DAFM, think bird flu"});
+    if(ea==="None")R.push({t:"Off food",go:"days",long:"aren\u2019t all eating and drinking \u2014 check the drinkers and ring the vet"});else if(ea==="Less")A.push("eating less");
+    if(/Watery|Green|Blood/.test(x.flDung||""))A.push("droppings "+String(x.flDung).toLowerCase());
+    sg.filter(function(s){return s!=="Swollen head";}).forEach(function(s){A.push(s.toLowerCase());});}
+  return{red:R,amb:A};}
+
+// the board's red alarms: the old ones plus everything a daily check can raise
+function stAlarms(r){var st=r.state||{};var td=tdISO();var x=dayOf(st,td);var A=stDayFlags(st,x).red.slice();var seen={};A.forEach(function(a){seen[a.t]=1;});
+  if(stranglesPos(st))A.push({t:"Strangles positive",go:"iso",long:"is strangles positive \u2014 strict isolation, served last"});
+  var sc=typeof stStranglesContact==="function"&&r.id!=null?stStranglesContact(r):null;if(sc)A.push({t:"Strangles contact",go:"iso",long:"shares a yard with "+sc.name+", who is strangles positive \u2014 test and keep apart"});
+  if(isEquine(st)&&(st.eq||{}).lami&&!seen["Laminitis signs"])A.push({t:"Laminitis signs",go:"feet",long:"has laminitis signs \u2014 ring the vet now"});
+  return A;}
+
+function stDayRange(){var d=S.dog||{};var td=tdISO();var intake=d.intakeDate||"";var start=intake&&intake>addDaysStr(td,-13)?intake:addDaysStr(td,intake?-13:-6);var ii=stIso(S);var end=td;
+  if(intake&&ii&&ii.state!=="done"&&ii.day!=null){var isoEnd=addDaysStr(intake,stIsoDays(d)+((d.isoExt||[]).reduce(function(a,e){return a+(parseInt(e.days)||0);},0)));if(isoEnd>end)end=isoEnd;}
+  var L=[];for(var dt=start;dt<=end&&L.length<24;dt=addDaysStr(dt,1))L.push(dt);return L;}
+function stDayLbl(dt){var d=S.dog||{};if(!d.intakeDate)return stDayW(dt).split(" ")[0];var n=Math.round((new Date(dt+"T12:00:00")-new Date(d.intakeDate+"T12:00:00"))/864e5);return n<=0?"In":"Day "+n;}
+
+function stTempChart(range){var T=stTpr(S);if(!T)return "";var pts=[];range.forEach(function(dt,i){var x=dayOf(S,dt);if(!x)return;[["tAm",0],["tPm",0.5]].forEach(function(k){var v=stNum(x[k[0]]);if(v!=null)pts.push({i:i+k[1],v:v,dt:dt,pm:k[1]>0});});});
+  if(!pts.length)return "";var lo=Math.min(T.t[0]-0.4,Math.min.apply(null,pts.map(function(p){return p.v;}))-0.2),hi=Math.max(T.hot+0.3,Math.max.apply(null,pts.map(function(p){return p.v;}))+0.2);
+  var W=360,H=96,n=Math.max(1,range.length-0.5);var X=function(i){return 10+i/n*(W-20);},Y=function(v){return 6+(hi-v)/(hi-lo)*(H-18);};
+  var s='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block" role="img" aria-label="Temperature since she came in">';
+  s+='<rect x="0" y="'+Y(T.t[1]).toFixed(1)+'" width="'+W+'" height="'+(Y(T.t[0])-Y(T.t[1])).toFixed(1)+'" fill="#ecfdf5"/>';
+  s+='<line x1="0" x2="'+W+'" y1="'+Y(T.hot).toFixed(1)+'" y2="'+Y(T.hot).toFixed(1)+'" stroke="#ef4444" stroke-dasharray="4 3" stroke-width="1"/><text x="4" y="'+(Y(T.hot)+11).toFixed(1)+'" font-size="9" fill="#dc2626" font-weight="700">'+T.hot+' \u00b0C ring the vet</text>';
+  s+='<polyline points="'+pts.map(function(p){return X(p.i).toFixed(1)+","+Y(p.v).toFixed(1);}).join(" ")+'" fill="none" stroke="#282932" stroke-width="2" stroke-linejoin="round"/>';
+  s+=pts.map(function(p){return '<circle cx="'+X(p.i).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="3.4" fill="'+(p.v>=T.hot?"#ef4444":p.v>T.t[1]?"#f59e0b":"#282932")+'"><title>'+esc(fmtDMY(p.dt).slice(0,5))+(p.pm?" PM":" AM")+" \u00b7 "+p.v+' \u00b0C</title></circle>';}).join("");
+  s+='<text x="10" y="'+(H-2)+'" font-size="9" fill="#6b7280">'+esc(fmtDMY(range[0]).slice(0,5))+'</text><text x="'+(W-10)+'" y="'+(H-2)+'" font-size="9" fill="#6b7280" text-anchor="end">'+esc(fmtDMY(range[range.length-1]).slice(0,5))+'</text></svg>';
+  return '<div class="lbl" style="margin:12px 0 4px">Temperature \u00b7 since '+(stHe()[0]==="they"?"they":stHe()[0])+' came in</div>'+s;}
+
+function stNumIn(lbl,k,x,ph,bad){return '<div class="f"><label class="lbl">'+lbl+'</label><input type="number" step="0.1" inputmode="decimal" value="'+esc(x[k]||"")+'" placeholder="'+esc(ph||"")+'" onchange="stDayNum(\''+k+'\',this.value)"'+(bad?' style="border-color:#f59e0b;background:#fffbeb"':'')+'></div>';}
+function stDayChips(label,em,k,opts,cur){return chipRow(label,em,k,opts,cur||"","stDay");}
+function stDayMultiRow(label,em,k,opts,x,clearLbl){var L=Array.isArray(x[k])?x[k]:[];return '<div class="cq"><label>'+label+(em?'<em>'+em+'</em>':'')+'</label><div class="cchips">'+(clearLbl?'<span class="cchip'+(!L.length&&x[k+"Clear"]?" on":"")+'" onclick="stDayMulti(\''+k+'\',\'__clear\')">'+clearLbl+'</span>':'')+opts.map(function(o){return '<span class="cchip'+(L.indexOf(o)>=0?" on":"")+'" onclick="stDayMulti(\''+k+'\',\''+o.replace(/'/g,"\\'")+'\')">'+esc(o)+'</span>';}).join("")+'</div></div>';}
+
+function renderStDaily(){var e=esc;var td=tdISO();var d=S.dog||{};var sp=d.species||"";var dt=stDayDate();if(dt>td){dt=td;window._stDayV=null;}var x=dayOf(S,dt)||{};var he=stHe();
+  var h='<h2>Daily check</h2><div class="sub">One check a day. Tap a day to look back or catch up. Anything red goes straight to the top of the board.</div>';
+  if(!sp)return h+'<div class="card"><div class="smt2">Set the species on the Animal tab first.</div></div>'+browNav("days");
+  var range=stDayRange();var ii=stIso(S);var past=range.filter(function(z){return z<=td;});var done=past.filter(function(z){return stDayHas(dayOf(S,z));}).length;
+  var fx=stDayFlags(S,x);var inIso=ii&&ii.state!=="done"&&ii.day!=null;
+  var sent=(inIso?'Isolation <b>day '+Math.max(0,ii.day)+' of '+(stIsoDays(d)+((d.isoExt||[]).reduce(function(a,z){return a+(parseInt(z.days)||0);},0)))+'</b>. ':'')+done+' of '+past.length+' check'+(past.length===1?'':'s')+' done.'
+    +(fx.red.length?' <b style="color:#fca5a5">'+e(fx.red.map(function(a){return a.t;}).join(", "))+(dt===td?'':' on '+fmtDMY(dt).slice(0,5))+'.</b>':fx.amb.length?' <b style="color:#fcd34d">'+e(fx.amb.slice(0,3).join(", "))+'.</b>':'');
+  var lastC=(S.days||[]).filter(stDayHas).sort(function(a,b){return (b.date+(b.at||"")).localeCompare(a.date+(a.at||""));})[0];
+  h+=tabStrip(inIso?"DAY "+Math.max(0,ii.day):stDayHas(dayOf(S,td))?"\u2713":"\u2014",fx.red.length?"#ef4444":inIso?"#f59e0b":"#c6e76c",fx.red.length?"#fff":"#282932",sent,"Last check",lastC?e(String(lastC.by||"").split(" ")[0])+(lastC.at?" \u00b7 "+e(lastC.at):lastC.date!==td?" \u00b7 "+e(fmtDMY(lastC.date).slice(0,5)):""):"none yet");
+  h+='<div class="dpills" id="st-dpills">'+range.map(function(z){var y=dayOf(S,z);var f=stDayFlags(S,y);var c=!stDayHas(y)?"":f.red.length?"n":f.amb.length?"a":"g";var fut=z>td;return '<div class="dpill'+(z===dt?" on":"")+(z===td?" dtoday":"")+'"'+(fut?' style="opacity:.45;cursor:default"':' onclick="stDayView(\''+z+'\')"')+'><b>'+e(stDayLbl(z))+'</b><small>'+e(fmtDMY(z).slice(0,5))+'</small><i class="'+c+'"></i></div>';}).join("")+'</div>';
+  var T=stTpr(S);
+  if(T){var tAm=stNum(x.tAm),tPm=stNum(x.tPm),p=stNum(x.pulse),r=stNum(x.resp);var bad=function(v,a){return v!=null&&(v<a[0]||v>a[1]);};var sc=isEquine(S)&&S._id&&(stStranglesContact(curRec())||stranglesPos(S));
+    h+='<div class="card"><div class="lbl" style="margin-bottom:8px">Temperature, pulse, breathing'+(dt!==td?' <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u00b7 '+e(stDayW(dt))+'</span>':'')+'</div>'
+      +'<div class="dueg" style="grid-template-columns:1fr 1fr 1fr">'+stNumIn("Temp \u00b0C \u00b7 AM","tAm",x,T.t[0]+"\u2013"+T.t[1],bad(tAm,T.t))+stNumIn("Pulse /min","pulse",x,T.p[0]+"\u2013"+T.p[1],bad(p,T.p))+stNumIn("Breaths /min","resp",x,T.r[0]+"\u2013"+T.r[1],bad(r,T.r))+'</div>'
+      +'<div class="dueg" style="grid-template-columns:1fr 1fr 1fr">'+stNumIn("Temp \u00b0C \u00b7 PM","tPm",x,sc?"twice a day":"",bad(tPm,T.t))+'<div></div><div></div></div>'
+      +'<div class="smt2">Normal for '+T.nm+': '+T.t[0]+'\u2013'+T.t[1]+' \u00b0C \u00b7 pulse '+T.p[0]+'\u2013'+T.p[1]+' \u00b7 breaths '+T.r[0]+'\u2013'+T.r[1]+'. Out of range turns amber; '+T.hot+' \u00b0C or more goes red on the board.'+(sc?' <b>Strangles '+(stranglesPos(S)?'positive':'contact')+': take the temperature morning and evening</b> \u2014 a rise comes a day or two before the snotty nose.':'')+'</div>'
+      +stTempChart(range.filter(function(z){return z<=td;}))+'</div>';}
+  var b='';
+  if(isFlock(S)){var lost=(S.days||[]).filter(function(y){return y.date<dt;}).reduce(function(a,y){return a+(parseInt(y.losses||0,10)||0);},0);var should=Math.max(0,(parseInt(d.count,10)||0)-lost);
+    b+='<div class="dueg">'+stNumIn("Eggs today","eggs",x,"0")+stNumIn("Birds counted","counted",x,should?"should be "+should:"")+'</div>'
+      +stDayChips("Eating &amp; drinking","","flEat",["Normal","Less","None"],x.flEat||(x.eat==="Yes"?"Normal":x.eat==="No"?"None":""))
+      +stDayChips("Droppings","","flDung",["Normal","Watery","Green","Blood"],x.flDung)
+      +stDayMultiRow("Signs","","signs",["Sneezing","Swollen head","Off legs","Feather loss","Pecking"],x,"None")
+      +'<div class="dueg">'+stNumIn("Deaths today","losses",x,"0",parseInt(x.losses||0,10)>1)+'<div></div></div>'
+      +'<div class="smt2">Two deaths in a day, or a bird with a swollen head, goes red on the board: <b>ring the vet and DAFM \u2014 think bird flu.</b></div>'
+      +'<div class="ptick"><div onclick="stDayTog(\'mites\')"><i class="'+(x.mites?"y":"")+'"></i>Red mite check done</div></div>';}
+  else if(isGoat(S)){b+=stDayChips("Eating","","eat",["All","Some","None"],x.eat)+stDayChips("Cudding","chewing the cud","cud",["Yes","Not seen","No"],x.cud)
+      +stDayChips("Left side","the rumen","side",["Normal","Full / tight","Bloated"],x.side||(x.bloat?"Bloated":""))+stDayChips("Droppings","","goatDung",["Pellets","Clumped","Scour","None"],x.goatDung)
+      +'<div class="cq"><label>FAMACHA<em>eyelid colour \u00b7 once a week is enough</em></label><div class="hk n5">'+[1,2,3,4,5].map(function(i){return '<span class="'+(String(x.fam)===String(i)?"on":"")+' fam f'+i+'" onclick="stDayFam('+i+')">'+i+'</span>';}).join("")+'</div></div>'
+      +'<div class="ptick"><div onclick="stDayTog(\'grind\')"><i class="'+(x.grind?"y":"")+'"></i>Grinding teeth or crying out</div><div onclick="stDayTog(\'kneel\')"><i class="'+(x.kneel?"y":"")+'"></i>Lame / kneeling to eat</div></div>';}
+  else{var eq=S.eq||{};b+=stDayChips("Eating","hay and feed","eat",["All","Most","Some","None"],x.eat)+stDayChips("Drinking","buckets / trough","drink",["Normal","Less","More","Not seen"],x.drink)
+      +stDayChips("Droppings","","dung",["Normal","Fewer","Dry","Loose","None"],x.dung)+stDayChips("Demeanour","","demean",["Bright","Quiet","Dull","Restless","Down a lot"],x.demean)
+      +stDayMultiRow("Nose &amp; cough","","nose",["Clear discharge","Thick / yellow","Cough","Swelling under the jaw"],x,"Clear")
+      +stDayChips("Feet","laminitis watch","feet",["Fine","Warm","Strong digital pulse","Lame","Won\u2019t move"],x.feet||(x.lame?"Lame":""))
+      +'<div class="ptick"><div onclick="stDayTog(\'colic\')"><i class="'+(x.colic?"y":"")+'"></i>Colic signs \u2014 pawing, rolling, looking at the belly</div>'+(eq.rugs==="On"?'<div onclick="stDayTog(\'rug\')"><i class="'+(x.rug?"y":"")+'"></i>Rug checked and refitted</div>':'')+'</div>';}
+  b+='<div class="f" style="margin-top:8px"><label class="lbl">Anything else</label><input value="'+e(x.notes||"")+'" placeholder="One line for the next person" onchange="stDayVal(\'notes\',this.value)"></div>';
+  b+='<div style="display:flex;gap:8px;margin-top:6px"><button class="btn" style="flex:1" onclick="stDaySame()">Same as '+(dt===td?'yesterday':'the day before')+'</button><button class="btn btnp" style="flex:1" onclick="stDayDone()">'+(dt===td?'Done for today':'Save '+e(fmtDMY(dt).slice(0,5)))+'</button></div>';
+  if(x.by&&stDayHas(x))b+='<div class="smt2" style="margin-top:8px">'+e(String(x.by).split(" ")[0])+(x.at?' \u00b7 '+e(x.at):'')+'</div>';
+  h+='<div class="card"><div class="lbl" style="margin-bottom:8px">'+(dt===td?'Today':e(stDayW(dt)))+' \u00b7 '+e(stDayLbl(dt).toLowerCase())+'</div>'+b+'</div>';
+  setTimeout(function(){var el=document.getElementById("st-dpills");var on=el&&el.querySelector(".dpill.on");if(on)el.scrollLeft=Math.max(0,on.offsetLeft-el.offsetLeft-el.clientWidth/2+on.offsetWidth/2);},0);
+  return h+browNav("days");}
+
+(function(){var t=window.tabDone,w=window.tabWarn;
+  window.tabDone=function(id){if(id==="days")return stDayHas(dayOf(S,tdISO()))?true:null;return t(id);};
+  window.tabWarn=function(id){if(id==="days")return stDayFlags(S,dayOf(S,tdISO())).red.length>0;return w(id);};})();
+
+// ════════════════════════════════════════════════════════════════════
+//  FEEDING and HANDLING, in depth
+// ════════════════════════════════════════════════════════════════════
+function stKgNow(st){st=st||S;var L=((st.weights)||[]).map(function(w){return{date:w.date||"",kg:parseFloat(String(w.weight||"").replace(/[^0-9.]/g,""))};}).filter(function(w){return w.date&&w.kg>0;}).sort(function(a,b){return b.date.localeCompare(a.date);});
+  if(L.length)return{kg:L[0].kg,date:L[0].date,from:"weighed"};var a=parseFloat(((st.eq||{}).arrKg)||"");return a>0?{kg:a,date:((st.dog||{}).intakeDate)||"",from:"on arrival"}:null;}
+function stHalf(v){return Math.round(v*2)/2;}
+function stFeedRates(st){return isDonkey(st)?[["1.3","1.3% keep"],["1.5","1.5%"],["1.8","1.8% gain"]]:[["1.5","1.5% keep"],["2","2% gain"],["2.5","2.5% gain fast"]];}
+function stFeedRate(st){var q=(st.eq||{});if(q.feedRate&&stFeedRates(st).some(function(r){return r[0]===q.feedRate;}))return q.feedRate;var hk=lastScore(st,"hk");var s=hk?hk.now.score:parseInt(q.arrHk,10)||0;return isDonkey(st)?(s&&s<=3?"1.8":"1.5"):(s&&s<=4?"2":"1.5");}
+function stForage(st){var k=stKgNow(st);if(!k||!isEquine(st))return null;var r=parseFloat(stFeedRate(st));return{kg:stHalf(k.kg*r/100),w:k,rate:r};}
+function stArrHk(st){var q=(st.eq||{});var a=parseInt(q.arrHk,10);if(a)return a;var hk=lastScore(st,"hk");return hk?hk.all[0].score:0;}
+function stRefeedOn(st){return isEquine(st)&&stArrHk(st)>0&&stArrHk(st)<=2&&!((st.eq||{}).refeedOff);}
+var ST_REFEED=[[1,3,1.0,"6 small feeds — every 4 hours · good hay only, no hard feed"],[4,6,1.5,"4–6 feeds · a handful of chaff from day 5"],[7,10,2.0,"hay nearly free · small chaff feed AM and PM"],[11,0,0,"the full plan below"]];
+function stRefeedRows(st){var d=st.dog||{};var k=stKgNow(st);var day=d.intakeDate?Math.max(1,daysSince(d.intakeDate)+1):0;
+  return ST_REFEED.map(function(r){var on=day&&day>=r[0]&&(!r[1]||day<=r[1]);var kg=r[2]&&k?stHalf(k.kg*r[2]/100):null;return{lbl:r[1]?"Days "+r[0]+"–"+r[1]:"Day "+r[0]+" on",txt:(kg?kg+" kg hay a day · ":"")+r[3],on:on};});}
+function stAppStrip(st,n){var td=tdISO();var d=st.dog||{};var start=addDaysStr(td,-(n-1));if(d.intakeDate&&d.intakeDate>start)start=d.intakeDate;var L=[];for(var dt=start;dt<=td;dt=addDaysStr(dt,1))L.push(dt);
+  return '<div class="fapp">'+L.map(function(dt){var x=dayOf(st,dt)||{};var v=x.eat||x.flEat||"";var c=v==="All"||v==="Most"||v==="Normal"||v==="Yes"?"#bbf7d0":v==="Some"||v==="Less"?"#fde68a":v==="None"||v==="No"?"#fecaca":"";return '<div title="'+esc(fmtDMY(dt)+(v?" · "+v:" · not logged"))+'"><i'+(c?' style="background:'+c+'"':'')+'></i>'+esc(fmtDMY(dt).slice(0,2))+'</div>';}).join("")+'</div>';}
+
+function renderStFeeding(){var q=stEq(),d=S.dog,e=esc;var eqn=isEquine(S),goat=isGoat(S);var he=stHe();
+  var F=stForage(S);var hk=lastScore(S,"hk");
+  var h='<h2>Feeding</h2><div class="sub">How much, the plan, and how '+he[0]+(he[0]==="they"?"’re":"’s")+' actually eating — on one screen.</div>';
+  var sent=eqn?(F?'<b>'+F.kg+' kg forage a day</b> · '+F.rate+'% of '+F.w.kg+' kg.'+(hk?' Henneke '+hk.now.score+(hk.now.score<5?' — aim for 5.':'.'):''):'<b>No weight yet.</b> Weigh or weigh-tape on Body to get an amount.'):goat?'<b>Hay or browse always there.</b> Concentrates only as the vet says.':'';
+  if(stRefeedOn(S))sent='<b style="color:#fcd34d">Refeeding plan.</b> '+sent;
+  h+=tabStrip(eqn?(F?F.kg+" kg":"—"):"—",stRefeedOn(S)?"#f59e0b":"#c6e76c","#282932",sent,"Set by",q.feedBy?e(String(q.feedBy).split(" ")[0]):"—");
+  if(eqn){var k=stKgNow(S);
+    h+='<div class="card"><div class="lbl" style="margin-bottom:6px">The amount</div>'
+      +'<div class="ovkv"><span>Weight</span><b>'+(k?k.kg+' kg · '+e(k.from)+(k.date?' '+e(fmtDMY(k.date).slice(0,5)):''):'<span class="lnk" data-go="weights">weigh on Body</span>')+'</b></div>'
+      +'<div class="ovkv"><span>Henneke</span><b>'+(hk?hk.now.score+' now → 5 target':'<span class="lnk" data-go="weights">not scored</span>')+'</b></div>'
+      +'<div class="ovkv"><span>Forage a day</span><b>'+(F?F.kg+' kg <span style="color:#6b7280;font-weight:600">('+F.rate+'% of '+(he[1]==="it"?"its":he[2])+' weight)</span>':'—')+'</b></div>'
+      +chipRow("Rate","","eq.feedRate",stFeedRates(S),stFeedRate(S))
+      +'<div class="smt2">'+(isDonkey(S)?'Donkeys need less than horses — 1.3–1.8% — and most of it barley straw, with hay added if they’re thin.':'Hay by weight, as fed. Ponies on a muzzle or prone to laminitis drop to 1.5%. Donkeys work out on 1.3–1.8% and mostly straw.')+' Your vet can change it.</div></div>';}
+  if(stRefeedOn(S)){var rows=stRefeedRows(S);
+    h+='<div class="card"><div class="lbl" style="margin-bottom:8px">Refeeding plan</div><div class="cflag a" style="margin:0 0 8px">Came in at <b>Henneke '+stArrHk(S)+'</b>. Small feeds often, no hard feed for the first days — too much too soon can kill a starved '+(isDonkey(S)?'donkey. Never let a donkey go without food either: hyperlipaemia.':'horse.')+'</div>'
+      +rows.map(function(r){return '<div style="display:flex;justify-content:space-between;gap:10px;padding:7px '+(r.on?'8px':'0')+';border-bottom:1px solid #f1f3ee;font-size:12.5px'+(r.on?';background:#f7fbe9;border-radius:6px;margin:0 -8px':'')+'"><b style="white-space:nowrap">'+e(r.lbl)+'</b><span style="text-align:right">'+e(r.txt)+'</span></div>';}).join("")
+      +fld("Vet’s changes",q.refeedVet||"","eq.refeedVet","text","e.g. alfalfa instead of hay, days 1–3")
+      +'<div class="smt2">The row for today is lit. When the plan is done, <span class="lnk" onclick="stTog(\'eq.refeedOff\')">switch it off</span>.</div></div>';}
+  else if(eqn&&stArrHk(S)&&stArrHk(S)<=2&&q.refeedOff)h+='<div class="smt2" style="margin:0 0 10px">Refeeding plan switched off. <span class="lnk" onclick="stTog(\'eq.refeedOff\')">Turn it back on</span>.</div>';
+  h+='<div class="card"><div class="lbl" style="margin-bottom:8px">The plan</div><div class="dog-fg">'+stWhere(d)+fld("Turned out with",q.with||"","eq.with","text","e.g. Ned & Nell")+'</div>'+(eqn?chipRow("Grazing","","eq.graze",["Full","Restricted","Muzzle","Off grass"],q.graze||""):'');
+  var am=q.hardAm!=null?q.hardAm:(q.hard||"");
+  h+='<div class="dueg">'+fld("Hay (kg a day)",q.hay||(F&&!q.hay?"":""),"eq.hay","number",F?String(F.kg):"6")+fld("Straw (kg a day)",q.straw||"","eq.straw","number",isDonkey(S)?"most of it":"")+'</div>'+(eqn?chipRow("Hay","","eq.soak",["Soaked","Dry","Haylage"],q.soak||""):'')
+    +'<div class="dueg">'+fld("Hard feed — AM",am,"eq.hardAm","text",stRefeedOn(S)?"none yet":"e.g. chaff 0.5 kg")+fld("Hard feed — PM",q.hardPm||"","eq.hardPm","text","")+'</div>'+fld("Supplements",q.supp||"","eq.supp","text","e.g. vit & min balancer")
+    +chipRow("Water","","eq.water",["Buckets","Automatic","Trough"],q.water||"")
+    +(eqn?chipRow("Rug","","eq.rugs",["On","Off","None"],q.rugs||""):fld("Feeding notes",q.feed||"","eq.feed","text","browse, no grain"))
+    +'<div class="dog-fg">'+fld("Set by",q.feedBy||"","eq.feedBy","text",currentName())+'</div></div>';
+  h+='<div class="card"><div class="lbl" style="margin-bottom:8px">Appetite <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">— from the daily checks</span></div>'+stAppStrip(S,14)+'<div class="smt2" style="margin-top:6px">Green all · amber some · red none · grey not logged.'+(isDonkey(S)?' <b>A donkey that stops eating goes red on the board the same day</b> — hyperlipaemia.':'')+'</div></div>';
+  h+='<div class="brow"><button class="btn" onclick="printFeedChart()">🖨 Feed-room chart</button></div>';
+  return h+browNav("feed");}
+
+function printFeedChart(){var td=tdISO();var L=records.filter(function(r){return stIsHere(r)&&!isFlock(r.state||{});});var gi=function(r){for(var i=0;i<SP_GROUPS.length;i++)if(SP_GROUPS[i][1](r.state||{}))return i;return 9;};
+  L.sort(function(a,b){return gi(a)-gi(b)||String(((a.state||{}).dog||{}).kennel||"").localeCompare(String(((b.state||{}).dog||{}).kennel||""))||(a.name||"").localeCompare(b.name||"");});
+  var e=esc;var rows=L.map(function(r){var st=r.state||{},q=st.eq||{},d=st.dog||{};var F=stForage(st);var ref=stRefeedOn(st)?stRefeedRows(st).filter(function(x){return x.on;})[0]:null;
+    return '<tr><td><b>'+e(r.name||d.name||"")+'</b><br><small>'+e(d.species||"")+'</small></td><td>'+e(d.kennel||"")+'</td><td>'+e(q.hay?q.hay+" kg":F?"~"+F.kg+" kg":"")+(q.soak?"<br><small>"+e(q.soak.toLowerCase())+"</small>":"")+'</td><td>'+e(q.straw?q.straw+" kg":"")+'</td><td>'+e(q.hardAm!=null?q.hardAm:(q.hard||""))+'</td><td>'+e(q.hardPm||"")+'</td><td>'+e(q.supp||"")+'</td><td>'+e([q.graze?"grazing "+q.graze.toLowerCase():"",q.water?q.water.toLowerCase():"",q.feed||"",q.refeedVet||""].filter(Boolean).join(" · "))+(ref?'<br><b>Refeeding: '+e(ref.lbl.toLowerCase())+' — '+e(ref.txt)+'</b>':'')+'</td></tr>';}).join("");
+  var w=window.open("","_blank");if(!w)return;w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Feed-room chart</title><style>body{font-family:system-ui,sans-serif;padding:18px;color:#282932}h1{font-size:17px;margin:0 0 2px}h2{font-size:12px;font-weight:400;color:#555;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #cfd4cf;padding:7px 8px;text-align:left;vertical-align:top}th{background:#f1f3ee;font-size:9px;text-transform:uppercase;letter-spacing:.05em}small{color:#666}@page{size:A4 landscape}@media print{body{padding:4px}}</style></head><body><h1>Feed-room chart &middot; NSPCA Longford Stables</h1><h2>'+L.length+' animals &middot; printed '+e(fmtDMY(td))+' &middot; check each animal’s Feeding tab for changes</h2><table><tr><th>Animal</th><th>Where</th><th>Hay a day</th><th>Straw</th><th>AM</th><th>PM</th><th>Supplements</th><th>Notes</th></tr>'+(rows||'<tr><td colspan="8">No animals in.</td></tr>')+'</table></body></html>');w.document.close();setTimeout(function(){w.print();},300);}
+
+// ── Handling: a ladder of what they'll let you do, and a session log ──
+var ST_HSTATE=[["Yes","yes","#86efac","#f0fdf4"],["Getting","getting there","#fcd34d","#fffbeb"],["No","not yet","#fca5a5","#fef2f2"],["","not tried","#e4e7e0","#fff"]];
+function stHState(v){v=v==="?"?"":(v||"");for(var i=0;i<ST_HSTATE.length;i++)if(ST_HSTATE[i][0]===v)return ST_HSTATE[i];return ST_HSTATE[3];}
+var HANDLING_SHORT={catch:"Catch",lead:"Lead",tie:"Tie up",feet:"Pick up feet",farrier:"Farrier",vet:"Vet &amp; needles",rug:"Rug",load:"Load"};
+function stHPick(k){window._hStep=window._hStep===k?null:k;renderMain();}
+function stHSet(k,v){var q=stEq();q["h_"+k]=v;q["h_"+k+"At"]=tdISO();persistSave();debouncedSave();renderMain();}
+function stSessAdd(){var q=stEq();var hs=window._hs||{};var t=((document.getElementById("hs-text")||{}).value||"").trim();if(!hs.kind&&!t){miniToast("Pick what you worked on first");return;}
+  q.sessions=q.sessions||[];q.sessions.push({date:tdISO(),kind:hs.kind||"",how:hs.how||"",text:t,by:currentName()});window._hs={};persistSave();debouncedSave();miniToast("Session saved");renderMain();}
+function stSessDel(i){var q=stEq();var L=q.sessions||[];var s=L[i];if(!s)return;appConfirm("Remove the "+(s.kind||"session")+" on "+fmtDMY(s.date)+"?",function(){L.splice(i,1);persistSave();debouncedSave();renderMain();});}
+function stHsPick(k,v){window._hs=window._hs||{};window._hs[k]=window._hs[k]===v?"":v;var t=document.getElementById("hs-text");window._hsText=t?t.value:"";renderMain();}
+function renderStHandling(){var q=stEq(),e=esc;var goat=isGoat(S);var list=goat?HANDLING_GOAT:HANDLING_EQ;var he=stHe();
+  var solid=list.filter(function(x){return q["h_"+x[0]]==="Yes";}).length,getting=list.filter(function(x){return q["h_"+x[0]]==="Getting";}).length;
+  var who=q.who?(q.who==="Named staff only"&&q.whoNames?q.whoNames:q.who):"";
+  var h='<h2>Handling</h2><div class="sub">What '+he[0]+'’ll let you do, every session, and who should handle '+he[1]+'.</div>';
+  h+=tabStrip(solid+" / "+list.length,"#c6e76c","#282932",'<b>'+solid+' of '+list.length+'</b> handling steps solid.'+(getting?' '+getting+' getting there.':''),"Handle by",who?e(who):"—");
+  var pick=window._hStep&&list.some(function(x){return x[0]===window._hStep;})?window._hStep:null;
+  var grid='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">'+list.map(function(x){var s=stHState(q["h_"+x[0]]);return '<div role="button" tabindex="0" onclick="stHPick(\''+x[0]+'\')" style="cursor:pointer;border:1.5px solid '+(pick===x[0]?"#282932":s[2])+';background:'+s[3]+';border-radius:10px;padding:8px 4px;text-align:center;font-size:11.5px;font-weight:800;line-height:1.2">'+(HANDLING_SHORT[x[0]]||e(x[1]))+'<small style="display:block;font-weight:700;color:#6b7280;margin-top:3px;font-size:10px">'+s[1]+'</small></div>';}).join("")+'</div>';
+  if(pick){var px=list.filter(function(x){return x[0]===pick;})[0];var cur=q["h_"+pick]==="?"?"":(q["h_"+pick]||"");
+    grid+='<div style="margin-top:10px;padding:10px 12px;border-radius:10px;background:#f7f8f4"><div style="font-size:13px;font-weight:800;margin-bottom:6px">'+e(px[1])+(q["h_"+pick+"At"]?' <span style="font-weight:600;color:#6b7280;font-size:11px">· set '+e(fmtDMY(q["h_"+pick+"At"]).slice(0,5))+'</span>':'')+'</div><div class="cchips">'+ST_HSTATE.map(function(s){return '<span class="cchip'+(cur===s[0]?" on":"")+'" onclick="stHSet(\''+pick+'\',\''+s[0]+'\')">'+s[1].replace(/^./,function(c){return c.toUpperCase();})+'</span>';}).join("")+'</div></div>';}
+  h+='<div class="card"><div class="lbl" style="margin-bottom:8px">What '+he[0]+'’ll let you do</div>'+grid+'<div class="smt2">Tap a step to change it. What '+he[0]+' can’t do yet shows on <span class="lnk" data-go="rehoming">Clearance</span>.</div></div>';
+  var hs=window._hs||{};var kinds=goat?["Catching","Leading","Feet","Vet visit"]:["Groundwork","Feet","Rugging","Loading","Farrier visit","Vet visit"];
+  var S2=(q.sessions||[]).map(function(s,i){return{s:s,i:i};}).sort(function(a,b){return String(b.s.date).localeCompare(String(a.s.date))||b.i-a.i;});
+  h+='<div class="card nofact"><div class="lbl" style="margin-bottom:8px">Sessions</div>'
+    +'<div class="cq"><label>Worked on</label><div class="cchips">'+kinds.map(function(k){return '<span class="cchip'+(hs.kind===k?" on":"")+'" onclick="stHsPick(\'kind\',\''+k+'\')">'+k+'</span>';}).join("")+'</div></div>'
+    +'<div class="cq"><label>How it went</label><div class="cchips">'+["Settled","Tense","Stopped early","Big step"].map(function(k){return '<span class="cchip'+(hs.how===k?" on":"")+'" onclick="stHsPick(\'how\',\''+k+'\')">'+k+'</span>';}).join("")+'</div></div>'
+    +'<div class="f"><label class="lbl">One line</label><input id="hs-text" value="'+e(window._hsText||"")+'" placeholder="e.g. held each front for 10 s, hinds still snatching" onkeydown="if(event.key===\'Enter\')stSessAdd()"></div>'
+    +'<button class="btn btnp" style="width:100%" onclick="stSessAdd()">Save session</button>'
+    +(S2.length?'<div class="lbl" style="margin:12px 0 4px">'+S2.length+' session'+(S2.length===1?'':'s')+' · newest first</div>'+S2.slice(0,12).map(function(o){var s=o.s;var c=s.how==="Big step"||s.how==="Settled"?"g":s.how==="Stopped early"?"r":"";return '<div class="srow"><b>'+e(fmtDMY(s.date).slice(0,5))+'</b><span>'+e([s.kind,s.text,s.by?String(s.by).split(" ")[0]:""].filter(Boolean).join(" · "))+'</span>'+(s.how?'<i class="'+c+'">'+e(s.how)+'</i>':'<i></i>')+'<u onclick="stSessDel('+o.i+')">remove</u></div>';}).join(""):'<div class="smt2" style="margin-top:8px">No sessions yet.</div>')+'</div>';
+  window._hsText="";
+  var W=Array.isArray(q.watch)?q.watch:[];
+  h+='<div class="card"><div class="lbl" style="margin-bottom:8px">For the handler</div><div class="cq"><label>Watch for</label><div class="cchips">'+(goat?["Hard to catch","Butts","Jumps out","Barges","Nervous"]:["Hard to catch","Kicks","Bites","Barges","Rears","Head-shy","Nervous of men"]).map(function(o){return '<span class="cchip'+(W.indexOf(o)>=0?" on":"")+'" onclick="stMulti(\'eq.watch\',\''+o+'\')">'+e(o)+'</span>';}).join("")+'</div></div>'
+    +chipRow("Who handles "+he[1],"","eq.who",["Anyone","Experienced staff","Two people","Named staff only"],q.who||"")
+    +(q.who==="Named staff only"?fld("Who",q.whoNames||"","eq.whoNames","text","e.g. Jamie, Shane"):'')
+    +(isEquine(S)?chipRow("Ridden","","eq.ridden",["Ridden","Unbacked","Don’t know","Not to be ridden"],q.ridden||""):'')
+    +'<div class="f"><label class="lbl">Notes</label><input value="'+e(q.handNotes||"")+'" data-save="eq.handNotes" placeholder="e.g. Bring a bucket to catch"></div></div>';
+  return h+browNav("hand");}
+
+// ════════════════════════════════════════════════════════════════════
+//  CLEARANCE (new tab), REHOMING for a yard, and the REPORT (new tab)
+// ════════════════════════════════════════════════════════════════════
+function stClearItems(st){var d=st.dog||{},q=st.eq||{},a=st.assessment||{};var eqn=isEquine(st),goat=isGoat(st),fl=isFlock(st);var L=[];var td=tdISO();
+  var add=function(t,state,why,go,k){L.push({t:t,s:state,why:why||"",go:go||"",k:k||t.toLowerCase()});};
+  var h=holdInfo(st);
+  if(d.courtHold)add("Court hold released","no",d.caseRef?"case "+d.caseRef:"court hold on","dog","court hold");
+  else if(d.cameIn==="Seized")add("Signed over, or released by the court",d.signedOver?"ok":"wait",d.signedOver?"":"not signed over","dog","signed over");
+  if(d.cameIn==="Surrendered")add("Signed over to the NSPCA",d.signedOver?"ok":"wait",d.signedOver?"":"form not signed","dog","signed over");
+  if(d.cameIn==="Impounded / stray"){var fr=h&&h.impound?h.free:null;add("Impound hold over",fr?"wait":"ok",fr?"free from "+fmtDMY(fr).slice(0,5):"","dog","impound hold");}
+  var ii=stIso(st);var tot=stIsoDays(d)+((d.isoExt||[]).reduce(function(x,e){return x+(parseInt(e.days)||0);},0));
+  add("Isolation done \u2014 "+tot+" days",ii&&ii.state==="done"?"ok":ii&&ii.day!=null?"wait":"wait",ii&&ii.state==="done"?"":ii&&ii.day!=null?"day "+Math.max(0,ii.day):"no intake date","iso","isolation");
+  if(eqn){var S3=stranglesOf(st);var pos=stranglesPos(st);var gpw=S3.some(function(x){return /pouch/i.test(x.type||"")&&x.result==="Clear";});var c=stranglesClear(st);
+    add("Strangles \u2014 3 clear swabs or a clear pouch wash",pos?"no":(gpw||c>=3)?"ok":"wait",pos?"positive":(gpw||c>=3)?"":c+" of 3","iso","strangles");}
+  if(eqn)add("Passport seen \u00b7 chip matches",d.passport==="Seen"&&d.chipMatch?"ok":d.passport==="No passport"?"no":"wait",d.passport==="No passport"?"needs a passport":d.passport!=="Seen"?"passport not seen":!d.chipMatch?"chip not checked":"","dog","passport");
+  if(goat)add("Ear tag",d.tag?"ok":"wait",d.tag?"":"no tag","dog","ear tag");
+  if(eqn||goat){var V=((st.medical||{}).vaccinations||[]).filter(function(v){return v&&v.date;});var has=function(re){return V.some(function(v){return re.test(v.type||"");});};
+    var ok=eqn?has(/flu/i)&&has(/tetanus/i):has(/clostrid/i);add(eqn?"Flu & tetanus started":"Clostridial vaccine",ok?"ok":"wait",ok?"":"not logged","medical","vaccines");}
+  add("Vet: fit to rehome",a.vetFit==="Yes"?"ok":a.vetFit==="Not yet"?"no":"wait",a.vetFit==="Not yet"?"vet says not yet":a.vetFit==="Yes"?"":"not asked","","the vet");
+  if(eqn){var hk=lastScore(st,"hk");add("Henneke 4 or more",hk&&hk.now.score>=4?"ok":hk?"no":"wait",hk?(hk.now.score>=4?"":String(hk.now.score)):"not scored","weights","Henneke");}
+  if(goat){var gb=lastScore(st,"goatBcs");add("Condition 2 or more",gb&&gb.now.score>=2?"ok":gb?"no":"wait",gb?(gb.now.score>=2?"":String(gb.now.score)):"not scored","weights","condition");}
+  if(eqn){var fo=q.farrierNext&&q.farrierNext<td,dn=q.dentistNext&&q.dentistNext<td;var fx=!!(q.farrierLast||(q.farrierVisits||[]).length),dx=!!(q.dentistLast||(q.dentVisits||[]).length);
+    add("Feet and teeth done",fo||dn?"no":fx&&dx?"ok":"wait",fo&&dn?"both overdue":fo?"farrier overdue":dn?"dentist overdue":!fx&&!dx?"not seen yet":!fx?"farrier not seen":!dx?"dentist not seen":"","feet","feet & teeth");}
+  if(goat){var to=q.trimNext&&q.trimNext<td;add("Feet trimmed",to?"no":(q.trimLast||(q.trimVisits||[]).length)?"ok":"wait",to?"overdue":"","feet","feet");}
+  if(eqn||goat){var keys=eqn?["catch","lead","feet","farrier"]:["catch","lead"];var yes=keys.filter(function(k){return q["h_"+k]==="Yes";}).length;var no=keys.some(function(k){return q["h_"+k]==="No";});
+    add("Handling: "+(eqn?"catch, lead, feet, farrier":"catch and lead"),yes===keys.length?"ok":no?"no":"wait",yes===keys.length?"":yes+" of "+keys.length,"hand","handling");}
+  return L;}
+var ST_DECIDE=[["Cleared \u2014 rehome outright","Rehome outright"],["Cleared \u2014 loan only","Loan only"],["Cleared \u2014 companion only","Companion only"],["Sanctuary / retire","Sanctuary / retire"],["Not fit yet","Not fit yet"],["Vet: put to sleep","Vet: put to sleep"]];
+function stDecide(v){var a=S.assessment=S.assessment||{};if(a.rehomingStatus===v){a.rehomingStatus="";}else{a.rehomingStatus=v;if(!a.rehomingDate)a.rehomingDate=tdISO();if(!a.rehomingBy)a.rehomingBy=currentName();
+  S.rehome=S.rehome||{};if(/loan only/.test(v)&&!S.rehome.goingAs)S.rehome.goingAs="Out on loan";if(/outright/.test(v)&&!S.rehome.goingAs)S.rehome.goingAs="Rehomed outright";}
+  persistSave();debouncedSave();renderMain();}
+function stVetFit(v){var a=S.assessment=S.assessment||{};a.vetFit=a.vetFit===v?"":v;persistSave();debouncedSave();renderMain();}
+function renderStClear(){var e=esc;var a=S.assessment=S.assessment||{};var L=stClearItems(S);var block=L.filter(function(x){return x.s!=="ok";});var he=stHe();var st=a.rehomingStatus||"";var lab=(ST_DECIDE.filter(function(x){return x[0]===st;})[0]||[st,st])[1];
+  var h='<h2>Clearance</h2><div class="sub">Every hold in one list, ticked from the record, then the decision. Nothing here blocks a save.</div>';
+  var cleared=/^Cleared/.test(st);
+  h+=tabStrip(st?(cleared?"CLEARED":e(lab.toUpperCase().slice(0,12))):"NOT YET",cleared?"#c6e76c":st?"#f59e0b":"#454857",cleared||st?"#282932":"#9a9fa8",(st?'<b>'+e(lab)+'</b>'+(a.rehomingDate?' \u00b7 '+e(fmtDMY(a.rehomingDate).slice(0,5)):'')+'. ':'')+(block.length?'<b>'+block.length+' thing'+(block.length===1?'':'s')+' in the way.</b> '+e(block.slice(0,5).map(function(x){return x.k;}).join(", ")+(block.length>5?" and more":""))+'.':'<b>Nothing in the way.</b>'),"Days here",S.dog.intakeDate?String(Math.max(0,daysSince(S.dog.intakeDate))):"\u2014");
+  var icon={ok:["#16a34a","\u2713"],no:["#dc2626","\u2715"],wait:["#d97706","\u2026"]};
+  h+='<div class="card"><div class="lbl" style="margin-bottom:4px">What would stop it</div>'+L.map(function(x){var c=icon[x.s];return '<div style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #f1f3ee;font-size:13px'+(x.go?';cursor:pointer':'')+'"'+(x.go?' data-go="'+x.go+'"':'')+'><span style="width:20px;height:20px;border-radius:50%;background:'+c[0]+';color:#fff;font-weight:900;font-size:11px;display:flex;align-items:center;justify-content:center;flex:none">'+c[1]+'</span><span style="flex:1;font-weight:600">'+e(x.t)+'</span><span style="font-size:11.5px;color:#6b7280;font-weight:700;white-space:nowrap">'+e(x.why)+(x.go?' \u203a':'')+'</span></div>';}).join("")
+    +'<div class="cq" style="margin-top:10px"><label>Vet says fit to rehome</label><div class="cchips">'+["Yes","Not yet"].map(function(o){return '<span class="cchip'+(a.vetFit===o?" on":"")+'" onclick="stVetFit(\''+o+'\')">'+o+'</span>';}).join("")+'</div></div></div>';
+  h+='<div class="card"><div class="lbl" style="margin-bottom:8px">The decision</div><div class="cchips">'+ST_DECIDE.map(function(o){return '<span class="cchip'+(st===o[0]?" on":"")+'" onclick="stDecide(\''+o[0].replace(/'/g,"\\'")+'\')">'+e(o[1])+'</span>';}).join("")+'</div>'
+    +(cleared&&block.length?'<div class="cflag a" style="margin-top:8px">Cleared with '+block.length+' thing'+(block.length===1?'':'s')+' still open \u2014 that\u2019s allowed; they stay on this list.</div>':'')
+    +fld("Conditions",a.rehomingConditions||"","assessment.rehomingConditions","text","e.g. companion only, not to be ridden, must go with Ned")
+    +'<div class="dueg">'+fld("Decided by",a.rehomingBy||"","assessment.rehomingBy","text","")+fld("Date",a.rehomingDate||"","assessment.rehomingDate","date")+'</div></div>';
+  h+='<div class="card"><div class="lbl" style="margin-bottom:6px">For the new home</div>'+ta("",a.homeText||"","assessment.homeText","Temperament, needs, who "+he[0]+" suits \u2014 goes on the new-home report")+'</div>';
+  return h+browNav("rehoming");}
+
+// ── Rehoming, shaped for a yard ─────────────────────────────────────
+function stHcList(st){if(isFlock(st))return[["house","Fox-proof house, shut at night"],["run","Secure run"],["water","Clean water and feed, with grit"],["mite","A red mite plan"],["reg","Registered with DAFM as a poultry keeper"],["vet","Vet named"]];
+  if(isGoat(st))return[["fence","Goat-proof fencing \u2014 1.2 m, no gaps"],["shelter","Dry shelter \u2014 goats hate rain"],["company","Another goat \u2014 never on their own"],["water","Clean water"],["plants","No yew, rhododendron or laurel"],["vet","Vet named, and who trims the feet"]];
+  return[["fence","Fencing safe \u2014 post and rail or electric, no barbed wire"],["acre","Enough grazing \u2014 about an acre per horse"],["shelter","Field shelter or stable"],["water","Clean water all day"],["plants","No ragwort, yew or sycamore"],["company","Company \u2014 never on "+(stHe()[2]==="its"?"its":stHe()[2])+" own"],["vet","Vet and farrier named"],["hay","Hay stored dry"]];}
+function stHcTog(k){S.rehome=S.rehome||{};var c=S.rehome.hc=S.rehome.hc||{};c[k]=!c[k];persistSave();debouncedSave();renderMain();}
+function stGoingAs(v){S.rehome=S.rehome||{};S.rehome.goingAs=S.rehome.goingAs===v?"":v;persistSave();debouncedSave();renderMain();}
+function stLoanVisits(st){var r=st.rehome||{};if(r.goingAs!=="Out on loan"||!r.adoptedDate)return[];var td=tdISO();var V=r.visits||{};var L=[{due:addDaysStr(r.adoptedDate,42),lbl:"6 weeks"}];
+  for(var y=1;y<=20;y++){var du=stAddMonths(r.adoptedDate,12*y);L.push({due:du,lbl:"Year "+y});if(du>td)break;}
+  return L.map(function(v){v.done=V[v.due]||null;return v;});}
+function stLoanNext(st){return stLoanVisits(st).filter(function(v){return !v.done;})[0]||null;}
+function stLoanDone(due){S.rehome=S.rehome||{};var V=S.rehome.visits=S.rehome.visits||{};if(V[due]){delete V[due];}else{V[due]={date:tdISO(),by:currentName()};}persistSave();debouncedSave();renderMain();}
+function renderRehome(){var h=dogRenderRehome();var r=S.rehome||{};var e=esc;var eqn=isEquine(S);var he=stHe();
+  var HC=stHcList(S);var c=r.hc||{};var n=HC.filter(function(x){return c[x[0]];}).length;
+  var extra=(isFlock(S)?'':'<div class="cq"><label>Going as</label><div class="cchips">'+["Rehomed outright","Out on loan"].map(function(o){return '<span class="cchip'+(r.goingAs===o?" on":"")+'" onclick="stGoingAs(\''+o+'\')">'+o+'</span>';}).join("")+'</div></div>')
+    +'<div class="lbl" style="margin:8px 0 4px">The '+(isFlock(S)?"set-up":"yard")+' \u00b7 '+n+' of '+HC.length+'</div><div class="ptick">'+HC.map(function(x){return '<div onclick="stHcTog(\''+x[0]+'\')"><i class="'+(c[x[0]]?"y":"")+'"></i>'+e(x[1])+'</div>';}).join("")+'</div>'
+    +fld("Yard address",r.yardAddress||"","rehome.yardAddress","text","if it\u2019s not where they live");
+  var k=h.indexOf('<div class="cq"><label>Result</label>');if(k>=0)h=h.slice(0,k)+extra+h.slice(k);
+  h=h.replace(/(Home check<\/b><small>)([^<]*)/,function(m,a,b){return a+b+(n?' \u00b7 '+n+' of '+HC.length:'');});
+  h=h.replace('<b>Adopted</b>','<b>Gone</b>').replace(/(Move to |Back to )Adopted</g,'$1Gone<');
+  var loan=r.goingAs==="Out on loan";var vis=stLoanVisits(S);
+  var gone='<div class="ptick">'+(eqn&&!loan?'<div onclick="stTog(\'dog.transferSent\')"><i class="'+(S.dog.transferSent?"y":"")+'"></i>Passport sent for change of owner \u2014 within 30 days</div>':'')+(loan?'<div onclick="stTog(\'rehome.loanSigned\')"><i class="'+(r.loanSigned?"y":"")+'"></i>Loan agreement signed \u2014 the NSPCA keeps ownership</div>':'')+'</div>'
+    +(loan?'<div class="lbl" style="margin:10px 0 4px">Loan welfare visits</div>'+(vis.length?vis.map(function(v){var od=!v.done&&v.due<tdISO();return '<div class="srow"><b>'+e(v.lbl)+'</b><span>'+(v.done?'done '+e(fmtDMY(v.done.date).slice(0,5))+(v.done.by?' \u00b7 '+e(String(v.done.by).split(" ")[0]):''):'due '+e(fmtDMY(v.due)))+'</span><i class="'+(v.done?"g":od?"r":"")+'">'+(v.done?"Done":od?"Overdue":"Due")+'</i><u onclick="stLoanDone(\''+v.due+'\')">'+(v.done?"undo":"mark done")+'</u></div>';}).join(""):'<div class="smt2">They schedule themselves from the date '+he[0]+' goes: 6 weeks, then every year.</div>'):'');
+  var j=h.indexOf('>Adoption date<');if(j>=0){var s0=h.lastIndexOf('<div class="dog-fg">',j);if(s0>=0)h=h.slice(0,s0)+gone+h.slice(s0);}
+  h=h.replace('>Adoption date<','>Date '+(he[0]==="they"?"they":he[0])+' went<');
+  return h;}
+function markAdopted(){ensureRF();var r=S.rehome;var loan=r.goingAs==="Out on loan";appConfirm((S.dog.name||"This animal")+" goes "+(loan?"out on loan":"to the new home")+(r.adopterName?" with "+r.adopterName:"")+"? This sets the Outcome to "+(loan?"Out on loan":"Rehomed")+" today.",function(){var td=tdISO();r.stage="Adopted";if(!r.adoptedDate)r.adoptedDate=td;r.log.push({date:td,text:(loan?"Out on loan":"Rehomed")+(r.adopterName?" with "+r.adopterName:""),by:currentName()});if(!S.fin)S.fin={};S.fin.outcome=loan?"Out on loan":"Rehomed";S.fin.outcomeDate=td;try{stampDecision("outcome");}catch(e){}persistSave();S.tab="outcome";render();});}
+(function(){var mh=window.morningHtml;if(typeof mh!=="function")return;window.morningHtml=function(active){var h=mh(active);try{var td=tdISO();var lim=addDaysStr(td,14);var due=records.filter(function(r){var n=stLoanNext(r.state||{});return n&&n.due<=lim;});if(!due.length)return h;
+  var line=due.map(function(r){var n=stLoanNext(r.state);return '<a href="#" onclick="openDog('+r.id+');S.tab=\'rehome\';render();return false">'+esc(r.name)+'</a>\u2019s loan visit '+(n.due<td?'<b style="color:#fcd34d">is overdue</b>':'is due '+esc(fmtDMY(n.due).slice(0,5)));}).join("; ")+".";var k=h.lastIndexOf('</p>');return k>=0?h.slice(0,k)+' '+line+h.slice(k):h;}catch(e){return h;}};})();
+
+// ── Report ─────────────────────────────────────────────────────────
+var ST_REP_PAGES=[["ident","Identity &amp; passport"],["arr","Arrival &amp; condition"],["body","Henneke &amp; weight"],["med","Medical &amp; feet"],["days","Daily checks"],["photos","Photos with dates"],["care","Handling &amp; feeding"],["out","Clearance &amp; outcome"],["notes","Notes"]];
+var ST_REP_FOR={"Our file":["ident","arr","body","med","days","photos","care","out","notes"],"Vet":["ident","arr","body","med","days"],"Court":["ident","arr","body","med","photos","notes"],"New home / loan":["ident","body","med","care","out"],"Transfer":["ident","arr","body","med","care","out","notes"]};
+function stRep(){var r=window._stRep;if(!r||r.id!==S._id){r=window._stRep={id:S._id,for:"Our file",pages:ST_REP_FOR["Our file"].slice()};}return r;}
+function stRepFor(f){var r=stRep();r.for=f;r.pages=(ST_REP_FOR[f]||[]).slice();renderMain();}
+function stRepPage(p){var r=stRep();var i=r.pages.indexOf(p);if(i>=0)r.pages.splice(i,1);else r.pages.push(p);renderMain();}
+function stRepPhotos(){var ps=photosFor();var d=S.dog||{};window._repTried=window._repTried||{};if(ps===null&&S._id&&supabaseClient&&window._repLoading!==S._id&&!window._repTried[S._id]){window._repLoading=S._id;window._repTried[S._id]=1;var id=S._id;loadDogPhotos(id).then(function(){window._repLoading=null;if(S&&S._id===id&&S.tab==="report")renderMain();},function(){window._repLoading=null;});}
+  return (ps||[]).filter(function(p){return p&&p.data;}).slice().sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});}
+function stRepHtml(forWho,pages){var d=S.dog||{},q=S.eq||{},m=S.medical||{},a=S.assessment||{},r=S.rehome||{},f=S.fin||{};var e=esc;var safe=forWho==="New home / loan"||forWho==="Vet";var newHome=forWho==="New home / loan";
+  var has=function(p){return pages.indexOf(p)>=0;};
+  var tbl=function(rows){rows=rows.filter(function(x){return x&&x[1]!==undefined&&x[1]!==null&&String(x[1])!=="";});return rows.length?'<table class="kv">'+rows.map(function(x){return '<tr><th>'+x[0]+'</th><td>'+x[1]+'</td></tr>';}).join("")+'</table>':'<p class="none">Nothing recorded.</p>';};
+  var list=function(head,rows){return rows.length?'<table class="ls"><tr>'+head.map(function(x){return '<th>'+x+'</th>';}).join("")+'</tr>'+rows.map(function(rw){return '<tr>'+rw.map(function(x){return '<td>'+(x==null?"":x)+'</td>';}).join("")+'</tr>';}).join("")+'</table>':'<p class="none">None recorded.</p>';};
+  var D=function(x){return x?e(fmtDMY(x)):"";};
+  var who=[d.species,d.breed,d.sex,d.age,d.height,d.colour].filter(Boolean).map(e).join(" \u00b7 ");
+  var o='<div class="band"><span>NSPCA LONGFORD \u00b7 STABLES'+(!safe&&d.caseRef?' \u00b7 CASE '+e(d.caseRef):'')+'</span><span>For: '+e(forWho)+' \u00b7 printed '+e(fmtDMY(tdISO()))+'</span></div><h1>'+e(d.name||"Unnamed")+'</h1><div class="who">'+who+'</div>';
+  if(has("ident"))o+='<h2>Identity &amp; passport</h2>'+tbl([["Species",e(d.species||"")],["Breed / type",e(d.breed||"")],["Sex",e(d.sex||"")],["Age",e(d.age||"")+(d.ageFrom?" ("+e(d.ageFrom.toLowerCase())+")":"")],["Height",e(d.height||"")],["Colour",e(d.colour||"")],["Markings",e([].concat(d.markings||[]).join(", ")+(d.markWhere?" \u2014 "+d.markWhere:""))],["Microchip",e(d.microchip||"")],["Passport",e(d.passport||"")],["UELN",e(d.ueln||"")],["Issued by",e(d.passIssuer||"")],["Name on passport",e(d.passName||"")],["Food chain",e(d.foodChain||"")],["Ear tag",e(d.tag||"")],["Birds",isFlock(S)?e(d.count||""):""],["Where now",e(d.kennel||"")]]);
+  if(has("arr")){o+='<h2>Arrival &amp; condition</h2>'+tbl([["Came in",e(d.cameIn||"")+(d.intakeDate?" on "+D(d.intakeDate):"")],["Inspector",safe?"":e(d.inspector==="Other"?(d.inspectorOther||""):(d.inspector||""))],["Found at",safe?"":e(d.foundAt||"")],["Reason",newHome?"":e(d.reason||"")],["Case ref",safe?"":e(d.caseRef||"")],["Court date",safe?"":D(d.courtDate)],["Garda ref",safe?"":e(d.gardaRef||"")],["Previous owner",safe?"":e([d.ownerName,d.ownerAddr].filter(Boolean).join(", "))],
+      [isGoat(S)?"Condition on arrival":"Henneke on arrival",q.arrHk?e(q.arrHk+(isGoat(S)?" of 5":" \u00b7 "+(HENNEKE[q.arrHk]||"").toLowerCase())):""],["Weight on arrival",q.arrKg?e(q.arrKg)+" kg":""],["Feet",e(q.arrFeet||"")],["Coat &amp; skin",e((q.arrCoat||[]).join(", "))],["Other",e((q.arrOther||[]).join(", "))],["Handling",e((q.arrHandle||[]).join(", "))],["Vet on arrival",e(q.arrVet||"")],["Notes",e(q.arrNotes||"")]]);}
+  if(has("body")){var hk=lastScore(S,isGoat(S)?"goatBcs":"hk");var W=stWeights().slice().reverse();var dates={};(hk?hk.all:[]).forEach(function(x){dates[x.date]=dates[x.date]||{};dates[x.date].s=x.score;});W.forEach(function(x){dates[x.date]=dates[x.date]||{};dates[x.date].kg=x.kg;});
+    o+='<h2>'+(isGoat(S)?"Condition":"Henneke")+' &amp; weight</h2>'+list(["Date",isGoat(S)?"Condition (1\u20135)":"Henneke (1\u20139)","Weight"],Object.keys(dates).sort().map(function(k){return [D(k),dates[k].s!=null?String(dates[k].s):"",dates[k].kg?dates[k].kg+" kg":""];}));}
+  if(has("med")){o+='<h2>Medical &amp; feet</h2><h3>Vaccinations</h3>'+list(["Date","Vaccine","By"],(m.vaccinations||[]).filter(function(v){return v.date;}).map(function(v){return [D(v.date),e(v.type||""),e(v.adminBy||"")];}))
+      +'<h3>Worming &amp; parasites</h3>'+list(["Date","Treatment","By"],(m.parasiteTreatments||[]).filter(function(v){return v.date;}).map(function(v){return [D(v.date),e(v.type||""),e(v.adminBy||"")];}))
+      +'<h3>Vet visits</h3>'+list(["Date","Vet","Reason","Findings","Treatment"],(m.vetVisits||[]).filter(function(v){return v.date;}).map(function(v){return [D(v.date),e(v.vet||""),e(v.reason||""),e(v.findings||""),e(v.treatment||"")];}))
+      +'<h3>Conditions</h3>'+list(["Date","Condition","Status","Treatment"],(m.diseases||[]).map(function(v){return [D(v.date),e(v.type||""),e(v.status||""),e(v.treatment||"")];}))
+      +'<h3>Medication</h3>'+list(["Medicine","Dose","How often","From","To"],(m.medications||[]).map(function(v){return [e(v.name||""),e(v.dose||""),e(v.frequency||""),D(v.startDate),D(v.endDate)];}));
+    if(isEquine(S))o+='<h3>Strangles tests</h3>'+list(["Date","Test","Result"],stranglesOf(S).map(function(x){return [D(x.date),e(x.type||""),e(x.result||"")];}));
+    var V=[].concat((q.farrierVisits||[]).map(function(v){return [D(v.date),"Farrier",e([v.work,v.by,v.note].filter(Boolean).join(" \u00b7 "))];}),(q.dentVisits||[]).map(function(v){return [D(v.date),"Dentist",e([v.work,v.by,v.note].filter(Boolean).join(" \u00b7 "))];}),(q.trimVisits||[]).map(function(v){return [D(v.date),"Feet trimmed",e([v.by,v.note].filter(Boolean).join(" \u00b7 "))];}));
+    if(!isFlock(S))o+='<h3>Feet &amp; teeth</h3>'+list(["Date","Visit","Detail"],V);}
+  if(has("days")){var DD=(S.days||[]).filter(stDayHas).slice().sort(function(a,b){return a.date.localeCompare(b.date);});
+    o+='<h2>Daily checks</h2>'+list(isFlock(S)?["Date","Eating","Eggs","Deaths","Signs","Notes"]:["Date","Temp \u00b0C","Eating","Droppings","Notes","By"],DD.map(function(x){var f=stDayFlags(S,x);var nt=e([].concat(f.red.map(function(a){return a.t;}),f.amb).join(", ")+(x.notes?(f.red.length||f.amb.length?" \u2014 ":"")+x.notes:""));
+      return isFlock(S)?[D(x.date),e(x.flEat||x.eat||""),e(x.eggs||""),e(x.losses||""),e((x.signs||[]).join(", ")),nt]:[D(x.date),e([x.tAm,x.tPm].filter(Boolean).join(" / ")),e(x.eat||""),e(x.dung||x.goatDung||""),nt,e(String(x.by||"").split(" ")[0])];}));}
+  if(has("photos")){var P=stRepPhotos();o+='<h2>Photos with dates</h2>';if(!P.length)o+='<p class="none">'+(photosFor()===null?'Photos are still loading \u2014 print again in a moment.':'No photos on the record.')+'</p>';else{var first=P[0],last=P.length>1?P[P.length-1]:null;var hs=lastScore(S,"hk");var sAt=function(dt){var L=hs?hs.all.filter(function(x){return x.date<=dt;}):[];return L.length?" \u00b7 Henneke "+L[L.length-1].score:"";};
+      o+='<div class="pair">'+[first,last].filter(Boolean).map(function(p,i){return '<figure><img src="'+blobSrc(p.data)+'"><figcaption>'+(i?"Latest":"Arrival")+' \u00b7 '+D(p.date)+e(sAt(p.date||""))+'</figcaption></figure>';}).join("")+'</div>';
+      if(P.length>2)o+='<div class="grid">'+P.slice(1,-1).map(function(p){return '<figure><img src="'+blobSrc(p.data)+'"><figcaption>'+D(p.date)+(p.caption?' \u00b7 '+e(p.caption):'')+'</figcaption></figure>';}).join("")+'</div>';}}
+  if(has("care")){var W2=q.watch||[];o+='<h2>Handling &amp; feeding</h2>'+tbl([["Handling",e((isGoat(S)?HANDLING_GOAT:HANDLING_EQ).map(function(x){var v=q["h_"+x[0]];return x[1]+": "+(v==="Yes"?"yes":v==="Getting"?"getting there":v==="No"?"not yet":"not tried");}).join(" \u00b7 "))],["Watch for",e(W2.join(", "))],["Who handles",e(q.who==="Named staff only"&&q.whoNames?q.whoNames:(q.who||""))],["Ridden",e(q.ridden||"")],["Character",e([q.words,(q.vices||[]).length?"vices: "+(q.vices||[]).join(", "):"",(q.goodWith||[]).length?"good with "+(q.goodWith||[]).join(", ").toLowerCase():""].filter(Boolean).join(" \u00b7 "))],
+      ["Hay",e(q.hay?q.hay+" kg a day"+(q.soak?" \u00b7 "+q.soak.toLowerCase():""):"")],["Straw",e(q.straw?q.straw+" kg a day":"")],["Hard feed",e([q.hardAm!=null?q.hardAm:q.hard,q.hardPm].filter(Boolean).join(" AM \u00b7 ")+(q.hardPm?" PM":""))],["Supplements",e(q.supp||"")],["Grazing",e(q.graze||"")],["Rug",e(q.rugs||"")],["Farrier every",isEquine(S)?FARRIER_WEEKS+" weeks":""],["Dentist every",isEquine(S)?DENTIST_MONTHS+" months":""]]);}
+  if(has("out")){var lab=(ST_DECIDE.filter(function(x){return x[0]===a.rehomingStatus;})[0]||[a.rehomingStatus,a.rehomingStatus])[1];
+    o+='<h2>Clearance &amp; outcome</h2>'+tbl([["Decision",e(lab||"")+(a.rehomingDate?" \u00b7 "+D(a.rehomingDate):"")+(a.rehomingBy?" \u00b7 "+e(a.rehomingBy):"")],["Conditions",e(a.rehomingConditions||"")],["For the new home",e(a.homeText||"")],["Going as",e(r.goingAs||"")],["New keeper",newHome?"":e(r.adopterName||"")],["Gone on",D(r.adoptedDate)],["Outcome",e(f.outcome||"")+(f.outcomeDate?" \u00b7 "+D(f.outcomeDate):"")]]);}
+  if(has("notes")){var N=(S.notes||[]).slice().sort(function(a,b){return String(a.date).localeCompare(String(b.date));});o+='<h2>Notes</h2>'+list(["Date","Note","By"],N.map(function(x){return [D(x.date)+(x.time?" "+e(x.time):""),e(x.text||""),e(String(x.staff||x.by||"").split(" ")[0])];}));}
+  return o;}
+var ST_REP_CSS='body{font-family:Inter,system-ui,Arial,sans-serif;color:#282932;margin:0;padding:12mm;font-size:10.5pt}.band{display:flex;justify-content:space-between;background:#282932;color:#c9ccd3;font-size:7.5pt;font-weight:800;letter-spacing:.12em;padding:3mm 5mm;border-radius:2mm}h1{font-size:24pt;margin:5mm 0 1mm}.who{color:#6b7280;font-weight:700;margin-bottom:4mm}h2{font-size:12pt;margin:7mm 0 2mm;padding-bottom:1mm;border-bottom:.6mm solid #c6e76c;page-break-after:avoid}h3{font-size:9pt;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin:4mm 0 1.5mm}table{width:100%;border-collapse:collapse;font-size:9.5pt;page-break-inside:auto}tr{page-break-inside:avoid}th,td{border:1px solid #d9dcd3;padding:1.6mm 2.2mm;text-align:left;vertical-align:top}.kv th{width:32%;background:#f5f6f2;font-weight:700}.ls th{background:#f1f3ee;font-size:7.5pt;text-transform:uppercase;letter-spacing:.06em}.none{color:#9a9fa8;font-style:italic;margin:1mm 0}.pair{display:flex;gap:4mm}.pair figure{flex:1;margin:0}.pair img{width:100%;height:70mm;object-fit:cover;border-radius:2mm}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;margin-top:3mm}.grid figure{margin:0}.grid img{width:100%;height:40mm;object-fit:cover;border-radius:2mm}figcaption{font-size:8.5pt;font-weight:700;margin-top:1mm}@page{size:A4;margin:10mm}@media print{body{padding:0}}';
+function stPrintReport(){var r=stRep();if(!r.pages.length){miniToast("Pick at least one page");return;}var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+esc((S.dog.name||"Animal")+" \u2014 "+r.for)+'</title><style>'+ST_REP_CSS+'</style></head><body>'+stRepHtml(r.for,ST_REP_PAGES.map(function(p){return p[0];}).filter(function(p){return r.pages.indexOf(p)>=0;}))+'</body></html>';
+  var w=window.open("","_blank");if(!w)return;w.document.open();w.document.write(html);w.document.close();setTimeout(function(){try{w.print();}catch(e){}},500);
+  if(!(typeof isLookOnly==="function"&&isLookOnly())){S.eq=S.eq||{};S.eq.repLast={date:tdISO(),by:currentName(),for:r.for};persistSave();debouncedSave();}}
+function renderStReport(){var e=esc;var r=stRep();var q=S.eq||{};var d=S.dog||{};var P=r.pages.indexOf("photos")>=0?stRepPhotos():[];
+  var h='<h2>Report</h2><div class="sub">The record on paper. Pick who it\u2019s for and which pages; what prints is what\u2019s on the record.</div>';
+  var what=ST_REP_PAGES.filter(function(p){return r.pages.indexOf(p[0])>=0;}).map(function(p){return p[1].replace(/&amp;/g,"&").split(" & ")[0].toLowerCase().replace(/^henneke/,"Henneke");});
+  h+=tabStrip("A4","#c6e76c","#282932",'<b>'+r.pages.length+' section'+(r.pages.length===1?'':'s')+'</b> \u00b7 for '+e(r.for.toLowerCase())+'. '+e(what.slice(0,4).join(", "))+(what.length>4?' and more':'')+'.',"Last printed",q.repLast?e(fmtDMY(q.repLast.date).slice(0,5))+" \u00b7 "+e(String(q.repLast.by||"").split(" ")[0]):"never");
+  h+='<div class="card nofact"><div class="cq"><label>For</label><div class="cchips">'+Object.keys(ST_REP_FOR).map(function(f){return '<span class="cchip'+(r.for===f?" on":"")+'" onclick="stRepFor(\''+f.replace(/'/g,"\\'")+'\')">'+e(f)+'</span>';}).join("")+'</div></div>'
+    +'<div class="cq"><label>Pages</label><div class="cchips">'+ST_REP_PAGES.map(function(p){return '<span class="cchip'+(r.pages.indexOf(p[0])>=0?" on":"")+'" onclick="stRepPage(\''+p[0]+'\')">'+p[1]+'</span>';}).join("")+'</div></div>'
+    +'<div class="smt2">'+(r.for==="New home / loan"?'The new-home copy leaves out the case, the inspector, where '+stHe()[0]+' was found, the reason and the old owner.':r.for==="Vet"?'The vet\u2019s copy leaves out the case, the court and the old owner.':r.for==="Court"?'The court copy keeps everything, with the arrival photo and the latest side by side, each with the Henneke score on that day.':'Our file and the transfer copy keep everything.')+'</div>'
+    +'<button class="btn btnp" style="width:100%;margin-top:8px" onclick="stPrintReport()">\ud83d\udda8 Print / save PDF</button></div>';
+  var first=P[0],last=P.length>1?P[P.length-1]:null;var tile=function(p,l){return '<div style="flex:1;height:64px;border-radius:6px;background:#e9ebe5'+(p?' url('+blobSrc(p.data)+') center/cover':'')+';display:flex;align-items:flex-end;padding:4px"><b style="font-size:10px;background:rgba(255,255,255,.85);padding:1px 5px;border-radius:4px">'+e(l)+'</b></div>';};
+  var safe=r.for==="New home / loan"||r.for==="Vet";
+  h+='<div class="card"><div class="lbl" style="margin-bottom:8px">Preview</div><div style="border:1px solid #e4e7e0;border-radius:8px;padding:12px;font-size:11.5px;line-height:1.5;background:#fff"><div style="font-weight:900;letter-spacing:.06em;font-size:9.5px;color:#6b7280">NSPCA LONGFORD \u00b7 STABLES'+(!safe&&d.caseRef?' \u00b7 CASE '+e(d.caseRef):'')+'</div><div style="font-size:17px;font-weight:900;margin:4px 0">'+e(d.name||"Unnamed")+'</div>'+e([d.species,d.breed,d.sex,d.age,d.height,d.colour].filter(Boolean).join(" \u00b7 "))
+    +(d.ueln||d.microchip?'<br>'+e([d.ueln?"UELN "+d.ueln:"",d.microchip?"chip "+d.microchip:""].filter(Boolean).join(" \u00b7 ")):'')
+    +(d.cameIn&&r.for!=="New home / loan"?'<br><b>'+e(d.cameIn)+'</b>'+(d.intakeDate?' '+e(fmtDMY(d.intakeDate)):'')+(!safe&&d.inspector?' by '+e(d.inspector==="Other"?(d.inspectorOther||""):d.inspector):'')+(!safe&&d.foundAt?', '+e(d.foundAt):''):'')
+    +(r.pages.indexOf("photos")>=0?'<div style="display:flex;gap:6px;margin-top:8px">'+tile(first,first?fmtDMY(first.date).slice(0,5)+" \u00b7 arrival":"no photo")+tile(last,last?fmtDMY(last.date).slice(0,5)+" \u00b7 latest":"latest")+'</div>':'')+'</div></div>';
+  return h+browNav("report");}
+
+(function(){var t=window.tabDone;window.tabDone=function(id){var q=(S&&S.eq)||{};
+  if(id==="rehoming")return (S.assessment||{}).rehomingStatus?true:false;
+  if(id==="report")return q.repLast?true:null;
+  if(id==="hand"){var L=isGoat(S)?HANDLING_GOAT:HANDLING_EQ;return L.every(function(h){var v=q["h_"+h[0]];return v&&v!=="?";})?true:null;}
+  return t(id);};})();
+(function(){["stDayMulti","stDayNum","stDayFam","stDayDone","stDaySame","stHSet","stSessAdd","stSessDel","stDecide","stVetFit","stHcTog","stGoingAs","stLoanDone","markAdopted"].forEach(function(n){var fn=window[n];if(typeof fn!=="function"||fn._lo)return;var w=function(){if(typeof isLookOnly==="function"&&isLookOnly()){if(typeof lookOnlyBlocked==="function")lookOnlyBlocked(true);return;}return fn.apply(this,arguments);};w._lo=true;window[n]=w;});})();
+
 // ── Init ──────────────────────────────────────────────────────────
 (function(){
   if(typeof famBoot!=="function"){document.body.innerHTML='<div style="font-family:Inter,system-ui,sans-serif;max-width:420px;margin:15vh auto;padding:24px;text-align:center;color:#282932"><h2 style="margin:0 0 8px">One file is missing</h2><p style="color:#6b7280;line-height:1.5">The app needs <b>family.js</b> next to index.html. Upload it to the same place on GitHub, then reload.</p></div>';return;}
@@ -7851,10 +8236,10 @@ function renderActivity(){
     var dogs={};list.forEach(function(e){if(e.app==="dog"){dogs[e.id]=actDog(e).name;}});
     if(A.who)list=list.filter(function(e){return e.who===A.who;});if(A.dog)list=list.filter(function(e){return e.app==="dog"&&String(e.id)===String(A.dog);});
     var chip=function(on,t,fn){return '<span class="'+(on?"on":"")+'" onclick="'+fn+'" role="button" tabindex="0">'+t+'</span>';};
-    var dsel='<select class="actsel" onchange="actSet(\'dog\',this.value)"><option value="">All dogs</option>'+Object.keys(dogs).sort(function(a,b){return String(dogs[a]).localeCompare(String(dogs[b]));}).map(function(id){return '<option value="'+esc(id)+'"'+(String(A.dog)===String(id)?" selected":"")+'>'+esc(dogs[id])+'</option>';}).join("")+'</select>';
+    var dsel='<select class="actsel" onchange="actSet(\'animal\',this.value)"><option value="">All animals</option>'+Object.keys(dogs).sort(function(a,b){return String(dogs[a]).localeCompare(String(dogs[b]));}).map(function(id){return '<option value="'+esc(id)+'"'+(String(A.dog)===String(id)?" selected":"")+'>'+esc(dogs[id])+'</option>';}).join("")+'</select>';
     right='<div class="actlbl">What changed</div>'
       +'<div class="actchips">'+chip(!A.who,"Everyone","actSet(\'who\',\'\')")+whos.map(function(w){return chip(A.who===w,esc(w),"actSet(\'who\',"+esc(JSON.stringify(w)).replace(/"/g,"&quot;")+")");}).join("")+'</div>'
-      +'<div class="actchips">'+chip(A.day==="today","Today","actSet(\'day\',\'today\')")+chip(A.day==="yesterday","Yesterday","actSet(\'day\',\'yesterday\')")+chip(A.day==="week","This week","actSet(\'day\',\'week\')")+dsel+(hasCat?chip(A.cats,"Dogs + Cats","actSet(\'cats\','+(!A.cats)+')"):"")+'</div>'
+      +'<div class="actchips">'+chip(A.day==="today","Today","actSet(\'day\',\'today\')")+chip(A.day==="yesterday","Yesterday","actSet(\'day\',\'yesterday\')")+chip(A.day==="week","This week","actSet(\'day\',\'week\')")+dsel+(hasCat?chip(A.cats,"Animals + Cats","actSet(\'cats\','+(!A.cats)+')"):"")+'</div>'
       +(A.err?'<div class="actnone">'+esc(A.err)+'</div>':actFeed(list,true));}
   return head+faces+'<div class="actg">'+left+'<div class="actr">'+right+'</div></div></div>';}
 // "In now": note who's active every few minutes (needs users.last_seen_at; switches itself off if the column isn't there)
