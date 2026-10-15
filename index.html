@@ -1022,6 +1022,7 @@ body.lookonly #save-bar.dirty{display:none!important}
   </div>
 </div>
 
+<script src="family.js"></script>
 <script>
 var SUPABASE_URL="https://sbajswwuykvjhtoehfps.supabase.co";
 var SUPABASE_KEY="sb_publishable_uP40lclXeaMzJ__zFQESHQ__XSLqJgK";
@@ -1040,10 +1041,10 @@ var USERS=[
 var CURRENT_USER=null;
 // ── Home app: some people land straight in their own unit's app ─────
 var APP_HOME="dogs";
-var HOME_FILES={dogs:"index.html",cats:"cats.html",stables:"stables.html"};
-var HOME_BUILTIN={STA01:"stables",JAM01:"stables",CAT01:"cats",CISO01:"cats"};
-function homeAppFor(u){if(!u)return "";var m={};try{m=unitSetting("homeApps")||{};}catch(e){}var em=String(u.email||"").toLowerCase();return (em&&m[em])||m[u.code||""]||HOME_BUILTIN[u.code||""]||(typeof lookBuiltin==="function"&&(lookBuiltin(u)||{}).home)||"";}
-function goHomeApp(u,force){var done="";try{done=sessionStorage.getItem("nspca-home-done")||"";}catch(e){}if(done&&!force)return false;try{sessionStorage.setItem("nspca-home-done","1");}catch(e){}var h=homeAppFor(u);if(h&&h!==APP_HOME&&HOME_FILES[h]){location.replace(HOME_FILES[h]);return true;}return false;}
+
+
+
+
 
 var CATS=[
   {k:"excitability",l:"Excitability / Arousal",s:{1:"Calm and settled; handles and walks without over-arousing.",2:"Briefly over-excited but settles within a minute or two.",3:"Hard to settle once aroused — jumping, mouthing, spinning, mounting or barking that's tough to interrupt.",4:"Cannot be calmed when stimulated; arousal escalates until handling is unsafe."}},
@@ -1083,32 +1084,16 @@ var LOGGED_IN=false,supabaseClient=null,records=[],_dSt=null;
 var _allUsersCache=null,_autoLogoutTimer=null,_lastActivity=Date.now(),_dashRefreshTimer=null;
 
 // ── User feature helpers ──────────────────────────────────────────
-function userPhoto(code){try{var _l=localStorage.getItem("nspca-user-photo-"+code);if(_l!==null)return _l;var _u=(typeof _allUsersCache!=="undefined"&&_allUsersCache||[]).find(function(x){return x.code===code;});return (_u&&_u.photo)||"";}catch(e){return"";}}
-function setUserPhoto(code,dataUrl){try{localStorage.setItem("nspca-user-photo-"+code,dataUrl||"");}catch(e){}if(supabaseClient)supabaseClient.from("users").update({photo:dataUrl||null}).eq("code",code).then(function(){},function(){});}
-function userLastLogin(code){try{var v=localStorage.getItem("nspca-user-lastlogin-"+code);return v?parseInt(v):0;}catch(e){return 0;}}
-function recordLastLogin(code){try{localStorage.setItem("nspca-user-lastlogin-"+code,Date.now().toString());}catch(e){}if(supabaseClient)supabaseClient.from("users").update({last_login_at:new Date().toISOString()}).eq("code",code).then(function(){},function(){});setTimeout(function(){try{seenBeat();}catch(e){}},4000);}
+
+
+
+
 
 // Map name → user record (search hardcoded + Supabase)
 
 // Cached merged user list — call refreshAllUsers() to repopulate
-function getAllUsersSync(){return _allUsersCache||USERS;}
-async function refreshAllUsers(){
-  var merged=USERS.slice().map(function(u){return Object.assign({},u,{source:"app"});});
-  if(supabaseClient){
-    try{
-      var res=await supabaseClient.from("users").select("*");
-      if(res.data&&res.data.length){
-        res.data.forEach(function(u){
-          var existing=merged.find(function(x){return x.code===u.code;});
-          if(existing){Object.assign(existing,u,{source:"both"});}
-          else{merged.push(Object.assign({},u,{source:"db"}));}
-        });
-      }
-    }catch(e){}
-  }
-  _allUsersCache=merged;
-  return merged;
-}
+
+
 
 // Activity feed — return records saved by a given user name
 function getUserActivity(name,limit){
@@ -1199,28 +1184,18 @@ function dismissWhatsNew(){
 }
 
 // ── Auto-logout ───────────────────────────────────────────────────
-function getAutoLogoutMins(){try{var v=localStorage.getItem("nspca-auto-logout-mins");return v?parseInt(v):0;}catch(e){return 0;}}
-function setAutoLogoutMins(n){try{localStorage.setItem("nspca-auto-logout-mins",n.toString());}catch(e){}setupAutoLogout();}
-function bumpActivity(){_lastActivity=Date.now();}
-function setupAutoLogout(){
-  if(_autoLogoutTimer){clearInterval(_autoLogoutTimer);_autoLogoutTimer=null;}
-  var mins=getAutoLogoutMins();
-  if(!mins||mins<=0)return;
-  _autoLogoutTimer=setInterval(function(){
-    if(!LOGGED_IN)return;
-    var idleMs=Date.now()-_lastActivity;
-    if(window._printWin&&!window._printWin.closed){bumpActivity();return;}
-    if(idleMs>mins*60*1000){doLogout();appAlert("You were logged out after "+mins+" minutes of inactivity.");}
-  },30000);
-}
-["mousemove","keydown","click","touchstart","touchmove","pointerdown","pointermove","wheel","scroll","focusin","input","change"].forEach(function(ev){document.addEventListener(ev,bumpActivity,{passive:true,capture:true});});
-document.addEventListener("visibilitychange",function(){if(!document.hidden)bumpActivity();});
-window.addEventListener("focus",bumpActivity);
+
+
+
+
+
+
+
 
 
 // ── Utilities ──────────────────────────────────────────────────────
-function initials(n){var p=(n||"").trim().split(/\s+/);return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():(n||"?").slice(0,2).toUpperCase();}
-function avatarColor(n){var c=["#0d9488","#7c3aed","#dc2626","#d97706","#2563eb","#16a34a","#db2777"];var h=0;for(var i=0;i<(n||"").length;i++)h=(h*31+n.charCodeAt(i))&0xfffffff;return c[h%c.length];}
+
+
 function esc(s){return(s===null||s===undefined?"":""+s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
 var _persistT=null;function persistSave(){if(_persistT)return;_persistT=setTimeout(function(){_persistT=null;try{localStorage.setItem("nspca-current",JSON.stringify(S));}catch(e){}},250);}
 window.addEventListener("pagehide",function(){persistNow();});
@@ -1531,106 +1506,43 @@ function saveMedDisease(){
 }
 
 // ── Auth ──────────────────────────────────────────────────────────
-function toggleLoginCode(){var inp=document.getElementById("login-code"),ic=document.getElementById("login-eye");if(!inp)return;var show=inp.type==="password";inp.type=show?"text":"password";if(ic)ic.innerHTML=show?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';}
-async function doLogin(){
-  var btn=document.getElementById("login-btn");
-  var codeEl=document.getElementById("login-code");var code=codeEl?(codeEl.value||"").replace(/\s+/g,""):"";
-  var errEl=document.getElementById("login-err");
-  errEl.style.display="none";
-  if(!code)return;
-  btn.textContent="Checking...";btn.disabled=true;
-  var user=USERS.find(function(u){return u.code===code;})||USERS.find(function(u){return String(u.code).toUpperCase()===code.toUpperCase();});
-  if(!user&&supabaseClient){try{var res=await supabaseClient.from("users").select("*").eq("code",code).single();if(res.data&&res.data.name)user=res.data;}catch(e){}}
-  if(!user&&supabaseClient&&code!==code.toUpperCase()){try{var res2=await supabaseClient.from("users").select("*").eq("code",code.toUpperCase()).single();if(res2.data&&res2.data.name)user=res2.data;}catch(e){}}
-  if(user&&user.active===false){errEl.textContent="This account is deactivated.";errEl.style.display="block";btn.textContent="Enter \u2192";btn.disabled=false;return;}
-  if(user){code=user.code||code;
-    LOGGED_IN=true;CURRENT_USER=user;window._wnShownSession=false;
-    localStorage.setItem("nspca-intake-auth",code);
-    localStorage.setItem("nspca-user-name",user.name);
-    localStorage.setItem("nspca-user-role",user.role||"staff");
-    window._prevLogin=userLastLogin(user.code);window._catchupDismissed=false;
-    recordLastLogin(user.code);
-    setupAutoLogout();
-    if(goHomeApp(user,true))return;
-    await refreshAllUsers();
-    await loadRecordsList();showDashboard();
-  }else{errEl.textContent="Incorrect code. Try again.";errEl.style.removeProperty("color");errEl.style.background="";errEl.style.borderLeftColor="";errEl.style.display="block";btn.textContent="Enter →";btn.disabled=false;}
-}
-function doLogout(){
-  LOGGED_IN=false;CURRENT_USER=null;try{sessionStorage.removeItem("nspca-home-done");}catch(e){}
-  if(_autoLogoutTimer){clearInterval(_autoLogoutTimer);_autoLogoutTimer=null;}
-  stopDashRefresh();
-  localStorage.removeItem("nspca-intake-auth");
-  var _lc=document.getElementById("login-code");if(_lc)_lc.value="";
-  document.getElementById("login-err").style.display="none";
-  var _lb=document.getElementById("login-btn");if(_lb){_lb.textContent="Enter →";_lb.disabled=false;}
-  authSignOut();window._loginWho="";window._loginFull=false;
-  var st=document.getElementById("overdue-sticky");if(st)st.innerHTML="";
-  showScreen("login-screen");
-}
-function currentRole(){return CURRENT_USER?CURRENT_USER.role:(localStorage.getItem("nspca-user-role")||"staff");}
-function currentName(){return CURRENT_USER?CURRENT_USER.name:(localStorage.getItem("nspca-user-name")||"Staff");}
+
+
+
+
+
 
 // ── Dashboard ─────────────────────────────────────────────────────
 // ── Profile / Team / Users render functions ───────────────────────
 function backToDashBtn(){return '<button onclick="loadRecordsList().then(function(){renderDashboard();})" style="background:#333542;color:#9a9fa8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">&#8592; Dashboard</button>';}
 function fmtAgo(ts){if(!ts)return"never";var diff=Math.round((Date.now()-(typeof ts==="number"?ts:new Date(ts).getTime()))/60000);if(diff<1)return"just now";if(diff<60)return diff+"m ago";if(diff<1440)return Math.round(diff/60)+"h ago";return Math.round(diff/1440)+"d ago";}
 
-function avatarByName(name,size){size=size||18;var u=getAllUsersSync().find(function(x){return x.name===name;});var photo=u?(userPhoto(u.code)||u.photo||""):"";
-  if(photo)return '<img src="'+blobSrc(photo)+'" alt="" style="width:'+size+'px;height:'+size+'px;border-radius:50%;object-fit:cover;flex-shrink:0;vertical-align:middle">';
-  return '<span style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+avatarColor(name)+';color:#fff;font-size:'+Math.max(7,Math.round(size*0.42))+'px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;vertical-align:middle">'+initials(name)+'</span>';}
-function userAvatarHtml(user,size){
-  size=size||40;
-  var photo=userPhoto(user.code);
-  if(photo)return '<img src="'+blobSrc(photo)+'" style="width:'+size+'px;height:'+size+'px;border-radius:50%;object-fit:cover;flex-shrink:0">';
-  return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+avatarColor(user.name)+';color:#fff;font-size:'+Math.round(size*0.36)+'px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials(user.name)+'</div>';
-}
 
-function userMeta(code){var m={};try{m=JSON.parse(localStorage.getItem("nspca-user-meta-"+code)||"{}");}catch(e){}try{var _u=(typeof _allUsersCache!=="undefined"&&_allUsersCache||[]).find(function(x){return x.code===code;});if(_u)["phone","since","about"].forEach(function(k){if(m[k]==null&&_u[k])m[k]=_u[k];});}catch(e){}return m;}
-function setUserMeta(code,k,v){var m=userMeta(code);m[k]=v;try{localStorage.setItem("nspca-user-meta-"+code,JSON.stringify(m));}catch(e){}if(supabaseClient){var u={};u[k]=v;supabaseClient.from("users").update(u).eq("code",code).then(function(){},function(){});}}
-function prefGet(k,dflt){try{var v=localStorage.getItem("nspca-pref-"+k);return v===null?dflt:v;}catch(e){return dflt;}}
-function prefSet(k,v){try{localStorage.setItem("nspca-pref-"+k,String(v));}catch(e){}if(k==="bigtext")document.documentElement.classList.toggle("bigtext",v==="1");showDashSection("profile");}
+
+
+
+
+
+
+// ── family.js hooks for the dog app ──
+async function famEnterApp(){await loadRecordsList();showDashboard();}
+function appWeek(me,mon){var w=myWeek(me.name);return {stats:[[w.reports,"day reports"],[w.weighs,"weigh-ins"],[w.assess,"assessed"]],names:w.dogs};}
+function appProfileExtra(role){var h="";var lb="";try{lb=localStorage.getItem("nspca-last-backup")||"";}catch(e){}
+  if(role==="admin"||role==="manager"){var users=getAllUsersSync();h+='<div class="fam-card"><div class="fam-lbl">Admin <em>only admins see this</em></div>'
+    +(role==="admin"?famRow("Manage users",users.length+" people",'<span class="fam-btn" onclick="showDashSection(\'users\')">Open</span>')+famRow("Activity","who\u2019s been in and what changed",'<span class="fam-btn" onclick="showDashSection(\'activity\')">Open</span>'):'')
+    +famRow("Download backup",lb?"last backup "+esc(fmtDMY(lb))+" \u00b7 "+daysSince(lb)+" days ago":"no backup on this device yet",'<span class="fam-btn" onclick="downloadBackup()">Download</span>')
+    +famRow("The month","the unit report",'<span class="fam-btn" onclick="showDashSection(\'month\')">Open</span>')+'</div>';}
+  h+='<div class="fam-card"><div class="fam-lbl">This app</div>'+famRow("NSPCA Longford \u00b7 Dog Isolation Unit","v"+esc(APP_VERSION),'<span class="fam-btn" onclick="showWhatsNew(true)">What\u2019s new</span>')+'</div>';
+  return h;}
 function myWeek(name){var now=new Date();var day=(now.getDay()+6)%7;var mon=new Date(now);mon.setDate(now.getDate()-day);var start=mon.toISOString().slice(0,10);var out={reports:0,weighs:0,assess:0,cleared:0,dogs:[]};
   records.forEach(function(r){var st=r.state||{};var touched=false;(st.days||[]).forEach(function(d){if(d&&d.date>=start&&(d.demeanour||d.notes)&&(!d.by||d.by===name)){out.reports++;touched=true;}});(st.weights||[]).forEach(function(w){if(w&&w.date>=start&&(!w.by||w.by===name)){out.weighs++;touched=true;}});(st.scoreHistory||[]).forEach(function(h){if(h&&h.date>=start&&(!h.by||h.by===name)){out.assess++;touched=true;}});var a=st.assessment||{};if(a.rehomingStatus==="Cleared for rehoming"&&a.rehomingDate&&a.rehomingDate>=start&&(!a.clearedBy||a.clearedBy===name)){out.cleared++;touched=true;}if(!touched&&r.savedBy===name&&(r.savedAt||"")>=start)touched=true;if(touched)out.dogs.push(r.name||(st.dog||{}).name||"");});
   out.start=start;return out;}
-function renderProfile(){
-  var me=CURRENT_USER||{name:currentName(),code:localStorage.getItem("nspca-intake-auth")||"",role:currentRole()};var meta=userMeta(me.code);var role=me.role||currentRole();
-  var roleLabel=role==="admin"?"Admin":role==="manager"?"Manager":role==="supervisor"?"Supervisor":role==="asst"?"Assistant Supervisor":role==="coordinator"?"Rehoming Co-Ordinator":role==="trainer"?"Dog Trainer \u0026 Behaviour Specialist":"Staff";
-  var photo=userPhoto(me.code);var autoMins=getAutoLogoutMins();var email=(me.email||authEmail()||"");var devices=devProfiles().length;var wk=myWeek(me.name);
-  var av=photo?'<img src="'+blobSrc(photo)+'" class="pf-av">':'<div class="pf-av" style="background:'+avatarColor(me.name)+';color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center">'+initials(me.name)+'</div>';
-  var row=function(l,sub,act){return '<div class="pf-row"><div><b>'+l+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div>'+(act||'')+'</div>';};
-  var seg=function(cur,opts,fn){return '<div class="pf-seg">'+opts.map(function(o){return '<span class="'+(String(cur)===String(o[0])?"on":"")+'" onclick="'+fn.replace("%v",o[0])+'">'+o[1]+'</span>';}).join("")+'</div>';};
-  var tog=function(k,dflt){var on=prefGet(k,dflt)==="1";return '<div class="pf-tog'+(on?" on":"")+'" onclick="prefSet(\''+k+'\',\''+(on?"0":"1")+'\')"></div>';};
-  var lb="";try{lb=localStorage.getItem("nspca-last-backup")||"";}catch(e){}
-  var h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+backToDashBtn()+'<h2 style="margin:0;flex:1">My profile</h2></div>';
-  h+='<div class="pf-me"><div style="position:relative;flex-shrink:0">'+av+'<label class="pf-edit"><input type="file" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">Edit</label></div><div style="min-width:0"><b>'+esc(me.name)+'</b><small>'+esc(roleLabel)+(email?' \u00b7 '+esc(email):'')+'</small><div class="since">'+(meta.since?'On the team since '+esc(meta.since):'')+(devices?(meta.since?' \u00b7 ':'')+'signed in on '+devices+' device'+(devices===1?'':'s'):'')+'</div></div>'+(photo?'<button onclick="removeAvatar()" class="btn" style="margin-left:auto;font-size:11px;padding:5px 10px;background:#333542;color:#fca5a5;border:none">Remove photo</button>':'')+'</div>';
-  h+='<div class="card"><div class="lbl" style="margin-bottom:8px">Your week <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 from '+esc(fmtDMY(wk.start))+'</span></div><div class="pf-nums"><div><b>'+wk.reports+'</b><span>day reports</span></div><div><b>'+wk.weighs+'</b><span>weigh-ins</span></div><div><b>'+wk.assess+'</b><span>assessments</span></div><div><b>'+wk.cleared+'</b><span>dogs cleared</span></div></div>'+(wk.dogs.length?'<div class="pf-dogs">'+wk.dogs.slice(0,8).map(function(n){return '<span>'+esc(n)+'</span>';}).join("")+(wk.dogs.length>8?'<span>+'+(wk.dogs.length-8)+'</span>':'')+'</div>':'')+'<div style="font-size:11.5px;color:#6b7280;font-weight:600;margin-top:8px">Counted from the records you saved. Nobody else sees this page.</div></div>';
-  h+='<div class="card pf-grp"><div class="lbl">About me</div><div class="dog-fg"><div class="f"><label class="lbl">Phone</label><input value="'+esc(meta.phone||"")+'" placeholder="for the rota and call-outs" onchange="setUserMeta(\''+esc(me.code)+'\',\'phone\',this.value)"></div><div class="f"><label class="lbl">On the team since</label><input value="'+esc(meta.since||"")+'" placeholder="e.g. Mar 2025" onchange="setUserMeta(\''+esc(me.code)+'\',\'since\',this.value)"></div></div><div class="f"><label class="lbl">A line about you <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 shows on Manage Users</span></label><textarea rows="2" placeholder="e.g. Intake, assessments, and the day reports." onchange="setUserMeta(\''+esc(me.code)+'\',\'about\',this.value)">'+esc(meta.about||"")+'</textarea></div></div>';
-  var pinSet=devProfiles().some(function(p){return p.email===email&&p.pin;});
-  h+='<div class="card pf-grp"><div class="lbl">Sign-in</div>'
-    +row("Email",email?esc(email):"Signed in with an access code \u2014 ask an admin to add your email")
-    +(email?row("Password","Change it here \u2014 no email needed",'<button class="btn" onclick="pwSheet()">Change</button>'):'')
-    +(email?row("PIN on this device",pinSet?"Set \u00b7 quick unlock":"Not set",'<button class="btn" onclick="setDevicePin()">'+(pinSet?'Change':'Set')+'</button>'):'')
-    +row("This device","Remembered for quick unlock"+(devices>1?' \u00b7 '+(devices-1)+' other'+(devices>2?'s':'')+' on this device too':''),'<button class="btn" onclick="forgetOtherProfiles()">Forget others</button>')
-    +'</div>';
-  h+='<div class="card pf-grp"><div class="lbl">How the app behaves for you</div>'
-    +row("Auto sign-out","after this long with nothing touched",seg(autoMins,[[0,"Off"],[15,"15 min"],[30,"30 min"],[120,"2 h"]],"setAutoLogoutMins(%v);showDashSection(&quot;profile&quot;)"))
-    +row("Larger text","for the corridor, gloves on",tog("bigtext","0"))
-    +'</div>';
-  if(role==="admin"||role==="manager"){var users=getAllUsersSync();var invited=users.filter(function(u){return u.email&&!u.active;}).length;
-    h+='<div class="card pf-grp"><div class="lbl">Admin <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 only admins see this</span></div>'
-      +(role==="admin"?row("Manage users",users.length+" people",'<button class="btn" onclick="showDashSection(\'users\')">Open</button>'):'')
-      +row("Download backup",lb?"Last backup "+esc(fmtDMY(lb))+" \u00b7 "+daysSince(lb)+" days ago":"No backup on this device yet",'<button class="btn btnp" onclick="downloadBackup()">Download</button>')
-      +row("The month","Print the unit report",'<button class="btn" onclick="showDashSection(\'month\')">Open</button>')
-      +'</div>';}
-  h+='<div class="card pf-grp"><div class="lbl">This app</div>'+row("NSPCA Longford \u00b7 Dog Isolation Unit","v"+esc(APP_VERSION),'<button class="btn" onclick="showWhatsNew(true)">What\u0027s new</button>')+row("Sign out","On this device",'<button class="btn" style="background:#fee2e2;color:#991b1b;border:none" onclick="appConfirm(\'Sign out of NSPCA Longford?\',doLogout)">Sign out</button>')+'</div>';
-  return h;
-}
+
 function appPrompt(msg,cb){var v=window.prompt(msg,"");if(v!==null)cb(v);}
-function setDevicePin(){var email=authEmail();if(!email){appAlert("Sign in with your email first.");return;}appPrompt("New 4-digit PIN for this device",function(pin){if(!/^\d{4}$/.test(pin||"")){appAlert("Four digits.");return;}devProfileSet(email,currentName(),pin).then(function(){miniToast("PIN set");showDashSection("profile");});});}
-function forgetOtherProfiles(){var email=authEmail();devProfilesSave(devProfiles().filter(function(p){return p.email===email;}));miniToast("Only you are remembered on this device");showDashSection("profile");}
-function userRoleInfo(role){return({admin:["ADMIN","#282932"],manager:["MANAGER","#0d9488"],supervisor:["SUPERVISOR","#7c3aed"],asst:["ASST SUPERVISOR","#8b5cf6"],coordinator:["CO-ORDINATOR","#db2777"],trainer:["TRAINER","#475569"]})[role]||["STAFF","#6b7280"];}
-function userLastIn(u){var t=0;if(u.last_login_at){var x=new Date(u.last_login_at).getTime();if(!isNaN(x))t=x;}var l=userLastLogin(u.code);if(l>t)t=l;return t;}
+
+
+
+
 function userTap(code){var u=getAllUsersSync().find(function(x){return x.code===code;});if(!u)return;if(u.source==="app"){miniToast(u.name+" is built into the app — changed in the code");return;}showEditUserModal(code);}
 function renderUsersAdmin(){
   var all=getAllUsersSync().slice().sort(function(a,b){var o={admin:0,manager:1,supervisor:2,asst:3,coordinator:4,trainer:5};var x=o[a.role]==null?9:o[a.role],y=o[b.role]==null?9:o[b.role];return x-y||(a.name||"").localeCompare(b.name||"");});
@@ -1760,25 +1672,8 @@ async function toggleUserActive(code,makeActive){
   }catch(e){appAlert("Could not update user status.");}
 }
 
-function handleAvatarUpload(inp){
-  var file=inp.files[0];if(!file)return;
-  if(file.size>5*1024*1024){appAlert("Photo too large. Max 5MB.");return;}
-  compressPhoto(file,function(data){
-    var code=CURRENT_USER?CURRENT_USER.code:(localStorage.getItem("nspca-intake-auth")||"");
-    if(!code)return;
-    setUserPhoto(code,data);
-    showDashSection("profile");
-  });
-}
-function removeAvatar(){
-  appConfirm("Remove your profile photo?",function(){
-    var code=CURRENT_USER?CURRENT_USER.code:(localStorage.getItem("nspca-intake-auth")||"");
-    if(!code)return;
-    setUserPhoto(code,"");
-    try{localStorage.removeItem("nspca-user-photo-"+code);}catch(e){}
-    showDashSection("profile");
-  },{danger:true});
-}
+
+
 
 function showDashSection(section){try{bumpActivity();}catch(e){}
   window._dashSection=section;
@@ -4649,21 +4544,9 @@ function showPhotoLightbox(src){if(!src)return;var ov=document.getElementById("p
 var FILE_BUCKET="dog-files";
 function safeSeg(s){return String(s||"").replace(/[^a-zA-Z0-9._-]/g,"_");}
 function fileURL(f){if(!f)return"";if(f.data)return f.data;if(f.storage){var sg=fileSigned(f.storage);return sg||SUPABASE_URL+"/storage/v1/object/public/"+FILE_BUCKET+"/"+f.storage;}return"";}
-function pwSheet(){var o=document.getElementById("pwsheet");if(!o){o=document.createElement("div");o.id="pwsheet";document.body.appendChild(o);}
-  o.innerHTML='<div class="dtsh-bg" onclick="pwClose()"></div><div class="dtsh" role="dialog" aria-label="Change password"><div class="grab"></div><div class="dtsh-h"><b>Change password</b><span onclick="pwClose()">Cancel</span></div><div class="dtsh-b">'
-    +'<div class="cq"><label>New password <em>8 or more characters</em></label><input id="pw-1" class="expw" type="password" autocomplete="new-password"></div>'
-    +'<div class="cq"><label>Again</label><input id="pw-2" class="expw" type="password" autocomplete="new-password" onkeydown="if(event.key===\'Enter\')pwSave()"></div>'
-    +'<div id="pw-err" style="display:none;color:#b91c1c;font-size:12.5px;font-weight:700;margin:4px 0 8px"></div><button class="lg-btn expsave" id="pw-go" onclick="pwSave()">Save new password</button></div></div>';
-  setTimeout(function(){var e=document.getElementById("pw-1");if(e)e.focus();},50);}
-function pwClose(){var o=document.getElementById("pwsheet");if(o)o.remove();}
-async function pwSave(){var a=(document.getElementById("pw-1")||{}).value||"",b=(document.getElementById("pw-2")||{}).value||"";var er=document.getElementById("pw-err");var say=function(t){er.textContent=t;er.style.display="block";};
-  if(a.length<8)return say("At least 8 characters.");if(a!==b)return say("The two don’t match.");
-  var go=document.getElementById("pw-go");go.disabled=true;go.textContent="Saving…";
-  try{if(AUTH&&AUTH.expires_at&&AUTH.expires_at<Date.now()+60000){try{await authRefresh();}catch(e){}}
-    var r=await fetch(SUPABASE_URL+"/auth/v1/user",{method:"PUT",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+authToken(),"Content-Type":"application/json"},body:JSON.stringify({password:a})});
-    if(!r.ok){var d={};try{d=await r.json();}catch(e){}throw new Error(d.msg||d.message||d.error_description||("error "+r.status));}
-    pwClose();miniToast("Password changed");}
-  catch(e){go.disabled=false;go.textContent="Save new password";say("Couldn’t change it: "+(e.message||"try again"));}}
+
+
+
 // signed links for uploaded paperwork: work whether the bucket is public or private
 window._fsig={};window._fsigBusy=false;
 function fileSigned(path){var c=window._fsig[path];if(c&&c.url&&c.exp>Date.now()+60000)return c.url;if(!c||(!c.url&&!c.fail)||(c.url&&c.exp<=Date.now()+60000)){window._fsig[path]=Object.assign({},c||{},{want:true});fileSignSoon();}return (c&&c.url)||"";}
@@ -6060,63 +5943,37 @@ function dayEventsFor(st,date){var ev=[];var e=esc;
   ((st.foster&&st.foster.log)||[]).filter(function(x){return x.date===date;}).forEach(function(x){ev.push({k:"Foster",t:"",x:e(x.text)});});
   ev.sort(function(a,b){return (a.t||"").localeCompare(b.t||"");});return ev;}
 // ── Auth (Supabase email sign-in) ─────────────────────────────────
-var AUTH=null;
-function authLoad(){try{AUTH=JSON.parse(localStorage.getItem("nspca-auth")||"null");}catch(e){AUTH=null;}return AUTH;}
-function authSave(a){AUTH=a;try{if(a)localStorage.setItem("nspca-auth",JSON.stringify(a));else localStorage.removeItem("nspca-auth");}catch(e){}}
-function authToken(){return (AUTH&&AUTH.access_token)||"";}
-function authEmail(){return (AUTH&&AUTH.user&&AUTH.user.email)||"";}
-async function authRefresh(){if(!AUTH||!AUTH.refresh_token)return false;try{var r=await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:AUTH.refresh_token})});var d=await r.json();if(!r.ok||!d.access_token){authSave(null);return false;}authSave({access_token:d.access_token,refresh_token:d.refresh_token,expires_at:Date.now()+((d.expires_in||3600)*1000),user:d.user||AUTH.user});return true;}catch(e){return false;}}
+
+
+
+
+
+
 async function sbFetch(url,opts){opts=opts||{};if(AUTH&&AUTH.expires_at&&Date.now()>AUTH.expires_at-60000){await authRefresh();if(opts.headers)opts.headers.Authorization="Bearer "+(authToken()||SUPABASE_KEY);}var r=await fetch(url,opts);if(r.status===401&&AUTH){var ok=await authRefresh();if(ok){opts.headers=Object.assign({},opts.headers||{},{Authorization:"Bearer "+authToken()});r=await fetch(url,opts);}}return r;}
-async function authSignIn(email,password){var r=await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=password",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Content-Type":"application/json"},body:JSON.stringify({email:email,password:password})});var d=await r.json();if(!r.ok||!d.access_token)throw new Error((d&&(d.error_description||d.msg||d.message))||"Sign-in failed");authSave({access_token:d.access_token,refresh_token:d.refresh_token,expires_at:Date.now()+((d.expires_in||3600)*1000),user:d.user});return d.user;}
-async function authSignOut(){try{if(AUTH)await fetch(SUPABASE_URL+"/auth/v1/logout",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+authToken()}});}catch(e){}authSave(null);}
-async function authRecover(email){window._authErr="";try{var r=await fetch(SUPABASE_URL+"/auth/v1/recover?redirect_to="+encodeURIComponent(location.origin+location.pathname),{method:"POST",headers:{"apikey":SUPABASE_KEY,"Content-Type":"application/json"},body:JSON.stringify({email:email})});if(r.ok)return true;var d={};try{d=await r.json();}catch(e){}var msg=String(d.msg||d.message||d.error_description||d.error||"");window._authErr=(r.status===429||/rate limit/i.test(msg))?"Too many emails sent \u2014 Supabase\u2019s built-in email only sends a few an hour. Wait an hour and try once, or sign in with your code for now.":/smtp|sending/i.test(msg)?"Supabase couldn\u2019t send the email ("+msg+"). The email settings in Supabase need checking.":msg?msg+" (error "+r.status+")":"Error "+r.status+".";return false;}catch(e){window._authErr="Couldn\u2019t reach Supabase \u2014 check the connection.";return false;}}
-async function userForEmail(email){if(!supabaseClient||!email)return null;var em=email.toLowerCase();try{var res=await supabaseClient.from("users").select("*").eq("email",em).single();if(res&&res.data&&res.data.name)return res.data;var all=await supabaseClient.from("users").select("*");return ((all&&all.data)||[]).filter(function(u){return u&&u.name&&String(u.email||"").toLowerCase()===em;})[0]||null;}catch(e){return null;}}
+
+
+
+
 // quick unlock: people who have signed in on this device, each with a PIN
-function devProfiles(){try{return JSON.parse(localStorage.getItem("nspca-device-profiles")||"[]");}catch(e){return[];}}
-function devProfilesSave(p){try{localStorage.setItem("nspca-device-profiles",JSON.stringify(p));}catch(e){}}
-async function pinHash(email,pin){var enc=new TextEncoder().encode(email.toLowerCase()+":"+pin+":nspca");var buf=await crypto.subtle.digest("SHA-256",enc);return Array.prototype.map.call(new Uint8Array(buf),function(b){return ("0"+b.toString(16)).slice(-2);}).join("");}
-async function devProfileSet(email,name,pin){var p=devProfiles().filter(function(x){return x.email!==email;});p.push({email:email,name:name,pin:pin?await pinHash(email,pin):"",refresh:(AUTH&&AUTH.refresh_token)||""});devProfilesSave(p);}
-async function devProfileKeep(email,name){var old=devProfiles().find(function(x){return x.email===email;});var p=devProfiles().filter(function(x){return x.email!==email;});p.push({email:email,name:name,pin:old&&old.pin?old.pin:"",refresh:(AUTH&&AUTH.refresh_token)||""});devProfilesSave(p);}
-function pinOffer(em,user){var box=document.getElementById("login-auth");if(!box){finishAuthLogin(user);return;}window._pinOfferUser=user;window._pinOfferEm=em;
-  box.innerHTML='<h1>Quick unlock</h1><div class="lg-sub">Set a 4-digit PIN for this device? Next time, tap your name and type the PIN.</div><div class="lg-f"><label for="pin-offer">4-digit PIN</label><input id="pin-offer" type="password" inputmode="numeric" maxlength="4" autocomplete="off" onkeydown="if(event.key===\'Enter\')pinOfferSet()"></div><button class="lg-btn" onclick="pinOfferSet()">Set PIN</button><div class="lg-lnk"><a href="#" onclick="pinOfferSkip();return false">Not now</a></div>';
-  setTimeout(function(){var e=document.getElementById("pin-offer");if(e)e.focus();},50);}
-async function pinOfferSet(){var v=(document.getElementById("pin-offer")||{}).value||"";var err=document.getElementById("login-err");if(!/^\d{4}$/.test(v)){if(err){err.textContent="Four digits, numbers only.";err.style.display="block";}return;}if(err)err.style.display="none";var u=window._pinOfferUser;await devProfileSet(window._pinOfferEm,u.name,v);try{localStorage.setItem("nspca-pin-asked:"+window._pinOfferEm,"1");}catch(_e){}await finishAuthLogin(u);}
-async function pinOfferSkip(){var u=window._pinOfferUser;try{localStorage.setItem("nspca-pin-asked:"+window._pinOfferEm,"1");}catch(_e){}var err=document.getElementById("login-err");if(err)err.style.display="none";await finishAuthLogin(u);}
-function devProfileForget(email){devProfilesSave(devProfiles().filter(function(x){return x.email!==email;}));renderLoginState();}
-async function finishAuthLogin(user){LOGGED_IN=true;CURRENT_USER=user;window._wnShownSession=false;localStorage.setItem("nspca-intake-auth",user.code||("EMAIL:"+user.email));localStorage.setItem("nspca-user-name",user.name);localStorage.setItem("nspca-user-role",user.role||"staff");window._prevLogin=userLastLogin(user.code||user.email);window._catchupDismissed=false;recordLastLogin(user.code||user.email);setupAutoLogout();await refreshAllUsers();if(goHomeApp(user,!!window._explicitLogin))return;window._explicitLogin=false;await loadRecordsList();showDashboard();}
-async function doEmailLogin(){var em=(document.getElementById("login-email")||{}).value||"";var pw=(document.getElementById("login-pass")||{}).value||"";var err=document.getElementById("login-err");var btn=document.getElementById("login-btn2");em=em.trim().toLowerCase();if(!em||!pw)return;err.style.display="none";btn.textContent="Signing in\u2026";btn.disabled=true;
-  try{window._explicitLogin=true;var au=await authSignIn(em,pw);var user=await userForEmail(em);if(!user){await authSignOut();throw new Error("Signed in, but no account in Manage Users has this email. Ask an admin to add it.");}if(user.active===false){await authSignOut();throw new Error("This account is deactivated.");}
-    var prev=devProfiles().find(function(x){return x.email===em;});await devProfileKeep(em,user.name);
-    var asked=false;try{asked=!!localStorage.getItem("nspca-pin-asked:"+em);}catch(_e){}
-    if(!(prev&&prev.pin)&&!asked){pinOffer(em,user);return;}
-    await finishAuthLogin(user);}
-  catch(e){err.textContent=e.message||"Sign-in failed";err.style.display="block";btn.textContent="Sign in";btn.disabled=false;}}
-async function doPinUnlock(email){var pin=(document.getElementById("login-pin")||{}).value||"";var err=document.getElementById("login-err");var p=devProfiles().find(function(x){return x.email===email;});if(!p)return;if(!p.pin){err.textContent="No PIN set for this person \u2014 sign in with the password.";err.style.display="block";return;}
-  if(await pinHash(email,pin)!==p.pin){err.textContent="Wrong PIN.";err.style.display="block";window._pinBuf="";var _pi=document.getElementById("login-pin");if(_pi)_pi.value="";lgPinDraw();return;}
-  AUTH={access_token:"",refresh_token:p.refresh,expires_at:0,user:{email:email}};var ok=await authRefresh();if(!ok){err.textContent="Session expired \u2014 sign in with the password once.";err.style.display="block";devProfileForget(email);return;}
-  var user=await userForEmail(email);if(!user||user.active===false){await authSignOut();err.textContent="Account not active.";err.style.display="block";return;}
-  var p2=devProfiles();var mine=p2.find(function(x){return x.email===email;});if(mine)mine.refresh=AUTH.refresh_token;devProfilesSave(p2);await finishAuthLogin(user);}
-async function doForgot(){var em=((document.getElementById("login-email")||{}).value||"").trim().toLowerCase();var err=document.getElementById("login-err");if(!em){err.textContent="Type your email first, then tap Forgotten password.";err.style.display="block";return;}var ok=await authRecover(em);err.style.setProperty("color",ok?"#bbf7d0":"#fca5a5","important");err.style.borderLeftColor=ok?"#22c55e":"#ef4444";err.style.background=ok?"#143322":"#3a1d1d";err.textContent=ok?"Reset link sent \u2014 check your email.":"Couldn\u0027t send a reset link. "+(window._authErr||"");err.style.display="block";}
-function authFromHash(){var h=location.hash||"";if(h.indexOf("access_token=")<0)return null;var p={};h.replace(/^#/,"").split("&").forEach(function(kv){var i=kv.indexOf("=");if(i>0)p[decodeURIComponent(kv.slice(0,i))]=decodeURIComponent(kv.slice(i+1));});return p.access_token?p:null;}
-async function authSetPassword(){var pw=(document.getElementById("setpw-1")||{}).value||"";var pw2=(document.getElementById("setpw-2")||{}).value||"";var pin=(document.getElementById("setpw-pin")||{}).value||"";var err=document.getElementById("login-err");err.style.display="none";
-  if(pw.length<8){err.textContent="Password needs at least 8 characters.";err.style.display="block";return;}if(pw!==pw2){err.textContent="The two passwords don\u0027t match.";err.style.display="block";return;}
-  try{var r=await fetch(SUPABASE_URL+"/auth/v1/user",{method:"PUT",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+authToken(),"Content-Type":"application/json"},body:JSON.stringify({password:pw})});var d=await r.json();if(!r.ok)throw new Error(d.msg||d.message||d.error_description||"Couldn\u0027t set the password");
-    var em=authEmail();var user=await userForEmail(em);if(!user){err.textContent="Password set. But no account in Manage Users has "+em+" \u2014 ask an admin to add it, then sign in.";err.style.display="block";window._setPw=false;await authSignOut();renderLoginState();return;}
-    await devProfileSet(em,user.name,/^\d{4}$/.test(pin)?pin:"");window._setPw=false;history.replaceState(null,"",location.pathname);await finishAuthLogin(user);}
-  catch(e){err.textContent=e.message;err.style.display="block";}}
-function renderLoginState(){var box=document.getElementById("login-auth");if(!box)return;var mode=window._loginMode||"auth";var err=document.getElementById("login-err");if(err&&!window._loginKeepErr){err.style.display="none";}window._loginKeepErr=false;var v=document.getElementById("login-ver");if(v)v.textContent="v"+APP_VERSION;
-  var F=function(id,type,ph,extra){return '<div class="lg-f"><label for="'+id+'">'+ph+'</label><input id="'+id+'" type="'+type+'" '+(extra||"")+'></div>';};
-  if(window._setPw){box.innerHTML='<h1>Set your password</h1><div class="lg-sub">'+esc(authEmail())+'</div>'+F("setpw-1","password","New password (8+ characters)",'autocomplete="new-password"')+F("setpw-2","password","Again",'autocomplete="new-password"')+F("setpw-pin","password","4-digit PIN for this device (optional)",'inputmode="numeric" maxlength="4"')+'<button class="lg-btn" onclick="authSetPassword()">Save and sign in</button>';return;}
-  var prof=devProfiles();var who=window._loginWho||"";
-  if(mode==="code"){box.innerHTML='<h1>Access code</h1><div class="lg-sub">The old way in. Ask an admin for your email sign-in.</div><div class="lg-f"><label for="login-code">Code</label><input id="login-code" type="password" style="text-align:center;letter-spacing:.14em;font-size:20px" onkeydown="if(event.key===\'Enter\')doLogin()"></div><button class="lg-btn" id="login-btn" onclick="doLogin()">Enter &rarr;</button><div class="lg-lnk"><a href="#" onclick="window._loginMode=\'auth\';renderLoginState();return false">Sign in with email instead</a></div>';setTimeout(function(){var e=document.getElementById("login-code");if(e)e.focus();},50);return;}
-  if(prof.length&&!who&&mode==="auth"&&!window._loginFull){box.innerHTML='<h1>Who\u0027s this?</h1><div class="lg-sub">Tap your name, then your PIN.</div><div class="lg-avs">'+prof.map(function(p){var nm=p.name||p.email;return '<div class="lg-av" onclick="window._loginWho=\''+esc(p.email)+'\';renderLoginState()"><i style="background:'+avatarColor(nm)+'">'+esc(initials(nm))+'</i><b>'+esc(String(nm).split(" ")[0])+'</b></div>';}).join("")+'<div class="lg-av more" onclick="window._loginFull=true;renderLoginState()"><i>+</i><b>Someone else</b></div></div>';return;}
-  if(who){var p=prof.find(function(x){return x.email===who;})||{};window._pinBuf="";var first=String(p.name||who).split(" ")[0];
-    box.innerHTML='<h1>Hi '+esc(first)+'</h1><div class="lg-sub">Your 4-digit PIN for this device.</div><div class="lg-dots" id="lg-dots"><i></i><i></i><i></i><i></i></div><input id="login-pin" type="password" inputmode="numeric" maxlength="4" style="position:absolute;opacity:0;pointer-events:none" oninput="lgPinSync(this.value)"><div class="lg-pad">'+["1","2","3","4","5","6","7","8","9"].map(function(n){return '<span onclick="lgPinKey(\''+n+'\')">'+n+'</span>';}).join("")+'<span class="x" onclick="window._loginWho=\'\';renderLoginState()">not me</span><span onclick="lgPinKey(\'0\')">0</span><span class="x" onclick="lgPinKey(\'del\')">delete</span></div><div class="lg-lnk"><a href="#" onclick="window._loginWho=\'\';window._loginFull=true;renderLoginState();return false">Use my password instead</a> &middot; <a href="#" style="color:#6b7280" onclick="devProfileForget(\''+esc(who)+'\');window._loginWho=\'\';renderLoginState();return false">Forget me on this device</a></div>';
-    window._pinWho=who;setTimeout(function(){var e=document.getElementById("login-pin");if(e&&window.matchMedia&&!window.matchMedia("(pointer:coarse)").matches)e.focus();},50);return;}
-  box.innerHTML='<h1>Sign in</h1>'+F("login-email","email","Email",'autocomplete="username" inputmode="email"')+F("login-pass","password","Password",'autocomplete="current-password" onkeydown="if(event.key===\'Enter\')doEmailLogin()"')+'<button class="lg-btn" id="login-btn2" onclick="doEmailLogin()">Sign in</button><div class="lg-lnk"><a href="#" onclick="doForgot();return false">Forgotten your password?</a> &middot; <a href="#" onclick="window._loginMode=\'code\';renderLoginState();return false">Access code</a>'+(prof.length?' &middot; <a href="#" onclick="window._loginFull=false;renderLoginState();return false">Back</a>':'')+'</div>';setTimeout(function(){var e=document.getElementById("login-email");if(e)e.focus();},50);}
-function lgPinSync(v){window._pinBuf=String(v||"").replace(/\D/g,"").slice(0,4);lgPinDraw();if(window._pinBuf.length===4)doPinUnlock(window._pinWho);}
-function lgPinKey(k){var b=window._pinBuf||"";if(k==="del")b=b.slice(0,-1);else if(b.length<4)b+=k;window._pinBuf=b;var inp=document.getElementById("login-pin");if(inp)inp.value=b;lgPinDraw();if(b.length===4)doPinUnlock(window._pinWho);}
-function lgPinDraw(){var d=document.getElementById("lg-dots");if(!d)return;var n=(window._pinBuf||"").length;Array.prototype.forEach.call(d.children,function(el,i){el.className=i<n?"f":"";});}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function adoptionBlurbFor(st,fp){var d=st.dog||{},a=st.assessment||{},c=st.care||{};var name=d.name||"This dog";
   var fem=(d.sex||"").toLowerCase().indexOf("female")===0;
   var P=fp?{S:"I",s:"I",O:"me",o:"me",p:"my",Ps:"I\u0027m",ps:"I\u0027m",d:"I\u0027d",l:"I\u0027ll",has:"have",is:"am",v:function(x){return x;}}:{S:fem?"She":"He",s:fem?"she":"he",O:fem?"her":"him",o:fem?"her":"him",p:fem?"her":"his",Ps:fem?"She\u0027s":"He\u0027s",ps:fem?"she\u0027s":"he\u0027s",d:fem?"She\u0027d":"He\u0027d",l:fem?"she\u0027ll":"he\u0027ll",has:"has",is:"is",v:function(x){return x+"s";}};
@@ -7090,24 +6947,8 @@ function loadCurrent(){
 
 // ── Init ──────────────────────────────────────────────────────────
 (function(){
-  initSupabase();loadCurrent();authLoad();try{if(prefGet("bigtext","0")==="1")document.documentElement.classList.add("bigtext");}catch(e){}
-  (function(){var h=location.hash||"";if(h.indexOf("error")<0||h.indexOf("access_token=")>=0)return;var q={};h.replace(/^#/,"").split("&").forEach(function(kv){var i=kv.indexOf("=");if(i>0)q[decodeURIComponent(kv.slice(0,i))]=decodeURIComponent(kv.slice(i+1).replace(/\+/g," "));});if(!q.error&&!q.error_code)return;
-    window._authLinkErr=q.error_code==="otp_expired"?"That email link has expired or was already used. Each link works once, for 24 hours \u2014 and some email apps open links in the background before you do. Ask an admin for a new invite, or type your email above and tap \u201cForgotten your password?\u201d":"That sign-in link didn\u2019t work"+(q.error_description?" \u2014 "+q.error_description:"")+". Ask an admin for a new invite.";
-    try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}
-    setTimeout(function(){var er=document.getElementById("login-err");if(er&&window._authLinkErr){er.textContent=window._authLinkErr;er.style.display="block";}},700);})();
-  (function(){var p=authFromHash();if(p){authSave({access_token:p.access_token,refresh_token:p.refresh_token||"",expires_at:Date.now()+((parseInt(p.expires_in)||3600)*1000),user:{email:""}});window._setPw=true;fetch(SUPABASE_URL+"/auth/v1/user",{headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+p.access_token}}).then(function(r){return r.json();}).then(function(u){if(u&&u.email){AUTH.user={email:u.email,id:u.id};authSave(AUTH);}renderLoginState();});localStorage.removeItem("nspca-intake-auth");}})();
-  var savedCode=localStorage.getItem("nspca-intake-auth");
-  if(AUTH&&AUTH.refresh_token&&savedCode&&savedCode.indexOf("EMAIL:")===0){savedCode="";(async function(){var ok=await authRefresh();var u=ok?await userForEmail(authEmail()):null;if(u&&u.active!==false){await finishAuthLogin(u);}else{authSave(null);showScreen("login-screen");}})();}
-  if(savedCode){
-    var user=USERS.find(function(u){return u.code===savedCode;});
-    if(user){LOGGED_IN=true;CURRENT_USER=user;localStorage.setItem("nspca-user-name",user.name);localStorage.setItem("nspca-user-role",user.role);setupAutoLogout();if(goHomeApp(user,false))return;refreshAllUsers().then(function(){return loadRecordsList();}).then(function(){showDashboard();});}
-    else if(supabaseClient){(async function(){var sc=savedCode;if(AUTH&&AUTH.refresh_token){try{await authRefresh();}catch(e){}}
-      var u=null,net=false;try{var res=await supabaseClient.from("users").select("*").eq("code",sc).single();if(res&&res.data&&res.data.name)u=res.data;else if(res&&res.error&&!res.error.code)net=true;}catch(e){net=true;}
-      if(!u&&net){var nm=localStorage.getItem("nspca-user-name");if(nm)u={code:sc,name:nm,role:localStorage.getItem("nspca-user-role")||"staff"};}
-      if(!u||u.active===false){localStorage.removeItem("nspca-intake-auth");showScreen("login-screen");return;}
-      LOGGED_IN=true;CURRENT_USER=u;localStorage.setItem("nspca-user-name",u.name);localStorage.setItem("nspca-user-role",u.role||"staff");setupAutoLogout();if(goHomeApp(u,false))return;await refreshAllUsers();await loadRecordsList();showDashboard();})();}
-    else{showScreen("login-screen");}
-  }else{showScreen("login-screen");}
+  if(typeof famBoot!=="function"){document.body.innerHTML='<div style="font-family:Inter,system-ui,sans-serif;max-width:420px;margin:15vh auto;padding:24px;text-align:center;color:#282932"><h2 style="margin:0 0 8px">One file is missing</h2><p style="color:#6b7280;line-height:1.5">The app needs <b>family.js</b> next to index.html. Upload it to the same place on GitHub, then reload.</p></div>';return;}
+  initSupabase();loadCurrent();famBoot();
 })();
 
 // ── Activity (admin): who's been in today and every saved change, from dog_history ──
@@ -7199,18 +7040,15 @@ function renderActivity(){
       +(A.err?'<div class="actnone">'+esc(A.err)+'</div>':actFeed(list,true));}
   return head+faces+'<div class="actg">'+left+'<div class="actr">'+right+'</div></div></div>';}
 // "In now": note who's active every few minutes (needs users.last_seen_at; switches itself off if the column isn't there)
-function seenBeat(){if(window._seenOff||typeof LOGGED_IN==="undefined"||!LOGGED_IN||!supabaseClient||!CURRENT_USER)return;if(Date.now()-(_lastActivity||0)>5*60000)return;
-  var em=CURRENT_USER.email||authEmail()||"";var q=supabaseClient.from("users").update({last_seen_at:new Date().toISOString(),last_seen_app:"dogs"});var p=CURRENT_USER.code?q.eq("code",CURRENT_USER.code):(em?q.eq("email",em):null);
-  if(p)Promise.resolve(p).then(function(r){if(r&&r.error)window._seenOff=true;},function(){});}
-setInterval(seenBeat,180000);
+
+
 
 // ── Look only (v3.309): per person, outside their home app they can read everything but change nothing ──
 // Built-in default: Sarah (Assistant Supervisor, Cattery) opens in Cats and is look-only elsewhere.
 // Manage users → Edit user overrides it (unitSetting "lookOnly", keyed by email, else code).
-function lookBuiltin(u){if(!u)return null;if(u.role==="asst"&&/^sarah\b/i.test(String(u.name||""))&&u.code!=="SAR01")return{home:"cats",look:true};return null;}
-function lookOnlyFor(u){if(!u)return false;var m={};try{m=unitSetting("lookOnly")||{};}catch(e){}var em=String(u.email||"").toLowerCase();
-  if(em&&Object.prototype.hasOwnProperty.call(m,em))return !!m[em];if(u.code&&Object.prototype.hasOwnProperty.call(m,u.code))return !!m[u.code];var b=lookBuiltin(u);return !!(b&&b.look);}
-function isLookOnly(){try{if(!LOGGED_IN||!CURRENT_USER)return false;if(currentRole()==="admin")return false;if(!lookOnlyFor(CURRENT_USER))return false;var h=homeAppFor(CURRENT_USER)||"dogs";return h!==APP_HOME;}catch(e){return false;}}
+
+
+
 window._loAct=0;
 ["click","input","change","keydown","pointerdown"].forEach(function(ev){document.addEventListener(ev,function(){window._loAct=Date.now();},true);});
 var _loToastAt=0;
