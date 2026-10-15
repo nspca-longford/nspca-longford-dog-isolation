@@ -4,7 +4,7 @@
 // Edit this file once and every app gets the change. Each app keeps only its own animals.
 
 var HOME_FILES={dogs:"index.html",cats:"cats.html",stables:"stables.html"};
-var HOME_BUILTIN={STA01:"stables",JAM01:"stables",CAT01:"cats",CISO01:"cats"};
+var HOME_BUILTIN={STA01:"stables",CAT01:"cats",CISO01:"cats"};
 function homeAppFor(u){if(!u)return "";var m={};try{m=unitSetting("homeApps")||{};}catch(e){}var em=String(u.email||"").toLowerCase();return (em&&m[em])||m[u.code||""]||HOME_BUILTIN[u.code||""]||(typeof lookBuiltin==="function"&&(lookBuiltin(u)||{}).home)||"";}
 function goHomeApp(u,force){var done="";try{done=sessionStorage.getItem("nspca-home-done")||"";}catch(e){}if(done&&!force)return false;try{sessionStorage.setItem("nspca-home-done","1");}catch(e){}var h=homeAppFor(u);if(h&&h!==APP_HOME&&HOME_FILES[h]){location.replace(HOME_FILES[h]);return true;}return false;}
 function userPhoto(code){try{var _l=localStorage.getItem("nspca-user-photo-"+code);if(_l!==null)return _l;var _u=(typeof _allUsersCache!=="undefined"&&_allUsersCache||[]).find(function(x){return x.code===code;});return (_u&&_u.photo)||"";}catch(e){return"";}}
@@ -192,10 +192,9 @@ function seenBeat(){if(window._seenOff||typeof LOGGED_IN==="undefined"||!LOGGED_
   if(p)Promise.resolve(p).then(function(r){if(r&&r.error)window._seenOff=true;},function(){});}
 setInterval(seenBeat,180000);
 // Built-in defaults for the whole family (Manage users → Edit user can still change them):
-// Sarah (Assistant Supervisor) works in Cats, Jamie runs the Stables; both look only elsewhere.
-function lookBuiltin(u){if(!u)return null;if(u.role==="asst"&&/^sarah\b/i.test(String(u.name||""))&&u.code!=="SAR01")return{home:"cats",look:true};if(u.code==="JAM01"||/^jamie\b/i.test(String(u.name||"")))return{home:"stables",look:true};return null;}
-var FAM_TITLES={JAM01:"Senior Equine Animal Care Assistant"};
-function famTitle(u){u=u||{};return u.title||FAM_TITLES[u.code]||((/^jamie\b/i.test(String(u.name||"")))?FAM_TITLES.JAM01:"");}
+// Sarah (Assistant Supervisor) works in Cats and is look only elsewhere. Everyone else: set in Manage users.
+function lookBuiltin(u){if(!u)return null;if(u.role==="asst"&&/^sarah\b/i.test(String(u.name||""))&&u.code!=="SAR01")return{home:"cats",look:true};return null;}
+function famTitle(u){u=u||{};return String(u.title||"").trim();}
 function lookOnlyFor(u){if(!u)return false;var m={};try{m=unitSetting("lookOnly")||{};}catch(e){}var em=String(u.email||"").toLowerCase();
   if(em&&Object.prototype.hasOwnProperty.call(m,em))return !!m[em];if(u.code&&Object.prototype.hasOwnProperty.call(m,u.code))return !!m[u.code];var b=lookBuiltin(u);return !!(b&&b.look);}
 function isLookOnly(){try{if(!LOGGED_IN||!CURRENT_USER)return false;if(currentRole()==="admin")return false;if(!lookOnlyFor(CURRENT_USER))return false;var h=homeAppFor(CURRENT_USER)||"dogs";return h!==APP_HOME;}catch(e){return false;}}
@@ -329,14 +328,14 @@ function renderProfile(){
 function userTap(code){var u=getAllUsersSync().find(function(x){return x.code===code;});if(!u)return;if(u.source==="app"){miniToast(u.name+" is built into the app — changed in the code");return;}showEditUserModal(code);}
 function renderUsersAdmin(){
   var all=getAllUsersSync().slice().sort(function(a,b){var o={admin:0,manager:1,supervisor:2,asst:3,coordinator:4,trainer:5};var x=o[a.role]==null?9:o[a.role],y=o[b.role]==null?9:o[b.role];return x-y||(a.name||"").localeCompare(b.name||"");});
-  var shared=function(u){return !u.email&&(u.role||"staff")==="staff";};
+  var shared=function(u){return !u.email&&!famTitle(u)&&(u.role||"staff")==="staff";};
   var people=all.filter(function(u){return !shared(u);}),codes=all.filter(shared);
   var now=Date.now(),me=(CURRENT_USER||{}).code;
   var emailN=all.filter(function(u){return u.email&&u.active!==false;}).length;var invited=all.filter(function(u){return u.email&&u.active===false;});
   var quiet=people.filter(function(u){var t=userLastIn(u);return t&&now-t>14*864e5&&u.active!==false;});
   var bits=['<b>'+emailN+' on email sign-in</b>'];if(codes.length)bits.push(codes.length+' shared code'+(codes.length===1?'':'s'));if(invited.length)bits.push('<b>'+esc(invited.map(function(u){return u.name;}).join(", "))+' invited</b> — not in yet');
   var sent=bits.join(", ")+'.'+(quiet.length?' '+esc(quiet.slice(0,2).map(function(u){return u.name;}).join(" and "))+' last in '+fmtAgo(userLastIn(quiet[0]))+'.':'');
-  var row=function(u){var ri=famTitle(u)?[famTitle(u).replace(/Animal Care Assistant/i,"ACA").toUpperCase(),"#0f766e"]:userRoleInfo(u.role);var t=userLastIn(u);var off=u.active===false;var inv=off&&u.email;var r;
+  var row=function(u){var ri=famTitle(u)?[famTitle(u).toUpperCase(),"#0f766e"]:userRoleInfo(u.role);var t=userLastIn(u);var off=u.active===false;var inv=off&&u.email;var r;
     if(u.code===me)r='<span class="ur-s on">in now</span>';else if(inv)r='<span class="ur-s inv">invited</span>';else if(off)r='<span class="ur-s off">switched off</span>';else r='<span class="ur-s'+(t&&now-t<7*864e5?' on':'')+'">'+(t?esc(fmtAgo(t)):'—')+'</span>';
     var sub=u.email?'email · '+esc(u.email):'code '+esc(u.code)+(shared(u)?' · shared':'');if(u.source==="app")sub+=' · built-in';
     return '<div class="ur'+(off&&!inv?' off':'')+'" onclick="userTap(\''+esc(u.code)+'\')">'+userAvatarHtml(u,34)+'<div class="ur-m"><b>'+esc(u.name)+' <span class="ur-rp" style="background:'+ri[1]+'">'+ri[0]+'</span></b><small>'+sub+'</small></div>'+r+'</div>';};
@@ -355,7 +354,7 @@ function showAddUserModal(){
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:15px;font-weight:600">Add new user</span><button onclick="this.closest(\'.add-user-ov\').remove()" style="background:#f1f3ee;border:none;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px">&#10005;</button></div>'
     +'<div class="f"><label class="lbl">Full name</label><input id="new-user-name" type="text" placeholder="e.g. John Murphy"></div>'
     +'<div class="f"><label class="lbl">Email <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 for sign-in; invite them in Supabase \u2192 Authentication \u2192 Users with the same address</span></label><input id="new-user-email" type="email" placeholder="name@nspca.ie"></div>'
-    +'<div class="f"><label class="lbl">Access code</label><input id="new-user-code" type="text" placeholder="e.g. JM-01" style="font-family:monospace;letter-spacing:0.04em;text-transform:uppercase"></div>'
+    +'<div class="f"><label class="lbl">Job title <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 optional, shown instead of the role</span></label><input id="new-user-title" type="text" placeholder="e.g. Senior Equine ACA"></div><div class="f"><label class="lbl">Access code</label><input id="new-user-code" type="text" placeholder="e.g. JM-01" style="font-family:monospace;letter-spacing:0.04em;text-transform:uppercase"></div>'
     +'<div class="f"><label class="lbl">Role</label><select id="new-user-role"><option value="staff">Staff</option><option value="supervisor">Supervisor</option><option value="asst">Assistant Supervisor</option><option value="coordinator">Rehoming Co-Ordinator</option><option value="trainer">Dog Trainer &amp; Behaviour Specialist</option><option value="manager">Manager</option><option value="admin">Admin</option></select></div>'
     +'<button onclick="saveNewUser()" class="btn btnp" style="width:100%;padding:10px;font-size:13px;font-weight:600">Add user</button>'
     +'</div>';
@@ -373,7 +372,7 @@ async function saveNewUser(){
   if(getAllUsersSync().some(function(u){return u.code===code;})){appAlert("That code is already in use.");return;}
   if(!supabaseClient){appAlert("Supabase not connected.");return;}
   try{
-    var _ins=await supabaseClient.from("users").insert([{name:name,code:code,role:role,active:true,email:email||null}]);if(_ins&&_ins.error)throw _ins.error;
+    var _ins=await supabaseClient.from("users").insert([Object.assign({name:name,code:code,role:role,active:true,email:email||null},(function(){var t=((document.getElementById("new-user-title")||{}).value||"").trim();return t?{title:t}:{};})())]);if(_ins&&_ins.error)throw _ins.error;
     var ov=document.querySelector(".add-user-ov");if(ov)ov.remove();
     await refreshAllUsers();
     showDashSection("users");
@@ -391,7 +390,7 @@ function showEditUserModal(code){
     +'<div class="f"><label class="lbl">Full name</label><input id="edit-user-name" type="text" value="'+esc(u.name)+'"></div>'
     +'<div class="f"><label class="lbl">Email</label><input id="edit-user-email" type="email" value="'+esc(u.email||"")+'"></div>'
     +'<div class="f"><label class="lbl">Access code (read-only)</label><input type="text" value="'+esc(u.code)+'" disabled style="background:#f1f3ee;color:#6b7280;font-family:monospace"></div>'
-    +'<div class="f"><label class="lbl">Role</label><select id="edit-user-role">'+[["staff","Staff"],["supervisor","Supervisor"],["asst","Assistant Supervisor"],["coordinator","Rehoming Co-Ordinator"],["trainer","Dog Trainer & Behaviour Specialist"],["manager","Manager"],["admin","Admin"]].map(function(r){return'<option value="'+r[0]+'"'+(u.role===r[0]?" selected":"")+'>'+r[1]+'</option>';}).join("")+'</select></div>'
+    +'<div class="f"><label class="lbl">Job title <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 optional, shown instead of the role</span></label><input id="edit-user-title" type="text" value="'+esc(u.title||"")+'" placeholder="e.g. Senior Equine ACA"></div><div class="f"><label class="lbl">Role</label><select id="edit-user-role">'+[["staff","Staff"],["supervisor","Supervisor"],["asst","Assistant Supervisor"],["coordinator","Rehoming Co-Ordinator"],["trainer","Dog Trainer & Behaviour Specialist"],["manager","Manager"],["admin","Admin"]].map(function(r){return'<option value="'+r[0]+'"'+(u.role===r[0]?" selected":"")+'>'+r[1]+'</option>';}).join("")+'</select></div>'
     +'<div class="f"><label class="lbl">Opens in</label><select id="edit-user-home">'+[["","Dogs (the usual)"],["cats","Cats"],["stables","Stables"]].map(function(h){var cur=homeAppFor(u);return '<option value="'+h[0]+'"'+((cur===h[0])||(h[0]===""&&(cur===""||cur==="dogs"))?" selected":"")+'>'+h[1]+'</option>';}).join("")+'</select></div>'
     +'<div class="f"><label class="lbl">Outside that app</label><select id="edit-user-look">'+[["0","Full use everywhere"],["1","Look only \u2014 can\u2019t change anything"]].map(function(o){var cur=lookOnlyFor(u)?"1":"0";return '<option value="'+o[0]+'"'+(cur===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+'</select><div style="font-size:10.5px;color:#9a9fa8;margin-top:4px">Admins always have full use.</div></div>'
     +'<button onclick="saveEditedUser(\''+esc(code)+'\')" class="btn btnp" style="width:100%;padding:10px;font-size:13px;font-weight:600">Save changes</button>'
@@ -433,7 +432,7 @@ async function saveEditedUser(code){
   try{var _lEl=document.getElementById("edit-user-look");if(_lEl){var _u2=getAllUsersSync().find(function(x){return x.code===code;})||{};var _em2=String(((document.getElementById("edit-user-email")||{}).value||_u2.email||"")).trim().toLowerCase();var _lm=JSON.parse(JSON.stringify(unitSetting("lookOnly")||{}));var _k2=_em2||code;_lm[_k2]=_lEl.value==="1";if(_em2&&_k2!==code)delete _lm[code];setUnitSetting("lookOnly",_lm);}}catch(_e){}
   if(!supabaseClient)return;
   try{
-    var _upd=await supabaseClient.from("users").update(Object.assign({name:name,role:role},{email:(((document.getElementById("edit-user-email")||{}).value||"").trim().toLowerCase())||null})).eq("code",code);if(_upd&&_upd.error)throw _upd.error;
+    var _upd=await supabaseClient.from("users").update(Object.assign({name:name,role:role,title:(((document.getElementById("edit-user-title")||{}).value||"").trim())||null},{email:(((document.getElementById("edit-user-email")||{}).value||"").trim().toLowerCase())||null})).eq("code",code);if(_upd&&_upd.error)throw _upd.error;
     var ov=document.querySelector(".edit-user-ov");if(ov)ov.remove();
     await refreshAllUsers();
     showDashSection("users");
