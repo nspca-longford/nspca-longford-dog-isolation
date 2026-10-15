@@ -191,7 +191,11 @@ function seenBeat(){if(window._seenOff||typeof LOGGED_IN==="undefined"||!LOGGED_
   var em=CURRENT_USER.email||authEmail()||"";var q=supabaseClient.from("users").update({last_seen_at:new Date().toISOString(),last_seen_app:(typeof APP_HOME!=="undefined"?APP_HOME:"")});var p=CURRENT_USER.code?q.eq("code",CURRENT_USER.code):(em?q.eq("email",em):null);
   if(p)Promise.resolve(p).then(function(r){if(r&&r.error)window._seenOff=true;},function(){});}
 setInterval(seenBeat,180000);
-function lookBuiltin(u){if(!u)return null;if(u.role==="asst"&&/^sarah\b/i.test(String(u.name||""))&&u.code!=="SAR01")return{home:"cats",look:true};return null;}
+// Built-in defaults for the whole family (Manage users → Edit user can still change them):
+// Sarah (Assistant Supervisor) works in Cats, Jamie runs the Stables; both look only elsewhere.
+function lookBuiltin(u){if(!u)return null;if(u.role==="asst"&&/^sarah\b/i.test(String(u.name||""))&&u.code!=="SAR01")return{home:"cats",look:true};if(u.code==="JAM01"||/^jamie\b/i.test(String(u.name||"")))return{home:"stables",look:true};return null;}
+var FAM_TITLES={JAM01:"Senior Equine Animal Care Assistant"};
+function famTitle(u){u=u||{};return u.title||FAM_TITLES[u.code]||((/^jamie\b/i.test(String(u.name||"")))?FAM_TITLES.JAM01:"");}
 function lookOnlyFor(u){if(!u)return false;var m={};try{m=unitSetting("lookOnly")||{};}catch(e){}var em=String(u.email||"").toLowerCase();
   if(em&&Object.prototype.hasOwnProperty.call(m,em))return !!m[em];if(u.code&&Object.prototype.hasOwnProperty.call(m,u.code))return !!m[u.code];var b=lookBuiltin(u);return !!(b&&b.look);}
 function isLookOnly(){try{if(!LOGGED_IN||!CURRENT_USER)return false;if(currentRole()==="admin")return false;if(!lookOnlyFor(CURRENT_USER))return false;var h=homeAppFor(CURRENT_USER)||"dogs";return h!==APP_HOME;}catch(e){return false;}}
@@ -226,7 +230,7 @@ function famAppName(k){var a=FAM_APPS.filter(function(x){return x[0]===k;})[0];r
 function famHere(){return (typeof APP_HOME!=="undefined"&&APP_HOME)||"dogs";}
 function famEsc(v){return (v===null||v===undefined?"":""+v).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
 async function famEnterAppSafe(){if(typeof famEnterApp==="function")return famEnterApp();if(typeof loadRecordsList==="function")await loadRecordsList();if(typeof showDashboard==="function")showDashboard();}
-function famRoleLabel(u){u=u||{};if(u.title)return u.title;var r=u.role||"staff";return r==="admin"?"Admin":r==="manager"?"Manager":r==="supervisor"?"Supervisor":r==="asst"?"Assistant Supervisor":r==="coordinator"?"Rehoming Co-Ordinator":r==="trainer"?"Dog Trainer & Behaviour Specialist":r==="director"?"Director":"Staff";}
+function famRoleLabel(u){u=u||{};if(famTitle(u))return famTitle(u);var r=u.role||"staff";return r==="admin"?"Admin":r==="manager"?"Manager":r==="supervisor"?"Supervisor":r==="asst"?"Assistant Supervisor":r==="coordinator"?"Rehoming Co-Ordinator":r==="trainer"?"Dog Trainer & Behaviour Specialist":r==="director"?"Director":"Staff";}
 function famMe(){var me=CURRENT_USER||{name:currentName(),code:localStorage.getItem("nspca-intake-auth")||"",role:currentRole()};var row=(getAllUsersSync()||[]).filter(function(u){return u.code===me.code;})[0];return Object.assign({},row||{},me);}
 
 // ── A small bottom sheet that every app can use (own styles, so it looks the same everywhere) ──
@@ -332,7 +336,7 @@ function renderUsersAdmin(){
   var quiet=people.filter(function(u){var t=userLastIn(u);return t&&now-t>14*864e5&&u.active!==false;});
   var bits=['<b>'+emailN+' on email sign-in</b>'];if(codes.length)bits.push(codes.length+' shared code'+(codes.length===1?'':'s'));if(invited.length)bits.push('<b>'+esc(invited.map(function(u){return u.name;}).join(", "))+' invited</b> — not in yet');
   var sent=bits.join(", ")+'.'+(quiet.length?' '+esc(quiet.slice(0,2).map(function(u){return u.name;}).join(" and "))+' last in '+fmtAgo(userLastIn(quiet[0]))+'.':'');
-  var row=function(u){var ri=userRoleInfo(u.role);var t=userLastIn(u);var off=u.active===false;var inv=off&&u.email;var r;
+  var row=function(u){var ri=famTitle(u)?[famTitle(u).replace(/Animal Care Assistant/i,"ACA").toUpperCase(),"#0f766e"]:userRoleInfo(u.role);var t=userLastIn(u);var off=u.active===false;var inv=off&&u.email;var r;
     if(u.code===me)r='<span class="ur-s on">in now</span>';else if(inv)r='<span class="ur-s inv">invited</span>';else if(off)r='<span class="ur-s off">switched off</span>';else r='<span class="ur-s'+(t&&now-t<7*864e5?' on':'')+'">'+(t?esc(fmtAgo(t)):'—')+'</span>';
     var sub=u.email?'email · '+esc(u.email):'code '+esc(u.code)+(shared(u)?' · shared':'');if(u.source==="app")sub+=' · built-in';
     return '<div class="ur'+(off&&!inv?' off':'')+'" onclick="userTap(\''+esc(u.code)+'\')">'+userAvatarHtml(u,34)+'<div class="ur-m"><b>'+esc(u.name)+' <span class="ur-rp" style="background:'+ri[1]+'">'+ri[0]+'</span></b><small>'+sub+'</small></div>'+r+'</div>';};
