@@ -6847,7 +6847,7 @@ function restoreState(saved){
   });
   return base;
 }
-function loadRecord(id){
+function dogLoadRecord(id){
   var rec=records.find(function(r){return r.id===id;});if(!rec||!rec.state)return;
   S=restoreState(rec.state);if(S.dog&&S.dog.inspector==="James McCormick")S.dog.inspector="James McCormack";
   window._asmtOpen={};window._medOpen={};   // every card starts closed on a fresh dog
@@ -7108,7 +7108,7 @@ function tmDelSit(i){appConfirm("Delete this sit-in?",function(){S.temper.sits.s
 
 // ── Day reports ────────────────────────────────────────────────────
 function cdEnsure(n){S.days=S.days||[];var d=S.dog;for(var i=0;i<n;i++){if(!S.days[i])S.days[i]={date:"",stress:"",eating:"",tray:"",flu:[],notes:""};if(!S.days[i].date&&d.intakeDate)S.days[i].date=addDaysStr(d.intakeDate,i+1);}}
-function cdSet(i,k,v){cdEnsure(i+1);var x=S.days[i];x[k]=(String(x[k])===String(v))?"":v;if(k==="eating"&&x.eating&&x.eating!=="Nothing"){S.lastAte=new Date().toISOString();}x.by=currentName();persistSave();debouncedSave();renderMain();}
+function cdSet(i,k,v){cdEnsure(i+1);var x=S.days[i];x[k]=(String(x[k])===String(v))?"":v;if(k==="eating"&&x.eating&&x.eating!=="Nothing"){cdAteOn(x.date);}x.by=currentName();persistSave();debouncedSave();renderMain();}
 function cdFlu(i,s){cdEnsure(i+1);var x=S.days[i];x.flu=x.flu||[];if(s==="None"){x.flu=x.flu.indexOf("None")>=0?[]:["None"];}else{x.flu=x.flu.filter(function(y){return y!=="None";});var j=x.flu.indexOf(s);if(j>=0)x.flu.splice(j,1);else x.flu.push(s);}persistSave();debouncedSave();renderMain();}
 function catAteNow(){S.lastAte=new Date().toISOString();persistSave();debouncedSave();renderMain();miniToast("Logged \u2014 ate now");}
 function cdSetCur(k,v){cdSet(window._cdView||0,k,v);}
@@ -7145,6 +7145,9 @@ function catFeedingBase(){if(!S.feedingPlan)S.feedingPlan={};var fp=S.feedingPla
   h+='<div class="card"><div class="lbl" style="margin-bottom:8px">Appetite <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 from the day reports</span></div>'+(days.length?'<div class="fapp">'+days.map(function(x){var t=/Ate all|Ate some/.test(x.eating||"")?"g":x.eating==="Nothing"?"n":x.eating?"h":"e";return '<div title="'+e(x.eating||"not logged")+'"><i class="'+t+'"></i>'+e(fmtDMY(x.date).slice(0,5))+'</div>';}).join("")+'</div>':'<div style="font-size:12.5px;color:#6b7280;font-weight:600">No day reports yet.</div>')+'<div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:6px">A cat off its food for 24 hours goes amber on the board, 48 hours red. <span class="lnk" onclick="catAteNow()">Ate just now</span></div></div>';
   h+='<div class="card"><div class="lbl" style="margin-bottom:6px">Notes</div>'+ta("",fp.notes||"","feedingPlan.notes","Allergies, prescription diet, how the tablet goes in\u2026")+'</div>';
   return h+browNav("feeding");}
+
+// A report for an earlier day moves "last ate" to that evening, never past now, never backwards.
+function cdAteOn(ds){var now=new Date();var td=now.toISOString().slice(0,10);var t=(!ds||ds>=td)?now:new Date(ds+"T18:00:00");if(t>now)t=now;var cur=S.lastAte?new Date(S.lastAte):null;if(!cur||isNaN(cur)||t>cur)S.lastAte=t.toISOString();}
 
 // ── Medical: FeLV/FIV first, ringworm last ─────────────────────────
 function medCSet(k,v){if(!S.medical)S.medical=defaultMedical();S.medical[k]=(S.medical[k]===v)?"":v;if((k==="felv"||k==="fiv")&&S.medical[k]&&!S.medical.testDate)S.medical.testDate=new Date().toISOString().slice(0,10);if(k==="culture"&&v==="Pending"&&!S.medical.cultureDate)S.medical.cultureDate=new Date().toISOString().slice(0,10);persistSave();debouncedSave();renderMain();}
@@ -7643,7 +7646,7 @@ function agreementFollowUp(r){var st=r.state||{};var f=st.fin||{};if(f.outcome!=
 var RCP_WAIT=["Pregnant","Nursing","Too young","Unwell"];
 function rcpWaitSet(k,v){if(!S.medical)S.medical=defaultMedical();var m=S.medical;m.rcpWait=(m.rcpWait===v)?"":v;m.rcpWaitBy=m.rcpWait?currentName():"";m.rcpWaitOn=m.rcpWait?new Date().toISOString().slice(0,10):"";persistSave();debouncedSave();renderMain();}
 function rcpWaitOf(st){var m=(st||{}).medical||{};return m.rcpWait||"";}
-function rcpWaitHtml(){var m=S.medical||{};var a=S.arrival||{};var hint=!m.rcpWait&&/Pregnant|Nursing/.test(a.pregnant||"")?'<div class="cflag a" style="margin:0 0 8px">Arrival says <b>'+esc(a.pregnant.split(" —")[0].toLowerCase())+'</b> — ask the vet before giving the RCP.</div>':'';
+function rcpWaitHtml(){var m=S.medical||{};var a=S.arrival||{};if(!m.rcpWait&&firstRcpGiven(S))return "";var hint=!m.rcpWait&&/Pregnant|Nursing/.test(a.pregnant||"")?'<div class="cflag a" style="margin:0 0 8px">Arrival says <b>'+esc(a.pregnant.split(" —")[0].toLowerCase())+'</b> — ask the vet before giving the RCP.</div>':'';
   return hint+chipRow("Vet says wait","no RCP yet — the Cattery gate lets the cat through on the vet’s word","rcpWait",RCP_WAIT,m.rcpWait||"","rcpWaitSet")+(m.rcpWait?'<div style="font-size:11px;color:#6b7280;font-weight:600;margin:-4px 0 10px">Set by '+esc(m.rcpWaitBy||"")+(m.rcpWaitOn?' on '+esc(fmtDMY(m.rcpWaitOn)):'')+'. Clear it once the vet says go.</div>':'');}
 
 // ── Cattery round: two taps a day for every cat in the Cattery ─────
@@ -7731,7 +7734,7 @@ function renderTemperament(){var t=S.temper||{};var e=esc;var d=S.dog;var him=he
 // ══ Overhaul 11 Oct: Day reports = the week · today · same as yesterday ══
 var CD_COPY=["stress","eating","tray","wee","water","pen","groom"];
 function cdProblem(x){if(!x)return "there\u2019s no report";if(!dayMinDone(x))return "the report wasn\u2019t finished";if(/Picked|Nothing/.test(x.eating||""))return (x.eating==="Nothing"?"ate nothing":"picked at the food");if(/Diarrhoea|Nothing passed/.test(x.tray||""))return x.tray==="Diarrhoea"?"had diarrhoea":"passed nothing";if(x.wee==="Straining")return "was straining";if((x.flu||[]).some(function(s){return s!=="None";}))return "had cat flu signs";return "";}
-function cdSame(i){cdEnsure(i+1);var p=S.days[i-1],x=S.days[i];if(!p||cdProblem(p))return;window._cdUndo={i:i,snap:JSON.parse(JSON.stringify(x))};CD_COPY.forEach(function(k){if(p[k])x[k]=p[k];});x.flu=(p.flu||[]).slice();x.copied=true;x.by=currentName();if(x.eating&&x.eating!=="Nothing")S.lastAte=new Date().toISOString();persistSave();debouncedSave();renderMain();}
+function cdSame(i){cdEnsure(i+1);var p=S.days[i-1],x=S.days[i];if(!p||cdProblem(p))return;window._cdUndo={i:i,snap:JSON.parse(JSON.stringify(x))};CD_COPY.forEach(function(k){if(p[k])x[k]=p[k];});x.flu=(p.flu||[]).slice();x.copied=true;x.by=currentName();if(x.eating&&x.eating!=="Nothing")cdAteOn(x.date);persistSave();debouncedSave();renderMain();}
 function cdUndo(){var u=window._cdUndo;if(!u)return;S.days[u.i]=u.snap;window._cdUndo=null;persistSave();debouncedSave();renderMain();}
 function renderCatDays(){var d=S.dog,e=esc;var r=curRec();var g=catGate(r);var N=Math.max(g.qDays,(S.days||[]).filter(function(x){return x&&x.date;}).length);cdEnsure(N);var td=new Date().toISOString().slice(0,10);
   var cur=window._cdView;if(cur==null||cur>=N){cur=0;for(var i=0;i<N;i++){if(S.days[i].date&&S.days[i].date<=td)cur=i;}}window._cdView=cur;
@@ -7760,7 +7763,7 @@ function renderCatDays(){var d=S.dog,e=esc;var r=curRec();var g=catGate(r);var N
   var x=S.days[cur];var prev=cur>0?S.days[cur-1]:null;var pb=cur>0?cdProblem(prev):"it\u2019s the first day";var isT=x.date===td;
   var head='<div class="dhead"><div><b>'+(isT?'Today':'Day '+(cur+1))+' \u00b7 '+(isT?'day '+(cur+1):e(x.date?new Date(x.date+"T12:00").toLocaleDateString("en-IE",{weekday:"short"}):""))+'</b><small>'+(x.date?e(fmtDMY(x.date)):"")+'</small></div>'
     +(pb?'<span class="btn" style="opacity:.45;cursor:default" title="Off: yesterday '+e(pb)+'">Same as yesterday</span>':'<span class="btn btnp" onclick="cdSame('+cur+')">Same as yesterday</span>')+'</div>';
-  if(pb&&cur>0&&!dayMinDone(x))head+='<div style="font-size:11.5px;color:#92400e;font-weight:600;margin:-4px 0 8px">Same as yesterday is off \u2014 yesterday '+e(he)+' '+e(pb.replace(/^there\u2019s no report$/,"has no report").replace(/^the report wasn\u2019t finished$/,"\u2019s report wasn\u2019t finished"))+'. Tap each one fresh so nothing gets missed.</div>';
+  if(pb&&cur>0&&!dayMinDone(x))head+='<div style="font-size:11.5px;color:#92400e;font-weight:600;margin:-4px 0 8px">Same as yesterday is off \u2014 '+e(pb==="there\u2019s no report"?"there\u2019s no report for yesterday":pb==="the report wasn\u2019t finished"?"yesterday\u2019s report wasn\u2019t finished":"yesterday "+he+" "+pb)+'. Tap each one fresh so nothing gets missed.</div>';
   if(x.copied&&window._cdUndo&&window._cdUndo.i===cur)head+='<div class="copied">Copied from yesterday \u2014 '+e([x.stress?"stress "+x.stress:"",x.eating?x.eating.toLowerCase():"",x.tray?"tray "+x.tray.toLowerCase():"",x.wee?"wee "+x.wee.toLowerCase():""].filter(Boolean).join(", "))+'. <b>Change anything that\u2019s different.</b> <span class="lnk" onclick="cdUndo()">Undo</span></div>';
   else if(x.copied)head+='<div style="font-size:11px;color:#166534;font-weight:700;margin:-4px 0 8px">Copied from yesterday by '+e(x.by||"")+'.</div>';
   var mc=function(label,inner){return '<div class="mcell"><label>'+label+mustTag()+'</label>'+inner+'</div>';};
@@ -8150,6 +8153,13 @@ function renderDashboard(){var out=dogRenderDashboard.apply(this,arguments);setT
 // Sign-in, sessions and PINs live in family.js (shared by every app). Only Manage users is fixed here.
 
 // Manage users now lives in family.js (stage 2) — nothing of ours here.
+
+// ── Opening a cat shouldn't count as a change ─────────────────────
+// Day reports, Outcome and Medical fill in blank rows and worked-out dates when
+// they first draw. Do that quietly on open, so just looking never shows "Unsaved".
+function loadRecord(id){dogLoadRecord(id);if(!S||!S._id)return;var t=S.tab;
+  ["days","outcome","medical"].forEach(function(x){try{S.tab=x;page();}catch(e){}});
+  S.tab=t;try{window._lastSavedJson=_stateSig();}catch(e){}}
 
 // ── Init ──────────────────────────────────────────────────────────
 (function(){
