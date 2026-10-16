@@ -1002,7 +1002,8 @@ body.lookonly #save-bar.dirty{display:none!important}
 .ov2cin{font-weight:600;font-size:12px;display:inline-block;max-width:200px;text-align:right;white-space:normal;word-break:break-word}.ov2 .ovkv b{min-width:0;text-align:right}.ov2 .ovkv .ov2cin{white-space:normal;color:#3a3c48}
 @media(min-width:1180px){.ov2{width:min(1100px,calc(100vw - 64px));margin-left:calc((100% - min(1100px,calc(100vw - 64px)))/2)}}
 @media(max-width:1179px){.ov2cols{display:flex;flex-direction:column;gap:0}.ov2cols>.c{display:contents}.ov2cols .o-med{order:1}.ov2cols .o-story{order:2}.ov2cols .o-rep{order:3}.ov2cols .o-now{order:4}.ov2cols .o-todo{order:5}.ov2cols .o-since{order:6}.ov2cols>.c>*{margin-bottom:12px}}
-@media(max-width:640px){.ov2tiles{grid-template-columns:1fr 1fr;gap:8px}.ov2mn .mni:nth-of-type(3){display:none}.ov2att .ar em{display:none}.ov2t b{font-size:16px}}
+@media(max-width:1179px){.ov2cols>.c>*{align-self:stretch;width:100%;box-sizing:border-box}}
+@media(max-width:640px){.ov2 .ovstory{flex-direction:row;align-items:flex-start;gap:12px}.ov2 .ovstory img{width:64px;height:64px;border-radius:12px;flex:none}.ov2 .ovstory p{font-size:14px}.ov2 .ovarc{grid-template-columns:96px 1fr 70px}.ov2 .ovarc svg{width:70px}.ov2tiles{grid-template-columns:1fr 1fr;gap:8px}.ov2mn .mni:nth-of-type(3){display:none}.ov2att .ar em{display:none}.ov2t b{font-size:16px}}
 .wk-day{background:#fff;border:1px solid #e4e7e0;border-radius:12px;padding:8px 12px;margin-bottom:8px}.wk-day.empty{background:transparent;border-style:dashed}
 .wk-h{display:flex;align-items:baseline;gap:8px;padding:2px 0 4px}.wk-h b{font-size:13.5px;font-weight:800;color:#282932}.wk-h span{font-size:11.5px;color:#9a9fa8;font-weight:700}
 .wk-it{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid #f0f1ec;cursor:pointer;font-size:13px}.wk-it i{width:9px;height:9px;border-radius:50%;flex:none}.wk-it div{flex:1;min-width:0;color:#3a3c48}.wk-it div b{color:#282932}.wk-it span{font-size:11px;font-weight:800;color:#6b7280;white-space:nowrap}.wk-it em.late{font-style:normal;font-size:10px;font-weight:900;color:#b91c1c;background:#fee2e2;border-radius:6px;padding:1px 6px;margin-left:4px}
@@ -2104,7 +2105,8 @@ function wxGet(){var c=null;try{c=JSON.parse(localStorage.getItem("nspca-wx3")||
       var cur=j.current||{};var c2={at:Date.now(),d:tdISO(),now:cur.temperature_2m!=null?cur.temperature_2m:T[i0],code:cur.weather_code!=null?cur.weather_code:W[i0],max:Math.round(Math.max.apply(null,day.length?day:[T[i0]])),min:Math.round(Math.min.apply(null,night.length?night:[T[i0]])),dayLbl:dayTom?"tomorrow":"today",next:next};
       try{localStorage.setItem("nspca-wx3",JSON.stringify(c2));}catch(e){}var ds=document.getElementById("dashboard-screen");if(ds&&ds.style.display!=="none"&&!window._dashSection)renderDashboard();}).catch(function(){}).then(function(){window._wxBusy=false;});}catch(e){window._wxBusy=false;}}
   return c;}
-function wxPanelHtml(){var wx=wxGet();if(!wx)return "";var e=esc;var hr=new Date().getHours();var deg=function(v){return String(Math.round(v)).replace("-","−")+"°";};
+function wxPanelHtml(){var wx=wxGet();if(!wx)return "";if(!(wx.min<=WX_COLD||wx.max>=WX_HOT))return "";  // only on a frost night or a hot day
+  var e=esc;var hr=new Date().getHours();var deg=function(v){return String(Math.round(v)).replace("-","−")+"°";};
   var flag=wx.min<=WX_COLD?'<span class="wxf cold">Frost tonight</span>':wx.max>=WX_HOT?'<span class="wxf hot">Hot '+(wx.dayLbl==="tomorrow"?"tomorrow":"today")+'</span>':'';
   return '<div class="wxp" title="Longford forecast, updated hourly"><div class="wxp-top">'+wxIcon(wx.code,wxNight(hr),34)+'<div class="wxp-now"><b>'+deg(wx.now)+'</b><span>'+e(wxWord(wx.code)||"Longford")+'</span></div></div>'
     +'<div class="wxp-hl"><span>'+(wx.dayLbl==="tomorrow"?"Tomorrow":"High")+' <b>'+deg(wx.max)+'</b></span><span>Tonight <b>'+deg(wx.min)+'</b></span></div>'
