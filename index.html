@@ -1041,15 +1041,15 @@ body.lookonly #save-bar.dirty{display:none!important}
 @media(max-width:640px){#pres-chip{position:fixed;right:10px;top:58px;z-index:40;box-shadow:0 4px 12px rgba(0,0,0,.2)}}
 .pres-face{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;color:#fff;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #fff,0 0 0 4px #22c55e;z-index:3;pointer-events:none}
 #dashboard-content{position:relative}
-.wxp{background:#fff;border:1px solid #e4e7e0;border-radius:14px;padding:12px 14px;margin-bottom:12px}
-.wxp-h{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}.wxp-h span{font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#6b7280}.wxp-h b{font-size:22px;font-weight:900;color:#282932}.wxp-h em{font-style:normal;font-size:12px;font-weight:700;color:#6b7280}
-.wxp-r{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;border-top:1px solid #f0f1ec}.wxp-r span{color:#6b7280;font-weight:600}.wxp-r b{color:#282932}
-.wxp-ok{font-size:12px;color:#166534;font-weight:700;margin-top:6px}
-.wxp-a{margin-top:8px;padding:9px 10px;border-radius:10px;background:#eff6ff}.wxp.hot .wxp-a{background:#fff7ed}.wxp-a>b{display:block;font-size:13px;color:#1e3a8a}.wxp.hot .wxp-a>b{color:#9a3412}.wxp-a>small{display:block;font-size:11.5px;color:#4b5060;font-weight:600;margin:2px 0 6px}
-.wxp-d{display:flex;gap:6px;align-items:baseline;padding:4px 0;border-top:1px solid rgba(0,0,0,.06);cursor:pointer;font-size:12.5px}.wxp-d b{color:#282932}.wxp-d span{color:#6b7280;font-size:11.5px;font-weight:600}
-.wxp.cold{border-color:#bfdbfe}.wxp.hot{border-color:#fed7aa}
-@media(min-width:1740px){.wxp{position:absolute;right:calc(100% + 22px);top:18px;width:230px;margin:0}}
-@media(max-width:1739px){.wxp{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;padding:9px 14px}.wxp-h{margin:0}.wxp-h b{font-size:17px}.wxp-r{border:none;gap:6px;padding:0}.wxp-ok{margin:0}.wxp-a{flex-basis:100%;margin-top:4px}}
+.wxp{--wx-bg:#fff;background:#fff;border:1px solid #e4e7e0;border-radius:16px;padding:14px 16px;margin-bottom:12px;color:#282932}
+.wxp-top{display:flex;align-items:center;gap:10px}.wxp .wxi{color:#4b5563;flex:none}.wxp-now b{display:block;font-size:30px;font-weight:900;line-height:1;letter-spacing:-.02em}.wxp-now span{display:block;font-size:12px;font-weight:700;color:#6b7280;margin-top:3px}
+.wxp-hl{display:flex;gap:14px;margin-top:10px;font-size:12px;color:#6b7280;font-weight:600}.wxp-hl b{color:#282932;font-weight:800;margin-left:2px}
+.wxp-next{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:12px;padding-top:10px;border-top:1px solid #f0f1ec;text-align:center}.wxp-next small{display:block;font-size:10px;font-weight:700;color:#9a9fa8}.wxp-next .wxi{display:block;margin:3px auto;color:#6b7280}.wxp-next b{font-size:12.5px;font-weight:800}
+.wxp-flag{margin-top:10px}.wxf{display:inline-block;font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px}.wxf.cold{background:#dbeafe;color:#1e40af}.wxf.hot{background:#ffedd5;color:#9a3412}
+.wxp-loc{margin-top:10px;font-size:9.5px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#b6bab0}
+@media(min-width:1740px){.wxp{position:absolute;right:calc(100% + 22px);top:18px;width:200px;margin:0}}
+@media(max-width:1739px){.wxp{display:flex;align-items:center;gap:6px 16px;flex-wrap:wrap;padding:9px 14px;border-radius:12px}.wxp-top{gap:8px}.wxp .wxp-top .wxi{width:24px;height:24px}.wxp-now{display:flex;align-items:baseline;gap:6px}.wxp-now b{font-size:18px}.wxp-now span{margin:0}.wxp-hl{margin:0}.wxp-next,.wxp-loc{display:none}.wxp-flag{margin:0 0 0 auto}}
+
 </style>
 </head>
 <body>
@@ -1437,6 +1437,7 @@ function dogMedicalDue(r){
     var due=last.nextDue||addDaysStr(last.date,90);
     items.push({icon:d[2],label:d[1],due:due});
   });
+  var _seenP={};pl.slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");}).forEach(function(p){var k=String(p.product||p.type||"").split(/[\s\u2014(]/)[0];if(!k||_seenP[k])return;_seenP[k]=1;if(/^(Milpro|Bravecto)$/.test(k)||!p.nextDue)return;items.push({icon:"",label:"Worm/flea ("+k+")",due:p.nextDue});});
   items.forEach(function(it){if(it.booked){it.state="booked";return;}it.state=it.due<today?"overdue":(it.due<=addDaysStr(today,14)?"soon":"upcoming");});
   return items;
 }
@@ -1954,7 +1955,7 @@ function weekItems(){var td=tdISO();var end=addDaysStr(td,6);var out=[];var add=
       if(d.intakeDate&&!fo.out){try{var ii=isolationInfo(d.intakeDate,fin.outcome||"",isoExtraDays(d),pupIsoVax(d,m));if(ii&&ii.state!=="done"&&!ii.awaitVax&&ii.clears)add(ii.clears,"iso",r,"Isolation ends","days",d.kennel?kennelShort(d.kennel):"");}catch(e){}}
     }else if(fin.followUp&&!fin.followUpDone)add(fin.followUp,"follow",r,"Follow-up call","outcome");
   });
-  try{incLoad().forEach(function(x){if(!x||String(x.id||"").indexOf("__")===0)return;var w=x.when||"";var dd=/^\d{4}-\d{2}-\d{2}$/.test(w)?w:w==="tomorrow"?addDaysStr(x.created||td,1):(x.created||td);add(dd,"exp",null,"Expected: "+[x.what,x.from?"from "+x.from:"",x.source].filter(Boolean).join(" · "),"",x.kennel?kennelShort(x.kennel):"");});}catch(e){}
+  try{incLoad().forEach(function(x){if(!x||String(x.id||"").indexOf("__")===0)return;var dd=expDate(x);add(dd,"exp",null,"Expected: "+[x.what,x.from?"from "+x.from:"",x.source].filter(Boolean).join(" · "),"",x.kennel?kennelShort(x.kennel):"");});}catch(e){}
   out.sort(function(a,b){return a.d.localeCompare(b.d)||(a.r&&b.r?kennelCompare((a.r.state.dog||{}).kennel,(b.r.state.dog||{}).kennel):0);});return out;}
 function renderThisWeek(){var e=esc;var td=tdISO();var L=weekItems();var h=pgHead("This week","Everything with a date in the next seven days, across every dog. Today’s list only covers today; this is for planning. Tap a line to open the dog.");
   var by={};L.forEach(function(x){(by[x.d]=by[x.d]||[]).push(x);});
@@ -1965,24 +1966,36 @@ function renderThisWeek(){var e=esc;var td=tdISO();var L=weekItems();var h=pgHea
 
 // 26 · Worming & flea day — one product, many dogs, saved to each Medical tab
 var WF_PRODUCTS=[["Drontal Plus","Drontal Plus — roundworms, tapeworms",90],["Milpro","Milpro — roundworms, hookworms, whipworms, tapeworms",90],["Milbemax","Milbemax — roundworms, tapeworms",90],["Panacur","Panacur — roundworms, hookworms, whipworms",90],["Bravecto","Bravecto Oral — fleas, ticks (3 month)",84],["NexGard","NexGard — fleas, ticks (monthly)",28],["Advocate","Advocate (Bayer) — fleas, roundworms, lungworm",28],["Frontline Combo","Frontline Combo — fleas, ticks",28],["Stronghold","Stronghold — fleas, roundworms",28],["Seresto","Seresto Collar — fleas, ticks (8 month)",240]];
+// The next parasite date that actually matters: latest treatment of each product, then the soonest of those.
+function paraNext(m){var seen={};var out=null;((m||{}).parasiteTreatments||[]).slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");}).forEach(function(p){var k=String(p.product||p.type||"").split(/[\s\u2014(]/)[0];if(!k||seen[k])return;seen[k]=1;if(p.nextDue&&(!out||p.nextDue<out.nextDue))out=p;});return out;}
 function wfProd(){var i=window._wfP==null?0:window._wfP;return WF_PRODUCTS[i]||WF_PRODUCTS[0];}
 function wfLast(r,short){var pl=(((r.state||{}).medical||{}).parasiteTreatments||[]).filter(function(p){return p.date&&(String(p.type||"").indexOf(short)===0||String(p.product||"").indexOf(short)===0);}).sort(function(a,b){return b.date.localeCompare(a.date);});return pl[0]||null;}
 function renderWormDay(){var e=esc;var P=wfProd();var td=tdISO();var L=navList();window._wfOff=window._wfOff||{};
-  var next=window._wfNext||addDaysStr(td,P[2]);
+  var next=window._wfNext||addDaysStr(window._wfDate||td,P[2]);
   var h=pgHead("Worming &amp; flea day","Pick the product, untick anyone who isn’t getting it, and save once. Each dog gets the treatment on its Medical tab with the next date due. Dogs treated with the same product in the last fortnight are left unticked.");
   h+='<div class="card" style="margin-bottom:10px"><div class="lbl" style="margin-bottom:8px">Product</div><div class="cchips">'+WF_PRODUCTS.map(function(p,i){return '<span class="cchip'+(p===P?" on":"")+'" onclick="window._wfP='+i+';window._wfNext=null;window._wfOff={};showDashSection(\'wormday\')">'+e(p[0])+'</span>';}).join("")+'</div>'
-    +'<div class="wf-row"><label>Given on<input type="date" id="wf-date" value="'+e(window._wfDate||td)+'" max="'+td+'" onchange="window._wfDate=this.value"></label><label>Next due<input type="date" id="wf-next" value="'+e(next)+'" onchange="window._wfNext=this.value"></label></div></div>';
+    +'<div class="wf-row"><label>Given on<input type="date" id="wf-date" value="'+e(window._wfDate||td)+'" max="'+td+'" onchange="window._wfDate=this.value;showDashSection(\'wormday\')"></label><label>Next due<input type="date" id="wf-next" value="'+e(next)+'" onchange="window._wfNext=this.value"></label></div></div>';
   if(!L.length)return h+'<div class="card">No dogs in.</div></div>';
   var n=0;h+='<div class="card wf-list">'+L.map(function(r){var last=wfLast(r,P[0]);var recent=last&&daysSince(last.date)<14;var on=window._wfOff[r.id]===undefined?!recent:!window._wfOff[r.id];if(on)n++;var d=(r.state||{}).dog||{};var kg=null;try{var ws=(r.state.weights||[]).filter(function(w){return w.date;}).sort(function(a,b){return a.date.localeCompare(b.date);});kg=ws.length?wiNum(ws[ws.length-1].weight):null;}catch(err){}
     return '<div class="wf-it'+(on?'':' off')+'" onclick="window._wfOff['+r.id+']='+(on?'true':'false')+';showDashSection(\'wormday\')"><span class="ck">'+(on?'✓':'')+'</span><b class="k">'+e(kennelShort(d.kennel||"")||"—")+'</b><div><b>'+e(r.name||d.name||"")+'</b><small>'+(kg!==null?kg+' kg':'not weighed')+(recDob(d)?' · pup':'')+'</small></div><em>'+(last?(recent?'done ':'last ')+e(fmtDMY(last.date).slice(0,5)):'never')+'</em></div>';}).join("")+'</div>';
-  h+='<button class="btn btnp" style="width:100%;padding:11px;font-weight:800;margin-top:10px" onclick="wormDaySave()">Save '+e(P[0])+' for '+n+' dog'+(n===1?'':'s')+'</button>';
+  h+='<button class="btn btnp wf-save" style="width:100%;padding:11px;font-weight:800;margin-top:10px" onclick="wormDaySave()">Save '+e(P[0])+' for '+n+' dog'+(n===1?'':'s')+'</button>';
   return h+'</div>';}
 function recDob(d){return !!(d&&(d.dob||/puppy/i.test(d.age||"")));}
-async function wormDaySave(){var P=wfProd();var td=tdISO();var date=(document.getElementById("wf-date")||{}).value||td;if(date>td)date=td;var next=(document.getElementById("wf-next")||{}).value||"";var recs=[];
-  navList().forEach(function(r){var last=wfLast(r,P[0]);var recent=last&&daysSince(last.date)<14;var on=window._wfOff[r.id]===undefined?!recent:!window._wfOff[r.id];if(!on||!r.state)return;var m=r.state.medical||(r.state.medical=defaultMedical());if(!m.parasiteTreatments)m.parasiteTreatments=[];m.parasiteTreatments.push({type:P[1],product:P[1],date:date,adminBy:currentName(),notes:"Worming & flea day",nextDue:next});recs.push(r);if(S&&S._id&&String(S._id)===String(r.id)){S.medical=JSON.parse(JSON.stringify(m));}});
-  if(!recs.length){miniToast("Nobody ticked");return;}
-  for(var i=0;i<recs.length;i++){try{await saveRecordChange(recs[i]);}catch(e){}}
-  window._wfOff={};window._wfDate="";window._wfNext=null;miniToast(P[0]+" saved for "+recs.length+" dog"+(recs.length===1?"":"s"));showDashSection("wormday");}
+// Change another dog's record safely: read its latest copy from the database, apply the change, write it back.
+async function recPatch(id,apply){if(!supabaseClient)return{ok:false,err:"no connection"};var rec=records.find(function(r){return String(r.id)===String(id);});var st=null;
+  try{var res=await supabaseClient.from("dogs").select("id,data,saved_at").eq("id",id);if(res&&res.error)return{ok:false,err:(res.error.message||"couldn\u2019t read it")};st=res&&res.data&&res.data[0]&&res.data[0].data;}catch(e){return{ok:false,err:"no connection"};}
+  if(!st)return{ok:false,err:"not found"};try{apply(st);}catch(e){return{ok:false,err:e.message};}st._savedBy=currentName();var now=new Date().toISOString();
+  var up=null;try{up=await supabaseClient.from("dogs").update({data:st,saved_at:now}).eq("id",id);}catch(e){return{ok:false,err:"no connection"};}if(up&&up.error)return{ok:false,err:(up.error.message||"couldn\u2019t save")};
+  if(rec){rec.state=st;rec.savedAt=now;rec.savedBy=currentName();}if(S&&String(S._id)===String(id)){try{apply(S);window._mrAt=now;}catch(e){}}try{cacheRecordsList();}catch(e){}return{ok:true};}
+async function wormDaySave(){if(window._wfBusy)return;var P=wfProd();var td=tdISO();var date=(document.getElementById("wf-date")||{}).value||td;if(date>td)date=td;var next=(document.getElementById("wf-next")||{}).value||"";var pick=[];
+  navList().forEach(function(r){var last=wfLast(r,P[0]);var recent=last&&daysSince(last.date)<14;var on=window._wfOff[r.id]===undefined?!recent:!window._wfOff[r.id];if(on)pick.push(r);});
+  if(!pick.length){miniToast("Nobody ticked");return;}
+  window._wfBusy=true;var btn=document.querySelector(".wf-save");if(btn){btn.disabled=true;btn.textContent="Saving\u2026";}var ok=0,fail=[];
+  for(var i=0;i<pick.length;i++){var r=pick[i];var entry={type:P[1],product:P[1],date:date,adminBy:currentName(),notes:"Worming & flea day",nextDue:next};
+    var res=await recPatch(r.id,function(st){var m=st.medical||(st.medical=defaultMedical());if(!m.parasiteTreatments)m.parasiteTreatments=[];if(m.parasiteTreatments.some(function(p){return p.date===entry.date&&p.type===entry.type;}))return;m.parasiteTreatments.push(Object.assign({},entry));});
+    if(res.ok)ok++;else fail.push((r.name||"a dog")+" ("+res.err+")");}
+  window._wfBusy=false;window._wfOff={};window._wfDate="";window._wfNext=null;
+  if(ok)miniToast(P[0]+" saved for "+ok+" dog"+(ok===1?"":"s"));if(fail.length)appAlert("Not saved for: "+fail.join(", ")+". Try those again when you\u2019ve signal.");showDashSection("wormday");}
 
 // 30 · Tidy up — the gaps that make records and The month wrong
 function tidyChecks(){var td=tdISO();var C=[
@@ -2047,7 +2060,7 @@ function palsHtml(){var e=esc;var L=palsFor(S._id);window._palAdd=window._palAdd
     h+='<div class="pal-add"><select id="pal-dog"><option value="">Which dog?</option>'+others.map(function(r){return '<option value="'+r.id+'">'+e((r.name||"")+(((r.state||{}).dog||{}).kennel?" · "+kennelShort(r.state.dog.kennel):""))+'</option>';}).join("")+'</select><input id="pal-note" type="text" placeholder="e.g. shared run C3, walked together"><div class="pal-btns"><button class="btn btnp" onclick="palAdd(\'ok\')">Gets on</button><button class="btn" style="color:#991b1b" onclick="palAdd(\'apart\')">Keep apart</button></div></div>';}
   return h+'</div>';}
 function palAdd(kind){var id=(document.getElementById("pal-dog")||{}).value;if(!id){miniToast("Pick a dog first");return;}var note=((document.getElementById("pal-note")||{}).value||"").trim();if(!S.pals)S.pals=[];S.pals.push({id:id,kind:kind,note:note,by:currentName(),date:tdISO()});window._palAdd=false;saveRecord();renderMain();miniToast(kind==="apart"?"Marked keep apart":"Linked");}
-async function palRemove(otherId,own,i){if(own){(S.pals||[]).splice(i,1);saveRecord();renderMain();return;}var o=records.find(function(r){return String(r.id)===String(otherId);});if(!o||!o.state||!o.state.pals)return;o.state.pals.splice(i,1);try{await saveRecordChange(o);}catch(e){}renderMain();}
+async function palRemove(otherId,own,i){if(own){(S.pals||[]).splice(i,1);saveRecord();renderMain();return;}var me=String(S._id);var res=await recPatch(otherId,function(st){st.pals=(st.pals||[]).filter(function(p){return String(p.id)!==me;});});if(!res.ok)appAlert("Couldn\u2019t remove the link: "+res.err);renderMain();}
 function palsOverviewHtml(){var L=palsFor(S._id);if(!L.length)return "";var ok=L.filter(function(x){return x.kind!=="apart";}),ap=L.filter(function(x){return x.kind==="apart";});var nm=function(x){return esc(x.r.name||"Dog");};
   return (ok.length?'<div class="ovkv"><span>Gets on with</span><b class="g">'+ok.map(nm).join(", ")+'</b></div>':'')+(ap.length?'<div class="ovkv"><span>Keep apart</span><b style="color:#b91c1c">'+ap.map(nm).join(", ")+'</b></div>':'');}
 
@@ -2066,26 +2079,37 @@ function recentHide(){var b=document.getElementById("recent-pop");if(b)b.style.d
 var WX_CODES=[[0,"Clear"],[1,"Mostly clear"],[2,"Partly cloudy"],[3,"Cloudy"],[45,"Fog"],[48,"Fog"],[51,"Drizzle"],[53,"Drizzle"],[55,"Drizzle"],[56,"Freezing drizzle"],[57,"Freezing drizzle"],[61,"Light rain"],[63,"Rain"],[65,"Heavy rain"],[66,"Freezing rain"],[67,"Freezing rain"],[71,"Light snow"],[73,"Snow"],[75,"Heavy snow"],[77,"Snow"],[80,"Showers"],[81,"Showers"],[82,"Heavy showers"],[85,"Snow showers"],[86,"Snow showers"],[95,"Thunder"],[96,"Thunder"],[99,"Thunder"]];
 function wxWord(c){var f=WX_CODES.filter(function(x){return x[0]===c;})[0];return f?f[1]:"";}
 function wxDeg(v){return String(Math.round(v)).replace("-","−")+" °C";}
-function wxGet(){var c=null;try{c=JSON.parse(localStorage.getItem("nspca-wx2")||"null");}catch(e){}
+// Small line icons for the weather (no emoji): sun, moon, cloud, rain, snow, fog, thunder.
+function wxIcon(code,night,sz){sz=sz||28;var s='<svg class="wxi" viewBox="0 0 32 32" width="'+sz+'" height="'+sz+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
+  var sun='<circle cx="16" cy="16" r="5.5"/><path d="M16 3.5v3M16 25.5v3M3.5 16h3M25.5 16h3M7.2 7.2l2.1 2.1M22.7 22.7l2.1 2.1M7.2 24.8l2.1-2.1M22.7 9.3l2.1-2.1"/>';
+  var moon='<path d="M21.5 20.5A9 9 0 0 1 12.2 7a9.5 9.5 0 1 0 12.3 12.3 9 9 0 0 1-3 1.2z"/>';
+  var cloud='<path d="M9.5 24h13a5 5 0 0 0 .6-9.96A7 7 0 0 0 9.6 15.1 4.5 4.5 0 0 0 9.5 24z"/>';
+  var small='<g transform="translate(-3 -4) scale(.85)">'+(night?moon:sun)+'</g>';
+  var c=code==null?3:code;var body;
+  if(c===0)body=night?moon:sun;else if(c<=2)body=small+'<path d="M12.5 26h11a4.2 4.2 0 0 0 .5-8.4 5.9 5.9 0 0 0-11.3 1A3.8 3.8 0 0 0 12.5 26z" fill="var(--wx-bg,#fff)"/>';
+  else if(c===3)body=cloud;else if(c===45||c===48)body='<path d="M6 12h20M4 17h24M7 22h18"/>';
+  else if((c>=71&&c<=77)||c===85||c===86)body='<path d="M9.5 19h13a4.6 4.6 0 0 0 .5-9.2A6.4 6.4 0 0 0 10.6 11 4.1 4.1 0 0 0 9.5 19z"/><path d="M11 24v.1M16 26v.1M21 24v.1M13.5 29v.1M18.5 29v.1"/>';
+  else if(c>=95)body='<path d="M9.5 19h13a4.6 4.6 0 0 0 .5-9.2A6.4 6.4 0 0 0 10.6 11 4.1 4.1 0 0 0 9.5 19z"/><path d="M16.5 20l-3 5h4l-2.5 5"/>';
+  else body='<path d="M9.5 19h13a4.6 4.6 0 0 0 .5-9.2A6.4 6.4 0 0 0 10.6 11 4.1 4.1 0 0 0 9.5 19z"/><path d="M11 23l-1.5 4M16 23l-1.5 4M21 23l-1.5 4"/>';
+  return s+body+'</svg>';}
+function wxNight(h){return h<7||h>=19;}
+function wxGet(){var c=null;try{c=JSON.parse(localStorage.getItem("nspca-wx3")||"null");}catch(e){}
   var fresh=c&&c.at&&Date.now()-c.at<3600e3;
-  if(!fresh&&!window._wxBusy&&navigator.onLine!==false){window._wxBusy=true;try{fetch("https://api.open-meteo.com/v1/forecast?latitude=53.73&longitude=-7.80&current=temperature_2m,weather_code&hourly=temperature_2m&forecast_days=2&timezone=Europe%2FDublin").then(function(r){return r.json();}).then(function(j){var H=j&&j.hourly;if(!H||!H.time)return;var now=new Date();var pad=function(n){return String(n).padStart(2,"0");};var key=now.getFullYear()+"-"+pad(now.getMonth()+1)+"-"+pad(now.getDate())+"T"+pad(now.getHours());
-      var i0=H.time.findIndex(function(t){return t.slice(0,13)>=key;});if(i0<0)i0=0;var T=H.temperature_2m;var td=H.time[i0].slice(0,10);
-      // the rest of today's daylight (to 9pm), or tomorrow's if it's already evening
-      var day=[];for(var i=i0;i<H.time.length;i++){var hh=parseInt(H.time[i].slice(11,13),10);var dd=H.time[i].slice(0,10);if(dd===td&&hh>=9&&hh<=20)day.push(T[i]);}
-      if(day.length<3)for(var k=0;k<H.time.length;k++){var hh2=parseInt(H.time[k].slice(11,13),10);if(H.time[k].slice(0,10)>td&&hh2>=9&&hh2<=20)day.push(T[k]);}
-      // tonight: from now until 9am tomorrow
+  if(!fresh&&!window._wxBusy&&navigator.onLine!==false){window._wxBusy=true;try{fetch("https://api.open-meteo.com/v1/forecast?latitude=53.73&longitude=-7.80&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&forecast_days=2&timezone=Europe%2FDublin").then(function(r){return r.json();}).then(function(j){var H=j&&j.hourly;if(!H||!H.time)return;var now=new Date();var pad=function(n){return String(n).padStart(2,"0");};var key=now.getFullYear()+"-"+pad(now.getMonth()+1)+"-"+pad(now.getDate())+"T"+pad(now.getHours());
+      var i0=H.time.findIndex(function(t){return t.slice(0,13)>=key;});if(i0<0)i0=0;var T=H.temperature_2m,W=H.weather_code||[];var td=H.time[i0].slice(0,10);
+      var day=[];for(var i=i0;i<H.time.length;i++){var hh=parseInt(H.time[i].slice(11,13),10);if(H.time[i].slice(0,10)===td&&hh>=9&&hh<=20)day.push(T[i]);}
+      var dayTom=false;if(day.length<3){day=[];dayTom=true;for(var k=0;k<H.time.length;k++){var hh2=parseInt(H.time[k].slice(11,13),10);if(H.time[k].slice(0,10)>td&&hh2>=9&&hh2<=20)day.push(T[k]);}}
       var night=[];for(var n=i0;n<H.time.length;n++){var t=H.time[n];if(t.slice(0,10)>td&&parseInt(t.slice(11,13),10)>9)break;night.push(T[n]);}
-      var cur=j.current||{};var c2={at:Date.now(),d:tdISO(),now:cur.temperature_2m!=null?cur.temperature_2m:T[i0],code:cur.weather_code,max:Math.round(Math.max.apply(null,day.length?day:[T[i0]])),min:Math.round(Math.min.apply(null,night.length?night:[T[i0]])),dayLbl:new Date().getHours()>=20?"tomorrow":"today"};
-      try{localStorage.setItem("nspca-wx2",JSON.stringify(c2));}catch(e){}var ds=document.getElementById("dashboard-screen");if(ds&&ds.style.display!=="none"&&!window._dashSection)renderDashboard();}).catch(function(){}).then(function(){window._wxBusy=false;});}catch(e){window._wxBusy=false;}}
+      var next=[];for(var q=1;q<=4;q++){var ix=i0+q*3;if(ix<H.time.length)next.push({h:parseInt(H.time[ix].slice(11,13),10),t:Math.round(T[ix]),c:W[ix]});}
+      var cur=j.current||{};var c2={at:Date.now(),d:tdISO(),now:cur.temperature_2m!=null?cur.temperature_2m:T[i0],code:cur.weather_code!=null?cur.weather_code:W[i0],max:Math.round(Math.max.apply(null,day.length?day:[T[i0]])),min:Math.round(Math.min.apply(null,night.length?night:[T[i0]])),dayLbl:dayTom?"tomorrow":"today",next:next};
+      try{localStorage.setItem("nspca-wx3",JSON.stringify(c2));}catch(e){}var ds=document.getElementById("dashboard-screen");if(ds&&ds.style.display!=="none"&&!window._dashSection)renderDashboard();}).catch(function(){}).then(function(){window._wxBusy=false;});}catch(e){window._wxBusy=false;}}
   return c;}
-function wxPanelHtml(active){var wx=wxGet();if(!wx)return "";var e=esc;var hot=wx.max>=WX_HOT,cold=wx.min<=WX_COLD;var L=[];
-  (active||[]).forEach(function(r){if(((r.state||{}).foster||{}).out)return;if(hot){var w=wxRisks(r,true);if(w.length)L.push({r:r,w:w});}else if(cold){var c=wxRisks(r,false);if(c.length)L.push({r:r,w:c});}});
-  var alert=(hot||cold)&&L.length;
-  var h='<div class="wxp'+(alert?(hot?' hot':' cold'):'')+'"><div class="wxp-h"><span>Longford</span><b>'+wxDeg(wx.now)+'</b><em>'+e(wxWord(wx.code))+'</em></div>'
-    +'<div class="wxp-r"><span>'+(wx.dayLbl==="tomorrow"?"Tomorrow":"Today")+' up to</span><b>'+wxDeg(wx.max)+'</b></div><div class="wxp-r"><span>Tonight down to</span><b>'+wxDeg(wx.min)+'</b></div>';
-  if(alert)h+='<div class="wxp-a"><b>'+(hot?'Hot '+(wx.dayLbl==="tomorrow"?'tomorrow':'today'):'Frost tonight')+'</b><small>'+(hot?'Shade and water, no runs 12–4.':'Extra bedding, coats on, close up early.')+'</small>'+L.map(function(x){return '<div class="wxp-d" onclick="openDog('+x.r.id+')"><b>'+e(x.r.name||"Dog")+'</b><span>'+e(x.w.join(", "))+'</span></div>';}).join("")+'</div>';
-  else h+='<div class="wxp-ok">'+(hot||cold?'No dogs here at risk from it.':'Nothing to watch for.')+'</div>';
-  return h+'</div>';}
+function wxPanelHtml(){var wx=wxGet();if(!wx)return "";var e=esc;var hr=new Date().getHours();var deg=function(v){return String(Math.round(v)).replace("-","−")+"°";};
+  var flag=wx.min<=WX_COLD?'<span class="wxf cold">Frost tonight</span>':wx.max>=WX_HOT?'<span class="wxf hot">Hot '+(wx.dayLbl==="tomorrow"?"tomorrow":"today")+'</span>':'';
+  return '<div class="wxp" title="Longford forecast, updated hourly"><div class="wxp-top">'+wxIcon(wx.code,wxNight(hr),34)+'<div class="wxp-now"><b>'+deg(wx.now)+'</b><span>'+e(wxWord(wx.code)||"Longford")+'</span></div></div>'
+    +'<div class="wxp-hl"><span>'+(wx.dayLbl==="tomorrow"?"Tomorrow":"High")+' <b>'+deg(wx.max)+'</b></span><span>Tonight <b>'+deg(wx.min)+'</b></span></div>'
+    +(wx.next&&wx.next.length?'<div class="wxp-next">'+wx.next.map(function(x){return '<div><small>'+String(x.h).padStart(2,"0")+':00</small>'+wxIcon(x.c,wxNight(x.h),20)+'<b>'+deg(x.t)+'</b></div>';}).join("")+'</div>':'')
+    +(flag?'<div class="wxp-flag">'+flag+'</div>':'')+'<div class="wxp-loc">Longford</div></div>';}
 
 var WX_HOT=24,WX_COLD=0;
 function wxLastBcs(st){var l=(st.bcsLog||[]).slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");});var v=l.length?parseInt(l[l.length-1].score):parseInt(String((st.medical||{}).bcs||""));return isNaN(v)?null:v;}
@@ -2093,7 +2117,7 @@ function wxRisks(r,hot){var st=r.state||{};var d=st.dog||{};var why=[];var fl=(B
   if(hot){if(/br/.test(fl))why.push("short-nosed");if(bcs!==null&&bcs>=7)why.push("overweight");if(yrs!==null&&yrs>=9)why.push(yrs+" yrs");if(pup)why.push("pup");}
   else{if(bcs!==null&&bcs<=3)why.push("thin, BCS "+bcs);if(/greyhound|lurcher|whippet|saluki|chihuahua|italian/i.test((d.breed||"")+" "+(d.breed2||"")))why.push("thin coat");if(yrs!==null&&yrs>=9)why.push(yrs+" yrs");if(pup)why.push("pup");}
   return why;}
-function wxNotify(wx,active){try{if(!wx||typeof famNotify!=="function"||!supabaseClient)return;var hr=new Date().getHours();if(hr<7||hr>=21)return;var td=tdISO();if(localStorage.getItem("nspca-wx-sent")===td)return;
+function wxNotify(wx,active){try{if(!wx||typeof famNotify!=="function"||!supabaseClient)return;if(wx.d!==tdISO()||!wx.at||Date.now()-wx.at>3*3600e3)return;var hr=new Date().getHours();if(hr<7||hr>=21)return;var td=tdISO();if(localStorage.getItem("nspca-wx-sent")===td)return;
   var hot=wx.max>=WX_HOT,cold=wx.min<=WX_COLD;if(!hot&&!cold)return;var L=[];active.forEach(function(r){if(((r.state||{}).foster||{}).out)return;var w=wxRisks(r,hot);if(w.length)L.push((r.name||"Dog")+" ("+w.join(", ")+")");});if(!L.length)return;
   localStorage.setItem("nspca-wx-sent",td);
   Promise.resolve(supabaseClient.from("incoming").select("id,data").eq("id","__wx_sent")).then(function(res){var row=res&&res.data&&res.data[0];if(row&&row.data&&row.data.d===td)return;
@@ -2110,32 +2134,34 @@ function caseSet(k,v){window._cs[k]=window._cs[k]===v&&k!=="date"?"":v;showDashS
 function renderCaseIntake(){var e=esc;var C=window._cs;if(!C){caseOpen();return "";}var free=caseFree();var used={};C.dogs.forEach(function(x){if(x.kennel)used[x.kennel]=(used[x.kennel]||0)+1;});
   var src=[["NSPCA Inspector","Inspector"],["Dog warden","Dog warden"],["Garda","Garda"],["Owner","Owner"],["Member of the public","Public"],["Transfer","Transfer"],["Other","Other"]];
   var h=pgHead("Several from one case","A seizure or a litter often brings dogs in together. Fill in who brought them, when and why once; then give each dog a name and a kennel. Every record starts with those details, and the dogs stay linked.");
-  var fp=null;try{fp=fairPhase(C.date);}catch(err){}
+  var fp=null;try{fp=fairPhase(C.date);}catch(err){}window._csFair=fp?fp.label:"";
   h+='<div class="card cs-card"><div class="lbl">Shared \u00b7 filled in once</div>'
     +'<div class="cq"><label>Brought in by</label><div class="cchips">'+src.map(function(o){return '<span class="cchip'+(C.by===o[0]?" on":"")+'" onclick="caseSet(\'by\',\''+o[0]+'\')">'+o[1]+'</span>';}).join("")+'</div></div>'
     +(C.by==="NSPCA Inspector"?'<div class="cs-two"><label>Inspector<select onchange="window._cs.inspector=this.value">'+inspectorOpts(C.inspector).map(function(o){return '<option value="'+e(o[0])+'"'+(o[0]===C.inspector?' selected':'')+'>'+e(o[1])+'</option>';}).join("")+'</select></label><label>Case ref<input value="'+e(C.ref)+'" placeholder="e.g. 26-0412" oninput="window._cs.ref=this.value"></label></div>':'<div class="cs-two"><label>Ref (optional)<input value="'+e(C.ref)+'" placeholder="warden sheet no., Garda ref\u2026" oninput="window._cs.ref=this.value"></label></div>')
     +'<div class="cq"><label>Why</label><div class="cchips">'+DT_REASONS.map(function(o){return '<span class="cchip'+(C.why===o[0]?" on":"")+'" onclick="caseSet(\'why\',\''+o[0].replace(/'/g,"\\'")+'\')">'+e(o[1])+'</span>';}).join("")+'</div></div>'
-    +(fp&&fp.phase!=="before"?'<div class="cq"><label>Seized at</label><div class="cchips"><span class="cchip'+(C.event===fp.label?" on":"")+'" onclick="caseSet(\'event\',\''+e(fp.label)+'\')">'+e(fp.label)+'</span></div></div>':'')
+    +(fp&&fp.phase!=="before"?'<div class="cq"><label>Seized at</label><div class="cchips"><span class="cchip'+(C.event===fp.label?" on":"")+'" onclick="caseSet(\'event\',window._csFair)">'+e(fp.label)+'</span></div></div>':'')
     +'<div class="cs-two"><label>Came in on<input type="date" value="'+e(C.date)+'" max="'+tdISO()+'" onchange="window._cs.date=this.value;showDashSection(\'caseintake\')"></label></div></div>';
   h+='<div class="card cs-card"><div class="lbl">The dogs <em style="font-style:normal;letter-spacing:0;text-transform:none;font-weight:600;color:#9a9fa8">\u2014 '+free.length+' kennel'+(free.length===1?'':'s')+' free</em></div>'
     +C.dogs.map(function(x,i){return '<div class="cs-dog"><b>'+(i+1)+'</b><input value="'+e(x.name)+'" placeholder="Name, or leave blank" oninput="window._cs.dogs['+i+'].name=this.value"><select onchange="window._cs.dogs['+i+'].kennel=this.value;showDashSection(\'caseintake\')"><option value="">Kennel\u2026</option>'+free.map(function(k){return '<option value="'+e(k)+'"'+(x.kennel===k?' selected':'')+(used[k]&&x.kennel!==k?' disabled':'')+'>'+e(kennelShort(k))+'</option>';}).join("")+'</select>'+(C.dogs.length>1?'<u role="button" tabindex="0" onclick="window._cs.dogs.splice('+i+',1);showDashSection(\'caseintake\')">\u00d7</u>':'<i></i>')+'</div>';}).join("")
     +'<div class="cs-more" onclick="window._cs.dogs.push({name:\'\',kennel:\'\'});showDashSection(\'caseintake\')">+ another dog</div></div>';
-  var n=C.dogs.length;h+='<button class="btn btnp" style="width:100%;padding:11px;font-weight:800;margin-top:10px" onclick="caseStart()">Start all '+n+'</button><div class="rxsub" style="text-align:center;margin-top:6px">'+n+' record'+(n===1?'':'s')+(C.ref?', linked by '+e(C.ref):', linked together')+'. Breed, sex and the rest go on each Dog tab after.</div>';
+  var n=C.dogs.length;h+='<button class="btn btnp cs-start" style="width:100%;padding:11px;font-weight:800;margin-top:10px" onclick="caseStart()">Start all '+n+'</button><div class="rxsub" style="text-align:center;margin-top:6px">'+n+' record'+(n===1?'':'s')+(C.ref?', linked by '+e(C.ref):', linked together')+'. Breed, sex and the rest go on each Dog tab after.</div>';
   return h+'</div>';}
-async function caseStart(){var C=window._cs;if(!C)return;if(!supabaseClient||navigator.onLine===false){appAlert("Starting several dogs at once needs a connection. Try again when you\u2019ve signal, or add them one at a time.");return;}
+async function caseStart(){var C=window._cs;if(!C||window._csBusy)return;if(!supabaseClient||navigator.onLine===false){appAlert("Starting several dogs at once needs a connection. Try again when you\u2019ve signal, or add them one at a time.");return;}
   if(C.by==="NSPCA Inspector"&&!C.inspector){appAlert("Pick the inspector first.");return;}
-  var grp="cg"+Date.now().toString(36);var td=tdISO();var made=[];var unnamed=0;
+  window._csBusy=true;var _b=document.querySelector(".cs-start");if(_b){_b.disabled=true;_b.textContent="Starting\u2026";}
+  var grp=C.grp||("cg"+Date.now().toString(36));C.grp=grp;var td=tdISO();var made=[];var madeNames=[];var unnamed=0;var left=[];
   for(var i=0;i<C.dogs.length;i++){var x=C.dogs[i];var st=defaultState();var d=st.dog;var nm=(x.name||"").trim();if(!nm){unnamed++;nm=(C.ref?"Case "+C.ref:"Unnamed")+" #"+(i+1);}
-    d.name=nm;d.kennel=x.kennel||"";d.broughtInBy=C.by;d.intakeReason=C.why||"";d.intakeDate=C.date||td;d.caseGroup=grp;if(C.event)d.event=C.event;
+    d.name=nm;d.kennel=x.kennel||"";d.arrivalNotified=td;d.broughtInBy=C.by;d.intakeReason=C.why||"";d.intakeDate=C.date||td;d.caseGroup=grp;if(C.event)d.event=C.event;
     if(C.by==="NSPCA Inspector"){d.inspector=C.inspector;d.inspectorRef=C.ref||"";}else if(C.ref)d.caseRef=C.ref;
     var stc=JSON.parse(JSON.stringify(st));stc._savedBy=currentName();
     var row={name:nm,breed:"",ref_no:"",intake_date:d.intakeDate,assessor:"",score:0,traffic_light:"",saved_at:new Date().toISOString(),data:stc};
-    try{var res=await supabaseClient.from("dogs").insert([row],"id");if(res&&res.error)throw res.error;var id=res.data&&res.data[0]&&res.data[0].id;if(id){syncLocalRecord(id,row);made.push(id);}}catch(err){console.error("caseStart",err);}}
-  window._cs=null;
-  if(!made.length){appAlert("Couldn\u2019t start the dogs \u2014 nothing was saved. Check the connection and try again.");return;}
-  try{if(typeof famNotify==="function")famNotify("arrival",made.length+" new dogs \u00b7 "+(C.ref?"case "+C.ref:"one case"),C.dogs.map(function(x){return x.name;}).filter(Boolean).join(", ")||"names to follow");}catch(_n){}
+    var okId=null;try{var res=await supabaseClient.from("dogs").insert([row],"id");if(res&&res.error)throw res.error;okId=res.data&&res.data[0]&&res.data[0].id;if(okId){syncLocalRecord(okId,row);made.push(okId);madeNames.push(nm);}}catch(err){console.error("caseStart",err);}if(!okId)left.push(x);}
+  window._csBusy=false;
+  if(left.length){C.dogs=left;appAlert((made.length?made.length+" started, but ":"")+left.length+" didn\u2019t save \u2014 they\u2019re still on this page. Check the connection and tap Start again.");showDashSection("caseintake");if(!made.length)return;}
+  else window._cs=null;
+  try{if(typeof famNotify==="function")famNotify("arrival",(made.length===1?"New dog":made.length+" new dogs")+" \u00b7 "+(C.ref?"case "+C.ref:"one case"),madeNames.join(", "));}catch(_n){}
   miniToast(made.length+" dog"+(made.length===1?"":"s")+" started"+(unnamed?" \u2014 name "+(unnamed===1?"one":"them")+" on the Dog tab":""));
-  window._dashSection=null;renderDashboard();}
+  if(!left.length){window._dashSection=null;renderDashboard();}}
 function caseMates(st){var d=(st||S||{}).dog||{};var me=S&&S._id;var ref=String(d.inspectorRef||d.caseRef||"").trim().toLowerCase();if(!d.caseGroup&&!ref)return[];
   return records.filter(function(r){if(String(r.id)===String(me))return false;var o=(r.state||{}).dog||{};return (d.caseGroup&&o.caseGroup===d.caseGroup)||(ref&&String(o.inspectorRef||o.caseRef||"").trim().toLowerCase()===ref);});}
 function caseMatesHtml(){var L=caseMates(S);if(!L.length)return "";var d=S.dog||{};
@@ -2145,9 +2171,10 @@ function caseMatesHtml(){var L=caseMates(S);if(!L.length)return "";var d=S.dog||
 function chipScanOK(){return typeof window.BarcodeDetector==="function"&&!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);}
 async function chipScan(){if(!chipScanOK())return;var ov=document.createElement("div");ov.id="chip-scan";ov.innerHTML='<video playsinline muted></video><div class="cs-frame"></div><div class="cs-msg">Point at the chip sticker\u2019s barcode</div><button class="btn" onclick="chipScanStop()">Cancel</button>';document.body.appendChild(ov);
   var v=ov.querySelector("video");var stream=null;try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"},audio:false});}catch(e){chipScanStop();appAlert("The camera didn\u2019t open. Check the app is allowed to use the camera, or type the number.");return;}
+  if(!document.getElementById("chip-scan")){try{stream.getTracks().forEach(function(t){t.stop();});}catch(e){}return;}
   window._chipStream=stream;v.srcObject=stream;try{var _pp=v.play();if(_pp&&_pp.catch)_pp.catch(function(){});}catch(e){}
   var det;try{det=new BarcodeDetector({formats:["code_128","code_39","ean_13","itf","codabar","data_matrix","qr_code"]});}catch(e){det=new BarcodeDetector();}
-  var tries=0;var tick=async function(){if(!document.getElementById("chip-scan"))return;tries++;try{var found=await det.detect(v);for(var i=0;i<found.length;i++){var raw=String(found[i].rawValue||"");var m=raw.replace(/\D/g,"").match(/\d{15}/);if(m){chipScanDone(m[0]);return;}}}catch(e){}
+  var tries=0;var tick=async function(){if(!document.getElementById("chip-scan"))return;tries++;try{var found=await det.detect(v);for(var i=0;i<found.length;i++){var raw=String(found[i].rawValue||"").trim();var m=raw.match(/(?:^|\D)(\d{15})(?!\d)/)||raw.replace(/[\s-]/g,"").match(/^(\d{15})$/);if(m){chipScanDone(m[1]);return;}}}catch(e){}
     if(tries===80){var msg=ov.querySelector(".cs-msg");if(msg)msg.textContent="Still looking \u2014 hold it flat, closer, in good light";}setTimeout(tick,220);};tick();}
 function chipScanStop(){try{(window._chipStream&&window._chipStream.getTracks()||[]).forEach(function(t){t.stop();});}catch(e){}window._chipStream=null;var o=document.getElementById("chip-scan");if(o)o.remove();}
 function chipScanDone(num){chipScanStop();if(!S.dog)S.dog={};S.dog.microchip=num;try{if(navigator.vibrate)navigator.vibrate(60);}catch(e){}persistSave();debouncedSave();renderMain();try{checkMicrochip(num);}catch(e){}miniToast("Chip read \u00b7 "+num);}
@@ -2162,11 +2189,14 @@ window._pq=[];
 async function pqRefresh(){window._pq=await pqAll();return window._pq;}
 function pqFor(id){return (window._pq||[]).filter(function(x){return String(x.dog_id)===String(id);});}
 async function pqQueue(dogId,data){var item={k:"pq"+Date.now()+Math.floor(Math.random()*1e4),dog_id:dogId,date:tdISO(),data:data,by:currentName(),at:new Date().toISOString()};try{await pqPut(item);}catch(e){appAlert("No signal, and this phone couldn\u2019t hold the photo for later. Try again when you\u2019re back online.");return false;}await pqRefresh();return true;}
-async function pqFlush(){if(window._pqBusy||!supabaseClient||navigator.onLine===false)return;window._pqBusy=true;var sent=0;
-  try{var L=await pqRefresh();for(var i=0;i<L.length;i++){var x=L[i];var ps=_photoStore[x.dog_id];var star=Array.isArray(ps)?!ps.some(function(p){return p.star;}):false;
-      var res=null;try{res=await supabaseClient.from("dog_photos").insert({dog_id:x.dog_id,date:x.date,note:"",star:star,data:x.data},PHOTO_COLS);}catch(e){res=null;}
-      if(!res||res.error||!res.data)break;
-      await pqDel(x.k);sent++;if(Array.isArray(ps)){ps.push(res.data[0]);if(star){try{await setStarThumb(ps);}catch(e){}}}}
+async function pqFlush(){if(window._pqBusy||!supabaseClient||navigator.onLine===false)return;window._pqBusy=true;var sent=0;var net=function(m){return navigator.onLine===false||/fetch|network|load failed|timeout/i.test(String(m||""));};
+  try{var L=await pqRefresh();for(var i=0;i<L.length;i++){var x=L[i];
+      var hasStar=false;try{var q=await supabaseClient.from("dog_photos").select("id").eq("dog_id",x.dog_id).eq("star",true).limit(1);if(q&&q.error){if(net(q.error.message)||!q.error.code)break;}hasStar=!!(q&&q.data&&q.data.length);}catch(e){break;}
+      var res=null;try{res=await supabaseClient.from("dog_photos").insert({dog_id:x.dog_id,date:x.date,note:"",star:!hasStar,data:x.data},PHOTO_COLS);}catch(e){break;}
+      if(!res||res.error||!res.data){var m=res&&res.error&&res.error.message;if(!res||net(m)||!(res.error&&res.error.code))break;await pqDel(x.k);continue;}
+      await pqDel(x.k);sent++;var ps=_photoStore[x.dog_id];if(Array.isArray(ps))ps.push(res.data[0]);
+      if(!hasStar){if(S&&String(S._id)===String(x.dog_id)&&Array.isArray(ps)){try{await setStarThumb(ps);saveRecord();}catch(e){}}
+        else{try{var th=await thumbOf(x.data);if(th)await recPatch(x.dog_id,function(st){st.dog=st.dog||{};st.dog.photo=th;st.dog.thumbV=2;});}catch(e){}}}}
     await pqRefresh();}finally{window._pqBusy=false;}
   if(sent){miniToast(sent+" photo"+(sent===1?"":"s")+" uploaded");try{if(S&&S.tab==="photos")renderMain();}catch(e){}}}
 window.addEventListener("online",function(){setTimeout(pqFlush,1500);});
@@ -2183,11 +2213,14 @@ function vidFmt(s){s=Math.round(s||0);return Math.floor(s/60)+":"+String(s%60).p
 async function vidUpload(){var P=window._vidPend;if(!P)return;if(!P.label){miniToast("Pick what it shows");return;}if(!supabaseClient||navigator.onLine===false){appAlert("Videos need a connection to upload. Try again when you\u2019ve signal.");return;}
   if(!S._id){await saveRecord();if(!S._id){appAlert("Save the dog\u2019s name first, then add the video.");return;}}
   var ext=(String(P.file.name||"").match(/\.(\w{2,4})$/)||[,"mp4"])[1].toLowerCase();var path=safeSeg(S._id)+"/video-"+Date.now()+"."+ext;
-  P.busy=true;renderMain();
+  P.busy=true;renderMain();var forId=S._id;
   try{await storageUpload(path,P.file);}catch(e){P.busy=false;renderMain();appAlert("The video didn\u2019t upload: "+((e&&e.message)||"unknown error")+". If it says the file is too large, the size limit on the dog-files bucket in Supabase needs raising.");return;}
-  S.videos=S.videos||[];S.videos.unshift({storage:path,mime:P.file.type||"video/mp4",label:P.label,note:P.note||"",dur:Math.round(P.dur||0),size:P.file.size,date:tdISO(),by:currentName()});window._vidPend=null;saveRecord();renderMain();miniToast("Video added");}
+  var vEntry={storage:path,mime:P.file.type||"video/mp4",label:P.label,note:P.note||"",dur:Math.round(P.dur||0),size:P.file.size,date:tdISO(),by:currentName()};if(window._vidPend===P)window._vidPend=null;
+  if(S&&String(S._id)===String(forId)){S.videos=S.videos||[];S.videos.unshift(vEntry);saveRecord();renderMain();miniToast("Video added");}
+  else{var res=await recPatch(forId,function(st){st.videos=st.videos||[];if(!st.videos.some(function(v){return v.storage===vEntry.storage;}))st.videos.unshift(vEntry);});miniToast(res.ok?"Video added to the dog you were on":"The video uploaded but didn\u2019t attach: "+res.err);try{renderMain();}catch(e){}}}
 function vidDelete(i){appConfirm("Remove this video?",function(){var v=(S.videos||[])[i];if(!v)return;try{storageDelete(v.storage);}catch(e){}S.videos.splice(i,1);saveRecord();renderMain();},{danger:true});}
-function vidPlay(i){var v=(S.videos||[])[i];if(!v)return;var o=document.createElement("div");o.id="vid-play";o.innerHTML='<div class="vp-box"><video controls autoplay playsinline src="'+esc(fileURL(v))+'"></video><div class="vp-cap"><b>'+esc(v.label)+'</b>'+(v.note?' \u00b7 '+esc(v.note):'')+'<span>'+esc(fmtDMY(v.date))+(v.by?' \u00b7 '+esc(String(v.by).split(" ")[0]):'')+'</span></div><button class="btn" onclick="document.getElementById(\'vid-play\').remove()">Close</button></div>';o.onclick=function(ev){if(ev.target===o)o.remove();};document.body.appendChild(o);}
+async function vidSrc(path){try{var r=await fetch(SUPABASE_URL+"/storage/v1/object/sign/"+FILE_BUCKET+"/"+path,{method:"POST",headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+(authToken()||SUPABASE_KEY),"Content-Type":"application/json"},body:JSON.stringify({expiresIn:3600})});if(r.ok){var d=await r.json();var u=d.signedURL||d.signedUrl;if(u)return SUPABASE_URL+"/storage/v1"+(u.charAt(0)==="/"?u:"/"+u);}}catch(e){}return SUPABASE_URL+"/storage/v1/object/public/"+FILE_BUCKET+"/"+path;}
+function vidPlay(i){var v=(S.videos||[])[i];if(!v)return;var o=document.createElement("div");o.id="vid-play";vidSrc(v.storage).then(function(u){var vv=o.querySelector("video");if(vv){vv.src=u;try{var pp=vv.play();if(pp&&pp.catch)pp.catch(function(){});}catch(e){}}});o.innerHTML='<div class="vp-box"><video controls playsinline></video><div class="vp-cap"><b>'+esc(v.label)+'</b>'+(v.note?' \u00b7 '+esc(v.note):'')+'<span>'+esc(fmtDMY(v.date))+(v.by?' \u00b7 '+esc(String(v.by).split(" ")[0]):'')+'</span></div><button class="btn" onclick="document.getElementById(\'vid-play\').remove()">Close</button></div>';o.onclick=function(ev){if(ev.target===o)o.remove();};document.body.appendChild(o);}
 function videosHtml(){var e=esc;var L=S.videos||[];var P=window._vidPend;
   var h='<div class="card vids"><div class="lbl" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">Videos <em style="font-style:normal;letter-spacing:0;text-transform:none;font-weight:600;color:#9a9fa8">\u2014 for what a photo can\u2019t show \u00b7 about 30 seconds</em></div>';
   if(P){h+='<div class="vid-pend"><div class="vp-h"><b>New clip</b> \u00b7 '+(P.dur?vidFmt(P.dur):'')+' \u00b7 '+Math.round(P.file.size/1048576*10)/10+' MB</div><div class="cchips">'+VID_LABELS.map(function(l){return '<span class="cchip'+(P.label===l?" on":"")+'" onclick="window._vidPend.label=\''+l.replace(/'/g,"\\'")+'\';renderMain()">'+e(l)+'</span>';}).join("")+'</div><input type="text" placeholder="Anything to add (optional)" value="'+e(P.note||"")+'" oninput="window._vidPend.note=this.value"><div class="vp-btns"><button class="btn btnp" '+(P.busy?'disabled':'')+' onclick="vidUpload()">'+(P.busy?'Uploading\u2026':'Upload')+'</button><button class="btn" '+(P.busy?'disabled':'')+' onclick="window._vidPend=null;renderMain()">Cancel</button></div></div>';}
@@ -2897,12 +2930,12 @@ function renderDashboard(){
   var _mn=function(n,l,c,always){return (n||always)?'<div><b class="'+(n&&c?c:"")+'">'+n+'</b><span>'+l+'</span></div>':'';};
   window._vitalsHtml='<div class="mnums">'+_mn(_v.inunit,"in",'',true)+_mn(_v.con,"contagious","r")+_mn(_v.ready,"ready to go","g")+_mn(_v.fin,"finish this week","a")+_mn(_v.fost,"in foster")+_mn((function(){try{var td=tdISO();return expList().filter(function(e){return e.date<=td;}).length;}catch(e){return 0;}})(),"expected","g")+'</div>';
   var mainCol=(window._morningOff?vitals:'')+statusStrip;
-  el.innerHTML=offlineBannerHtml()+wxPanelHtml(active)+morningHtml(active)+fairNoticeHtml()+expUnheldHtml()+mainCol+viewBody+brandFooterHtml();
+  el.innerHTML=offlineBannerHtml()+wxPanelHtml()+morningHtml(active)+fairNoticeHtml()+expUnheldHtml()+mainCol+viewBody+brandFooterHtml();
   var hs=document.getElementById("dash-hsearch");if(hs&&hs.value!==_s&&window._dbSearchActive!=="h")hs.value=_s;
   if(window._dbSearchActive){var si=hs;if(si){si.focus();var l=(window._dbCaret!=null?window._dbCaret:si.value.length);si.setSelectionRange(l,l);}window._dbSearchActive=false;window._dbCaret=null;}
 }
 
-function openDog(id){try{recentPush(id);}catch(_r){}window._dtSheet=null;window._cqOpen={};window._asmtOpen={};window._scOpen={};window._arrOpen={};window._medSec={};window._dogSec={};window._foOpen={};window._foNew=false;window._foPickOut=false;window._foPickDue=false;window._rhOpen={};var rec=records.find(function(r){return r.id===id;});if(!rec)return;window._dashScroll=window.scrollY||0;window._dayView=0;loadRecord(id);showScreen("wrap");S.tab=(S.dog&&S.dog.name&&(S.days||[]).some(function(d){return d&&(d.demeanour||d.notes);}))?"picture":"dog";render();if(!maybeAutoHandlingGlance()){if(!maybeAutoContagiousOverlay()){if(!maybeAutoWarningOverlay()){if(!maybeAutoNoticeOverlay())maybeAutoIsolationOverlay();}}}}
+function openDog(id){try{recentPush(id);}catch(_r){}window._vidPend=null;window._dtSheet=null;window._cqOpen={};window._asmtOpen={};window._scOpen={};window._arrOpen={};window._medSec={};window._dogSec={};window._foOpen={};window._foNew=false;window._foPickOut=false;window._foPickDue=false;window._rhOpen={};var rec=records.find(function(r){return r.id===id;});if(!rec)return;window._dashScroll=window.scrollY||0;window._dayView=0;loadRecord(id);showScreen("wrap");S.tab=(S.dog&&S.dog.name&&(S.days||[]).some(function(d){return d&&(d.demeanour||d.notes);}))?"picture":"dog";render();if(!maybeAutoHandlingGlance()){if(!maybeAutoContagiousOverlay()){if(!maybeAutoWarningOverlay()){if(!maybeAutoNoticeOverlay())maybeAutoIsolationOverlay();}}}}
 var INC_KEY="nspca-incoming";
 var INC_SOURCES=["Warden / stray","Owner surrender","Welfare / seizure","Transfer in","Return"];
 var INC_WHEN=[["today","Today"],["tomorrow","Tomorrow"],["week","This week"]];
@@ -4386,7 +4419,7 @@ function renderMedical(){
   var e=esc;var _con=activeContagiousList(m);var _zoo=_con.some(function(x){return ZOONOTIC_DISEASES[x.type];});var _ii=S.dog.intakeDate?isolationInfo(S.dog.intakeDate,(S.fin||{}).outcome||"",isoExtraDays(S.dog),pupIsoVax(S.dog,m)):null;
   var _wl=(S.weights||[]).slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");});var _wlast=_wl.length?_wl[_wl.length-1]:null;var _wprev=_wl.length>1?_wl[_wl.length-2]:null;var _wd=(_wlast&&_wprev)?(parseFloat(String(_wlast.weight).replace(/[^0-9.]/g,""))-parseFloat(String(_wprev.weight).replace(/[^0-9.]/g,""))):0;
   var _neut=(m.neuterDate||/neutered|spayed|\(N\)|\(S\)/i.test(S.dog.sex||""))?"Neutered":"Entire";
-  var _paraNext=(m.parasiteTreatments||[]).filter(function(p){return p.nextDue;}).sort(function(a,b){return a.nextDue.localeCompare(b.nextDue);})[0];
+  var _paraNext=paraNext(m);
   // strip sentence
   var bits=[];
   if(_con.length)bits.push('<b style="color:#fca5a5">Contagious \u2014 '+e(_con.map(function(x){return diseaseShortName(x.type).toLowerCase();}).join(", "))+(_ii&&_ii.state!=="done"?', day '+_ii.day+(_ii.total?' of '+_ii.total:''):'')+'.</b> Serve last, full PPE'+(_zoo?', gloves':'')+'.');
@@ -5349,7 +5382,7 @@ function picParagraph(){var d=S.dog||{},a=S.assessment||{},m=S.medical||{},rh=S.
   var wl=(S.weights||[]).slice().sort(function(x,y){return (x.date||"").localeCompare(y.date||"");});if(wl.length>1){var f=parseFloat(String(wl[0].weight).replace(/[^0-9.]/g,"")),l=parseFloat(String(wl[wl.length-1].weight).replace(/[^0-9.]/g,""));if(f&&l&&Math.abs(l-f)>=0.3)p.push(L("weights",(l>f?"Up ":"Down ")+Math.abs(l-f).toFixed(1)+" kg")+" since arrival.");}
   var meds=(m.medications||[]).filter(function(x){return x.active!==false&&(!x.endDate||x.endDate>=new Date().toISOString().slice(0,10));});var con=activeContagiousList(m);var medBits=[];if(con.length)medBits.push(L("medical","contagious \u2014 "+e(con.map(function(x){return diseaseShortName(x.type).toLowerCase();}).join(", "))));if(meds.length)medBits.push("on "+L("medical",e(meds.map(function(x){return x.name;}).join(", "))));else medBits.push("on no medication");
   var vroll={overdue:0,upcoming:0,done:0};try{dogMedicalDue({state:S}).forEach(function(it){if(!/Vaccination|Booster|Kennel Cough/.test(it.label||""))return;if(it.state==="overdue")vroll.overdue++;else if(it.state==="soon"||it.state==="booked")vroll.upcoming++;});var _td=new Date().toISOString().slice(0,10);if((m.vaccinations||[]).some(function(v){return v.date&&v.date<=_td;}))vroll.done++;}catch(err){}if(vroll.overdue)medBits.push(L("medical","vaccination overdue"));else if(vroll.upcoming)medBits.push("vaccination "+L("medical","due"));else if(vroll.done)medBits.push("vaccinations up to date");
-  var pn=(m.parasiteTreatments||[]).filter(function(x){return x.nextDue;}).sort(function(x,y){return x.nextDue.localeCompare(y.nextDue);})[0];if(pn)medBits.push(e((pn.type||"wormer").split(" ")[0].toLowerCase())+" due "+e(fmtDMY(pn.nextDue)));
+  var pn=paraNext(m);if(pn)medBits.push(e((pn.type||"wormer").split(" ")[0].toLowerCase())+" due "+e(fmtDMY(pn.nextDue)));
   p.push(medBits.join("; ").replace(/^./,function(c){return c.toUpperCase();})+".");
   var fo=S.foster||{};if(fo.out)p.push(L("foster","In foster")+(fo.carer?" with "+e(fo.carer):"")+(fo.due?", due back "+e(fmtDMY(fo.due)):"")+".");
   else if(rh.stage)p.push(L("rehome",e(rh.stage))+(rh.adopterName?" by the "+e(rh.adopterName)+(/family|s$/i.test(rh.adopterName)?"":" family"):"")+(rh.homeCheckDate?", home check "+e(fmtDMY(rh.homeCheckDate)):rh.trial&&rh.trialEnds?", trial ends "+e(fmtDMY(rh.trialEnds)):"")+".");
@@ -7030,6 +7063,7 @@ async function saveRecord(){if(S&&S._id){try{delete _histCache[S._id];}catch(e){
   var _mr=null;if(S._id){try{_mr=await mrMerge();}catch(_e){_mr=null;}}
   var total=Object.values(S.scores||{}).reduce(function(a,v){return a+(parseInt(v)||0);},0);
   var tl=(handlingLight(total,S.scores)||{}).l||"";
+  var _arrNote=false;try{var _d=S.dog||{};if(!_d.arrivalNotified&&_d.name&&(_d.kennel||_d.breed)&&_d.intakeDate&&_d.intakeDate>=addDaysStr(tdISO(),-1)&&!(S.fin||{}).outcome){_d.arrivalNotified=tdISO();_arrNote=true;}}catch(_x){}
   var st=JSON.parse(JSON.stringify(S));delete st._id;st._savedBy=currentName();
   try{autoScoreHistory(total);st.scoreHistory=JSON.parse(JSON.stringify(S.scoreHistory||[]));}catch(_e){}
   var row={name:S.dog.name,breed:S.dog.breed||"",ref_no:S.dog.refNo||"",intake_date:S.dog.intakeDate||null,assessor:S.dog.assessor||"",score:total,traffic_light:tl,saved_at:new Date().toISOString(),data:st};
@@ -7040,7 +7074,8 @@ async function saveRecord(){if(S&&S._id){try{delete _histCache[S._id];}catch(e){
     }
     else{var res=await supabaseClient.from("dogs").insert([row],"id");
       if(res&&res.error)throw res.error;
-      if(res.data&&res.data[0]){S._id=res.data[0].id;notifyDog("arrival","New dog",[S.dog.breed,S.dog.broughtInBy?"brought in by "+String(S.dog.broughtInBy).toLowerCase().replace("nspca inspector","inspector "+(S.dog.inspector||"")):""].filter(Boolean).join(" \u00b7 "));}}
+      if(res.data&&res.data[0]){S._id=res.data[0].id;}}
+    if(_arrNote){try{notifyDog("arrival","New dog",[S.dog.breed,S.dog.broughtInBy?"brought in by "+String(S.dog.broughtInBy).toLowerCase().replace("nspca inspector","inspector "+(S.dog.inspector||"")):""].filter(Boolean).join(" \u00b7 "));}catch(_n){}}
     pendingClear(S._id);
     window._lastSavedJson=_stateSig();persistSave();showSaved();syncLocalRecord(S._id,row);updateSaveBar();
     try{window._mrBase=JSON.stringify(mrStrip(st));window._mrAt=row.saved_at;window._mrFor=S._id;}catch(_e){}
@@ -7308,7 +7343,7 @@ function lookGuardClient(){var c=supabaseClient;if(!c||c._loGuard||typeof c.from
   c.from=function(t){var b=f.apply(c,arguments);if(t==="users"||!b)return b;["insert","update","upsert","delete"].forEach(function(m){if(typeof b[m]==="function"){var o=b[m];b[m]=function(){if(isLookOnly()){lookOnlyBlocked(false);return loRefusal();}return o.apply(b,arguments);};}});return b;};}
 (function(){
   var guardAll=function(){
-    ["persistSave","debouncedSave","saveRecord","saveRecordChange","setUnitSetting","handlePhotoUpload","handleFileUpload","filePick","deletePhoto","removePhoto","showRepositionPhoto","openNewDog","openNewDogIn","openExpected","expSave","expArrived","expGone","expTomorrow","showIncidentModal","deleteRecord","rxArchivePicked","rxDeletePicked"].forEach(function(n){var fn=window[n];if(typeof fn!=="function"||fn._lo)return;
+    ["persistSave","debouncedSave","saveRecord","saveRecordChange","setUnitSetting","handlePhotoUpload","handleFileUpload","filePick","deletePhoto","removePhoto","showRepositionPhoto","openNewDog","openNewDogIn","openExpected","expSave","expArrived","expGone","expTomorrow","showIncidentModal","deleteRecord","rxArchivePicked","rxDeletePicked","caseOpen","caseStart","wormDaySave","vidPick","vidUpload","vidDelete","chipScan","palAdd","palRemove","ovAddMedNote","pqQueue"].forEach(function(n){var fn=window[n];if(typeof fn!=="function"||fn._lo)return;
       var w=function(){if(isLookOnly()){var forced=/^(open|show|handle|file|exp|delete|remove|rx|quick)/.test(n)||n==="setUnitSetting";lookOnlyBlocked(forced);if(n==="saveRecord"||n==="saveRecordChange")return Promise.resolve();return;}return fn.apply(this,arguments);};w._lo=true;window[n]=w;});
     if(typeof window.initSupabase==="function"&&!window.initSupabase._lo){var i0=window.initSupabase;var wi=function(){var r=i0.apply(this,arguments);try{lookGuardClient();}catch(e){}return r;};wi._lo=true;window.initSupabase=wi;}
     try{lookGuardClient();}catch(e){}
