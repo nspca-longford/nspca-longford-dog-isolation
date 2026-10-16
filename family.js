@@ -6,7 +6,10 @@
 var HOME_FILES={dogs:"index.html",cats:"cats.html",stables:"stables.html"};
 var HOME_BUILTIN={STA01:"stables",CAT01:"cats",CISO01:"cats"};
 function homeAppFor(u){if(!u)return "";var m={};try{m=unitSetting("homeApps")||{};}catch(e){}var em=String(u.email||"").toLowerCase();return (em&&m[em])||m[u.code||""]||HOME_BUILTIN[u.code||""]||(typeof lookBuiltin==="function"&&(lookBuiltin(u)||{}).home)||"";}
-function goHomeApp(u,force){var done="";try{done=sessionStorage.getItem("nspca-home-done")||"";}catch(e){}if(done&&!force)return false;try{sessionStorage.setItem("nspca-home-done","1");}catch(e){}var h=homeAppFor(u);if(h&&h!==APP_HOME&&HOME_FILES[h]){location.replace(HOME_FILES[h]);return true;}return false;}
+// Only the front door (index.html) sends people on to their home app. Opening Cats or Stables on
+// purpose — a bookmark, a shortcut, a new tab, or signing in there — keeps you where you asked to be.
+function famOnFrontDoor(){var p=String(location.pathname||"");return /\/(index\.html?)?$/.test(p)||p==="";}
+function goHomeApp(u,force){if(!famOnFrontDoor())return false;var done="";try{done=sessionStorage.getItem("nspca-home-done")||"";}catch(e){}if(done&&!force)return false;try{sessionStorage.setItem("nspca-home-done","1");}catch(e){}var h=homeAppFor(u);if(h&&h!==APP_HOME&&HOME_FILES[h]){location.replace(HOME_FILES[h]);return true;}return false;}
 function userPhoto(code){try{var _l=localStorage.getItem("nspca-user-photo-"+code);if(_l!==null)return _l;var _u=(typeof _allUsersCache!=="undefined"&&_allUsersCache||[]).find(function(x){return x.code===code;});return (_u&&_u.photo)||"";}catch(e){return"";}}
 function setUserPhoto(code,dataUrl){try{localStorage.setItem("nspca-user-photo-"+code,dataUrl||"");}catch(e){}if(supabaseClient)supabaseClient.from("users").update({photo:dataUrl||null}).eq("code",code).then(function(){},function(){});}
 function userLastLogin(code){try{var v=localStorage.getItem("nspca-user-lastlogin-"+code);return v?parseInt(v):0;}catch(e){return 0;}}
