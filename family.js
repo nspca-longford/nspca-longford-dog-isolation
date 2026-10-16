@@ -517,28 +517,30 @@ function famToast(t){if(typeof miniToast==="function")miniToast(t);else alert(t)
 // Phone notifications: a short list only. Each device chooses what it wants; nothing
 // is sent between 10pm and 7am. Needs the notify function and push_subs table in Supabase.
 var FAM_VAPID="BNTc0IK7b0xHcw9--JCQj8s3MA59XBdoDw4JgfdaDnmmqjA8Hm7tIsvg-KQSzfH-yVme_gpxKCloPddOALYyjHI";
-var FAM_PUSH_KINDS=[["contagious","Contagious","a dog is marked contagious"],["warning","Warnings","a new warning goes on a dog"],["arrival","New arrivals","a new dog starts in the unit"]];
+var FAM_PUSH_KINDS=[["contagious","Contagious","a dog is marked contagious"],["warning","Warnings","a new warning goes on a dog"],["arrival","New arrivals","a new dog starts in the unit"],["weight","Weight loss","a weigh-in 3% or more down on the last one"],["weather","Hot & cold days","heat or frost, with the dogs at risk"]];
+// Make sure this device holds a live sign-in token (it can be missing after the app restores a session).
+async function famEnsureToken(){try{if(typeof AUTH!=="undefined"&&AUTH&&AUTH.refresh_token&&(!AUTH.access_token||!AUTH.expires_at||Date.now()>AUTH.expires_at-60000))await authRefresh();}catch(e){}return !!authToken();}
 function pushOK(){return !!("serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window&&window.isSecureContext);}
 function pushIsIOSBrowser(){var ua=navigator.userAgent||"";return /iPhone|iPad|iPod/.test(ua)&&!(window.navigator.standalone||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches));}
 function pushPrefs(){try{return JSON.parse(localStorage.getItem("nspca-push")||"null");}catch(e){return null;}}
 async function pushSub(){var reg=await navigator.serviceWorker.ready;var sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:famUnB64(FAM_VAPID)});return sub;}
-async function pushSave(prefs){var sub=await pushSub();var j=sub.toJSON();var me=CURRENT_USER||{};
+async function pushSave(prefs){if(!(await famEnsureToken()))throw new Error("SIGNIN");var sub=await pushSub();var j=sub.toJSON();var me=CURRENT_USER||{};
   var row={endpoint:j.endpoint,sub:j,email:String(me.email||authEmail()||"").toLowerCase(),name:me.name||"",app:(typeof APP_HOME!=="undefined"?APP_HOME:""),prefs:prefs,updated_at:new Date().toISOString()};
   var r=await supabaseClient.from("push_subs").upsert(row,{onConflict:"endpoint"});if(r&&r.error)throw r.error;try{localStorage.setItem("nspca-push",JSON.stringify(prefs));}catch(e){}}
 async function pushOn(){if(!pushOK()){famToast(pushIsIOSBrowser()?"On an iPhone, add the app to the home screen first (Share → Add to Home Screen), then turn this on from there.":"This browser can’t do notifications.");return;}
   var perm=await Notification.requestPermission();if(perm!=="granted"){famToast("Notifications are blocked for this app in the phone’s settings.");return;}
   var prefs={};FAM_PUSH_KINDS.forEach(function(k){prefs[k[0]]=true;});
-  try{await pushSave(prefs);famToast("Notifications are on");}catch(e){famToast("Couldn’t turn notifications on: "+((e&&e.message)||"unknown")+(/push_subs/.test(String(e&&e.message))?" — the Supabase setup isn’t done yet":""));}
+  try{await pushSave(prefs);famToast("Notifications are on");}catch(e){var _m=String((e&&e.message)||"unknown");famToast(_m==="SIGNIN"||/row-level security/.test(_m)?"Your sign-in on this phone needs renewing. Sign out, sign back in with your email and password, then turn this on.":"Couldn’t turn notifications on: "+_m);}
   if(typeof showDashSection==="function")showDashSection("profile");}
 async function pushKind(k){var p=pushPrefs()||{};p[k]=p[k]===false;try{await pushSave(p);}catch(e){famToast("Couldn’t save that: "+((e&&e.message)||""));}if(typeof showDashSection==="function")showDashSection("profile");}
 async function pushOff(){try{var reg=await navigator.serviceWorker.ready;var sub=await reg.pushManager.getSubscription();if(sub){try{await supabaseClient.from("push_subs").delete().eq("endpoint",sub.endpoint);}catch(e){}await sub.unsubscribe();}}catch(e){}try{localStorage.removeItem("nspca-push");}catch(e){}famToast("Notifications are off on this device");if(typeof showDashSection==="function")showDashSection("profile");}
 // Called by the apps when something worth a buzz happens. Fire and forget.
-function famNotify(kind,title,body,url){try{if(!supabaseClient||typeof authToken!=="function"||!authToken())return;var u=url||(location.origin+location.pathname);
+async function famNotify(kind,title,body,url){try{if(!supabaseClient||typeof authToken!=="function")return;if(!(await famEnsureToken()))return;var u=url||(location.origin+location.pathname);
   fetch(SUPABASE_URL+"/functions/v1/notify",{method:"POST",headers:{"Content-Type":"application/json",apikey:SUPABASE_KEY,Authorization:"Bearer "+authToken()},body:JSON.stringify({kind:kind,title:title,body:body,url:u,app:(typeof APP_HOME!=="undefined"?APP_HOME:""),tag:kind+"-"+Date.now()})}).catch(function(){});}catch(e){}}
 function famDeviceRows(){var h="";
   if(bioOK()){var p=bioMine();if(p&&p.refresh)h+=famRow("Face / fingerprint","unlock with the phone’s own lock instead of the PIN",p.bio?'<span class="fam-btn" onclick="bioOff()">Turn off</span>':'<span class="fam-btn" onclick="bioSetup()">Turn on</span>');}
   var pp=pushPrefs();
-  h+=famRow("Phone notifications",pp?"nothing between 10pm and 7am":(pushIsIOSBrowser()?"add the app to the home screen first":"contagious dogs, new warnings, new arrivals"),pp?'<span class="fam-btn" onclick="pushOff()">Turn off</span>':'<span class="fam-btn" onclick="pushOn()">Turn on</span>');
+  h+=famRow("Phone notifications",pp?"nothing between 10pm and 7am":(pushIsIOSBrowser()?"add the app to the home screen first":"contagious dogs, warnings, arrivals, weight loss, hot and cold days"),pp?'<span class="fam-btn" onclick="pushOff()">Turn off</span>':'<span class="fam-btn" onclick="pushOn()">Turn on</span>');
   if(pp)h+='<div class="fam-pk">'+FAM_PUSH_KINDS.map(function(k){var on=pp[k[0]]!==false;return '<span class="fam-pkc'+(on?' on':'')+'" onclick="pushKind(\''+k[0]+'\')" title="'+k[2]+'">'+(on?'✓ ':'')+k[1]+'</span>';}).join("")+'</div>';
   return h;}
 (function(){if(document.getElementById("fam-css3"))return;var st=document.createElement("style");st.id="fam-css3";st.textContent=".fam-pk{display:flex;flex-wrap:wrap;gap:6px;padding:2px 0 10px}.fam-pkc{font-size:11.5px;font-weight:800;padding:5px 10px;border-radius:20px;border:1.5px solid #e4e7e0;background:#fff;color:#6b7280;cursor:pointer}.fam-pkc.on{background:#282932;border-color:#282932;color:#c6e76c}.lg-btn.lg-bio{margin:4px 0 14px;background:#c6e76c;color:#282932}";document.head.appendChild(st);})();
