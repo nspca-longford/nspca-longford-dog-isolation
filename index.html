@@ -1040,6 +1040,16 @@ body.lookonly #save-bar.dirty{display:none!important}
 #pres-chip{align-items:center;gap:6px;margin-left:8px;background:#3a3b46;border-radius:20px;padding:3px 10px 3px 3px;font-size:11px;font-weight:800;color:#fff;white-space:nowrap;max-width:220px;overflow:hidden}#pres-chip i{width:22px;height:22px;border-radius:50%;font-style:normal;font-size:9.5px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 0 0 2px #22c55e;flex:none}#pres-chip span{overflow:hidden;text-overflow:ellipsis}
 @media(max-width:640px){#pres-chip{position:fixed;right:10px;top:58px;z-index:40;box-shadow:0 4px 12px rgba(0,0,0,.2)}}
 .pres-face{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;color:#fff;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #fff,0 0 0 4px #22c55e;z-index:3;pointer-events:none}
+#dashboard-content{position:relative}
+.wxp{background:#fff;border:1px solid #e4e7e0;border-radius:14px;padding:12px 14px;margin-bottom:12px}
+.wxp-h{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}.wxp-h span{font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#6b7280}.wxp-h b{font-size:22px;font-weight:900;color:#282932}.wxp-h em{font-style:normal;font-size:12px;font-weight:700;color:#6b7280}
+.wxp-r{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;border-top:1px solid #f0f1ec}.wxp-r span{color:#6b7280;font-weight:600}.wxp-r b{color:#282932}
+.wxp-ok{font-size:12px;color:#166534;font-weight:700;margin-top:6px}
+.wxp-a{margin-top:8px;padding:9px 10px;border-radius:10px;background:#eff6ff}.wxp.hot .wxp-a{background:#fff7ed}.wxp-a>b{display:block;font-size:13px;color:#1e3a8a}.wxp.hot .wxp-a>b{color:#9a3412}.wxp-a>small{display:block;font-size:11.5px;color:#4b5060;font-weight:600;margin:2px 0 6px}
+.wxp-d{display:flex;gap:6px;align-items:baseline;padding:4px 0;border-top:1px solid rgba(0,0,0,.06);cursor:pointer;font-size:12.5px}.wxp-d b{color:#282932}.wxp-d span{color:#6b7280;font-size:11.5px;font-weight:600}
+.wxp.cold{border-color:#bfdbfe}.wxp.hot{border-color:#fed7aa}
+@media(min-width:1740px){.wxp{position:absolute;right:calc(100% + 22px);top:18px;width:230px;margin:0}}
+@media(max-width:1739px){.wxp{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;padding:9px 14px}.wxp-h{margin:0}.wxp-h b{font-size:17px}.wxp-r{border:none;gap:6px;padding:0}.wxp-ok{margin:0}.wxp-a{flex-basis:100%;margin-top:4px}}
 </style>
 </head>
 <body>
@@ -2052,19 +2062,43 @@ function recentShow(inp){if(inp.value)return recentHide();var L=recentList();if(
 function recentHide(){var b=document.getElementById("recent-pop");if(b)b.style.display="none";}
 
 // 18 · hot and cold days — Longford forecast, checked once a day
-function wxGet(){try{var c=JSON.parse(localStorage.getItem("nspca-wx")||"null");if(c&&c.d===tdISO())return c;}catch(e){}
-  if(!window._wxBusy&&navigator.onLine!==false){window._wxBusy=true;try{fetch("https://api.open-meteo.com/v1/forecast?latitude=53.73&longitude=-7.80&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FDublin&forecast_days=2").then(function(r){return r.json();}).then(function(j){var D=j&&j.daily;if(!D||!D.temperature_2m_max)return;var c={d:tdISO(),max:Math.round(D.temperature_2m_max[0]),min:Math.round(Math.min(D.temperature_2m_min[0],D.temperature_2m_min[1]))};try{localStorage.setItem("nspca-wx",JSON.stringify(c));}catch(e){}var ds=document.getElementById("dashboard-screen");if(ds&&ds.style.display!=="none"&&!window._dashSection)renderDashboard();}).catch(function(){}).then(function(){window._wxBusy=false;});}catch(e){window._wxBusy=false;}}
-  return null;}
+// 18 · hot and cold days — Longford forecast (hourly), refreshed every hour, shown in its own panel
+var WX_CODES=[[0,"Clear"],[1,"Mostly clear"],[2,"Partly cloudy"],[3,"Cloudy"],[45,"Fog"],[48,"Fog"],[51,"Drizzle"],[53,"Drizzle"],[55,"Drizzle"],[56,"Freezing drizzle"],[57,"Freezing drizzle"],[61,"Light rain"],[63,"Rain"],[65,"Heavy rain"],[66,"Freezing rain"],[67,"Freezing rain"],[71,"Light snow"],[73,"Snow"],[75,"Heavy snow"],[77,"Snow"],[80,"Showers"],[81,"Showers"],[82,"Heavy showers"],[85,"Snow showers"],[86,"Snow showers"],[95,"Thunder"],[96,"Thunder"],[99,"Thunder"]];
+function wxWord(c){var f=WX_CODES.filter(function(x){return x[0]===c;})[0];return f?f[1]:"";}
+function wxDeg(v){return String(Math.round(v)).replace("-","−")+" °C";}
+function wxGet(){var c=null;try{c=JSON.parse(localStorage.getItem("nspca-wx2")||"null");}catch(e){}
+  var fresh=c&&c.at&&Date.now()-c.at<3600e3;
+  if(!fresh&&!window._wxBusy&&navigator.onLine!==false){window._wxBusy=true;try{fetch("https://api.open-meteo.com/v1/forecast?latitude=53.73&longitude=-7.80&current=temperature_2m,weather_code&hourly=temperature_2m&forecast_days=2&timezone=Europe%2FDublin").then(function(r){return r.json();}).then(function(j){var H=j&&j.hourly;if(!H||!H.time)return;var now=new Date();var pad=function(n){return String(n).padStart(2,"0");};var key=now.getFullYear()+"-"+pad(now.getMonth()+1)+"-"+pad(now.getDate())+"T"+pad(now.getHours());
+      var i0=H.time.findIndex(function(t){return t.slice(0,13)>=key;});if(i0<0)i0=0;var T=H.temperature_2m;var td=H.time[i0].slice(0,10);
+      // the rest of today's daylight (to 9pm), or tomorrow's if it's already evening
+      var day=[];for(var i=i0;i<H.time.length;i++){var hh=parseInt(H.time[i].slice(11,13),10);var dd=H.time[i].slice(0,10);if(dd===td&&hh>=9&&hh<=20)day.push(T[i]);}
+      if(day.length<3)for(var k=0;k<H.time.length;k++){var hh2=parseInt(H.time[k].slice(11,13),10);if(H.time[k].slice(0,10)>td&&hh2>=9&&hh2<=20)day.push(T[k]);}
+      // tonight: from now until 9am tomorrow
+      var night=[];for(var n=i0;n<H.time.length;n++){var t=H.time[n];if(t.slice(0,10)>td&&parseInt(t.slice(11,13),10)>9)break;night.push(T[n]);}
+      var cur=j.current||{};var c2={at:Date.now(),d:tdISO(),now:cur.temperature_2m!=null?cur.temperature_2m:T[i0],code:cur.weather_code,max:Math.round(Math.max.apply(null,day.length?day:[T[i0]])),min:Math.round(Math.min.apply(null,night.length?night:[T[i0]])),dayLbl:new Date().getHours()>=20?"tomorrow":"today"};
+      try{localStorage.setItem("nspca-wx2",JSON.stringify(c2));}catch(e){}var ds=document.getElementById("dashboard-screen");if(ds&&ds.style.display!=="none"&&!window._dashSection)renderDashboard();}).catch(function(){}).then(function(){window._wxBusy=false;});}catch(e){window._wxBusy=false;}}
+  return c;}
+function wxPanelHtml(active){var wx=wxGet();if(!wx)return "";var e=esc;var hot=wx.max>=WX_HOT,cold=wx.min<=WX_COLD;var L=[];
+  (active||[]).forEach(function(r){if(((r.state||{}).foster||{}).out)return;if(hot){var w=wxRisks(r,true);if(w.length)L.push({r:r,w:w});}else if(cold){var c=wxRisks(r,false);if(c.length)L.push({r:r,w:c});}});
+  var alert=(hot||cold)&&L.length;
+  var h='<div class="wxp'+(alert?(hot?' hot':' cold'):'')+'"><div class="wxp-h"><span>Longford</span><b>'+wxDeg(wx.now)+'</b><em>'+e(wxWord(wx.code))+'</em></div>'
+    +'<div class="wxp-r"><span>'+(wx.dayLbl==="tomorrow"?"Tomorrow":"Today")+' up to</span><b>'+wxDeg(wx.max)+'</b></div><div class="wxp-r"><span>Tonight down to</span><b>'+wxDeg(wx.min)+'</b></div>';
+  if(alert)h+='<div class="wxp-a"><b>'+(hot?'Hot '+(wx.dayLbl==="tomorrow"?'tomorrow':'today'):'Frost tonight')+'</b><small>'+(hot?'Shade and water, no runs 12–4.':'Extra bedding, coats on, close up early.')+'</small>'+L.map(function(x){return '<div class="wxp-d" onclick="openDog('+x.r.id+')"><b>'+e(x.r.name||"Dog")+'</b><span>'+e(x.w.join(", "))+'</span></div>';}).join("")+'</div>';
+  else h+='<div class="wxp-ok">'+(hot||cold?'No dogs here at risk from it.':'Nothing to watch for.')+'</div>';
+  return h+'</div>';}
+
 var WX_HOT=24,WX_COLD=0;
 function wxLastBcs(st){var l=(st.bcsLog||[]).slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");});var v=l.length?parseInt(l[l.length-1].score):parseInt(String((st.medical||{}).bcs||""));return isNaN(v)?null:v;}
 function wxRisks(r,hot){var st=r.state||{};var d=st.dog||{};var why=[];var fl=(BREED_FLAGS[d.breed]||"")+","+(BREED_FLAGS[d.breed2]||"");var yrs=dtYears(d.age);var bcs=wxLastBcs(st);var pup=recIsPup(r);
   if(hot){if(/br/.test(fl))why.push("short-nosed");if(bcs!==null&&bcs>=7)why.push("overweight");if(yrs!==null&&yrs>=9)why.push(yrs+" yrs");if(pup)why.push("pup");}
   else{if(bcs!==null&&bcs<=3)why.push("thin, BCS "+bcs);if(/greyhound|lurcher|whippet|saluki|chihuahua|italian/i.test((d.breed||"")+" "+(d.breed2||"")))why.push("thin coat");if(yrs!==null&&yrs>=9)why.push(yrs+" yrs");if(pup)why.push("pup");}
   return why;}
-function todayExtras(active,push){var wx=wxGet();
-  if(wx){var hot=wx.max>=WX_HOT,cold=wx.min<=WX_COLD;
-    active.forEach(function(r){if(((r.state||{}).foster||{}).out)return;if(hot){var w=wxRisks(r,true);if(w.length)push(r,2,"a","","hot day · "+wx.max+" °C",w.join(", ")+" · shade and water, no runs 12–4","care");}
-      if(cold){var c=wxRisks(r,false);if(c.length)push(r,2,"a","","frost tonight · "+String(wx.min).replace("-","\u2212")+" °C",c.join(", ")+" · extra bedding, coat on","care");}});}
+function wxNotify(wx,active){try{if(!wx||typeof famNotify!=="function"||!supabaseClient)return;var hr=new Date().getHours();if(hr<7||hr>=21)return;var td=tdISO();if(localStorage.getItem("nspca-wx-sent")===td)return;
+  var hot=wx.max>=WX_HOT,cold=wx.min<=WX_COLD;if(!hot&&!cold)return;var L=[];active.forEach(function(r){if(((r.state||{}).foster||{}).out)return;var w=wxRisks(r,hot);if(w.length)L.push((r.name||"Dog")+" ("+w.join(", ")+")");});if(!L.length)return;
+  localStorage.setItem("nspca-wx-sent",td);
+  Promise.resolve(supabaseClient.from("incoming").select("id,data").eq("id","__wx_sent")).then(function(res){var row=res&&res.data&&res.data[0];if(row&&row.data&&row.data.d===td)return;
+    return Promise.resolve(supabaseClient.from("incoming").upsert({id:"__wx_sent",data:{d:td,by:currentName()}},{onConflict:"id"})).then(function(){famNotify("weather",hot?"Hot day \u00b7 "+wx.max+" \u00b0C":"Frost tonight \u00b7 "+String(wx.min).replace("-","\u2212")+" \u00b0C",(hot?"Shade and water, no runs 12\u20134: ":"Extra bedding, coats on: ")+L.join(", "));});}).catch(function(){});}catch(e){}}
+function todayExtras(active,push){var wx=wxGet();try{wxNotify(wx,active);}catch(_w){}
   active.forEach(function(r){var st=r.state||{};if((st.foster||{}).out)return;var R=null;try{R=wtEta(st);}catch(e){}if(!R)return;
     if(R.kind==="stalled"&&R.gap>0)push(r,4,"t","","weight stuck for "+R.span+" days",R.cur+" kg · target "+R.target+" kg · check the feeding","feeding");
     else if(R.kind==="wrong"&&R.gap>0&&R.rate<=-0.2)push(r,3,"a","","losing weight under target",Math.abs(R.rate).toFixed(1)+" kg a week down · target "+R.target+" kg","weights");});}
@@ -2225,6 +2259,7 @@ async function batchWeighSave(){var inputs=document.querySelectorAll("[data-bw]"
   if(!recs.length){miniToast("No weights entered");return;}
   for(var i=0;i<recs.length;i++){try{await saveRecordChange(recs[i]);}catch(e){}}
   window._wiLast={date:td,n:recs.length,by:currentName(),at:now,drops:drops};
+  try{if(drops.length&&typeof famNotify==="function")famNotify("weight",drops.length===1?"Weight down \u00b7 "+drops[0].name+(drops[0].k?", "+drops[0].k:""):drops.length+" dogs lost weight",drops.map(function(x){return x.name+" down "+x.d.toFixed(1)+" kg ("+Math.round(Math.abs(x.pct))+"%)";}).join(" \u00b7 "));}catch(_n){}
   showDashSection("weighin");window.scrollTo(0,0);
   miniToast(recs.length+" weight"+(recs.length!==1?"s":"")+" saved");}
 
@@ -2862,7 +2897,7 @@ function renderDashboard(){
   var _mn=function(n,l,c,always){return (n||always)?'<div><b class="'+(n&&c?c:"")+'">'+n+'</b><span>'+l+'</span></div>':'';};
   window._vitalsHtml='<div class="mnums">'+_mn(_v.inunit,"in",'',true)+_mn(_v.con,"contagious","r")+_mn(_v.ready,"ready to go","g")+_mn(_v.fin,"finish this week","a")+_mn(_v.fost,"in foster")+_mn((function(){try{var td=tdISO();return expList().filter(function(e){return e.date<=td;}).length;}catch(e){return 0;}})(),"expected","g")+'</div>';
   var mainCol=(window._morningOff?vitals:'')+statusStrip;
-  el.innerHTML=offlineBannerHtml()+morningHtml(active)+fairNoticeHtml()+expUnheldHtml()+mainCol+viewBody+brandFooterHtml();
+  el.innerHTML=offlineBannerHtml()+wxPanelHtml(active)+morningHtml(active)+fairNoticeHtml()+expUnheldHtml()+mainCol+viewBody+brandFooterHtml();
   var hs=document.getElementById("dash-hsearch");if(hs&&hs.value!==_s&&window._dbSearchActive!=="h")hs.value=_s;
   if(window._dbSearchActive){var si=hs;if(si){si.focus();var l=(window._dbCaret!=null?window._dbCaret:si.value.length);si.setSelectionRange(l,l);}window._dbSearchActive=false;window._dbCaret=null;}
 }
@@ -4508,7 +4543,7 @@ function renderWeights(){
     return h+browNav("weights");
   }catch(err){return'<div style="padding:20px;color:#dc2626">Weight tab error: '+err.message+'</div>';}
 }
-function addWeight(){var dEl=document.getElementById("w-date"),vEl=document.getElementById("w-val"),nEl=document.getElementById("w-note");var d=dEl?dEl.value.trim():"",v=vEl?vEl.value.trim().replace(",","."):"",n=nEl?nEl.value.trim():"";if(!d||!v){appAlert("Please enter a date and weight.");return;}if(!S.weights)S.weights=[];var entry={date:d,weight:parseFloat(v)+" kg",note:n};if(window._weightEdit!=null&&S.weights[window._weightEdit]){S.weights[window._weightEdit]=entry;window._weightEdit=null;}else{S.weights.push(entry);}saveRecord();renderMain();}
+function addWeight(){var dEl=document.getElementById("w-date"),vEl=document.getElementById("w-val"),nEl=document.getElementById("w-note");var d=dEl?dEl.value.trim():"",v=vEl?vEl.value.trim().replace(",","."):"",n=nEl?nEl.value.trim():"";if(!d||!v){appAlert("Please enter a date and weight.");return;}if(!S.weights)S.weights=[];var entry={date:d,weight:parseFloat(v)+" kg",note:n};if(window._weightEdit!=null&&S.weights[window._weightEdit]){S.weights[window._weightEdit]=entry;window._weightEdit=null;}else{var _pv=(S.weights||[]).filter(function(w){return w.date&&w.date<=d&&wiNum(w.weight)!==null;}).sort(function(a,b){return a.date.localeCompare(b.date);}).pop();S.weights.push(entry);try{var _c=_pv?wiChange(wiNum(_pv.weight),parseFloat(v)):null;if(_c&&_c.drop)notifyDog("weight","Weight down",wiNum(_pv.weight)+" \u2192 "+parseFloat(v)+" kg ("+Math.round(Math.abs(_c.pct))+"% since "+fmtDMY(_pv.date).slice(0,5)+")");}catch(_n){}}saveRecord();renderMain();}
 function syncDogWeightToLog(){
   var v=parseFloat((S.dog&&S.dog.weight)?(""+S.dog.weight):"");
   if(!v||v<=0)return;
