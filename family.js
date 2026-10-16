@@ -163,6 +163,8 @@ async function doEmailLogin(){var em=(document.getElementById("login-email")||{}
   catch(e){err.textContent=e.message||"Sign-in failed";err.style.display="block";btn.textContent="Sign in";btn.disabled=false;}}
 async function doPinUnlock(email){var pin=(document.getElementById("login-pin")||{}).value||"";var err=document.getElementById("login-err");var p=devProfiles().find(function(x){return x.email===email;});if(!p)return;if(!p.pin){err.textContent="No PIN set for this person \u2014 sign in with the password.";err.style.display="block";return;}
   if(await pinHash(email,pin)!==p.pin){err.textContent="Wrong PIN.";err.style.display="block";window._pinBuf="";var _pi=document.getElementById("login-pin");if(_pi)_pi.value="";lgPinDraw();return;}
+  await devUnlock(email);}
+async function devUnlock(email){var err=document.getElementById("login-err")||{style:{}};var p=devProfiles().find(function(x){return x.email===email;});if(!p)return;
   AUTH={access_token:"",refresh_token:p.refresh,expires_at:0,user:{email:email}};var ok=await authRefresh();if(!ok){err.textContent="Session expired \u2014 sign in with the password once.";err.style.display="block";devProfileForget(email);return;}
   var user=await userForEmail(email);if(!user||user.active===false){await authSignOut();err.textContent="Account not active.";err.style.display="block";return;}
   var p2=devProfiles();var mine=p2.find(function(x){return x.email===email;});if(mine)mine.refresh=AUTH.refresh_token;devProfilesSave(p2);await finishAuthLogin(user);}
@@ -179,9 +181,9 @@ function renderLoginState(){var box=document.getElementById("login-auth");if(!bo
   if(window._setPw){box.innerHTML='<h1>Set your password</h1><div class="lg-sub">'+esc(authEmail())+'</div>'+F("setpw-1","password","New password (8+ characters)",'autocomplete="new-password"')+F("setpw-2","password","Again",'autocomplete="new-password"')+F("setpw-pin","password","4-digit PIN for this device (optional)",'inputmode="numeric" maxlength="4"')+'<button class="lg-btn" onclick="authSetPassword()">Save and sign in</button>';return;}
   var prof=devProfiles();var who=window._loginWho||"";
   if(mode==="code"){box.innerHTML='<h1>Access code</h1><div class="lg-sub">The old way in. Ask an admin for your email sign-in.</div><div class="lg-f"><label for="login-code">Code</label><input id="login-code" type="password" style="text-align:center;letter-spacing:.14em;font-size:20px" onkeydown="if(event.key===\'Enter\')doLogin()"></div><button class="lg-btn" id="login-btn" onclick="doLogin()">Enter &rarr;</button><div class="lg-lnk"><a href="#" onclick="window._loginMode=\'auth\';renderLoginState();return false">Sign in with email instead</a></div>';setTimeout(function(){var e=document.getElementById("login-code");if(e)e.focus();},50);return;}
-  if(prof.length&&!who&&mode==="auth"&&!window._loginFull){box.innerHTML='<h1>Who\u0027s this?</h1><div class="lg-sub">Tap your name, then your PIN.</div><div class="lg-avs">'+prof.map(function(p){var nm=p.name||p.email;return '<div class="lg-av" onclick="window._loginWho=\''+esc(p.email)+'\';renderLoginState()"><i style="background:'+avatarColor(nm)+'">'+esc(initials(nm))+'</i><b>'+esc(String(nm).split(" ")[0])+'</b></div>';}).join("")+'<div class="lg-av more" onclick="window._loginFull=true;renderLoginState()"><i>+</i><b>Someone else</b></div></div>';return;}
+  if(prof.length&&!who&&mode==="auth"&&!window._loginFull){box.innerHTML='<h1>Who\u0027s this?</h1><div class="lg-sub">Tap your name, then your PIN.</div><div class="lg-avs">'+prof.map(function(p){var nm=p.name||p.email;return '<div class="lg-av" onclick="window._loginWho=\''+esc(p.email)+'\';renderLoginState()'+(p.bio&&bioOK()?';bioUnlock(\''+esc(p.email)+'\')':'')+'"><i style="background:'+avatarColor(nm)+'">'+esc(initials(nm))+'</i><b>'+esc(String(nm).split(" ")[0])+'</b></div>';}).join("")+'<div class="lg-av more" onclick="window._loginFull=true;renderLoginState()"><i>+</i><b>Someone else</b></div></div>';return;}
   if(who){var p=prof.find(function(x){return x.email===who;})||{};window._pinBuf="";var first=String(p.name||who).split(" ")[0];
-    box.innerHTML='<h1>Hi '+esc(first)+'</h1><div class="lg-sub">Your 4-digit PIN for this device.</div><div class="lg-dots" id="lg-dots"><i></i><i></i><i></i><i></i></div><input id="login-pin" type="password" inputmode="numeric" maxlength="4" style="position:absolute;opacity:0;pointer-events:none" oninput="lgPinSync(this.value)"><div class="lg-pad">'+["1","2","3","4","5","6","7","8","9"].map(function(n){return '<span onclick="lgPinKey(\''+n+'\')">'+n+'</span>';}).join("")+'<span class="x" onclick="window._loginWho=\'\';renderLoginState()">not me</span><span onclick="lgPinKey(\'0\')">0</span><span class="x" onclick="lgPinKey(\'del\')">delete</span></div><div class="lg-lnk"><a href="#" onclick="window._loginWho=\'\';window._loginFull=true;renderLoginState();return false">Use my password instead</a> &middot; <a href="#" style="color:#6b7280" onclick="devProfileForget(\''+esc(who)+'\');window._loginWho=\'\';renderLoginState();return false">Forget me on this device</a></div>';
+    box.innerHTML='<h1>Hi '+esc(first)+'</h1><div class="lg-sub">'+(p.bio&&bioOK()?'Face or fingerprint, or your 4-digit PIN.':'Your 4-digit PIN for this device.')+'</div>'+(p.bio&&bioOK()?'<button class="lg-btn lg-bio" onclick="bioUnlock(\''+esc(who)+'\')">Unlock with face or fingerprint</button>':'')+'<div class="lg-dots" id="lg-dots"><i></i><i></i><i></i><i></i></div><input id="login-pin" type="password" inputmode="numeric" maxlength="4" style="position:absolute;opacity:0;pointer-events:none" oninput="lgPinSync(this.value)"><div class="lg-pad">'+["1","2","3","4","5","6","7","8","9"].map(function(n){return '<span onclick="lgPinKey(\''+n+'\')">'+n+'</span>';}).join("")+'<span class="x" onclick="window._loginWho=\'\';renderLoginState()">not me</span><span onclick="lgPinKey(\'0\')">0</span><span class="x" onclick="lgPinKey(\'del\')">delete</span></div><div class="lg-lnk"><a href="#" onclick="window._loginWho=\'\';window._loginFull=true;renderLoginState();return false">Use my password instead</a> &middot; <a href="#" style="color:#6b7280" onclick="devProfileForget(\''+esc(who)+'\');window._loginWho=\'\';renderLoginState();return false">Forget me on this device</a></div>';
     window._pinWho=who;setTimeout(function(){var e=document.getElementById("login-pin");if(e&&window.matchMedia&&!window.matchMedia("(pointer:coarse)").matches)e.focus();},50);return;}
   box.innerHTML='<h1>Sign in</h1>'+F("login-email","email","Email",'autocomplete="username" inputmode="email"')+F("login-pass","password","Password",'autocomplete="current-password" onkeydown="if(event.key===\'Enter\')doEmailLogin()"')+'<button class="lg-btn" id="login-btn2" onclick="doEmailLogin()">Sign in</button><div class="lg-lnk"><a href="#" onclick="doForgot();return false">Forgotten your password?</a> &middot; <a href="#" onclick="window._loginMode=\'code\';renderLoginState();return false">Access code</a>'+(prof.length?' &middot; <a href="#" onclick="window._loginFull=false;renderLoginState();return false">Back</a>':'')+'</div>';setTimeout(function(){var e=document.getElementById("login-email");if(e)e.focus();},50);}
 function lgPinSync(v){window._pinBuf=String(v||"").replace(/\D/g,"").slice(0,4);lgPinDraw();if(window._pinBuf.length===4)doPinUnlock(window._pinWho);}
@@ -223,7 +225,7 @@ function famBoot(){
 //   famEnterApp()            after sign-in: load the app's records and show its board
 //   appWeek(me, monday)      { stats:[[n,"label"],…], names:[…] } for "Your week" in this app
 //   appProfileExtra(role)    extra cards at the foot of My profile (admin tools, version)
-var FAMILY_VERSION="2.0";
+var FAMILY_VERSION="2.1";
 var FAM_APPS=[["dogs","Dogs","dog_history","index.html"],["cats","Cats","cat_history","cats.html"],["stables","Stables","stables_history","stables.html"]];
 function famAppName(k){var a=FAM_APPS.filter(function(x){return x[0]===k;})[0];return a?a[1]:(k||"");}
 function famHere(){return (typeof APP_HOME!=="undefined"&&APP_HOME)||"dogs";}
@@ -294,6 +296,7 @@ function renderProfile(){
   h+='<div class="fam-card"><div class="fam-lbl">On this device</div>'
     +famRow("Auto sign-out","after this long untouched",famSeg(getAutoLogoutMins(),[[0,"Off"],[15,"15m"],[30,"30m"],[120,"2h"]],"setAutoLogoutMins(%v);showDashSection(&quot;profile&quot;)"))
     +famRow("Larger text","for the corridor, gloves on",famSeg(on?"1":"0",[["0","Off"],["1","On"]],"prefSet(&quot;bigtext&quot;,&quot;%v&quot;)"))
+    +famDeviceRows()
     +(devices>1?famRow("Others remembered here",(devices-1)+" other"+(devices>2?"s":"")+" can unlock this device",'<span class="fam-btn" onclick="forgetOtherProfiles()">Forget</span>'):'')
     +'</div>';
   if(typeof appProfileExtra==="function"){try{h+=appProfileExtra(role,me)||"";}catch(e){}}
@@ -489,3 +492,53 @@ function fairTag(){var d=famAnimalOf(S);var f=fairPhase(d.intakeDate);var lbl=f?
 ".fairn{position:relative;background:#fff;border:1px solid #e4e7e0;border-left:4px solid #c6e76c;border-radius:12px;padding:10px 34px 10px 13px;margin-bottom:10px}.fairn b{display:block;font-size:13.5px;color:#282932}.fairn small{display:block;font-size:12.5px;color:#4b5060;font-weight:600;line-height:1.45;margin-top:2px}"+
 ".fairn .fx{position:absolute;top:8px;right:10px;color:#9a9fa8;font-size:13px;cursor:pointer;padding:2px 4px}.fairn .fa{margin-top:7px}.fairn .fa span{font-size:12px;font-weight:800;color:#282932;background:#eef6d6;border-radius:20px;padding:4px 11px;cursor:pointer;display:inline-block}";
 (document.head||document.documentElement).appendChild(st);})();
+// ── v2.1 · face / fingerprint unlock (28) and phone notifications (29) ─────────
+// Face / fingerprint: the phone's own lock stands in for the PIN. It only unlocks a
+// profile that already has a saved session on this device (set up with a PIN first).
+function bioOK(){return !!(window.PublicKeyCredential&&navigator.credentials&&window.isSecureContext);}
+function famB64(buf){var s="";new Uint8Array(buf).forEach(function(b){s+=String.fromCharCode(b);});return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
+function famUnB64(s){s=String(s||"").replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";var b=atob(s);var u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;}
+function famRand(n){var u=new Uint8Array(n||32);crypto.getRandomValues(u);return u;}
+async function bioSetup(){if(!bioOK()){famToast("This phone or browser can’t do face or fingerprint unlock.");return;}
+  var em=String((CURRENT_USER&&CURRENT_USER.email)||authEmail()||"").toLowerCase();var prof=devProfiles();var p=prof.find(function(x){return x.email===em;});
+  if(!p||!p.refresh){famToast("Set a PIN for this device first, then turn this on.");return;}
+  try{var cred=await navigator.credentials.create({publicKey:{challenge:famRand(32),rp:{name:"NSPCA Longford"},user:{id:new TextEncoder().encode(em).slice(0,64),name:em,displayName:(CURRENT_USER&&CURRENT_USER.name)||em},pubKeyCredParams:[{type:"public-key",alg:-7},{type:"public-key",alg:-257}],authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required",residentKey:"discouraged"},timeout:60000,attestation:"none"}});
+    if(!cred)return;p.bio=famB64(cred.rawId);devProfilesSave(prof);famToast("Face / fingerprint unlock is on for this device");}
+  catch(e){famToast(e&&e.name==="NotAllowedError"?"Cancelled — nothing changed":"Couldn’t turn it on: "+((e&&e.message)||"unknown"));}
+  if(typeof showDashSection==="function")showDashSection("profile");}
+function bioOff(){var em=String((CURRENT_USER&&CURRENT_USER.email)||authEmail()||"").toLowerCase();var prof=devProfiles();var p=prof.find(function(x){return x.email===em;});if(p){delete p.bio;devProfilesSave(prof);}famToast("Face / fingerprint unlock is off");if(typeof showDashSection==="function")showDashSection("profile");}
+function bioMine(){var em=String((CURRENT_USER&&CURRENT_USER.email)||(typeof authEmail==="function"?authEmail():"")||"").toLowerCase();var p=devProfiles().find(function(x){return x.email===em;});return p||null;}
+async function bioUnlock(email){var err=document.getElementById("login-err");var p=devProfiles().find(function(x){return x.email===email;});if(!p||!p.bio||!bioOK())return;
+  try{var a=await navigator.credentials.get({publicKey:{challenge:famRand(32),allowCredentials:[{type:"public-key",id:famUnB64(p.bio)}],userVerification:"required",timeout:60000}});if(!a)return;}
+  catch(e){if(err&&e&&e.name!=="NotAllowedError"){err.textContent="Face / fingerprint didn’t work — use your PIN.";err.style.display="block";}return;}
+  await devUnlock(email);}
+function famToast(t){if(typeof miniToast==="function")miniToast(t);else alert(t);}
+
+// Phone notifications: a short list only. Each device chooses what it wants; nothing
+// is sent between 10pm and 7am. Needs the notify function and push_subs table in Supabase.
+var FAM_VAPID="BNTc0IK7b0xHcw9--JCQj8s3MA59XBdoDw4JgfdaDnmmqjA8Hm7tIsvg-KQSzfH-yVme_gpxKCloPddOALYyjHI";
+var FAM_PUSH_KINDS=[["contagious","Contagious","a dog is marked contagious"],["warning","Warnings","a new warning goes on a dog"],["arrival","New arrivals","a new dog starts in the unit"]];
+function pushOK(){return !!("serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window&&window.isSecureContext);}
+function pushIsIOSBrowser(){var ua=navigator.userAgent||"";return /iPhone|iPad|iPod/.test(ua)&&!(window.navigator.standalone||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches));}
+function pushPrefs(){try{return JSON.parse(localStorage.getItem("nspca-push")||"null");}catch(e){return null;}}
+async function pushSub(){var reg=await navigator.serviceWorker.ready;var sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:famUnB64(FAM_VAPID)});return sub;}
+async function pushSave(prefs){var sub=await pushSub();var j=sub.toJSON();var me=CURRENT_USER||{};
+  var row={endpoint:j.endpoint,sub:j,email:String(me.email||authEmail()||"").toLowerCase(),name:me.name||"",app:(typeof APP_HOME!=="undefined"?APP_HOME:""),prefs:prefs,updated_at:new Date().toISOString()};
+  var r=await supabaseClient.from("push_subs").upsert(row,{onConflict:"endpoint"});if(r&&r.error)throw r.error;try{localStorage.setItem("nspca-push",JSON.stringify(prefs));}catch(e){}}
+async function pushOn(){if(!pushOK()){famToast(pushIsIOSBrowser()?"On an iPhone, add the app to the home screen first (Share → Add to Home Screen), then turn this on from there.":"This browser can’t do notifications.");return;}
+  var perm=await Notification.requestPermission();if(perm!=="granted"){famToast("Notifications are blocked for this app in the phone’s settings.");return;}
+  var prefs={};FAM_PUSH_KINDS.forEach(function(k){prefs[k[0]]=true;});
+  try{await pushSave(prefs);famToast("Notifications are on");}catch(e){famToast("Couldn’t turn notifications on: "+((e&&e.message)||"unknown")+(/push_subs/.test(String(e&&e.message))?" — the Supabase setup isn’t done yet":""));}
+  if(typeof showDashSection==="function")showDashSection("profile");}
+async function pushKind(k){var p=pushPrefs()||{};p[k]=p[k]===false;try{await pushSave(p);}catch(e){famToast("Couldn’t save that: "+((e&&e.message)||""));}if(typeof showDashSection==="function")showDashSection("profile");}
+async function pushOff(){try{var reg=await navigator.serviceWorker.ready;var sub=await reg.pushManager.getSubscription();if(sub){try{await supabaseClient.from("push_subs").delete().eq("endpoint",sub.endpoint);}catch(e){}await sub.unsubscribe();}}catch(e){}try{localStorage.removeItem("nspca-push");}catch(e){}famToast("Notifications are off on this device");if(typeof showDashSection==="function")showDashSection("profile");}
+// Called by the apps when something worth a buzz happens. Fire and forget.
+function famNotify(kind,title,body,url){try{if(!supabaseClient||typeof authToken!=="function"||!authToken())return;var u=url||(location.origin+location.pathname);
+  fetch(SUPABASE_URL+"/functions/v1/notify",{method:"POST",headers:{"Content-Type":"application/json",apikey:SUPABASE_KEY,Authorization:"Bearer "+authToken()},body:JSON.stringify({kind:kind,title:title,body:body,url:u,app:(typeof APP_HOME!=="undefined"?APP_HOME:""),tag:kind+"-"+Date.now()})}).catch(function(){});}catch(e){}}
+function famDeviceRows(){var h="";
+  if(bioOK()){var p=bioMine();if(p&&p.refresh)h+=famRow("Face / fingerprint","unlock with the phone’s own lock instead of the PIN",p.bio?'<span class="fam-btn" onclick="bioOff()">Turn off</span>':'<span class="fam-btn" onclick="bioSetup()">Turn on</span>');}
+  var pp=pushPrefs();
+  h+=famRow("Phone notifications",pp?"nothing between 10pm and 7am":(pushIsIOSBrowser()?"add the app to the home screen first":"contagious dogs, new warnings, new arrivals"),pp?'<span class="fam-btn" onclick="pushOff()">Turn off</span>':'<span class="fam-btn" onclick="pushOn()">Turn on</span>');
+  if(pp)h+='<div class="fam-pk">'+FAM_PUSH_KINDS.map(function(k){var on=pp[k[0]]!==false;return '<span class="fam-pkc'+(on?' on':'')+'" onclick="pushKind(\''+k[0]+'\')" title="'+k[2]+'">'+(on?'✓ ':'')+k[1]+'</span>';}).join("")+'</div>';
+  return h;}
+(function(){if(document.getElementById("fam-css3"))return;var st=document.createElement("style");st.id="fam-css3";st.textContent=".fam-pk{display:flex;flex-wrap:wrap;gap:6px;padding:2px 0 10px}.fam-pkc{font-size:11.5px;font-weight:800;padding:5px 10px;border-radius:20px;border:1.5px solid #e4e7e0;background:#fff;color:#6b7280;cursor:pointer}.fam-pkc.on{background:#282932;border-color:#282932;color:#c6e76c}.lg-btn.lg-bio{margin:4px 0 14px;background:#c6e76c;color:#282932}";document.head.appendChild(st);})();
