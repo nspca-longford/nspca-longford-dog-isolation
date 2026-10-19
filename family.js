@@ -4,7 +4,7 @@
 // Edit this file once and every app gets the change. Each app keeps only its own animals.
 
 var HOME_FILES={dogs:"index.html",cats:"cats.html",stables:"stables.html"};
-var HOME_BUILTIN={STA01:"stables",CAT01:"cats",CISO01:"cats"};
+var HOME_BUILTIN={}; // shared unit codes (Cattery, Cat Iso, Stables) removed Oct 2026: everyone signs in as themselves
 function homeAppFor(u){if(!u)return "";var m={};try{m=unitSetting("homeApps")||{};}catch(e){}var em=String(u.email||"").toLowerCase();return (em&&m[em])||m[u.code||""]||HOME_BUILTIN[u.code||""]||(typeof lookBuiltin==="function"&&(lookBuiltin(u)||{}).home)||"";}
 // Only the front door (index.html) sends people on to their home app. Opening Cats or Stables on
 // purpose — a bookmark, a shortcut, a new tab, or signing in there — keeps you where you asked to be.
@@ -32,9 +32,9 @@ async function refreshAllUsers(){
   _allUsersCache=merged;
   return merged;
 }
-function getAutoLogoutMins(){try{var v=localStorage.getItem("nspca-auto-logout-mins");return v?parseInt(v):0;}catch(e){return 0;}}
+function getAutoLogoutMins(){var n=0;try{var v=localStorage.getItem("nspca-auto-logout-mins");n=v?parseInt(v):0;}catch(e){}if(typeof famShared==="function"&&famShared()&&(!n||n>15))n=15;return n;}
 function setAutoLogoutMins(n){try{localStorage.setItem("nspca-auto-logout-mins",n.toString());}catch(e){}setupAutoLogout();}
-function bumpActivity(){_lastActivity=Date.now();}
+function bumpActivity(){_lastActivity=Date.now();if(_lastActivity-(window._laW||0)>30000){window._laW=_lastActivity;try{localStorage.setItem("nspca-last-active",String(_lastActivity));}catch(e){}}}
 function setupAutoLogout(){
   if(_autoLogoutTimer){clearInterval(_autoLogoutTimer);_autoLogoutTimer=null;}
   var mins=getAutoLogoutMins();
@@ -85,7 +85,7 @@ function doLogout(){
   var _lc=document.getElementById("login-code");if(_lc)_lc.value="";
   document.getElementById("login-err").style.display="none";
   var _lb=document.getElementById("login-btn");if(_lb){_lb.textContent="Enter →";_lb.disabled=false;}
-  authSignOut();window._loginWho="";window._loginFull=false;
+  authSignOut();window._loginWho="";window._loginFull=false;window._lgStage="";window._setPw=false;window._lgPrefill="";window._loginMode="auth";
   var st=document.getElementById("overdue-sticky");if(st)st.innerHTML="";
   showScreen("login-screen");
 }
@@ -129,10 +129,10 @@ function removeAvatar(){
 }
 function pwClose(){var o=document.getElementById("pwsheet");if(o)o.remove();}
 async function pwSave(){var a=(document.getElementById("pw-1")||{}).value||"",b=(document.getElementById("pw-2")||{}).value||"";var er=document.getElementById("pw-err");var say=function(t){er.textContent=t;er.style.display="block";};
-  if(a.length<8)return say("At least 8 characters.");if(a!==b)return say("The two don’t match.");
+  if(a.length<10)return say("At least 10 characters. A short sentence works.");if(a!==b)return say("The two don’t match.");
   var go=document.getElementById("pw-go");go.disabled=true;go.textContent="Saving…";
   try{if(AUTH&&AUTH.expires_at&&AUTH.expires_at<Date.now()+60000){try{await authRefresh();}catch(e){}}
-    var r=await fetch(SUPABASE_URL+"/auth/v1/user",{method:"PUT",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+authToken(),"Content-Type":"application/json"},body:JSON.stringify({password:a})});
+    var r=await fetch(SUPABASE_URL+"/auth/v1/user",{method:"PUT",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+authToken(),"Content-Type":"application/json"},body:JSON.stringify({password:a,data:{pw_own:true}})});
     if(!r.ok){var d={};try{d=await r.json();}catch(e){}throw new Error(d.msg||d.message||d.error_description||("error "+r.status));}
     pwClose();miniToast("Password changed");}
   catch(e){go.disabled=false;go.textContent="Save new password";say("Couldn’t change it: "+(e.message||"try again"));}}
@@ -140,10 +140,10 @@ var AUTH=null;
 function authLoad(){try{AUTH=JSON.parse(localStorage.getItem("nspca-auth")||"null");}catch(e){AUTH=null;}return AUTH;}
 function authSave(a){AUTH=a;try{if(a)localStorage.setItem("nspca-auth",JSON.stringify(a));else localStorage.removeItem("nspca-auth");}catch(e){}
   // Supabase retires each sign-in when it renews it, so the PIN must always hold the newest one.
-  try{if(a&&a.refresh_token){var em=String((a.user&&a.user.email)||"").toLowerCase();if(em){var P=devProfiles();var me=P.find(function(x){return String(x.email||"").toLowerCase()===em;});if(me&&me.refresh!==a.refresh_token){me.refresh=a.refresh_token;devProfilesSave(P);}}}}catch(e){}}
+  try{if(a&&a.refresh_token){var em=String((a.user&&a.user.email)||"").toLowerCase();if(em){var P=devProfiles();var me=P.find(function(x){return String(x.email||"").toLowerCase()===em;});if(me&&(me.pin||me.bio)&&me.refresh!==a.refresh_token){me.refresh=a.refresh_token;devProfilesSave(P);}}}}catch(e){}}
 function authToken(){return (AUTH&&AUTH.access_token)||"";}
 function authEmail(){return (AUTH&&AUTH.user&&AUTH.user.email)||"";}
-async function authRefresh(){if(!AUTH||!AUTH.refresh_token)return false;try{var r=await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:AUTH.refresh_token})});var d=await r.json();if(!r.ok||!d.access_token){authSave(null);return false;}authSave({access_token:d.access_token,refresh_token:d.refresh_token,expires_at:Date.now()+((d.expires_in||3600)*1000),user:d.user||AUTH.user});return true;}catch(e){return false;}}
+async function authRefresh(){if(!AUTH||!AUTH.refresh_token)return false;window._authNetFail=false;try{var r=await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:AUTH.refresh_token})});if(r.status>=500){window._authNetFail=true;return false;}var d=await r.json();if(!r.ok||!d.access_token){authSave(null);return false;}authSave({access_token:d.access_token,refresh_token:d.refresh_token,expires_at:Date.now()+((d.expires_in||3600)*1000),user:d.user||AUTH.user});return true;}catch(e){window._authNetFail=true;return false;}}
 async function authSignIn(email,password){var r=await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=password",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Content-Type":"application/json"},body:JSON.stringify({email:email,password:password})});var d=await r.json();if(!r.ok||!d.access_token)throw new Error((d&&(d.error_description||d.msg||d.message))||"Sign-in failed");authSave({access_token:d.access_token,refresh_token:d.refresh_token,expires_at:Date.now()+((d.expires_in||3600)*1000),user:d.user});return d.user;}
 async function authSignOut(){try{var em=String((AUTH&&AUTH.user&&AUTH.user.email)||"").toLowerCase();var keep=em&&devProfiles().some(function(x){return String(x.email||"").toLowerCase()===em&&(x.pin||x.bio)&&x.refresh;});
   if(AUTH&&!keep)await fetch(SUPABASE_URL+"/auth/v1/logout?scope=local",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+authToken()}});}catch(e){}AUTH=null;try{localStorage.removeItem("nspca-auth");}catch(e){}}
@@ -153,50 +153,199 @@ function devProfiles(){try{return JSON.parse(localStorage.getItem("nspca-device-
 function devProfilesSave(p){try{localStorage.setItem("nspca-device-profiles",JSON.stringify(p));}catch(e){}}
 async function pinHash(email,pin){var enc=new TextEncoder().encode(email.toLowerCase()+":"+pin+":nspca");var buf=await crypto.subtle.digest("SHA-256",enc);return Array.prototype.map.call(new Uint8Array(buf),function(b){return ("0"+b.toString(16)).slice(-2);}).join("");}
 async function devProfileSet(email,name,pin){var p=devProfiles().filter(function(x){return x.email!==email;});p.push({email:email,name:name,pin:pin?await pinHash(email,pin):"",refresh:(AUTH&&AUTH.refresh_token)||""});devProfilesSave(p);}
-async function devProfileKeep(email,name){var old=devProfiles().find(function(x){return x.email===email;});var p=devProfiles().filter(function(x){return x.email!==email;});p.push({email:email,name:name,pin:old&&old.pin?old.pin:"",refresh:(AUTH&&AUTH.refresh_token)||""});devProfilesSave(p);}
-function pinOffer(em,user){var box=document.getElementById("login-auth");if(!box){finishAuthLogin(user);return;}window._pinOfferUser=user;window._pinOfferEm=em;
-  box.innerHTML='<h1>Quick unlock</h1><div class="lg-sub">Set a 4-digit PIN for this device? Next time, tap your name and type the PIN.</div><div class="lg-f"><label for="pin-offer">4-digit PIN</label><input id="pin-offer" type="password" inputmode="numeric" maxlength="4" autocomplete="off" onkeydown="if(event.key===\'Enter\')pinOfferSet()"></div><button class="lg-btn" onclick="pinOfferSet()">Set PIN</button><div class="lg-lnk"><a href="#" onclick="pinOfferSkip();return false">Not now</a></div>';
-  setTimeout(function(){var e=document.getElementById("pin-offer");if(e)e.focus();},50);}
-async function pinOfferSet(){var v=(document.getElementById("pin-offer")||{}).value||"";var err=document.getElementById("login-err");if(!/^\d{4}$/.test(v)){if(err){err.textContent="Four digits, numbers only.";err.style.display="block";}return;}if(err)err.style.display="none";var u=window._pinOfferUser;await devProfileSet(window._pinOfferEm,u.name,v);try{localStorage.setItem("nspca-pin-asked:"+window._pinOfferEm,"1");}catch(_e){}await finishAuthLogin(u);}
-async function pinOfferSkip(){var u=window._pinOfferUser;try{localStorage.setItem("nspca-pin-asked:"+window._pinOfferEm,"1");}catch(_e){}var err=document.getElementById("login-err");if(err)err.style.display="none";await finishAuthLogin(u);}
-function devProfileForget(email){devProfilesSave(devProfiles().filter(function(x){return x.email!==email;}));renderLoginState();}
-async function finishAuthLogin(user){LOGGED_IN=true;CURRENT_USER=user;window._wnShownSession=false;localStorage.setItem("nspca-intake-auth",user.code||("EMAIL:"+user.email));localStorage.setItem("nspca-user-name",user.name);localStorage.setItem("nspca-user-role",user.role||"staff");window._prevLogin=userLastLogin(user.code||user.email);window._catchupDismissed=false;recordLastLogin(user.code||user.email);setupAutoLogout();await refreshAllUsers();if(goHomeApp(user,!!window._explicitLogin))return;window._explicitLogin=false;await famEnterAppSafe();}
-async function doEmailLogin(){var em=(document.getElementById("login-email")||{}).value||"";var pw=(document.getElementById("login-pass")||{}).value||"";var err=document.getElementById("login-err");var btn=document.getElementById("login-btn2");em=em.trim().toLowerCase();if(!em||!pw)return;err.style.display="none";btn.textContent="Signing in\u2026";btn.disabled=true;
-  try{window._explicitLogin=true;var au=await authSignIn(em,pw);var user=await userForEmail(em);if(!user){await authSignOut();throw new Error("Signed in, but no account in Manage Users has this email. Ask an admin to add it.");}if(user.active===false){await authSignOut();throw new Error("This account is deactivated.");}
-    var prev=devProfiles().find(function(x){return x.email===em;});await devProfileKeep(em,user.name);
-    var asked=false;try{asked=!!localStorage.getItem("nspca-pin-asked:"+em);}catch(_e){}
-    if(!(prev&&prev.pin)&&!asked){pinOffer(em,user);return;}
-    await finishAuthLogin(user);}
-  catch(e){err.textContent=e.message||"Sign-in failed";err.style.display="block";btn.textContent="Sign in";btn.disabled=false;}}
-async function doPinUnlock(email){var pin=(document.getElementById("login-pin")||{}).value||"";var err=document.getElementById("login-err");var p=devProfiles().find(function(x){return x.email===email;});if(!p)return;if(!p.pin){err.textContent="No PIN set for this person \u2014 sign in with the password.";err.style.display="block";return;}
-  if(await pinHash(email,pin)!==p.pin){err.textContent="Wrong PIN.";err.style.display="block";window._pinBuf="";var _pi=document.getElementById("login-pin");if(_pi)_pi.value="";lgPinDraw();return;}
-  await devUnlock(email);}
-async function devUnlock(email){var err=document.getElementById("login-err")||{style:{}};var p=devProfiles().find(function(x){return x.email===email;});if(!p)return;
-  AUTH={access_token:"",refresh_token:p.refresh,expires_at:0,user:{email:email}};var ok=await authRefresh();if(!ok){err.textContent="Session expired \u2014 sign in with the password once.";err.style.display="block";devProfileForget(email);return;}
-  var user=await userForEmail(email);if(!user||user.active===false){await authSignOut();err.textContent="Account not active.";err.style.display="block";return;}
-  var p2=devProfiles();var mine=p2.find(function(x){return x.email===email;});if(mine)mine.refresh=AUTH.refresh_token;devProfilesSave(p2);await finishAuthLogin(user);}
-async function doForgot(){var em=((document.getElementById("login-email")||{}).value||"").trim().toLowerCase();var err=document.getElementById("login-err");if(!em){err.textContent="Type your email first, then tap Forgotten password.";err.style.display="block";return;}var ok=await authRecover(em);err.style.setProperty("color",ok?"#bbf7d0":"#fca5a5","important");err.style.borderLeftColor=ok?"#22c55e":"#ef4444";err.style.background=ok?"#143322":"#3a1d1d";err.textContent=ok?"Reset link sent \u2014 check your email.":"Couldn\u0027t send a reset link. "+(window._authErr||"");err.style.display="block";}
+async function devProfileKeep(email,name){var old=devProfiles().find(function(x){return x.email===email;});var p=devProfiles().filter(function(x){return x.email!==email;});p.push(Object.assign({},old||{},{email:email,name:name,pin:old&&old.pin?old.pin:"",refresh:(AUTH&&AUTH.refresh_token)||""}));devProfilesSave(p);}
 function authFromHash(){var h=location.hash||"";if(h.indexOf("access_token=")<0)return null;var p={};h.replace(/^#/,"").split("&").forEach(function(kv){var i=kv.indexOf("=");if(i>0)p[decodeURIComponent(kv.slice(0,i))]=decodeURIComponent(kv.slice(i+1));});return p.access_token?p:null;}
-async function authSetPassword(){var pw=(document.getElementById("setpw-1")||{}).value||"";var pw2=(document.getElementById("setpw-2")||{}).value||"";var pin=(document.getElementById("setpw-pin")||{}).value||"";var err=document.getElementById("login-err");err.style.display="none";
-  if(pw.length<8){err.textContent="Password needs at least 8 characters.";err.style.display="block";return;}if(pw!==pw2){err.textContent="The two passwords don\u0027t match.";err.style.display="block";return;}
-  try{var r=await fetch(SUPABASE_URL+"/auth/v1/user",{method:"PUT",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+authToken(),"Content-Type":"application/json"},body:JSON.stringify({password:pw})});var d=await r.json();if(!r.ok)throw new Error(d.msg||d.message||d.error_description||"Couldn\u0027t set the password");
-    var em=authEmail();var user=await userForEmail(em);if(!user){err.textContent="Password set. But no account in Manage Users has "+em+" \u2014 ask an admin to add it, then sign in.";err.style.display="block";window._setPw=false;await authSignOut();renderLoginState();return;}
-    await devProfileSet(em,user.name,/^\d{4}$/.test(pin)?pin:"");window._setPw=false;history.replaceState(null,"",location.pathname);await finishAuthLogin(user);}
-  catch(e){err.textContent=e.message;err.style.display="block";}}
-function renderLoginState(){var box=document.getElementById("login-auth");if(!box)return;var mode=window._loginMode||"auth";var err=document.getElementById("login-err");if(err&&!window._loginKeepErr){err.style.display="none";}window._loginKeepErr=false;var v=document.getElementById("login-ver");if(v)v.textContent="v"+APP_VERSION;
-  var F=function(id,type,ph,extra){return '<div class="lg-f"><label for="'+id+'">'+ph+'</label><input id="'+id+'" type="'+type+'" '+(extra||"")+'></div>';};
-  if(window._setPw){box.innerHTML='<h1>Set your password</h1><div class="lg-sub">'+esc(authEmail())+'</div>'+F("setpw-1","password","New password (8+ characters)",'autocomplete="new-password"')+F("setpw-2","password","Again",'autocomplete="new-password"')+F("setpw-pin","password","4-digit PIN for this device (optional)",'inputmode="numeric" maxlength="4"')+'<button class="lg-btn" onclick="authSetPassword()">Save and sign in</button>';return;}
-  var prof=devProfiles();var who=window._loginWho||"";
-  if(mode==="code"){box.innerHTML='<h1>Access code</h1><div class="lg-sub">The old way in. Ask an admin for your email sign-in.</div><div class="lg-f"><label for="login-code">Code</label><input id="login-code" type="password" style="text-align:center;letter-spacing:.14em;font-size:20px" onkeydown="if(event.key===\'Enter\')doLogin()"></div><button class="lg-btn" id="login-btn" onclick="doLogin()">Enter &rarr;</button><div class="lg-lnk"><a href="#" onclick="window._loginMode=\'auth\';renderLoginState();return false">Sign in with email instead</a></div>';setTimeout(function(){var e=document.getElementById("login-code");if(e)e.focus();},50);return;}
-  if(prof.length&&!who&&mode==="auth"&&!window._loginFull){box.innerHTML='<h1>Who\u0027s this?</h1><div class="lg-sub">Tap your name, then your PIN.</div><div class="lg-avs">'+prof.map(function(p){var nm=p.name||p.email;return '<div class="lg-av" data-em="'+esc(p.email)+'" onclick="lgAvTap(this)"><i style="background:'+avatarColor(nm)+'">'+esc(initials(nm))+'</i><b>'+esc(String(nm).split(" ")[0])+'</b></div>';}).join("")+'<div class="lg-av more" onclick="window._loginFull=true;renderLoginState()"><i>+</i><b>Someone else</b></div></div>';return;}
-  if(who){var p=prof.find(function(x){return x.email===who;})||{};window._pinBuf="";var first=String(p.name||who).split(" ")[0];
-    box.innerHTML='<h1>Hi '+esc(first)+'</h1><div class="lg-sub">'+(p.bio&&bioOK()?'Face or fingerprint, or your 4-digit PIN.':'Your 4-digit PIN for this device.')+'</div>'+(p.bio&&bioOK()?'<button class="lg-btn lg-bio" onclick="bioUnlock(window._loginWho)">Unlock with face or fingerprint</button>':'')+'<div class="lg-dots" id="lg-dots"><i></i><i></i><i></i><i></i></div><input id="login-pin" type="password" inputmode="numeric" maxlength="4" style="position:absolute;opacity:0;pointer-events:none" oninput="lgPinSync(this.value)"><div class="lg-pad">'+["1","2","3","4","5","6","7","8","9"].map(function(n){return '<span onclick="lgPinKey(\''+n+'\')">'+n+'</span>';}).join("")+'<span class="x" onclick="window._loginWho=\'\';renderLoginState()">not me</span><span onclick="lgPinKey(\'0\')">0</span><span class="x" onclick="lgPinKey(\'del\')">delete</span></div><div class="lg-lnk"><a href="#" onclick="window._loginWho=\'\';window._loginFull=true;renderLoginState();return false">Use my password instead</a> &middot; <a href="#" style="color:#6b7280" onclick="devProfileForget(window._loginWho);window._loginWho=\'\';renderLoginState();return false">Forget me on this device</a></div>';
-    window._pinWho=who;setTimeout(function(){var e=document.getElementById("login-pin");if(e&&window.matchMedia&&!window.matchMedia("(pointer:coarse)").matches)e.focus();},50);return;}
-  box.innerHTML='<h1>Sign in</h1>'+F("login-email","email","Email",'autocomplete="username" inputmode="email"')+F("login-pass","password","Password",'autocomplete="current-password" onkeydown="if(event.key===\'Enter\')doEmailLogin()"')+'<button class="lg-btn" id="login-btn2" onclick="doEmailLogin()">Sign in</button><div class="lg-lnk"><a href="#" onclick="doForgot();return false">Forgotten your password?</a> &middot; <a href="#" onclick="window._loginMode=\'code\';renderLoginState();return false">Access code</a>'+(prof.length?' &middot; <a href="#" onclick="window._loginFull=false;renderLoginState();return false">Back</a>':'')+'</div>';setTimeout(function(){var e=document.getElementById("login-email");if(e)e.focus();},50);}
-function lgAvTap(el){var em=el.getAttribute("data-em")||"";window._loginWho=em;renderLoginState();var p=devProfiles().find(function(x){return x.email===em;});if(p&&p.bio&&bioOK())bioUnlock(em);}
-function lgPinSync(v){window._pinBuf=String(v||"").replace(/\D/g,"").slice(0,4);lgPinDraw();if(window._pinBuf.length===4)doPinUnlock(window._pinWho);}
-function lgPinKey(k){var b=window._pinBuf||"";if(k==="del")b=b.slice(0,-1);else if(b.length<4)b+=k;window._pinBuf=b;var inp=document.getElementById("login-pin");if(inp)inp.value=b;lgPinDraw();if(b.length===4)doPinUnlock(window._pinWho);}
+// ── Sign-in (Oct 2026): email and password once per phone, then a face and a PIN or fingerprint ──
+// The office computer can be marked as shared (My profile, admins): no faces, no PINs, signs out on its own.
+var FAM_ADMIN_NAME="Shane";
+var FAM_CODES_END=new Date(2026,10,1);
+var LG_FACE=["#c6e76c","#fbcfe8","#bfdbfe","#fde68a","#a7f3d0","#ddd6fe","#fed7aa"];
+function famShared(){try{return localStorage.getItem("nspca-shared-device")==="1";}catch(e){return false;}}
+function famSetShared(on){try{if(on)localStorage.setItem("nspca-shared-device","1");else localStorage.removeItem("nspca-shared-device");}catch(e){}
+  if(on){devProfilesSave([]);try{localStorage.removeItem("nspca-user-cache");}catch(e){}}
+  setupAutoLogout();famToast(on?"This computer is now shared: no faces or PINs, and it signs out after "+getAutoLogoutMins()+" minutes":"This computer is no longer marked as shared");
+  if(typeof showDashSection==="function")showDashSection("profile");}
+function famAnimals(){var h=famHere();return h==="cats"?"cats":h==="stables"?"horses":"dogs";}
+function lgOffline(){return navigator.onLine===false;}
+function lgLastSync(){var t=0;try{t=parseInt(localStorage.getItem("nspca-last-sync")||"0",10)||0;}catch(e){}if(!t)return "";var d=new Date(t);var hm=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+  return "last synced "+(new Date().toDateString()===d.toDateString()?hm:d.toLocaleDateString("en-IE",{day:"numeric",month:"short"})+" "+hm);}
+function lgFirst(p){return String((p&&(p.name||p.email))||"").split(/[ @]/)[0];}
+function lgFace(p,i,size){var nm=lgFirst(p);return '<span class="lg-face" style="width:'+size+'px;height:'+size+'px;font-size:'+Math.round(size*0.36)+'px;background:'+LG_FACE[i%LG_FACE.length]+'">'+famEsc((nm[0]||"?").toUpperCase())+'</span>';}
+function lgMethods(p){var b=p.bio&&bioOK();return p.pin&&b?"PIN, fingerprint":p.pin?"PIN":b?"fingerprint":"password";}
+function lgTop(sub){return '<div class="lg-wm">NSPCA Longford</div>'+(sub?'<div class="lg-wms">'+sub+'</div>':'');}
+function lgErr(t,ok){var e=document.getElementById("login-err");if(!e)return;var slot=document.querySelector("#login-auth .lg-errslot");if(slot&&e.parentNode!==slot)slot.appendChild(e);
+  e.textContent=t;e.classList.toggle("ok",!!ok);e.style.removeProperty("color");e.style.background="";e.style.borderLeftColor="";e.style.display="block";}
+function lgErrHide(){var e=document.getElementById("login-err");if(e)e.style.display="none";}
+function lgAuthMsg(e){var m=String((e&&e.message)||"");
+  if(/invalid login credentials/i.test(m))return "That email and password don’t match. Check the email, or tap “Forgot your password?”.";
+  if(/not confirmed/i.test(m))return "This email hasn’t been confirmed yet. Ask "+FAM_ADMIN_NAME+" to tick Auto Confirm for it in Supabase.";
+  if((e&&e.name==="TypeError")||/fetch|network|load failed/i.test(m))return "No signal. The first sign-in on a phone needs signal. Try again when you’ve a bar or two.";
+  if(/rate|too many/i.test(m))return "Too many tries. Wait a few minutes, then try again.";
+  return "Couldn’t sign in: "+(m||"try again");}
+function lgProfilePlain(em,u){var P=devProfiles().filter(function(x){return x.email!==em;});P.push({email:em,name:u.name,label:famRoleLabel(u),pin:"",refresh:""});devProfilesSave(P);}
+function lgCacheUser(user){try{var c=Object.assign({},user);delete c.photo;var em=String(c.email||authEmail()||"").toLowerCase();
+    if(!famShared())localStorage.setItem("nspca-user-cache",JSON.stringify(c));
+    var P=devProfiles();var me=P.find(function(x){return String(x.email||"").toLowerCase()===em;});if(me){me.name=user.name;me.label=famRoleLabel(user);if(me.pin||me.bio)me.user=c;else delete me.user;devProfilesSave(P);}}catch(e){}}
+async function famBioCreate(em,name){var cred=await navigator.credentials.create({publicKey:{challenge:famRand(32),rp:{name:"NSPCA Longford"},user:{id:new TextEncoder().encode(em).slice(0,64),name:em,displayName:name||em},pubKeyCredParams:[{type:"public-key",alg:-7},{type:"public-key",alg:-257}],authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required",residentKey:"discouraged"},timeout:60000,attestation:"none"}});return cred?famB64(cred.rawId):"";}
+function devProfileForget(email){devProfilesSave(devProfiles().filter(function(x){return x.email!==email;}));renderLoginState();}
+async function finishAuthLogin(user){LOGGED_IN=true;CURRENT_USER=user;window._wnShownSession=false;window._lgStage="";window._loginWho="";window._loginFull=false;window._setPw=false;
+  localStorage.setItem("nspca-intake-auth",user.code||("EMAIL:"+user.email));localStorage.setItem("nspca-user-name",user.name);localStorage.setItem("nspca-user-role",user.role||"staff");lgCacheUser(user);
+  window._prevLogin=userLastLogin(user.code||user.email);window._catchupDismissed=false;recordLastLogin(user.code||user.email);bumpActivity();setupAutoLogout();await refreshAllUsers();if(goHomeApp(user,!!window._explicitLogin))return;window._explicitLogin=false;await famEnterAppSafe();}
+async function doEmailLogin(){var em=((document.getElementById("login-email")||{}).value||"").trim().toLowerCase();var pw=(document.getElementById("login-pass")||{}).value||"";var btn=document.getElementById("login-btn2");
+  if(!em){lgErr("Type your work email.");return;}if(!pw){lgErr("Type your password.");return;}
+  lgErrHide();btn.textContent="Signing in…";btn.disabled=true;var au;
+  try{window._explicitLogin=true;au=await authSignIn(em,pw);}catch(e){btn.textContent="Sign in";btn.disabled=false;lgErr(lgAuthMsg(e));return;}
+  window._lgPwOwn=!!(au&&au.user_metadata&&au.user_metadata.pw_own);await lgAfterPassword(em);}
+async function lgAfterPassword(em){window._lgEm=em;var user=await userForEmail(em);
+  if(!user){window._lgStage="wait";renderLoginState();return;}
+  if(user.active===false){await authSignOut();window._lgStage="";window._loginFull=true;window._lgPrefill=em;renderLoginState();lgErr("This account is switched off. Ask "+FAM_ADMIN_NAME+" if that’s a mistake.");return;}
+  window._lgUser=user;
+  if(!window._lgPwOwn){window._lgStage="";window._setPw=true;window._lgSetPwFirst=true;renderLoginState();return;}
+  await lgQuickOrIn();}
+async function lgQuickOrIn(){var u=window._lgUser,em=window._lgEm;window._setPw=false;window._lgStage="";
+  if(famShared()){await finishAuthLogin(u);return;}
+  var prev=devProfiles().find(function(x){return x.email===em;});var asked=false;try{asked=!!localStorage.getItem("nspca-pin-asked:"+em);}catch(_e){}
+  if(prev&&(prev.pin||prev.bio)){await devProfileKeep(em,u.name);await finishAuthLogin(u);return;}
+  if(asked){lgProfilePlain(em,u);await finishAuthLogin(u);return;}
+  window._lgQ={pin:true,bio:false,none:false};window._lgStage="quick";renderLoginState();}
+function lgQuickTick(k){var q=window._lgQ||{};if(k==="none")q={pin:false,bio:false,none:true};else{q[k]=!q[k];q.none=!q.pin&&!q.bio;}window._lgQ=q;renderLoginState();}
+async function lgQuickGo(){var q=window._lgQ||{},em=window._lgEm,u=window._lgUser;if(!u)return;try{localStorage.setItem("nspca-pin-asked:"+em,"1");}catch(_e){}
+  if(!q.pin&&!q.bio){lgProfilePlain(em,u);await finishAuthLogin(u);return;}
+  await devProfileKeep(em,u.name);
+  if(q.bio){try{var id=await famBioCreate(em,u.name);if(id){var P=devProfiles();var me=P.find(function(x){return x.email===em;});if(me){me.bio=id;devProfilesSave(P);}}}
+    catch(e){if(!q.pin){lgErr(e&&e.name==="NotAllowedError"?"Fingerprint wasn’t set up. Pick a PIN instead, or Neither.":"This phone couldn’t set up fingerprint. Pick a PIN instead, or Neither.");return;}}}
+  if(q.pin){window._lgStage="pinset";window._lgPin1="";window._pinBuf="";renderLoginState();return;}
+  await finishAuthLogin(u);}
+async function lgPinSetDone(pin){if(!window._lgPin1){window._lgPin1=pin;window._pinBuf="";renderLoginState();return;}
+  if(pin!==window._lgPin1){window._lgPin1="";window._pinBuf="";renderLoginState();lgErr("Those didn’t match. Start again.");return;}
+  var em=window._lgEm,u=window._lgUser;var P=devProfiles();var me=P.find(function(x){return x.email===em;});if(me){me.pin=await pinHash(em,pin);me.bad=0;devProfilesSave(P);}
+  window._lgPin1="";await finishAuthLogin(u);}
+async function lgCheckAgain(){var em=window._lgEm;var u=await userForEmail(em);if(!u){renderLoginState();lgErr("Still waiting. "+FAM_ADMIN_NAME+" hasn’t added "+em+" yet.");return;}await lgAfterPassword(em);}
+async function lgWaitOut(){await authSignOut();window._lgStage="";window._loginFull=true;window._lgPrefill="";renderLoginState();}
+async function doPinUnlock(email){var pin=window._pinBuf||((document.getElementById("login-pin")||{}).value||"");var P=devProfiles();var p=P.find(function(x){return x.email===email;});if(!p)return;
+  if(!p.pin){lgUsePassword(email);return;}
+  if(await pinHash(email,pin)!==p.pin){p.bad=(p.bad||0)+1;window._pinBuf="";var _pi=document.getElementById("login-pin");if(_pi)_pi.value="";lgPinDraw();
+    if(p.bad>=5){p.pin="";p.bad=0;if(!p.bio){p.refresh="";delete p.user;}devProfilesSave(P);try{localStorage.removeItem("nspca-pin-asked:"+email);}catch(_e){}
+      lgUsePassword(email);lgErr("Five wrong PINs, so the PIN is off on this phone. Sign in with your password, then set a new one.");return;}
+    devProfilesSave(P);var left=5-p.bad;lgErr("Wrong PIN. "+left+(left===1?" try":" tries")+" left, then it asks for your password.");return;}
+  if(p.bad){p.bad=0;devProfilesSave(P);}
+  await devUnlock(email);}
+async function devUnlock(email){var p=devProfiles().find(function(x){return x.email===email;});if(!p)return;
+  AUTH={access_token:"",refresh_token:p.refresh,expires_at:0,user:{email:email}};var ok=await authRefresh();
+  if(!ok&&window._authNetFail){
+    if(p.user){AUTH.expires_at=1;try{localStorage.setItem("nspca-auth",JSON.stringify(AUTH));}catch(e){}window._authOffline=true;await finishAuthLogin(Object.assign({},p.user));return;}
+    AUTH=null;lgErr("No signal, and this phone hasn’t got you saved for offline yet. Try again when there’s signal.");return;}
+  if(!ok){var P=devProfiles();var me=P.find(function(x){return x.email===email;});if(me){me.refresh="";delete me.user;devProfilesSave(P);}lgUsePassword(email);lgErr("Your sign-in on this phone has run out. Sign in with your password once.");return;}
+  var user=await userForEmail(email);if(!user&&p.user&&lgOffline())user=Object.assign({},p.user);
+  if(!user){window._lgEm=email;window._lgStage="wait";renderLoginState();return;}
+  if(user.active===false){await authSignOut();window._loginWho="";renderLoginState();lgErr("This account is switched off. Ask "+FAM_ADMIN_NAME+" if that’s a mistake.");return;}
+  var p2=devProfiles();var mine=p2.find(function(x){return x.email===email;});if(mine){mine.refresh=AUTH.refresh_token;devProfilesSave(p2);}await finishAuthLogin(user);}
+async function doForgot(){var em=((document.getElementById("login-email")||{}).value||"").trim().toLowerCase();
+  if(!em){lgErr("Type your email first, then tap “Forgot your password?”.");return;}
+  var ok=await authRecover(em);lgErr(ok?"A reset link is on its way to "+em+". Open it on this phone.":"Couldn’t send a reset link just now. Ask "+FAM_ADMIN_NAME+" to reset your password.",ok);}
+async function authSetPassword(){var pw=(document.getElementById("setpw-1")||{}).value||"";var pw2=(document.getElementById("setpw-2")||{}).value||"";
+  if(pw.length<10){lgErr("At least 10 characters. A short sentence works.");return;}if(pw!==pw2){lgErr("The two don’t match.");return;}
+  var go=document.getElementById("setpw-go");if(go){go.disabled=true;go.textContent="Saving…";}
+  try{if(AUTH&&AUTH.expires_at&&AUTH.expires_at<Date.now()+60000){try{await authRefresh();}catch(e){}}
+    var r=await fetch(SUPABASE_URL+"/auth/v1/user",{method:"PUT",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+authToken(),"Content-Type":"application/json"},body:JSON.stringify({password:pw,data:{pw_own:true}})});
+    var d={};try{d=await r.json();}catch(e){}
+    if(!r.ok){var m=String(d.msg||d.message||d.error_description||"");throw new Error(/different from the old/i.test(m)?"that’s the starting password. Pick a new one.":/weak|short|pwned|leaked/i.test(m)?"that one’s too easy to guess. Try a longer one.":m||("error "+r.status));}
+    try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}
+    var em=String(authEmail()||(d&&d.email)||"").toLowerCase();window._lgEm=em;window._lgPwOwn=true;window._setPw=false;window._lgSetPwFirst=false;
+    if(!window._lgUser||String(window._lgUser.email||"").toLowerCase()!==em){var u=await userForEmail(em);if(!u){window._lgStage="wait";renderLoginState();return;}if(u.active===false){await authSignOut();renderLoginState();lgErr("This account is switched off. Ask "+FAM_ADMIN_NAME+" if that’s a mistake.");return;}window._lgUser=u;}
+    await lgQuickOrIn();}
+  catch(e){if(go){go.disabled=false;go.textContent="Save password";}lgErr("Couldn’t save it: "+((e&&e.message)||"try again"));}}
+function lgPwMeter(v){var m=document.getElementById("lg-meter");if(!m)return;var n=String(v||"").length;m.style.width=Math.min(100,Math.round(n/14*100))+"%";m.style.background=n>=10?"#c6e76c":"#f59e0b";}
+function lgUsePassword(em){window._loginWho="";window._loginFull=true;window._lgPrefill=em||"";window._lgStage="";renderLoginState();}
+function lgNotMe(){window._loginWho="";window._pinBuf="";renderLoginState();}
+function lgSomeoneNew(){window._loginWho="";window._loginFull=true;window._lgPrefill="";renderLoginState();}
+function lgPad(left){return '<div class="lg-pad">'+["1","2","3","4","5","6","7","8","9"].map(function(n){return '<span onclick="lgPinKey(\''+n+'\')">'+n+'</span>';}).join("")+left+'<span onclick="lgPinKey(\'0\')">0</span><span class="x" onclick="lgPinKey(\'del\')" aria-label="Delete"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></span></div>'
+  +'<input id="login-pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px" oninput="lgPinSync(this.value)">';}
+function lgDots(){return '<div class="lg-dots" id="lg-dots"><i></i><i></i><i></i><i></i></div>';}
+function lgFocusPin(){setTimeout(function(){var e=document.getElementById("login-pin");if(e&&window.matchMedia&&!window.matchMedia("(pointer:coarse)").matches)e.focus();},50);}
+function renderLoginState(){var box=document.getElementById("login-auth");if(!box)return;var mode=window._loginMode||"auth";var err=document.getElementById("login-err");
+  if(err&&box.contains(err))box.parentNode.insertBefore(err,box.nextSibling);
+  var keep=!!window._loginKeepErr;if(err&&!keep){err.style.display="none";}window._loginKeepErr=false;var v=document.getElementById("login-ver");if(v)v.textContent="v"+APP_VERSION;
+  var scr=document.getElementById("login-screen");var wide=false;var h="";
+  var F=function(id,type,ph,extra,val){return '<div class="lg-f"><label for="'+id+'">'+ph+'</label><input id="'+id+'" type="'+type+'" '+(extra||"")+(val?' value="'+famEsc(val)+'"':'')+'></div>';};
+  var shared=famShared();var prof=shared?[]:devProfiles();var who=window._loginWho||"";var stage=window._lgStage||"";var off=lgOffline();
+  if(window._setPw){
+    h=lgTop()+'<h1>Choose your own password</h1><div class="lg-sub">'+(window._lgSetPwFirst?FAM_ADMIN_NAME+" gave you a starting one. Pick something only you know.":"Pick something only you know.")+'</div><div class="lg-errslot"></div>'
+      +F("setpw-1","password","New password",'autocomplete="new-password" oninput="lgPwMeter(this.value)"')+'<div class="lg-meter"><i id="lg-meter"></i></div>'
+      +F("setpw-2","password","Again",'autocomplete="new-password" onkeydown="if(event.key===\'Enter\')authSetPassword()"')
+      +'<button class="lg-btn" id="setpw-go" onclick="authSetPassword()">Save password</button><div class="lg-bot lg-fine">At least 10 characters. A short sentence is easiest to remember.</div>';
+  }else if(stage==="wait"){
+    h=lgTop()+'<h1>Nearly there</h1><div class="lg-sub">You’re signed in, but '+FAM_ADMIN_NAME+' hasn’t let you into the apps yet.</div><div class="lg-errslot"></div><div class="lg-opts">'
+      +'<div class="lg-opt on still"><i></i><div><b>Email checked</b><small>'+famEsc(window._lgEm||authEmail())+'</small></div></div>'
+      +'<div class="lg-opt still"><i></i><div><b>Waiting for an admin</b><small>Ask '+FAM_ADMIN_NAME+' to add this email in Manage users.</small></div></div></div>'
+      +'<div class="lg-bot"><a href="#" onclick="lgCheckAgain();return false">Check again</a><span class="lg-dim"> · </span><a href="#" class="lg-dim" onclick="lgWaitOut();return false">Use a different email</a></div>';
+  }else if(stage==="quick"){var q=window._lgQ||{};var u=window._lgUser||{};
+    var opt=function(k,b,s){return '<div class="lg-opt'+(q[k]?' on':'')+'" role="checkbox" aria-checked="'+(q[k]?'true':'false')+'" onclick="lgQuickTick(\''+k+'\')"><i></i><div><b>'+b+'</b><small>'+s+'</small></div></div>';};
+    h=lgTop()+'<h1>Quicker next time</h1><div class="lg-sub">On this phone, open the app with:</div><div class="lg-errslot"></div><div class="lg-opts">'+opt("pin","A 4-digit PIN","Set it next")+(bioOK()?opt("bio","Fingerprint or face","If this phone has it"):"")+opt("none","Neither","Password every time. Best on a shared phone.")+'</div>'
+      +'<button class="lg-btn" onclick="lgQuickGo()">Continue</button><div class="lg-note g">You’re signed in as <b>'+famEsc(lgFirst(u))+'</b>. Anything you save is under your name.</div>';
+  }else if(stage==="pinset"){
+    h=lgTop()+'<h1>'+(window._lgPin1?"Same PIN again":"Choose a PIN")+'</h1><div class="lg-sub">'+(window._lgPin1?"To make sure.":"4 digits, for this phone only.")+'</div><div class="lg-errslot"></div>'+lgDots()+lgPad('<span class="k" onclick="window._lgStage=\'quick\';renderLoginState()">Back</span>');
+  }else if(mode==="code"){
+    h=lgTop()+'<h1>Access code</h1><div class="lg-sub">The old way in, until 1 November.</div><div class="lg-errslot"></div><div class="lg-f"><label for="login-code">Code</label><input id="login-code" type="password" style="letter-spacing:.14em" onkeydown="if(event.key===\'Enter\')doLogin()"></div><button class="lg-btn" id="login-btn" onclick="doLogin()">Enter &rarr;</button><div class="lg-bot"><a href="#" onclick="window._loginMode=\'auth\';renderLoginState();return false">Sign in with email instead</a></div>';
+  }else if(prof.length&&!who&&!window._loginFull){var list=off?prof.filter(function(p){return (p.pin||p.bio)&&p.refresh&&p.user;}):prof;
+    if(off&&!list.length){h=lgTop()+'<h1>No signal</h1><div class="lg-sub">Nobody is saved for offline on this phone yet. Sign in once with signal, and set a PIN or fingerprint.</div>';}
+    else{h=lgTop(off?"":"Dogs · Cats · Stables")+'<h1>'+(off?"No signal":"Who’s this?")+'</h1><div class="lg-sub">'+(off?"You can still get in: your PIN opens the "+famAnimals()+" as they were when this phone last synced.":"Tap your face.")+'</div><div class="lg-errslot"></div><div class="lg-faces">'
+      +list.map(function(p){var i=prof.indexOf(p);return '<div class="lg-fc" role="button" tabindex="0" data-em="'+famEsc(p.email)+'" onclick="lgAvTap(this)">'+lgFace(p,i,72)+'<b>'+famEsc(lgFirst(p))+'</b><small>'+famEsc(off?(lgLastSync()||lgMethods(p)):lgMethods(p))+'</small></div>';}).join("")
+      +(off?'':'<div class="lg-fc" role="button" tabindex="0" onclick="lgSomeoneNew()"><span class="lg-face add">+</span><b>Someone new</b><small>email once</small></div>')+'</div>'
+      +(off?'<div class="lg-note g lg-end">Changes wait on the phone and go up when there’s signal, under your name.</div>':'<div class="lg-bot"><a href="#" onclick="lgSomeoneNew();return false">Not your phone? Use email instead</a></div>');}
+  }else if(who){var p=prof.find(function(x){return x.email===who;})||{};var pi=prof.indexOf(p);window._pinBuf="";var bio=!!(p.bio&&bioOK());
+    h=lgTop()+'<div class="lg-who">'+lgFace(p,pi<0?0:pi,52)+'<div><b>'+famEsc(lgFirst(p))+'</b><small>'+famEsc(off?(lgLastSync()||p.label||""):(p.label||""))+'</small></div></div><div class="lg-errslot"></div>'
+      +(p.pin?lgDots()+lgPad(bio?'<span class="k" onclick="bioUnlock(window._loginWho)">Finger</span>':'<span class="k" onclick="lgNotMe()">Not you?</span>'):'<button class="lg-btn" onclick="bioUnlock(window._loginWho)">Use fingerprint or face</button>')
+      +'<div class="lg-bot"><a href="#" onclick="lgUsePassword(window._loginWho);return false">Forgot your PIN? Use your password</a>'+(bio||!p.pin?'<span class="lg-dim"> · </span><a href="#" class="lg-dim" onclick="lgNotMe();return false">Not you?</a>':'')+'</div>'
+      +(off?'<div class="lg-note g">No signal: changes wait on the phone and go up when there’s signal, under your name.</div>':'');
+    window._pinWho=who;
+  }else{var pre=window._lgPrefill||"";wide=window.innerWidth>=900;
+    var form='<h1>Sign in</h1><div class="lg-sub">'+(shared?"Shared computer: you’re signed out after "+getAutoLogoutMins()+" minutes without use.":pre?"Your work email and password.":"Your work email and password. You’ll only do this once on this "+(window.innerWidth>=900?"computer.":"phone."))+'</div><div class="lg-errslot"></div>'
+      +F("login-email","email","Email",'autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false"',pre)+F("login-pass","password","Password",'autocomplete="current-password" onkeydown="if(event.key===\'Enter\')doEmailLogin()"')
+      +'<button class="lg-btn" id="login-btn2" onclick="doEmailLogin()">Sign in</button><div class="lg-lnk2"><a href="#" onclick="doForgot();return false">Forgot your password?</a>'+(prof.length?'<span class="lg-dim"> · </span><a href="#" class="lg-dim" onclick="window._loginFull=false;window._lgPrefill=\'\';renderLoginState();return false">Back</a>':'')+'</div>';
+    var codes=Date.now()<FAM_CODES_END.getTime()&&!pre?'<div class="lg-note y lg-end">Used to sign in with a code? Codes stop on 1 November. Ask '+FAM_ADMIN_NAME+' for your email sign-in. <a href="#" onclick="window._loginMode=\'code\';renderLoginState();return false">Use your code for now</a></div>':'';
+    if(wide){var d=new Date();h='<div class="lg-split"><div class="lg-left">'+lgTop()+'<div class="lg-day">'+d.toLocaleDateString("en-IE",{weekday:"long"})+' '+d.getDate()+'</div><div class="lg-sub">Isolation, Cattery and Stables. Sign in to see the animals.</div><div class="lg-apps"><div><b>Dogs</b><small>isolation</small></div><div><b>Cats</b><small>cattery</small></div><div><b>Stables</b><small>equine</small></div></div></div><div class="lg-right">'+form+codes+'</div></div>';}
+    else h=lgTop()+form+codes;}
+  if(scr)scr.classList.toggle("lg-wide",wide);
+  box.innerHTML=h;
+  if(err&&keep&&err.style.display!=="none"){var slot=box.querySelector(".lg-errslot");if(slot)slot.appendChild(err);}
+  if(window._loginWho||stage==="pinset")lgFocusPin();
+  else setTimeout(function(){var e=document.getElementById(window._setPw?"setpw-1":document.getElementById("login-email")&&document.getElementById("login-email").value?"login-pass":"login-email")||document.getElementById("login-code");if(e&&window.matchMedia&&!window.matchMedia("(pointer:coarse)").matches)e.focus();},50);}
+function lgAvTap(el){var em=el.getAttribute("data-em")||"";var p=devProfiles().find(function(x){return x.email===em;});if(!p)return;
+  if(!(p.pin||p.bio)||!p.refresh){lgUsePassword(em);return;}
+  window._loginWho=em;renderLoginState();if(p.bio&&bioOK())bioUnlock(em);}
+function lgPinSync(v){window._pinBuf=String(v||"").replace(/\D/g,"").slice(0,4);lgPinDraw();lgPinFull();}
+function lgPinKey(k){var b=window._pinBuf||"";if(k==="del")b=b.slice(0,-1);else if(b.length<4)b+=k;window._pinBuf=b;var inp=document.getElementById("login-pin");if(inp)inp.value=b;lgPinDraw();lgPinFull();}
+function lgPinFull(){var b=window._pinBuf||"";if(b.length!==4)return;if(window._lgStage==="pinset"){setTimeout(function(){lgPinSetDone(b);},120);return;}doPinUnlock(window._pinWho);}
 function lgPinDraw(){var d=document.getElementById("lg-dots");if(!d)return;var n=(window._pinBuf||"").length;Array.prototype.forEach.call(d.children,function(el,i){el.className=i<n?"f":"";});}
+window.addEventListener("online",function(){if(window._authOffline&&typeof AUTH!=="undefined"&&AUTH&&AUTH.refresh_token){authRefresh().then(function(ok){if(ok)window._authOffline=false;});}lgNetChanged();});
+window.addEventListener("offline",lgNetChanged);
+function lgNetChanged(){var s=document.getElementById("login-screen");if(!s||s.style.display==="none")return;if(window._loginWho||window._loginFull||window._lgStage||window._setPw)return;renderLoginState();}
+(function(){if(document.getElementById("fam-lg-css"))return;var st=document.createElement("style");st.id="fam-lg-css";st.textContent=[
+".lg .lg-top{display:none}#login-auth{flex:1;display:flex;flex-direction:column}",
+".lg .lg-wm{color:#c6e76c;font-weight:900;font-size:22px;letter-spacing:-.02em;line-height:1.1}.lg .lg-wms{font-size:12px;color:#9a9fa8;font-weight:600;margin-top:3px}",
+".lg h1{font-size:24px;font-weight:800;letter-spacing:-.015em;margin:30px 0 0;line-height:1.2}.lg .lg-sub{font-size:13.5px;color:#cdd3df;font-weight:500;margin-top:8px;line-height:1.5}",
+".lg .lg-err{background:#4a1f24;border-left:0;border-radius:10px;color:#fecaca!important;font-size:13px;font-weight:500;line-height:1.45;padding:10px 12px;margin:14px 0 0}.lg .lg-err.ok{background:#23301c;color:#d9f99d!important}",
+".lg-faces{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 8px;margin-top:26px}.lg-fc{text-align:center;cursor:pointer;border-radius:14px;padding:4px 2px;-webkit-tap-highlight-color:transparent}.lg-fc:active{transform:scale(.97)}",
+".lg-face{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:#282932;font-weight:900;flex:none}.lg-fc .lg-face{margin-bottom:8px}.lg-face.add{width:72px;height:72px;background:transparent;border:2px dashed #6b7080;color:#9a9fa8;font-size:24px}",
+".lg-fc b{display:block;font-size:13.5px;font-weight:700;color:#fff;line-height:1.25}.lg-fc small{display:block;font-size:11.5px;color:#9a9fa8;margin-top:2px;line-height:1.3}",
+".lg-who{display:flex;align-items:center;gap:14px;margin-top:28px}.lg-who b{display:block;font-size:17px;font-weight:800;color:#fff}.lg-who small{display:block;font-size:12.5px;color:#9a9fa8;margin-top:1px}",
+".lg .lg-dots{display:flex;gap:14px;justify-content:center;margin-top:20px}.lg .lg-dots i{width:13px;height:13px;border-radius:50%;border:2px solid #8a8f9c;display:block}.lg .lg-dots i.f{background:#c6e76c;border-color:#c6e76c}",
+".lg .lg-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}.lg .lg-pad span{background:#3a3b46;border-radius:12px;height:54px;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:700;color:#fff;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}.lg .lg-pad span:active{background:#4a4c59}",
+".lg .lg-pad span.k{background:transparent;color:#c6e76c;font-size:14px;font-weight:800}",
+".lg .lg-f{margin-top:12px;background:#3a3b46;border-radius:12px;padding:9px 14px 10px;border:1.5px solid transparent}.lg .lg-f:focus-within{border-color:#c6e76c}.lg .lg-f label{font-size:11.5px;font-weight:500;letter-spacing:0;text-transform:none;color:#9a9fa8;margin:0 0 2px}.lg .lg-f input,.lg .lg-f input:focus{background:transparent!important;border:0!important;border-radius:0;padding:2px 0 0!important;min-height:0!important;box-shadow:none!important;font-size:16px!important;font-weight:500;color:#fff;outline:none;width:100%;height:auto}",
+".lg .lg-btn{margin-top:14px;font-weight:800;border-radius:12px;padding:14px}.lg-lnk2{text-align:center;margin-top:14px;font-size:13.5px;font-weight:700}.lg-lnk2 a,.lg-bot a{color:#c6e76c;text-decoration:none}",
+".lg-bot{margin-top:auto;padding-top:22px;text-align:center;font-size:13.5px;font-weight:700}.lg-bot.lg-fine{color:#9a9fa8;font-weight:500;font-size:12.5px;text-align:left;line-height:1.5}.lg .lg-dim,.lg-bot a.lg-dim,.lg-lnk2 a.lg-dim{color:#9a9fa8}",
+".lg-meter{height:4px;border-radius:2px;background:#3a3b46;margin-top:8px;overflow:hidden}.lg-meter i{display:block;height:100%;width:0;background:#f59e0b;transition:width .15s}",
+".lg-opts{display:flex;flex-direction:column;gap:10px;margin-top:20px}.lg-opt{display:flex;gap:12px;align-items:flex-start;background:#3a3b46;border-radius:12px;padding:12px 14px;cursor:pointer}.lg-opt.still{cursor:default}",
+".lg-opt i{width:20px;height:20px;border-radius:5px;border:2px solid #9a9fa8;flex:none;margin-top:1px}.lg-opt.on i{background:#c6e76c;border-color:#c6e76c}.lg-opt b{display:block;font-size:14px;font-weight:700;color:#fff}.lg-opt small{display:block;font-size:12px;color:#9a9fa8;margin-top:2px;line-height:1.45}",
+".lg-note{border-radius:12px;padding:11px 13px;font-size:13px;line-height:1.5;margin-top:16px}.lg-note.y{background:#fef3c7;color:#92400e;font-weight:600}.lg-note.y a{color:#92400e;font-weight:800}.lg-note.g{background:#23301c;color:#d9f99d}.lg-note.g b{color:#fff}.lg-end{margin-top:auto}",
+".lg-faces+.lg-note.lg-end,.lg-lnk2+.lg-note.lg-end{margin-top:auto}#login-auth>.lg-note.lg-end{margin-top:auto}#login-auth>.lg-lnk2{margin-bottom:22px}",
+".lg.lg-wide .lg-wrap{max-width:1120px}.lg-split{display:grid;grid-template-columns:1.15fr 1fr;border-radius:22px;overflow:hidden;background:#282932;box-shadow:0 30px 60px -30px rgba(0,0,0,.6);min-height:440px;margin:auto 0}",
+".lg-left{background:linear-gradient(160deg,#30313b,#22232b);padding:38px 44px}.lg-right{padding:38px 44px;display:flex;flex-direction:column}.lg-right h1{margin-top:0}",
+".lg-day{font-size:54px;font-weight:900;color:#c6e76c;letter-spacing:-.035em;line-height:1;margin-top:34px}.lg-apps{display:flex;gap:28px;margin-top:26px}.lg-apps b{display:block;font-size:22px;font-weight:800;color:#fff}.lg-apps small{display:block;color:#9a9fa8;font-size:12px;margin-top:3px}",
+".lg.lg-wide #login-auth{justify-content:center}.lg-right .lg-lnk2{margin-bottom:18px}"
+].join("");document.head.appendChild(st);})();
 function seenBeat(){if(window._seenOff||typeof LOGGED_IN==="undefined"||!LOGGED_IN||!supabaseClient||!CURRENT_USER)return;if(Date.now()-(_lastActivity||0)>5*60000)return;
   var em=CURRENT_USER.email||authEmail()||"";var q=supabaseClient.from("users").update({last_seen_at:new Date().toISOString(),last_seen_app:(typeof APP_HOME!=="undefined"?APP_HOME:"")});var p=CURRENT_USER.code?q.eq("code",CURRENT_USER.code):(em?q.eq("email",em):null);
   if(p)Promise.resolve(p).then(function(r){if(r&&r.error)window._seenOff=true;},function(){});}
@@ -215,8 +364,9 @@ function famBoot(){
     try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}
     setTimeout(function(){var er=document.getElementById("login-err");if(er&&window._authLinkErr){er.textContent=window._authLinkErr;er.style.display="block";}},700);})();
   (function(){var p=authFromHash();if(p){authSave({access_token:p.access_token,refresh_token:p.refresh_token||"",expires_at:Date.now()+((parseInt(p.expires_in)||3600)*1000),user:{email:""}});window._setPw=true;fetch(SUPABASE_URL+"/auth/v1/user",{headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+p.access_token}}).then(function(r){return r.json();}).then(function(u){if(u&&u.email){AUTH.user={email:u.email,id:u.id};authSave(AUTH);}renderLoginState();});localStorage.removeItem("nspca-intake-auth");}})();
+  if(famShared()){var la=0;try{la=parseInt(localStorage.getItem("nspca-last-active")||"0",10)||0;}catch(e){}if(Date.now()-la>getAutoLogoutMins()*60000){var A0=AUTH;AUTH=null;try{localStorage.removeItem("nspca-auth");localStorage.removeItem("nspca-intake-auth");}catch(e){}if(A0&&A0.access_token){try{fetch(SUPABASE_URL+"/auth/v1/logout?scope=local",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+A0.access_token}});}catch(e){}}}}
   var savedCode=localStorage.getItem("nspca-intake-auth");
-  if(AUTH&&AUTH.refresh_token&&savedCode&&savedCode.indexOf("EMAIL:")===0){savedCode="";(async function(){var ok=await authRefresh();var u=ok?await userForEmail(authEmail()):null;if(u&&u.active!==false){await finishAuthLogin(u);}else{authSave(null);showScreen("login-screen");}})();}
+  if(AUTH&&AUTH.refresh_token&&savedCode&&savedCode.indexOf("EMAIL:")===0){savedCode="";(async function(){var ok=await authRefresh();if(!ok&&window._authNetFail){var c=null;try{c=JSON.parse(localStorage.getItem("nspca-user-cache")||"null");}catch(e){}if(c&&c.name&&String(c.email||"").toLowerCase()===String(authEmail()).toLowerCase()){AUTH.expires_at=1;window._authOffline=true;await finishAuthLogin(c);return;}}var u=ok?await userForEmail(authEmail()):null;if(u&&u.active!==false){await finishAuthLogin(u);}else{authSave(null);showScreen("login-screen");}})();}
   if(savedCode){
     var user=USERS.find(function(u){return u.code===savedCode;});
     if(user){LOGGED_IN=true;CURRENT_USER=user;localStorage.setItem("nspca-user-name",user.name);localStorage.setItem("nspca-user-role",user.role);setupAutoLogout();if(goHomeApp(user,false))return;refreshAllUsers().then(function(){return famEnterAppSafe();});}
@@ -247,7 +397,7 @@ function famSheet(title,body){var o=document.getElementById("famsheet");if(!o){o
   o.innerHTML='<div class="fam-bg" onclick="famSheetClose()"></div><div class="fam-sh" role="dialog" aria-label="'+famEsc(title)+'"><div class="fam-grab"></div><div class="fam-shh"><b>'+famEsc(title)+'</b><span onclick="famSheetClose()">Cancel</span></div><div class="fam-shb">'+body+'</div></div>';
   setTimeout(function(){var e=o.querySelector("input,textarea");if(e)e.focus();},60);}
 function famSheetClose(){var o=document.getElementById("famsheet");if(o)o.remove();}
-function pwSheet(){famSheet("Change password",'<label class="fam-l">New password <em>8 or more characters</em></label><input id="pw-1" class="fam-in" type="password" autocomplete="new-password">'
+function pwSheet(){famSheet("Change password",'<label class="fam-l">New password <em>10 or more characters</em></label><input id="pw-1" class="fam-in" type="password" autocomplete="new-password">'
   +'<label class="fam-l">Again</label><input id="pw-2" class="fam-in" type="password" autocomplete="new-password" onkeydown="if(event.key===\'Enter\')pwSave()">'
   +'<div id="pw-err" class="fam-err" style="display:none"></div><button class="fam-go" id="pw-go" onclick="pwSave()">Save new password</button>');}
 function pwClose(){famSheetClose();}
@@ -293,7 +443,7 @@ function renderProfile(){
   var pinSet=devProfiles().some(function(p){return p.email===email&&p.pin;});var devices=devProfiles().length;
   h+='<div class="fam-card"><div class="fam-lbl">Sign-in</div>'
     +famRow("Email",email?famEsc(email):"Signed in with a code — ask an admin to add your email")
-    +(email?famRow("Password","change it here",'<span class="fam-btn" onclick="pwSheet()">Change</span>')+famRow("PIN on this device",pinSet?"set · quick unlock":"not set",'<span class="fam-btn" onclick="setDevicePin()">'+(pinSet?"Change":"Set")+'</span>'):'')
+    +(email?famRow("Password","change it here",'<span class="fam-btn" onclick="pwSheet()">Change</span>')+(famShared()?famRow("PIN on this device","none: this is a shared computer"):famRow("PIN on this device",pinSet?"set · quick unlock":"not set",'<span class="fam-btn" onclick="setDevicePin()">'+(pinSet?"Change":"Set")+'</span>')):'')
     +'</div>';
   // your apps
   var home=(typeof homeAppFor==="function"&&homeAppFor(me))||"dogs";var look=role!=="admin"&&typeof lookOnlyFor==="function"&&lookOnlyFor(me);
@@ -302,9 +452,9 @@ function renderProfile(){
   // this device
   var on=prefGet("bigtext","0")==="1";
   h+='<div class="fam-card"><div class="fam-lbl">On this device</div>'
-    +famRow("Auto sign-out","after this long untouched",famSeg(getAutoLogoutMins(),[[0,"Off"],[15,"15m"],[30,"30m"],[120,"2h"]],"setAutoLogoutMins(%v);showDashSection(&quot;profile&quot;)"))
+    +(famShared()?famRow("Auto sign-out","after "+getAutoLogoutMins()+" minutes untouched, because this is a shared computer"):famRow("Auto sign-out","after this long untouched",famSeg(getAutoLogoutMins(),[[0,"Off"],[15,"15m"],[30,"30m"],[120,"2h"]],"setAutoLogoutMins(%v);showDashSection(&quot;profile&quot;)")))+(role==="admin"?famRow("Shared computer","no faces or PINs, signs out on its own",famSeg(famShared()?"1":"0",[["0","Off"],["1","On"]],"famSetShared(&quot;%v&quot;===&quot;1&quot;)")):(famShared()?famRow("Shared computer","set by an admin"):""))
     +famRow("Larger text","for the corridor, gloves on",famSeg(on?"1":"0",[["0","Off"],["1","On"]],"prefSet(&quot;bigtext&quot;,&quot;%v&quot;)"))
-    +famDeviceRows()
+    +(famShared()?"":famDeviceRows())
     +(devices>1?famRow("Others remembered here",(devices-1)+" other"+(devices>2?"s":"")+" can unlock this device",'<span class="fam-btn" onclick="forgetOtherProfiles()">Forget</span>'):'')
     +'</div>';
   if(typeof appProfileExtra==="function"){try{h+=appProfileExtra(role,me)||"";}catch(e){}}
