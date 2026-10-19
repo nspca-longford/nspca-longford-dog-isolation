@@ -1605,7 +1605,7 @@ async function famEnterApp(){if(!records.length){try{await Promise.race([_rcRead
 function appWeek(me,mon){var w=myWeek(me.name);return {stats:[[w.reports,"day reports"],[w.weighs,"weigh-ins"],[w.assess,"assessed"]],names:w.dogs};}
 function appProfileExtra(role){var h="";var lb="";try{lb=localStorage.getItem("nspca-last-backup")||"";}catch(e){}
   if(role==="admin"||role==="manager"){var users=getAllUsersSync();h+='<div class="fam-card"><div class="fam-lbl">Admin <em>only admins see this</em></div>'
-    +(role==="admin"?famRow("Manage users",users.length+" people",'<span class="fam-btn" onclick="showDashSection(\'users\')">Open</span>')+famRow("Activity","who\u2019s been in and what changed",'<span class="fam-btn" onclick="showDashSection(\'activity\')">Open</span>'):'')
+    +(role==="admin"?famRow("Manage users",users.length+" people",'<span class="fam-btn" onclick="showDashSection(\'users\')">Open</span>')+famRow("Activity","who\u2019s been in and what changed",'<span class="fam-btn" onclick="showDashSection(\'activity\')">Open</span>')+famRow("Security","signed-in phones and computers, rare actions",'<span class="fam-btn" onclick="showDashSection(\'security\')">Open</span>'):'')
     +famRow("Download backup",lb?"last backup "+esc(fmtDMY(lb))+" \u00b7 "+daysSince(lb)+" days ago":"no backup on this device yet",'<span class="fam-btn" onclick="downloadBackup()">Download</span>')
     +famRow("The month","the unit report",'<span class="fam-btn" onclick="showDashSection(\'month\')">Open</span>')+'</div>';}
   h+='<div class="fam-card"><div class="fam-lbl">This app</div>'+famRow("NSPCA Longford \u00b7 Dog Isolation Unit","v"+esc(APP_VERSION),'<span class="fam-btn" onclick="showWhatsNew(true)">What\u2019s new</span>')+'</div>';
@@ -1658,6 +1658,8 @@ function showDashSection(section){try{bumpActivity();}catch(e){}
     if(currentRole()!=="admin"){el.innerHTML='<div style="text-align:center;padding:40px"><h2>Admin only</h2><div style="color:#6b7280;margin-top:8px">User management is restricted to admin accounts.</div><button onclick="showDashSection(\'profile\')" class="btn" style="margin-top:14px">&larr; Back to profile</button></div>';return;}
     refreshAllUsers().then(function(){el.innerHTML=renderUsersAdmin();});
     el.innerHTML='<div style="text-align:center;padding:40px;color:#6b7280">Loading users...</div>';
+  }else if(section==="security"){
+    famSecurityOpen(el);
   }else if(section==="activity"){
     window._act.rows=null;window._act.person="";el.innerHTML=renderActivity();
   }else if(section==="feedboard"){
@@ -1778,7 +1780,7 @@ async function rxArchivePicked(){var pk=rxPicked();var dep=pk.filter(function(r)
   var toArch=dep.some(function(r){return !isArchived(r);});for(var i=0;i<dep.length;i++){dep[i].state._archived=toArch;try{await saveRecordChange(dep[i]);}catch(e){}}
   window._rSel=false;window._rPick={};showDashSection("records");undoToast((toArch?"Archived ":"Restored ")+dep.length+(dep.length<pk.length?" · "+(pk.length-dep.length)+" still here, skipped":""),async function(){for(var j=0;j<dep.length;j++){dep[j].state._archived=!toArch;try{await saveRecordChange(dep[j]);}catch(e){}}showDashSection("records");});}
 function rxDeletePicked(){if(!rxCanDelete()){appAlert("Only an admin, manager, supervisor or assistant supervisor can delete records.");return;}var pk=rxPicked();if(!pk.length)return;
-  appConfirm("Delete "+(pk.length===1?esc(pk[0].name||"this record"):pk.length+" records")+"? Cannot be undone.",async function(){if(!supabaseClient)return;for(var i=0;i<pk.length;i++){var id=pk[i].id;try{await supabaseClient.from("dogs").delete().eq("id",id);}catch(e){}try{await supabaseClient.from("dog_photos").delete().eq("dog_id",id);}catch(e){}try{delete _photoStore[id];}catch(e){}}
+  appConfirm("Delete "+(pk.length===1?esc(pk[0].name||"this record"):pk.length+" records")+"? Cannot be undone.",async function(){if(!supabaseClient)return;try{famSecLog(currentName()+" deleted "+(pk.length===1?"a dog record: "+(pk[0].name||"unnamed"):pk.length+" dog records: "+pk.map(function(r){return r.name||"unnamed";}).slice(0,6).join(", ")));}catch(_e){}for(var i=0;i<pk.length;i++){var id=pk[i].id;try{await supabaseClient.from("dogs").delete().eq("id",id);}catch(e){}try{await supabaseClient.from("dog_photos").delete().eq("dog_id",id);}catch(e){}try{delete _photoStore[id];}catch(e){}}
     window._rSel=false;window._rPick={};await loadRecordsList();showDashSection("records");miniToast("Deleted "+pk.length);},{danger:true});}
 function page_records(){
   if(!records.length)return'<div class="rxempty">No saved records yet.</div>';
@@ -2366,6 +2368,8 @@ var DT_SW={"Black":"#1c1c1c","White":"#f7f7f2","Cream":"#efe3c2","Golden":"#d9a4
 (function(){var w0=window.innerWidth>640,t=null;window.addEventListener("resize",function(){clearTimeout(t);t=setTimeout(function(){var w=window.innerWidth>640;if(w!==w0){w0=w;try{var wr=document.getElementById("wrap");if(S&&S.tab==="dog"&&wr&&wr.style.display!=="none")renderMain();}catch(e){}}},150);});})();
 function dtDay(iso){try{return new Date(iso+"T12:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"});}catch(e){return iso;}}
 function dtSwatch(c){var v=DT_SW[c];return v?'<i class="idsw" style="background:'+v+'"></i>':'';}
+function dtRedraw(el,fn){fn=fn||renderMain;if(el&&el.type==="date"&&document.activeElement===el){if(!el._rdPend){el._rdPend=true;el.addEventListener("blur",function(){setTimeout(fn,0);},{once:true});}return;}setTimeout(fn,0);}
+function dtDateOpen(flag,key){var q=function(){return document.querySelector('.dtsh input[data-save="'+key+'"]')||document.querySelector('input[data-save="'+key+'"]');};var inp=q();if(inp&&window[flag]&&!inp.value){window[flag]=false;renderMain();return;}window[flag]=true;if(!inp){renderMain();inp=q();}if(inp){try{inp.focus({preventScroll:true});}catch(e){}try{if(inp.showPicker)inp.showPicker();}catch(e){}}}
 function dtSheet(k){window._dtSheet=k||null;renderMain();if(k){setTimeout(function(){var i=document.querySelector(".dtsh input:not([type=file])");if(i&&window.matchMedia&&!window.matchMedia("(pointer:coarse)").matches)i.focus();},40);if(!window._dtEsc){window._dtEsc=true;document.addEventListener("keydown",function(ev){if(ev.key==="Escape"&&window._dtSheet)dtSheet(null);});}}}
 function dtPick(k,v){window._dtSheet=null;if(v===""){S.dog[k]="";dtSave();return;}dtSet(k,v);}
 function dtFoundShown(d){return d.intakeReason==="Stray"||d.intakeReason==="Abandoned"||/^(Member of the public|Dog warden|Garda)$/.test(d.broughtInBy||"")||!!d.foundAt;}
@@ -2829,7 +2833,7 @@ function printIncidentRegister(){
 // Walks every dog still carrying photos inside its row and moves them to
 // dog_photos. Works from the list already in memory — no extra download.
 function downloadBackup(){if(currentRole()!=="admin"){appAlert("Backups are admin-only.");return;}
-  downloadBackupRun_([]);try{localStorage.setItem("nspca-last-backup",new Date().toISOString().slice(0,10));}catch(e){}
+  downloadBackupRun_([]);try{famSecLog(currentName()+" downloaded a backup of all the dogs");}catch(_e){}try{localStorage.setItem("nspca-last-backup",new Date().toISOString().slice(0,10));}catch(e){}
 }
 function downloadBackupRun_(photos){
   try{
@@ -2889,7 +2893,7 @@ function renderDashboard(){
   var overdueDogs=records.filter(function(r){var o=r.state&&r.state.fin?r.state.fin.outcome:"";return (!o||o==="Active — in isolation"||o==="Active - in isolation")&&daysInIsolation(r.intakeDate)>5+isoExtraDays(r.state&&r.state.dog);});
   var stickyEl=document.getElementById("overdue-sticky");
   if(stickyEl)stickyEl.innerHTML=alertsRailHtml();
-  if(!active.length){el.innerHTML=offlineBannerHtml()+expUnheldHtml()+statusStrip+fb+'<div style="text-align:center;padding:40px"><div style="font-size:40px"></div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+brandFooterHtml();return;}
+  if(!active.length){el.innerHTML=offlineBannerHtml()+(typeof famWaitNoticeHtml==="function"?famWaitNoticeHtml():"")+expUnheldHtml()+statusStrip+fb+'<div style="text-align:center;padding:40px"><div style="font-size:40px"></div><div style="color:var(--color-text-secondary);margin-top:8px">No dogs match</div></div>'+brandFooterHtml();return;}
 
   var _cats=computeDueToday(active,true);
   var cards=active.map(function(rec){
@@ -2957,7 +2961,7 @@ function renderDashboard(){
   var _mn=function(n,l,c,always){return (n||always)?'<div><b class="'+(n&&c?c:"")+'">'+n+'</b><span>'+l+'</span></div>':'';};
   window._vitalsHtml='<div class="mnums">'+_mn(_v.inunit,"in",'',true)+_mn(_v.con,"contagious","r")+_mn(_v.ready,"ready to go","g")+_mn(_v.fin,"finish this week","a")+_mn(_v.fost,"in foster")+_mn((function(){try{var td=tdISO();return expList().filter(function(e){return e.date<=td;}).length;}catch(e){return 0;}})(),"expected","g")+'</div>';
   var mainCol=(window._morningOff?vitals:'')+statusStrip;
-  el.innerHTML=offlineBannerHtml()+morningHtml(active)+fairNoticeHtml()+expUnheldHtml()+mainCol+viewBody+brandFooterHtml();
+  el.innerHTML=offlineBannerHtml()+morningHtml(active)+fairNoticeHtml()+(typeof famWaitNoticeHtml==="function"?famWaitNoticeHtml():"")+expUnheldHtml()+mainCol+viewBody+brandFooterHtml();
   var hs=document.getElementById("dash-hsearch");if(hs&&hs.value!==_s&&window._dbSearchActive!=="h")hs.value=_s;
   if(window._dbSearchActive){var si=hs;if(si){si.focus();var l=(window._dbCaret!=null?window._dbCaret:si.value.length);si.setSelectionRange(l,l);}window._dbSearchActive=false;window._dbCaret=null;}
 }
@@ -5775,7 +5779,7 @@ function page(){
     var identity='<div class="dog-fg">'+fld("Name",d.name,"dog.name","text","e.g. Bailey",'onblur="checkDuplicateName()" id="dog-name-input"')+'<div class="f"><label class="lbl">Breed <em class="dt-em">type to search</em></label><input list="dt-breeds" value="'+esc(d.breed||"")+'" placeholder="e.g. Collie" data-save="dog.breed">'+_breedList+'<div class="cchips dt-xb"><span class="cchip'+(d.crossbreed?" on":"")+'" onclick="dtCross()">'+(d.crossbreed?"\u2713 ":"+ ")+'Crossbreed</span></div></div>'+(d.crossbreed?'<div class="f"><label class="lbl">Crossed with</label><input list="dt-breeds" value="'+esc(d.breed2||"")+'" placeholder="e.g. Labrador" data-save="dog.breed2"></div>':'')+'</div>'
       +'<div id="dup-name-hint" style="display:none;font-size:11px;color:#854d0e;background:#fef9c3;border-radius:7px;padding:6px 10px;margin:0 0 10px">There&rsquo;s already an active dog with this name.</div>'
       +'<div class="cq"><label>Sex</label><div class="cchips">'+["Male","Female","Unknown"].map(function(x){return '<span class="cchip'+((x==="Unknown"?d.sex==="Unknown":_sexB===x)?" on":"")+'" onclick="dtSex(\''+x+'\')">'+x+'</span>';}).join("")+(/^(Male|Female)$/.test(_sexB)?'<span class="cchip dt-add'+(_fixed?" on":"")+'" onclick="dtFix()">'+(_fixed?"\u2713 ":"+ ")+(_sexB==="Male"?"neutered":"spayed")+'</span>':'')+'</div></div>'
-      +'<div class="cq"><label>Age<em>or a date of birth</em></label><div class="cchips"><span class="cchip'+(_yrs===0?" on":"")+'" onclick="dtAge(\'pup\')">Under 1</span><span class="cchip dt-stp" onclick="dtAge(-1)">\u2212</span><span class="'+(_yrs&&_yrs>0?"cchip on":"dt-yrs")+'" style="min-width:74px;text-align:center">'+(_yrs&&_yrs>0?esc(String(d.age).replace(/\s*\(.*\)/,"")):"years")+'</span><span class="cchip dt-stp" onclick="dtAge(1)">+</span><span class="cchip dt-add" onclick="window._dtDob=!window._dtDob;renderMain()">'+(d.dob?"\u2713 born "+esc(fmtDMY(d.dob)):"date of birth")+'</span></div>'+((window._dtDob||d.dob)?'<div class="dog-fg" style="margin-top:6px">'+fld("Date of birth",d.dob||"","dog.dob","date")+'</div>':'')+'</div>'
+      +'<div class="cq"><label>Age<em>or a date of birth</em></label><div class="cchips"><span class="cchip'+(_yrs===0?" on":"")+'" onclick="dtAge(\'pup\')">Under 1</span><span class="cchip dt-stp" onclick="dtAge(-1)">\u2212</span><span class="'+(_yrs&&_yrs>0?"cchip on":"dt-yrs")+'" style="min-width:74px;text-align:center">'+(_yrs&&_yrs>0?esc(String(d.age).replace(/\s*\(.*\)/,"")):"years")+'</span><span class="cchip dt-stp" onclick="dtAge(1)">+</span><span class="cchip dt-add" onclick="dtDateOpen(\'_dtDob\',\'dog.dob\')">'+(d.dob?"\u2713 born "+esc(fmtDMY(d.dob)):"date of birth")+'</span></div>'+((window._dtDob||d.dob)?'<div class="dog-fg" style="margin-top:6px">'+fld("Date of birth",d.dob||"","dog.dob","date")+'</div>':'')+'</div>'
       +'<div class="cq"><label>Size'+(_sizeSug?'<em>suggested from '+(/^female/i.test(d.sex||"")?"her":"his")+' '+_kgL.kg+' kg</em>':'')+'</label><div class="cchips">'+DT_SIZES.map(function(o){return '<span class="cchip'+(d.size===o[0]?" on":_sizeSug===o[0]?" dt-sug":"")+'" onclick="dtSize(\''+o[0]+'\')">'+esc(o[1])+'</span>';}).join("")+'</div></div>'
       +dtChips("Colour","",DT_COLOURS,d.colour||"","dtColour")
       +'<div class="cq"><label>Weight<em>from Weights</em></label><div class="dt-ro">'+(_kgL.kg!==null?'<b>'+_kgL.kg+' kg</b>'+(_kgL.date?' \u00b7 '+esc(fmtAgo(_kgL.date+"T12:00:00")):''):'Not weighed yet')+'<span data-go="weights">Weigh \u203a</span></div></div>'
@@ -5793,7 +5797,7 @@ function page(){
       +dtChips("Why",(d.intakeReason&&!DT_REASONS.some(function(o){return o[0]===d.intakeReason;}))?esc(d.intakeReason):"",DT_REASONS,d.intakeReason||"","dtReason")
       +famFairChip(d)
       +(dtFoundShown(d)?'<div class="dt-found"><div class="lbl">Where found</div><div class="dog-fg">'+fld("Place",d.foundAt,"dog.foundAt","text","road, town, landmark")+fld("Found by",d.finder,"dog.finder","text","name")+fld("Finder\u2019s phone",d.finderPhone,"dog.finderPhone","tel","")+'</div></div>':'')
-      +'<div class="cq"><label>Came in on</label><div class="cchips"><span class="cchip on">'+esc(fmtDMY(S.dog.intakeDate))+'</span><span class="cchip dt-add" onclick="window._dtDate=!window._dtDate;renderMain()">change</span></div>'+(window._dtDate?'<div class="dog-fg" style="margin-top:6px">'+fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date")+'</div>':'')+'</div>'
+      +'<div class="cq"><label>Came in on</label><div class="cchips"><span class="cchip on">'+esc(fmtDMY(S.dog.intakeDate))+'</span><span class="cchip dt-add" onclick="dtDateOpen(\'_dtDate\',\'dog.intakeDate\')">change</span></div>'+(window._dtDate?'<div class="dog-fg" style="margin-top:6px">'+fld("Intake date",S.dog.intakeDate,"dog.intakeDate","date")+'</div>':'')+'</div>'
       +'<div class="cq"><label>Assessed by</label><div class="cchips">'+_names.map(function(n){return '<span class="cchip'+(d.assessor===n?" on":"")+'" onclick="dtAssessor(\''+esc(n).replace(/'/g,"\\'")+'\')">'+esc(n.split(" ")[0])+'</span>';}).join("")+'<span class="cchip dt-add'+(_assOther?" on":"")+'" onclick="dtAssessor(\'__other\')">'+(_assOther&&d.assessor?esc(d.assessor):"other\u2026")+'</span></div>'+(_assOther?'<div class="dog-fg" style="margin-top:6px">'+fld("Assessor",d.assessor||"","dog.assessor","text","name")+'</div>':'')+'</div>'
       +(_isRet?dtChips("Return / reclaim","",[["Returned from adoption","Returned from adoption"],["Back from foster / trial","Back from foster / trial"],["Owner-reclaim deadline","Owner-reclaim deadline (stray)"]],d.returnType||"","dtReturn")+(d.returnType?'<div class="dog-fg">'+fld(returnDateLabel(d.returnType),d.returnDate||"","dog.returnDate","date")+'</div>':''):'')
       +'<div class="dog-fg" style="margin-top:8px">'+ta("Notes",d.cameInNote||"","dog.cameInNote","Anything else about how they came in \u2014 what the inspector or owner said, the circumstances\u2026")+'</div>'
@@ -6836,7 +6840,7 @@ function renderArrival(){var a=S.arrival||{};var d=S.dog||{};var as=S.assessment
   h+='<div class="brow" style="margin-top:12px"><button class="btn" data-go="dog">&larr; Dog</button><button class="btn btnp" data-go="days">Next: day reports &rarr;</button></div>';
   return h;
 }
-function renderMain(){setTimeout(updateSaveBar,0);document.getElementById("content").innerHTML=page();try{sleekPass();}catch(e){}try{if(S&&S._id){presWrite(APP_HOME+":"+S._id,S.tab||"");presRead();presPaint();}}catch(e){}}
+function renderMain(){setTimeout(updateSaveBar,0);var _sh=document.querySelector(".dtsh"),_st=_sh?_sh.scrollTop:0,_sy=window.scrollY;document.getElementById("content").innerHTML=page();if(_sh){var _sh2=document.querySelector(".dtsh");if(_sh2){if(_st)_sh2.scrollTop=_st;if(Math.abs(window.scrollY-_sy)>2)window.scrollTo(0,_sy);}}try{sleekPass();}catch(e){}try{if(S&&S._id){presWrite(APP_HOME+":"+S._id,S.tab||"");presRead();presPaint();}}catch(e){}}
 // ── Sleeker everywhere (v3.308): ⓘ instead of the paragraph, picked answers as facts ──
 function sleekPass(){var c=document.getElementById("content");if(!c)return;try{applyLookOnly();}catch(e){}
   var h=c.querySelector(":scope > h2")||c.querySelector(":scope > .ov2 > h2");var sub=h&&h.nextElementSibling;
@@ -6992,7 +6996,7 @@ document.getElementById("wrap").addEventListener("input",function(e){
     if(p[0]==="dog"&&p[1]==="name"){var bg=document.getElementById("badge");if(bg){bg.style.display=val?"block":"none";bg.textContent=val;}}
     // record who made the call, not just who saved last
     if(p[0]==="fin"&&p[1]==="outcome"&&val)stampDecision("outcome");
-    if(p[0]==="dog"&&p[1]==="dob"&&val&&!S.dog.age){var _w=Math.floor((Date.now()-new Date(val).getTime())/6048e5);if(_w>=0){var _y=Math.floor(_w/52);S.dog.age=_y<1?"Under 1 year (puppy)":(_y+(_y===1?" year":" years"));persistSave();setTimeout(render,0);}}
+    if(p[0]==="dog"&&p[1]==="dob"&&val&&!S.dog.age){var _w=Math.floor((Date.now()-new Date(val).getTime())/6048e5);if(_w>=0){var _y=Math.floor(_w/52);S.dog.age=_y<1?"Under 1 year (puppy)":(_y+(_y===1?" year":" years"));persistSave();dtRedraw(el,render);}}
     if(p[0]==="rehome"&&p[1]==="webUrl"){ensureRF();S.rehome.webUrlDate=val?new Date().toISOString().slice(0,10):"";}
     if(p[0]==="assessment"&&p[1]==="assessorReport"){S.assessment.assessorReportBy=currentName();S.assessment.assessorReportDate=new Date().toISOString().slice(0,10);}
     if(p[0]==="rehome"&&p[1]==="trial"){setTimeout(render,0);}
@@ -7023,13 +7027,13 @@ document.getElementById("wrap").addEventListener("change",function(e){
       S.assessment.rehomingBy=currentName()||"";
       S.assessment.rehomingAt=new Date().toISOString().slice(0,10);
     }
-    renderMain();debouncedSave();
+    dtRedraw(el);debouncedSave();
   }
   if(el.dataset.sd){
     var p2=el.dataset.sd.split(".");var dayIdx=parseInt(p2[0]);var dayField=p2[1];
     S.days[dayIdx][dayField]=el.value;
     if(dayIdx===0&&dayField==="date"&&el.value){for(var j=1;j<=4;j++){if(!S.days[j].date){var nd=new Date(el.value);nd.setDate(nd.getDate()+j);S.days[j].date=nd.toISOString().slice(0,10);}}}
-    renderMain();debouncedSave();
+    dtRedraw(el);debouncedSave();
   }
 });
 
@@ -7117,8 +7121,10 @@ async function saveRecord(){if(S&&S._id){try{delete _histCache[S._id];}catch(e){
 async function deleteRecord(id){
   if(!supabaseClient)return;
   if(!rxCanDelete()){appAlert("Only an admin, manager, supervisor or assistant supervisor can delete records.");return;}
+  var _nm=((records.find(function(r){return r.id===id;})||{}).name)||"a record";
   var _dr=await supabaseClient.from("dogs").delete().eq("id",id);
   if(_dr&&_dr.error){appAlert("Couldn\u2019t delete the record \u2014 check the connection and try again.");return;}
+  try{famSecLog(currentName()+" deleted a dog record: "+_nm);}catch(_e){}
   try{await supabaseClient.from("dog_photos").delete().eq("dog_id",id);}catch(e){}
   delete _photoStore[id];
   await loadRecordsList();
