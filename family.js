@@ -161,7 +161,7 @@ var FAM_ADMIN_NAME="Shane";
 var FAM_CODES_END=new Date(2026,10,1);
 var LG_FACE=["#c6e76c","#fbcfe8","#bfdbfe","#fde68a","#a7f3d0","#ddd6fe","#fed7aa"];
 function famShared(){try{return localStorage.getItem("nspca-shared-device")==="1";}catch(e){return false;}}
-function famSetShared(on){try{if(on)localStorage.setItem("nspca-shared-device","1");else localStorage.removeItem("nspca-shared-device");}catch(e){}
+function famSetShared(on){if(on!==famShared())famSecLog(currentName()+(on?" marked this "+famDevLabel()+" as a shared computer":" took the shared mark off this computer"));try{if(on)localStorage.setItem("nspca-shared-device","1");else localStorage.removeItem("nspca-shared-device");}catch(e){}
   if(on){devProfilesSave([]);try{localStorage.removeItem("nspca-user-cache");}catch(e){}}
   setupAutoLogout();famToast(on?"This computer is now shared: no faces or PINs, and it signs out after "+getAutoLogoutMins()+" minutes":"This computer is no longer marked as shared");
   if(typeof showDashSection==="function")showDashSection("profile");}
@@ -190,14 +190,14 @@ async function famBioCreate(em,name){var cred=await navigator.credentials.create
 function devProfileForget(email){devProfilesSave(devProfiles().filter(function(x){return x.email!==email;}));renderLoginState();}
 async function finishAuthLogin(user){LOGGED_IN=true;CURRENT_USER=user;window._wnShownSession=false;window._lgStage="";window._loginWho="";window._loginFull=false;window._setPw=false;
   localStorage.setItem("nspca-intake-auth",user.code||("EMAIL:"+user.email));localStorage.setItem("nspca-user-name",user.name);localStorage.setItem("nspca-user-role",user.role||"staff");lgCacheUser(user);
-  window._prevLogin=userLastLogin(user.code||user.email);window._catchupDismissed=false;recordLastLogin(user.code||user.email);bumpActivity();setupAutoLogout();await refreshAllUsers();if(goHomeApp(user,!!window._explicitLogin))return;window._explicitLogin=false;await famEnterAppSafe();}
+  window._prevLogin=userLastLogin(user.code||user.email);window._catchupDismissed=false;recordLastLogin(user.code||user.email);bumpActivity();setupAutoLogout();await refreshAllUsers();setTimeout(function(){famDevBeat(true);if(user.role==="admin")famWaitList();},1500);if(goHomeApp(user,!!window._explicitLogin))return;window._explicitLogin=false;await famEnterAppSafe();}
 async function doEmailLogin(){var em=((document.getElementById("login-email")||{}).value||"").trim().toLowerCase();var pw=(document.getElementById("login-pass")||{}).value||"";var btn=document.getElementById("login-btn2");
   if(!em){lgErr("Type your work email.");return;}if(!pw){lgErr("Type your password.");return;}
   lgErrHide();btn.textContent="Signing in…";btn.disabled=true;var au;
   try{window._explicitLogin=true;au=await authSignIn(em,pw);}catch(e){btn.textContent="Sign in";btn.disabled=false;lgErr(lgAuthMsg(e));return;}
   window._lgPwOwn=!!(au&&au.user_metadata&&au.user_metadata.pw_own);await lgAfterPassword(em);}
 async function lgAfterPassword(em){window._lgEm=em;var user=await userForEmail(em);
-  if(!user){window._lgStage="wait";renderLoginState();return;}
+  if(!user){famWaitAdd(em);window._lgStage="wait";renderLoginState();return;}
   if(user.active===false){await authSignOut();window._lgStage="";window._loginFull=true;window._lgPrefill=em;renderLoginState();lgErr("This account is switched off. Ask "+FAM_ADMIN_NAME+" if that’s a mistake.");return;}
   window._lgUser=user;
   if(!window._lgPwOwn){window._lgStage="";window._setPw=true;window._lgSetPwFirst=true;renderLoginState();return;}
@@ -226,7 +226,7 @@ async function doPinUnlock(email){var pin=window._pinBuf||((document.getElementB
   if(!p.pin){lgUsePassword(email);return;}
   if(await pinHash(email,pin)!==p.pin){p.bad=(p.bad||0)+1;window._pinBuf="";var _pi=document.getElementById("login-pin");if(_pi)_pi.value="";lgPinDraw();
     if(p.bad>=5){p.pin="";p.bad=0;if(!p.bio){p.refresh="";delete p.user;}devProfilesSave(P);try{localStorage.removeItem("nspca-pin-asked:"+email);}catch(_e){}
-      lgUsePassword(email);lgErr("Five wrong PINs, so the PIN is off on this phone. Sign in with your password, then set a new one.");return;}
+      famSecLog("5 wrong PINs for "+(p.name||email)+" on the "+famDevLabel(),"");lgUsePassword(email);lgErr("Five wrong PINs, so the PIN is off on this phone. Sign in with your password, then set a new one.");return;}
     devProfilesSave(P);var left=5-p.bad;lgErr("Wrong PIN. "+left+(left===1?" try":" tries")+" left, then it asks for your password.");return;}
   if(p.bad){p.bad=0;devProfilesSave(P);}
   await devUnlock(email);}
@@ -237,7 +237,7 @@ async function devUnlock(email){var p=devProfiles().find(function(x){return x.em
     AUTH=null;lgErr("No signal, and this phone hasn’t got you saved for offline yet. Try again when there’s signal.");return;}
   if(!ok){var P=devProfiles();var me=P.find(function(x){return x.email===email;});if(me){me.refresh="";delete me.user;devProfilesSave(P);}lgUsePassword(email);lgErr("Your sign-in on this phone has run out. Sign in with your password once.");return;}
   var user=await userForEmail(email);if(!user&&p.user&&lgOffline())user=Object.assign({},p.user);
-  if(!user){window._lgEm=email;window._lgStage="wait";renderLoginState();return;}
+  if(!user){famWaitAdd(email);window._lgEm=email;window._lgStage="wait";renderLoginState();return;}
   if(user.active===false){await authSignOut();window._loginWho="";renderLoginState();lgErr("This account is switched off. Ask "+FAM_ADMIN_NAME+" if that’s a mistake.");return;}
   var p2=devProfiles();var mine=p2.find(function(x){return x.email===email;});if(mine){mine.refresh=AUTH.refresh_token;devProfilesSave(p2);}await finishAuthLogin(user);}
 async function doForgot(){var em=((document.getElementById("login-email")||{}).value||"").trim().toLowerCase();
@@ -503,7 +503,7 @@ function renderUsersAdmin(){
   var h='<div class="rxhead"><button onclick="(typeof boardBack===\'function\'?boardBack():loadRecordsList().then(function(){renderDashboard();}))" class="rxback">&#8592; Dashboard</button><h2>Manage users</h2></div><div class="rxsub">Who can sign in, how, and when they were last in.</div>';
   h+='<div class="rxstrip"><div class="rxlt">'+all.length+'<small>people</small></div><div class="rxtx">'+sent+'</div></div>';
   h+='<button class="btn btnp" style="width:100%;margin-bottom:4px" onclick="showAddUserModal()">+ Add someone</button>';
-  h+='<div class="rxlbl">People <em>'+people.length+'</em></div><div class="rxlist">'+people.map(row).join("")+'</div>';
+  h+='<div id="fam-wait"></div>';setTimeout(famWaitPaint,0);h+='<div class="rxlbl">People <em>'+people.length+'</em></div><div class="rxlist">'+people.map(row).join("")+'</div>';
   if(codes.length)h+='<div class="rxlbl">Shared codes <em>'+codes.length+'</em></div><div class="rxlist">'+codes.map(row).join("")+'</div>';
   h+='<div class="rxsub" style="margin-top:10px">Tap someone to change their name, email or role, or switch them off. Built-in people are set in the app itself.</div>';
   return '<div style="max-width:640px;margin:0 auto">'+h+'</div>';
@@ -593,6 +593,7 @@ async function saveEditedUser(code){
   try{var _lEl=document.getElementById("edit-user-look");if(_lEl){var _u2=getAllUsersSync().find(function(x){return x.code===code;})||{};var _em2=String(((document.getElementById("edit-user-email")||{}).value||_u2.email||"")).trim().toLowerCase();var _lm=JSON.parse(JSON.stringify(unitSetting("lookOnly")||{}));var _k2=_em2||code;_lm[_k2]=_lEl.value==="1";if(_em2&&_k2!==code)delete _lm[code];setUnitSetting("lookOnly",_lm);}}catch(_e){}
   if(!supabaseClient)return;
   try{
+    var _old=getAllUsersSync().find(function(x){return x.code===code;})||{};if(_old.role&&_old.role!==role)famSecLog(currentName()+" changed "+name+" from "+famRoleLabel({role:_old.role})+" to "+famRoleLabel({role:role}));
     var _upd=await supabaseClient.from("users").update(Object.assign({name:name,role:role,title:(((document.getElementById("edit-user-title")||{}).value||"").trim())||null},{email:(((document.getElementById("edit-user-email")||{}).value||"").trim().toLowerCase())||null})).eq("code",code);if(_upd&&_upd.error)throw _upd.error;
     var ov=document.querySelector(".edit-user-ov");if(ov)ov.remove();
     await refreshAllUsers();
@@ -602,7 +603,7 @@ async function saveEditedUser(code){
 async function toggleUserActive(code,makeActive){
   if(!supabaseClient)return;
   try{
-    var _act2=await supabaseClient.from("users").update({active:makeActive}).eq("code",code);if(_act2&&_act2.error)throw _act2.error;
+    var _act2=await supabaseClient.from("users").update({active:makeActive}).eq("code",code);if(_act2&&_act2.error)throw _act2.error;try{var _ou=getAllUsersSync().find(function(x){return x.code===code;})||{};famSecLog(currentName()+(makeActive?" switched "+(_ou.name||code)+" back on":" switched "+(_ou.name||code)+" off"));}catch(_e){}
     await refreshAllUsers();
     showDashSection("users");
   }catch(e){appAlert("Could not update user status.");}
@@ -713,3 +714,90 @@ function famDeviceRows(){var h="";
   if(on)h+='<div class="fam-pk">'+FAM_PUSH_KINDS.filter(function(k){return here==="dogs"||k[0]!=="weather";}).map(function(k){var kon=pp[k[0]]!==false;return '<span class="fam-pkc'+(kon?' on':'')+'" onclick="pushKind(\''+k[0]+'\')" title="'+k[2]+'">'+(kon?'✓ ':'')+k[1]+'</span>';}).join("")+'</div>';
   return h;}
 (function(){if(document.getElementById("fam-css3"))return;var st=document.createElement("style");st.id="fam-css3";st.textContent=".fam-pk{display:flex;flex-wrap:wrap;gap:6px;padding:2px 0 10px}.fam-pkc{font-size:11.5px;font-weight:800;padding:5px 10px;border-radius:20px;border:1.5px solid #e4e7e0;background:#fff;color:#6b7280;cursor:pointer}.fam-pkc.on{background:#282932;border-color:#282932;color:#c6e76c}.lg-btn.lg-bio{margin:4px 0 14px;background:#c6e76c;color:#282932}";document.head.appendChild(st);})();
+
+// ── Security (lockdown step 6): who's waiting to be let in, every signed-in phone and computer, rare actions ──
+// Needs the Supabase step (access_waiting, devices, security_log, admin_sign_out). Until then it quietly does nothing.
+var FAM_ROLES=[["staff","Staff"],["supervisor","Supervisor"],["asst","Assistant Supervisor"],["coordinator","Rehoming Co-Ordinator"],["trainer","Dog Trainer & Behaviour Specialist"],["manager","Manager"],["admin","Admin"]];
+function famDevId(){var k="nspca-device-id",v="";try{v=localStorage.getItem(k)||"";}catch(e){}if(!v){v=Array.prototype.map.call(famRand(9),function(b){return ("0"+b.toString(16)).slice(-2);}).join("");try{localStorage.setItem(k,v);}catch(e){}}return v;}
+function famDevLabel(){if(famShared())return "shared computer";var u=navigator.userAgent||"";return /iPhone/.test(u)?"iPhone":/iPad/.test(u)?"iPad":/SM-|Samsung/i.test(u)?"Samsung":/Pixel/.test(u)?"Pixel":/Android/.test(u)?"Android phone":/Windows/.test(u)?"Windows computer":/Macintosh/.test(u)?"Mac":/CrOS/.test(u)?"Chromebook":"computer";}
+function famDevMethod(em){if(famShared())return "password, shared";var p=devProfiles().find(function(x){return String(x.email||"").toLowerCase()===em;})||{};var b=p.bio&&bioOK();return p.pin&&b?"PIN and fingerprint":p.pin?"PIN":b?"fingerprint":"password";}
+function famJwt(){try{var t=String(authToken()).split(".")[1];t=t.replace(/-/g,"+").replace(/_/g,"/");while(t.length%4)t+="=";return JSON.parse(atob(t));}catch(e){return {};}}
+async function famRest(path,opts){opts=opts||{};try{await famEnsureToken();}catch(e){}if(!authToken())return {ok:false,status:401,data:null};
+  var h=Object.assign({"apikey":SUPABASE_KEY,"Authorization":"Bearer "+authToken(),"Content-Type":"application/json"},opts.headers||{});
+  try{var r=await fetch(SUPABASE_URL+"/rest/v1/"+path,{method:opts.method||"GET",headers:h,body:opts.body!==undefined?JSON.stringify(opts.body):undefined});var d=null;try{d=await r.json();}catch(e){}return {ok:r.ok,status:r.status,data:d};}
+  catch(e){return {ok:false,status:0,data:null};}}
+function famWhen(iso,time){var d=new Date(iso);if(isNaN(d))return "";var t=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);var day=Math.round((new Date(new Date().toDateString())-new Date(d.toDateString()))/864e5);
+  var s=day===0?"today":day===1?"yesterday":day<7?d.toLocaleDateString("en-IE",{weekday:"long"}):d.toLocaleDateString("en-IE",{day:"numeric",month:"short"});return time?s.charAt(0).toUpperCase()+s.slice(1)+" "+t:s;}
+function famDayShort(iso){var d=new Date(iso);if(isNaN(d))return "";var day=Math.round((new Date(new Date().toDateString())-new Date(d.toDateString()))/864e5);return day===0?"Today":day<7?d.toLocaleDateString("en-IE",{weekday:"short"}):d.toLocaleDateString("en-IE",{day:"numeric",month:"short"});}
+function famNameGuess(em){return String(em||"").split("@")[0].replace(/[._-]+/g," ").replace(/\d+/g,"").trim().split(" ").filter(Boolean).map(function(w){return w.charAt(0).toUpperCase()+w.slice(1);}).join(" ");}
+// The phone or computer you're on: its row in Security, and whether an admin has signed it out.
+async function famDevBeat(first){try{if(!LOGGED_IN)return;var em=String(authEmail()||"").toLowerCase();if(!em)return;if(!first&&Date.now()-(window._devBeatAt||0)<60000)return;window._devBeatAt=Date.now();
+  var id=famDevId()+":"+em;
+  if(!first){var g=await famRest("devices?select=signed_out&id=eq."+encodeURIComponent(id));if(g.ok&&g.data&&g.data[0]&&g.data[0].signed_out){famDevKicked(em);return;}}
+  var row={id:id,email:em,name:currentName(),label:famDevLabel(),method:famDevMethod(em),session_id:famJwt().session_id||null,last_used:new Date().toISOString()};if(first)row.signed_out=false;
+  await famRest("devices?on_conflict=id",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:[row]});
+  famSecFlush();}catch(e){}}
+function famDevKicked(em){devProfilesSave(devProfiles().filter(function(x){return String(x.email||"").toLowerCase()!==em;}));try{localStorage.removeItem("nspca-user-cache");}catch(e){}
+  doLogout();setTimeout(function(){lgErr("An admin signed you out on this "+famDevLabel()+". Sign in with your password.");},300);}
+setInterval(function(){if(typeof LOGGED_IN!=="undefined"&&LOGGED_IN&&Date.now()-(_lastActivity||0)<10*60000)famDevBeat(false);},180000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&typeof LOGGED_IN!=="undefined"&&LOGGED_IN)famDevBeat(false);});
+// Rare, sensitive actions. Held on the phone until there's a signed-in person and signal.
+function famSecLog(what,who){var q=[];what=String(what);try{var cn=currentName();if(cn&&cn.indexOf(" ")>0&&what.indexOf(cn+" ")===0)what=cn.split(" ")[0]+what.slice(cn.length);}catch(e){}try{q=JSON.parse(localStorage.getItem("nspca-sec-q")||"[]");}catch(e){}q.push({at:new Date().toISOString(),who:who!==undefined?who:((typeof LOGGED_IN!=="undefined"&&LOGGED_IN&&currentName())||""),what:String(what).slice(0,300)});
+  try{localStorage.setItem("nspca-sec-q",JSON.stringify(q.slice(-30)));}catch(e){}famSecFlush();}
+async function famSecFlush(){if(window._secBusy||typeof LOGGED_IN==="undefined"||!LOGGED_IN||!authEmail())return;var q=[];try{q=JSON.parse(localStorage.getItem("nspca-sec-q")||"[]");}catch(e){}if(!q.length)return;
+  window._secBusy=true;try{var em=String(authEmail()).toLowerCase();var r=await famRest("security_log",{method:"POST",headers:{"Prefer":"return=minimal"},body:q.map(function(x){return {at:x.at,who:x.who||"",email:em,what:x.what};})});
+    if(r.ok||r.status===404||r.status===400){try{localStorage.removeItem("nspca-sec-q");}catch(e){}}}catch(e){}window._secBusy=false;}
+// Waiting for you: signed in with a real email, but not in Manage users yet.
+async function famWaitAdd(em){try{await famRest("access_waiting?on_conflict=email",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:[{email:String(em).toLowerCase(),last_seen:new Date().toISOString()}]});}catch(e){}}
+async function famWaitList(){var r=await famRest("access_waiting?select=*&order=first_seen.desc");if(!r.ok||!Array.isArray(r.data))return [];var have={};(getAllUsersSync()||[]).forEach(function(u){if(u.email)have[String(u.email).toLowerCase()]=1;});
+  var L=r.data.filter(function(w){return !have[String(w.email).toLowerCase()];});r.data.forEach(function(w){if(have[String(w.email).toLowerCase()])famRest("access_waiting?email=eq."+encodeURIComponent(w.email),{method:"DELETE"});});
+  window._famWait=L;window._famWaitN=L.length;window._famWaitAt=Date.now();return L;}
+function famWaitNoticeHtml(){if(currentRole()!=="admin"||!authEmail())return "";if(Date.now()-(window._famWaitAt||0)>120000){window._famWaitAt=Date.now();famWaitList();}
+  var L=window._famWait||[];if(!L.length)return "";var nm=L.length===1?(famNameGuess(L[0].email)||L[0].email)+" is":L.length+" people are";
+  return '<div class="fairn"><b>'+famEsc(nm)+' waiting to be let in</b><small>Signed in, but not in Manage users yet. Pick a role and let them in, or turn them away.</small><div class="fa"><span onclick="showDashSection(\'users\')">Open Manage users ›</span></div></div>';}
+async function famWaitPaint(){var box=document.getElementById("fam-wait");if(!box)return;var L=await famWaitList();box=document.getElementById("fam-wait");if(!box)return;if(!L.length){box.innerHTML="";return;}
+  box.innerHTML='<div class="rxlbl">Waiting for you <em>'+L.length+'</em></div>'+L.map(function(w,i){var g=famNameGuess(w.email);
+    return '<div class="fam-wt"><div class="fam-wt-t"><span class="fam-wt-av" style="background:'+avatarColor(g||w.email)+'">'+famEsc(initials(g||w.email))+'</span><div class="fam-wt-m"><input id="wt-n-'+i+'" class="fam-wt-n" value="'+famEsc(g)+'" placeholder="Their full name" aria-label="Their name"><small>'+famEsc(w.email)+' · signed in '+famEsc(famWhen(w.first_seen))+'</small></div></div>'
+      +'<div class="fam-wt-a"><label>Role <select id="wt-r-'+i+'">'+FAM_ROLES.map(function(r){return '<option value="'+r[0]+'">'+famEsc(r[1])+'</option>';}).join("")+'</select></label><span class="fam-wt-go" role="button" tabindex="0" onclick="famLetIn('+i+')">Let in</span><span class="fam-wt-no" role="button" tabindex="0" onclick="famNotStaff('+i+')">Not staff</span></div></div>';}).join("")
+    +'<div class="rxsub" style="margin:2px 0 12px">Signing in isn’t enough on its own. Nobody sees an animal until you let them in and pick their role. Check the name before you let them in.</div>';}
+async function famLetIn(i){var w=(window._famWait||[])[i];if(!w)return;var nm=((document.getElementById("wt-n-"+i)||{}).value||"").trim();var role=(document.getElementById("wt-r-"+i)||{}).value||"staff";
+  if(!nm){appAlert("Type their full name first.");return;}if(!supabaseClient)return;
+  var code="E"+Array.prototype.map.call(famRand(10),function(b){return "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[b%32];}).join("");
+  var res=await supabaseClient.from("users").insert([{name:nm,code:code,role:role,active:true,email:String(w.email).toLowerCase()}]);if(res&&res.error){appAlert("Couldn’t let them in: "+(res.error.message||"try again"));return;}
+  await famRest("access_waiting?email=eq."+encodeURIComponent(w.email),{method:"DELETE"});
+  famSecLog(currentName()+" let "+nm+" in as "+famRoleLabel({role:role}));await refreshAllUsers();showDashSection("users");famToast(nm+" is in. They can tap “Check again” now.");}
+function famNotStaff(i){var w=(window._famWait||[])[i];if(!w)return;
+  appConfirm("Take "+w.email+" off the waiting list? They still can’t see any animals. To stop them signing in at all, delete them in Supabase → Authentication → Users.",async function(){await famRest("access_waiting?email=eq."+encodeURIComponent(w.email),{method:"DELETE"});famSecLog(currentName()+" turned away "+w.email);showDashSection("users");});}
+// The Security page (admins)
+async function famSecurityOpen(el){var back='<div class="rxhead"><button onclick="showDashSection(\'profile\')" class="rxback">&#8592; Profile</button><h2>Security</h2></div>';
+  if(currentRole()!=="admin"){el.innerHTML=back+'<div class="rxsub">Admins only.</div>';return;}
+  if(!authEmail()){el.innerHTML='<div class="fam-sec">'+back+'<div class="fam-card"><div class="fam-sec-none">Sign in with your email to see this page. Codes can’t read it.</div></div></div>';return;}
+  el.innerHTML='<div class="fam-sec">'+back+'<div class="fam-card"><div class="fam-sec-none">Loading…</div></div></div>';
+  var D=await famRest("devices?select=*&signed_out=eq.false&order=last_used.desc");var L=await famRest("security_log?select=*&order=at.desc&limit=40");
+  if(D.status===404||L.status===404){el.innerHTML='<div class="fam-sec">'+back+'<div class="fam-card"><div class="fam-sec-none">Not set up yet. This page needs the Supabase step for the lockdown.</div></div></div>';return;}
+  var mine=famDevId()+":"+String(authEmail()).toLowerCase();var now=Date.now();window._famDevs=(D.data||[]);
+  var dev=(D.data||[]).map(function(d,i){var old=now-new Date(d.last_used).getTime()>2*864e5;var me=d.id===mine;
+    return '<div class="fam-dv"><div class="fam-dv-m"><b>'+famEsc((d.name||d.email).split(" ")[0])+' · '+famEsc(d.label||"device")+(me?' <span class="fam-tag g">this one</span>':'')+'</b><small>'+famEsc(famWhen(d.last_used,true))+(d.method?' · '+famEsc(d.method):'')+(old?' · not used since':'')+'</small></div>'+(me?'':'<span class="fam-dv-out" role="button" tabindex="0" onclick="famDevOut('+i+')">Sign out</span>')+'</div>';}).join("")||'<div class="fam-sec-none">Nobody yet. Phones and computers show here once people sign in by email.</div>';
+  var log=(L.data||[]).map(function(x){return '<div class="fam-lg"><span>'+famEsc(famDayShort(x.at))+'</span><div>'+famEsc(x.what)+'</div></div>';}).join("")||'<div class="fam-sec-none">Nothing yet.</div>';
+  el.innerHTML='<div class="fam-sec">'+back
+    +'<div class="fam-card"><div class="fam-lbl">Signed in <em>every phone and computer with a live sign-in</em></div>'+dev
+    +((D.data||[]).length>1?'<div class="fam-sec-all" role="button" tabindex="0" onclick="famDevOutAll()">Sign everyone out</div>':'')+'</div>'
+    +'<div class="fam-card"><div class="fam-lbl">Worth knowing <em>rare, sensitive actions only</em></div>'+log+'</div>'
+    +'<div class="rxsub">Signing a phone out ends its sign-in and forgets its PIN. That person needs their password next time. A phone that’s off or has no signal goes when it next connects.</div></div>';}
+function famDevOut(i){var d=(window._famDevs||[])[i];if(!d)return;var who=(d.name||d.email).split(" ")[0];
+  appConfirm("Sign "+who+" out on the "+(d.label||"device")+"? They’ll need their password next time on it.",async function(){var r=await famRest("rpc/admin_sign_out",{method:"POST",body:{p_device:d.id}});
+    if(!r.ok){appAlert("Couldn’t sign it out: "+((r.data&&(r.data.message||r.data.hint))||("error "+r.status)));return;}
+    famSecLog(currentName()+" signed "+who+" out on the "+(d.label||"device"));famToast(who+" is signed out on the "+(d.label||"device"));showDashSection("security");});}
+function famDevOutAll(){appConfirm("Sign everyone out on every phone and computer, except you here? Everyone will need their password next time.",async function(){var r=await famRest("rpc/admin_sign_out_all",{method:"POST",body:{}});
+    if(!r.ok){appAlert("Couldn’t do it: "+((r.data&&(r.data.message||r.data.hint))||("error "+r.status)));return;}
+    famSecLog(currentName()+" signed everyone out");famToast("Everyone else is signed out");showDashSection("security");},{danger:true});}
+(function(){if(document.getElementById("fam-sec-css"))return;var st=document.createElement("style");st.id="fam-sec-css";st.textContent=[
+".fam-sec{max-width:640px;margin:0 auto}.fam-sec-none{font-size:13px;color:#6b7280;padding:6px 0}",
+".fam-dv{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid #f0f1ec}.fam-card .fam-lbl+.fam-dv{border-top:0}.fam-dv-m{flex:1;min-width:0}.fam-dv-m b{display:block;font-size:14px;font-weight:700;color:#282932}.fam-dv-m small{display:block;font-size:12.5px;color:#6b7280;margin-top:1px}",
+".fam-dv-out{font-size:12.5px;font-weight:800;color:#991b1b;background:#fef2f2;border-radius:8px;padding:6px 11px;cursor:pointer;white-space:nowrap}.fam-sec-all{margin-top:10px;text-align:center;font-size:13px;font-weight:800;color:#991b1b;border:1.5px solid #fecaca;border-radius:10px;padding:10px;cursor:pointer}",
+".fam-lg{display:grid;grid-template-columns:52px 1fr;gap:10px;padding:8px 0;border-top:1px solid #f0f1ec;font-size:13.5px;color:#282932}.fam-card .fam-lbl+.fam-lg{border-top:0}.fam-lg span{font-size:12px;font-weight:800;color:#6b7280;padding-top:1px}",
+".fam-wt{background:#fff;border:1px solid #e4e7e0;border-left:4px solid #c6e76c;border-radius:12px;padding:12px 14px;margin-bottom:8px}.fam-wt-t{display:flex;gap:12px;align-items:center}.fam-wt-av{width:38px;height:38px;border-radius:50%;color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex:none}",
+".fam-wt-m{flex:1;min-width:0}.fam-wt-n{border:0!important;background:transparent!important;padding:0!important;font-size:15px!important;font-weight:800;color:#282932;box-shadow:none!important;min-height:0!important;width:100%}.fam-wt-n:focus{text-decoration:underline;text-decoration-color:#c6e76c}.fam-wt-m small{display:block;font-size:12px;color:#6b7280;margin-top:1px}",
+".fam-wt-a{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}.fam-wt-a label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#6b7280;flex:1;min-width:180px}.fam-wt-a select{flex:1;width:auto}",
+".fam-wt-go{background:#c6e76c;color:#282932;font-weight:800;font-size:13px;border-radius:9px;padding:8px 14px;cursor:pointer}.fam-wt-no{font-size:12.5px;font-weight:700;color:#6b7280;padding:8px 6px;cursor:pointer}"
+].join("");document.head.appendChild(st);})();
