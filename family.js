@@ -14,7 +14,10 @@ function userPhoto(code){try{var _l=localStorage.getItem("nspca-user-photo-"+cod
 function setUserPhoto(code,dataUrl){try{localStorage.setItem("nspca-user-photo-"+code,dataUrl||"");}catch(e){}if(supabaseClient)supabaseClient.from("users").update({photo:dataUrl||null}).eq("code",code).then(function(){},function(){});}
 function userLastLogin(code){try{var v=localStorage.getItem("nspca-user-lastlogin-"+code);return v?parseInt(v):0;}catch(e){return 0;}}
 function recordLastLogin(code){try{localStorage.setItem("nspca-user-lastlogin-"+code,Date.now().toString());}catch(e){}if(supabaseClient)supabaseClient.from("users").update({last_login_at:new Date().toISOString()}).eq("code",code).then(function(){},function(){});setTimeout(function(){try{seenBeat();}catch(e){}},4000);}
-function getAllUsersSync(){return _allUsersCache||USERS;}
+// Shared unit codes are retired in every app, whatever an app's own list still says.
+var FAM_RETIRED_CODES=["CAT01","CISO01","STA01"];
+function famRetired(u){if(!u)return false;var c=String(u.code||u||"").toUpperCase();if(FAM_RETIRED_CODES.indexOf(c)>=0)return true;return typeof u==="object"&&!u.email&&/^(cattery|cat iso|cat isolation|stables)$/i.test(String(u.name||"").trim());}
+function getAllUsersSync(){return (_allUsersCache||USERS).filter(function(u){return !famRetired(u);});}
 async function refreshAllUsers(){
   var merged=USERS.slice().map(function(u){return Object.assign({},u,{source:"app"});});
   if(supabaseClient){
@@ -29,6 +32,7 @@ async function refreshAllUsers(){
       }
     }catch(e){}
   }
+  merged=merged.filter(function(u){return !famRetired(u);});
   _allUsersCache=merged;
   return merged;
 }
@@ -58,10 +62,12 @@ async function doLogin(){
   var errEl=document.getElementById("login-err");
   errEl.style.display="none";
   if(!code)return;
+  if(famRetired(code)){errEl.textContent="Shared codes have stopped. Sign in with your own email, or ask "+FAM_ADMIN_NAME+" for one.";errEl.style.display="block";return;}
   btn.textContent="Checking...";btn.disabled=true;
   var user=USERS.find(function(u){return u.code===code;})||USERS.find(function(u){return String(u.code).toUpperCase()===code.toUpperCase();});
   if(!user&&supabaseClient){try{var res=await supabaseClient.from("users").select("*").eq("code",code).single();if(res.data&&res.data.name)user=res.data;}catch(e){}}
   if(!user&&supabaseClient&&code!==code.toUpperCase()){try{var res2=await supabaseClient.from("users").select("*").eq("code",code.toUpperCase()).single();if(res2.data&&res2.data.name)user=res2.data;}catch(e){}}
+  if(user&&famRetired(user))user=null;
   if(user&&user.active===false){errEl.textContent="This account is deactivated.";errEl.style.display="block";btn.textContent="Enter \u2192";btn.disabled=false;return;}
   if(user){code=user.code||code;
     LOGGED_IN=true;CURRENT_USER=user;window._wnShownSession=false;
@@ -367,6 +373,7 @@ function famBoot(){
   (function(){var p=authFromHash();if(p){authSave({access_token:p.access_token,refresh_token:p.refresh_token||"",expires_at:Date.now()+((parseInt(p.expires_in)||3600)*1000),user:{email:""}});window._setPw=true;fetch(SUPABASE_URL+"/auth/v1/user",{headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+p.access_token}}).then(function(r){return r.json();}).then(function(u){if(u&&u.email){AUTH.user={email:u.email,id:u.id};authSave(AUTH);}renderLoginState();});localStorage.removeItem("nspca-intake-auth");}})();
   if(famShared()){var la=0;try{la=parseInt(localStorage.getItem("nspca-last-active")||"0",10)||0;}catch(e){}if(Date.now()-la>getAutoLogoutMins()*60000){var A0=AUTH;AUTH=null;try{localStorage.removeItem("nspca-auth");localStorage.removeItem("nspca-intake-auth");}catch(e){}if(A0&&A0.access_token){try{fetch(SUPABASE_URL+"/auth/v1/logout?scope=local",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+A0.access_token}});}catch(e){}}}}
   var savedCode=localStorage.getItem("nspca-intake-auth");
+  if(savedCode&&famRetired(savedCode)){try{localStorage.removeItem("nspca-intake-auth");}catch(e){}savedCode="";}
   if(AUTH&&AUTH.refresh_token&&savedCode&&savedCode.indexOf("EMAIL:")===0){savedCode="";(async function(){var ok=await authRefresh();if(!ok&&window._authNetFail){var c=null;try{c=JSON.parse(localStorage.getItem("nspca-user-cache")||"null");}catch(e){}if(c&&c.name&&String(c.email||"").toLowerCase()===String(authEmail()).toLowerCase()){AUTH.expires_at=1;window._authOffline=true;await finishAuthLogin(c);return;}}var u=ok?await userForEmail(authEmail()):null;if(u&&u.active!==false){await finishAuthLogin(u);}else{authSave(null);showScreen("login-screen");}})();}
   if(savedCode){
     var user=USERS.find(function(u){return u.code===savedCode;});
