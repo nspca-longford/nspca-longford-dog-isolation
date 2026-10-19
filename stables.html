@@ -1122,10 +1122,7 @@ var USERS=[
   
   {code:"SAR01",name:"Sarah",role:"manager"},
   {code:"CIA01",name:"Ciara",role:"supervisor"},
-  {code:"LAU01",name:"Laura",role:"coordinator"},
-  {code:"CAT01",name:"Cattery",role:"staff"},
-  {code:"CISO01",name:"Cat Iso",role:"staff"},
-  {code:"STA01",name:"Stables",role:"staff"}
+  {code:"LAU01",name:"Laura",role:"coordinator"}
 ];
 var CURRENT_USER=null;
 // ── Home app: some people land straight in their own unit's app ─────
@@ -2773,7 +2770,7 @@ function renderDashboard(){
   if(window._dbSearchActive){var si=hs;if(si){si.focus();var l=(window._dbCaret!=null?window._dbCaret:si.value.length);si.setSelectionRange(l,l);}window._dbSearchActive=false;window._dbCaret=null;}
 }
 
-function openDog(id){window._dtSheet=null;window._cqOpen={};window._asmtOpen={};window._scOpen={};window._arrOpen={};window._medSec={};window._dogSec={};window._foOpen={};window._foNew=false;window._foPickOut=false;window._foPickDue=false;window._rhOpen={};var rec=records.find(function(r){return r.id===id;});if(!rec)return;window._dashScroll=window.scrollY||0;window._dayView=0;loadRecord(id);showScreen("wrap");S.tab=(S.dog&&S.dog.name&&(S.days||[]).some(function(d){return d&&(d.demeanour||d.notes);}))?"picture":"dog";render();if(!maybeAutoHandlingGlance()){if(!maybeAutoContagiousOverlay()){if(!maybeAutoWarningOverlay()){if(!maybeAutoNoticeOverlay())maybeAutoIsolationOverlay();}}}}
+function openDog(id){window._dtSheet=null;window._cqOpen={};window._asmtOpen={};window._scOpen={};window._arrOpen={};window._medSec={};window._dogSec={};window._foOpen={};window._foNew=false;window._foPickOut=false;window._foPickDue=false;window._rhOpen={};var rec=records.find(function(r){return r.id===id;});if(!rec)return;window._dashScroll=window.scrollY||0;window._dayView=0;loadRecord(id);showScreen("wrap");S.tab=(S.dog&&S.dog.name)?"picture":"dog";render();if(!maybeAutoHandlingGlance()){if(!maybeAutoContagiousOverlay()){if(!maybeAutoWarningOverlay()){if(!maybeAutoNoticeOverlay())maybeAutoIsolationOverlay();}}}}
 var INC_KEY="nspca-stables-incoming";
 var INC_SOURCES=["Warden / stray","Owner surrender","Welfare / seizure","Transfer in","Return"];
 var INC_WHEN=[["today","Today"],["tomorrow","Tomorrow"],["week","This week"]];
@@ -7118,11 +7115,11 @@ var GOAT_BCS=["","Emaciated","Thin","Ideal","Fat","Obese"];
 // that fit the open record's species (TABS is mutated in place so every
 // dog-app reader of it sees the same list).
 var ST_ALL_TABS=[
-  {id:"picture",l:"Overview",g:"Animal"},{id:"dog",l:"Animal",g:"Animal"},{id:"photos",l:"Photos",g:"Animal"},{id:"notes",l:"Notes",g:"Animal"},
-  {id:"arrival",l:"Arrival",g:"Health",sp:"any"},{id:"days",l:"Daily check",g:"Health"},{id:"iso",l:"Isolation",g:"Health",sp:"any"},{id:"weights",l:"Body",g:"Health",sp:"eg"},{id:"medical",l:"Medical",g:"Health"},
-  {id:"feet",l:"Feet & teeth",g:"Care",sp:"eg"},{id:"flock",l:"Flock",g:"Care",sp:"p"},{id:"hand",l:"Handling",g:"Care",sp:"eg"},{id:"feed",l:"Feeding",g:"Care",sp:"eg"},{id:"mites",l:"Mites & worms",g:"Care",sp:"p"},
-  {id:"rehoming",l:"Clearance",g:"Departure"},{id:"rehome",l:"Rehoming",g:"Departure"},{id:"foster",l:"Foster",g:"Departure"},{id:"outcome",l:"Outcome",g:"Departure"},
-  {id:"story",l:"Story",g:"Record"},{id:"files",l:"Files",g:"Record"},{id:"report",l:"Report",g:"Record"}];
+  {id:"picture",l:"Overview",g:"Today"},{id:"days",l:"Daily check",g:"Today"},{id:"feed",l:"Feeding",g:"Today",sp:"eg"},{id:"flock",l:"Flock",g:"Today",sp:"p"},{id:"notes",l:"Notes",g:"Today"},
+  {id:"dog",l:"Animal",g:"Animal"},{id:"photos",l:"Photos",g:"Animal"},{id:"arrival",l:"Arrival",g:"Animal",sp:"any"},{id:"hand",l:"Handling",g:"Animal",sp:"eg"},
+  {id:"iso",l:"Isolation",g:"Health",sp:"any"},{id:"medical",l:"Medical",g:"Health"},{id:"weights",l:"Body",g:"Health",sp:"eg"},{id:"feet",l:"Feet & teeth",g:"Health",sp:"eg"},{id:"mites",l:"Mites & worms",g:"Health",sp:"p"},
+  {id:"rehoming",l:"Clearance",g:"Leaving"},{id:"rehome",l:"Rehoming",g:"Leaving"},{id:"foster",l:"Foster",g:"Leaving"},{id:"outcome",l:"Outcome",g:"Leaving"},{id:"story",l:"Story",g:"Leaving"},
+  {id:"files",l:"Files",g:"Record"},{id:"report",l:"Report",g:"Record"}];
 var TABS=[];
 function stTabsFor(st){var sp=spOf(st);var k=isEquine(st)?"e":isGoat(st)?"g":isFlock(st)?"p":"";
   return ST_ALL_TABS.filter(function(t){if(!t.sp)return true;if(!k)return false;return t.sp==="any"||t.sp.indexOf(k)>=0;}).map(function(t){var x={id:t.id,l:t.l,g:t.g};
@@ -8534,6 +8531,9 @@ function stDueWhen(x){var td=tdISO();return x.dt<td?"overdue since "+fmtDMY(x.dt
     var tap=L.length===1?'openDogAt('+L[0].r.id+',\''+L[0].go+'\')':(j[0]==="worm"?'showDashSection(\'upcomingMedical\')':'showDashSection(\'farrier\')');
     chips.push('<span class="al '+(od?"red":"amb")+'" role="button" tabindex="0" onclick="'+tap+'"><i>'+e(j[1])+(od?' overdue':' due')+'</i>'+L.map(function(x){return e(x.r.name)+(L.length===1?' <span>'+e(stDueWhen(x))+'</span>':'');}).join(", ")+'</span>');});});}catch(err){}
   if(!chips.length)return h;if(!h)return '<div class="alrail">'+chips.join("")+'</div>';var k=h.lastIndexOf("</div>");return h.slice(0,k)+chips.join("")+h.slice(k);};})();
+
+// More sheet: the Today group is already the bottom bar, so More lists the other groups
+(function(){var fn=window.toggleMoreSheet;if(typeof fn!=="function"||fn._st)return;var w=function(){var r=fn.apply(this,arguments);try{var sh=document.getElementById("moresheet");if(sh&&sh.style.display!=="none"){var h=[].slice.call(sh.querySelectorAll(".mh")).filter(function(x){return x.textContent==="Today";})[0];if(h){var g=h.nextElementSibling;if(g&&g.classList.contains("mg"))g.remove();h.remove();}var tt=sh.querySelector(".msheet b");if(tt&&tt.textContent==="All tabs")tt.textContent="More";}}catch(e){}return r;};w._st=true;window.toggleMoreSheet=w;})();
 
 // ════════════════════════════════════════════════════════════════════
 //  SECURITY (Dogs v3.318 brief): Security page, rare-action log,
