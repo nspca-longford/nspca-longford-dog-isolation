@@ -57,30 +57,9 @@ function initials(n){var p=(n||"").trim().split(/\s+/);return p.length>=2?(p[0][
 function avatarColor(n){var c=["#0d9488","#7c3aed","#dc2626","#d97706","#2563eb","#16a34a","#db2777"];var h=0;for(var i=0;i<(n||"").length;i++)h=(h*31+n.charCodeAt(i))&0xfffffff;return c[h%c.length];}
 function toggleLoginCode(){var inp=document.getElementById("login-code"),ic=document.getElementById("login-eye");if(!inp)return;var show=inp.type==="password";inp.type=show?"text":"password";if(ic)ic.innerHTML=show?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';}
 async function doLogin(){
-  var btn=document.getElementById("login-btn");
-  var codeEl=document.getElementById("login-code");var code=codeEl?(codeEl.value||"").replace(/\s+/g,""):"";
+  // Access codes ended on 21 October 2026: the database only answers people signed in by email.
   var errEl=document.getElementById("login-err");
-  errEl.style.display="none";
-  if(!code)return;
-  if(famRetired(code)){errEl.textContent="Shared codes have stopped. Sign in with your own email, or ask "+FAM_ADMIN_NAME+" for one.";errEl.style.display="block";return;}
-  btn.textContent="Checking...";btn.disabled=true;
-  var user=USERS.find(function(u){return u.code===code;})||USERS.find(function(u){return String(u.code).toUpperCase()===code.toUpperCase();});
-  if(!user&&supabaseClient){try{var res=await supabaseClient.from("users").select("*").eq("code",code).single();if(res.data&&res.data.name)user=res.data;}catch(e){}}
-  if(!user&&supabaseClient&&code!==code.toUpperCase()){try{var res2=await supabaseClient.from("users").select("*").eq("code",code.toUpperCase()).single();if(res2.data&&res2.data.name)user=res2.data;}catch(e){}}
-  if(user&&famRetired(user))user=null;
-  if(user&&user.active===false){errEl.textContent="This account is deactivated.";errEl.style.display="block";btn.textContent="Enter \u2192";btn.disabled=false;return;}
-  if(user){code=user.code||code;
-    LOGGED_IN=true;CURRENT_USER=user;window._wnShownSession=false;
-    localStorage.setItem("nspca-intake-auth",code);
-    localStorage.setItem("nspca-user-name",user.name);
-    localStorage.setItem("nspca-user-role",user.role||"staff");
-    window._prevLogin=userLastLogin(user.code);window._catchupDismissed=false;
-    recordLastLogin(user.code);
-    setupAutoLogout();
-    if(goHomeApp(user,true))return;
-    await refreshAllUsers();
-    await famEnterAppSafe();
-  }else{errEl.textContent="Incorrect code. Try again.";errEl.style.removeProperty("color");errEl.style.background="";errEl.style.borderLeftColor="";errEl.style.display="block";btn.textContent="Enter →";btn.disabled=false;}
+  if(errEl){errEl.textContent="Access codes have stopped. Sign in with your work email, or ask "+FAM_ADMIN_NAME+" for one.";errEl.style.display="block";}
 }
 function doLogout(){
   try{pushOffQuiet();}catch(e){}
@@ -93,17 +72,23 @@ function doLogout(){
   var _lb=document.getElementById("login-btn");if(_lb){_lb.textContent="Enter →";_lb.disabled=false;}
   authSignOut();window._loginWho="";window._loginFull=false;window._lgStage="";window._setPw=false;window._lgPrefill="";window._loginMode="auth";
   var st=document.getElementById("overdue-sticky");if(st)st.innerHTML="";
+  if(famShared())famWipeShared();
   showScreen("login-screen");
 }
+// Shared computer: nothing from the last person stays behind (unsent saves and photo uploads are kept)
+function famWipeShared(){try{Object.keys(localStorage).forEach(function(k){if(/^nspca-.*(records|cache)/.test(k))localStorage.removeItem(k);});}catch(e){}
+  try{if(typeof records!=="undefined"&&Array.isArray(records))records.length=0;}catch(e){}
+  try{if(typeof window.famAppWipe==="function")window.famAppWipe();}catch(e){}
+  try{if(indexedDB.databases)indexedDB.databases().then(function(l){(l||[]).forEach(function(d){if(d&&d.name&&/^nspca-/.test(d.name)&&!/photoq/.test(d.name))indexedDB.deleteDatabase(d.name);});},function(){});else indexedDB.deleteDatabase("nspca-records");}catch(e){}}
 function currentRole(){return CURRENT_USER?CURRENT_USER.role:(localStorage.getItem("nspca-user-role")||"staff");}
 function currentName(){return CURRENT_USER?CURRENT_USER.name:(localStorage.getItem("nspca-user-name")||"Staff");}
 function avatarByName(name,size){size=size||18;var u=getAllUsersSync().find(function(x){return x.name===name;});var photo=u?(userPhoto(u.code)||u.photo||""):"";
-  if(photo)return '<img src="'+blobSrc(photo)+'" alt="" style="width:'+size+'px;height:'+size+'px;border-radius:50%;object-fit:cover;flex-shrink:0;vertical-align:middle">';
+  if(photo)return '<img src="'+famSrc(photo)+'" alt="" style="width:'+size+'px;height:'+size+'px;border-radius:50%;object-fit:cover;flex-shrink:0;vertical-align:middle">';
   return '<span style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+avatarColor(name)+';color:#fff;font-size:'+Math.max(7,Math.round(size*0.42))+'px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;vertical-align:middle">'+initials(name)+'</span>';}
 function userAvatarHtml(user,size){
   size=size||40;
   var photo=userPhoto(user.code);
-  if(photo)return '<img src="'+blobSrc(photo)+'" style="width:'+size+'px;height:'+size+'px;border-radius:50%;object-fit:cover;flex-shrink:0">';
+  if(photo)return '<img src="'+famSrc(photo)+'" style="width:'+size+'px;height:'+size+'px;border-radius:50%;object-fit:cover;flex-shrink:0">';
   return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+avatarColor(user.name)+';color:#fff;font-size:'+Math.round(size*0.36)+'px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials(user.name)+'</div>';
 }
 function userMeta(code){var m={};try{m=JSON.parse(localStorage.getItem("nspca-user-meta-"+code)||"{}");}catch(e){}try{var _u=(typeof _allUsersCache!=="undefined"&&_allUsersCache||[]).find(function(x){return x.code===code;});if(_u)["phone","since","about"].forEach(function(k){if(m[k]==null&&_u[k])m[k]=_u[k];});}catch(e){}return m;}
@@ -160,11 +145,14 @@ function devProfilesSave(p){try{localStorage.setItem("nspca-device-profiles",JSO
 async function pinHash(email,pin){var enc=new TextEncoder().encode(email.toLowerCase()+":"+pin+":nspca");var buf=await crypto.subtle.digest("SHA-256",enc);return Array.prototype.map.call(new Uint8Array(buf),function(b){return ("0"+b.toString(16)).slice(-2);}).join("");}
 async function devProfileSet(email,name,pin){var p=devProfiles().filter(function(x){return x.email!==email;});p.push({email:email,name:name,pin:pin?await pinHash(email,pin):"",refresh:(AUTH&&AUTH.refresh_token)||""});devProfilesSave(p);}
 async function devProfileKeep(email,name){var old=devProfiles().find(function(x){return x.email===email;});var p=devProfiles().filter(function(x){return x.email!==email;});p.push(Object.assign({},old||{},{email:email,name:name,pin:old&&old.pin?old.pin:"",refresh:(AUTH&&AUTH.refresh_token)||""}));devProfilesSave(p);}
-function authFromHash(){var h=location.hash||"";if(h.indexOf("access_token=")<0)return null;var p={};h.replace(/^#/,"").split("&").forEach(function(kv){var i=kv.indexOf("=");if(i>0)p[decodeURIComponent(kv.slice(0,i))]=decodeURIComponent(kv.slice(i+1));});return p.access_token?p:null;}
+function authFromHash(){var h=location.hash||"";if(h.indexOf("access_token=")<0)return null;var p={};h.replace(/^#/,"").split("&").forEach(function(kv){var i=kv.indexOf("=");if(i>0)p[decodeURIComponent(kv.slice(0,i))]=decodeURIComponent(kv.slice(i+1));});
+  // only Supabase's own invite / password-reset links, and take the token out of the address bar straight away
+  try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}
+  return p.access_token&&/^(invite|recovery|signup|magiclink)$/.test(p.type||"")?p:null;}
 // ── Sign-in (Oct 2026): email and password once per phone, then a face and a PIN or fingerprint ──
 // The office computer can be marked as shared (My profile, admins): no faces, no PINs, signs out on its own.
 var FAM_ADMIN_NAME="Shane";
-var FAM_CODES_END=new Date(2026,10,1);
+var FAM_CODES_END=new Date(2026,9,21);
 var LG_FACE=["#c6e76c","#fbcfe8","#bfdbfe","#fde68a","#a7f3d0","#ddd6fe","#fed7aa"];
 function famShared(){try{return localStorage.getItem("nspca-shared-device")==="1";}catch(e){return false;}}
 function famSetShared(on){if(on!==famShared())famSecLog(currentName()+(on?" marked this "+famDevLabel()+" as a shared computer":" took the shared mark off this computer"));try{if(on)localStorage.setItem("nspca-shared-device","1");else localStorage.removeItem("nspca-shared-device");}catch(e){}
@@ -266,7 +254,7 @@ function lgPwMeter(v){var m=document.getElementById("lg-meter");if(!m)return;var
 function lgUsePassword(em){window._loginWho="";window._loginFull=true;window._lgPrefill=em||"";window._lgStage="";renderLoginState();}
 function lgNotMe(){window._loginWho="";window._pinBuf="";renderLoginState();}
 function lgSomeoneNew(){window._loginWho="";window._loginFull=true;window._lgPrefill="";renderLoginState();}
-function lgPad(left){return '<div class="lg-pad">'+["1","2","3","4","5","6","7","8","9"].map(function(n){return '<span onclick="lgPinKey(\''+n+'\')">'+n+'</span>';}).join("")+left+'<span onclick="lgPinKey(\'0\')">0</span><span class="x" onclick="lgPinKey(\'del\')" aria-label="Delete"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></span></div>'
+function lgPad(left){return '<div class="lg-pad">'+["1","2","3","4","5","6","7","8","9"].map(function(n){return '<span onclick="lgPinKey(\''+famJsq(n)+'\')">'+n+'</span>';}).join("")+left+'<span onclick="lgPinKey(\'0\')">0</span><span class="x" onclick="lgPinKey(\'del\')" aria-label="Delete"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></span></div>'
   +'<input id="login-pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px" oninput="lgPinSync(this.value)">';}
 function lgDots(){return '<div class="lg-dots" id="lg-dots"><i></i><i></i><i></i><i></i></div>';}
 function lgFocusPin(){setTimeout(function(){var e=document.getElementById("login-pin");if(e&&window.matchMedia&&!window.matchMedia("(pointer:coarse)").matches)e.focus();},50);}
@@ -287,7 +275,7 @@ function renderLoginState(){var box=document.getElementById("login-auth");if(!bo
       +'<div class="lg-opt still"><i></i><div><b>Waiting for an admin</b><small>Ask '+FAM_ADMIN_NAME+' to add this email in Manage users.</small></div></div></div>'
       +'<div class="lg-bot"><a href="#" onclick="lgCheckAgain();return false">Check again</a><span class="lg-dim"> · </span><a href="#" class="lg-dim" onclick="lgWaitOut();return false">Use a different email</a></div>';
   }else if(stage==="quick"){var q=window._lgQ||{};var u=window._lgUser||{};
-    var opt=function(k,b,s){return '<div class="lg-opt'+(q[k]?' on':'')+'" role="checkbox" aria-checked="'+(q[k]?'true':'false')+'" onclick="lgQuickTick(\''+k+'\')"><i></i><div><b>'+b+'</b><small>'+s+'</small></div></div>';};
+    var opt=function(k,b,s){return '<div class="lg-opt'+(q[k]?' on':'')+'" role="checkbox" aria-checked="'+(q[k]?'true':'false')+'" onclick="lgQuickTick(\''+famJsq(k)+'\')"><i></i><div><b>'+b+'</b><small>'+s+'</small></div></div>';};
     h=lgTop()+'<h1>Quicker next time</h1><div class="lg-sub">On this phone, open the app with:</div><div class="lg-errslot"></div><div class="lg-opts">'+opt("pin","A 4-digit PIN","Set it next")+(bioOK()?opt("bio","Fingerprint or face","If this phone has it"):"")+opt("none","Neither","Password every time. Best on a shared phone.")+'</div>'
       +'<button class="lg-btn" onclick="lgQuickGo()">Continue</button><div class="lg-note g">You’re signed in as <b>'+famEsc(lgFirst(u))+'</b>. Anything you save is under your name.</div>';
   }else if(stage==="pinset"){
@@ -371,19 +359,11 @@ function famBoot(){
     try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}
     setTimeout(function(){var er=document.getElementById("login-err");if(er&&window._authLinkErr){er.textContent=window._authLinkErr;er.style.display="block";}},700);})();
   (function(){var p=authFromHash();if(p){authSave({access_token:p.access_token,refresh_token:p.refresh_token||"",expires_at:Date.now()+((parseInt(p.expires_in)||3600)*1000),user:{email:""}});window._setPw=true;fetch(SUPABASE_URL+"/auth/v1/user",{headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+p.access_token}}).then(function(r){return r.json();}).then(function(u){if(u&&u.email){AUTH.user={email:u.email,id:u.id};authSave(AUTH);}renderLoginState();});localStorage.removeItem("nspca-intake-auth");}})();
-  if(famShared()){var la=0;try{la=parseInt(localStorage.getItem("nspca-last-active")||"0",10)||0;}catch(e){}if(Date.now()-la>getAutoLogoutMins()*60000){var A0=AUTH;AUTH=null;try{localStorage.removeItem("nspca-auth");localStorage.removeItem("nspca-intake-auth");}catch(e){}if(A0&&A0.access_token){try{fetch(SUPABASE_URL+"/auth/v1/logout?scope=local",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+A0.access_token}});}catch(e){}}}}
+  if(famShared()){var la=0;try{la=parseInt(localStorage.getItem("nspca-last-active")||"0",10)||0;}catch(e){}if(Date.now()-la>getAutoLogoutMins()*60000){famWipeShared();var A0=AUTH;AUTH=null;try{localStorage.removeItem("nspca-auth");localStorage.removeItem("nspca-intake-auth");}catch(e){}if(A0&&A0.access_token){try{fetch(SUPABASE_URL+"/auth/v1/logout?scope=local",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+A0.access_token}});}catch(e){}}}}
   var savedCode=localStorage.getItem("nspca-intake-auth");
   if(savedCode&&famRetired(savedCode)){try{localStorage.removeItem("nspca-intake-auth");}catch(e){}savedCode="";}
   if(AUTH&&AUTH.refresh_token&&savedCode&&savedCode.indexOf("EMAIL:")===0){savedCode="";(async function(){var ok=await authRefresh();if(!ok&&window._authNetFail){var c=null;try{c=JSON.parse(localStorage.getItem("nspca-user-cache")||"null");}catch(e){}if(c&&c.name&&String(c.email||"").toLowerCase()===String(authEmail()).toLowerCase()){AUTH.expires_at=1;window._authOffline=true;await finishAuthLogin(c);return;}}var u=ok?await userForEmail(authEmail()):null;if(u&&u.active!==false){await finishAuthLogin(u);}else{authSave(null);showScreen("login-screen");}})();}
-  if(savedCode){
-    var user=USERS.find(function(u){return u.code===savedCode;});
-    if(user){LOGGED_IN=true;CURRENT_USER=user;localStorage.setItem("nspca-user-name",user.name);localStorage.setItem("nspca-user-role",user.role);setupAutoLogout();if(goHomeApp(user,false))return;refreshAllUsers().then(function(){return famEnterAppSafe();});}
-    else if(supabaseClient){(async function(){var sc=savedCode;if(AUTH&&AUTH.refresh_token){try{await authRefresh();}catch(e){}}
-      var u=null,net=false;try{var res=await supabaseClient.from("users").select("*").eq("code",sc).single();if(res&&res.data&&res.data.name)u=res.data;else if(res&&res.error&&!res.error.code)net=true;}catch(e){net=true;}
-      if(!u&&net){var nm=localStorage.getItem("nspca-user-name");if(nm)u={code:sc,name:nm,role:localStorage.getItem("nspca-user-role")||"staff"};}
-      if(!u||u.active===false){localStorage.removeItem("nspca-intake-auth");showScreen("login-screen");return;}
-      LOGGED_IN=true;CURRENT_USER=u;localStorage.setItem("nspca-user-name",u.name);localStorage.setItem("nspca-user-role",u.role||"staff");setupAutoLogout();if(goHomeApp(u,false))return;await refreshAllUsers();await famEnterAppSafe();})();}
-    else{showScreen("login-screen");}
+  if(savedCode){try{localStorage.removeItem("nspca-intake-auth");}catch(e){}showScreen("login-screen");
   }else{showScreen("login-screen");}
 }
 
@@ -395,7 +375,11 @@ var FAMILY_VERSION="2.1";
 var FAM_APPS=[["dogs","Dogs","dog_history","index.html"],["cats","Cats","cat_history","cats.html"],["stables","Stables","stables_history","stables.html"]];
 function famAppName(k){var a=FAM_APPS.filter(function(x){return x[0]===k;})[0];return a?a[1]:(k||"");}
 function famHere(){return (typeof APP_HOME!=="undefined"&&APP_HOME)||"dogs";}
-function famEsc(v){return (v===null||v===undefined?"":""+v).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
+function famEsc(v){return (v===null||v===undefined?"":""+v).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+// text inside onclick="fn('...')"
+function famJsq(v){return famEsc(String(v===null||v===undefined?"":v).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\r?\n/g,"\\n"));}
+// an image address that can't break out of src="..." or url(...)
+function famSrc(p){var r=(typeof blobSrc==="function")?blobSrc(p):p;return String(r||"").replace(/["'<>()\s\\]/g,function(c){return "%"+("0"+c.charCodeAt(0).toString(16).toUpperCase()).slice(-2);});}
 async function famEnterAppSafe(){if(typeof famEnterApp==="function")return famEnterApp();if(typeof loadRecordsList==="function")await loadRecordsList();if(typeof showDashboard==="function")showDashboard();}
 function famRoleLabel(u){u=u||{};if(famTitle(u))return famTitle(u);var r=u.role||"staff";return r==="admin"?"Admin":r==="manager"?"Manager":r==="supervisor"?"Supervisor":r==="asst"?"Assistant Supervisor":r==="coordinator"?"Rehoming Co-Ordinator":r==="trainer"?"Dog Trainer & Behaviour Specialist":r==="director"?"Director":"Staff";}
 function famMe(){var me=CURRENT_USER||{name:currentName(),code:localStorage.getItem("nspca-intake-auth")||"",role:currentRole()};var row=(getAllUsersSync()||[]).filter(function(u){return u.code===me.code;})[0];return Object.assign({},row||{},me);}
@@ -411,8 +395,8 @@ function pwSheet(){famSheet("Change password",'<label class="fam-l">New password
 function pwClose(){famSheetClose();}
 var FAM_META={phone:["Phone","for the rota and call-outs",false],since:["On the team since","e.g. Mar 2025",false],about:["A line about you","e.g. Intake, assessments and the day reports.",true]};
 function famMetaSheet(k){var me=famMe();var f=FAM_META[k];if(!f)return;var v=userMeta(me.code)[k]||"";
-  famSheet(f[0],(f[2]?'<textarea id="fam-meta" class="fam-in" rows="3" placeholder="'+famEsc(f[1])+'">'+famEsc(v)+'</textarea>':'<input id="fam-meta" class="fam-in" value="'+famEsc(v)+'" placeholder="'+famEsc(f[1])+'" onkeydown="if(event.key===\'Enter\')famMetaSave(\''+k+'\')">')
-    +'<button class="fam-go" onclick="famMetaSave(\''+k+'\')">Save</button>');}
+  famSheet(f[0],(f[2]?'<textarea id="fam-meta" class="fam-in" rows="3" placeholder="'+famEsc(f[1])+'">'+famEsc(v)+'</textarea>':'<input id="fam-meta" class="fam-in" value="'+famEsc(v)+'" placeholder="'+famEsc(f[1])+'" onkeydown="if(event.key===\'Enter\')famMetaSave(\''+famJsq(k)+'\')">')
+    +'<button class="fam-go" onclick="famMetaSave(\''+famJsq(k)+'\')">Save</button>');}
 function famMetaSave(k){var me=famMe();var e=document.getElementById("fam-meta");var v=e?e.value.trim():"";setUserMeta(me.code,k,v);try{(_allUsersCache||[]).forEach(function(u){if(u.code===me.code)u[k]=v;});}catch(_e){}famSheetClose();if(typeof miniToast==="function")miniToast("Saved");showDashSection("profile");}
 
 // ── Your week: this app from its own records (appWeek), the others from their change history ──
@@ -435,16 +419,16 @@ function renderProfile(){
   var W=window._famWeek;var tab=window._famTab||here;
   var back=(typeof backToDashBtn==="function")?backToDashBtn():'';
   var h='<div class="fam-pf"><div class="fam-top">'+back+'<h2>My profile</h2></div>';
-  var av=photo?'<img src="'+(typeof blobSrc==="function"?blobSrc(photo):photo)+'" alt="">':'<span style="background:'+avatarColor(me.name)+'">'+famEsc(initials(me.name))+'</span>';
+  var av=photo?'<img src="'+famSrc(photo)+'" alt="">':'<span style="background:'+avatarColor(me.name)+'">'+famEsc(initials(me.name))+'</span>';
   h+='<div class="fam-me"><label class="fam-ph">'+av+'<i>Edit</i><input type="file" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)"></label><div class="fam-mt"><b>'+famEsc(me.name)+'</b><small>'+famEsc(famRoleLabel(me))+(email?' · '+famEsc(email):' · code sign-in')+'</small>'+(meta.about?'<div class="fam-ab">'+famEsc(meta.about)+'</div>':'')+(photo?'<u onclick="removeAvatar()">Remove photo</u>':'')+'</div></div>';
   // your week
-  var cur=W.data[tab];var pill=function(a){var d=W.data[a[0]];var n=d&&d.stats?d.total:null;return '<span class="'+(tab===a[0]?"on":"")+'" onclick="window._famTab=\''+a[0]+'\';showDashSection(\'profile\')">'+a[1]+(n!==null?' <em>'+n+'</em>':'')+'</span>';};
+  var cur=W.data[tab];var pill=function(a){var d=W.data[a[0]];var n=d&&d.stats?d.total:null;return '<span class="'+(tab===a[0]?"on":"")+'" onclick="window._famTab=\''+famJsq(a[0])+'\';showDashSection(\'profile\')">'+a[1]+(n!==null?' <em>'+n+'</em>':'')+'</span>';};
   h+='<div class="fam-card"><div class="fam-lbl">Your week <em>from Monday</em></div><div class="fam-apps">'+FAM_APPS.map(pill).join("")+'</div>'
     +(cur&&cur.stats?'<div class="fam-nums">'+cur.stats.map(function(x){return '<div><b>'+(x[0]||0)+'</b><span>'+famEsc(x[1])+'</span></div>';}).join("")+'</div>'+(cur.names&&cur.names.length?'<div class="fam-names">'+cur.names.slice(0,8).map(function(n){return '<span>'+famEsc(n)+'</span>';}).join("")+(cur.names.length>8?'<span>+'+(cur.names.length-8)+'</span>':'')+'</div>':'')
       :'<div class="fam-wait">'+(W.loading?"Counting…":"Nothing to count here yet.")+'</div>')
     +'</div>';
   // about me
-  var ed=function(k){return '<span class="fam-btn" onclick="famMetaSheet(\''+k+'\')">'+(meta[k]?"Edit":"Add")+'</span>';};
+  var ed=function(k){return '<span class="fam-btn" onclick="famMetaSheet(\''+famJsq(k)+'\')">'+(meta[k]?"Edit":"Add")+'</span>';};
   h+='<div class="fam-card"><div class="fam-lbl">About me <em>everyone sees this</em></div>'
     +famRow("Phone",famEsc(meta.phone||"not added"),ed("phone"))+famRow("On the team since",famEsc(meta.since||"not added"),ed("since"))+famRow("A line about you",famEsc(meta.about||"not added"),ed("about"))+'</div>';
   // sign-in
@@ -497,17 +481,17 @@ function renderProfile(){
 function userTap(code){var u=getAllUsersSync().find(function(x){return x.code===code;});if(!u)return;if(u.source==="app"){miniToast(u.name+" is built into the app — changed in the code");return;}showEditUserModal(code);}
 function renderUsersAdmin(){
   var all=getAllUsersSync().slice().sort(function(a,b){var o={admin:0,manager:1,supervisor:2,asst:3,coordinator:4,trainer:5};var x=o[a.role]==null?9:o[a.role],y=o[b.role]==null?9:o[b.role];return x-y||(a.name||"").localeCompare(b.name||"");});
-  var shared=function(u){return !u.email&&!famTitle(u)&&(u.role||"staff")==="staff";};
+  var shared=function(u){return famRetired(u);};
   var people=all.filter(function(u){return !shared(u);}),codes=all.filter(shared);
   var now=Date.now(),me=(CURRENT_USER||{}).code;
   var emailN=all.filter(function(u){return u.email&&u.active!==false;}).length;var invited=all.filter(function(u){return u.email&&u.active===false;});
   var quiet=people.filter(function(u){var t=userLastIn(u);return t&&now-t>14*864e5&&u.active!==false;});
-  var bits=['<b>'+emailN+' on email sign-in</b>'];if(codes.length)bits.push(codes.length+' shared code'+(codes.length===1?'':'s'));if(invited.length)bits.push('<b>'+esc(invited.map(function(u){return u.name;}).join(", "))+' invited</b> — not in yet');
+  var bits=['<b>'+emailN+' on email sign-in</b>'];var onCode=all.filter(function(u){return !u.email&&u.active!==false;});if(onCode.length)bits.push('<b style="color:#b45309">'+onCode.length+' still on a code</b>: '+esc(onCode.map(function(u){return String(u.name||'').split(' ')[0];}).join(', ')));if(invited.length)bits.push('<b>'+esc(invited.map(function(u){return u.name;}).join(", "))+' invited</b> — not in yet');
   var sent=bits.join(", ")+'.'+(quiet.length?' '+esc(quiet.slice(0,2).map(function(u){return u.name;}).join(" and "))+' last in '+fmtAgo(userLastIn(quiet[0]))+'.':'');
   var row=function(u){var ri=famTitle(u)?[famTitle(u).toUpperCase(),"#0f766e"]:userRoleInfo(u.role);var t=userLastIn(u);var off=u.active===false;var inv=off&&u.email;var r;
     if(u.code===me)r='<span class="ur-s on">in now</span>';else if(inv)r='<span class="ur-s inv">invited</span>';else if(off)r='<span class="ur-s off">switched off</span>';else r='<span class="ur-s'+(t&&now-t<7*864e5?' on':'')+'">'+(t?esc(fmtAgo(t)):'—')+'</span>';
-    var sub=u.email?'email · '+esc(u.email):'code '+esc(u.code)+(shared(u)?' · shared':'');if(u.source==="app")sub+=' · built-in';
-    return '<div class="ur'+(off&&!inv?' off':'')+'" onclick="userTap(\''+esc(u.code)+'\')">'+userAvatarHtml(u,34)+'<div class="ur-m"><b>'+esc(u.name)+' <span class="ur-rp" style="background:'+ri[1]+'">'+ri[0]+'</span></b><small>'+sub+'</small></div>'+r+'</div>';};
+    var sub=u.email?'email · '+esc(u.email):'<span style="color:#b45309">code '+esc(u.code)+' · needs an email sign-in</span>';if(u.source==="app")sub+=' · built-in';
+    return '<div class="ur'+(off&&!inv?' off':'')+'" onclick="userTap(\''+famJsq(u.code)+'\')">'+userAvatarHtml(u,34)+'<div class="ur-m"><b>'+esc(u.name)+' <span class="ur-rp" style="background:'+ri[1]+'">'+ri[0]+'</span></b><small>'+sub+'</small></div>'+r+'</div>';};
   var h='<div class="rxhead"><button onclick="(typeof boardBack===\'function\'?boardBack():loadRecordsList().then(function(){renderDashboard();}))" class="rxback">&#8592; Dashboard</button><h2>Manage users</h2></div><div class="rxsub">Who can sign in, how, and when they were last in.</div>';
   h+='<div class="rxstrip"><div class="rxlt">'+all.length+'<small>people</small></div><div class="rxtx">'+sent+'</div></div>';
   h+='<button class="btn btnp" style="width:100%;margin-bottom:4px" onclick="showAddUserModal()">+ Add someone</button>';
@@ -562,10 +546,10 @@ function showEditUserModal(code){
     +'<div class="f"><label class="lbl">Job title <span style="text-transform:none;letter-spacing:0;color:#9a9fa8;font-weight:600">\u2014 optional, shown instead of the role</span></label><input id="edit-user-title" type="text" value="'+esc(u.title||"")+'" placeholder="e.g. Senior Equine ACA"></div><div class="f"><label class="lbl">Role</label><select id="edit-user-role">'+[["staff","Staff"],["supervisor","Supervisor"],["asst","Assistant Supervisor"],["coordinator","Rehoming Co-Ordinator"],["trainer","Dog Trainer & Behaviour Specialist"],["manager","Manager"],["admin","Admin"]].map(function(r){return'<option value="'+r[0]+'"'+(u.role===r[0]?" selected":"")+'>'+r[1]+'</option>';}).join("")+'</select></div>'
     +'<div class="f"><label class="lbl">Opens in</label><select id="edit-user-home">'+[["","Dogs (the usual)"],["cats","Cats"],["stables","Stables"]].map(function(h){var cur=homeAppFor(u);return '<option value="'+h[0]+'"'+((cur===h[0])||(h[0]===""&&(cur===""||cur==="dogs"))?" selected":"")+'>'+h[1]+'</option>';}).join("")+'</select></div>'
     +'<div class="f"><label class="lbl">Outside that app</label><select id="edit-user-look">'+[["0","Full use everywhere"],["1","Look only \u2014 can\u2019t change anything"]].map(function(o){var cur=lookOnlyFor(u)?"1":"0";return '<option value="'+o[0]+'"'+(cur===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+'</select><div style="font-size:10.5px;color:#9a9fa8;margin-top:4px">Admins always have full use.</div></div>'
-    +'<button onclick="saveEditedUser(\''+esc(code)+'\')" class="btn btnp" style="width:100%;padding:10px;font-size:13px;font-weight:600">Save changes</button>'
-    +((u.code!==((CURRENT_USER||{}).code))?'<button onclick="this.closest(\'.edit-user-ov\').remove();toggleUserActive(\''+esc(code)+'\','+(u.active===false)+')" style="width:100%;margin-top:8px;padding:9px;font-size:12px;background:'+(u.active===false?'#dcfce7':'#fef9c3')+';border:none;color:'+(u.active===false?'#166534':'#854d0e')+';border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700">'+(u.active===false?'Switch '+esc(u.name)+' back on':'Switch '+esc(u.name)+' off \u2014 can\u2019t sign in')+'</button>':'')
+    +'<button onclick="saveEditedUser(\''+famJsq(code)+'\')" class="btn btnp" style="width:100%;padding:10px;font-size:13px;font-weight:600">Save changes</button>'
+    +((u.code!==((CURRENT_USER||{}).code))?'<button onclick="this.closest(\'.edit-user-ov\').remove();toggleUserActive(\''+famJsq(code)+'\','+(u.active===false)+')" style="width:100%;margin-top:8px;padding:9px;font-size:12px;background:'+(u.active===false?'#dcfce7':'#fef9c3')+';border:none;color:'+(u.active===false?'#166534':'#854d0e')+';border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700">'+(u.active===false?'Switch '+esc(u.name)+' back on':'Switch '+esc(u.name)+' off \u2014 can\u2019t sign in')+'</button>':'')
     +(userRemovable(u)
-      ?'<button onclick="removeUser(\''+esc(code)+'\')" style="width:100%;margin-top:8px;padding:9px;font-size:12px;background:none;border:0.5px solid #fca5a5;color:#991b1b;border-radius:8px;cursor:pointer;font-family:inherit">Remove '+esc(u.name)+' from the app</button>'
+      ?'<button onclick="removeUser(\''+famJsq(code)+'\')" style="width:100%;margin-top:8px;padding:9px;font-size:12px;background:none;border:0.5px solid #fca5a5;color:#991b1b;border-radius:8px;cursor:pointer;font-family:inherit">Remove '+esc(u.name)+' from the app</button>'
       :'<div style="margin-top:8px;font-size:11px;color:#9a9fa8;text-align:center">'+(u.code===((CURRENT_USER||{}).code)?"You cannot remove your own account.":"Built-in accounts cannot be removed \u2014 set them inactive instead.")+'</div>')
     +'</div>';
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
@@ -649,7 +633,7 @@ var FAM_WORDS={dogs:{who:"seized dogs and pups",tab:"Dog tab",room:"a kennel or 
 function fairCount(y){return (typeof records!=="undefined"?records:[]).filter(function(r){var d=famAnimalOf(r.state);return /Ballinasloe/i.test(d.event||"")&&String(d.intakeDate||r.intakeDate||"").slice(0,4)===String(y);}).length;}
 function fairNoticeHtml(){var f=fairPhase();if(!f)return "";var key="nspca-fair-"+f.y+"-"+(f.phase==="before"?"b":"a");try{if(localStorage.getItem(key))return "";}catch(e){}
   var w=FAM_WORDS[famHere()]||FAM_WORDS.dogs;var fd=function(d){return d.toLocaleDateString("en-IE",{weekday:"short"})+" "+d.getDate();};var n=fairCount(f.y);
-  var x='<span class="fx" role="button" tabindex="0" title="Hide until next time" onclick="try{localStorage.setItem(\''+key+'\',\'1\')}catch(e){};renderDashboard()">✕</span>';
+  var x='<span class="fx" role="button" tabindex="0" title="Hide until next time" onclick="try{localStorage.setItem(\''+famJsq(key)+'\',\'1\')}catch(e){};renderDashboard()">✕</span>';
   if(f.phase==="before")return '<div class="fairn">'+x+'<b>Ballinasloe Horse Fair is coming up</b><small>Main days '+fd(f.days[0])+', '+fd(f.days[1])+' and '+fd(f.days[2])+' '+f.days[2].toLocaleDateString("en-IE",{month:"short"})+'. NSPCA inspectors attend, and '+w.who+' usually come in over the days after. Worth keeping '+w.room+' free.</small>'+(typeof openExpected==="function"?'<div class="fa"><span onclick="openExpected()">+ Expected arrival</span></div>':'')+'</div>';
   return '<div class="fairn">'+x+'<b>Ballinasloe Horse Fair '+(f.phase==="on"?"is on":"was on")+'</b><small>'+w.one+' seized there: on its '+w.tab+', open <i>How they came in</i> and tap “Ballinasloe Horse Fair”. '+(n?n+" tagged so far.":"None tagged yet.")+'</small>'+(n?'<div class="fa"><span onclick="window._dbS=\'ballinasloe\';renderDashboard()">See them ›</span></div>':'')+'</div>';}
 // the chip on "How they came in" — only around fair time, or once a record is tagged
@@ -719,7 +703,7 @@ function famDeviceRows(){var h="";
   var pp=pushPrefs();var on=!!(pp&&pushAppsOf(pp)[here]);var other=pp?Object.keys(pushAppsOf(pp)).filter(function(a){return a!==here&&pushAppsOf(pp)[a];}).map(function(a){return FAM_PUSH_APPS[a];}):[];
   var what=here==="cats"?"contagious cats, warnings, arrivals, weight loss":"contagious dogs, warnings, arrivals, weight loss, hot and cold days";
   h+=famRow("Phone notifications",on?"on for "+FAM_PUSH_APPS[here]+(other.length?" and "+other.join(", "):"")+" · nothing between 10pm and 7am":(pushIsIOSBrowser()?"add the app to the home screen first":what+(other.length?" · "+other.join(", ")+" already on":"")),on?'<span class="fam-btn" onclick="pushOffHere()">Turn off</span>':'<span class="fam-btn" onclick="pushOn()">Turn on</span>');
-  if(on)h+='<div class="fam-pk">'+FAM_PUSH_KINDS.filter(function(k){return here==="dogs"||k[0]!=="weather";}).map(function(k){var kon=pp[k[0]]!==false;return '<span class="fam-pkc'+(kon?' on':'')+'" onclick="pushKind(\''+k[0]+'\')" title="'+k[2]+'">'+(kon?'✓ ':'')+k[1]+'</span>';}).join("")+'</div>';
+  if(on)h+='<div class="fam-pk">'+FAM_PUSH_KINDS.filter(function(k){return here==="dogs"||k[0]!=="weather";}).map(function(k){var kon=pp[k[0]]!==false;return '<span class="fam-pkc'+(kon?' on':'')+'" onclick="pushKind(\''+famJsq(k[0])+'\')" title="'+k[2]+'">'+(kon?'✓ ':'')+k[1]+'</span>';}).join("")+'</div>';
   return h;}
 (function(){if(document.getElementById("fam-css3"))return;var st=document.createElement("style");st.id="fam-css3";st.textContent=".fam-pk{display:flex;flex-wrap:wrap;gap:6px;padding:2px 0 10px}.fam-pkc{font-size:11.5px;font-weight:800;padding:5px 10px;border-radius:20px;border:1.5px solid #e4e7e0;background:#fff;color:#6b7280;cursor:pointer}.fam-pkc.on{background:#282932;border-color:#282932;color:#c6e76c}.lg-btn.lg-bio{margin:4px 0 14px;background:#c6e76c;color:#282932}";document.head.appendChild(st);})();
 
