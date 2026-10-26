@@ -1,7 +1,7 @@
 // NSPCA Longford — offline worker. Pages: network first, so updates arrive as soon
 // as there's signal; the last copy opens when there isn't, or after 3 seconds of waiting. Pages and family.js (shared by all apps) work the same way. Data (Supabase) is never cached here.
-var V="nspca-3321b";
-var SHELL=["./","./index.html","./family.js","./family.js?v=3321a","./manifest.webmanifest","./icon-192.png","./icon-round.png","./icon-square.png"];
+var V="nspca-3321d";
+var SHELL=["./","./index.html","./family.js","./family.js?v=3321c","./manifest.webmanifest","./icon-192.png","./icon-round.png","./icon-square.png"];
 self.addEventListener("install",function(e){e.waitUntil(caches.open(V).then(function(c){return Promise.all(SHELL.map(function(u){return c.add(new Request(u,{cache:"reload"})).catch(function(){});}));}));self.skipWaiting();});
 self.addEventListener("activate",function(e){e.waitUntil(caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k!==V;}).map(function(k){return caches.delete(k);}));}).then(function(){return self.clients.claim();}));});
 self.addEventListener("fetch",function(e){var r=e.request;if(r.method!=="GET")return;var u=new URL(r.url);

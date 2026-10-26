@@ -1122,7 +1122,7 @@ body.lookonly #save-bar.dirty{display:none!important}
   </div>
 </div>
 
-<script src="family.js?v=3321a"></script>
+<script src="family.js?v=3321c"></script>
 <script>
 var SUPABASE_URL="https://sbajswwuykvjhtoehfps.supabase.co";
 var SUPABASE_KEY="sb_publishable_uP40lclXeaMzJ__zFQESHQ__XSLqJgK";
@@ -1913,7 +1913,7 @@ function renderMedRound(){var e=esc;var td=tdISO();var groups={am:[],mid:[],pm:[
 var CV_ST=[["held","Held as evidence"],["signed","Signed over by owner"],["forfeited","Forfeited by court"],["returned","Returned to owner"],["closed","Case closed"]];
 function cvStName(s){var o=CV_ST.filter(function(x){return x[0]===s;})[0];return o?o[1]:"Not set yet";}
 function cvKey(ref){return String(ref||"").trim().toUpperCase();}
-function cvRefOf(st){var d=(st&&st.dog)||{};return d.broughtInBy==="NSPCA Inspector"&&d.inspectorRef?cvKey(d.inspectorRef):"";}
+function cvRefOf(st){var d=(st&&st.dog)||{};return (d.intakeReason==="Seized"||d.intakeReason==="Cruelty case")&&d.inspectorRef?cvKey(d.inspectorRef):"";}
 function cvAll(){var o={};try{incLoad().forEach(function(e){var id=String((e&&e.id)||"");if(id.indexOf("__case:")===0)o[id.slice(7)]=e;});}catch(e){}return o;}
 function cvGet(k){k=cvKey(k);return cvAll()[k]||{id:"__case:"+k,ref:k,status:"",log:[]};}
 function cvOf(st){var k=cvRefOf(st);return k?cvGet(k):null;}
@@ -1939,8 +1939,8 @@ function cvWt(st){var ws=((st&&st.weights)||[]).filter(function(w){return w&&w.d
 
 function cvListHtml(){var e=esc;var L=cvList();var open=L.filter(function(x){return cvOpenish(x.c);}),done=L.filter(function(x){return !cvOpenish(x.c);});
   var row=function(x){var c=x.c;var held=c.status==="held";return '<div class="cv-row" role="button" tabindex="0" onclick="cvOpen(\''+jsq(x.k)+'\')"><div><b>Case '+e(x.k)+'</b><small>'+e([x.insp,x.seized?"seized "+fmtDMY(x.seized):"",x.dogs.length+" dog"+(x.dogs.length!==1?"s":"")].filter(Boolean).join(" · "))+'</small></div><span class="cv-pill '+(held?"r":c.status?"g":"a")+'">'+e(cvStName(c.status))+'</span>'+(c.nextCourt&&cvOpenish(c)?'<span class="cv-court">court '+e(fmtDMY(c.nextCourt))+'</span>':'')+'</div>';};
-  var h='<div class="rxhead"><button onclick="boardBack()" class="rxback">&#8592; Dashboard</button><h2>Cruelty cases</h2></div><div class="rxsub">Every animal brought in by an NSPCA inspector with a case ref, grouped by case. Held as evidence means no rehoming until the case is signed over or forfeited.</div>';
-  if(!L.length)return h+'<div class="card" style="color:#6b7280">No cases yet. On a dog’s Dog tab, set Brought in by to NSPCA Inspector and type the case ref: the case appears here.</div>';
+  var h='<div class="rxhead"><button onclick="boardBack()" class="rxback">&#8592; Dashboard</button><h2>Cruelty cases</h2></div><div class="rxsub">Every seized animal with a case ref, grouped by case. Held as evidence means no rehoming until the case is signed over or forfeited.</div>';
+  if(!L.length)return h+'<div class="card" style="color:#6b7280">No cases yet. A dog shows here when its reason for coming in is Seized and it has a case ref.</div>';
   h+='<div class="card cv-list"><div class="lbl" style="margin-bottom:6px">Open · '+open.length+'</div>'+(open.length?open.map(row).join(""):'<div style="color:#6b7280;font-size:13px">None open.</div>')+'</div>';
   if(done.length)h+='<div class="card cv-list"><div class="lbl" style="margin-bottom:6px">Settled · '+done.length+'</div>'+done.map(row).join("")+'</div>';
   return h;}
@@ -4069,7 +4069,13 @@ function _defaultStateInner(){return{_id:null,tab:"dog",
 var S=defaultState();
 
 // ── Medical tab functions ─────────────────────────────────────────
-function getMedical(){if(!S.medical)S.medical=defaultMedical();return S.medical;}
+function getMedical(){if(!S.medical)S.medical=defaultMedical();medTidy(S.medical);if(S.files!=null){if(!Array.isArray(S.files))S.files=[];S.files=S.files.filter(function(f){return f&&typeof f==="object";});S.files.forEach(function(f){["kind","name","type","date"].forEach(function(k){if(f[k]!=null&&typeof f[k]!=="string")f[k]=typeof f[k]==="object"?"":String(f[k]);});});}return S.medical;}
+// One odd entry (a condition with no name picked, a blank line, a number where text should be) used to stop the whole Medical tab opening.
+function medTidy(m){if(!m||typeof m!=="object")return m;var STR=["type","name","date","startDate","endDate","product","kind","status","dose","frequency","vaccine","next","due","notes","text","by","reason","vet","result","route","label"];
+  ["vaccinations","parasiteTreatments","medications","vetVisits","diseases","vetLog"].forEach(function(L){var a=m[L];if(a==null){m[L]=[];return;}if(!Array.isArray(a))a=(typeof a==="object")?Object.keys(a).map(function(k){return a[k];}):[];
+    m[L]=a.filter(function(x){return x&&typeof x==="object"&&!Array.isArray(x);});m[L].forEach(function(x){STR.forEach(function(k){if(x[k]!=null&&typeof x[k]!=="string")x[k]=(typeof x[k]==="object")?"":String(x[k]);});if(L==="diseases"&&!x.type)x.type="Condition (not named)";});});
+  ["bcs","neuteredConfirmed","neuterDate","dental","dentalDate","currentStatus","currentNote","vetNotes","nextVetDate","nextVetReason","injuries","skinCondition","arrivalHealthNotes"].forEach(function(k){if(m[k]!=null&&typeof m[k]!=="string")m[k]=(typeof m[k]==="object")?"":String(m[k]);});
+  return m;}
 
 function addMedEntry(section,entry){
   // Date validation is section-specific
@@ -7220,7 +7226,9 @@ function renderArrival(){var a=S.arrival||{};var d=S.dog||{};var as=S.assessment
   h+='<div class="brow" style="margin-top:12px"><button class="btn" data-go="dog">&larr; Dog</button><button class="btn btnp" data-go="days">Next: day reports &rarr;</button></div>';
   return h;
 }
-function renderMain(){setTimeout(updateSaveBar,0);try{var _cn=document.getElementById("content");if(_cn)_cn.classList.toggle("medw",!!(S&&S.tab==="medical"&&window.innerWidth>=1180));if(!S||S.tab!=="medical")window._mbOpen=null;}catch(_e){}var _sh=document.querySelector(".dtsh"),_st=_sh?_sh.scrollTop:0,_sy=window.scrollY;document.getElementById("content").innerHTML=cvBannerHtml()+page();if(_sh){var _sh2=document.querySelector(".dtsh");if(_sh2){if(_st)_sh2.scrollTop=_st;if(Math.abs(window.scrollY-_sy)>2)window.scrollTo(0,_sy);}}try{sleekPass();}catch(e){}try{if(S&&S._id){presWrite(APP_HOME+":"+S._id,S.tab||"");presRead();presPaint();}}catch(e){}}
+function safePage(){try{return page();}catch(err){try{console.error(err);}catch(e){}var t=(S&&S.tab)||"";var nm=(S&&S.dog&&S.dog.name)||"This dog";
+  return '<div class="card" style="border-left:4px solid #dc2626"><b style="font-size:15px">'+esc(nm)+'\u2019s '+esc(t||"tab")+' tab couldn\u2019t open</b><div style="color:#6b7280;font-size:13px;margin:6px 0 10px">Nothing is lost. Send Shane this line so it can be fixed:</div><div style="font-family:monospace;font-size:12px;background:#f6f7f3;border-radius:8px;padding:8px 10px;word-break:break-word">'+esc(String(err&&err.message||err))+' \u00b7 '+esc(String((err&&err.stack||"").split("\n")[1]||"").trim().slice(0,120))+'</div><button class="btn" style="margin-top:10px" onclick="S.tab=\'picture\';render()">Back to Overview</button></div>';}}
+function renderMain(){setTimeout(updateSaveBar,0);try{var _cn=document.getElementById("content");if(_cn)_cn.classList.toggle("medw",!!(S&&S.tab==="medical"&&window.innerWidth>=1180));if(!S||S.tab!=="medical")window._mbOpen=null;}catch(_e){}var _sh=document.querySelector(".dtsh"),_st=_sh?_sh.scrollTop:0,_sy=window.scrollY;document.getElementById("content").innerHTML=cvBannerHtml()+safePage();if(_sh){var _sh2=document.querySelector(".dtsh");if(_sh2){if(_st)_sh2.scrollTop=_st;if(Math.abs(window.scrollY-_sy)>2)window.scrollTo(0,_sy);}}try{sleekPass();}catch(e){}try{if(S&&S._id){presWrite(APP_HOME+":"+S._id,S.tab||"");presRead();presPaint();}}catch(e){}}
 // ── Sleeker everywhere (v3.308): ⓘ instead of the paragraph, picked answers as facts ──
 function sleekPass(){var c=document.getElementById("content");if(!c)return;try{applyLookOnly();}catch(e){}
   var h=c.querySelector(":scope > h2")||c.querySelector(":scope > .ov2 > h2");var sub=h&&h.nextElementSibling;
