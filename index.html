@@ -1345,8 +1345,10 @@ function syncStatus(){
   return false;
 }
 function debouncedSave(){if(_dSt)clearTimeout(_dSt);_dSt=setTimeout(function(){saveRecord();},1500);}
-function addDaysStr(ds,n){var d=new Date(ds);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
-function weekStartStr(ds){var d=new Date(ds);if(isNaN(d.getTime()))return new Date().toISOString().slice(0,10);var day=d.getDay();var diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
+// a date typed as 26/10/2026 or 26-10-26 still counts; a date that can't be read gives "" instead of stopping the page
+function dateSafe(ds){if(ds instanceof Date)return isNaN(ds.getTime())?null:new Date(ds.getTime());var t=String(ds==null?"":ds).trim();if(!t)return null;var m=t.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2}|\d{4})$/);if(m){var y=m[3].length===2?2000+parseInt(m[3],10):parseInt(m[3],10);t=y+"-"+("0"+m[2]).slice(-2)+"-"+("0"+m[1]).slice(-2);}var d=new Date(t);return isNaN(d.getTime())?null:d;}
+function addDaysStr(ds,n){var d=dateSafe(ds);if(!d)return "";d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+function weekStartStr(ds){var d=dateSafe(ds)||new Date(NaN);if(isNaN(d.getTime()))return new Date().toISOString().slice(0,10);var day=d.getDay();var diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
 function showScreen(id){["login-screen","dashboard-screen","wrap"].forEach(function(s){var el=document.getElementById(s);if(el)el.style.display=(s===id?"block":"none");});try{var _bb=document.getElementById("bottombar");if(_bb)_bb.style.display=(id==="wrap")?"":"none";var _ms=document.getElementById("moresheet");if(_ms)_ms.style.display="none";var _js=document.getElementById("jumpsheet");if(_js)_js.style.display="none";}catch(e){}if(id==="login-screen"){try{renderLoginState();}catch(e){}var lc=document.getElementById("login-code");if(lc)setTimeout(function(){try{lc.focus();}catch(e){}},60);}}
 
 // ── Medical overlay controls (THE FIX — these now live in <script>, not <style>) ─
@@ -2592,7 +2594,7 @@ function computeDueToday(activeRecords,strict){
     var due=false;
     ["1st Vaccination","Kennel Cough","2nd Vaccination","Booster"].forEach(function(vt){if(vl.some(function(v){return v.type===vt;}))return;var ex=vl.find(function(v){return v.type===vt&&v.nextDue;});if(ex&&ex.nextDue&&ex.nextDue<=addDaysStr(today,LA_V))due=true;});
     var first=dateOf("1st Vaccination");if(first&&!vl.some(function(v){return v.type==="2nd Vaccination";})&&addDaysStr(first,28)<=addDaysStr(today,LA_V))due=true;
-    var second=dateOf("2nd Vaccination");if(second&&!vl.some(function(v){return v.type==="Booster";})){var dy=new Date(second);dy.setFullYear(dy.getFullYear()+1);if(dy.toISOString().slice(0,10)<=addDaysStr(today,LA_V))due=true;}
+    var second=dateOf("2nd Vaccination");if(second&&!vl.some(function(v){return v.type==="Booster";})){var dy=dateSafe(second);if(dy){dy.setFullYear(dy.getFullYear()+1);if(dy.toISOString().slice(0,10)<=addDaysStr(today,LA_V))due=true;}}
     return due;
   }
   act.forEach(function(r){
@@ -5131,7 +5133,7 @@ function fxPosterRows(A,fp){var tgt=A.targetKg;if(!tgt)return null;
   else{var me={kg:tgt,me:true,v:Math.round(feedInterp(xs,G[col],tgt))};var at=rows.findIndex(function(r){return r.kg>tgt;});if(at<0)rows.push(me);else rows.splice(at,0,me);}
   var where=lo<0?"is below the poster\u2019s first row, so it\u2019s scaled down from "+xs[0]+" kg":lo>=n-1&&!exact?"is past the poster\u2019s last row, so it\u2019s scaled up from "+xs[n-1]+" kg":exact?"is a row on the poster":"sits between the "+xs[lo]+" and "+xs[lo+1]+" rows";
   return {rows:rows,col:col,where:where};}
-function fxTrend(st,A){var w=(st.weights||[]).map(function(x){return {d:x.date,k:parseFloat(x.weight)};}).filter(function(x){return x.d&&!isNaN(x.k)&&x.k>0;}).sort(function(a,b){return a.d.localeCompare(b.d);});
+function fxTrend(st,A){var w=(Array.isArray(st.weights)?st.weights:[]).filter(function(x){return x&&typeof x==="object";}).map(function(x){var dd=dateSafe(x.date);return {d:dd?dd.toISOString().slice(0,10):"",k:parseFloat(x.weight)};}).filter(function(x){return x.d&&!isNaN(x.k)&&x.k>0;}).sort(function(a,b){return a.d.localeCompare(b.d);});
   var out={pts:w.slice(-8),now:A.nowKg,target:A.targetKg};if(!w.length)return out;var last=w[w.length-1];out.lastDate=last.d;
   var cut=new Date(new Date(last.d).getTime()-42*864e5).toISOString().slice(0,10);var r=w.filter(function(x){return x.d>=cut;});
   if(r.length>=2){var t0=new Date(r[0].d).getTime();var xs=r.map(function(x){return (new Date(x.d).getTime()-t0)/864e5;}),ys=r.map(function(x){return x.k;});var mx=xs.reduce(function(a,b){return a+b;},0)/xs.length,my=ys.reduce(function(a,b){return a+b;},0)/ys.length;var sxy=0,sxx=0;for(var i=0;i<xs.length;i++){sxy+=(xs[i]-mx)*(ys[i]-my);sxx+=(xs[i]-mx)*(xs[i]-mx);}
@@ -7226,7 +7228,7 @@ function renderArrival(){var a=S.arrival||{};var d=S.dog||{};var as=S.assessment
   h+='<div class="brow" style="margin-top:12px"><button class="btn" data-go="dog">&larr; Dog</button><button class="btn btnp" data-go="days">Next: day reports &rarr;</button></div>';
   return h;
 }
-function safePage(){try{return page();}catch(err){try{console.error(err);}catch(e){}var t=(S&&S.tab)||"";var nm=(S&&S.dog&&S.dog.name)||"This dog";
+function safePage(){try{if(S&&S.medical)medTidy(S.medical);}catch(e){}try{return page();}catch(err){try{console.error(err);}catch(e){}var t=(S&&S.tab)||"";var nm=(S&&S.dog&&S.dog.name)||"This dog";
   return '<div class="card" style="border-left:4px solid #dc2626"><b style="font-size:15px">'+esc(nm)+'\u2019s '+esc(t||"tab")+' tab couldn\u2019t open</b><div style="color:#6b7280;font-size:13px;margin:6px 0 10px">Nothing is lost. Send Shane this line so it can be fixed:</div><div style="font-family:monospace;font-size:12px;background:#f6f7f3;border-radius:8px;padding:8px 10px;word-break:break-word">'+esc(String(err&&err.message||err))+' \u00b7 '+esc(String((err&&err.stack||"").split("\n")[1]||"").trim().slice(0,120))+'</div><button class="btn" style="margin-top:10px" onclick="S.tab=\'picture\';render()">Back to Overview</button></div>';}}
 function renderMain(){setTimeout(updateSaveBar,0);try{var _cn=document.getElementById("content");if(_cn)_cn.classList.toggle("medw",!!(S&&S.tab==="medical"&&window.innerWidth>=1180));if(!S||S.tab!=="medical")window._mbOpen=null;}catch(_e){}var _sh=document.querySelector(".dtsh"),_st=_sh?_sh.scrollTop:0,_sy=window.scrollY;document.getElementById("content").innerHTML=cvBannerHtml()+safePage();if(_sh){var _sh2=document.querySelector(".dtsh");if(_sh2){if(_st)_sh2.scrollTop=_st;if(Math.abs(window.scrollY-_sy)>2)window.scrollTo(0,_sy);}}try{sleekPass();}catch(e){}try{if(S&&S._id){presWrite(APP_HOME+":"+S._id,S.tab||"");presRead();presPaint();}}catch(e){}}
 // ── Sleeker everywhere (v3.308): ⓘ instead of the paragraph, picked answers as facts ──
