@@ -1,6 +1,6 @@
 // NSPCA Longford — offline worker. Pages: network first, so updates arrive as soon
-// as there's signal; the last copy opens when there isn't, or after 3 seconds of waiting. Pages and family.js (shared by all apps) work the same way. Data (Supabase) is never cached here.
-var V="nspca-3324f";
+// as there's signal (never the browser's 10-minute copy); the last copy opens when there isn't, or after 6 seconds of waiting. Pages and family.js (shared by all apps) work the same way. Data (Supabase) is never cached here.
+var V="nspca-3324h";
 var SHELL=["./","./index.html","./family.js","./family.js?v=3324e","./manifest.webmanifest","./icon-192.png","./icon-round.png","./icon-square.png"];
 self.addEventListener("install",function(e){e.waitUntil(caches.open(V).then(function(c){return Promise.all(SHELL.map(function(u){return c.add(new Request(u,{cache:"reload"})).catch(function(){});}));}));self.skipWaiting();});
 self.addEventListener("activate",function(e){e.waitUntil(caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k!==V;}).map(function(k){return caches.delete(k);}));}).then(function(){return self.clients.claim();}));});
@@ -10,11 +10,11 @@ self.addEventListener("fetch",function(e){var r=e.request;if(r.method!=="GET")re
   if(same&&(r.mode==="navigate"||/\.(html?|js)$/.test(u.pathname)||u.pathname.slice(-1)==="/")){
     // Network first, but don't keep people waiting on one bar of signal: after 3 seconds the
     // copy on the phone opens, and the download carries on so the next open has the update.
-    var net=fetch(r).then(function(res){if(res&&res.ok){var cp=res.clone();caches.open(V).then(function(c){c.put(r,cp);});}return res;});
+    var net=fetch(r.mode==="navigate"?new Request(r.url,{cache:"no-cache",credentials:"same-origin"}):new Request(r,{cache:"no-cache"})).then(function(res){if(res&&res.ok){var cp=res.clone();caches.open(V).then(function(c){c.put(r,cp);});}return res;});
     var cached=function(){return caches.match(r,{ignoreSearch:true}).then(function(m){return m||(r.mode==="navigate"?caches.match("./index.html"):null);});};
     e.waitUntil(net.catch(function(){}));
     e.respondWith(new Promise(function(done){var settled=false;var finish=function(x){if(!settled&&x){settled=true;done(x);}};
-      var t=setTimeout(function(){caches.match(r,{ignoreSearch:true}).then(function(m){if(m)finish(m);});},3000);
+      var t=setTimeout(function(){caches.match(r,{ignoreSearch:true}).then(function(m){if(m)finish(m);});},6000);
       net.then(function(res){clearTimeout(t);finish(res);},function(){clearTimeout(t);cached().then(function(m){finish(m||Response.error());});});}));return;}
   e.respondWith(caches.match(r).then(function(m){var net=fetch(r).then(function(res){if(res&&(res.ok||res.type==="opaque")){var cp=res.clone();caches.open(V).then(function(c){c.put(r,cp);});}return res;}).catch(function(){return m;});return m||net;}));
 });
